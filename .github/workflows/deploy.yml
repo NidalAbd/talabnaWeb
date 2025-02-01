@@ -19,8 +19,8 @@ jobs:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./  # Directory to deploy (project ssroaot, with trailing slash)
-          server-dir: /  # Deploy to root directory on the server (with trailing slash)
+          local-dir: ./  # Local directory to deploy (excluding the public directory)
+          server-dir: /home/u693675641/domains/talbna.cloud  # The folder where the app should reside (non-public folder)
 
       - name: Deploy public files
         uses: SamKirkland/FTP-Deploy-Action@4.1.0
@@ -28,5 +28,5 @@ jobs:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./public/  # Directory to deploy (Laravel public directory, with trailing slash)
-          server-dir: /public_html/  # Deploy to public_html directory on the server (with trailing slash)
+          local-dir: ./public/  # Local directory for public files
+          server-dir: /home/u693675641/domains/talbna.cloud/public_html/  # Server path for the public directory

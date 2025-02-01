@@ -25,7 +25,7 @@ class UserController extends Controller
     public function index(): View|Factory|Application
     {
         $users = User::withCount('servicePosts')->withCount('reports')
-            ->with('photos')->orderBy('id', 'desc')->paginate(7);
+            ->with('photos')->orderBy('id', 'desc')->paginate(10);
         return view('users.index')->with('Users', $users);
 
     }
@@ -44,12 +44,12 @@ class UserController extends Controller
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @return Application|RedirectResponse|Redirector
+     * @return RedirectResponse
      * @throws ValidationException
      */
     public function store(Request $request)
     {
-            $validatedData = $request->validate([
+        $validatedData = $request->validate([
             'user_name' => 'nullable|string|max:255',
             'name' => 'nullable|string|max:255',
             'gender' => 'nullable|string|max:255',
@@ -191,23 +191,21 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         // Delete the user's photo from the polymorphic relation
         $userPhoto = $user->photos()->first();
-            if(file_exists($userPhoto) && !in_array($userPhoto, ['photos/avatar1.png', 'photos/avatar2.png', 'photos/avatar3.png', 'photos/avatar4.png', 'photos/avatar5.png'])){
-                foreach ($userPhoto as $photo) {
-                    Storage::delete($photo->src);
-                    $photo->delete();
-                }
-            }else{
-                $userPhoto->delete();
+        if(file_exists($userPhoto) && !in_array($userPhoto, ['photos/avatar1.png', 'photos/avatar2.png', 'photos/avatar3.png', 'photos/avatar4.png', 'photos/avatar5.png'])){
+            foreach ($userPhoto as $photo) {
+                Storage::delete($photo->src);
+                $photo->delete();
             }
+        }else{
+            $userPhoto->delete();
+        }
         // Get all service posts related to the user and their photos
         $servicePosts = $user->servicePosts()->with('photos')->get();
         foreach ($servicePosts as $servicePost) {
             foreach ($servicePost->photos as $photo) {
-                if (Storage::disk('public')->exists($photo->src) && !in_array($photo->src, ['photos/servicepost1.jpg', 'photos/servicepost2.jpg', 'photos/servicepost3.jpg', 'photos/servicepost4.jpg', 'photos/servicepost5.jpg'])) {
                 Storage::delete($photo->src);
                 $photo->delete();
             }
-        }
             // Delete the service post
             $servicePost->delete();
         }
