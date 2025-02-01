@@ -21,6 +21,8 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./  # Directory to deploy (project root, with trailing slash)
           server-dir: /  # Deploy to root directory on the server (with trailing slash)
+          exclude: |
+            css/*  # This prevents errors if css/ is missing
 
       - name: Deploy public files
         uses: SamKirkland/FTP-Deploy-Action@4.1.0
@@ -30,3 +32,6 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./public/  # Directory to deploy (Laravel public directory, with trailing slash)
           server-dir: /public_html/  # Deploy to public_html directory on the server (with trailing slash)
+          exclude: |
+            css/*  # This prevents errors if css/ is missing
+
