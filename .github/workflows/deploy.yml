@@ -19,7 +19,7 @@ jobs:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./  # Local directory to deploy (excluding the paaublic directory)
+          local-dir: ./  # Local directory to deploy (excluding the public directory)
           server-dir: /home/u693675641/domains/talbna.cloud  # The folder where the app should reside (non-public folder)
 
       - name: Deploy public files
