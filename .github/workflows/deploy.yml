@@ -3,7 +3,7 @@ name: Deploy to Hostinger
 on:
   push:
     branches:
-      - master  # or main, depending on your branch name
+      - master  # Change to "main" if your default branch is "main"
 
 jobs:
   deploy:
@@ -13,25 +13,54 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Deploy application files
+      - name: Set Correct File Permissions on Hostinger (SSH)
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: talbna.cloud
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            chmod -R 775 /home/u693675641/domains/talbna.cloud
+            chmod -R 777 /home/u693675641/domains/talbna.cloud/public_html/css
+            chmod -R 777 /home/u693675641/domains/talbna.cloud/storage
+            chmod -R 777 /home/u693675641/domains/talbna.cloud/bootstrap/cache
+
+      - name: Deploy Application Files (Laravel Backend)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./  # Directory to deploy (project root, with trailing slash)
-          server-dir: /  # Deploy to root directory on the server (with trailing slash)
+          local-dir: ./  # Deploy Laravel application files
+          server-dir: /home/u693675641/domains/talbna.cloud/  # Correct Laravel deployment directory
           exclude: |
-            css/*  # This prevents errors if css/ is missing
+            **/.git*
+            **/node_modules
+            **/vendor
+            **/storage
+            **/bootstrap/cache
+            **/public/css  # Ignore missing CSS files
 
-      - name: Deploy public files
+      - name: Deploy Public Files (Frontend Assets)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./public/  # Directory to deploy (Laravel public directory, with trailing slash)
-          server-dir: /public_html/  # Deploy to public_html directory on the server (with trailing slash)
+          local-dir: ./public/  # Deploy Laravel public directory
+          server-dir: /home/u693675641/domains/talbna.cloud/public_html/  # Correct public_html directory
           exclude: |
-            css/*  # This prevents errors if css/ is missing
+            **/public/css  # Ignore missing CSS files
 
+      - name: Clear Laravel Cache on Hostinger (SSH)
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: talbna.cloud
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          script: |
+            cd /home/u693675641/domains/talbna.cloud
+            php artisan cache:clear
+            php artisan config:clear
+            php artisan route:clear
+            php artisan view:clear
