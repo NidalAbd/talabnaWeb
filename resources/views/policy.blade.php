@@ -32,7 +32,7 @@
                 <h4 class="fw-bold text-secondary mt-4">5. Contact Information</h4>
                 <p>If you have any concerns about child safety, please reach out to our support team:</p>
                 <ul class="list-unstyled">
-                    <li>📧 Email: <a href="mailto:talbna@talbna.cloud" class="text-primary">talbna@talbna.cloud</a></li>
+                    <li>📧 Email: <a href="mailto:talbna@talbna.cloud" class="text-primary">talbna@talbna.cloudaaa</a></li>
                     <li>🌍 Website: <a href="https://talbna.cloud/policy" class="text-primary">https://talbna.cloud/policy</a></li>
                 </ul>
 
