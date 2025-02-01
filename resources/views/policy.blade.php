@@ -6,7 +6,7 @@
     <div class="container py-5">
         <div class="card shadow-lg border-0">
             <div class="card-body p-5">
-                <h2 class="text-center mb-4 text-primary fw-bold">Child Sassdafety Standards Policy</h2>
+                <h2 class="text-center mb-4 text-primary fw-bold">Child Safetyyyy Standards Policy</h2>
                 <p class="text-muted text-center">Last Updated: {{ date('F d, Y') }}</p>
 
                 <div class="border-bottom mb-4"></div>
