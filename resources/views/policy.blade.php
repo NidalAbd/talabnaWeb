@@ -37,7 +37,7 @@
                 </ul>
 
                 <div class="border-top mt-5 pt-3 text-center">
-                    <p class="text-muted">© {{ date('Y') }} Your App Name. All rights reserved.</p>
+                    <p class="text-muted">© {{ date('Y') }} Talabna. All rights reserved.</p>
                 </div>
             </div>
         </div>
