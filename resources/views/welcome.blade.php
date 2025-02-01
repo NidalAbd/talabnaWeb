@@ -199,7 +199,7 @@
     <div class="d-flex align-items-center justify-content-between bg-gradient shadow-lg p-5 rounded-4">
         <!-- Left Section -->
         <div class="text-white">
-            <h1 class="fw-bold display-5 mb-3">🚀 Talabnaa App is Now Live!</h1>
+            <h1 class="fw-bold display-5 mb-3">🚀 Talabnaaaa App is Now Live!</h1>
             <p class="fs-5">
                 Experience convenience like never before. Download the Talabna app on Google Play
                 and take your services to the next level!
