@@ -3,7 +3,7 @@ name: Deploy to Hostinger
 on:
   push:
     branches:
-      - main  # or main, depending on your branch name
+      - master  # or main, depending on your branch name
 
 jobs:
   deploy:
@@ -19,7 +19,7 @@ jobs:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./  # Directory to deploy (project root, with trailing slash)
+          local-dir: ./  # Directory to deploy (project ssroot, with trailing slash)
           server-dir: /  # Deploy to root directory on the server (with trailing slash)
 
       - name: Deploy public files
