@@ -30,7 +30,6 @@
     <script src="{{ asset('js/app.js') }}" defer></script>
 
 </head>
-</head>
 <body style="background-color: #D6D2D3;">
     <div id="app">
         <nav class="navbar navbar-expand-md sidebar-dark-dark border-0 shadow-sm" >
