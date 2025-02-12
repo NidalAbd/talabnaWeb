@@ -12,6 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('users', function (Blueprint $table) {
+            $table->engine = 'InnoDB'; // Ensure InnoDB engine
             $table->id();
             $table->string('user_name')->nullable();
             $table->string('name')->nullable();

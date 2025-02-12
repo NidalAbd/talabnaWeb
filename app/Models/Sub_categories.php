@@ -16,6 +16,9 @@ class Sub_categories extends Model
     protected $fillable = [
         'categories_id','name',
     ];
+    protected $casts = [
+        'name' => 'array', // Converts JSON to PHP array automatically
+    ];
     protected $primaryKey = 'id';
     public function category(): BelongsTo
     {

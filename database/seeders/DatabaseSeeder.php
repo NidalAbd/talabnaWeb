@@ -18,13 +18,13 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-//        $this->call(RolesAndPermissionsSeeder::class);
-//        $this->call(categories::class);
-//        $this->call(subcategories::class);
-//        $this->call(CountriesSeeder::class);
-//        $this->call(CitiesSeeder::class);
-//        User::factory(50)->create();
-//        ServicePost::factory(400)->create();
+        $this->call(RolesAndPermissionsSeeder::class);
+        $this->call(categories::class);
+        $this->call(subcategories::class);
+        $this->call(CountriesSeeder::class);
+        $this->call(CitiesSeeder::class);
+        User::factory(50)->create();
+        ServicePost::factory(400)->create();
         Comment::factory(400)->create();
     }
 }
