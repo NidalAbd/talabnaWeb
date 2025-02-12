@@ -30,10 +30,6 @@ return new class extends Migration
             $table->string('fcm_token')->nullable();
             $table->rememberToken();
             $table->timestamps();
-
-            $table->foreign('country_id')->references('id')->on('countries');
-            $table->foreign('city_id')->references('id')->on('cities');
-
         });
     }
 
