@@ -26,18 +26,8 @@ return new class extends Migration
             $table->enum('price_currency', [
                 'دولار امريكي',
                 'دينار اردني',
-                'دينار تونسي',
-                'ريال سعودي',
                 'جنيه مصري',
-                ' شيكل فلسطيني',
-                'ليرة لبنانية',
-                'درهم إماراتي',
-                'درهم مغربي',
-                'دينار كويتي',
-                'ريال قطري',
-                'دينار بحريني',
-                'دينار ليبي',
-                'ريال عماني',
+                'شيكل',
             ])->default('دولار امريكي');
             $table->decimal('location_latitudes',15,8)->nullable();
             $table->decimal('location_longitudes',15,8)->nullable();
