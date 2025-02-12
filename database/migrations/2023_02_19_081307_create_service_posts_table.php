@@ -38,6 +38,10 @@ return new class extends Migration
             $table->unsignedInteger('report_count')->default(0);
             $table->unsignedInteger('view_count')->default(0);
             $table->enum('state', ['published', 'archive', 'not published','rejected'])->default('published');
+            $table->foreignId('categories_id')->constrained()->onDelete('cascade');
+            $table->foreignId('sub_categories_id')->constrained()->onDelete('cascade');
+            $table->foreign('country_id')->references('id')->on('countries')->onDelete('set null');
+            $table->foreign('city_id')->references('id')->on('cities')->onDelete('set null');
             $table->timestamps();
 
         });

@@ -305,7 +305,8 @@ public function store(Request $request)
         $user = Auth::user();
         // Check if the user has the required permissions to view all service posts
         if ($user->hasPermission('view_service')) {
-            $servicePosts = ServicePost::where('category', 'Jobs')->paginate(7);
+            $servicePosts = ServicePost::where('category', 'وظائف')
+                ->paginate(7);
             return view('service_posts.job_index', compact('servicePosts', 'user'));
         } else {
 
@@ -318,7 +319,7 @@ public function store(Request $request)
         $user = Auth::user();
         // Check if the user has the required permissions to view all service posts
         if ($user->hasPermission('view_service')) {
-            $servicePosts = ServicePost::where('category', 'Cars')->paginate(7);
+            $servicePosts = ServicePost::where('category', 'سيارات')->paginate(7);
             return view('service_posts.car_index', compact('servicePosts', 'user'));
         } else {
             return view('errors.403');
@@ -330,7 +331,7 @@ public function store(Request $request)
         $user = Auth::user();
         // Check if the user has the required permissions to view all service posts
         if ($user->hasPermission('view_service')) {
-            $servicePosts = ServicePost::where('category', 'Devices')->paginate(7);
+            $servicePosts = ServicePost::where('category', 'اجهزة')->paginate(7);
             return view('service_posts.phone_index', compact('servicePosts', 'user'));
         } else {
             return view('errors.403');
@@ -342,7 +343,7 @@ public function store(Request $request)
         $user = Auth::user();
         // Check if the user has the required permissions to view all service posts
         if ($user->hasPermission('view_service')) {
-            $servicePosts = ServicePost::where('category', 'Real Estate')->paginate(7);
+            $servicePosts = ServicePost::where('category', 'عقارات')->paginate(7);
             return view('service_posts.real_state_index', compact('servicePosts', 'user'));
         } else {
             return view('errors.403');
@@ -354,7 +355,7 @@ public function store(Request $request)
         $user = Auth::user();
         // Check if the user has the required permissions to view all service posts
         if ($user->hasPermission('view_service')) {
-            $servicePosts = ServicePost::where('category', 'Services')->paginate(7);
+            $servicePosts = ServicePost::where('category', 'خدمات')->paginate(7);
             return view('service_posts.general_index', compact('servicePosts', 'user'));
         } else {
 
