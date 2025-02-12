@@ -14,8 +14,7 @@ return new class extends Migration
     public function up()
     {
         Schema::create('countries', function (Blueprint $table) {
-            $table->engine = 'InnoDB'; // Ensure InnoDB engine
-            $table->id(); // This is BIGINT(20) UNSIGNED by default
+            $table->id();
             $table->string('name');
             $table->string('country_code')->nullable();
             $table->timestamps();
