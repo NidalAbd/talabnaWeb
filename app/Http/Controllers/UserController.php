@@ -101,7 +101,7 @@ class UserController extends Controller
         $user = User::with(['servicePosts', 'photos'])->find($id);
 
         if (!$user) {
-            return redirect('/users')->with('error', 'User not found');
+            return redirect('/users')->with('error', 'User not found1');
         }
 
         return view('users.show', compact('user'));
