@@ -124,7 +124,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                             <ul class="nav nav-treeview">
                                 @permission('user_index')
                                 <li class="nav-item">
-                                    <a href="{{route('users.data')}}" class="nav-link">
+                                    <a href="{{route('users.index')}}" class="nav-link">
                                         <i class="fas fa-users-cog nav-icon"></i>
                                         <p>Users</p>
                                     </a>
