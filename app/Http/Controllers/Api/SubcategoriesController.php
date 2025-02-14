@@ -46,19 +46,21 @@ class SubcategoriesController extends Controller
             $arabicName = $subcategory->name['ar'] ?? '';
             $englishName = $subcategory->name['en'] ?? '';
 
-            // Update each photo's `src` path
-            $subcategory->photos = $subcategory->photos->map(function ($photo) use ($arabicName, $englishName) {
-                if (!empty($arabicName) && !empty($englishName)) {
-                    $photo->src = str_replace($arabicName, $englishName, $photo->src);
-                }
-                return $photo;
-            });
+            // Ensure replacement only happens when both names exist
+            if (!empty($arabicName) && !empty($englishName)) {
+                $subcategory->photos = $subcategory->photos->map(function ($photo) use ($arabicName, $englishName) {
+                    // Replace Arabic name with English name in photo src
+                    $photo->src = str_replace(urlencode($arabicName), urlencode($englishName), $photo->src);
+                    return $photo;
+                });
+            }
 
             return $subcategory;
         });
 
         return response()->json(['subcategories' => $subcategories]);
     }
+
 
     /**
      * Show the form for creating a new resource.
