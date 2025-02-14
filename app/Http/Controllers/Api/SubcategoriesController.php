@@ -28,7 +28,7 @@ class SubcategoriesController extends Controller
         // Return the subcategories as JSON
         return response()->json(['subcategories' => $subcategories]);
     }
-    public function CategoriesSelected( $categories): JsonResponse
+    public function CategoriesSelected($categories): JsonResponse
     {
         $subcategories = Sub_categories::where('categories_id', $categories)
             ->whereHas('servicePosts', function ($query) {
@@ -39,9 +39,27 @@ class SubcategoriesController extends Controller
             }])
             ->with('photos')
             ->get();
-        // Return the subcategories as JSON
+
+        // Modify each subcategory before returning it
+        $subcategories = $subcategories->map(function ($subcategory) {
+            // Get Arabic and English names
+            $arabicName = $subcategory->name['ar'] ?? '';
+            $englishName = $subcategory->name['en'] ?? '';
+
+            // Update each photo's `src` path
+            $subcategory->photos = $subcategory->photos->map(function ($photo) use ($arabicName, $englishName) {
+                if (!empty($arabicName) && !empty($englishName)) {
+                    $photo->src = str_replace($arabicName, $englishName, $photo->src);
+                }
+                return $photo;
+            });
+
+            return $subcategory;
+        });
+
         return response()->json(['subcategories' => $subcategories]);
     }
+
     /**
      * Show the form for creating a new resource.
      */
