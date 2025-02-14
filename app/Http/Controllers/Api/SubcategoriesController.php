@@ -28,7 +28,7 @@ class SubcategoriesController extends Controller
         // Return the subcategories as JSON
         return response()->json(['subcategories' => $subcategories]);
     }
-    public function CategoriesSelected($categories): JsonResponse
+    public function CategoriesSelected( $categories): JsonResponse
     {
         $subcategories = Sub_categories::where('categories_id', $categories)
             ->whereHas('servicePosts', function ($query) {
@@ -39,34 +39,9 @@ class SubcategoriesController extends Controller
             }])
             ->with('photos')
             ->get();
-
-        // Process each subcategory
-        $subcategories = $subcategories->map(function ($subcategory) {
-            // Ensure 'name' is an array with 'en' key
-            $englishName = is_array($subcategory->name) && isset($subcategory->name['en'])
-                ? $subcategory->name['en']
-                : '';
-
-            // Modify each photo's 'src' to replace Arabic category names with English names
-            $subcategory->photos = $subcategory->photos->map(function ($photo) use ($englishName) {
-                if (!empty($englishName)) {
-                    // Extract the Arabic name from the path
-                    preg_match('/storage\/subcategory\/([^\/]+)\//', $photo->src, $matches);
-                    if (!empty($matches[1])) {
-                        $arabicName = $matches[1]; // The current Arabic name in the path
-                        $photo->src = str_replace($arabicName, $englishName, $photo->src);
-                    }
-                }
-                return $photo;
-            });
-
-            return $subcategory;
-        });
+        // Return the subcategories as JSON
         return response()->json(['subcategories' => $subcategories]);
     }
-
-
-
     /**
      * Show the form for creating a new resource.
      */
