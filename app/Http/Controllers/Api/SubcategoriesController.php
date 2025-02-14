@@ -40,26 +40,31 @@ class SubcategoriesController extends Controller
             ->with('photos')
             ->get();
 
-        // Modify each subcategory before returning it
+        // Process each subcategory
         $subcategories = $subcategories->map(function ($subcategory) {
-            // Get Arabic and English names
-            $arabicName = $subcategory->name['ar'] ?? '';
-            $englishName = $subcategory->name['en'] ?? '';
+            // Ensure 'name' is an array with 'en' key
+            $englishName = is_array($subcategory->name) && isset($subcategory->name['en'])
+                ? $subcategory->name['en']
+                : '';
 
-            // Ensure replacement only happens when both names exist
-            if (!empty($arabicName) && !empty($englishName)) {
-                $subcategory->photos = $subcategory->photos->map(function ($photo) use ($arabicName, $englishName) {
-                    // Replace Arabic name with English name in photo src
-                    $photo->src = str_replace(urlencode($arabicName), urlencode($englishName), $photo->src);
-                    return $photo;
-                });
-            }
+            // Modify each photo's 'src' to replace Arabic category names with English names
+            $subcategory->photos = $subcategory->photos->map(function ($photo) use ($englishName) {
+                if (!empty($englishName)) {
+                    // Extract the Arabic name from the path
+                    preg_match('/storage\/subcategory\/([^\/]+)\//', $photo->src, $matches);
+                    if (!empty($matches[1])) {
+                        $arabicName = $matches[1]; // The current Arabic name in the path
+                        $photo->src = str_replace($arabicName, $englishName, $photo->src);
+                    }
+                }
+                return $photo;
+            });
 
             return $subcategory;
         });
-
         return response()->json(['subcategories' => $subcategories]);
     }
+
 
 
     /**
