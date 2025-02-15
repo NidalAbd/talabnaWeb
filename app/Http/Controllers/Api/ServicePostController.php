@@ -136,7 +136,7 @@ class ServicePostController extends Controller
         $servicePost->title = $validatedData['title'];
         $servicePost->description = $validatedData['description'];
         $servicePost->category = $category->name;
-        $servicePost->sub_category = $subCategory->name;
+        $servicePost->sub_category = $subCategory['name']['ar'];
         $servicePost->price = $validatedData['price'];
         $servicePost->price_currency = $validatedData['priceCurrency'];
         $servicePost->location_latitudes = $validatedData['locationLatitudes'];
