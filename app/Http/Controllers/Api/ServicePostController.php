@@ -565,7 +565,7 @@ class ServicePostController extends Controller
             $servicePosts = ServicePost::where('categories_id', $categories)
                 ->where('sub_categories_id', $sub_categories)
                 ->where('state', 'published')
-                ->with('photos')
+                ->with('photos', 'subCategory')
                 ->withCount('comments')
 
                 ->withCount('favorites')
