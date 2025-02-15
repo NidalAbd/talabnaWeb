@@ -26,7 +26,8 @@ class ServicePost extends Model
         'have_badge',
         'badge_duration',
         'view_num',
-        'state'
+        'state',
+        'categories_id', 'sub_categories_id'
     ];
 
     public static function distance($lat1, $lng1, $lat2, $lng2): float|int
@@ -64,7 +65,10 @@ class ServicePost extends Model
     {
         return $this->morphMany(Photos::class, 'photoable');
     }
-
+    public function subCategory()
+    {
+        return $this->belongsTo(Sub_categories::class, 'sub_categories_id');
+    }
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);
