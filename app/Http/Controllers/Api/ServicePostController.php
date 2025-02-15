@@ -70,7 +70,7 @@ class ServicePostController extends Controller
             'title' => 'required|max:255',
             'description' => 'required',
             'category' => 'required|exists:categories,id',
-            'subCategory' => 'required|string',
+            'subCategory' => 'required|exists:sub_categories,id',
             'price' => 'nullable|numeric',
             'priceCurrency' => 'nullable',
             'locationLatitudes' => 'required|numeric',
@@ -136,7 +136,7 @@ class ServicePostController extends Controller
         $servicePost->title = $validatedData['title'];
         $servicePost->description = $validatedData['description'];
         $servicePost->category = $category->name;
-        $servicePost->sub_category = $subCategory['name']['ar'];
+        $servicePost->sub_category = $subCategory->name;
         $servicePost->price = $validatedData['price'];
         $servicePost->price_currency = $validatedData['priceCurrency'];
         $servicePost->location_latitudes = $validatedData['locationLatitudes'];
