@@ -69,8 +69,8 @@ class ServicePostController extends Controller
         $validatedData = $request->validate([
             'title' => 'required|max:255',
             'description' => 'required',
-            'category' => 'required|exists:categories,id',
-            'subCategory' => 'required|exists:sub_categories,id',
+            'category' => 'required|string',
+            'subCategory' => 'required|string',
             'price' => 'nullable|numeric',
             'priceCurrency' => 'nullable',
             'locationLatitudes' => 'required|numeric',
