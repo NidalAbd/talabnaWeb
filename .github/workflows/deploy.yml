@@ -1,0 +1,34 @@
+name: Deploy to Hostinger
+
+on:
+  push:
+    branches:
+      - master  # or main, depending on your branch name
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Deploy application files
+        uses: SamKirkland/FTP-Deploy-Action@4.1.0
+        with:
+          server: talbna.cloud
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./  # Directory to deploy (project ssroot, with trailing slash)
+          server-dir: /domains/talbna.cloud/  # This should be the *actual* Laravel app base
+#          dangerous-clean-slate: true  # <== Force full sync
+
+
+      - name: Deploy public files
+        uses: SamKirkland/FTP-Deploy-Action@4.1.0
+        with:
+          server: talbna.cloud
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./public/  # Directory to deploy (Laravel public directory, with trailing slash)
+          server-dir: /domains/talbna.cloud/public_html/

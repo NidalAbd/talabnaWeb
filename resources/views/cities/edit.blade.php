@@ -1,0 +1,140 @@
+@extends('adminlte::page')
+@section('title', "Edit City")
+@section('content_header')
+    @include('partials.breadcrumbs')
+    <h1><i class="fas fa-edit text-warning mr-2"></i> Edit City</h1>
+@stop
+@section('content')
+    <div class="container-fluid p-0">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-city text-primary mr-2"></i>
+                            City Details
+                        </h5>
+                    </div>
+
+                    <form action="{{ route('cities.update', $city->id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+
+                        <div class="card-body">
+                            @if ($errors->any())
+                                <div class="alert alert-danger">
+                                    <ul class="mb-0">
+                                        @foreach ($errors->all() as $error)
+                                            <li>{{ $error }}</li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="name_en">City Name (English) <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control @error('name_en') is-invalid @enderror"
+                                               id="name_en" name="name_en" value="{{ old('name_en', $nameArray['en'] ?? '') }}" required>
+                                        @error('name_en')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="name_ar">City Name (Arabic)</label>
+                                        <input type="text" class="form-control @error('name_ar') is-invalid @enderror"
+                                               id="name_ar" name="name_ar" value="{{ old('name_ar', $nameArray['ar'] ?? '') }}" dir="rtl">
+                                        @error('name_ar')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="country_id">Country <span class="text-danger">*</span></label>
+                                <select class="form-control @error('country_id') is-invalid @enderror"
+                                        id="country_id" name="country_id" required>
+                                    <option value="">-- Select Country --</option>
+                                    @foreach($countries as $country)
+                                        <option value="{{ $country->id }}"
+                                            {{ (old('country_id', $city->country_id) == $country->id) ? 'selected' : '' }}>
+                                            {{ $country->getTranslatedName() }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('country_id')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="image">City Image</label>
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input @error('image') is-invalid @enderror"
+                                           id="image" name="image" accept="image/*">
+                                    <label class="custom-file-label" for="image">Choose file</label>
+                                    @error('image')
+                                    <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                                <small class="form-text text-muted">Recommended size: 200x120 pixels</small>
+                            </div>
+
+                            <div class="form-group">
+                                <div class="img-preview mt-3">
+                                    @if($city->photos && $city->photos->count() > 0)
+                                        <p>Current image:</p>
+                                        <img src="{{ asset($city->photos->first()->src) }}" alt="{{ $city->getTranslatedName() }}"
+                                             class="img-thumbnail" style="max-height: 200px;">
+                                    @else
+                                        <p>No image currently uploaded.</p>
+                                    @endif
+                                </div>
+                                <div class="new-img-preview mt-3" style="display: none;">
+                                    <p>New image:</p>
+                                    <img id="preview-image" src="#" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white">
+                            <div class="d-flex justify-content-between">
+                                <a href="{{ route('cities.index') }}" class="btn btn-secondary">
+                                    <i class="fas fa-arrow-left mr-1"></i> Back
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-1"></i> Update City
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @push('scripts')
+        <script>
+            $(document).ready(function() {
+                // Preview uploaded image
+                $('#image').change(function() {
+                    let file = this.files[0];
+                    if (file) {
+                        let reader = new FileReader();
+                        reader.onload = function(e) {
+                            $('.new-img-preview').show();
+                            $('#preview-image').attr('src', e.target.result);
+                        }
+                        reader.readAsDataURL(file);
+                        $('.custom-file-label').text(file.name);
+                    }
+                });
+            });
+        </script>
+    @endpush
+@endsection

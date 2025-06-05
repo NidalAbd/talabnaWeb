@@ -1,0 +1,400 @@
+@extends('adminlte::page')
+
+@section('title', 'Points Order Requests')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-coins text-primary mr-2"></i> Points Order Requests</h1>
+        <div>
+            <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#settingsModal">
+                <i class="fas fa-cog mr-1"></i> Point Settings
+            </button>
+        </div>
+    </div>
+@stop
+
+@section('content')
+    <div class="container-fluid">
+        <!-- Dashboard Summary Cards -->
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box shadow">
+                    <span class="info-box-icon bg-primary"><i class="fas fa-clock"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Pending Requests</span>
+                        <span class="info-box-number">{{ $purchaseRequests->where('status', 'pending')->count() }}</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-primary" style="width: {{ $purchaseRequests->count() > 0 ? ($purchaseRequests->where('status', 'pending')->count() / $purchaseRequests->count()) * 100 : 0 }}%"></div>
+                        </div>
+                        <a href="#" class="small-box-footer">
+                            View All <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+                <button type="button" class="btn btn-warning" onclick="if(confirm('Are you sure you want to clean up orphaned requests?')) { window.location.href='{{ route('purchase_points.cleanup_orphaned') }}'; }">
+                    <i class="fas fa-broom mr-1"></i> Cleanup Orphaned Records
+                </button>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box shadow">
+                    <span class="info-box-icon bg-success"><i class="fas fa-check-circle"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Approved Orders</span>
+                        <span class="info-box-number">{{ $purchaseRequests->where('status', 'approved')->count() }}</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" style="width: {{ $purchaseRequests->count() > 0 ? ($purchaseRequests->where('status', 'approved')->count() / $purchaseRequests->count()) * 100 : 0 }}%"></div>
+                        </div>
+                        <a href="#" class="small-box-footer">
+                            View All <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box shadow">
+                    <span class="info-box-icon bg-danger"><i class="fas fa-ban"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Canceled Orders</span>
+                        <span class="info-box-number">{{ $purchaseRequests->where('status', 'canceled')->count() }}</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-danger" style="width: {{ $purchaseRequests->count() > 0 ? ($purchaseRequests->where('status', 'canceled')->count() / $purchaseRequests->count()) * 100 : 0 }}%"></div>
+                        </div>
+                        <a href="#" class="small-box-footer">
+                            View All <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box shadow">
+                    <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Points Requested</span>
+                        <span class="info-box-number">{{ number_format($purchaseRequests->sum('points_requested')) }}</span>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" style="width: 100%"></div>
+                        </div>
+                        <a href="#" class="small-box-footer">
+                            More info <i class="fas fa-arrow-circle-right"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Card -->
+        <div class="card card-outline card-primary shadow-sm">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-list mr-1"></i>
+                    Point Order Requests
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <div class="input-group input-group-sm float-right" style="width: 250px;">
+                        <form action="{{ route('purchase_points.search') }}" method="GET" class="d-flex w-100">
+                            <input type="text" class="form-control" name="search" placeholder="Search users...">
+                            <div class="input-group-append">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover table-striped">
+                        <thead class="thead-light">
+                        <tr>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Points</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @if(is_countable($purchaseRequests) && count($purchaseRequests) > 0)
+                            @foreach ($purchaseRequests as $purchaseRequest)
+                                <tr>
+                                    @if($purchaseRequest->user)
+                                        <td>
+                                            <span class="badge badge-primary">{{ $purchaseRequest->user->id }}</span>
+                                        </td>
+                                        <td>
+                                            <div class="user-info">
+                                                @if($purchaseRequest->user && $purchaseRequest->user->photos && $purchaseRequest->user->photos->count() > 0)
+                                                    @php
+                                                        $photo = $purchaseRequest->user->photos->first();
+                                                        $imgSrc = $photo->is_external ? $photo->src : asset($photo->src);
+                                                    @endphp
+                                                    <img class="img-circle img-size-32 mr-2" src="{{ $imgSrc }}" alt="{{ $purchaseRequest->user->user_name }}">
+                                                @else
+                                                    <img class="img-circle img-size-32 mr-2" src="{{ asset('vendor/adminlte/dist/img/user-default.jpg') }}" alt="User Image">
+                                                @endif
+                                                <span>{{ $purchaseRequest->user->user_name }}</span>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if(count($purchaseRequest->user->roles) > 0)
+                                                @foreach($purchaseRequest->user->roles as $role)
+                                                    <span class="badge badge-info">{{$role->name}}</span>
+                                                @endforeach
+                                            @else
+                                                <span class="badge badge-secondary">No Role</span>
+                                            @endif
+                                        </td>
+                                    @else
+                                        <td colspan="3" class="text-center">
+                                            <span class="text-danger">User Not Found</span>
+                                        </td>
+                                    @endif
+                                    <td>
+                                        <span class="badge badge-warning badge-pill px-3">{{ $purchaseRequest->points_requested }} pts</span>
+                                    </td>
+                                    <td>
+                                        <span class="text-muted">${{ number_format($purchaseRequest->price_per_point, 2) }} / point</span>
+                                    </td>
+                                    <td>
+                                        <span class="font-weight-bold">${{ number_format($purchaseRequest->total_price, 2) }}</span>
+                                    </td>
+                                    <td>
+                                        @php
+                                            $statusClass = [
+                                                'pending' => 'warning',
+                                                'approved' => 'success',
+                                                'canceled' => 'danger'
+                                            ][$purchaseRequest->status] ?? 'secondary';
+                                        @endphp
+                                        <span class="badge badge-{{ $statusClass }} badge-pill">
+                                                {{ ucfirst($purchaseRequest->status) }}
+                                            </span>
+                                    </td>
+                                    <td>
+                                        @if ($purchaseRequest->status == 'pending')
+                                            <div class="btn-group">
+                                                <form action="{{ route('purchase_points.approved', $purchaseRequest) }}" method="POST" class="mr-1">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="user_id" value="{{ $purchaseRequest->user_id }}">
+                                                    <button type="submit" class="btn btn-sm btn-success">
+                                                        <i class="fas fa-check mr-1"></i> Approve
+                                                    </button>
+                                                </form>
+                                                <form action="{{ route('purchase_points.cancel', $purchaseRequest) }}" method="POST">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
+                                                    <button type="submit" class="btn btn-sm btn-danger">
+                                                        <i class="fas fa-times mr-1"></i> Cancel
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        @else
+                                            <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailsModal{{ $purchaseRequest->id }}">
+                                                <i class="fas fa-eye"></i> Details
+                                            </button>
+
+                                            <!-- Details Modal -->
+                                            <!-- Details Modal -->
+                                            <div class="modal fade" id="detailsModal{{ $purchaseRequest->id }}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel{{ $purchaseRequest->id }}" aria-hidden="true">
+                                                <div class="modal-dialog" role="document">
+                                                    <div class="modal-content">
+                                                        <div class="modal-header">
+                                                            <h5 class="modal-title" id="detailsModalLabel{{ $purchaseRequest->id }}">Order Details</h5>
+                                                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                                                <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <div class="card">
+                                                                <div class="card-body p-0">
+                                                                    <table class="table table-bordered">
+                                                                        <tr>
+                                                                            <th>Order ID:</th>
+                                                                            <td>{{ $purchaseRequest->id }}</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>User:</th>
+                                                                            <td>
+                                                                                @if($purchaseRequest->user)
+                                                                                    {{ $purchaseRequest->user->user_name }}
+                                                                                @else
+                                                                                    <span class="text-danger">User Not Found</span>
+                                                                                @endif
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>Points Requested:</th>
+                                                                            <td>{{ $purchaseRequest->points_requested }}</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>Price Per Point:</th>
+                                                                            <td>${{ number_format($purchaseRequest->price_per_point, 2) }}</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>Total Price:</th>
+                                                                            <td>${{ number_format($purchaseRequest->total_price, 2) }}</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>Status:</th>
+                                                                            <td><span class="badge badge-{{ $statusClass }}">{{ ucfirst($purchaseRequest->status) }}</span></td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>Created At:</th>
+                                                                            <td>{{ $purchaseRequest->created_at->format('M d, Y h:i A') }}</td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>Updated At:</th>
+                                                                            <td>{{ $purchaseRequest->updated_at->format('M d, Y h:i A') }}</td>
+                                                                        </tr>
+                                                                    </table>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="modal-footer">
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>      @endif
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <div class="alert alert-info m-0">
+                                        <i class="fas fa-info-circle mr-1"></i> {{ __('No records found') }}
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer clearfix">
+                <div class="float-right">
+                    {{ $purchaseRequests->links() }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div class="modal fade" id="settingsModal" tabindex="-1" role="dialog" aria-labelledby="settingsModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title" id="settingsModalLabel"><i class="fas fa-cog mr-2"></i>Point Price Settings</h5>
+                    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form>
+                        <div class="form-group">
+                            <label for="pointPrice"><i class="fas fa-dollar-sign mr-1"></i>Price Per Point ($)</label>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">$</span>
+                                </div>
+                                <input type="number" class="form-control" id="pointPrice" step="0.01" min="0.01" value="1.00">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bulkDiscount"><i class="fas fa-percentage mr-1"></i>Bulk Purchase Discount (%)</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="bulkDiscount" min="0" max="100" value="5">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">%</span>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">Discount applied for purchases over 1000 points</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="minimumPurchase"><i class="fas fa-coins mr-1"></i>Minimum Purchase Amount</label>
+                            <div class="input-group">
+                                <input type="number" class="form-control" id="minimumPurchase" min="1" value="100">
+                                <div class="input-group-append">
+                                    <span class="input-group-text">points</span>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancel</button>
+                    <button type="button" class="btn btn-primary"><i class="fas fa-save mr-1"></i>Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+@stop
+
+@section('css')
+    <style>
+        .user-info {
+            display: flex;
+            align-items: center;
+        }
+
+        .img-circle {
+            object-fit: cover;
+            width: 32px;
+            height: 32px;
+        }
+
+        .badge-pill {
+            padding-right: 0.8em;
+            padding-left: 0.8em;
+        }
+
+        .table th {
+            font-weight: 600;
+        }
+
+        .info-box-number {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .info-box .progress {
+            height: 3px;
+            margin: 5px 0;
+        }
+
+        .info-box .progress-bar {
+            height: 3px;
+        }
+    </style>
+@stop
+
+@section('js')
+    <script>
+        $(function() {
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Initialize DataTable for better filtering/sorting if needed
+            // $('.table').DataTable({
+            //     "paging": false,
+            //     "lengthChange": false,
+            //     "searching": false,
+            //     "ordering": true,
+            //     "info": false,
+            //     "autoWidth": false,
+            //     "responsive": true,
+            // });
+        });
+    </script>
+@stop

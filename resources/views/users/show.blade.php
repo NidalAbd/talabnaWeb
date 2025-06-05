@@ -1,0 +1,504 @@
+@extends('adminlte::page')
+
+@section('title', 'User Details')
+
+@section('content_header')
+    @include('partials.breadcrumbs')
+    @include('partials.alert')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-user text-info mr-2"></i> User Details</h1>
+        <div>
+            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-warning">
+                <i class="fas fa-edit mr-1"></i> Edit User
+            </a>
+            <a href="{{ route('users.index') }}" class="btn btn-outline-primary ml-2">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Users
+            </a>
+        </div>
+    </div>
+@stop
+
+@section('content')
+    <div class="container-fluid">
+        <div class="row">
+            <!-- User Profile Card -->
+            <div class="col-md-4">
+                <div class="card card-primary card-outline">
+                    <div class="card-body box-profile">
+                        <div class="text-center">
+                            @if($user->photos && $user->photos->count() > 0)
+                                @php
+                                    $photo = $user->photos->first();
+                                    $imgSrc = $photo->is_external ? $photo->src : asset($photo->src);
+                                @endphp
+                                <img class="profile-user-img img-fluid img-circle"
+                                     src="{{ $imgSrc }}"
+                                     alt="{{ $user->name }}" style="width: 150px; height: 150px; object-fit: cover;">
+                            @else
+                                <img class="profile-user-img img-fluid img-circle"
+                                     src="{{ asset('vendor/adminlte/dist/img/user-default.jpg') }}"
+                                     alt="User profile picture" style="width: 150px; height: 150px; object-fit: cover;">
+                            @endif
+                        </div>
+
+                        <h3 class="profile-username text-center">{{ $user->name }}</h3>
+                        <p class="text-muted text-center">{{ '@' . $user->user_name }}</p>
+
+                        <ul class="list-group list-group-unbordered mb-3">
+                            <li class="list-group-item">
+                                <b>Service Posts</b> <a class="float-right">{{ $user->servicePosts->count() }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Followers</b> <a class="float-right">{{ $user->followers->count() }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Following</b> <a class="float-right">{{ $user->following->count() }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Points Balance</b> <a class="float-right">{{ $user->pointsBalance }}</a>
+                            </li>
+                        </ul>
+
+                        <div class="d-flex">
+                            <a href="{{ route('user.profile', ['user' => $user->id]) }}"
+                               class="btn btn-primary btn-block mb-2">
+                                <i class="fas fa-id-card mr-1"></i> View Public Profile
+                            </a>
+                        </div>
+
+                        <div class="d-flex mt-2">
+                            <a href="{{ route('palservice_points.create', ['user_id' => $user->id]) }}"
+                               class="btn btn-success flex-grow-1 mr-1">
+                                <i class="fas fa-coins mr-1"></i> Add Points
+                            </a>
+                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="flex-grow-1 ml-1">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="btn btn-danger btn-block"
+                                        onclick="return confirm('Are you sure you want to delete this user?')">
+                                    <i class="fas fa-trash mr-1"></i> Delete User
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Account Status Card -->
+                <div class="card card-outline card-{{ $user->is_active == 'active' ? 'success' : ($user->is_active == 'banned' ? 'danger' : 'warning') }}">
+                    <div class="card-header">
+                        <h3 class="card-title">Account Status</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            @if($user->is_active == 'active')
+                                <span class="badge badge-success p-2"><i class="fas fa-check-circle mr-1"></i> Active</span>
+                            @elseif($user->is_active == 'banned')
+                                <span class="badge badge-danger p-2"><i class="fas fa-ban mr-1"></i> Banned</span>
+                            @else
+                                <span class="badge badge-warning p-2"><i class="fas fa-exclamation-circle mr-1"></i> Inactive</span>
+                            @endif
+                        </div>
+                        <div class="mt-3">
+                            <form action="{{ route('users.update.status', $user->id) }}" method="POST">
+                                @csrf
+                                @method('PATCH')
+                                <div class="form-group">
+                                    <select name="is_active" class="form-control" id="status">
+                                        <option value="active" {{ $user->is_active == 'active' ? 'selected' : '' }}>Set as Active</option>
+                                        <option value="inactive" {{ $user->is_active == 'inactive' ? 'selected' : '' }}>Set as Inactive</option>
+                                        <option value="banned" {{ $user->is_active == 'banned' ? 'selected' : '' }}>Ban User</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">Update Status</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roles Card -->
+                <div class="card card-outline card-info">
+                    <div class="card-header">
+                        <h3 class="card-title">User Roles</h3>
+                    </div>
+                    <div class="card-body">
+                        @if(count($user->roles) > 0)
+                            @foreach($user->roles as $role)
+                                <span class="badge badge-info p-2 mb-2 mr-2">
+                                <i class="fas fa-user-tag mr-1"></i> {{ $role->display_name ?? $role->name }}
+                            </span>
+                            @endforeach
+                        @else
+                            <div class="text-center">
+                                <span class="text-muted">No roles assigned</span>
+                            </div>
+                        @endif
+                        <div class="mt-3">
+                            <a href="/app" class="btn btn-outline-info btn-block">
+                                <i class="fas fa-user-shield mr-1"></i> Manage Roles & Permissions
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Details & Activities -->
+            <div class="col-md-8">
+                <!-- User Details Card -->
+                <div class="card card-outline card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">User Information</h3>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Full Name</span>
+                                        <span class="info-box-number">{{ $user->name ?? 'Not set' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Username</span>
+                                        <span class="info-box-number">{{ $user->user_name ?? 'Not set' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Email</span>
+                                        <span class="info-box-number">{{ $user->email }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Auth Type</span>
+                                        <span class="info-box-number">{{ ucfirst($user->auth_type) }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Gender</span>
+                                        <span class="info-box-number">{{ $user->gender }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Date of Birth</span>
+                                        <span class="info-box-number">
+                                        {{ $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth)->format('M d, Y') : 'Not set' }}
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Phone Number</span>
+                                        <span class="info-box-number">{{ $user->phones ?? 'Not set' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">WhatsApp Number</span>
+                                        <span class="info-box-number">{{ $user->WatsNumber ?? 'Not set' }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Location</span>
+                                        <span class="info-box-number">
+                {{ $locationDisplay }}
+            </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Data Saver</span>
+                                        <span class="info-box-number">
+                                        @if($user->data_saver_enabled)
+                                                <span class="badge badge-success">Enabled</span>
+                                            @else
+                                                <span class="badge badge-secondary">Disabled</span>
+                                            @endif
+                                    </span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Member Since</span>
+                                        <span class="info-box-number">{{ $user->created_at->format('M d, Y') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Last Updated</span>
+                                        <span class="info-box-number">{{ $user->updated_at->format('M d, Y') }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                            <!-- Latitude -->
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Latitude</span>
+                                        <span class="info-box-number">
+                @if($user->location_latitudes)
+                                                <div class="d-flex align-items-center">
+                        <span>{{ $user->location_latitudes }}</span>
+                        <button class="btn btn-xs btn-outline-info ml-2 copy-btn" data-coords="{{ $user->location_latitudes }}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                                            @else
+                                                Not set
+                                            @endif
+            </span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Longitude -->
+                            <div class="col-md-6">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">Longitude</span>
+                                        <span class="info-box-number">
+                @if($user->location_longitudes)
+                                                <div class="d-flex align-items-center">
+                        <span>{{ $user->location_longitudes }}</span>
+                        <button class="btn btn-xs btn-outline-info ml-2 copy-btn" data-coords="{{ $user->location_longitudes }}">
+                            <i class="fas fa-copy"></i>
+                        </button>
+                    </div>
+                                            @else
+                                                Not set
+                                            @endif
+            </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- User Location Map -->
+                        @if($user->location_latitudes && $user->location_longitudes)
+                            <div class="mt-4">
+                                <h5>User Location</h5>
+                                <div id="map" style="height: 300px;"></div>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- User Activities -->
+                <div class="card card-outline card-success">
+                    <div class="card-header p-2">
+                        <ul class="nav nav-pills">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#services" data-toggle="tab">
+                                    <i class="fas fa-file-alt mr-1"></i> Service Posts
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#points" data-toggle="tab">
+                                    <i class="fas fa-coins mr-1"></i> Points History
+                                </a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#reports" data-toggle="tab">
+                                    <i class="fas fa-flag mr-1"></i> Reports
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <div class="tab-content">
+                            <!-- Service Posts Tab -->
+                            <div class="tab-pane active" id="services">
+                                @if($user->servicePosts->count() > 0)
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Title</th>
+                                                <th>Category</th>
+                                                <th>Created</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach($user->servicePosts as $post)
+                                                <tr>
+                                                    <td>{{ $post->id }}</td>
+                                                    <td>{{ $post->title }}</td>
+                                                    <td>{{ $post->subCategory->display_name }}</td>
+                                                    <td>{{ $post->created_at->format('M d, Y') }}</td>
+                                                    <td>
+                                                        <span class="badge badge-{{ $post->state ? 'success' : 'danger' }}">
+                                                            {{ $post->state ? 'published' : 'Inactive' }}
+                                                        </span>
+                                                    </td>
+                                                    <td>
+                                                        <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-sm btn-info">
+                                                            <i class="fas fa-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="text-center py-4">
+                                        <span class="text-muted">No service posts found</span>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Points History Tab -->
+                            <div class="tab-pane" id="points">
+                                @if(isset($pointsHistory) && $pointsHistory->count() > 0)
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                            <tr>
+                                                <th>Date</th>
+                                                <th>Points</th>
+                                                <th>Type</th>
+                                                <th>Description</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach($pointsHistory as $point)
+                                                <tr>
+                                                    <td>{{ $point->created_at->format('M d, Y') }}</td>
+                                                    <td>
+                                                        <span class="badge badge-{{ $point->point > 0 ? 'success' : 'danger' }}">
+                                                            {{ $point->point > 0 ? '+' : '' }}{{ $point->point }}
+                                                        </span>
+                                                    </td>
+                                                    <td>{{ $point->type ?? 'N/A' }}</td>
+                                                    <td>{{ $point->description ?? 'N/A' }}</td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="text-center py-4">
+                                        <span class="text-muted">No points history found</span>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Reports Tab -->
+                            <div class="tab-pane" id="reports">
+                                @if($user->reports->count() > 0)
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                            <tr>
+                                                <th>Reported By</th>
+                                                <th>Reason</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            @foreach($user->reports as $report)
+                                                <tr>
+                                                    <td>
+                                                        @if($report->user)
+                                                            {{ $report->user->name }}
+                                                        @else
+                                                            Anonymous
+                                                        @endif
+                                                    </td>
+                                                    <td>{{ $report->reason }}</td>
+                                                    <td>{{ $report->created_at->format('M d, Y') }}</td>
+                                                    <td>
+                                                        <button class="btn btn-sm btn-danger">
+                                                            <i class="fas fa-ban"></i> Action
+                                                        </button>
+                                                    </td>
+                                                </tr>
+                                            @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                @else
+                                    <div class="text-center py-4">
+                                        <span class="text-muted">No reports found</span>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@stop
+
+@section('css')
+    <style>
+        .profile-user-img {
+            border: 3px solid #adb5bd;
+            margin: 0 auto;
+            padding: 3px;
+        }
+        .info-box-number {
+            font-weight: 500;
+        }
+        .tab-pane {
+            padding-top: 10px;
+        }
+    </style>
+@stop
+
+@section('js')
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+    <script>
+        $(function() {
+            // Initialize Google Maps
+            @if($user->location_latitudes && $user->location_longitudes)
+            var userLocation = {
+                lat: {{ $user->location_latitudes }},
+                lng: {{ $user->location_longitudes }}
+            };
+
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: userLocation,
+                zoom: 14
+            });
+
+            var marker = new google.maps.Marker({
+                position: userLocation,
+                map: map,
+                title: "{{ $user->name }}'s Location"
+            });
+            @endif
+        });
+    </script>
+@stop

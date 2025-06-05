@@ -1,0 +1,336 @@
+@extends('adminlte::page')
+
+@section('title', 'Report Statistics')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>
+            <a href="{{ route('reports.index') }}" class="btn btn-sm btn-outline-secondary mr-2">
+                <i class="fas fa-arrow-left"></i>
+            </a>
+            <i class="fas fa-chart-bar text-info mr-2"></i> Report Statistics
+        </h1>
+        <div>
+            <button type="button" class="btn btn-outline-primary" id="refreshStats">
+                <i class="fas fa-sync-alt mr-1"></i> Refresh Data
+            </button>
+            <button type="button" class="btn btn-outline-success" id="exportStats">
+                <i class="fas fa-file-excel mr-1"></i> Export
+            </button>
+        </div>
+    </div>
+@stop
+
+@section('content')
+    <div class="container-fluid">
+        <!-- Summary Cards -->
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ number_format($resolutionStats['resolved'] + $resolutionStats['pending'] + $resolutionStats['dismissed']) }}</h3>
+                        <p>Total Reports</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-flag"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ number_format($resolutionStats['resolved']) }}</h3>
+                        <p>Resolved Reports</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>{{ number_format($resolutionStats['pending']) }}</h3>
+                        <p>Pending Reports</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="small-box bg-secondary">
+                    <div class="inner">
+                        <h3>{{ number_format($resolutionStats['dismissed']) }}</h3>
+                        <p>Dismissed Reports</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-times-circle"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Daily Report Trend Chart -->
+            <div class="col-md-8">
+                <div class="card card-outline card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-line mr-1"></i>
+                            Report Trends (Last 30 Days)
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="reportTrendsChart" style="min-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports by Type -->
+            <div class="col-md-4">
+                <div class="card card-outline card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-chart-pie mr-1"></i>
+                            Reports by Type
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="reportTypesChart" style="min-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Top Report Reasons -->
+            <div class="col-md-6">
+                <div class="card card-outline card-warning">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-list-ol mr-1"></i>
+                            Top Report Reasons
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th style="width: 10px">#</th>
+                                <th>Reason</th>
+                                <th style="width: 120px">Count</th>
+                                <th style="width: 120px">Percentage</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @php
+                                $total = $reportsByReason->sum('total');
+                                $counter = 1;
+                            @endphp
+                            @foreach($reportsByReason as $reasonStat)
+                                <tr>
+                                    <td>{{ $counter++ }}</td>
+                                    <td>{{ $reasonStat->reason }}</td>
+                                    <td>
+                                        <span class="badge bg-primary">{{ number_format($reasonStat->total) }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-xs">
+                                            <div class="progress-bar progress-bar-danger" style="width: {{ ($reasonStat->total / $total) * 100 }}%"></div>
+                                        </div>
+                                        <span class="badge bg-secondary">{{ round(($reasonStat->total / $total) * 100, 1) }}%</span>
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Report Type Distribution -->
+            <div class="col-md-6">
+                <div class="card card-outline card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-tasks mr-1"></i>
+                            Report Distribution
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <canvas id="resolutionStatsChart" style="min-height: 300px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+@stop
+
+@section('css')
+    <style>
+        .small-box .icon {
+            font-size: 70px;
+            top: 5px;
+        }
+        .progress-xs {
+            height: 7px;
+            margin-top: 5px;
+            margin-bottom: 5px;
+        }
+    </style>
+@stop
+
+@section('js')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.9.4/Chart.min.js"></script>
+    <script>
+        $(function() {
+            // Daily Reports Trend Chart
+            var trendCtx = document.getElementById('reportTrendsChart').getContext('2d');
+            var trendChart = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: {!! json_encode($dailyReports->pluck('date')) !!},
+                    datasets: [{
+                        label: 'Reports',
+                        data: {!! json_encode($dailyReports->pluck('total')) !!},
+                        backgroundColor: 'rgba(60, 141, 188, 0.2)',
+                        borderColor: 'rgba(60, 141, 188, 1)',
+                        pointRadius: 3,
+                        pointBackgroundColor: 'rgba(60, 141, 188, 1)',
+                        pointBorderColor: '#fff',
+                        pointHoverRadius: 5,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(60, 141, 188, 1)',
+                        fill: true
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        xAxes: [{
+                            gridLines: {
+                                display: false,
+                            },
+                            ticks: {
+                                maxTicksLimit: 7
+                            }
+                        }],
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true
+                            }
+                        }]
+                    },
+                    title: {
+                        display: true,
+                        text: 'Daily Report Volume'
+                    }
+                }
+            });
+
+            // Report Types Chart
+            var typeLabels = [];
+            var typeData = [];
+            var typeColors = ['#f56954', '#00a65a', '#f39c12', '#00c0ef', '#3c8dbc'];
+
+            @foreach($reportsByType as $index => $typeStat)
+            typeLabels.push('{{ $typeStat->reportable_type == "App\\Models\\User" ? "User" : "Service Post" }}');
+            typeData.push({{ $typeStat->total }});
+            @endforeach
+
+            var typeCtx = document.getElementById('reportTypesChart').getContext('2d');
+            var typeChart = new Chart(typeCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: typeLabels,
+                    datasets: [{
+                        data: typeData,
+                        backgroundColor: typeColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    legend: {
+                        position: 'right'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribution by Content Type'
+                    }
+                }
+            });
+
+            // Resolution Stats Chart - Using All Reports as Pending since we don't have status fields yet
+            var resLabels = ['Pending'];
+            var resData = [{{ $resolutionStats['pending'] }}];
+            var resColors = ['#f39c12'];
+
+            var resCtx = document.getElementById('resolutionStatsChart').getContext('2d');
+            var resChart = new Chart(resCtx, {
+                type: 'pie',
+                data: {
+                    labels: resLabels,
+                    datasets: [{
+                        data: resData,
+                        backgroundColor: resColors,
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    responsive: true,
+                    legend: {
+                        position: 'right'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Report Status Distribution'
+                    }
+                }
+            });
+
+            // Refresh button functionality
+            $('#refreshStats').click(function() {
+                $(this).html('<i class="fas fa-spinner fa-spin mr-1"></i> Refreshing...');
+                location.reload();
+            });
+
+            // Export functionality
+            $('#exportStats').click(function() {
+                alert('Export functionality would be implemented here.');
+                // This would normally involve an AJAX call to a backend endpoint that generates
+                // and returns an Excel/CSV file for download
+            });
+        });
+    </script>
+@stop

@@ -1,0 +1,17 @@
+// Fonts
+@import url('https://fonts.bunny.net/css?family=Nunito');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import 'bootstrap/scss/bootstrap';
+@import 'bootstrap-icons/font/bootstrap-icons.css';
+.btn {
+    color: #fff; // Sets text color to white for all Bootstrap buttons
+}
+
+// Alternatively, if you only want to target specific button types:
+.btn-primary {
+    color: #fff; // Only sets text color to white for primary buttons
+}

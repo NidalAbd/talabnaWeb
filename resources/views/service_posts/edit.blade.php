@@ -1,0 +1,651 @@
+@extends('adminlte::page')
+@section('title', "Edit Service Post")
+@section('content_header')
+    @include('partials.breadcrumbs')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-edit text-primary mr-2"></i> Edit Service Post #{{ $servicePost->id }}</h1>
+        <div>
+            <a href="{{ route('service_posts.index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Back to List
+            </a>
+            <a href="{{ route('service_posts.show', $servicePost->id) }}" class="btn btn-info">
+                <i class="fas fa-eye mr-1"></i> View
+            </a>
+        </div>
+    </div>
+@stop
+
+@section('content')
+    <div class="container-fluid p-0">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit text-warning mr-2"></i>
+                            Edit Service Post: <span class="text-primary">{{ $servicePost->title }}</span>
+                        </h5>
+                    </div>
+
+                    <form action="{{ route('service_posts.update', $servicePost->id) }}" method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @method('PUT')
+                        <div class="card-body">
+                            @if(session('success'))
+                                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                    {{ session('success') }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            @endif
+
+                            @if(session('error'))
+                                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                                    {{ session('error') }}
+                                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                            @endif
+
+                            <div class="row mb-4">
+                                <div class="col-md-6">
+                                    <div class="alert alert-info">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        <strong>Your Point Balance:</strong> {{ Auth::user()->pointsBalance ?? 0 }} points
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="alert alert-secondary">
+                                        <i class="fas fa-clock mr-1"></i>
+                                        <strong>Created:</strong> {{ $servicePost->created_at->format('M d, Y H:i') }} |
+                                        <strong>Last Updated:</strong> {{ $servicePost->updated_at->format('M d, Y H:i') }}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Basic Information -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-info-circle mr-1"></i>
+                                        Basic Information
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="title" class="font-weight-bold">
+                                                    Title <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="text" id="title" name="title"
+                                                       class="form-control @error('title') is-invalid @enderror"
+                                                       value="{{ old('title', $servicePost->title) }}" required>
+                                                @error('title')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group">
+                                                <label for="description" class="font-weight-bold">
+                                                    Description <span class="text-danger">*</span>
+                                                </label>
+                                                <textarea id="description" name="description" rows="5"
+                                                          class="form-control @error('description') is-invalid @enderror"
+                                                          required>{{ old('description', $servicePost->description) }}</textarea>
+                                                @error('description')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="type" class="font-weight-bold">
+                                                    Type <span class="text-danger">*</span>
+                                                </label>
+                                                <select name="type" id="type"
+                                                        class="form-control @error('type') is-invalid @enderror" required>
+                                                    <option value="عرض" {{ old('type', $servicePost->type) == 'عرض' ? 'selected' : '' }}>Offer</option>
+                                                    <option value="طلب" {{ old('type', $servicePost->type) == 'طلب' ? 'selected' : '' }}>Request</option>
+                                                </select>
+                                                @error('type')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="state" class="font-weight-bold">
+                                                    Status <span class="text-danger">*</span>
+                                                </label>
+                                                <select name="state" id="state"
+                                                        class="form-control @error('state') is-invalid @enderror" required>
+                                                    <option value="published" {{ old('state', $servicePost->state) == 'published' ? 'selected' : '' }}>Published</option>
+                                                    <option value="archive" {{ old('state', $servicePost->state) == 'archive' ? 'selected' : '' }}>Archive</option>
+                                                    <option value="not published" {{ old('state', $servicePost->state) == 'not published' ? 'selected' : '' }}>Draft</option>
+                                                    <option value="rejected" {{ old('state', $servicePost->state) == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                                </select>
+                                                @error('state')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Category Selection -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-th-large mr-1"></i>
+                                        Category & Subcategory
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="categories_id" class="font-weight-bold">
+                                                    Category <span class="text-danger">*</span>
+                                                </label>
+                                                <select name="categories_id" id="categories_id"
+                                                        class="form-control @error('categories_id') is-invalid @enderror" required>
+                                                    <option value="">Select Category</option>
+                                                    @foreach($categories as $category)
+                                                        <option value="{{ $category->id }}" {{ old('categories_id', $servicePost->categories_id) == $category->id ? 'selected' : '' }}>
+                                                            {{ $category->name[app()->getLocale()] ?? $category->name['en'] ?? 'Unknown' }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('categories_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-group">
+                                                <label for="sub_categories_id" class="font-weight-bold">
+                                                    Subcategory <span class="text-danger">*</span>
+                                                </label>
+                                                <select name="sub_categories_id" id="sub_categories_id"
+                                                        class="form-control @error('sub_categories_id') is-invalid @enderror" required>
+                                                    <option value="">Select Category First</option>
+                                                    @foreach($subcategories->where('categories_id', $servicePost->categories_id) as $subcategory)
+                                                        <option value="{{ $subcategory->id }}" {{ old('sub_categories_id', $servicePost->sub_categories_id) == $subcategory->id ? 'selected' : '' }}>
+                                                            {{ $subcategory->name[app()->getLocale()] ?? $subcategory->name['en'] ?? 'Unknown' }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('sub_categories_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Price & Location -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-tag mr-1"></i>
+                                        Price & Location
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="price" class="font-weight-bold">Price</label>
+                                                <input type="number" id="price" name="price"
+                                                       class="form-control @error('price') is-invalid @enderror"
+                                                       value="{{ old('price', $servicePost->price) }}">
+                                                @error('price')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="price_currency_code" class="font-weight-bold">Currency</label>
+                                                <select name="price_currency_code" id="price_currency_code"
+                                                        class="form-control @error('price_currency_code') is-invalid @enderror">
+                                                    <option value="USD" {{ old('price_currency_code', $servicePost->price_currency_code) == 'USD' ? 'selected' : '' }}>USD</option>
+                                                    @foreach($countries ?? [] as $country)
+                                                        @if($country->currency_code)
+                                                            <option value="{{ $country->currency_code }}" {{ old('price_currency_code', $servicePost->price_currency_code) == $country->currency_code ? 'selected' : '' }}>
+                                                                {{ $country->currency_code }} - {{ getTranslatedName($country->name) }}
+                                                            </option>
+                                                        @endif
+                                                    @endforeach
+                                                </select>
+                                                @error('price_currency_code')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="country_id" class="font-weight-bold">Country</label>
+                                                <select name="country_id" id="country_id"
+                                                        class="form-control @error('country_id') is-invalid @enderror">
+                                                    <option value="">Select Country</option>
+                                                    @foreach($countries ?? [] as $country)
+                                                        <option value="{{ $country->id }}"
+                                                                data-currency="{{ $country->currency_code }}"
+                                                            {{ old('country_id', $servicePost->country_id) == $country->id ? 'selected' : '' }}>
+                                                            {{ getTranslatedName($country->name) }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                @error('country_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="city_id" class="font-weight-bold">City</label>
+                                                <select name="city_id" id="city_id"
+                                                        class="form-control @error('city_id') is-invalid @enderror">
+                                                    <option value="{{ $country->id }}"
+                                                            data-currency="{{ $country->currency_code }}"
+                                                        {{ old('country_id', $servicePost->country_id) == $country->id ? 'selected' : '' }}>
+                                                        {{ getTranslatedName($country->name) }}
+                                                    </option>
+                                                </select>
+                                                @error('city_id')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="location_latitudes" class="font-weight-bold">
+                                                    Latitude <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="number" step="any" id="location_latitudes" name="location_latitudes"
+                                                       class="form-control @error('location_latitudes') is-invalid @enderror"
+                                                       value="{{ old('location_latitudes', $servicePost->location_latitudes) }}" required>
+                                                @error('location_latitudes')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                        <div class="col-md-4">
+                                            <div class="form-group">
+                                                <label for="location_longitudes" class="font-weight-bold">
+                                                    Longitude <span class="text-danger">*</span>
+                                                </label>
+                                                <input type="number" step="any" id="location_longitudes" name="location_longitudes"
+                                                       class="form-control @error('location_longitudes') is-invalid @enderror"
+                                                       value="{{ old('location_longitudes', $servicePost->location_longitudes) }}" required>
+                                                @error('location_longitudes')
+                                                <div class="invalid-feedback">{{ $message }}</div>
+                                                @enderror
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="row">
+                                        <div class="col-md-12">
+                                            <div class="form-group mb-0">
+                                                <button type="button" id="use-my-location" class="btn btn-sm btn-outline-secondary">
+                                                    <i class="fas fa-map-marker-alt mr-1"></i> Use My Location
+                                                </button>
+                                                <small class="form-text text-muted">
+                                                    Click to use your current location (requires location permission)
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Stats Information -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-chart-line mr-1"></i>
+                                        Post Performance
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <h2 class="mb-0">{{ $servicePost->view_count }}</h2>
+                                                    <small class="text-muted">Views</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <h2 class="mb-0">{{ $servicePost->favorites()->count() }}</h2>
+                                                    <small class="text-muted">Favorites</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <h2 class="mb-0">{{ $servicePost->comments()->count() }}</h2>
+                                                    <small class="text-muted">Comments</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 mb-3">
+                                            <div class="card bg-light">
+                                                <div class="card-body text-center py-3">
+                                                    <h2 class="mb-0">{{ $servicePost->reports()->count() }}</h2>
+                                                    <small class="text-muted">Reports</small>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Current Photos -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-images mr-1"></i>
+                                        Current Photos
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    @if($servicePost->photos->count() > 0)
+                                        <div class="row" id="current-photos">
+                                            @foreach($servicePost->photos as $photo)
+                                                <div class="col-md-3 mb-3">
+                                                    <div class="card h-100">
+                                                        <div class="card-body text-center p-2">
+                                                            @if(Str::contains($photo->src, ['.jpg', '.jpeg', '.png', '.gif']))
+                                                                <img src="{{ asset($photo->src) }}" class="img-fluid" style="max-height: 150px;">
+                                                            @elseif(Str::contains($photo->src, ['.mp3', '.wav']))
+                                                                <i class="fas fa-music fa-3x text-info mb-2"></i>
+                                                                <p class="mb-0">Audio File</p>
+                                                            @elseif(Str::contains($photo->src, ['.mp4', '.avi', '.mov']))
+                                                                <i class="fas fa-video fa-3x text-danger mb-2"></i>
+                                                                <p class="mb-0">Video File</p>
+                                                            @else
+                                                                <i class="fas fa-file fa-3x text-secondary mb-2"></i>
+                                                                <p class="mb-0">File</p>
+                                                            @endif
+                                                        </div>
+                                                        <div class="card-footer bg-light p-2">
+                                                            <div class="custom-control custom-checkbox">
+                                                                <input type="checkbox" class="custom-control-input" id="delete_photo_{{ $photo->id }}" name="delete_photos[]" value="{{ $photo->id }}">
+                                                                <label class="custom-control-label" for="delete_photo_{{ $photo->id }}">Delete</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div class="alert alert-warning">
+                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                            No photos are currently attached to this post.
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
+
+                            <!-- Add New Photos -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-plus mr-1"></i>
+                                        Add New Photos
+                                    </h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-group">
+                                        <div class="custom-file">
+                                            <input type="file" class="custom-file-input @error('images') is-invalid @enderror @error('images.*') is-invalid @enderror"
+                                                   id="images" name="images[]" multiple onchange="previewImages(this)">
+                                            <label class="custom-file-label" for="images">Choose files...</label>
+                                            @error('photos')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                            @error('photos.*')
+                                            <div class="invalid-feedback">{{ $message }}</div>
+                                            @enderror
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            You can upload multiple images. Max file size: 2MB per image.
+                                            Allowed formats: JPG, PNG, HEIC, HEIF, MP3, MP4
+                                        </small>
+                                    </div>
+
+                                    <div class="row mt-3" id="image-preview-container">
+                                        <!-- Image previews will be inserted here -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-white d-flex justify-content-between">
+                            <a href="{{ route('service_posts.index') }}" class="btn btn-secondary">
+                                <i class="fas fa-arrow-left mr-1"></i> Back to Service Posts
+                            </a>
+                            <div>
+                                <a href="{{ route('service_posts.show', $servicePost->id) }}" class="btn btn-info mr-2">
+                                    <i class="fas fa-eye mr-1"></i> View Post
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-1"></i> Update Service Post
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    @section('js')
+        <script>
+            console.log("AdminLTE JS section for edit page");
+            $(document).ready(function() {
+                console.log("Document ready with jQuery");
+
+                // Initialize file input with file name display
+                if (typeof bsCustomFileInput !== 'undefined') {
+                    bsCustomFileInput.init();
+                }
+
+                // Category change event
+                $('#categories_id').on('change', function() {
+                    console.log("Category changed:", $(this).val());
+                    const categoryId = $(this).val();
+
+                    if (categoryId) {
+                        $.ajax({
+                            url: "{{ route('fetchSubcategories') }}",
+                            type: 'GET',
+                            data: { category_id: categoryId },
+                            success: function(data) {
+                                console.log("Data received:", data);
+                                let options = '<option value="">Select Subcategory</option>';
+                                data.forEach(function(subcategory, index) {
+                                    const name = subcategory.name['{{ app()->getLocale() }}'] || subcategory.name['en'] || 'Unknown';
+                                    // Set selected attribute on the first subcategory
+                                    const selected = index === 0 ? 'selected' : '';
+                                    options += `<option value="${subcategory.id}" ${selected}>${name}</option>`;
+                                });
+                                $('#sub_categories_id').html(options);
+
+                                // Trigger change event to ensure any dependent fields update
+                                $('#sub_categories_id').trigger('change');
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error:", error);
+                                $('#sub_categories_id').html('<option value="">Error loading subcategories</option>');
+                            }
+                        });
+                    } else {
+                        $('#sub_categories_id').html('<option value="">Select Category First</option>');
+                    }
+                });
+
+                // Country change event
+                $('#country_id').on('change', function() {
+                    const countryId = $(this).val();
+                    console.log("Country changed:", countryId);
+
+                    if (countryId) {
+                        $.ajax({
+                            url: `/get-cities-for-form/${countryId}`,
+                            type: 'GET',
+                            success: function(data) {
+                                console.log("Cities received:", data);
+                                let options = '<option value="">Select City</option>';
+
+                                data.forEach(function(city, index) {
+                                    let cityName;
+
+                                    // Handle various name formats
+                                    if (typeof city.name === 'string' && city.name.startsWith('{')) {
+                                        try {
+                                            const nameObj = JSON.parse(city.name);
+                                            const locale = $('html').attr('lang') || 'en';
+                                            cityName = nameObj[locale] || nameObj['en'] || Object.values(nameObj)[0];
+                                        } catch (e) {
+                                            cityName = city.name;
+                                        }
+                                    }
+                                    else if (typeof city.name === 'object') {
+                                        const locale = $('html').attr('lang') || 'en';
+                                        cityName = city.name[locale] || city.name['en'] || Object.values(city.name)[0];
+                                    }
+                                    else {
+                                        cityName = city.name;
+                                    }
+
+                                    // Set selected attribute on the first city
+                                    const selected = index === 0 ? 'selected' : '';
+                                    options += `<option value="${city.id}" ${selected}>${cityName}</option>`;
+                                });
+
+                                $('#city_id').html(options);
+
+                                // Trigger change event to ensure any dependent fields update
+                                $('#city_id').trigger('change');
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error loading cities:", error);
+                                $('#city_id').html('<option value="">Error loading cities</option>');
+                            }
+                        });
+
+                        const currencyCode = $(this).find('option:selected').data('currency');
+                        if (currencyCode) {
+                            $('#price_currency_code').val(currencyCode);
+                        }
+                    } else {
+                        $('#city_id').html('<option value="">Select Country First</option>');
+                    }
+                });
+
+                // Use current location button
+                $('#use-my-location').on('click', function() {
+                    if (navigator.geolocation) {
+                        navigator.geolocation.getCurrentPosition(function(position) {
+                            $('#location_latitudes').val(position.coords.latitude);
+                            $('#location_longitudes').val(position.coords.longitude);
+                        }, function(error) {
+                            alert('Error getting location: ' + error.message);
+                        });
+                    } else {
+                        alert('Geolocation is not supported by this browser.');
+                    }
+                });
+            });
+
+            // Preview images before upload function
+            function previewImages(input) {
+                const container = document.getElementById('image-preview-container');
+                container.innerHTML = '';
+
+                if (input.files && input.files.length > 0) {
+                    for (let i = 0; i < input.files.length; i++) {
+                        const reader = new FileReader();
+                        const file = input.files[i];
+
+                        reader.onload = function(e) {
+                            const col = document.createElement('div');
+                            col.className = 'col-md-3 mb-3';
+
+                            const card = document.createElement('div');
+                            card.className = 'card h-100';
+
+                            const cardBody = document.createElement('div');
+                            cardBody.className = 'card-body text-center p-2';
+
+                            // Create preview based on file type
+                            if (file.type.startsWith('image/')) {
+                                // Image preview
+                                const img = document.createElement('img');
+                                img.src = e.target.result;
+                                img.className = 'img-fluid';
+                                img.style.maxHeight = '150px';
+                                cardBody.appendChild(img);
+                            } else if (file.type.startsWith('audio/')) {
+                                // Audio preview
+                                const audioIcon = document.createElement('i');
+                                audioIcon.className = 'fas fa-music fa-3x text-info mb-2';
+
+                                const audioName = document.createElement('p');
+                                audioName.className = 'mb-0 text-truncate';
+                                audioName.textContent = file.name;
+
+                                cardBody.appendChild(audioIcon);
+                                cardBody.appendChild(audioName);
+                            } else if (file.type.startsWith('video/')) {
+                                // Video preview
+                                const videoIcon = document.createElement('i');
+                                videoIcon.className = 'fas fa-video fa-3x text-danger mb-2';
+
+                                const videoName = document.createElement('p');
+                                videoName.className = 'mb-0 text-truncate';
+                                videoName.textContent = file.name;
+
+                                cardBody.appendChild(videoIcon);
+                                cardBody.appendChild(videoName);
+                            }
+
+                            const cardFooter = document.createElement('div');
+                            cardFooter.className = 'card-footer bg-light p-1';
+                            cardFooter.innerHTML = `<small class="text-muted">${file.name.substring(0, 20)}${file.name.length > 20 ? '...' : ''}</small>`;
+
+                            card.appendChild(cardBody);
+                            card.appendChild(cardFooter);
+                            col.appendChild(card);
+                            container.appendChild(col);
+                        }
+
+                        reader.readAsDataURL(file);
+                    }
+                }
+            }
+        </script>
+    @stop
+@endsection

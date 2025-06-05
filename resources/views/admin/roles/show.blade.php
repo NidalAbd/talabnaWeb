@@ -1,0 +1,233 @@
+@extends('adminlte::page')
+
+@section('title', 'Role Details')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-user-tag text-info mr-2"></i> Role Details: {{ $role->display_name ?? $role->name }}</h1>
+        <div>
+            @can('edit_role')
+                @if($role->name != 'superadmin' && $role->name != 'admin')
+                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-warning">
+                        <i class="fas fa-edit mr-1"></i> Edit Role
+                    </a>
+                @endif
+            @endcan
+            <a href="{{ route('role-assignments.users-with-role', $role->id) }}" class="btn btn-primary ml-2">
+                <i class="fas fa-users mr-1"></i> View Users
+            </a>
+            <a href="{{ route('roles.index') }}" class="btn btn-secondary ml-2">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Roles
+            </a>
+        </div>
+    </div>
+@stop
+
+@section('content')
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4">
+                <!-- Role Info Card -->
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Role Information</h3>
+                    </div>
+                    <div class="card-body box-profile">
+                        <h3 class="profile-username text-center">
+                            <span class="badge badge-{{ $role->name == 'superadmin' ? 'danger' : ($role->name == 'admin' ? 'warning' : 'info') }} px-3 py-2">
+                                {{ $role->name }}
+                            </span>
+                        </h3>
+                        <p class="text-muted text-center">{{ $role->display_name }}</p>
+
+                        <ul class="list-group list-group-unbordered mb-3">
+                            <li class="list-group-item">
+                                <b>ID</b> <a class="float-right">{{ $role->id }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Name</b> <a class="float-right">{{ $role->name }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Display Name</b> <a class="float-right">{{ $role->display_name ?? 'Not set' }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Created</b> <a class="float-right">{{ $role->created_at->format('M d, Y') }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Last Updated</b> <a class="float-right">{{ $role->updated_at->format('M d, Y') }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Permissions</b> <a class="float-right">{{ $role->permissions->count() }}</a>
+                            </li>
+                            <li class="list-group-item">
+                                <b>Users Assigned</b> <a class="float-right">{{ $usersCount }}</a>
+                            </li>
+                        </ul>
+
+                        <div class="text-center mt-4">
+                            @if($role->name != 'superadmin' && $role->name != 'admin' && $role->name != 'user' && $usersCount == 0)
+                                @can('delete_role')
+                                    <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="d-inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button class="btn btn-danger btn-block" type="submit" onclick="return confirm('Are you sure you want to delete this role?')">
+                                            <i class="fas fa-trash mr-1"></i> Delete Role
+                                        </button>
+                                    </form>
+                                @endcan
+                            @else
+                                <button class="btn btn-danger btn-block" disabled>
+                                    <i class="fas fa-lock mr-1"></i> Cannot Delete
+                                </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Options Card -->
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Options</h3>
+                    </div>
+                    <div class="card-body">
+                        <a href="{{ route('role-assignments.users-with-role', $role->id) }}" class="btn btn-block btn-default">
+                            <i class="fas fa-users mr-1"></i> View Users with this Role
+                        </a>
+
+                        @if($role->name != 'superadmin' && $role->name != 'admin')
+                            <button type="button" class="btn btn-block btn-default" data-toggle="modal" data-target="#cloneRoleModal">
+                                <i class="fas fa-copy mr-1"></i> Clone Role
+                            </button>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-8">
+                <!-- Role Description Card -->
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Role Description</h3>
+                    </div>
+                    <div class="card-body">
+                        @if($role->description)
+                            {{ $role->description }}
+                        @else
+                            <div class="text-muted">No description available for this role.</div>
+                        @endif
+                    </div>
+                </div>
+
+                <!-- Permissions Card -->
+                <div class="card card-primary card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">Role Permissions</h3>
+                        <div class="card-tools">
+                            <span class="badge badge-primary">
+                                {{ $role->permissions->count() }} Permissions
+                            </span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        @if($role->permissions->count() > 0)
+                            @php
+                                $groupedPermissions = $role->permissions->groupBy(function($permission) {
+                                    $parts = explode('_', $permission->name);
+                                    return $parts[0] ?? 'general';
+                                });
+                            @endphp
+
+                            @foreach($groupedPermissions as $group => $permissions)
+                                <div class="mb-4">
+                                    <h5 class="text-capitalize">{{ $group }} Permissions</h5>
+                                    <div class="row">
+                                        @foreach($permissions as $permission)
+                                            <div class="col-md-4 mb-2">
+                                                <div class="info-box info-box-sm bg-light">
+                                                    <span class="info-box-icon bg-info">
+                                                        <i class="fas fa-key"></i>
+                                                    </span>
+                                                    <div class="info-box-content">
+                                                        <span class="info-box-text">{{ $permission->display_name ?? $permission->name }}</span>
+                                                        <span class="info-box-number">{{ $permission->name }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            @endforeach
+                        @else
+                            <div class="alert alert-warning">
+                                <i class="icon fas fa-exclamation-triangle"></i>
+                                This role has no permissions assigned to it.
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clone Role Modal -->
+    <div class="modal fade" id="cloneRoleModal" tabindex="-1" role="dialog" aria-labelledby="cloneRoleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <form action="{{ route('roles.clone', $role->id) }}" method="POST">
+                    @csrf
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="cloneRoleModalLabel">Clone Role</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <p>This will create a new role with the same permissions as "{{ $role->name }}".</p>
+
+                        <div class="form-group">
+                            <label for="new_name">New Role Name <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" id="new_name" name="new_name"
+                                   placeholder="Enter a unique role name" required>
+                            <small class="form-text text-muted">
+                                Use lowercase letters without spaces (e.g. editor, content_manager)
+                            </small>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="new_display_name">New Display Name</label>
+                            <input type="text" class="form-control" id="new_display_name" name="new_display_name"
+                                   placeholder="Human readable name">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Clone Role</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+@stop
+
+@section('css')
+    <style>
+        .info-box-sm {
+            min-height: 60px;
+        }
+
+        .info-box-sm .info-box-icon {
+            width: 50px;
+            height: 50px;
+            font-size: 0.8rem;
+        }
+
+        .info-box-sm .info-box-content {
+            padding: 5px 10px;
+            margin-left: 50px;
+        }
+
+        .info-box-sm .info-box-number {
+            font-size: 0.8rem;
+        }
+    </style>
+@stop
