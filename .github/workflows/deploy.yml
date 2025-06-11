@@ -125,110 +125,110 @@ jobs:
         run: |
           # Create a script that will run on the server to recreate storage link
           cat > deploy_temp/setup_storage.php << 'EOF'
-  <?php
-  // Post-deployment script to recreate storage symlink
-  $publicPath = __DIR__ . '/public_html';
-  $storagePath = __DIR__ . '/storage/app/public';
+          <?php
+          // Post-deployment script to recreate storage symlink
+          $publicPath = __DIR__ . '/public_html';
+          $storagePath = __DIR__ . '/storage/app/public';
 
-  // Remove existing storage directory in public_html
-  if (file_exists($publicPath . '/storage')) {
-  // If it's a directory, remove it recursively
-  if (is_dir($publicPath . '/storage') && !is_link($publicPath . '/storage')) {
-  $files = new RecursiveIteratorIterator(
-  new RecursiveDirectoryIterator($publicPath . '/storage', RecursiveDirectoryIterator::SKIP_DOTS),
-  RecursiveIteratorIterator::CHILD_FIRST
-  );
-  foreach ($files as $fileinfo) {
-$todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
-  $todo($fileinfo->getRealPath());
-}
-  rmdir($publicPath . '/storage');
-} elseif (is_link($publicPath . '/storage')) {
-  unlink($publicPath . '/storage');
-}
-}
+          // Remove existing storage directory in public_html
+          if (file_exists($publicPath . '/storage')) {
+              // If it's a directory, remove it recursively
+              if (is_dir($publicPath . '/storage') && !is_link($publicPath . '/storage')) {
+                  $files = new RecursiveIteratorIterator(
+                      new RecursiveDirectoryIterator($publicPath . '/storage', RecursiveDirectoryIterator::SKIP_DOTS),
+                      RecursiveIteratorIterator::CHILD_FIRST
+                  );
+                  foreach ($files as $fileinfo) {
+                      $todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+                      $todo($fileinfo->getRealPath());
+                  }
+                  rmdir($publicPath . '/storage');
+              } elseif (is_link($publicPath . '/storage')) {
+                  unlink($publicPath . '/storage');
+              }
+          }
 
-  // Create storage directories if they don't exist
-  if (!file_exists($storagePath)) {
-  mkdir($storagePath, 0755, true);
-}
+          // Create storage directories if they don't exist
+          if (!file_exists($storagePath)) {
+              mkdir($storagePath, 0755, true);
+          }
 
-  // Create the symlink
-  if (symlink('../storage/app/public', $publicPath . '/storage')) {
-  echo "Storage symlink created successfully\n";
-} else {
-  echo "Failed to create storage symlink\n";
-}
-  EOF
+          // Create the symlink
+          if (symlink('../storage/app/public', $publicPath . '/storage')) {
+              echo "Storage symlink created successfully\n";
+          } else {
+              echo "Failed to create storage symlink\n";
+          }
+          EOF
 
-- name: Set proper permissions
-  run: |
-    cd deploy_temp
-    # Set proper permissions for Laravel
-    find . -type f -exec chmod 644 {} \;
-    find . -type d -exec chmod 755 {} \;
-    chmod -R 775 storage bootstrap/cache
-    chmod 644 public_html/index.php
+      - name: Set proper permissions
+        run: |
+          cd deploy_temp
+          # Set proper permissions for Laravel
+          find . -type f -exec chmod 644 {} \;
+          find . -type d -exec chmod 755 {} \;
+          chmod -R 775 storage bootstrap/cache
+          chmod 644 public_html/index.php
 
-- name: Create .htaccess for public_html
-  run: |
-    cat > deploy_temp/public_html/.htaccess << 'EOF'
-    <IfModule mod_rewrite.c>
-        <IfModule mod_negotiation.c>
-            Options -MultiViews -Indexes
-        </IfModule>
+      - name: Create .htaccess for public_html
+        run: |
+          cat > deploy_temp/public_html/.htaccess << 'EOF'
+          <IfModule mod_rewrite.c>
+              <IfModule mod_negotiation.c>
+                  Options -MultiViews -Indexes
+              </IfModule>
 
-        RewriteEngine On
+              RewriteEngine On
 
-        # Handle Authorization Header
-        RewriteCond %{HTTP:Authorization} .
-        RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+              # Handle Authorization Header
+              RewriteCond %{HTTP:Authorization} .
+              RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-        # Redirect Trailing Slashes If Not A Folder...
-        RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteCond %{REQUEST_URI} (.+)/$
-        RewriteRule ^ %1 [L,R=301]
+              # Redirect Trailing Slashes If Not A Folder...
+              RewriteCond %{REQUEST_FILENAME} !-d
+              RewriteCond %{REQUEST_URI} (.+)/$
+              RewriteRule ^ %1 [L,R=301]
 
-        # Send Requests To Front Controller...
-        RewriteCond %{REQUEST_FILENAME} !-d
-        RewriteCond %{REQUEST_FILENAME} !-f
-        RewriteRule ^ index.php [L]
-    </IfModule>
-    EOF
+              # Send Requests To Front Controller...
+              RewriteCond %{REQUEST_FILENAME} !-d
+              RewriteCond %{REQUEST_FILENAME} !-f
+              RewriteRule ^ index.php [L]
+          </IfModule>
+          EOF
 
-- name: Verify deployment structure
-  run: |
-    echo "Deployment structure:"
-    ls -la deploy_temp/
-    echo "Public HTML contents:"
-    ls -la deploy_temp/public_html/
-    echo "Checking critical files:"
-    [ -f "deploy_temp/public_html/index.php" ] && echo "✓ index.php exists" || echo "✗ index.php missing"
-    [ -f "deploy_temp/.env" ] && echo "✓ .env exists" || echo "✗ .env missing"
-    [ -d "deploy_temp/vendor" ] && echo "✓ vendor directory exists" || echo "✗ vendor directory missing"
+      - name: Verify deployment structure
+        run: |
+          echo "Deployment structure:"
+          ls -la deploy_temp/
+          echo "Public HTML contents:"
+          ls -la deploy_temp/public_html/
+          echo "Checking critical files:"
+          [ -f "deploy_temp/public_html/index.php" ] && echo "✓ index.php exists" || echo "✗ index.php missing"
+          [ -f "deploy_temp/.env" ] && echo "✓ .env exists" || echo "✗ .env missing"
+          [ -d "deploy_temp/vendor" ] && echo "✓ vendor directory exists" || echo "✗ vendor directory missing"
 
-- name: Deploy to Hostinger via FTP
-  uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-  with:
-    server: ftp.talbna.cloud
-    username: u693675641
-    password: ${{ secrets.FTP_PASSWORD }}
-    local-dir: ./deploy_temp/
-    server-dir: ./domains/talbna.cloud/
-    state-name: .ftp-deploy-sync-state.json
-    exclude: |
-      .git*
-      .git*/**
-      node_modules/**
-      .github/**
-      tests/**
-      *.md
-      .DS_Store
-      Thumbs.db
+      - name: Deploy to Hostinger via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ftp.talbna.cloud
+          username: u693675641
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy_temp/
+          server-dir: ./domains/talbna.cloud/
+          state-name: .ftp-deploy-sync-state.json
+          exclude: |
+            .git*
+            .git*/**
+            node_modules/**
+            .github/**
+            tests/**
+            *.md
+            .DS_Store
+            Thumbs.db
 
-- name: Post-deployment cleanup
-  if: always()
-  run: |
-    echo "Deployment completed"
-    # Remove sensitive deployment files
-    rm -rf deploy_temp
+      - name: Post-deployment cleanup
+        if: always()
+        run: |
+          echo "Deployment completed"
+          # Remove sensitive deployment files
+          rm -rf deploy_temp
