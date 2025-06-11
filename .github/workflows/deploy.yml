@@ -52,8 +52,6 @@ jobs:
             --exclude='node_modules' \
             --exclude='.git' \
             --exclude='deploy_temp' \
-            --exclude='.env' \
-            --exclude='.env.*' \
             --exclude='tests' \
             --exclude='.github' \
             --exclude='README.md' \
@@ -83,20 +81,22 @@ jobs:
           sed -i "s|require __DIR__.'/../vendor/autoload.php';|require __DIR__.'/../vendor/autoload.php';|g" deploy_temp/public_html/index.php
           sed -i "s|\$app = require_once __DIR__.'/../bootstrap/app.php';|\$app = require_once __DIR__.'/../bootstrap/app.php';|g" deploy_temp/public_html/index.php
 
-      - name: Create production environment file
+      - name: Update environment for production
         run: |
           cd deploy_temp
 
-          # Create .env from example
-          cp .env.example .env
-
-          # Set production environment variables
+          # Modify existing .env for production
           sed -i 's/APP_ENV=local/APP_ENV=production/' .env
           sed -i 's/APP_DEBUG=true/APP_DEBUG=false/' .env
-          sed -i "s|APP_URL=http://localhost|APP_URL=https://talbna.cloud|" .env
+          sed -i 's|APP_URL=http://localhost|APP_URL=https://talbna.cloud|' .env
+          sed -i 's/LOG_LEVEL=debug/LOG_LEVEL=error/' .env
+          sed -i 's/DB_HOST=127.0.0.1/DB_HOST=localhost/' .env
+          sed -i 's/DB_USERNAME=root/DB_USERNAME=u693675641_talabna/' .env
 
-          # Generate application key
-          php artisan key:generate --no-interaction
+          # Set database password from GitHub secret
+          if [ ! -z "${{ secrets.DB_PASSWORD }}" ]; then
+            sed -i "s/DB_PASSWORD=/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/" .env
+          fi
 
           # Clear and cache config for production
           php artisan config:clear
