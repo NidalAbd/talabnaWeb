@@ -13,8 +13,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Deploy application files (excluding public)
-        uses: SamKirkland/FTP-Deploy-Action@4.3.4
+      - name: Deploy application files
+        uses: SamKirkland/FTP-Deploy-Action@4.1.0
         with:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
@@ -35,9 +35,11 @@ jobs:
             *.log
             .DS_Store
             Thumbs.db
+            composer.lock
+            package-lock.json
 
-      - name: Deploy public files only
-        uses: SamKirkland/FTP-Deploy-Action@4.3.4
+      - name: Deploy public files
+        uses: SamKirkland/FTP-Deploy-Action@4.1.0
         with:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
