@@ -2,7 +2,7 @@ name: Deploy Laravel to Hostinger
 
 on:
   push:
-    branches: [ master ]  # Changed to match your branch
+    branches: [ master ]
 
 jobs:
   deploy:
@@ -12,44 +12,48 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Hostinger
-        uses: appleboy/ssh-action@v0.1.7
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.PRIVATE_KEY }}
-          port: 22
-          script: |
-            # Navigate to your domain directory
-            cd domains/talbna.cloud/
+          php-version: '8.1'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, pdo
 
-            # Initialize git if not already done
-            if [ ! -d ".git" ]; then
-              git init
-              git remote add origin https://github.com/NidalAbd/talabnaWeb.git
-            fi
+      - name: Install Composer dependencies
+        run: composer install --no-dev --optimize-autoloader --no-interaction
 
-            # Pull latest changes
-            git fetch origin master
-            git reset --hard origin/master
+      - name: Prepare deployment files
+        run: |
+          # Create temporary directory structure
+          mkdir -p deploy_temp/public_html
 
-            # Install/update Composer dependencies (using full path)
-            /opt/alt/php81/usr/bin/php /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
+          # Copy all Laravel files except public and unnecessary folders
+          rsync -av --exclude='public' --exclude='node_modules' --exclude='.git' --exclude='deploy_temp' --exclude='.env' ./ deploy_temp/
 
-            # Copy Laravel's public folder contents to public_html
-            cp -rf public/* public_html/
+          # Copy public folder contents to public_html
+          cp -r public/* deploy_temp/public_html/
 
-            # Update public_html/index.php to point to Laravel directories
-            sed -i "s|__DIR__\.'/../vendor'|__DIR__.'/../vendor'|g" public_html/index.php
-            sed -i "s|__DIR__\.'/../bootstrap'|__DIR__.'/../bootstrap'|g" public_html/index.php
+          # Fix index.php paths to point to Laravel directories
+          sed -i "s|require __DIR__\.'/../vendor/autoload.php';|require __DIR__\.'/../vendor/autoload.php';|g" deploy_temp/public_html/index.php
+          sed -i "s|\$app = require_once __DIR__\.'/../bootstrap/app.php';|\$app = require_once __DIR__\.'/../bootstrap/app.php';|g" deploy_temp/public_html/index.php
 
-            # Set proper permissions
-            find public_html/ -type f -exec chmod 644 {} \; 2>/dev/null || true
-            find public_html/ -type d -exec chmod 755 {} \; 2>/dev/null || true
-            chmod -R 775 storage/ 2>/dev/null || true
-            chmod -R 775 bootstrap/cache/ 2>/dev/null || true
+          # Create production .env file
+          cp .env.example deploy_temp/.env
 
-            # Laravel optimizations (using full PHP path)
-            /opt/alt/php81/usr/bin/php artisan config:cache --no-interaction 2>/dev/null || true
-            /opt/alt/php81/usr/bin/php artisan route:cache --no-interaction 2>/dev/null || true
-            /opt/alt/php81/usr/bin/php artisan view:cache --no-interaction 2>/dev/null || true
+          # Generate application key
+          cd deploy_temp && php artisan key:generate --no-interaction
+
+      - name: Deploy to Hostinger via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ftp.talbna.cloud
+          username: u693675641
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./deploy_temp/
+          server-dir: ./domains/talbna.cloud/
+          exclude: |
+            .git*
+            .git*/**
+            node_modules/**
+            .github/**
+            tests/**
+            *.md
