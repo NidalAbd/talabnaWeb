@@ -3,7 +3,7 @@ name: Deploy to Hostinger
 on:
   push:
     branches:
-      - master  # or main, depending on your branch name
+      - master
 
 jobs:
   deploy:
@@ -11,22 +11,36 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
 
-      - name: Deploy application files
-        uses: SamKirkland/FTP-Deploy-Action@4.1.0
+      - name: Deploy application files (excluding public)
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
         with:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./  # Directory to deploy (project ssroot, with trailing slash)
-          server-dir: /  # Deploy to root directory on the server (with trailing slash)
+          local-dir: ./
+          server-dir: /domains/talbna.cloud/
+          exclude: |
+            public/**
+            .git/**
+            .github/**
+            .gitignore
+            .env
+            .env.example
+            node_modules/**
+            tests/**
+            storage/logs/**
+            .idea/**
+            *.log
+            .DS_Store
+            Thumbs.db
 
-      - name: Deploy public files
-        uses: SamKirkland/FTP-Deploy-Action@4.1.0
+      - name: Deploy public files only
+        uses: SamKirkland/FTP-Deploy-Action@4.3.4
         with:
           server: talbna.cloud
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./public/  # Directory to deploy (Laravel public directory, with trailing slash)
-          server-dir: /public_html/  # Deploy to public_html directory on the server (with trailing slash)
+          local-dir: ./public/
+          server-dir: /domains/talbna.cloud/public_html/
