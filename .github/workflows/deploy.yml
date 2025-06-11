@@ -22,34 +22,36 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, pdo, curl, zip, bcmath
           tools: composer:v2
 
-      - name: Validate composer.json
-        run: composer validate --strict
+      # Skip Composer installation since vendor folder already exists on server
+      # - name: Validate composer.json
+      #   run: composer validate --strict
 
-      - name: Cache Composer packages
-        id: composer-cache
-        uses: actions/cache@v3
-        with:
-          path: vendor
-          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-php-
+      # - name: Cache Composer packages
+      #   id: composer-cache
+      #   uses: actions/cache@v3
+      #   with:
+      #     path: vendor
+      #     key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+      #     restore-keys: |
+      #       ${{ runner.os }}-php-
 
-      - name: Install Composer dependencies
-        run: |
-          # First try to install with existing lock file
-          if ! composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist; then
-            echo "Lock file incompatible, updating dependencies..."
-            composer update --no-dev --optimize-autoloader --no-interaction --prefer-dist
-          fi
+      # - name: Install Composer dependencies
+      #   run: |
+      #     # First try to install with existing lock file
+      #     if ! composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist; then
+      #       echo "Lock file incompatible, updating dependencies..."
+      #       composer update --no-dev --optimize-autoloader --no-interaction --prefer-dist
+      #     fi
 
       - name: Create deployment directory
         run: mkdir -p deploy_temp
 
       - name: Prepare Laravel files
         run: |
-          # Copy all files except those we want to exclude
+          # Copy all files except those we want to exclude (including vendor)
           rsync -av \
             --exclude='node_modules' \
+            --exclude='vendor' \
             --exclude='.git' \
             --exclude='deploy_temp' \
             --exclude='tests' \
@@ -110,21 +112,33 @@ jobs:
             sed -i "s/DB_PASSWORD=/DB_PASSWORD=${{ secrets.DB_PASSWORD }}/" .env
           fi
 
-          # Clear and cache config for production
-          php artisan config:clear
-          php artisan cache:clear
-          php artisan view:clear
-          php artisan route:clear
+          # Note: Cache clearing will be done on server since vendor folder is not deployed
 
       - name: Create post-deployment script
         run: |
-          # Create a script that will run on the server to recreate storage symlink only
+          # Create a script that will run on the server to recreate storage symlink and clear cache
           cat > deploy_temp/setup_storage.php << 'EOF'
           <?php
-          echo "Creating storage symlink after deployment...\n";
+          echo "Starting post-deployment setup...\n";
 
           $publicPath = __DIR__ . '/public_html';
           $storagePath = __DIR__ . '/storage/app/public';
+
+          // Clear Laravel caches first (since vendor exists on server)
+          echo "Clearing Laravel caches...\n";
+          $commands = [
+              'php artisan config:clear',
+              'php artisan cache:clear',
+              'php artisan view:clear',
+              'php artisan route:clear'
+          ];
+
+          foreach ($commands as $command) {
+              $output = shell_exec("cd " . __DIR__ . " && $command 2>&1");
+              if ($output) {
+                  echo "  $command: " . trim($output) . "\n";
+              }
+          }
 
           // Remove existing storage directory/symlink in public_html if it exists
           if (file_exists($publicPath . '/storage')) {
@@ -169,7 +183,7 @@ jobs:
               echo "❌ Symlink verification: FAILED - Link is not working\n";
           }
 
-          echo "Storage symlink setup completed!\n";
+          echo "✅ Post-deployment setup completed!\n";
           EOF
 
       - name: Set proper permissions
@@ -234,17 +248,18 @@ jobs:
             .git*
             .git*/**
             node_modules/**
+            vendor/**
             .github/**
             tests/**
             *.md
             .DS_Store
             Thumbs.db
 
-      - name: Setup Laravel storage symlink via web request
+      - name: Setup Laravel storage symlink and clear cache via web request
         run: |
           echo "Waiting 10 seconds for FTP files to sync..."
           sleep 10
-          echo "Creating storage symlink on server..."
+          echo "Running post-deployment setup (cache clearing + storage symlink)..."
           response=$(curl -s -w "HTTPSTATUS:%{http_code}" https://talbna.cloud/setup_storage.php)
           http_code=$(echo "$response" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
           body=$(echo "$response" | sed -e 's/HTTPSTATUS\:.*//g')
@@ -253,7 +268,7 @@ jobs:
           echo "Response: $body"
 
           if [ "$http_code" -eq 200 ]; then
-            echo "✅ Storage symlink setup completed successfully!"
+            echo "✅ Post-deployment setup completed successfully!"
           else
             echo "⚠️  Setup script executed but returned HTTP $http_code"
             echo "Check manually at: https://talbna.cloud/setup_storage.php"
