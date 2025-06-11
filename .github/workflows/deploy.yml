@@ -84,19 +84,8 @@ jobs:
             rm -rf deploy_temp/public_html/storage
           fi
 
-          # Always create the storage directory structure for shared hosting
-          echo "Creating storage directory structure..."
-          mkdir -p deploy_temp/public_html/storage
-
-          # Copy files from storage/app/public if they exist
-          if [ -d "deploy_temp/storage/app/public" ] && [ "$(ls -A deploy_temp/storage/app/public 2>/dev/null)" ]; then
-            echo "Copying storage files..."
-            cp -r deploy_temp/storage/app/public/* deploy_temp/public_html/storage/ 2>/dev/null || true
-          else
-            echo "No storage files to copy, keeping empty storage directory"
-            # Create a placeholder file to ensure the directory is not empty
-            touch deploy_temp/public_html/storage/.gitkeep
-          fi
+          # Note: We don't create storage directory here as it will be handled by post-deployment script
+          echo "Storage directory will be created by post-deployment script on server"
 
       - name: Fix Laravel paths for shared hosting
         run: |
@@ -129,17 +118,18 @@ jobs:
 
       - name: Create post-deployment script
         run: |
-          # Create a script that will run on the server to recreate storage link
+          # Create a script that will run on the server to recreate storage symlink only
           cat > deploy_temp/setup_storage.php << 'EOF'
           <?php
-          // Post-deployment script to recreate storage symlink
+          echo "Creating storage symlink after deployment...\n";
+
           $publicPath = __DIR__ . '/public_html';
           $storagePath = __DIR__ . '/storage/app/public';
 
-          // Remove existing storage directory in public_html
+          // Remove existing storage directory/symlink in public_html if it exists
           if (file_exists($publicPath . '/storage')) {
-              // If it's a directory, remove it recursively
               if (is_dir($publicPath . '/storage') && !is_link($publicPath . '/storage')) {
+                  // Remove directory recursively
                   $files = new RecursiveIteratorIterator(
                       new RecursiveDirectoryIterator($publicPath . '/storage', RecursiveDirectoryIterator::SKIP_DOTS),
                       RecursiveIteratorIterator::CHILD_FIRST
@@ -149,22 +139,37 @@ jobs:
                       $todo($fileinfo->getRealPath());
                   }
                   rmdir($publicPath . '/storage');
+                  echo "Removed existing storage directory from public_html\n";
               } elseif (is_link($publicPath . '/storage')) {
                   unlink($publicPath . '/storage');
+                  echo "Removed existing storage symlink\n";
               }
           }
 
-          // Create storage directories if they don't exist
+          // Verify that storage/app/public exists on server
           if (!file_exists($storagePath)) {
+              echo "Warning: $storagePath does not exist on server\n";
+              echo "Creating storage/app/public directory...\n";
               mkdir($storagePath, 0755, true);
           }
 
           // Create the symlink
           if (symlink('../storage/app/public', $publicPath . '/storage')) {
-              echo "Storage symlink created successfully\n";
+              echo "✅ Storage symlink created successfully!\n";
+              echo "public_html/storage -> ../storage/app/public\n";
           } else {
-              echo "Failed to create storage symlink\n";
+              echo "❌ Failed to create storage symlink\n";
+              echo "Please check file permissions\n";
           }
+
+          // Verify the symlink works
+          if (is_link($publicPath . '/storage') && file_exists($publicPath . '/storage')) {
+              echo "✅ Symlink verification: SUCCESS - Link is working\n";
+          } else {
+              echo "❌ Symlink verification: FAILED - Link is not working\n";
+          }
+
+          echo "Storage symlink setup completed!\n";
           EOF
 
       - name: Set proper permissions
@@ -234,6 +239,25 @@ jobs:
             *.md
             .DS_Store
             Thumbs.db
+
+      - name: Setup Laravel storage symlink via web request
+        run: |
+          echo "Waiting 10 seconds for FTP files to sync..."
+          sleep 10
+          echo "Creating storage symlink on server..."
+          response=$(curl -s -w "HTTPSTATUS:%{http_code}" https://talbna.cloud/setup_storage.php)
+          http_code=$(echo "$response" | tr -d '\n' | sed -e 's/.*HTTPSTATUS://')
+          body=$(echo "$response" | sed -e 's/HTTPSTATUS\:.*//g')
+
+          echo "HTTP Status: $http_code"
+          echo "Response: $body"
+
+          if [ "$http_code" -eq 200 ]; then
+            echo "✅ Storage symlink setup completed successfully!"
+          else
+            echo "⚠️  Setup script executed but returned HTTP $http_code"
+            echo "Check manually at: https://talbna.cloud/setup_storage.php"
+          fi
 
       - name: Post-deployment cleanup
         if: always()
