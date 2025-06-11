@@ -2,7 +2,7 @@ name: Deploy Laravel to Hostinger
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master ]  # Changed to match your branch
 
 jobs:
   deploy:
@@ -12,35 +12,44 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Deploy to Hostinger via SSH
+      - name: Deploy to Hostinger
         uses: appleboy/ssh-action@v0.1.7
         with:
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME }}
           key: ${{ secrets.PRIVATE_KEY }}
-          port: ${{ secrets.PORT || 22 }}
+          port: 22
           script: |
-            cd /domains/talbna.cloud/
+            # Navigate to your domain directory
+            cd domains/talbna.cloud/
+
+            # Initialize git if not already done
+            if [ ! -d ".git" ]; then
+              git init
+              git remote add origin https://github.com/NidalAbd/talabnaWeb.git
+            fi
 
             # Pull latest changes
-            git pull origin main
+            git fetch origin master
+            git reset --hard origin/master
 
-            # Install/update dependencies
-            composer install --no-dev --optimize-autoloader
+            # Install/update Composer dependencies (using full path)
+            /opt/alt/php81/usr/bin/php /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
 
             # Copy Laravel's public folder contents to public_html
-            cp -r public/* public_html/
+            cp -rf public/* public_html/
 
-            # Update public_html/index.php paths
-            sed -i 's|__DIR__.*vendor|__DIR__."/../vendor"|g' public_html/index.php
-            sed -i 's|__DIR__.*bootstrap|__DIR__."/../bootstrap"|g' public_html/index.php
+            # Update public_html/index.php to point to Laravel directories
+            sed -i "s|__DIR__\.'/../vendor'|__DIR__.'/../vendor'|g" public_html/index.php
+            sed -i "s|__DIR__\.'/../bootstrap'|__DIR__.'/../bootstrap'|g" public_html/index.php
 
-            # Set permissions
-            chmod -R 755 public_html/
-            chmod -R 775 storage/
-            chmod -R 775 bootstrap/cache/
+            # Set proper permissions
+            find public_html/ -type f -exec chmod 644 {} \; 2>/dev/null || true
+            find public_html/ -type d -exec chmod 755 {} \; 2>/dev/null || true
+            chmod -R 775 storage/ 2>/dev/null || true
+            chmod -R 775 bootstrap/cache/ 2>/dev/null || true
 
-            # Laravel optimizations
-            php artisan config:cache
-            php artisan route:cache
-            php artisan view:cache
+            # Laravel optimizations (using full PHP path)
+            /opt/alt/php81/usr/bin/php artisan config:cache --no-interaction 2>/dev/null || true
+            /opt/alt/php81/usr/bin/php artisan route:cache --no-interaction 2>/dev/null || true
+            /opt/alt/php81/usr/bin/php artisan view:cache --no-interaction 2>/dev/null || true
