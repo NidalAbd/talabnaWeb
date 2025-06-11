@@ -75,6 +75,23 @@ jobs:
             rm -rf deploy_temp/public
           fi
 
+          # Handle Laravel storage symlink issue
+          if [ -L "deploy_temp/public_html/storage" ]; then
+            echo "Removing storage symlink..."
+            rm deploy_temp/public_html/storage
+          fi
+
+          # Create actual storage directory and copy files
+          if [ -d "deploy_temp/storage/app/public" ]; then
+            echo "Creating storage directory with actual files..."
+            mkdir -p deploy_temp/public_html/storage
+            cp -r deploy_temp/storage/app/public/* deploy_temp/public_html/storage/ 2>/dev/null || true
+          else
+            # Create empty storage directory if no files exist
+            mkdir -p deploy_temp/public_html/storage
+            echo "Created empty storage directory"
+          fi
+
       - name: Fix Laravel paths for shared hosting
         run: |
           # Update index.php to work with shared hosting structure
@@ -104,74 +121,114 @@ jobs:
           php artisan view:clear
           php artisan route:clear
 
-      - name: Set proper permissions
+      - name: Create post-deployment script
         run: |
-          cd deploy_temp
-          # Set proper permissions for Laravel
-          find . -type f -exec chmod 644 {} \;
-          find . -type d -exec chmod 755 {} \;
-          chmod -R 775 storage bootstrap/cache
-          chmod 644 public_html/index.php
+          # Create a script that will run on the server to recreate storage link
+          cat > deploy_temp/setup_storage.php << 'EOF'
+  <?php
+  // Post-deployment script to recreate storage symlink
+  $publicPath = __DIR__ . '/public_html';
+  $storagePath = __DIR__ . '/storage/app/public';
 
-      - name: Create .htaccess for public_html
-        run: |
-          cat > deploy_temp/public_html/.htaccess << 'EOF'
-          <IfModule mod_rewrite.c>
-              <IfModule mod_negotiation.c>
-                  Options -MultiViews -Indexes
-              </IfModule>
+  // Remove existing storage directory in public_html
+  if (file_exists($publicPath . '/storage')) {
+  // If it's a directory, remove it recursively
+  if (is_dir($publicPath . '/storage') && !is_link($publicPath . '/storage')) {
+  $files = new RecursiveIteratorIterator(
+  new RecursiveDirectoryIterator($publicPath . '/storage', RecursiveDirectoryIterator::SKIP_DOTS),
+  RecursiveIteratorIterator::CHILD_FIRST
+  );
+  foreach ($files as $fileinfo) {
+$todo = ($fileinfo->isDir() ? 'rmdir' : 'unlink');
+  $todo($fileinfo->getRealPath());
+}
+  rmdir($publicPath . '/storage');
+} elseif (is_link($publicPath . '/storage')) {
+  unlink($publicPath . '/storage');
+}
+}
 
-              RewriteEngine On
+  // Create storage directories if they don't exist
+  if (!file_exists($storagePath)) {
+  mkdir($storagePath, 0755, true);
+}
 
-              # Handle Authorization Header
-              RewriteCond %{HTTP:Authorization} .
-              RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+  // Create the symlink
+  if (symlink('../storage/app/public', $publicPath . '/storage')) {
+  echo "Storage symlink created successfully\n";
+} else {
+  echo "Failed to create storage symlink\n";
+}
+  EOF
 
-              # Redirect Trailing Slashes If Not A Folder...
-              RewriteCond %{REQUEST_FILENAME} !-d
-              RewriteCond %{REQUEST_URI} (.+)/$
-              RewriteRule ^ %1 [L,R=301]
+- name: Set proper permissions
+  run: |
+    cd deploy_temp
+    # Set proper permissions for Laravel
+    find . -type f -exec chmod 644 {} \;
+    find . -type d -exec chmod 755 {} \;
+    chmod -R 775 storage bootstrap/cache
+    chmod 644 public_html/index.php
 
-              # Send Requests To Front Controller...
-              RewriteCond %{REQUEST_FILENAME} !-d
-              RewriteCond %{REQUEST_FILENAME} !-f
-              RewriteRule ^ index.php [L]
-          </IfModule>
-          EOF
+- name: Create .htaccess for public_html
+  run: |
+    cat > deploy_temp/public_html/.htaccess << 'EOF'
+    <IfModule mod_rewrite.c>
+        <IfModule mod_negotiation.c>
+            Options -MultiViews -Indexes
+        </IfModule>
 
-      - name: Verify deployment structure
-        run: |
-          echo "Deployment structure:"
-          ls -la deploy_temp/
-          echo "Public HTML contents:"
-          ls -la deploy_temp/public_html/
-          echo "Checking critical files:"
-          [ -f "deploy_temp/public_html/index.php" ] && echo "✓ index.php exists" || echo "✗ index.php missing"
-          [ -f "deploy_temp/.env" ] && echo "✓ .env exists" || echo "✗ .env missing"
-          [ -d "deploy_temp/vendor" ] && echo "✓ vendor directory exists" || echo "✗ vendor directory missing"
+        RewriteEngine On
 
-      - name: Deploy to Hostinger via FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
-        with:
-          server: ftp.talbna.cloud
-          username: u693675641
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./deploy_temp/
-          server-dir: ./domains/talbna.cloud/
-          state-name: .ftp-deploy-sync-state.json
-          exclude: |
-            .git*
-            .git*/**
-            node_modules/**
-            .github/**
-            tests/**
-            *.md
-            .DS_Store
-            Thumbs.db
+        # Handle Authorization Header
+        RewriteCond %{HTTP:Authorization} .
+        RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
 
-      - name: Post-deployment cleanup
-        if: always()
-        run: |
-          echo "Deployment completed"
-          # Remove sensitive deployment files
-          rm -rf deploy_temp
+        # Redirect Trailing Slashes If Not A Folder...
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteCond %{REQUEST_URI} (.+)/$
+        RewriteRule ^ %1 [L,R=301]
+
+        # Send Requests To Front Controller...
+        RewriteCond %{REQUEST_FILENAME} !-d
+        RewriteCond %{REQUEST_FILENAME} !-f
+        RewriteRule ^ index.php [L]
+    </IfModule>
+    EOF
+
+- name: Verify deployment structure
+  run: |
+    echo "Deployment structure:"
+    ls -la deploy_temp/
+    echo "Public HTML contents:"
+    ls -la deploy_temp/public_html/
+    echo "Checking critical files:"
+    [ -f "deploy_temp/public_html/index.php" ] && echo "✓ index.php exists" || echo "✗ index.php missing"
+    [ -f "deploy_temp/.env" ] && echo "✓ .env exists" || echo "✗ .env missing"
+    [ -d "deploy_temp/vendor" ] && echo "✓ vendor directory exists" || echo "✗ vendor directory missing"
+
+- name: Deploy to Hostinger via FTP
+  uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+  with:
+    server: ftp.talbna.cloud
+    username: u693675641
+    password: ${{ secrets.FTP_PASSWORD }}
+    local-dir: ./deploy_temp/
+    server-dir: ./domains/talbna.cloud/
+    state-name: .ftp-deploy-sync-state.json
+    exclude: |
+      .git*
+      .git*/**
+      node_modules/**
+      .github/**
+      tests/**
+      *.md
+      .DS_Store
+      Thumbs.db
+
+- name: Post-deployment cleanup
+  if: always()
+  run: |
+    echo "Deployment completed"
+    # Remove sensitive deployment files
+    rm -rf deploy_temp
