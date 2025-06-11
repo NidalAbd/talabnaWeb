@@ -3,44 +3,143 @@ name: Deploy Laravel to Hostinger
 on:
   push:
     branches: [ master ]
+  workflow_dispatch: # Allow manual deployment
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
+    environment: production # Add environment protection
+
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4 # Updated to latest version
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.1'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, pdo
+          php-version: '8.2' # Updated to newer PHP version
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, pdo, curl, zip, bcmath
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict
+
+      - name: Cache Composer packages
+        id: composer-cache
+        uses: actions/cache@v3
+        with:
+          path: vendor
+          key: ${{ runner.os }}-php-${{ hashFiles('**/composer.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-php-
 
       - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader --no-interaction
+        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
 
-      - name: Prepare deployment files
+      - name: Create deployment directory
+        run: mkdir -p deploy_temp
+
+      - name: Prepare Laravel files
         run: |
-          # Create temporary directory structure
+          # Copy all files except those we want to exclude
+          rsync -av \
+            --exclude='node_modules' \
+            --exclude='.git' \
+            --exclude='deploy_temp' \
+            --exclude='.env' \
+            --exclude='.env.*' \
+            --exclude='tests' \
+            --exclude='.github' \
+            --exclude='README.md' \
+            --exclude='phpunit.xml' \
+            --exclude='vite.config.js' \
+            --exclude='package*.json' \
+            ./ deploy_temp/
+
+      - name: Setup public_html structure
+        run: |
+          # Create public_html directory
           mkdir -p deploy_temp/public_html
 
-          # Copy all Laravel files except public and unnecessary folders
-          rsync -av --exclude='public' --exclude='node_modules' --exclude='.git' --exclude='deploy_temp' --exclude='.env' ./ deploy_temp/
+          # Move public folder contents to public_html
+          if [ -d "deploy_temp/public" ]; then
+            mv deploy_temp/public/* deploy_temp/public_html/
+            rmdir deploy_temp/public
+          fi
 
-          # Copy public folder contents to public_html
-          cp -r public/* deploy_temp/public_html/
+      - name: Fix Laravel paths for shared hosting
+        run: |
+          # Update index.php to work with shared hosting structure
+          sed -i "s|require __DIR__.'/../vendor/autoload.php';|require __DIR__.'/../vendor/autoload.php';|g" deploy_temp/public_html/index.php
+          sed -i "s|\$app = require_once __DIR__.'/../bootstrap/app.php';|\$app = require_once __DIR__.'/../bootstrap/app.php';|g" deploy_temp/public_html/index.php
 
-          # Fix index.php paths to point to Laravel directories
-          sed -i "s|require __DIR__\.'/../vendor/autoload.php';|require __DIR__\.'/../vendor/autoload.php';|g" deploy_temp/public_html/index.php
-          sed -i "s|\$app = require_once __DIR__\.'/../bootstrap/app.php';|\$app = require_once __DIR__\.'/../bootstrap/app.php';|g" deploy_temp/public_html/index.php
+      - name: Create production environment file
+        run: |
+          cd deploy_temp
 
-          # Create production .env file
-          cp .env.example deploy_temp/.env
+          # Create .env from example
+          cp .env.example .env
+
+          # Set production environment variables
+          sed -i 's/APP_ENV=local/APP_ENV=production/' .env
+          sed -i 's/APP_DEBUG=true/APP_DEBUG=false/' .env
+          sed -i "s|APP_URL=http://localhost|APP_URL=https://talbna.cloud|" .env
 
           # Generate application key
-          cd deploy_temp && php artisan key:generate --no-interaction
+          php artisan key:generate --no-interaction
+
+          # Clear and cache config for production
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan view:clear
+          php artisan route:clear
+
+      - name: Set proper permissions
+        run: |
+          cd deploy_temp
+          # Set proper permissions for Laravel
+          find . -type f -exec chmod 644 {} \;
+          find . -type d -exec chmod 755 {} \;
+          chmod -R 775 storage bootstrap/cache
+          chmod 644 public_html/index.php
+
+      - name: Create .htaccess for public_html
+        run: |
+          cat > deploy_temp/public_html/.htaccess << 'EOF'
+          <IfModule mod_rewrite.c>
+              <IfModule mod_negotiation.c>
+                  Options -MultiViews -Indexes
+              </IfModule>
+
+              RewriteEngine On
+
+              # Handle Authorization Header
+              RewriteCond %{HTTP:Authorization} .
+              RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
+
+              # Redirect Trailing Slashes If Not A Folder...
+              RewriteCond %{REQUEST_FILENAME} !-d
+              RewriteCond %{REQUEST_URI} (.+)/$
+              RewriteRule ^ %1 [L,R=301]
+
+              # Send Requests To Front Controller...
+              RewriteCond %{REQUEST_FILENAME} !-d
+              RewriteCond %{REQUEST_FILENAME} !-f
+              RewriteRule ^ index.php [L]
+          </IfModule>
+          EOF
+
+      - name: Verify deployment structure
+        run: |
+          echo "Deployment structure:"
+          ls -la deploy_temp/
+          echo "Public HTML contents:"
+          ls -la deploy_temp/public_html/
+          echo "Checking critical files:"
+          [ -f "deploy_temp/public_html/index.php" ] && echo "✓ index.php exists" || echo "✗ index.php missing"
+          [ -f "deploy_temp/.env" ] && echo "✓ .env exists" || echo "✗ .env missing"
+          [ -d "deploy_temp/vendor" ] && echo "✓ vendor directory exists" || echo "✗ vendor directory missing"
 
       - name: Deploy to Hostinger via FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -50,6 +149,7 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./deploy_temp/
           server-dir: ./domains/talbna.cloud/
+          state-name: .ftp-deploy-sync-state.json
           exclude: |
             .git*
             .git*/**
@@ -57,3 +157,12 @@ jobs:
             .github/**
             tests/**
             *.md
+            .DS_Store
+            Thumbs.db
+
+      - name: Post-deployment cleanup
+        if: always()
+        run: |
+          echo "Deployment completed"
+          # Remove sensitive deployment files
+          rm -rf deploy_temp
