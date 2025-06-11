@@ -69,8 +69,12 @@ jobs:
 
           # Move public folder contents to public_html
           if [ -d "deploy_temp/public" ]; then
-            mv deploy_temp/public/* deploy_temp/public_html/
-            rmdir deploy_temp/public
+            # Copy all files and directories from public to public_html
+            cp -r deploy_temp/public/* deploy_temp/public_html/ 2>/dev/null || true
+            # Also copy hidden files if any
+            cp -r deploy_temp/public/.* deploy_temp/public_html/ 2>/dev/null || true
+            # Remove the public directory completely
+            rm -rf deploy_temp/public
           fi
 
       - name: Fix Laravel paths for shared hosting
