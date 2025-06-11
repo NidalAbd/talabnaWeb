@@ -18,7 +18,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2' # Updated to newer PHP version
+          php-version: '8.0' # Match Hostinger PHP version
           extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, pdo, curl, zip, bcmath
           tools: composer:v2
 
@@ -35,7 +35,12 @@ jobs:
             ${{ runner.os }}-php-
 
       - name: Install Composer dependencies
-        run: composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+        run: |
+          # First try to install with existing lock file
+          if ! composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist; then
+            echo "Lock file incompatible, updating dependencies..."
+            composer update --no-dev --optimize-autoloader --no-interaction --prefer-dist
+          fi
 
       - name: Create deployment directory
         run: mkdir -p deploy_temp
