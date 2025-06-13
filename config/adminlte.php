@@ -304,7 +304,6 @@ return [
             'text' => 'Dashboard',
             'url'  => 'home',
             'icon' => 'fas fa-tachometer-alt',
-            'permission' => ['view_statistics']
         ],
 
         // Administration & User Management
