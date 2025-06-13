@@ -302,7 +302,7 @@ return [
         // Dashboard
         [
             'text' => 'Dashboard',
-            'url'  => 'home',
+            'url'  => 'admin/dashboard',
             'icon' => 'fas fa-tachometer-alt',
             'permission' => ['view_statistics']
         ],

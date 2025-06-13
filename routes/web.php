@@ -65,7 +65,7 @@ Route::get('/home', function() {
 */
 Route::group(['middleware' => ['auth', 'admin']], function() {
     // Dashboard
-    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('/dashboard', [HomeController::class, 'index'])->name('admin.dashboard');
     Route::get('statistics', [App\Http\Controllers\dashboard::class, 'index'])->name('statistics.index');
 
     /*
