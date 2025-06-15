@@ -140,7 +140,7 @@
                                             <td>{{ $palservicePoint->id }}</td>
                                             <td>
                                                 <div class="user-block">
-                                                    @if($palservicePoint->user->hasProfilePhoto())
+                                                    @if($palservicePoint->user && $palservicePoint->user->hasProfilePhoto())
                                                         <img src="{{ $palservicePoint->user->profileImage }}"
                                                              alt="Profile"
                                                              class="rounded-circle me-2"
@@ -155,21 +155,21 @@
                                                              height="40">
                                                     @endif
                                                     <span class="username">
-                                                    <a href="#">{{ $palservicePoint->user?->name ?? 'Passed User' }}</a>
-                                                </span>
+                        <a href="#">{{ $palservicePoint->user?->name ?? 'Deleted User' }}</a>
+                    </span>
                                                     <span class="description">
-                                                        ID: {{ $palservicePoint->user?->id ?? 'N/A' }} |
-                                                        Username: {{ $palservicePoint->user?->user_name ?? 'N/A' }}
-                                                    </span>
+                        ID: {{ $palservicePoint->user?->id ?? 'N/A' }} |
+                        Username: {{ $palservicePoint->user?->user_name ?? 'N/A' }}
+                    </span>
                                                 </div>
                                             </td>
                                             <td>
                                                 @if($palservicePoint->user && count($palservicePoint->user->roles) > 0)
                                                     @foreach($palservicePoint->user->roles as $role)
-                                                        <span class="badge badge-info">{{ $role->name ?? 'Passed User' }}</span>
+                                                        <span class="badge badge-info">{{ $role->name ?? 'Unknown Role' }}</span>
                                                     @endforeach
                                                 @else
-                                                    <span class="badge badge-secondary">Passed User</span>
+                                                    <span class="badge badge-secondary">{{ $palservicePoint->user ? 'No Role' : 'Deleted User' }}</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -187,8 +187,8 @@
                                                             </a>
                                                         @else
                                                             <span class="btn btn-sm btn-warning disabled" title="User has been deleted">
-                    <i class="fas fa-user-times mr-1"></i> Deleted User
-                </span>
+                                <i class="fas fa-user-times mr-1"></i> Deleted User
+                            </span>
                                                         @endif
                                                     @endif
                                                     <a href="{{ route('palservice_points.edit', $palservicePoint->id) }}" class="btn btn-sm btn-success">
