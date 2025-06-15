@@ -788,7 +788,7 @@
                     @else
                         @if(Auth::user()->hasRole(['admin']))
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('home') }}">{{ __('Dashboard') }}</a>
+                                <a class="nav-link" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
                             </li>
                         @endif
                         <li class="nav-item dropdown">
