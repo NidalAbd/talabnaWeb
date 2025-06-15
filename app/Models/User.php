@@ -181,7 +181,7 @@ class User extends Authenticatable implements CanResetPasswordContract
         }
 
         // Return default image if no photo is found
-        return 'https://example.com/default-profile.png';
+        return asset('vendor/adminlte/dist/img/user2-160x160.jpg');
     }
 
     public function bannedDevices(): HasMany
