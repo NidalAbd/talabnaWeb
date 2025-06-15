@@ -176,9 +176,15 @@
                                                         <i class="fas fa-eye mr-1"></i> View
                                                     </a>
                                                     @if(auth()->user()->hasPermission('grant_points') || auth()->user()->hasPermission('point_transfer'))
-                                                        <a href="{{ url('palservice_points') }}/{{ $palservicePoint->user->id }}" class="btn btn-sm btn-primary">
-                                                            <i class="fas fa-plus-circle mr-1"></i> Add/Deduct
-                                                        </a>
+                                                        @if($palservicePoint->user)
+                                                            <a href="{{ url('palservice_points') }}/{{ $palservicePoint->user->id }}" class="btn btn-sm btn-primary">
+                                                                <i class="fas fa-plus-circle mr-1"></i> Add/Deduct
+                                                            </a>
+                                                        @else
+                                                            <span class="btn btn-sm btn-warning disabled" title="User has been deleted">
+                    <i class="fas fa-user-times mr-1"></i> Deleted User
+                </span>
+                                                        @endif
                                                     @endif
                                                     <a href="{{ route('palservice_points.edit', $palservicePoint->id) }}" class="btn btn-sm btn-success">
                                                         <i class="fas fa-edit mr-1"></i> Edit
