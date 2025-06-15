@@ -140,15 +140,19 @@
                                             <td>{{ $palservicePoint->id }}</td>
                                             <td>
                                                 <div class="user-block">
-                                                    @if($palservicePoint->user && $palservicePoint->user->photos && $palservicePoint->user->photos->count() > 0)
-                                                        @php
-                                                            $photo = $palservicePoint->user->photos->first();
-                                                            $imgSrc = $photo->is_external ? $photo->src : asset($photo->src);
-                                                        @endphp
-                                                        <img class="img-circle" src="{{ $imgSrc }}" alt="{{ $palservicePoint->user->name }}">
+                                                    @if($palservicePoint->user->hasProfilePhoto())
+                                                        <img src="{{ $palservicePoint->user->profileImage }}"
+                                                             alt="Profile"
+                                                             class="rounded-circle me-2"
+                                                             width="40"
+                                                             height="40"
+                                                             onerror="this.src='{{ asset('vendor/adminlte/dist/img/user2-160x160.jpg') }}'">
                                                     @else
-                                                        <img src="{{ $palservicePoint->user->adminlte_image }}"
-                                                             onerror="this.src='{{ asset('vendor/adminlte/dist/img/user2-160x160.jpg') }}'" alt="">
+                                                        <img src="{{ asset('vendor/adminlte/dist/img/user2-160x160.jpg') }}"
+                                                             alt="Default Profile"
+                                                             class="rounded-circle me-2"
+                                                             width="40"
+                                                             height="40">
                                                     @endif
                                                     <span class="username">
                                                     <a href="#">{{ $palservicePoint->user?->name ?? 'Passed User' }}</a>
