@@ -147,7 +147,7 @@
                                                         @endphp
                                                         <img class="img-circle" src="{{ $imgSrc }}" alt="{{ $palservicePoint->user->name }}">
                                                     @else
-                                                        <img src="{{ $user->adminlte_image }}"
+                                                        <img src="{{ $palservicePoint->user->adminlte_image }}"
                                                              onerror="this.src='{{ asset('vendor/adminlte/dist/img/user2-160x160.jpg') }}'" alt="">
                                                     @endif
                                                     <span class="username">
