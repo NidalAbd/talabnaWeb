@@ -184,6 +184,19 @@ class User extends Authenticatable implements CanResetPasswordContract
         return asset('vendor/adminlte/dist/img/user2-160x160.jpg');
     }
 
+    public function getProfileImageAttribute()
+    {
+        return $this->adminlte_image();
+    }
+
+    /**
+     * Helper method to check if user has a profile photo
+     */
+    public function hasProfilePhoto()
+    {
+        return $this->photos()->where('isVideo', false)->exists();
+    }
+
     public function bannedDevices(): HasMany
     {
         return $this->hasMany(BannedDevice::class);
