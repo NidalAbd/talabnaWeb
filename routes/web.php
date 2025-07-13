@@ -53,6 +53,10 @@ Route::get('/api/validate-deep-link/{route}/{id}', [DeepLinkController::class, '
 // Authentication Routes
 Auth::routes();
 
+// Google OAuth routes for web login
+Route::get('login/google', [App\Http\Controllers\Auth\LoginController::class, 'redirectToGoogle'])->name('login.google');
+Route::get('login/google/callback', [App\Http\Controllers\Auth\LoginController::class, 'handleGoogleCallback']);
+
 // Redirect regular users trying to access dashboard
 Route::get('/home', function() {
     return redirect('/');
