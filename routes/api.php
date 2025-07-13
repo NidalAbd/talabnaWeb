@@ -153,4 +153,7 @@ Route::middleware(['auth:api'])->group(function () {
     // These routes will be used by the Flutter app for country/city filtering
     Route::get('countries', [ServicePostController::class, 'getCountries']);
     Route::get('cities', [ServicePostController::class, 'getCities']);
+
+    // Dynamic Levels API Routes
+    Route::get('levels', [LevelController::class, 'getActiveLevels']);
 });

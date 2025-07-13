@@ -267,23 +267,28 @@ class ServicePostController extends Controller
         $badgeType = $request->haveBadge ?? 'عادي';
         $badgeDuration = $request->badgeDuration ?? 0;
 
-        // Only perform badge check if user selected a premium badge
+        // Get level information from database
+        $level = null;
         if ($badgeType !== 'عادي') {
-            // Badge prices per day
-            $badgePrices = ['ذهبي' => 2, 'ماسي' => 10, 'عادي' => 0];
-
-            // Validate badge type
-            if (!isset($badgePrices[$badgeType])) {
+            $level = \App\Models\Level::where('name->ar', $badgeType)
+                ->orWhere('name->en', $badgeType)
+                ->active()
+                ->first();
+            
+            if (!$level) {
                 return response()->json(['error' => 'Invalid badge type'], 400);
             }
+        }
 
-            // Calculate point cost
-            $pointCost = $badgeDuration * $badgePrices[$badgeType];
+        // Only perform badge check if user selected a premium badge
+        if ($level && $level->is_premium) {
+            // Calculate point cost using dynamic level pricing
+            $pointCost = $badgeDuration * $level->points_per_day;
 
             // Check if user has enough points
             if ($user->pointsBalance < $pointCost) {
                 return response()->json([
-                    'error' => "Needed $pointCost points for $badgeType, but your balance is not enough."
+                    'error' => "Needed $pointCost points for {$level->localized_name}, but your balance is not enough."
                 ], 400);
             }
         }
@@ -300,13 +305,12 @@ class ServicePostController extends Controller
             ];
 
             // Handle badge logic if a premium badge is selected
-            if ($badgeType !== 'عادي') {
-                $badgePrices = ['ذهبي' => 2, 'ماسي' => 10];
-                $pointCost = $badgeDuration * $badgePrices[$badgeType];
+            if ($level && $level->is_premium) {
+                $pointCost = $badgeDuration * $level->points_per_day;
 
                 Log::info('Deducting points for badge', [
                     'userId' => $user->id,
-                    'badge' => $badgeType,
+                    'badge' => $level->localized_name,
                     'duration' => $badgeDuration,
                     'cost' => $pointCost
                 ]);
@@ -325,7 +329,7 @@ class ServicePostController extends Controller
                 Log::info('Point transaction created', ['transaction_id' => $pointTransaction->id]);
 
                 $badgeDetails = [
-                    'badge' => $badgeType,
+                    'badge' => $level->localized_name,
                     'duration' => $badgeDuration,
                     'expires_at' => Carbon::now()->addDays($badgeDuration)
                 ];
@@ -354,6 +358,7 @@ class ServicePostController extends Controller
                 'location_longitudes' => $request->locationLongitudes ?? $defaultLongitude,
                 'type' => $request->type,
                 'have_badge' => $badgeDetails['badge'],
+                'level_id' => $level ? $level->id : null,
                 'badge_duration' => $badgeDetails['duration'],
                 'badge_expires_at' => $badgeExpiresAt,
                 'state' => $request->state ?? 'published',
@@ -399,19 +404,14 @@ class ServicePostController extends Controller
             if ($badgeDetails['badge'] !== 'عادي') {
                 Log::info('Creating badge benefit notification');
 
-                // Define view boost estimates based on badge type
-                $viewBoosts = [
-                    'ذهبي' => 200, // Gold badge provides approximately 200% view boost
-                    'ماسي' => 500  // Diamond badge provides approximately 500% view boost
-                ];
-
-                $viewBoost = $viewBoosts[$badgeDetails['badge']] ?? 0;
+                // Get view boost from level
+                $viewBoost = $level ? $level->view_boost_percentage : 0;
                 $expiresAt = $badgeExpiresAt->format('Y-m-d H:i:s');
 
                 // Create localized message with benefits information
                 $message = json_encode([
-                    'ar' => "تم تطبيق شارة " . $this->translateBadgeType($badgeDetails['badge'], 'ar') . " على منشورك بعنوان: {$servicePost->title}. ستحصل على زيادة تقريبية بنسبة {$viewBoost}٪ في المشاهدات وسيتم عرض منشورك في مكان مميز. ستنتهي الشارة في {$expiresAt}. [post_id:{$servicePost->id}]",
-                    'en' => "Applied " . $this->translateBadgeType($badgeDetails['badge'], 'en') . " badge to your post titled: {$servicePost->title}. You will get approximately {$viewBoost}% more views and your post will be displayed in premium positions. Badge will expire at {$expiresAt}. [post_id:{$servicePost->id}]"
+                    'ar' => "تم تطبيق شارة " . $badgeDetails['badge'] . " على منشورك بعنوان: {$servicePost->title}. ستحصل على زيادة تقريبية بنسبة {$viewBoost}٪ في المشاهدات وسيتم عرض منشورك في مكان مميز. ستنتهي الشارة في {$expiresAt}. [post_id:{$servicePost->id}]",
+                    'en' => "Applied " . $badgeDetails['badge'] . " badge to your post titled: {$servicePost->title}. You will get approximately {$viewBoost}% more views and your post will be displayed in premium positions. Badge will expire at {$expiresAt}. [post_id:{$servicePost->id}]"
                 ]);
 
                 // Create new notification record directly

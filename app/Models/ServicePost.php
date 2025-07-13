@@ -25,6 +25,7 @@ class ServicePost extends Model
         'location_longitudes',
         'type',
         'have_badge',
+        'level_id',
         'badge_duration',
         'badge_expires_at',
         'view_count',
@@ -44,7 +45,7 @@ class ServicePost extends Model
         'updated_at' => 'datetime',
     ];
 
-    protected $appends = ['currency_name'];
+    protected $appends = ['currency_name', 'level_name'];
 
     /**
      * Boot the model.
@@ -179,6 +180,19 @@ class ServicePost extends Model
     }
 
     /**
+     * Get level name based on current locale
+     */
+    public function getLevelNameAttribute()
+    {
+        if ($this->level) {
+            return $this->level->localized_name;
+        }
+        
+        // Fallback to old badge system
+        return $this->have_badge ?? 'عادي';
+    }
+
+    /**
      * Calculate distance between two geographic coordinates
      */
     public static function distance($lat1, $lng1, $lat2, $lng2): float|int
@@ -288,5 +302,13 @@ class ServicePost extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(cities::class);
+    }
+
+    /**
+     * Get the level for this service post.
+     */
+    public function level(): BelongsTo
+    {
+        return $this->belongsTo(Level::class);
     }
 }

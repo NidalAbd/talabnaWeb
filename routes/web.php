@@ -131,6 +131,13 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
         Route::get('point-analytics', [PointPackageController::class, 'analytics'])->name('point-analytics');
     });
 
+    // Level Management Routes
+    Route::group(['middleware' => ['auth', 'admin'], 'prefix' => 'admin'], function() {
+        Route::resource('levels', LevelController::class);
+        Route::post('levels/update-order', [LevelController::class, 'updateOrder'])->name('admin.levels.updateOrder');
+        Route::post('levels/{level}/toggle-active', [LevelController::class, 'toggleActive'])->name('admin.levels.toggleActive');
+    });
+
     // Investor Dashboard Routes
     Route::group(['middleware' => ['auth', 'investor'], 'prefix' => 'investor'], function() {
         Route::get('dashboard', [App\Http\Controllers\InvestorDashboardController::class, 'index'])->name('investor.dashboard');
