@@ -22,12 +22,12 @@ class PointPackageController extends Controller
         $packages = PointPackage::all();
         $features = PremiumFeature::all();
         
-        return view('admin.point-packages.index', compact('packages', 'features'));
+        return view('admin.point_packages.index', compact('packages', 'features'));
     }
 
     public function create()
     {
-        return view('admin.point-packages.create');
+        return view('admin.point_packages.create');
     }
 
     public function store(Request $request)
@@ -47,13 +47,13 @@ class PointPackageController extends Controller
             $package->features()->attach($request->features);
         }
 
-        return redirect()->route('point-packages.index')
+        return redirect()->route('point_packages.index')
             ->with('success', 'Point package created successfully.');
     }
 
     public function edit(PointPackage $pointPackage)
     {
-        return view('admin.point-packages.edit', compact('pointPackage'));
+        return view('admin.point_packages.edit', compact('pointPackage'));
     }
 
     public function update(Request $request, PointPackage $pointPackage)
@@ -73,14 +73,14 @@ class PointPackageController extends Controller
             $pointPackage->features()->sync($request->features);
         }
 
-        return redirect()->route('point-packages.index')
+        return redirect()->route('point_packages.index')
             ->with('success', 'Point package updated successfully.');
     }
 
     public function destroy(PointPackage $pointPackage)
     {
         $pointPackage->delete();
-        return redirect()->route('point-packages.index')
+        return redirect()->route('point_packages.index')
             ->with('success', 'Point package deleted successfully.');
     }
 
@@ -88,28 +88,77 @@ class PointPackageController extends Controller
     public function features()
     {
         $features = PremiumFeature::all();
-        return view('admin.premium-features.index', compact('features'));
+        return view('admin.premium_features.index', compact('features'));
     }
 
     public function createFeature()
     {
-        return view('admin.premium-features.create');
+        return view('admin.premium_features.create');
     }
 
     public function storeFeature(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'point_cost' => 'required|integer|min:1',
+            'name' => 'required|array',
+            'name.ar' => 'required|string|max:255',
+            'name.en' => 'required|string|max:255',
+            'description' => 'nullable|array',
+            'description.ar' => 'nullable|string',
+            'description.en' => 'nullable|string',
+            'points_cost' => 'required|integer|min:1',
+            'duration_days' => 'required|integer|min:1',
+            'category' => 'required|string|max:100',
+            'icon' => 'nullable|string|max:100',
+            'color' => 'nullable|string|max:7',
             'is_active' => 'boolean',
-            'feature_type' => 'required|in:post_enhancement,user_benefit,system_feature'
+            'is_popular' => 'boolean'
         ]);
 
         PremiumFeature::create($request->all());
 
-        return redirect()->route('premium-features.index')
+        return redirect()->route('admin.premium-features.index')
             ->with('success', 'Premium feature created successfully.');
+    }
+
+    public function editFeature(PremiumFeature $feature)
+    {
+        return view('admin.premium_features.edit', compact('feature'));
+    }
+
+    public function updateFeature(Request $request, PremiumFeature $feature)
+    {
+        $request->validate([
+            'name' => 'required|array',
+            'name.ar' => 'required|string|max:255',
+            'name.en' => 'required|string|max:255',
+            'description' => 'nullable|array',
+            'description.ar' => 'nullable|string',
+            'description.en' => 'nullable|string',
+            'points_cost' => 'required|integer|min:1',
+            'duration_days' => 'required|integer|min:1',
+            'category' => 'required|string|max:100',
+            'icon' => 'nullable|string|max:100',
+            'color' => 'nullable|string|max:7',
+            'is_active' => 'boolean',
+            'is_popular' => 'boolean'
+        ]);
+
+        $feature->update($request->all());
+
+        return redirect()->route('admin.premium-features.index')
+            ->with('success', 'Premium feature updated successfully.');
+    }
+
+    public function destroyFeature(PremiumFeature $feature)
+    {
+        $feature->delete();
+        return redirect()->route('admin.premium-features.index')
+            ->with('success', 'Premium feature deleted successfully.');
+    }
+
+    public function showFeature(PremiumFeature $feature)
+    {
+        return view('admin.premium_features.show', compact('feature'));
     }
 
     // User Point Purchase
@@ -193,6 +242,6 @@ class PointPackageController extends Controller
             ->groupBy('month')
             ->get();
 
-        return view('admin.point-packages.analytics', compact('packageSales', 'featureUsage', 'monthlySales'));
+        return view('admin.point_packages.analytics', compact('packageSales', 'featureUsage', 'monthlySales'));
     }
 } 

@@ -17,12 +17,13 @@ return new class extends Migration
             $table->id();
             $table->unsignedBigInteger('from_user_id')->nullable();
             $table->unsignedBigInteger('to_user_id')->nullable();
+            $table->unsignedBigInteger('package_id')->nullable();
             $table->enum('type', ['purchase', 'transfer', 'admin_grant','used']);
             $table->unsignedBigInteger('point')->default(0);
             $table->timestamps();
             $table->foreign('from_user_id')->references('id')->on('users')->onDelete('cascade');
             $table->foreign('to_user_id')->references('id')->on('users')->onDelete('cascade');
-
+            $table->foreign('package_id')->references('id')->on('point_packages')->onDelete('cascade');
         });
     }
 

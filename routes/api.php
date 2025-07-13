@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\NotificationController;
 use App\Http\Controllers\CountriesController;
 use App\Http\Controllers\PointTransactionsController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LevelController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;

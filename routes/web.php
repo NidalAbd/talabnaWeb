@@ -21,6 +21,7 @@ use App\Http\Controllers\PointTransactionsController;
 use App\Http\Controllers\PolicyController;
 use App\Http\Controllers\PointPackageController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\LevelController;
 use App\Http\Controllers\RolesAssignmentController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ServicePostController;
@@ -124,11 +125,32 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
 
     // Point Packages & Premium Features
     Route::group(['middleware' => ['auth', 'admin']], function() {
-        Route::resource('point-packages', PointPackageController::class);
-        Route::get('premium-features', [PointPackageController::class, 'features'])->name('premium-features.index');
-        Route::get('premium-features/create', [PointPackageController::class, 'createFeature'])->name('premium-features.create');
-        Route::post('premium-features', [PointPackageController::class, 'storeFeature'])->name('premium-features.store');
+        // Point Packages Routes with explicit naming
+        Route::get('point-packages', [PointPackageController::class, 'index'])->name('admin.point_packages.index');
+        Route::get('point-packages/create', [PointPackageController::class, 'create'])->name('admin.point_packages.create');
+        Route::post('point-packages', [PointPackageController::class, 'store'])->name('admin.point_packages.store');
+        Route::get('point-packages/{pointPackage}/edit', [PointPackageController::class, 'edit'])->name('admin.point_packages.edit');
+        Route::put('point-packages/{pointPackage}', [PointPackageController::class, 'update'])->name('admin.point_packages.update');
+        Route::delete('point-packages/{pointPackage}', [PointPackageController::class, 'destroy'])->name('admin.point_packages.destroy');
+        Route::get('point-packages/{pointPackage}', [PointPackageController::class, 'show'])->name('admin.point_packages.show');
+        
+        Route::get('premium-features', [PointPackageController::class, 'features'])->name('admin.premium-features.index');
+        Route::get('premium-features/create', [PointPackageController::class, 'createFeature'])->name('admin.premium-features.create');
+        Route::post('premium-features', [PointPackageController::class, 'storeFeature'])->name('admin.premium-features.store');
+        Route::get('premium-features/{feature}/edit', [PointPackageController::class, 'editFeature'])->name('admin.premium-features.edit');
+        Route::put('premium-features/{feature}', [PointPackageController::class, 'updateFeature'])->name('admin.premium-features.update');
+        Route::delete('premium-features/{feature}', [PointPackageController::class, 'destroyFeature'])->name('admin.premium-features.destroy');
+        Route::get('premium-features/{feature}', [PointPackageController::class, 'showFeature'])->name('admin.premium-features.show');
         Route::get('point-analytics', [PointPackageController::class, 'analytics'])->name('point-analytics');
+        
+        // Investor Dashboard Routes
+        Route::get('investor-dashboard', [App\Http\Controllers\InvestorDashboardController::class, 'index'])->name('investor-dashboard');
+        
+        // Marketing Dashboard Routes
+        Route::get('marketing-dashboard', [App\Http\Controllers\MarketingController::class, 'index'])->name('marketing-dashboard');
+        
+        // System Health Routes
+        Route::get('system-health', [App\Http\Controllers\SystemHealthController::class, 'index'])->name('system-health');
     });
 
     // Level Management Routes

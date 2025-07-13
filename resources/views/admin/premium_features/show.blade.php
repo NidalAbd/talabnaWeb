@@ -1,0 +1,273 @@
+@extends('adminlte::page')
+
+@section('title', 'Premium Feature Details')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1>
+            <i class="fas fa-crown mr-2"></i>
+            Premium Feature Details
+        </h1>
+        <div>
+            <a href="{{ route('admin.premium-features.edit', $feature->id) }}" class="btn btn-primary">
+                <i class="fas fa-edit mr-1"></i> Edit
+            </a>
+            <a href="{{ route('admin.premium-features.index') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Features
+            </a>
+        </div>
+    </div>
+@stop
+
+@section('content')
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Feature Details Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Feature Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>ID:</strong></td>
+                                    <td>{{ $feature->id }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Name (Arabic):</strong></td>
+                                    <td>{{ $feature->name['ar'] ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Name (English):</strong></td>
+                                    <td>{{ $feature->name['en'] ?? 'N/A' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Category:</strong></td>
+                                    <td>
+                                        <span class="badge badge-info">{{ ucfirst(str_replace('_', ' ', $feature->category)) }}</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Points Cost:</strong></td>
+                                    <td>
+                                        <span class="badge badge-primary">{{ number_format($feature->points_cost) }} pts</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <table class="table table-borderless">
+                                <tr>
+                                    <td><strong>Duration:</strong></td>
+                                    <td>
+                                        <span class="badge badge-success">{{ $feature->duration_days }} days</span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Status:</strong></td>
+                                    <td>
+                                        @if($feature->is_active)
+                                            <span class="badge badge-success">Active</span>
+                                        @else
+                                            <span class="badge badge-danger">Inactive</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Popular:</strong></td>
+                                    <td>
+                                        @if($feature->is_popular)
+                                            <span class="badge badge-warning">Yes</span>
+                                        @else
+                                            <span class="badge badge-secondary">No</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Icon:</strong></td>
+                                    <td>
+                                        @if($feature->icon)
+                                            <i class="{{ $feature->icon }}" style="font-size: 18px; color: {{ $feature->color ?? '#ffc107' }};"></i>
+                                            <span class="ml-2">{{ $feature->icon }}</span>
+                                        @else
+                                            <span class="text-muted">None</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><strong>Color:</strong></td>
+                                    <td>
+                                        @if($feature->color)
+                                            <div class="d-flex align-items-center">
+                                                <div class="color-preview mr-2" style="width: 20px; height: 20px; background-color: {{ $feature->color }}; border-radius: 3px;"></div>
+                                                <span>{{ $feature->color }}</span>
+                                            </div>
+                                        @else
+                                            <span class="text-muted">Default</span>
+                                        @endif
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Descriptions -->
+                    <div class="row mt-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-language mr-2"></i>Description (Arabic)</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    {{ $feature->description['ar'] ?? 'No description available' }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-language mr-2"></i>Description (English)</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    {{ $feature->description['en'] ?? 'No description available' }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Timestamps -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h5><i class="fas fa-clock mr-2"></i>Timestamps</h5>
+                            <div class="card bg-light">
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <strong>Created:</strong> {{ $feature->created_at->format('M d, Y H:i:s') }}
+                                        </div>
+                                        <div class="col-md-6">
+                                            <strong>Updated:</strong> {{ $feature->updated_at->format('M d, Y H:i:s') }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <!-- Feature Preview Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-eye mr-2"></i>
+                        Feature Preview
+                    </h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="feature-preview">
+                        <div class="mb-4">
+                            <i class="{{ $feature->icon ?? 'fas fa-crown' }}" 
+                               style="font-size: 64px; color: {{ $feature->color ?? '#ffc107' }};"></i>
+                        </div>
+                        <h4>{{ $feature->name['en'] ?? 'Feature Name' }}</h4>
+                        <p class="text-muted">{{ $feature->description['en'] ?? 'Feature description' }}</p>
+                        <div class="badge badge-primary mr-2 mb-2">{{ number_format($feature->points_cost) }} pts</div>
+                        <div class="badge badge-info mb-2">{{ $feature->duration_days }} days</div>
+                        @if($feature->is_popular)
+                            <div class="badge badge-warning">Popular</div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-tools mr-2"></i>
+                        Quick Actions
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ route('admin.premium-features.edit', $feature->id) }}" class="btn btn-primary">
+                            <i class="fas fa-edit mr-1"></i> Edit Feature
+                        </a>
+                        <form action="{{ route('admin.premium-features.destroy', $feature->id) }}" method="POST" class="d-inline">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-danger w-100" 
+                                    onclick="return confirm('Are you sure you want to delete this feature? This action cannot be undone.')">
+                                <i class="fas fa-trash mr-1"></i> Delete Feature
+                            </button>
+                        </form>
+                        <a href="{{ route('admin.premium-features.index') }}" class="btn btn-secondary">
+                            <i class="fas fa-list mr-1"></i> View All Features
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Statistics Card -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-bar mr-2"></i>
+                        Statistics
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <div class="info-box bg-info">
+                                <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Users</span>
+                                    <span class="info-box-number">0</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="info-box bg-success">
+                                <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Purchases</span>
+                                    <span class="info-box-number">0</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@stop
+
+@section('css')
+<style>
+.color-preview {
+    border: 1px solid #ddd;
+}
+.feature-preview {
+    padding: 20px;
+}
+.info-box {
+    min-height: 80px;
+}
+</style>
+@stop
+
+@section('js')
+<script>
+$(document).ready(function() {
+    // Add any JavaScript functionality here
+    console.log('Feature details loaded');
+});
+</script>
+@stop 
