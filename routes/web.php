@@ -57,6 +57,9 @@ Auth::routes();
 Route::get('login/google', [App\Http\Controllers\Auth\LoginController::class, 'redirectToGoogle'])->name('login.google');
 Route::get('login/google/callback', [App\Http\Controllers\Auth\LoginController::class, 'handleGoogleCallback']);
 
+// API-style Google callback route (for existing Google OAuth configuration)
+Route::get('api/auth/google/callback', [App\Http\Controllers\Auth\LoginController::class, 'handleGoogleCallback']);
+
 // Redirect regular users trying to access dashboard
 Route::get('/home', function() {
     return redirect('/');

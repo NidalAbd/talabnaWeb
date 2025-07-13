@@ -81,8 +81,21 @@ class LoginController extends Controller
      */
     public function handleGoogleCallback()
     {
+        // Add debugging
+        Log::info('Google callback received', [
+            'url' => request()->fullUrl(),
+            'method' => request()->method(),
+            'user_agent' => request()->userAgent()
+        ]);
+
         try {
             $googleUser = Socialite::driver('google')->stateless()->user();
+
+            Log::info('Google user data retrieved', [
+                'email' => $googleUser->getEmail(),
+                'name' => $googleUser->getName(),
+                'id' => $googleUser->getId()
+            ]);
 
             // Find or create user
             $user = User::where('email', $googleUser->getEmail())->first();
@@ -209,6 +222,11 @@ class LoginController extends Controller
 
             // Log the user in
             auth()->login($user, true);
+
+            Log::info('Google login successful', [
+                'user_id' => $user->id,
+                'is_new_user' => $isNewUser
+            ]);
 
             // Redirect based on role
             return $this->authenticated(request(), $user);
