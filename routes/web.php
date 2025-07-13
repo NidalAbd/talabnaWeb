@@ -19,6 +19,7 @@ use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\PointPurchaseRequestsController;
 use App\Http\Controllers\PointTransactionsController;
 use App\Http\Controllers\PolicyController;
+use App\Http\Controllers\PointPackageController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RolesAssignmentController;
 use App\Http\Controllers\RolesController;
@@ -120,6 +121,22 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     // Dashboard
     Route::get('/dashboard', [HomeController::class, 'index'])->name('admin.dashboard');
     Route::get('statistics', [App\Http\Controllers\dashboard::class, 'index'])->name('statistics.index');
+
+    // Point Packages & Premium Features
+    Route::group(['middleware' => ['auth', 'admin']], function() {
+        Route::resource('point-packages', PointPackageController::class);
+        Route::get('premium-features', [PointPackageController::class, 'features'])->name('premium-features.index');
+        Route::get('premium-features/create', [PointPackageController::class, 'createFeature'])->name('premium-features.create');
+        Route::post('premium-features', [PointPackageController::class, 'storeFeature'])->name('premium-features.store');
+        Route::get('point-analytics', [PointPackageController::class, 'analytics'])->name('point-analytics');
+    });
+
+    // Investor Dashboard Routes
+    Route::group(['middleware' => ['auth', 'investor'], 'prefix' => 'investor'], function() {
+        Route::get('dashboard', [App\Http\Controllers\InvestorDashboardController::class, 'index'])->name('investor.dashboard');
+        Route::get('financial-report', [App\Http\Controllers\InvestorDashboardController::class, 'financialReport'])->name('investor.financial-report');
+        Route::get('business-metrics', [App\Http\Controllers\InvestorDashboardController::class, 'businessMetrics'])->name('investor.business-metrics');
+    });
 
     /*
     |--------------------------------------------------------------------------
