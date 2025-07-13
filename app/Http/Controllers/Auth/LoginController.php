@@ -59,12 +59,28 @@ class LoginController extends Controller
      */
     protected function authenticated(Request $request, $user)
     {
+        Log::info('User authenticated', [
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'auth_type' => $user->auth_type,
+            'is_admin' => $user->is_admin,
+            'has_role_admin' => $user->hasRole('admin')
+        ]);
+
         // Check if user is admin
         if ($user->is_admin || $user->hasRole('admin')) { // Adjust this condition based on your admin setup
+            Log::info('Redirecting admin user to dashboard');
+            return redirect()->intended('/dashboard');
+        }
+
+        // For Google users, redirect to a specific page or dashboard
+        if ($user->auth_type === 'google') {
+            Log::info('Redirecting Google user to dashboard');
             return redirect()->intended('/dashboard');
         }
 
         // Regular users go to welcome page
+        Log::info('Redirecting regular user to home page');
         return redirect()->intended('/');
     }
 
@@ -105,95 +121,119 @@ class LoginController extends Controller
                 Log::info('Creating new user for Google sign-in: ' . $googleUser->getEmail());
                 $isNewUser = true;
 
-                // Get default country and city
-                $country = countries::findOrFail(1);
-                $city = null;
-                if ($country) {
-                    $city = cities::findOrFail(1);
-                }
+                try {
+                    // Get default country and city
+                    $country = countries::findOrFail(1);
+                    $city = null;
+                    if ($country) {
+                        $city = cities::findOrFail(1);
+                    }
 
-                // Create user data array
-                $userData = [
-                    'name' => $googleUser->getName() ?? $googleUser->getNickname() ?? 'Google User',
-                    'user_name' => $this->generateUsername($googleUser->getName() ?? $googleUser->getNickname() ?? 'user'),
-                    'email' => $googleUser->getEmail(),
-                    'password' => Hash::make(Str::random(16)),
-                    'google_id' => $googleUser->getId(),
-                    'email_verified_at' => now(),
-                    'is_active' => 'active',
-                    'auth_type' => 'google',
-                    'gender' => 'ذكر', // Default gender
-                    'data_saver_enabled' => false,
-                ];
-
-                // Set country and city if available
-                if ($country) {
-                    $userData['country_id'] = $country->id;
-                }
-                if ($city) {
-                    $userData['city_id'] = $city->id;
-                }
-
-                // Create the user
-                $user = User::create($userData);
-
-                // Create profile photo
-                $photoUrl = $googleUser->getAvatar();
-                if (!empty($photoUrl)) {
-                    $photo = new Photos([
-                        'src' => $photoUrl,
-                        'is_external' => true
+                    Log::info('Country and city found', [
+                        'country_id' => $country ? $country->id : null,
+                        'city_id' => $city ? $city->id : null
                     ]);
-                } else {
-                    $photo = new Photos([
-                        'src' => fake()->randomElement([
-                            'storage/photos/avatar1.png',
-                            'storage/photos/avatar2.png',
-                            'storage/photos/avatar3.png',
-                            'storage/photos/avatar4.png',
-                            'storage/photos/avatar5.png'
-                        ]),
-                    ]);
-                }
-                $user->photos()->save($photo);
 
-                // Assign role to user
-                if (class_exists('App\\Models\\Role')) {
-                    $role = Role::where('name', 'user')->first();
-                    if ($role) {
-                        try {
-                            // Manually attach role
-                            $user->roles()->attach($role->id, ['user_type' => get_class($user)]);
+                    // Create user data array
+                    $userData = [
+                        'name' => $googleUser->getName() ?? $googleUser->getNickname() ?? 'Google User',
+                        'user_name' => $this->generateUsername($googleUser->getName() ?? $googleUser->getNickname() ?? 'user'),
+                        'email' => $googleUser->getEmail(),
+                        'password' => Hash::make(Str::random(16)),
+                        'google_id' => $googleUser->getId(),
+                        'email_verified_at' => now(),
+                        'is_active' => 'active',
+                        'auth_type' => 'google',
+                        'gender' => 'ذكر', // Default gender
+                        'data_saver_enabled' => false,
+                    ];
 
-                            // Get all permissions associated with this role
-                            $permissions = $role->permissions;
+                    // Set country and city if available
+                    if ($country) {
+                        $userData['country_id'] = $country->id;
+                    }
+                    if ($city) {
+                        $userData['city_id'] = $city->id;
+                    }
 
-                            // Sync permissions
-                            if ($permissions->isNotEmpty()) {
-                                $permissionIds = $permissions->pluck('id')->toArray();
-                                $user->permissions()->sync($permissionIds);
+                    Log::info('Creating user with data', $userData);
+
+                    // Create the user
+                    $user = User::create($userData);
+
+                    Log::info('User created successfully', ['user_id' => $user->id]);
+
+                    // Create profile photo
+                    $photoUrl = $googleUser->getAvatar();
+                    if (!empty($photoUrl)) {
+                        $photo = new Photos([
+                            'src' => $photoUrl,
+                            'is_external' => true
+                        ]);
+                    } else {
+                        $photo = new Photos([
+                            'src' => fake()->randomElement([
+                                'storage/photos/avatar1.png',
+                                'storage/photos/avatar2.png',
+                                'storage/photos/avatar3.png',
+                                'storage/photos/avatar4.png',
+                                'storage/photos/avatar5.png'
+                            ]),
+                        ]);
+                    }
+                    $user->photos()->save($photo);
+
+                    Log::info('Profile photo created');
+
+                    // Assign role to user
+                    if (class_exists('App\\Models\\Role')) {
+                        $role = Role::where('name', 'user')->first();
+                        if ($role) {
+                            try {
+                                // Manually attach role
+                                $user->roles()->attach($role->id, ['user_type' => get_class($user)]);
+
+                                // Get all permissions associated with this role
+                                $permissions = $role->permissions;
+
+                                // Sync permissions
+                                if ($permissions->isNotEmpty()) {
+                                    $permissionIds = $permissions->pluck('id')->toArray();
+                                    $user->permissions()->sync($permissionIds);
+                                }
+
+                                Log::info('Role and permissions assigned');
+                            } catch (\Exception $e) {
+                                Log::error('Role and permission sync failed', [
+                                    'error' => $e->getMessage(),
+                                    'trace' => $e->getTraceAsString()
+                                ]);
                             }
-                        } catch (\Exception $e) {
-                            Log::error('Role and permission sync failed', [
-                                'error' => $e->getMessage(),
-                                'trace' => $e->getTraceAsString()
-                            ]);
                         }
                     }
+
+                    // Create welcome notification
+                    $message = json_encode([
+                        'en' => "🎉 Welcome to our app! We're thrilled to have you here.",
+                        'ar' => "🎉 مرحبًا بك في تطبيقنا! نحن سعداء بانضمامك إلينا."
+                    ]);
+
+                    $notification = new Notification([
+                        'message' => $message,
+                        'user_id' => $user->id,
+                        'type' => 'login'
+                    ]);
+                    $user->notifications()->save($notification);
+
+                    Log::info('Welcome notification created');
+
+                } catch (\Exception $e) {
+                    Log::error('Error creating new user', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString()
+                    ]);
+                    throw $e;
                 }
-
-                // Create welcome notification
-                $message = json_encode([
-                    'en' => "🎉 Welcome to our app! We're thrilled to have you here.",
-                    'ar' => "🎉 مرحبًا بك في تطبيقنا! نحن سعداء بانضمامك إلينا."
-                ]);
-
-                $notification = new Notification([
-                    'message' => $message,
-                    'user_id' => $user->id,
-                    'type' => 'login'
-                ]);
-                $user->notifications()->save($notification);
             } else {
                 // Update existing user's Google info
                 Log::info('Updating existing user for Google sign-in: ' . $user->id);

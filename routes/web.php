@@ -60,6 +60,52 @@ Route::get('login/google/callback', [App\Http\Controllers\Auth\LoginController::
 // API-style Google callback route (for existing Google OAuth configuration)
 Route::get('api/auth/google/callback', [App\Http\Controllers\Auth\LoginController::class, 'handleGoogleCallback']);
 
+// Test route to verify Google login setup
+Route::get('test/google-login', function() {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Google login routes are working',
+        'routes' => [
+            'redirect' => route('login.google'),
+            'callback' => url('api/auth/google/callback'),
+            'config' => [
+                'client_id' => config('services.google.client_id') ? 'Set' : 'Not Set',
+                'redirect_uri' => config('services.google.redirect') ? 'Set' : 'Not Set'
+            ]
+        ]
+    ]);
+})->name('test.google.login');
+
+// Test route to simulate Google login
+Route::get('test/google-simulation', function() {
+    try {
+        // Simulate a Google user
+        $user = \App\Models\User::first();
+        if ($user) {
+            auth()->login($user);
+            return response()->json([
+                'status' => 'success',
+                'message' => 'User logged in successfully',
+                'user' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'auth_type' => $user->auth_type
+                ]
+            ]);
+        } else {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'No users found in database'
+            ]);
+        }
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage()
+        ]);
+    }
+})->name('test.google.simulation');
+
 // Redirect regular users trying to access dashboard
 Route::get('/home', function() {
     return redirect('/');
