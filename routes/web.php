@@ -363,7 +363,6 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::resource('favorites', FavoriteController::class);
     Route::post('{reported}/{reportedId}/reports', [ReportController::class, 'store'])
         ->name('reports.store');
-    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
     /*
     |--------------------------------------------------------------------------
@@ -489,6 +488,17 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         ->name('reports.handle-reported');
     Route::delete('/reports/{id}', [ReportController::class, 'destroy'])
         ->name('reports.destroy');
+    
+    // Report actions
+    Route::post('/reports/ban-user/{user}', [ReportController::class, 'banUser'])->name('reports.ban-user');
+    Route::post('/reports/unban-user/{user}', [ReportController::class, 'unbanUser'])->name('reports.unban-user');
+    Route::delete('/reports/delete-post/{post}', [ReportController::class, 'deletePost'])->name('reports.delete-post');
+    Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
+    
+    // Test route for debugging
+    Route::get('/reports/test', function() {
+        return response()->json(['success' => true, 'message' => 'Reports test route working']);
+    })->name('reports.test');
 
     // Point Transactions Fix
     Route::get('/point-transactions/fix', [PointTransactionsController::class, 'fixTransactionRecords'])

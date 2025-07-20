@@ -3,13 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Report;
-use App\Models\ServicePost;
 use App\Models\User;
+use App\Models\ServicePost;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
@@ -21,26 +19,35 @@ class ReportController extends Controller
             return view('errors.403');
         }
 
-        // Get grouped reports with count, ordered by most reported items first
-        $reports = Report::with(['reportable'])
-            ->select('reportable_type', 'reportable_id', DB::raw('count(*) as total'))
+        // Get reports grouped by reportable type and ID, ordered by count
+        $reportedItems = Report::select('reportable_type', 'reportable_id')
+            ->selectRaw('COUNT(*) as report_count')
+            ->selectRaw('MAX(created_at) as latest_report')
+            ->with(['reportable', 'user'])
             ->groupBy('reportable_type', 'reportable_id')
-            ->orderBy('total', 'desc')
-            ->paginate(10);
+            ->orderBy('report_count', 'desc')
+            ->orderBy('latest_report', 'desc')
+            ->paginate(15);
 
-        // Get additional statistics for the dashboard
+        // Get statistics
         $stats = [
             'total_reports' => Report::count(),
+            'unique_reported_items' => Report::distinct('reportable_type', 'reportable_id')->count(),
             'user_reports' => Report::where('reportable_type', User::class)->count(),
             'post_reports' => Report::where('reportable_type', ServicePost::class)->count(),
-            'handled_reports' => 0, // Since your model doesn't have status field yet
-            'recent_reports' => Report::with(['reportable', 'reporter'])
-                ->orderBy('created_at', 'desc')
-                ->take(5)
-                ->get(),
+            'today_reports' => Report::whereDate('created_at', today())->count(),
+            'this_week_reports' => Report::whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->count(),
         ];
 
-        return view('admin.reports.index', compact('reports', 'stats'));
+        // Get top reported items for quick actions
+        $topReportedItems = Report::select('reportable_type', 'reportable_id')
+            ->selectRaw('COUNT(*) as report_count')
+            ->groupBy('reportable_type', 'reportable_id')
+            ->orderBy('report_count', 'desc')
+            ->limit(5)
+            ->get();
+
+        return view('admin.reports.index', compact('reportedItems', 'stats', 'topReportedItems'));
     }
     public function showDetails(string $type, int $id): View
     {
@@ -235,5 +242,143 @@ class ReportController extends Controller
             'reportsByReason',
             'resolutionStats'
         ));
+    }
+
+    public function export()
+    {
+        $user = Auth::user();
+        if (!$user->hasPermission('report_index')) {
+            return view('errors.403');
+        }
+
+        $reports = Report::with(['reportable', 'user'])
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $filename = 'reports_' . date('Y-m-d_H-i-s') . '.csv';
+        
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
+        ];
+
+        $callback = function() use ($reports) {
+            $file = fopen('php://output', 'w');
+            
+            // CSV headers
+            fputcsv($file, ['ID', 'Type', 'Reported Item', 'Reporter', 'Reason', 'Created At']);
+            
+            foreach ($reports as $report) {
+                $type = class_basename($report->reportable_type);
+                $reportedItem = $report->reportable ? $report->reportable->name ?? $report->reportable->title ?? 'Unknown' : 'Not Found';
+                $reporter = $report->user ? $report->user->name : 'Unknown';
+                
+                fputcsv($file, [
+                    $report->id,
+                    $type,
+                    $reportedItem,
+                    $reporter,
+                    $report->reason,
+                    $report->created_at->format('Y-m-d H:i:s')
+                ]);
+            }
+            
+            fclose($file);
+        };
+
+        return response()->stream($callback, 200, $headers);
+    }
+
+    public function banUser(User $user)
+    {
+        try {
+            $admin = Auth::user();
+            
+            // Simple admin check - you can adjust this based on your needs
+            if (!$admin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ], 403);
+            }
+
+            $user->is_active = 'banned';
+            $user->save();
+
+            Log::info("User {$user->id} banned by admin {$admin->id}");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User has been banned successfully.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error banning user: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while banning the user.'
+            ], 500);
+        }
+    }
+
+    public function unbanUser(User $user)
+    {
+        try {
+            $admin = Auth::user();
+            
+            // Simple admin check
+            if (!$admin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ], 403);
+            }
+
+            $user->is_active = 'active';
+            $user->save();
+
+            Log::info("User {$user->id} unbanned by admin {$admin->id}");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User has been unbanned successfully.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error unbanning user: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while unbanning the user.'
+            ], 500);
+        }
+    }
+
+    public function deletePost(ServicePost $post)
+    {
+        try {
+            $admin = Auth::user();
+            
+            // Simple admin check
+            if (!$admin) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unauthorized access'
+                ], 403);
+            }
+
+            $postId = $post->id;
+            $post->delete();
+
+            Log::info("Post {$postId} deleted by admin {$admin->id}");
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Post has been deleted successfully.'
+            ]);
+        } catch (\Exception $e) {
+            Log::error("Error deleting post: " . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'An error occurred while deleting the post.'
+            ], 500);
+        }
     }
 }

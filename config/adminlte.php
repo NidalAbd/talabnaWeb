@@ -354,7 +354,7 @@ return [
         ],
         [
             'text' => 'Reports',
-            'url'  => 'reports',
+            'url'  => 'admin/reports',
             'icon' => 'fas fa-file-alt',
             'permission' => ['report_index']
         ],
