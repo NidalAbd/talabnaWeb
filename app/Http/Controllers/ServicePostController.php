@@ -209,7 +209,7 @@ class ServicePostController extends Controller
                 'hasFeaturedColumn'
             ));
         } else {
-            return redirect()->route('errors.403');
+            return view('errors.403');
         }
     }
 
