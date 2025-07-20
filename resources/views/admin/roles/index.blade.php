@@ -132,8 +132,8 @@
 @push('css')
 <style>
     .table thead th { 
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
+        background: #f8f9fa;
+        color: #495057;
         border: none;
         font-weight: 600;
         text-transform: uppercase;
@@ -142,9 +142,7 @@
     }
     
     .table tbody tr:hover {
-        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-        color: white;
-        transform: scale(1.01);
+        background: #f8f9fa;
         transition: all 0.3s ease;
     }
     
@@ -174,7 +172,7 @@
     }
     
     .card-header {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #007bff;
         color: white;
         border: none;
         padding: 1.5rem;
@@ -197,19 +195,6 @@
         border-top: 1px solid #f8f9fa;
     }
     
-
-    
-    /* Animation for badges */
-    .badge {
-        animation: pulse 2s infinite;
-    }
-    
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.05); }
-        100% { transform: scale(1); }
-    }
-    
     /* Custom scrollbar */
     .table-responsive::-webkit-scrollbar {
         width: 8px;
@@ -222,12 +207,12 @@
     }
     
     .table-responsive::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #007bff;
         border-radius: 10px;
     }
     
     .table-responsive::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        background: #0056b3;
     }
 </style>
 @endpush
