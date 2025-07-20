@@ -33,7 +33,8 @@ class CustomRolesController extends Controller
      */
     public function index()
     {
-        $roles = $this->rolesModel::withCount('permissions')
+        $roles = $this->rolesModel::with(['permissions', 'users'])
+            ->withCount(['permissions', 'users'])
             ->orderBy('name')
             ->paginate(10);
 

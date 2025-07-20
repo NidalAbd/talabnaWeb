@@ -92,7 +92,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <form action="{{ route('users.banned') }}" method="GET">
+                <form action="{{ route('admin.users.banned') }}" method="GET">
                     <div class="row">
                         <div class="col-md-9">
                             <div class="input-group">
@@ -105,7 +105,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <a href="{{ route('users.banned') }}" class="btn btn-outline-secondary btn-block">
+                            <a href="{{ route('admin.users.banned') }}" class="btn btn-outline-secondary btn-block">
                                 <i class="fas fa-sync-alt"></i> Reset
                             </a>
                         </div>

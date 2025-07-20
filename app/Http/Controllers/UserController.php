@@ -353,11 +353,13 @@ class UserController extends Controller
     public function ban($id)
     {
         try {
+            \Log::info('Ban user method called', ['user_id' => $id]);
             $user = User::findOrFail($id);
             $user->update(['is_active' => 'banned']);
             
             return back()->with('success', 'User has been banned successfully');
         } catch (\Exception $e) {
+            \Log::error('Ban user failed', ['user_id' => $id, 'error' => $e->getMessage()]);
             return back()->with('error', 'Failed to ban user: ' . $e->getMessage());
         }
     }
@@ -368,11 +370,13 @@ class UserController extends Controller
     public function unban($id)
     {
         try {
+            \Log::info('Unban user method called', ['user_id' => $id]);
             $user = User::findOrFail($id);
             $user->update(['is_active' => 'active']);
             
             return back()->with('success', 'User has been unbanned successfully');
         } catch (\Exception $e) {
+            \Log::error('Unban user failed', ['user_id' => $id, 'error' => $e->getMessage()]);
             return back()->with('error', 'Failed to unban user: ' . $e->getMessage());
         }
     }
@@ -386,6 +390,7 @@ class UserController extends Controller
     public function resetPassword($id)
     {
         try {
+            \Log::info('Reset password method called', ['user_id' => $id]);
             $user = User::findOrFail($id);
             $newPassword = \Str::random(10);
             $user->password = \Hash::make($newPassword);
@@ -395,6 +400,7 @@ class UserController extends Controller
 
             return redirect()->back()->with('success', 'Password reset successfully! New password: ' . $newPassword);
         } catch (\Exception $e) {
+            \Log::error('Reset password failed', ['user_id' => $id, 'error' => $e->getMessage()]);
             return redirect()->back()->with('error', 'Failed to reset password: ' . $e->getMessage());
         }
     }
@@ -498,4 +504,77 @@ class UserController extends Controller
         $logins = []; // Replace with actual login history data
         return view('users.login_history', compact('user', 'logins'));
     }
+
+    /**
+     * Add points to user balance
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function addPoints(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $points = $request->input('points', 0);
+            
+            if ($points <= 0) {
+                return response()->json(['success' => false, 'message' => 'Points must be greater than 0']);
+            }
+            
+            // Create a new points record
+            \App\Models\palservice_points::create([
+                'user_id' => $user->id,
+                'point' => $points
+            ]);
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Points added successfully',
+                'new_balance' => $user->fresh()->pointsBalance
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error adding points: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Deduct points from user balance
+     *
+     * @param Request $request
+     * @param int $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function deductPoints(Request $request, $id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $points = $request->input('points', 0);
+            
+            if ($points <= 0) {
+                return response()->json(['success' => false, 'message' => 'Points must be greater than 0']);
+            }
+            
+            $currentBalance = $user->pointsBalance;
+            if ($currentBalance < $points) {
+                return response()->json(['success' => false, 'message' => 'Insufficient balance']);
+            }
+            
+            // Create a negative points record
+            \App\Models\palservice_points::create([
+                'user_id' => $user->id,
+                'point' => -$points
+            ]);
+            
+            return response()->json([
+                'success' => true, 
+                'message' => 'Points deducted successfully',
+                'new_balance' => $user->fresh()->pointsBalance
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['success' => false, 'message' => 'Error deducting points: ' . $e->getMessage()]);
+        }
+    }
+
+
 }

@@ -24,7 +24,7 @@
                             User Ban Form
                         </h3>
                     </div>
-                    <form action="{{ route('users.ban', $user->id) }}" method="POST">
+                    <form action="{{ route('admin.users.ban', $user->id) }}" method="POST">
                         @csrf
                         <div class="card-body">
                             @if(session('success'))

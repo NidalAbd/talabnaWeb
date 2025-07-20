@@ -10,9 +10,8 @@ class palservice_points extends Model
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'price',
-        'points',
+        'user_id',
+        'point',
     ];
     public function user()
     {

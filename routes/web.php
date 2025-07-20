@@ -46,6 +46,22 @@ Route::get('/policy', [PolicyController::class, 'index'])->name('policy.index');
 Route::post('/facebook/data-deletion', [App\Http\Controllers\FacebookController::class, 'handleDataDeletion']);
 Route::get('/facebook/deletion-status', [App\Http\Controllers\FacebookController::class, 'getDeletionStatus']);
 
+// Test route for debugging
+Route::get('/test-users', function() {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'User routes are working',
+        'routes' => [
+            'users.index' => route('users.index'),
+            'users.ban' => route('users.ban', 1),
+            'users.unban' => route('users.unban', 1),
+            'users.reset_password' => route('users.reset_password', 1),
+            'users.send_notification' => route('users.send_notification', 1),
+            'users.impersonate' => route('users.impersonate', 1),
+        ]
+    ]);
+})->name('test.users');
+
 
 // Deep Link Routes
 Route::get('api/deep-link/{route}/{id?}', [DeepLinkController::class, 'redirect'])->name('deep.link');
@@ -353,6 +369,12 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::post('users/{user}/impersonate', [App\Http\Controllers\UserController::class, 'impersonate'])->name('users.impersonate');
     Route::post('users/stop-impersonation', [App\Http\Controllers\UserController::class, 'stopImpersonation'])->name('users.stop_impersonation');
     Route::get('users/{user}/login-history', [App\Http\Controllers\UserController::class, 'loginHistory'])->name('users.login_history');
+    
+    // Balance management routes
+    Route::post('users/{user}/add-points', [App\Http\Controllers\UserController::class, 'addPoints'])->name('users.add_points');
+    Route::post('users/{user}/deduct-points', [App\Http\Controllers\UserController::class, 'deductPoints'])->name('users.deduct_points');
+    
+
 
     // Simple ban/unban routes
     Route::post('users/{user}/ban', [UserController::class, 'ban'])->name('users.ban');

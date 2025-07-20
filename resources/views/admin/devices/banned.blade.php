@@ -9,7 +9,7 @@
             <a href="{{ route('devices.ban.form') }}" class="btn btn-danger">
                 <i class="fas fa-ban mr-1"></i> Ban New Device
             </a>
-            <a href="{{ route('users.banned') }}" class="btn btn-primary ml-2">
+            <a href="{{ route('admin.users.banned') }}" class="btn btn-primary ml-2">
                 <i class="fas fa-user-slash mr-1"></i> Banned Users
             </a>
             <a href="{{ route('users.index') }}" class="btn btn-info ml-2">
@@ -65,7 +65,7 @@
                     <div class="icon">
                         <i class="fas fa-user-slash"></i>
                     </div>
-                    <a href="{{ route('users.banned') }}" class="small-box-footer">
+                    <a href="{{ route('admin.users.banned') }}" class="small-box-footer">
                         View users <i class="fas fa-arrow-circle-right"></i>
                     </a>
                 </div>

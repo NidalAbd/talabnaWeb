@@ -167,37 +167,43 @@
                             <td><span class="badge badge-danger">{{ $user->reports_count ?? 0 }}</span></td>
                             <td><span class="text-muted">{{ $user->created_at ? $user->created_at->format('Y-m-d') : '-' }}</span></td>
                             <td>
-                                <a href="{{ route('users.show', $user->id) }}" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
-                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-xs btn-outline-primary" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-xs btn-outline-danger" data-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
-                                </form>
-                                @if($user->is_active == 'banned')
-                                    <form action="{{ route('users.unban', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Unban this user?');">
+                                <div class="btn-group" role="group">
+                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
+                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-xs btn-outline-primary" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
+                                    
+                                    <!-- Balance Button -->
+                                    <button type="button" class="btn btn-xs btn-outline-success" data-toggle="tooltip" title="Balance: {{ $user->pointsBalance ?? 0 }} points" onclick="showBalanceModal({{ $user->id }}, '{{ $user->name }}', {{ $user->pointsBalance ?? 0 }})">
+                                        <i class="fas fa-coins"></i>
+                                    </button>
+                                    
+                                    <!-- Role Assignment Link -->
+                                    <a href="{{ route('role-assignments.edit', $user->id) }}" class="btn btn-xs btn-outline-warning" data-toggle="tooltip" title="Assign Roles & Permissions">
+                                        <i class="fas fa-user-shield"></i>
+                                    </a>
+                                    
+                                    <!-- Ban/Unban Button -->
+                                    @if($user->is_active == 'banned')
+                                        <form action="{{ route('users.unban', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Unban this user?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-xs btn-outline-success" data-toggle="tooltip" title="Unban"><i class="fas fa-unlock"></i></button>
+                                        </form>
+                                    @else
+                                        <form action="{{ route('users.ban', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Ban this user?');">
+                                            @csrf
+                                            <button type="submit" class="btn btn-xs btn-outline-warning" data-toggle="tooltip" title="Ban"><i class="fas fa-user-slash"></i></button>
+                                        </form>
+                                    @endif
+                                    
+                                    <!-- Delete Button -->
+                                    <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this user?');">
                                         @csrf
-                                        <button type="submit" class="btn btn-xs btn-outline-success" data-toggle="tooltip" title="Unban"><i class="fas fa-unlock"></i></button>
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-xs btn-outline-danger" data-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
                                     </form>
-                                @else
-                                    <form action="{{ route('users.ban', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Ban this user?');">
-                                        @csrf
-                                        <button type="submit" class="btn btn-xs btn-outline-warning" data-toggle="tooltip" title="Ban"><i class="fas fa-user-slash"></i></button>
-                                    </form>
-                                @endif
-                                <form action="{{ route('users.reset_password', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Reset password for this user?');">
-                                    @csrf
-                                    <button type="submit" class="btn btn-xs btn-outline-secondary" data-toggle="tooltip" title="Reset Password"><i class="fas fa-key"></i></button>
-                                </form>
-                                <form action="{{ route('users.send_notification', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Send notification to this user?');">
-                                    @csrf
-                                    <button type="submit" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="Send Notification"><i class="fas fa-bell"></i></button>
-                                </form>
-                                <form action="{{ route('users.impersonate', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Impersonate this user?');">
-                                    @csrf
-                                    <button type="submit" class="btn btn-xs btn-outline-dark" data-toggle="tooltip" title="Impersonate"><i class="fas fa-user-secret"></i></button>
-                                </form>
-                                <a href="{{ route('users.login_history', $user->id) }}" class="btn btn-xs btn-outline-secondary" data-toggle="tooltip" title="Login History"><i class="fas fa-history"></i></a>
+                                    
+                                    <!-- History Button -->
+                                    <a href="{{ route('users.login_history', $user->id) }}" class="btn btn-xs btn-outline-secondary" data-toggle="tooltip" title="Login History"><i class="fas fa-history"></i></a>
+                                </div>
                             </td>
                         </tr>
                     @empty
@@ -226,6 +232,43 @@
     </div>
 </div>
 
+<!-- Balance Modal -->
+<div class="modal fade" id="balanceModal" tabindex="-1" role="dialog" aria-labelledby="balanceModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="balanceModalLabel">User Balance</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="text-center">
+                    <h4 id="balanceUserName"></h4>
+                    <div class="balance-display">
+                        <i class="fas fa-coins text-warning" style="font-size: 3rem;"></i>
+                        <h2 id="balanceAmount" class="text-success mt-2"></h2>
+                        <p class="text-muted">Total Points Balance</p>
+                    </div>
+                    <div class="balance-actions mt-3">
+                        <button type="button" class="btn btn-success" onclick="addPoints()">
+                            <i class="fas fa-plus"></i> Add Points
+                        </button>
+                        <button type="button" class="btn btn-warning" onclick="deductPoints()">
+                            <i class="fas fa-minus"></i> Deduct Points
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 @push('js')
 <script>
     function printTable(btn) {
@@ -250,6 +293,92 @@
         a.download = 'users-export.csv';
         a.click();
     }
+    
+    // Global variables for modals
+    let currentUserId = null;
+    let currentUserName = null;
+    
+    // Balance Modal Functions
+    function showBalanceModal(userId, userName, balance) {
+        currentUserId = userId;
+        currentUserName = userName;
+        
+        document.getElementById('balanceUserName').textContent = userName;
+        document.getElementById('balanceAmount').textContent = balance + ' points';
+        
+        $('#balanceModal').modal('show');
+    }
+    
+    function addPoints() {
+        const points = prompt('Enter points to add:');
+        if (points && !isNaN(points) && points > 0) {
+            // AJAX call to add points
+            fetch(`/users/${currentUserId}/add-points`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ points: parseInt(points) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Points added successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error adding points');
+            });
+        }
+    }
+    
+    function deductPoints() {
+        const points = prompt('Enter points to deduct:');
+        if (points && !isNaN(points) && points > 0) {
+            // AJAX call to deduct points
+            fetch(`/users/${currentUserId}/deduct-points`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                },
+                body: JSON.stringify({ points: parseInt(points) })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Points deducted successfully!');
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error deducting points');
+            });
+        }
+    }
+    
+
+    
+    // Debug form submissions
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Users index page loaded');
+        
+        // Add event listeners to all action forms
+        const actionForms = document.querySelectorAll('form[action*="/users/"]');
+        actionForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                console.log('Form submitted:', this.action);
+            });
+        });
+    });
 </script>
 @endpush
 
@@ -262,6 +391,36 @@
     .btn-xs { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
     .badge-pink { background: #e83e8c; color: #fff; }
     .img-circle { border-radius: 50%; }
+    
+    /* Button group styling */
+    .btn-group .btn {
+        margin-right: 2px;
+    }
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+    
+    /* Modal styling */
+    .balance-display {
+        padding: 20px;
+        background: #f8f9fa;
+        border-radius: 10px;
+        margin: 20px 0;
+    }
+    
+    .balance-actions {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+    }
+    
+    .custom-control {
+        margin-bottom: 8px;
+    }
+    
+    .badge {
+        font-size: 0.75rem;
+    }
 </style>
 @endpush
 @stop
