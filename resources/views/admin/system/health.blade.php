@@ -17,9 +17,7 @@
 @stop
 
 @section('content')
-<div class="content-wrapper">
-    <section class="content">
-        <div class="container-fluid">
+<div class="container-fluid">
             <!-- System Status Overview -->
             <div class="row mb-4">
                 <div class="col-lg-3 col-md-6">
@@ -94,7 +92,7 @@
             <!-- Detailed Health Information -->
             <div class="row">
                 <!-- Database Health -->
-                <div class="col-md-6">
+                <div class="col-lg-6 col-md-12">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -149,7 +147,7 @@
                 </div>
 
                 <!-- Storage Health -->
-                <div class="col-md-6">
+                <div class="col-lg-6 col-md-12">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -217,7 +215,7 @@
 
             <div class="row">
                 <!-- Performance Metrics -->
-                <div class="col-md-6">
+                <div class="col-lg-6 col-md-12">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -270,7 +268,7 @@
                 </div>
 
                 <!-- Cache Health -->
-                <div class="col-md-6">
+                <div class="col-lg-6 col-md-12">
                     <div class="card">
                         <div class="card-header">
                             <h3 class="card-title">
@@ -447,6 +445,37 @@
 .btn-block {
     display: block;
     width: 100%;
+}
+
+/* Full width improvements */
+.container-fluid {
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.card {
+    margin-bottom: 1.5rem;
+    box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+}
+
+.info-box {
+    margin-bottom: 1rem;
+}
+
+/* Responsive improvements */
+@media (max-width: 768px) {
+    .container-fluid {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .info-box {
+        margin-bottom: 0.75rem;
+    }
 }
 </style>
 @endsection
