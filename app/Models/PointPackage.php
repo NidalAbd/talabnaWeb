@@ -11,16 +11,27 @@ class PointPackage extends Model
 
     protected $fillable = [
         'name',
-        'points',
-        'price',
         'description',
+        'points_amount',
+        'price',
+        'currency_code',
+        'currency_name',
         'is_active',
-        'features'
+        'is_popular',
+        'display_order',
+        'features',
+        'validity_days',
+        'discount_percentage',
+        'icon',
+        'color',
+        'max_purchases'
     ];
 
     protected $casts = [
+        'name' => 'array',
+        'description' => 'array',
+        'features' => 'array',
         'is_active' => 'boolean',
-        'features' => 'array'
     ];
 
     public function features()
@@ -45,6 +56,6 @@ class PointPackage extends Model
 
     public function getFormattedPointsAttribute()
     {
-        return number_format($this->points) . ' points';
+        return number_format($this->points_amount) . ' points';
     }
 } 

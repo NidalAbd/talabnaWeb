@@ -3,26 +3,74 @@
 @section('title', 'Create New Level')
 
 @section('content')
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Create New Level</h1>
-                </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.levels.index') }}">Levels</a></li>
-                        <li class="breadcrumb-item active">Create</li>
-                    </ol>
-                </div>
-            </div>
+<div class="container-fluid">
+    <div class="row mb-2">
+        <div class="col-sm-6">
+            <h1 class="m-0">
+                <i class="fas fa-layer-group mr-2"></i>
+                Create New Level
+            </h1>
+            <p class="text-muted mt-1">Add a new user level with custom features and benefits</p>
+        </div>
+        <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('levels.index') }}">Levels</a></li>
+                <li class="breadcrumb-item active">Create</li>
+            </ol>
         </div>
     </div>
 
     <section class="content">
         <div class="container-fluid">
+            <!-- Statistics Cards -->
+            <div class="row mb-4">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ \App\Models\Level::count() }}</h3>
+                            <p>Total Levels</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-layer-group"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ \App\Models\Level::where('is_active', true)->count() }}</h3>
+                            <p>Active Levels</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ \App\Models\Level::where('is_premium', true)->count() }}</h3>
+                            <p>Premium Levels</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-danger">
+                        <div class="inner">
+                            <h3>{{ \App\Models\ServicePost::count() }}</h3>
+                            <p>Service Posts</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <div class="row">
                 <div class="col-md-8">
                     <div class="card">
@@ -31,8 +79,13 @@
                                 <i class="fas fa-plus mr-2"></i>
                                 Level Information
                             </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
                         </div>
-                        <form action="{{ route('admin.levels.store') }}" method="POST">
+                        <form action="{{ route('levels.store') }}" method="POST" id="levelForm">
                             @csrf
                             <div class="card-body">
                                 <div class="row">
@@ -219,12 +272,17 @@
 
                             <div class="card-footer">
                                 <div class="d-flex justify-content-between">
-                                    <a href="{{ route('admin.levels.index') }}" class="btn btn-secondary">
+                                    <a href="{{ route('levels.index') }}" class="btn btn-secondary">
                                         <i class="fas fa-arrow-left mr-1"></i> Back to Levels
                                     </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save mr-1"></i> Create Level
-                                    </button>
+                                    <div>
+                                        <button type="button" class="btn btn-info mr-2" id="previewBtn">
+                                            <i class="fas fa-eye mr-1"></i> Preview
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                                            <i class="fas fa-save mr-1"></i> Create Level
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -254,6 +312,32 @@
                                 </div>
                             </div>
                         </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-bolt mr-2"></i>
+                                    Quick Actions
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="btn-group-vertical w-100">
+                                    <button type="button" class="btn btn-outline-primary mb-2" onclick="fillBasicLevel()">
+                                        <i class="fas fa-star mr-1"></i> Basic Level
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success mb-2" onclick="fillPremiumLevel()">
+                                        <i class="fas fa-crown mr-1"></i> Premium Level
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning mb-2" onclick="fillAdvancedLevel()">
+                                        <i class="fas fa-rocket mr-1"></i> Advanced Level
+                                    </button>
+                                    <button type="button" class="btn btn-outline-info" onclick="clearForm()">
+                                        <i class="fas fa-eraser mr-1"></i> Clear Form
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -273,6 +357,7 @@
     color: white;
     font-size: 24px;
     margin-bottom: 10px;
+    background-color: #6c757d;
 }
 </style>
 @endpush
@@ -311,7 +396,154 @@ $(document).ready(function() {
         var boost = $(this).val() || 0;
         $('#preview-boost').text('+' + boost + '%');
     });
+
+    // Form submission with AJAX
+    $('#levelForm').on('submit', function(e) {
+        e.preventDefault();
+        
+        var form = $(this)[0];
+        var formData = new FormData(form);
+        
+        // Manually set JSON fields
+        formData.set('name', JSON.stringify({
+            ar: $('#name_ar').val(),
+            en: $('#name_en').val()
+        }));
+        formData.set('description', JSON.stringify({
+            ar: $('#description_ar').val(),
+            en: $('#description_en').val()
+        }));
+        formData.set('features', JSON.stringify({
+            ar: $('#features_ar').val(),
+            en: $('#features_en').val()
+        }));
+        
+        var submitBtn = $('#submitBtn');
+        var originalText = submitBtn.html();
+        
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Creating...');
+        
+        $.ajax({
+            url: $(this).attr('action'),
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Level created successfully!',
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then(function() {
+                    window.location.href = '{{ route("levels.index") }}';
+                });
+            },
+            error: function(xhr) {
+                var errors = xhr.responseJSON.errors;
+                var errorMessage = 'Please fix the following errors:\n';
+                
+                for (var field in errors) {
+                    errorMessage += '- ' + errors[field][0] + '\n';
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                });
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+
+    // Preview button
+    $('#previewBtn').on('click', function() {
+        Swal.fire({
+            title: 'Level Preview',
+            html: `
+                <div class="text-center">
+                    <div class="level-badge mx-auto mb-3" style="background-color: ${$('#color').val() || '#6c757d'};">
+                        <i class="${$('#icon').val() || 'fas fa-star'}" style="color: white; font-size: 24px;"></i>
+                    </div>
+                    <h5>${$('#name_ar').val() || 'اسم المستوى'} / ${$('#name_en').val() || 'Level Name'}</h5>
+                    <p class="text-muted">${$('#description_ar').val() || 'وصف المستوى'}</p>
+                    <div class="badge badge-info mr-2">${$('#points_per_day').val() || 0} pts/day</div>
+                    <div class="badge badge-success">+${$('#view_boost_percentage').val() || 0}%</div>
+                </div>
+            `,
+            confirmButtonText: 'OK'
+        });
+    });
 });
+
+// Quick action functions
+function fillBasicLevel() {
+    $('#name_ar').val('مبتدئ');
+    $('#name_en').val('Basic');
+    $('#description_ar').val('مستوى للمستخدمين الجدد');
+    $('#description_en').val('Level for new users');
+    $('#icon').val('fas fa-star');
+    $('#color').val('#6c757d');
+    $('#points_per_day').val(0);
+    $('#view_boost_percentage').val(0);
+    $('#display_order').val(1);
+    $('#is_active').prop('checked', true);
+    $('#is_premium').prop('checked', false);
+}
+
+function fillPremiumLevel() {
+    $('#name_ar').val('مميز');
+    $('#name_en').val('Premium');
+    $('#description_ar').val('مستوى مميز مع مزايا إضافية');
+    $('#description_en').val('Premium level with extra features');
+    $('#icon').val('fas fa-crown');
+    $('#color').val('#ffc107');
+    $('#points_per_day').val(10);
+    $('#view_boost_percentage').val(25);
+    $('#display_order').val(2);
+    $('#is_active').prop('checked', true);
+    $('#is_premium').prop('checked', true);
+}
+
+function fillAdvancedLevel() {
+    $('#name_ar').val('متقدم');
+    $('#name_en').val('Advanced');
+    $('#description_ar').val('مستوى متقدم للمستخدمين المحترفين');
+    $('#description_en').val('Advanced level for professional users');
+    $('#icon').val('fas fa-rocket');
+    $('#color').val('#dc3545');
+    $('#points_per_day').val(25);
+    $('#view_boost_percentage').val(50);
+    $('#display_order').val(3);
+    $('#is_active').prop('checked', true);
+    $('#is_premium').prop('checked', true);
+}
+
+function clearForm() {
+    Swal.fire({
+        title: 'Clear Form?',
+        text: 'Are you sure you want to clear all form fields?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, clear it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $('#levelForm')[0].reset();
+            $('#preview-name').text('Level Name');
+            $('#preview-description').text('Level description');
+            $('#preview-icon').attr('class', 'fas fa-star');
+            $('#preview-badge').css('background-color', '#6c757d');
+            $('#preview-points').text('0 pts/day');
+            $('#preview-boost').text('+0%');
+        }
+    });
+}
 </script>
 @endpush
 @endsection 

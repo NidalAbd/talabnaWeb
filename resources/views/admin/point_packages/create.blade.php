@@ -3,19 +3,55 @@
 @section('title', 'Create Point Package')
 
 @section('content')
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Create New Point Package</h1>
+<div class="container-fluid">
+    <div class="row mb-2">
+        <div class="col-sm-6">
+            <h1 class="m-0">
+                <i class="fas fa-gift mr-2"></i>
+                Create New Point Package
+            </h1>
+            <p class="text-muted mt-1">Add a new point package with pricing and features</p>
+        </div>
+        <div class="col-sm-6">
+            <ol class="breadcrumb float-sm-right">
+                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.point_packages.index') }}">Point Packages</a></li>
+                <li class="breadcrumb-item active">Create</li>
+            </ol>
+        </div>
+    </div>
+    <!-- Statistics Cards: Remove the card for PointPurchaseRequest -->
+    <div class="row mb-4">
+        <div class="col-lg-4 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>{{ \App\Models\PointPackage::count() }}</h3>
+                    <p>Total Packages</p>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('admin.point_packages.index') }}">Point Packages</a></li>
-                        <li class="breadcrumb-item active">Create</li>
-                    </ol>
+                <div class="icon">
+                    <i class="fas fa-gift"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>{{ \App\Models\PointPackage::where('is_active', true)->count() }}</h3>
+                    <p>Active Packages</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>{{ \App\Models\PointPackage::where('is_popular', true)->count() }}</h3>
+                    <p>Popular Packages</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-star"></i>
                 </div>
             </div>
         </div>
@@ -31,8 +67,13 @@
                                 <i class="fas fa-plus mr-2"></i>
                                 Package Information
                             </h3>
+                            <div class="card-tools">
+                                <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                            </div>
                         </div>
-                        <form action="{{ route('admin.point_packages.store') }}" method="POST">
+                        <form action="{{ route('admin.point_packages.store') }}" method="POST" id="packageForm">
                             @csrf
                             <div class="card-body">
                                 <div class="row">
@@ -276,16 +317,7 @@
                                         </div>
                                     </div>
 
-                                    <!-- Featured -->
-                                    <div class="col-md-4">
-                                        <div class="form-group">
-                                            <div class="custom-control custom-switch">
-                                                <input type="checkbox" class="custom-control-input" id="is_featured" 
-                                                       name="is_featured" value="1" {{ old('is_featured') ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="is_featured">Featured</label>
-                                            </div>
-                                        </div>
-                                    </div>
+
                                 </div>
                             </div>
 
@@ -294,9 +326,14 @@
                                     <a href="{{ route('admin.point_packages.index') }}" class="btn btn-secondary">
                                         <i class="fas fa-arrow-left mr-1"></i> Back to Packages
                                     </a>
-                                    <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-save mr-1"></i> Create Package
-                                    </button>
+                                    <div>
+                                        <button type="button" class="btn btn-info mr-2" id="previewBtn">
+                                            <i class="fas fa-eye mr-1"></i> Preview
+                                        </button>
+                                        <button type="submit" class="btn btn-primary" id="submitBtn">
+                                            <i class="fas fa-save mr-1"></i> Create Package
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </form>
@@ -324,6 +361,32 @@
                                     <div class="badge badge-primary" id="preview-points">100 pts</div>
                                     <div class="badge badge-success" id="preview-price">10 SAR</div>
                                     <div class="badge badge-info" id="preview-duration">30 days</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quick Actions -->
+                        <div class="card mt-3">
+                            <div class="card-header">
+                                <h3 class="card-title">
+                                    <i class="fas fa-bolt mr-2"></i>
+                                    Quick Actions
+                                </h3>
+                            </div>
+                            <div class="card-body">
+                                <div class="btn-group-vertical w-100">
+                                    <button type="button" class="btn btn-outline-primary mb-2" onclick="fillBasicPackage()">
+                                        <i class="fas fa-gift mr-1"></i> Basic Package
+                                    </button>
+                                    <button type="button" class="btn btn-outline-success mb-2" onclick="fillPopularPackage()">
+                                        <i class="fas fa-star mr-1"></i> Popular Package
+                                    </button>
+                                    <button type="button" class="btn btn-outline-warning mb-2" onclick="fillPremiumPackage()">
+                                        <i class="fas fa-crown mr-1"></i> Premium Package
+                                    </button>
+                                    <button type="button" class="btn btn-outline-info" onclick="clearForm()">
+                                        <i class="fas fa-eraser mr-1"></i> Clear Form
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -391,7 +454,176 @@ $(document).ready(function() {
         var days = $(this).val() || 0;
         $('#preview-duration').text(days + ' days');
     });
+
+    // Form submission with AJAX
+    $('#packageForm').on('submit', function(e) {
+        e.preventDefault();
+
+        var submitBtn = $('#submitBtn');
+        var originalText = submitBtn.html();
+
+        submitBtn.prop('disabled', true).html('<i class="fas fa-spinner fa-spin mr-1"></i> Creating...');
+
+        // Prepare form data as flat fields
+        var formData = {
+            _token: $('input[name="_token"]').val(),
+            'name[ar]': $('#name_ar').val(),
+            'name[en]': $('#name_en').val(),
+            'description[ar]': $('#description_ar').val(),
+            'description[en]': $('#description_en').val(),
+            'features[ar]': $('#features_ar').val(),
+            'features[en]': $('#features_en').val(),
+            'points': $('#points').val(),
+            'price': $('#price').val(),
+            'currency': $('#currency').val(),
+            'duration_days': $('#duration_days').val(),
+            'discount_percentage': $('#discount_percentage').val(),
+            'max_purchases': $('#max_purchases').val(),
+            'icon': $('#icon').val(),
+            'color': $('#color').val(),
+            'display_order': $('#display_order').val(),
+            'is_active': $('#is_active').is(':checked') ? 1 : 0,
+            'is_popular': $('#is_popular').is(':checked') ? 1 : 0
+        };
+
+        $.ajax({
+            url: $(this).attr('action'),
+            method: 'POST',
+            data: formData,
+            dataType: 'json',
+            success: function(response) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: 'Package created successfully!',
+                    showConfirmButton: false,
+                    timer: 2000
+                }).then(function() {
+                    window.location.href = '{{ route("admin.point_packages.index") }}';
+                });
+            },
+            error: function(xhr, status, error) {
+                var errors = xhr.responseJSON ? xhr.responseJSON.errors : null;
+                var errorMessage = 'Please fix the following errors:\n';
+
+                if (errors) {
+                    for (var field in errors) {
+                        errorMessage += '- ' + errors[field][0] + '\n';
+                    }
+                } else {
+                    errorMessage = 'An error occurred while creating the package.';
+                }
+
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Validation Error',
+                    text: errorMessage,
+                    confirmButtonText: 'OK'
+                });
+            },
+            complete: function() {
+                submitBtn.prop('disabled', false).html(originalText);
+            }
+        });
+    });
+
+    // Preview button
+    $('#previewBtn').on('click', function() {
+        Swal.fire({
+            title: 'Package Preview',
+            html: `
+                <div class="text-center">
+                    <div class="package-badge mx-auto mb-3" style="background-color: ${$('#color').val() || '#007bff'};">
+                        <i class="${$('#icon').val() || 'fas fa-gift'}" style="color: white; font-size: 24px;"></i>
+                    </div>
+                    <h5>${$('#name_ar').val() || 'اسم الباقة'} / ${$('#name_en').val() || 'Package Name'}</h5>
+                    <p class="text-muted">${$('#description_ar').val() || 'وصف الباقة'}</p>
+                    <div class="badge badge-primary mr-2">${$('#points').val() || 0} pts</div>
+                    <div class="badge badge-success mr-2">${$('#price').val() || 0} ${$('#currency').val() || 'SAR'}</div>
+                    <div class="badge badge-info">${$('#duration_days').val() || 0} days</div>
+                </div>
+            `,
+            confirmButtonText: 'OK'
+        });
+    });
 });
+
+// Quick action functions
+function fillBasicPackage() {
+    $('#name_ar').val('باقة أساسية');
+    $('#name_en').val('Basic Package');
+    $('#description_ar').val('باقة مناسبة للمستخدمين الجدد');
+    $('#description_en').val('Suitable package for new users');
+    $('#points').val(100);
+    $('#price').val(10);
+    $('#currency').val('SAR');
+    $('#duration_days').val(30);
+    $('#discount_percentage').val(0);
+    $('#max_purchases').val(0);
+    $('#icon').val('fas fa-gift');
+    $('#color').val('#007bff');
+    $('#display_order').val(1);
+    $('#is_active').prop('checked', true);
+    $('#is_popular').prop('checked', false);
+}
+
+function fillPopularPackage() {
+    $('#name_ar').val('باقة شائعة');
+    $('#name_en').val('Popular Package');
+    $('#description_ar').val('الباقة الأكثر شعبية بين المستخدمين');
+    $('#description_en').val('Most popular package among users');
+    $('#points').val(500);
+    $('#price').val(45);
+    $('#currency').val('SAR');
+    $('#duration_days').val(60);
+    $('#discount_percentage').val(10);
+    $('#max_purchases').val(100);
+    $('#icon').val('fas fa-star');
+    $('#color').val('#ffc107');
+    $('#display_order').val(2);
+    $('#is_active').prop('checked', true);
+    $('#is_popular').prop('checked', true);
+}
+
+function fillPremiumPackage() {
+    $('#name_ar').val('باقة مميزة');
+    $('#name_en').val('Premium Package');
+    $('#description_ar').val('باقة مميزة مع مزايا إضافية');
+    $('#description_en').val('Premium package with extra features');
+    $('#points').val(1000);
+    $('#price').val(80);
+    $('#currency').val('SAR');
+    $('#duration_days').val(90);
+    $('#discount_percentage').val(20);
+    $('#max_purchases').val(50);
+    $('#icon').val('fas fa-crown');
+    $('#color').val('#dc3545');
+    $('#display_order').val(3);
+    $('#is_active').prop('checked', true);
+    $('#is_popular').prop('checked', true);
+}
+
+function clearForm() {
+    Swal.fire({
+        title: 'Clear Form?',
+        text: 'Are you sure you want to clear all form fields?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, clear it!',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $('#packageForm')[0].reset();
+            $('#preview-name').text('Package Name');
+            $('#preview-description').text('Package description');
+            $('#preview-icon').attr('class', 'fas fa-gift');
+            $('#preview-badge').css('background-color', '#007bff');
+            $('#preview-points').text('100 pts');
+            $('#preview-price').text('10 SAR');
+            $('#preview-duration').text('30 days');
+        }
+    });
+}
 </script>
 @endpush
 @endsection 

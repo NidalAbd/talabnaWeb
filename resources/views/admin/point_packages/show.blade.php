@@ -1,0 +1,422 @@
+@extends('adminlte::page')
+
+@section('title', 'Point Package Details - Talabna Admin')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="m-0">
+                <i class="fas fa-gift text-primary mr-2"></i> 
+                Point Package Details
+            </h1>
+            <p class="text-muted mb-0">View detailed information about the point package</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.point_packages.edit', $pointPackage->id) }}" class="btn btn-primary">
+                <i class="fas fa-edit mr-1"></i> Edit Package
+            </a>
+            <a href="{{ route('admin.point_packages.index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Back to List
+            </a>
+        </div>
+    </div>
+@stop
+
+@section('content')
+<div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h5><i class="icon fas fa-check"></i> Success!</h5>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h5><i class="icon fas fa-ban"></i> Error!</h5>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="row">
+        <!-- Package Details Card -->
+        <div class="col-md-8">
+            <div class="card card-outline card-primary shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-info-circle mr-2"></i> Package Information
+                    </h3>
+                    <div class="card-tools">
+                        <span class="badge badge-{{ $pointPackage->is_active ? 'success' : 'danger' }} mr-2">
+                            {{ $pointPackage->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                        @if($pointPackage->is_popular)
+                            <span class="badge badge-warning">Popular</span>
+                        @endif
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <!-- Package Icon -->
+                        <div class="col-md-2 text-center mb-3">
+                            <div class="package-icon">
+                                @if($pointPackage->icon)
+                                    <i class="{{ $pointPackage->icon }}" style="font-size: 48px; color: {{ $pointPackage->color ?? '#007bff' }};"></i>
+                                @else
+                                    <i class="fas fa-gift" style="font-size: 48px; color: {{ $pointPackage->color ?? '#007bff' }};"></i>
+                                @endif
+                            </div>
+                        </div>
+                        
+                        <!-- Package Details -->
+                        <div class="col-md-10">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h4 class="text-primary">{{ $pointPackage->name['en'] ?? 'N/A' }}</h4>
+                                    <p class="text-muted">{{ $pointPackage->name['ar'] ?? 'N/A' }}</p>
+                                </div>
+                                <div class="col-md-6 text-right">
+                                    <h3 class="text-success">{{ $pointPackage->price }} {{ $pointPackage->currency_code }}</h3>
+                                    <h5 class="text-primary">{{ number_format($pointPackage->points_amount) }} Points</h5>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    @if($pointPackage->description)
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6 class="text-muted">Description</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>English:</strong></p>
+                                        <p class="text-muted">{{ $pointPackage->description['en'] ?? 'No description available' }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Arabic:</strong></p>
+                                        <p class="text-muted">{{ $pointPackage->description['ar'] ?? 'لا يوجد وصف متاح' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+
+                    <!-- Package Features -->
+                    @if($pointPackage->features)
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <h6 class="text-muted">Features</h6>
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <p><strong>English:</strong></p>
+                                        <p class="text-muted">{{ $pointPackage->features['en'] ?? 'No features listed' }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p><strong>Arabic:</strong></p>
+                                        <p class="text-muted">{{ $pointPackage->features['ar'] ?? 'لا توجد ميزات مدرجة' }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Package Statistics -->
+            <div class="card card-outline card-info shadow-sm mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-chart-bar mr-2"></i> Package Statistics
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="info-box bg-gradient-info">
+                                <span class="info-box-icon"><i class="fas fa-calendar"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Validity Period</span>
+                                    <span class="info-box-number">{{ $pointPackage->validity_days ?? 0 }} Days</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="info-box bg-gradient-success">
+                                <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Total Sales</span>
+                                    <span class="info-box-number">{{ $pointPackage->sales->count() }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="info-box bg-gradient-warning">
+                                <span class="info-box-icon"><i class="fas fa-star"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Display Order</span>
+                                    <span class="info-box-number">{{ $pointPackage->display_order ?? 0 }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6 mb-3">
+                            <div class="info-box bg-gradient-secondary">
+                                <span class="info-box-icon"><i class="fas fa-clock"></i></span>
+                                <div class="info-box-content">
+                                    <span class="info-box-text">Created</span>
+                                    <span class="info-box-number">{{ $pointPackage->created_at->format('M d, Y') }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar Actions -->
+        <div class="col-md-4">
+            <!-- Quick Actions -->
+            <div class="card card-outline card-secondary shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bolt mr-2"></i> Quick Actions
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-{{ $pointPackage->is_active ? 'warning' : 'success' }}" 
+                                onclick="toggleStatus({{ $pointPackage->id }})">
+                            <i class="fas fa-{{ $pointPackage->is_active ? 'pause' : 'play' }} mr-2"></i>
+                            {{ $pointPackage->is_active ? 'Deactivate' : 'Activate' }} Package
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-{{ $pointPackage->is_popular ? 'warning' : 'info' }}" 
+                                onclick="togglePopular({{ $pointPackage->id }})">
+                            <i class="fas fa-star mr-2"></i>
+                            {{ $pointPackage->is_popular ? 'Remove Popular' : 'Set Popular' }}
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-success" onclick="duplicatePackage({{ $pointPackage->id }})">
+                            <i class="fas fa-copy mr-2"></i> Duplicate Package
+                        </button>
+                        
+                        <form action="{{ route('admin.point_packages.destroy', $pointPackage->id) }}" 
+                              method="POST" class="d-inline ajax-form"
+                              data-confirm="Are you sure you want to delete this package? This action cannot be undone."
+                              data-success-message="Package deleted successfully!"
+                              data-redirect="{{ route('admin.point_packages.index') }}">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-trash mr-2"></i> Delete Package
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Package Details -->
+            <div class="card card-outline card-info shadow-sm mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-cog mr-2"></i> Package Settings
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tr>
+                            <td><strong>ID:</strong></td>
+                            <td><span class="badge badge-secondary">{{ $pointPackage->id }}</span></td>
+                        </tr>
+                        <tr>
+                            <td><strong>Status:</strong></td>
+                            <td>
+                                <span class="badge badge-{{ $pointPackage->is_active ? 'success' : 'danger' }}">
+                                    {{ $pointPackage->is_active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Popular:</strong></td>
+                            <td>
+                                <span class="badge badge-{{ $pointPackage->is_popular ? 'warning' : 'secondary' }}">
+                                    {{ $pointPackage->is_popular ? 'Yes' : 'No' }}
+                                </span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><strong>Currency:</strong></td>
+                            <td>{{ $pointPackage->currency_code }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Created:</strong></td>
+                            <td>{{ $pointPackage->created_at->format('M d, Y H:i') }}</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Updated:</strong></td>
+                            <td>{{ $pointPackage->updated_at->format('M d, Y H:i') }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+function toggleStatus(packageId) {
+    Swal.fire({
+        title: 'Toggle Package Status',
+        text: 'Change the active status of this package?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, toggle!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.point_packages.toggle-status", "") }}/' + packageId,
+                type: 'PATCH',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to update package status.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function togglePopular(packageId) {
+    Swal.fire({
+        title: 'Toggle Popular Status',
+        text: 'Change the popular status of this package?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, toggle!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.point_packages.toggle-popular", "") }}/' + packageId,
+                type: 'PATCH',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to update package popular status.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function duplicatePackage(packageId) {
+    Swal.fire({
+        title: 'Duplicate Package',
+        text: 'Create a copy of this package?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, duplicate!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.point_packages.duplicate", "") }}/' + packageId,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            window.location.href = '{{ route("admin.point_packages.index") }}';
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to duplicate package.', 'error');
+                }
+            });
+        }
+    });
+}
+
+// Handle AJAX form submissions
+$(document).on('submit', '.ajax-form', function(e) {
+    e.preventDefault();
+    var form = $(this);
+    var confirmMessage = form.data('confirm');
+    var successMessage = form.data('success-message');
+    var redirectUrl = form.data('redirect');
+
+    if (confirmMessage) {
+        Swal.fire({
+            title: 'Confirm Action',
+            text: confirmMessage,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, proceed!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                submitAjaxForm(form, successMessage, redirectUrl);
+            }
+        });
+    } else {
+        submitAjaxForm(form, successMessage, redirectUrl);
+    }
+});
+
+function submitAjaxForm(form, successMessage, redirectUrl) {
+    $.ajax({
+        url: form.attr('action'),
+        type: form.attr('method'),
+        data: form.serialize(),
+        success: function(response) {
+            if (response.success) {
+                Swal.fire('Success!', successMessage || response.message, 'success').then(() => {
+                    if (redirectUrl) {
+                        window.location.href = redirectUrl;
+                    } else {
+                        location.reload();
+                    }
+                });
+            } else {
+                Swal.fire('Error!', response.message || 'Operation failed', 'error');
+            }
+        },
+        error: function(xhr) {
+            let errorMessage = 'An error occurred';
+            if (xhr.responseJSON && xhr.responseJSON.message) {
+                errorMessage = xhr.responseJSON.message;
+            }
+            Swal.fire('Error!', errorMessage, 'error');
+        }
+    });
+}
+</script>
+@endpush
+@endsection 

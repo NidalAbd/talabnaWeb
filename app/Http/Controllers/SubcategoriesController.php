@@ -50,8 +50,8 @@ class SubcategoriesController extends Controller
         $subCategories = Sub_categories::with(['category', 'photos'])
             ->withCount('servicePosts')
             ->paginate(7);
-
-        return view('sub_categories.index', compact('subCategories'));
+        $categories = Categories::where('isSuspended', false)->get();
+        return view('sub_categories.index', compact('subCategories', 'categories'));
     }
 
     /**

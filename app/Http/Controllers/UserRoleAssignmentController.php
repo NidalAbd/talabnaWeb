@@ -174,8 +174,7 @@ class UserRoleAssignmentController extends Controller
 
             DB::commit();
 
-            return redirect()->back()
-                ->with('success', 'User roles and permissions updated successfully');
+            return response()->json(['success' => true, 'message' => 'User roles and permissions updated successfully']);
 
         } catch (\Exception $e) {
             DB::rollBack();
@@ -183,9 +182,7 @@ class UserRoleAssignmentController extends Controller
                 'user_id' => $id,
                 'exception' => $e
             ]);
-            return redirect()
-                ->back()
-                ->with('error', 'Failed to update user roles: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to update user roles: ' . $e->getMessage()], 500);
         }
     }
 

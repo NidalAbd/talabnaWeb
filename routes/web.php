@@ -134,6 +134,20 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
         Route::delete('point-packages/{pointPackage}', [PointPackageController::class, 'destroy'])->name('admin.point_packages.destroy');
         Route::get('point-packages/{pointPackage}', [PointPackageController::class, 'show'])->name('admin.point_packages.show');
         
+        // Point Package AJAX Actions
+        Route::patch('point-packages/{pointPackage}/toggle-status', [PointPackageController::class, 'toggleStatus'])->name('admin.point_packages.toggle-status');
+        Route::patch('point-packages/{pointPackage}/toggle-popular', [PointPackageController::class, 'togglePopular'])->name('admin.point_packages.toggle-popular');
+        Route::post('point-packages/{pointPackage}/duplicate', [PointPackageController::class, 'duplicate'])->name('admin.point_packages.duplicate');
+        Route::post('point-packages/bulk-activate', [PointPackageController::class, 'bulkActivate'])->name('admin.point_packages.bulk-activate');
+        Route::post('point-packages/bulk-deactivate', [PointPackageController::class, 'bulkDeactivate'])->name('admin.point_packages.bulk-deactivate');
+        Route::post('point-packages/set-popular', [PointPackageController::class, 'setPopular'])->name('admin.point_packages.set-popular');
+        Route::get('point-packages/list', [PointPackageController::class, 'list'])->name('admin.point_packages.list');
+        Route::get('point-packages/stats', [PointPackageController::class, 'stats'])->name('admin.point_packages.stats');
+        Route::get('point-packages/export', [PointPackageController::class, 'export'])->name('admin.point_packages.export');
+        
+        // Ensure DELETE route is properly registered
+        Route::delete('point-packages/{pointPackage}', [PointPackageController::class, 'destroy'])->name('admin.point_packages.destroy');
+        
         Route::get('premium-features', [PointPackageController::class, 'features'])->name('admin.premium-features.index');
         Route::get('premium-features/create', [PointPackageController::class, 'createFeature'])->name('admin.premium-features.create');
         Route::post('premium-features', [PointPackageController::class, 'storeFeature'])->name('admin.premium-features.store');
@@ -148,6 +162,11 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
         
         // Marketing Dashboard Routes
         Route::get('marketing-dashboard', [App\Http\Controllers\MarketingController::class, 'index'])->name('marketing-dashboard');
+        Route::post('marketing/send-notification', [App\Http\Controllers\MarketingController::class, 'sendNotification'])->name('admin.marketing.send-notification');
+        Route::get('marketing/export-data', [App\Http\Controllers\MarketingController::class, 'exportData'])->name('admin.marketing.export-data');
+        Route::get('marketing/refresh-metrics', [App\Http\Controllers\MarketingController::class, 'refreshMetrics'])->name('admin.marketing.refresh-metrics');
+        Route::get('marketing/refresh-activities', [App\Http\Controllers\MarketingController::class, 'refreshActivities'])->name('admin.marketing.refresh-activities');
+        Route::get('marketing/export', [App\Http\Controllers\MarketingController::class, 'export'])->name('admin.marketing.export');
         
         // System Health Routes
         Route::get('system-health', [App\Http\Controllers\SystemHealthController::class, 'index'])->name('system-health');
@@ -156,8 +175,12 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     // Level Management Routes
     Route::group(['middleware' => ['auth', 'admin'], 'prefix' => 'admin'], function() {
         Route::resource('levels', LevelController::class);
-        Route::post('levels/update-order', [LevelController::class, 'updateOrder'])->name('admin.levels.updateOrder');
+        Route::post('levels/update-order', [LevelController::class, 'updateOrder'])->name('admin.levels.update-order');
         Route::post('levels/{level}/toggle-active', [LevelController::class, 'toggleActive'])->name('admin.levels.toggleActive');
+        Route::post('levels/bulk-activate', [LevelController::class, 'bulkActivate'])->name('admin.levels.bulk-activate');
+        Route::post('levels/bulk-deactivate', [LevelController::class, 'bulkDeactivate'])->name('admin.levels.bulk-deactivate');
+        Route::post('levels/{level}/duplicate', [LevelController::class, 'duplicate'])->name('admin.levels.duplicate');
+        Route::get('levels/export', [LevelController::class, 'export'])->name('admin.levels.export');
     });
 
     // Investor Dashboard Routes
@@ -174,10 +197,40 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     */
     // Service Posts Resources and Actions
     Route::resource('service_posts', ServicePostController::class);
-    Route::delete('service-posts/bulk-destroy', [ServicePostController::class, 'bulkDestroy'])
+    Route::post('service_posts/bulk-destroy', [ServicePostController::class, 'bulkDestroy'])
         ->name('service_posts.bulk-destroy');
-    Route::post('inViewCount/{servicePost}', [ServicePostController::class, 'inViewCount'])
-        ->name('inViewCount.view');
+    Route::patch('service_posts/{servicePost}/approve', [ServicePostController::class, 'approve'])
+        ->name('service_posts.approve');
+    Route::patch('service_posts/{servicePost}/reject', [ServicePostController::class, 'reject'])
+        ->name('service_posts.reject');
+    Route::patch('service_posts/{servicePost}/toggle-premium', [ServicePostController::class, 'togglePremium'])
+        ->name('service_posts.toggle-premium');
+    
+    // Enhanced Service Posts Routes
+    Route::post('service_posts/bulk-action', [ServicePostController::class, 'bulkAction'])
+        ->name('service_posts.bulk-action');
+    Route::get('service_posts/export', [ServicePostController::class, 'export'])
+        ->name('service_posts.export');
+    Route::get('service_posts/statistics', [ServicePostController::class, 'statistics'])
+        ->name('service_posts.statistics');
+    Route::post('service_posts/{servicePost}/duplicate', [ServicePostController::class, 'duplicate'])
+        ->name('service_posts.duplicate');
+    Route::patch('service_posts/{servicePost}/archive', [ServicePostController::class, 'archive'])
+        ->name('service_posts.archive');
+    Route::patch('service_posts/{servicePost}/feature', [ServicePostController::class, 'feature'])
+        ->name('service_posts.feature');
+    Route::patch('service_posts/{servicePost}/unarchive', [ServicePostController::class, 'unarchive'])
+        ->name('service_posts.unarchive');
+    Route::patch('service_posts/{servicePost}/unfeature', [ServicePostController::class, 'unfeature'])
+        ->name('service_posts.unfeature');
+    
+    // Dynamic Level Management Routes
+    Route::patch('service_posts/{servicePost}/update-level', [ServicePostController::class, 'updateLevel'])
+        ->name('service_posts.update-level');
+    Route::get('service_posts/{servicePost}/available-levels', [ServicePostController::class, 'getAvailableLevels'])
+        ->name('service_posts.available-levels');
+    Route::get('service_posts/point-packages', [ServicePostController::class, 'getPointPackages'])
+        ->name('service_posts.point-packages');
 
     // User Profile Service Posts
     Route::get('service_posts/user/{user}', [ServicePostController::class, 'indexProfile'])
@@ -291,6 +344,10 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::get('users/data', [UserController::class, 'data'])->name('users.data');
     Route::post('users/{id}/update-status', [UserController::class, 'updateStatus'])
         ->name('users.update.status');
+    Route::get('users/{user}/reset-password', [App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.reset_password');
+    Route::post('users/{user}/send-notification', [App\Http\Controllers\UserController::class, 'sendNotification'])->name('users.send_notification');
+    Route::get('users/{user}/impersonate', [App\Http\Controllers\UserController::class, 'impersonate'])->name('users.impersonate');
+    Route::get('users/{user}/login-history', [App\Http\Controllers\UserController::class, 'loginHistory'])->name('users.login_history');
 
     // AJAX Ban/Unban action for users
     Route::post('/users/{user}/toggle-ban', [BanController::class, 'toggleBan'])
@@ -377,6 +434,22 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::get('/app', function () {
         return view('vendor/laratrust/panel/layout');
     });
+    Route::get('user-analytics', [App\Http\Controllers\AnalyticsController::class, 'userAnalytics'])->name('analytics.user_analytics');
+    Route::get('point-analytics', [App\Http\Controllers\AnalyticsController::class, 'pointAnalytics'])->name('analytics.point_analytics');
+    Route::get('database-management', [App\Http\Controllers\ManagementController::class, 'databaseManagement'])->name('management.database_management');
+    Route::get('backup-restore', [App\Http\Controllers\ManagementController::class, 'backupRestore'])->name('management.backup_restore');
+
+    // Business Operations & Planning
+    Route::get('investor-relations', [App\Http\Controllers\BusinessController::class, 'investorRelations'])->name('business.investor_relations');
+    Route::get('investment-tracking', [App\Http\Controllers\BusinessController::class, 'investmentTracking'])->name('business.investment_tracking');
+    Route::get('strategic-planning', [App\Http\Controllers\BusinessController::class, 'strategicPlanning'])->name('business.strategic_planning');
+    Route::get('monthly-budget-planning', [App\Http\Controllers\BusinessController::class, 'monthlyBudgetPlanning'])->name('business.monthly_budget_planning');
+    Route::get('expense-approvals', [App\Http\Controllers\BusinessController::class, 'expenseApprovals'])->name('business.expense_approvals');
+    Route::get('budget-limits', [App\Http\Controllers\BusinessController::class, 'budgetLimits'])->name('business.budget_limits');
+
+    // System Management
+    Route::get('system-logs', [App\Http\Controllers\SystemController::class, 'systemLogs'])->name('system.logs');
+    Route::get('api-management', [App\Http\Controllers\SystemController::class, 'apiManagement'])->name('system.api_management');
 });
 
 /*
@@ -468,4 +541,18 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/roles/list', [ApiController::class, 'getRoles'])->name('roles.list');
         Route::get('/countries/list', [ApiController::class, 'getCountries'])->name('countries.list');
     });
+});
+
+// Financial Management
+Route::middleware(['auth', 'admin'])->group(function() {
+    Route::get('financial/revenue', [App\Http\Controllers\FinancialController::class, 'revenue'])->name('financial.revenue');
+    Route::get('point-sales', [App\Http\Controllers\FinancialController::class, 'pointSales'])->name('financial.point_sales');
+    Route::get('golden-post-revenue', [App\Http\Controllers\FinancialController::class, 'goldenPostRevenue'])->name('financial.golden_post_revenue');
+    Route::get('payment-reports', [App\Http\Controllers\FinancialController::class, 'paymentReports'])->name('financial.payment_reports');
+    Route::get('financial/expenses', [App\Http\Controllers\FinancialController::class, 'expenses'])->name('financial.expenses');
+    Route::get('advertisement-costs', [App\Http\Controllers\FinancialController::class, 'advertisementCosts'])->name('financial.advertisement_costs');
+    Route::get('server-hosting-costs', [App\Http\Controllers\FinancialController::class, 'serverHostingCosts'])->name('financial.server_hosting_costs');
+    Route::get('monthly-profit-loss', [App\Http\Controllers\FinancialController::class, 'monthlyProfitLoss'])->name('financial.monthly_profit_loss');
+    Route::get('cash-flow-projections', [App\Http\Controllers\FinancialController::class, 'cashFlowProjections'])->name('financial.cash_flow_projections');
+    Route::get('income-statement', [App\Http\Controllers\FinancialController::class, 'incomeStatement'])->name('financial.income_statement');
 });

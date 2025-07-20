@@ -368,8 +368,16 @@
 
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtF4Mz-vpzJFGSuOj1o5krujUu-MZuW0k&libraries=places"></script>
-    <script>
+    @if(config('services.google.maps_api_key_web'))
+        <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key_web') }}&callback=initMap" async defer></script>
+    @else
+        <script>
+            // Fallback when API key is not configured
+            function initMap() {
+                document.getElementById('map').innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Google Maps API key is not configured. Please add GOOGLE_MAPS_API_KEY_WEB to your .env file.</div>';
+            }
+        </script>
+    @endif    <script>
         $(function () {
             // Badge Distribution Chart
             var badgeChartCanvas = document.getElementById('badgeChart').getContext('2d');
@@ -548,6 +556,12 @@
 
             // Initialize the map
             function initMap() {
+                // Check if Google Maps API is loaded
+                if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
+                    document.getElementById('map').innerHTML = '<div class="alert alert-warning">Google Maps could not be loaded. Please check your API key configuration.</div>';
+                    return;
+                }
+
                 var map = new google.maps.Map(document.getElementById('map'), {
                     center: {lat: 0, lng: 0},
                     zoom: 2
@@ -595,10 +609,8 @@
             }
 
             // Load the map when the page is fully loaded
-            $(document).ready(function() {
-                // Initialize Google Maps
-                initMap();
-            });
+            // Note: initMap is called by the Google Maps API callback
+            // No need to call it again in document.ready
         });
     </script>
 @stop

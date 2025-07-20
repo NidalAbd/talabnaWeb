@@ -296,7 +296,7 @@ class PalservicePointsController extends Controller
     {
         $user = Auth::user();
         if (!$user->hasPermission('purchase_index')) {
-            return view('errors.403');
+            return response()->json(['success' => false, 'message' => 'Permission denied.'], 403);
         }
 
         try {
@@ -311,11 +311,12 @@ class PalservicePointsController extends Controller
             $palservice_points->point_count = $request->point_count;
             $palservice_points->save();
 
-            return redirect()->route('palservice_points.index')->with('success', 'Palservice point updated successfully!');
+            return response()->json(['success' => true, 'message' => 'Palservice point updated successfully!']);
         } catch (ValidationException $e) {
-            return redirect()->back()->withErrors($e->validator)->withInput();
+            return response()->json(['success' => false, 'message' => 'Validation failed.', 'errors' => $e->errors()], 422);
         } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'An error occurred while updating the palservice point.');
+            Log::error("Error updating palservice point: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'An error occurred while updating the palservice point.'], 500);
         }
     }
 
@@ -325,7 +326,7 @@ class PalservicePointsController extends Controller
      * @param palservice_points $palservice_points
      * @return RedirectResponse
      */
-    public function destroy(palservice_points $palservice_points): RedirectResponse
+    public function destroy(palservice_points $palservice_points)
     {
         try {
             // Delete the pal service point
@@ -334,15 +335,13 @@ class PalservicePointsController extends Controller
             // Log the success message
             Log::info('Pal Service Point deleted successfully.');
 
-            // Redirect back with success message
-            return redirect()->back()->with('success', 'Pal Service Point deleted successfully.');
+            return response()->json(['success' => true, 'message' => 'Pal Service Point deleted successfully.']);
 
         } catch (Throwable $th) {
             // Log the error message
             Log::error('Error deleting Pal Service Point: ' . $th->getMessage());
 
-            // Redirect back with error message
-            return redirect()->back()->with('error', 'Error deleting Pal Service Point.');
+            return response()->json(['success' => false, 'message' => 'Error deleting Pal Service Point.'], 500);
         }
     }
 }

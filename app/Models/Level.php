@@ -49,6 +49,14 @@ class Level extends Model
     }
 
     /**
+     * Get the localized name for a specific locale.
+     */
+    public function getLocalizedName(string $locale): string
+    {
+        return $this->name[$locale] ?? $this->name['ar'] ?? '';
+    }
+
+    /**
      * Get the localized description for the current locale.
      */
     public function getLocalizedDescriptionAttribute(): string
@@ -58,11 +66,27 @@ class Level extends Model
     }
 
     /**
+     * Get the localized description for a specific locale.
+     */
+    public function getLocalizedDescription(string $locale): string
+    {
+        return $this->description[$locale] ?? $this->description['ar'] ?? '';
+    }
+
+    /**
      * Get the localized features for the current locale.
      */
     public function getLocalizedFeaturesAttribute(): array
     {
         $locale = app()->getLocale();
+        return $this->features[$locale] ?? $this->features['ar'] ?? [];
+    }
+
+    /**
+     * Get the localized features for a specific locale.
+     */
+    public function getLocalizedFeatures(string $locale): array
+    {
         return $this->features[$locale] ?? $this->features['ar'] ?? [];
     }
 

@@ -352,7 +352,7 @@
                                                 <tr>
                                                     <td>{{ $post->id }}</td>
                                                     <td>{{ $post->title }}</td>
-                                                    <td>{{ $post->subCategory->display_name }}</td>
+                                                    <td>{{ optional($post->subCategory)->display_name ?? 'N/A' }}</td>
                                                     <td>{{ $post->created_at->format('M d, Y') }}</td>
                                                     <td>
                                                         <span class="badge badge-{{ $post->state ? 'success' : 'danger' }}">

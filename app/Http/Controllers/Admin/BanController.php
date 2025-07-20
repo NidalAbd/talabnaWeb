@@ -50,11 +50,24 @@ class BanController extends Controller
             // Find the user
             $user = User::findOrFail($id);
             $action = $request->input('action');
+            
+            // Debug logging
+            \Log::info('ToggleBan Debug', [
+                'user_id' => $id,
+                'current_status' => $user->is_active,
+                'action_received' => $action,
+                'all_request_data' => $request->all(),
+                'user_fresh_status' => $user->fresh()->is_active,
+                'action_type' => gettype($action),
+                'action_equals_ban' => $action === 'ban',
+                'action_equals_unban' => $action === 'unban'
+            ]);
 
             // Begin transaction
             DB::beginTransaction();
 
             if ($action === 'ban') {
+                \Log::info('Executing BAN logic');
                 // Ban user immediately
                 $user->is_active = 'banned';
                 $user->save();
@@ -72,6 +85,7 @@ class BanController extends Controller
 
                 $message = "User has been banned successfully";
             } else {
+                \Log::info('Executing UNBAN logic');
                 // Unban user immediately
                 $user->is_active = 'active';
                 $user->save();
@@ -93,10 +107,21 @@ class BanController extends Controller
             // Commit transaction
             DB::commit();
 
+            // Log the final status
+            \Log::info('ToggleBan Result', [
+                'user_id' => $id,
+                'final_status' => $user->fresh()->is_active,
+                'action_performed' => $action,
+                'message' => $message
+            ]);
+
             return response()->json([
                 'success' => true,
                 'message' => $message,
-                'status' => $user->is_active
+                'data' => [
+                    'id' => $user->id,
+                    'is_active' => $user->is_active
+                ]
             ]);
         } catch (\Exception $e) {
             // Rollback transaction
@@ -134,11 +159,10 @@ class BanController extends Controller
 
             DB::commit();
 
-            return redirect()->route('admin.users.banned')
-                ->with('success', 'User has been banned successfully');
+            return response()->json(['success' => true, 'message' => 'User has been banned successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to ban user: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to ban user: ' . $e->getMessage()], 500);
         }
     }
 
@@ -154,11 +178,10 @@ class BanController extends Controller
             $user->unban($request->reason, auth()->id());
             DB::commit();
 
-            return redirect()->route('admin.users.banned')
-                ->with('success', 'User has been unbanned successfully');
+            return response()->json(['success' => true, 'message' => 'User has been unbanned successfully']);
         } catch (\Exception $e) {
             DB::rollBack();
-            return back()->with('error', 'Failed to unban user: ' . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to unban user: ' . $e->getMessage()], 500);
         }
     }
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\Log;
 
 class ReportController extends Controller
 {
@@ -178,17 +179,22 @@ class ReportController extends Controller
             return back()->with('error', 'An error occurred while processing your request: ' . $e->getMessage());
         }
     }
-    public function destroy($id): RedirectResponse
+    public function destroy($id)
     {
         $user = Auth::user();
         if (!$user->hasPermission('report_manage')) {
-            return back()->with('error', 'You do not have permission to perform this action.');
+            return response()->json(['success' => false, 'message' => 'You do not have permission to perform this action.'], 403);
         }
 
-        $report = Report::findOrFail($id);
-        $report->delete();
+        try {
+            $report = Report::findOrFail($id);
+            $report->delete();
 
-        return back()->with('success', 'Report has been deleted successfully.');
+            return response()->json(['success' => true, 'message' => 'Report has been deleted successfully.']);
+        } catch (\Exception $e) {
+            Log::error("Error deleting report: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to delete report.'], 500);
+        }
     }
     public function statistics(): View
     {

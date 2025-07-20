@@ -131,6 +131,12 @@
     {{-- Custom Scripts --}}
     @yield('adminlte_js')
 
+    {{-- SweetAlert2 for better alerts --}}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    
+    {{-- Universal AJAX Handler --}}
+    <script src="{{ asset('js/ajax-handler.js') }}"></script>
+
 </body>
 
 </html>

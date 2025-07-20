@@ -1,216 +1,296 @@
 @extends('adminlte::page')
 
-@section('title', 'Point Packages')
+@section('title', 'Point Packages Management - Talabna Admin')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="m-0">
+                <i class="fas fa-gift text-primary mr-2"></i> 
+                Point Packages Management
+            </h1>
+            <p class="text-muted mb-0">Manage point packages and pricing plans for users</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" onclick="exportPackages()">
+                <i class="fas fa-file-export mr-1"></i> Export
+            </button>
+            <button type="button" class="btn btn-outline-secondary" onclick="printPackages()">
+                <i class="fas fa-print mr-1"></i> Print
+            </button>
+            <a href="{{ route('admin.point_packages.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus mr-1"></i> Add New Package
+            </a>
+        </div>
+    </div>
+@stop
 
 @section('content')
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Point Packages Management</h1>
+<div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h5><i class="icon fas fa-check"></i> Success!</h5>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h5><i class="icon fas fa-ban"></i> Error!</h5>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Stats Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-6">
+            <div class="info-box bg-gradient-info shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-gift"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total Packages</span>
+                    <span class="info-box-number">{{ $packages->count() }}</span>
+                    <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-chart-line text-light"></i> All available packages
+                    </span>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Point Packages</li>
-                    </ol>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="info-box bg-gradient-success shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Active Packages</span>
+                    <span class="info-box-number">{{ $packages->where('is_active', true)->count() }}</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $packages->count() > 0 ? ($packages->where('is_active', true)->count() / $packages->count()) * 100 : 0 }}%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-check-circle text-light"></i> {{ $packages->count() > 0 ? number_format(($packages->where('is_active', true)->count() / $packages->count()) * 100, 1) : 0 }}% of total
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="info-box bg-gradient-warning shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-star"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Popular Packages</span>
+                    <span class="info-box-number">{{ $packages->where('is_popular', true)->count() }}</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $packages->count() > 0 ? ($packages->where('is_popular', true)->count() / $packages->count()) * 100 : 0 }}%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-star text-light"></i> {{ $packages->count() > 0 ? number_format(($packages->where('is_popular', true)->count() / $packages->count()) * 100, 1) : 0 }}% of total
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-6">
+            <div class="info-box bg-gradient-danger shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-pause-circle"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Inactive Packages</span>
+                    <span class="info-box-number">{{ $packages->where('is_active', false)->count() }}</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $packages->count() > 0 ? ($packages->where('is_active', false)->count() / $packages->count()) * 100 : 0 }}%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-pause-circle text-light"></i> {{ $packages->count() > 0 ? number_format(($packages->where('is_active', false)->count() / $packages->count()) * 100, 1) : 0 }}% of total
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <section class="content">
-        <div class="container-fluid">
-            <!-- Success/Error Messages -->
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                    <h5><i class="icon fas fa-check"></i> Success!</h5>
-                    {{ session('success') }}
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-outline card-secondary shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bolt mr-2"></i> Quick Actions
+                    </h3>
                 </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                    <h5><i class="icon fas fa-ban"></i> Error!</h5>
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            <!-- Stats Cards -->
-            <div class="row mb-4">
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-info">
-                        <div class="inner">
-                            <h3>{{ $packages->count() }}</h3>
-                            <p>Total Packages</p>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <button type="button" class="btn btn-outline-primary btn-block" onclick="bulkActivate()">
+                                <i class="fas fa-play mr-2"></i> Activate All
+                            </button>
                         </div>
-                        <div class="icon">
-                            <i class="fas fa-gift"></i>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <button type="button" class="btn btn-outline-warning btn-block" onclick="bulkDeactivate()">
+                                <i class="fas fa-pause mr-2"></i> Deactivate All
+                            </button>
                         </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-success">
-                        <div class="inner">
-                            <h3>{{ $packages->where('is_active', true)->count() }}</h3>
-                            <p>Active Packages</p>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <button type="button" class="btn btn-outline-info btn-block" onclick="setPopular()">
+                                <i class="fas fa-star mr-2"></i> Set Popular
+                            </button>
                         </div>
-                        <div class="icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-warning">
-                        <div class="inner">
-                            <h3>{{ $packages->where('is_popular', true)->count() }}</h3>
-                            <p>Popular Packages</p>
-                        </div>
-                        <div class="icon">
-                            <i class="fas fa-star"></i>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-3 col-6">
-                    <div class="small-box bg-danger">
-                        <div class="inner">
-                            <h3>{{ $packages->where('is_active', false)->count() }}</h3>
-                            <p>Inactive Packages</p>
-                        </div>
-                        <div class="icon">
-                            <i class="fas fa-pause-circle"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-gift mr-2"></i>
-                                Point Packages
-                            </h3>
-                            <div class="card-tools">
-                                <a href="{{ route('admin.point_packages.create') }}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-plus mr-1"></i> Add New Package
-                                </a>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped" id="packages-table">
-                                    <thead>
-                                        <tr>
-                                            <th width="50">#</th>
-                                            <th width="80">Icon</th>
-                                            <th>Name (AR)</th>
-                                            <th>Name (EN)</th>
-                                            <th>Points</th>
-                                            <th>Price</th>
-                                            <th>Discount</th>
-                                            <th>Duration</th>
-                                            <th>Status</th>
-                                            <th width="150">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($packages as $package)
-                                            <tr>
-                                                <td>{{ $package->id }}</td>
-                                                <td>
-                                                    @if($package->icon)
-                                                        <i class="{{ $package->icon }}" style="font-size: 18px; color: {{ $package->color ?? '#007bff' }};"></i>
-                                                    @else
-                                                        <i class="fas fa-gift" style="font-size: 18px; color: {{ $package->color ?? '#007bff' }};"></i>
-                                                    @endif
-                                                </td>
-                                                <td>{{ $package->name['ar'] ?? 'N/A' }}</td>
-                                                <td>{{ $package->name['en'] ?? 'N/A' }}</td>
-                                                <td>
-                                                    <span class="badge badge-primary">{{ number_format($package->points) }} pts</span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-success">{{ $package->price }} {{ $package->currency }}</span>
-                                                </td>
-                                                <td>
-                                                    @if($package->discount_percentage > 0)
-                                                        <span class="badge badge-warning">-{{ $package->discount_percentage }}%</span>
-                                                    @else
-                                                        <span class="badge badge-secondary">No Discount</span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-info">{{ $package->duration_days }} days</span>
-                                                </td>
-                                                <td>
-                                                    @if($package->is_active)
-                                                        <span class="badge badge-success">Active</span>
-                                                    @else
-                                                        <span class="badge badge-danger">Inactive</span>
-                                                    @endif
-                                                    @if($package->is_popular)
-                                                        <span class="badge badge-warning ml-1">Popular</span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group" role="group">
-                                                        <a href="{{ route('admin.point_packages.edit', $package->id) }}" 
-                                                           class="btn btn-sm btn-info" title="Edit">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <a href="{{ route('admin.point_packages.show', $package->id) }}" 
-                                                           class="btn btn-sm btn-secondary" title="View">
-                                                            <i class="fas fa-eye"></i>
-                                                        </a>
-                                                        <form action="{{ route('admin.point_packages.destroy', $package->id) }}" 
-                                                              method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger" 
-                                                                    onclick="return confirm('Are you sure you want to delete this package?')"
-                                                                    title="Delete">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="10" class="text-center py-4">
-                                                    <div class="text-muted">
-                                                        <i class="fas fa-gift fa-3x mb-3"></i>
-                                                        <p>No point packages found. Create your first package to get started.</p>
-                                                        <a href="{{ route('admin.point_packages.create') }}" class="btn btn-primary">
-                                                            <i class="fas fa-plus mr-1"></i> Add First Package
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <button type="button" class="btn btn-outline-success btn-block" onclick="duplicatePackage()">
+                                <i class="fas fa-copy mr-2"></i> Duplicate Package
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+
+    <!-- Point Packages Table -->
+    <div class="card card-outline card-primary shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+            <div class="card-title mb-2 mb-md-0">
+                <i class="fas fa-gift mr-2"></i> Point Packages
+                <span class="badge badge-primary ml-2">{{ $packages->count() }}</span>
+            </div>
+            <div class="card-tools d-flex align-items-center">
+                <div class="input-group input-group-sm mr-3" style="width: 200px;">
+                    <input type="text" class="form-control" placeholder="Search packages..." id="packageSearch">
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div>
+                </div>
+                <div class="btn-group btn-group-sm mr-2">
+                    <button type="button" class="btn btn-outline-secondary" onclick="toggleView('grid')">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary active" onclick="toggleView('table')">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+                <a href="{{ route('admin.point_packages.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus mr-1"></i> Add New Package
+                </a>
+            </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover table-striped table-bordered align-middle" id="packages-table">
+                <thead class="thead-light">
+                    <tr>
+                        <th width="50">#</th>
+                        <th width="80">Icon</th>
+                        <th>Name (AR)</th>
+                        <th>Name (EN)</th>
+                        <th>Points</th>
+                        <th>Price</th>
+                        <th>Discount</th>
+                        <th>Duration</th>
+                        <th>Status</th>
+                        <th width="180">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($packages as $package)
+                        <tr data-package-id="{{ $package->id }}">
+                            <td>
+                                <span class="badge badge-secondary">{{ $package->id }}</span>
+                            </td>
+                            <td>
+                                @if($package->icon)
+                                    <i class="{{ $package->icon }}" style="font-size: 18px; color: {{ $package->color ?? '#007bff' }};"></i>
+                                @else
+                                    <i class="fas fa-gift" style="font-size: 18px; color: {{ $package->color ?? '#007bff' }};"></i>
+                                @endif
+                            </td>
+                            <td>
+                                <strong>{{ $package->name['ar'] ?? 'N/A' }}</strong>
+                                @if($package->is_popular)
+                                    <span class="badge badge-warning ml-1">Popular</span>
+                                @endif
+                            </td>
+                            <td>{{ $package->name['en'] ?? 'N/A' }}</td>
+                            <td>
+                                <span class="badge badge-primary">{{ number_format($package->points) }} pts</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-success">{{ $package->price }} {{ $package->currency }}</span>
+                            </td>
+                            <td>
+                                @if($package->discount_percentage > 0)
+                                    <span class="badge badge-warning">-{{ $package->discount_percentage }}%</span>
+                                @else
+                                    <span class="badge badge-secondary">No Discount</span>
+                                @endif
+                            </td>
+                            <td>
+                                <span class="badge badge-info">{{ $package->duration_days }} days</span>
+                            </td>
+                            <td>
+                                @if($package->is_active)
+                                    <span class="badge badge-success">Active</span>
+                                @else
+                                    <span class="badge badge-danger">Inactive</span>
+                                @endif
+                                @if($package->is_popular)
+                                    <span class="badge badge-warning ml-1">Popular</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('admin.point_packages.edit', $package->id) }}" 
+                                       class="btn btn-outline-primary" title="Edit Package">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <a href="{{ route('admin.point_packages.show', $package->id) }}" 
+                                       class="btn btn-outline-secondary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-outline-{{ $package->is_popular ? 'warning' : 'info' }}" 
+                                            onclick="togglePopular({{ $package->id }})"
+                                            title="{{ $package->is_popular ? 'Remove Popular' : 'Set Popular' }}">
+                                        <i class="fas fa-star"></i>
+                                    </button>
+                                    <button type="button" 
+                                            class="btn btn-outline-success" 
+                                            onclick="duplicatePackage({{ $package->id }})"
+                                            title="Duplicate Package">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <form action="{{ route('admin.point_packages.destroy', $package->id) }}" 
+                                          method="POST" class="d-inline ajax-form"
+                                          data-confirm="Are you sure you want to delete this package?"
+                                          data-success-message="Package deleted successfully!"
+                                          data-row-id="{{ $package->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" 
+                                                title="Delete Package">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="10" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-gift fa-4x mb-4 text-muted"></i>
+                                    <h4 class="text-muted">No Packages Found</h4>
+                                    <p class="text-muted mb-4">Create your first point package to get started with pricing plans.</p>
+                                    <a href="{{ route('admin.point_packages.create') }}" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-plus mr-2"></i> Create First Package
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
 <script>
 $(document).ready(function() {
-    $('#packages-table').DataTable({
+    // Initialize DataTable
+    var table = $('#packages-table').DataTable({
         "responsive": true,
         "autoWidth": false,
-        "order": [[0, "desc"]], // Sort by ID descending
+        "order": [[0, "asc"]], // Sort by ID
         "pageLength": 25,
         "language": {
             "search": "Search packages:",
@@ -220,7 +300,465 @@ $(document).ready(function() {
             "infoFiltered": "(filtered from _MAX_ total packages)"
         }
     });
+
+    // Search functionality
+    $('#packageSearch').on('keyup', function() {
+        table.search(this.value).draw();
+    });
+
+    // Handle AJAX form submissions
+    $(document).on('submit', '.ajax-form', function(e) {
+        e.preventDefault();
+        var form = $(this);
+        var confirmMessage = form.data('confirm');
+        var successMessage = form.data('success-message');
+        var rowId = form.data('row-id');
+
+        if (confirmMessage) {
+            Swal.fire({
+                title: 'Confirm Action',
+                text: confirmMessage,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, proceed!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    submitAjaxForm(form, successMessage, rowId);
+                }
+            });
+        } else {
+            submitAjaxForm(form, successMessage, rowId);
+        }
+    });
+
+    // Update stats cards
+    function updateStats() {
+        $.ajax({
+            url: '{{ route("admin.point_packages.stats") }}',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    updateStatsCards(response.data);
+                }
+            }
+        });
+    }
+
+    function updateStatsCards(data) {
+        // Update total packages
+        $('.info-box-number').eq(0).text(data.total);
+        
+        // Update active packages
+        $('.info-box-number').eq(1).text(data.active);
+        var activePercentage = data.total > 0 ? (data.active / data.total) * 100 : 0;
+        $('.progress-bar').eq(1).css('width', activePercentage + '%');
+        $('.progress-description').eq(1).html('<i class="fas fa-check-circle text-light"></i> ' + activePercentage.toFixed(1) + '% of total');
+        
+        // Update popular packages
+        $('.info-box-number').eq(2).text(data.popular);
+        var popularPercentage = data.total > 0 ? (data.popular / data.total) * 100 : 0;
+        $('.progress-bar').eq(2).css('width', popularPercentage + '%');
+        $('.progress-description').eq(2).html('<i class="fas fa-star text-light"></i> ' + popularPercentage.toFixed(1) + '% of total');
+        
+        // Update inactive packages
+        $('.info-box-number').eq(3).text(data.inactive);
+        var inactivePercentage = data.total > 0 ? (data.inactive / data.total) * 100 : 0;
+        $('.progress-bar').eq(3).css('width', inactivePercentage + '%');
+        $('.progress-description').eq(3).html('<i class="fas fa-pause-circle text-light"></i> ' + inactivePercentage.toFixed(1) + '% of total');
+    }
+
+    // Global function to submit AJAX forms
+    window.submitAjaxForm = function(form, successMessage, rowId) {
+        // Get the method from the form
+        var method = form.attr('method');
+        var methodInput = form.find('input[name="_method"]');
+        
+        // If there's a _method input, use that for the actual request
+        if (methodInput.length > 0) {
+            method = methodInput.val();
+        }
+        
+        $.ajax({
+            url: form.attr('action'),
+            type: method,
+            data: form.serialize(),
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire('Success!', successMessage || response.message, 'success');
+                    
+                    // Remove row if it's a delete action
+                    if (method === 'DELETE') {
+                        if (rowId) {
+                            $('tr[data-package-id="' + rowId + '"]').fadeOut(400, function() {
+                                $(this).remove();
+                                table.draw();
+                            });
+                        }
+                    }
+                    
+                    // Update stats
+                    updateStats();
+                } else {
+                    Swal.fire('Error!', response.message || 'Operation failed', 'error');
+                }
+            },
+            error: function(xhr) {
+                let errorMessage = 'An error occurred';
+                if (xhr.responseJSON && xhr.responseJSON.message) {
+                    errorMessage = xhr.responseJSON.message;
+                }
+                Swal.fire('Error!', errorMessage, 'error');
+            }
+        });
+    };
 });
+
+// AJAX Functions for Point Packages
+function exportPackages() {
+    Swal.fire({
+        title: 'Export Packages',
+        text: 'Choose export format:',
+        icon: 'info',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Excel',
+        denyButtonText: 'PDF',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Export to Excel
+            window.open('{{ route("admin.point_packages.export") }}?format=excel', '_blank');
+        } else if (result.isDenied) {
+            // Export to PDF
+            window.open('{{ route("admin.point_packages.export") }}?format=pdf', '_blank');
+        }
+    });
+}
+
+function printPackages() {
+    window.print();
+}
+
+function bulkActivate() {
+    Swal.fire({
+        title: 'Activate All Packages',
+        text: 'This will activate all inactive packages. Continue?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, activate all!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.point_packages.bulk-activate") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success');
+                        updateTableData(response.data);
+                        updateStats();
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to activate packages.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function bulkDeactivate() {
+    Swal.fire({
+        title: 'Deactivate All Packages',
+        text: 'This will deactivate all active packages. Continue?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, deactivate all!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.point_packages.bulk-deactivate") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success');
+                        updateTableData(response.data);
+                        updateStats();
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to deactivate packages.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function setPopular() {
+    // Get all packages for selection
+    $.ajax({
+        url: '{{ route("admin.point_packages.list") }}',
+        type: 'GET',
+        success: function(response) {
+            if (response.success) {
+                let packagesHtml = '<div class="form-group">';
+                packagesHtml += '<label>Select packages to mark as popular:</label>';
+                packagesHtml += '<div class="mt-2" style="max-height: 200px; overflow-y: auto;">';
+                
+                response.data.forEach(function(package) {
+                    packagesHtml += '<div class="custom-control custom-checkbox">';
+                    packagesHtml += '<input type="checkbox" class="custom-control-input" id="package_' + package.id + '" value="' + package.id + '">';
+                    packagesHtml += '<label class="custom-control-label" for="package_' + package.id + '">';
+                    packagesHtml += package.name.en + ' (' + package.points + ' pts)';
+                    packagesHtml += '</label>';
+                    packagesHtml += '</div>';
+                });
+                
+                packagesHtml += '</div></div>';
+
+                Swal.fire({
+                    title: 'Set Popular Packages',
+                    html: packagesHtml,
+                    showCancelButton: true,
+                    confirmButtonText: 'Set Popular',
+                    preConfirm: () => {
+                        let selectedPackages = [];
+                        $('.custom-control-input:checked').each(function() {
+                            selectedPackages.push($(this).val());
+                        });
+                        return selectedPackages;
+                    }
+                }).then((result) => {
+                    if (result.isConfirmed && result.value.length > 0) {
+                        $.ajax({
+                            url: '{{ route("admin.point_packages.set-popular") }}',
+                            type: 'POST',
+                            data: {
+                                _token: '{{ csrf_token() }}',
+                                package_ids: result.value
+                            },
+                            success: function(response) {
+                                if (response.success) {
+                                    Swal.fire('Success!', response.message, 'success');
+                                    updateTableData(response.data);
+                                    updateStats();
+                                } else {
+                                    Swal.fire('Error!', response.message, 'error');
+                                }
+                            },
+                            error: function() {
+                                Swal.fire('Error!', 'Failed to set popular packages.', 'error');
+                            }
+                        });
+                    }
+                });
+            }
+        }
+    });
+}
+
+function duplicatePackage(packageId = null) {
+    if (packageId) {
+        // Duplicate specific package
+        Swal.fire({
+            title: 'Duplicate Package',
+            text: 'Create a copy of this package?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, duplicate!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{{ route("admin.point_packages.duplicate", "") }}/' + packageId,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('Success!', response.message, 'success');
+                            updateTableData(response.data);
+                            updateStats();
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error!', 'Failed to duplicate package.', 'error');
+                    }
+                });
+            }
+        });
+    } else {
+        // Duplicate from template - get packages list
+        $.ajax({
+            url: '{{ route("admin.point_packages.list") }}',
+            type: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    let selectHtml = '<select class="form-control" id="packageSelect">';
+                    selectHtml += '<option value="">Select a package...</option>';
+                    
+                    response.data.forEach(function(package) {
+                        selectHtml += '<option value="' + package.id + '">' + package.name.en + ' (' + package.points + ' pts)</option>';
+                    });
+                    
+                    selectHtml += '</select>';
+
+                    Swal.fire({
+                        title: 'Duplicate Package',
+                        html: selectHtml,
+                        showCancelButton: true,
+                        confirmButtonText: 'Duplicate',
+                        preConfirm: () => {
+                            return $('#packageSelect').val();
+                        }
+                    }).then((result) => {
+                        if (result.isConfirmed && result.value) {
+                            duplicatePackage(result.value);
+                        }
+                    });
+                }
+            }
+        });
+    }
+}
+
+function togglePopular(packageId) {
+    Swal.fire({
+        title: 'Toggle Popular Status',
+        text: 'Change the popular status of this package?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, toggle!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.point_packages.toggle-popular", "") }}/' + packageId,
+                type: 'PATCH',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success');
+                        updateTableData(response.data);
+                        updateStats();
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to update package popular status.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function toggleView(view) {
+    if (view === 'grid') {
+        // Implement grid view
+        Swal.fire('Grid View', 'Grid view functionality will be implemented.', 'info');
+    } else {
+        // Table view is already active
+    }
+}
+
+// Function to update table data without reload
+function updateTableData(packages) {
+    if (!packages || packages.length === 0) return;
+    
+    var table = $('#packages-table').DataTable();
+    table.clear();
+    
+    packages.forEach(function(package) {
+        var row = [
+            '<span class="badge badge-secondary">' + package.id + '</span>',
+            package.icon ? '<i class="' + package.icon + '" style="font-size: 18px; color: ' + (package.color || '#007bff') + ';"></i>' : 
+                          '<i class="fas fa-gift" style="font-size: 18px; color: ' + (package.color || '#007bff') + ';"></i>',
+            '<strong>' + (package.name.ar || 'N/A') + '</strong>' + 
+            (package.is_popular ? '<span class="badge badge-warning ml-1">Popular</span>' : ''),
+            package.name.en || 'N/A',
+            '<span class="badge badge-primary">' + package.points.toLocaleString() + ' pts</span>',
+            '<span class="badge badge-success">' + package.price + ' ' + package.currency + '</span>',
+            package.discount_percentage > 0 ? 
+                '<span class="badge badge-warning">-' + package.discount_percentage + '%</span>' : 
+                '<span class="badge badge-secondary">No Discount</span>',
+            '<span class="badge badge-info">' + package.duration_days + ' days</span>',
+            (package.is_active ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-danger">Inactive</span>') +
+            (package.is_popular ? '<span class="badge badge-warning ml-1">Popular</span>' : ''),
+            generateActionButtons(package)
+        ];
+        
+        table.row.add(row).draw();
+    });
+}
+
+// Function to generate action buttons HTML
+function generateActionButtons(package) {
+    return '<div class="btn-group btn-group-sm" role="group">' +
+           '<a href="{{ route("admin.point_packages.edit", "") }}/' + package.id + '" class="btn btn-outline-primary" title="Edit Package">' +
+           '<i class="fas fa-edit"></i></a>' +
+           '<a href="{{ route("admin.point_packages.show", "") }}/' + package.id + '" class="btn btn-outline-secondary" title="View Details">' +
+           '<i class="fas fa-eye"></i></a>' +
+           '<button type="button" class="btn btn-outline-' + (package.is_popular ? 'warning' : 'info') + '" ' +
+           'onclick="togglePopular(' + package.id + ')" title="' + (package.is_popular ? 'Remove Popular' : 'Set Popular') + '">' +
+           '<i class="fas fa-star"></i></button>' +
+           '<button type="button" class="btn btn-outline-success" onclick="duplicatePackage(' + package.id + ')" title="Duplicate Package">' +
+           '<i class="fas fa-copy"></i></button>' +
+           '<form action="{{ route("admin.point_packages.destroy", "") }}/' + package.id + '" method="POST" class="d-inline ajax-form" ' +
+           'data-confirm="Are you sure you want to delete this package?" data-success-message="Package deleted successfully!" data-row-id="' + package.id + '">' +
+           '@csrf @method("DELETE")' +
+           '<button type="submit" class="btn btn-outline-danger" title="Delete Package"><i class="fas fa-trash"></i></button>' +
+           '</form></div>';
+}
+
+// Function to update stats
+function updateStats() {
+    $.ajax({
+        url: '{{ route("admin.point_packages.stats") }}',
+        type: 'GET',
+        success: function(response) {
+            if (response.success) {
+                updateStatsCards(response.data);
+            }
+        }
+    });
+}
+
+function updateStatsCards(data) {
+    // Update total packages
+    $('.info-box-number').eq(0).text(data.total);
+    
+    // Update active packages
+    $('.info-box-number').eq(1).text(data.active);
+    var activePercentage = data.total > 0 ? (data.active / data.total) * 100 : 0;
+    $('.progress-bar').eq(1).css('width', activePercentage + '%');
+    $('.progress-description').eq(1).html('<i class="fas fa-check-circle text-light"></i> ' + activePercentage.toFixed(1) + '% of total');
+    
+    // Update popular packages
+    $('.info-box-number').eq(2).text(data.popular);
+    var popularPercentage = data.total > 0 ? (data.popular / data.total) * 100 : 0;
+    $('.progress-bar').eq(2).css('width', popularPercentage + '%');
+    $('.progress-description').eq(2).html('<i class="fas fa-star text-light"></i> ' + popularPercentage.toFixed(1) + '% of total');
+    
+    // Update inactive packages
+    $('.info-box-number').eq(3).text(data.inactive);
+    var inactivePercentage = data.total > 0 ? (data.inactive / data.total) * 100 : 0;
+    $('.progress-bar').eq(3).css('width', inactivePercentage + '%');
+    $('.progress-description').eq(3).html('<i class="fas fa-pause-circle text-light"></i> ' + inactivePercentage.toFixed(1) + '% of total');
+}
 </script>
 @endpush
 @endsection 

@@ -1,160 +1,291 @@
 @extends('adminlte::page')
 
-@section('title', 'Manage Levels')
+@section('title', 'Level Management - Talabna Admin')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="m-0">
+                <i class="fas fa-layer-group text-primary mr-2"></i> 
+                Level Management
+            </h1>
+            <p class="text-muted mb-0">Manage dynamic service post levels and their features</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button type="button" class="btn btn-outline-secondary" onclick="exportLevels()">
+                <i class="fas fa-file-export mr-1"></i> Export
+            </button>
+            <button type="button" class="btn btn-outline-secondary" onclick="printLevels()">
+                <i class="fas fa-print mr-1"></i> Print
+            </button>
+            <a href="{{ route('levels.create') }}" class="btn btn-primary">
+                <i class="fas fa-plus mr-1"></i> Add New Level
+            </a>
+        </div>
+    </div>
+@stop
 
 @section('content')
-<div class="content-wrapper">
-    <div class="content-header">
-        <div class="container-fluid">
-            <div class="row mb-2">
-                <div class="col-sm-6">
-                    <h1 class="m-0">Level Management</h1>
+<div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h5><i class="icon fas fa-check"></i> Success!</h5>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <h5><i class="icon fas fa-ban"></i> Error!</h5>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <!-- Level Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box bg-gradient-primary shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-layer-group"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total Levels</span>
+                    <span class="info-box-number">{{ $levels->count() }}</span>
+                    <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-chart-line text-light"></i> All available levels
+                    </span>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Levels</li>
-                    </ol>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box bg-gradient-success shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Active Levels</span>
+                    <span class="info-box-number">{{ $levels->where('is_active', true)->count() }}</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $levels->count() > 0 ? ($levels->where('is_active', true)->count() / $levels->count()) * 100 : 0 }}%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-check-circle text-light"></i> {{ $levels->count() > 0 ? number_format(($levels->where('is_active', true)->count() / $levels->count()) * 100, 1) : 0 }}% of total
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box bg-gradient-warning shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-star"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Premium Levels</span>
+                    <span class="info-box-number">{{ $levels->where('is_premium', true)->count() }}</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $levels->count() > 0 ? ($levels->where('is_premium', true)->count() / $levels->count()) * 100 : 0 }}%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-star text-light"></i> {{ $levels->count() > 0 ? number_format(($levels->where('is_premium', true)->count() / $levels->count()) * 100, 1) : 0 }}% of total
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box bg-gradient-info shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-eye"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Avg View Boost</span>
+                    <span class="info-box-number">{{ number_format($levels->avg('view_boost_percentage'), 0) }}%</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-chart-line text-light"></i> Average boost across all levels
+                    </span>
                 </div>
             </div>
         </div>
     </div>
 
-    <section class="content">
-        <div class="container-fluid">
-            <!-- Success/Error Messages -->
-            @if(session('success'))
-                <div class="alert alert-success alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                    <h5><i class="icon fas fa-check"></i> Success!</h5>
-                    {{ session('success') }}
+    <!-- Quick Actions -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card card-outline card-secondary shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bolt mr-2"></i> Quick Actions
+                    </h3>
                 </div>
-            @endif
-
-            @if(session('error'))
-                <div class="alert alert-danger alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
-                    <h5><i class="icon fas fa-ban"></i> Error!</h5>
-                    {{ session('error') }}
-                </div>
-            @endif
-
-            <div class="row">
-                <div class="col-12">
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">
-                                <i class="fas fa-layer-group mr-2"></i>
-                                Dynamic Levels
-                            </h3>
-                            <div class="card-tools">
-                                <a href="{{ route('admin.levels.create') }}" class="btn btn-primary btn-sm">
-                                    <i class="fas fa-plus mr-1"></i> Add New Level
-                                </a>
-                            </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <button type="button" class="btn btn-outline-primary btn-block" onclick="bulkActivate()">
+                                <i class="fas fa-play mr-2"></i> Activate All
+                            </button>
                         </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped" id="levels-table">
-                                    <thead>
-                                        <tr>
-                                            <th width="50">#</th>
-                                            <th width="80">Icon</th>
-                                            <th>Name (AR)</th>
-                                            <th>Name (EN)</th>
-                                            <th>Color</th>
-                                            <th>Points/Day</th>
-                                            <th>View Boost</th>
-                                            <th>Order</th>
-                                            <th>Status</th>
-                                            <th width="150">Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        @forelse($levels as $level)
-                                            <tr>
-                                                <td>{{ $level->id }}</td>
-                                                <td>
-                                                    @if($level->icon)
-                                                        <i class="{{ $level->icon }}" style="color: {{ $level->color }}; font-size: 18px;"></i>
-                                                    @else
-                                                        <div class="w-3 h-3 rounded-full" style="background-color: {{ $level->color }};"></div>
-                                                    @endif
-                                                </td>
-                                                <td>{{ $level->name['ar'] ?? 'N/A' }}</td>
-                                                <td>{{ $level->name['en'] ?? 'N/A' }}</td>
-                                                <td>
-                                                    <div class="d-flex align-items-center">
-                                                        <div class="w-4 h-4 rounded mr-2" style="background-color: {{ $level->color }};"></div>
-                                                        <span class="text-sm">{{ $level->color }}</span>
-                                                    </div>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-{{ $level->points_per_day > 0 ? 'warning' : 'secondary' }}">
-                                                        {{ $level->points_per_day }} pts/day
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-{{ $level->view_boost_percentage > 0 ? 'info' : 'secondary' }}">
-                                                        +{{ $level->view_boost_percentage }}%
-                                                    </span>
-                                                </td>
-                                                <td>
-                                                    <span class="badge badge-primary">{{ $level->display_order }}</span>
-                                                </td>
-                                                <td>
-                                                    @if($level->is_active)
-                                                        <span class="badge badge-success">Active</span>
-                                                    @else
-                                                        <span class="badge badge-danger">Inactive</span>
-                                                    @endif
-                                                </td>
-                                                <td>
-                                                    <div class="btn-group" role="group">
-                                                        <a href="{{ route('admin.levels.edit', $level->id) }}" 
-                                                           class="btn btn-sm btn-info" title="Edit">
-                                                            <i class="fas fa-edit"></i>
-                                                        </a>
-                                                        <form action="{{ route('admin.levels.destroy', $level->id) }}" 
-                                                              method="POST" class="d-inline">
-                                                            @csrf
-                                                            @method('DELETE')
-                                                            <button type="submit" class="btn btn-sm btn-danger" 
-                                                                    onclick="return confirm('Are you sure you want to delete this level?')"
-                                                                    title="Delete">
-                                                                <i class="fas fa-trash"></i>
-                                                            </button>
-                                                        </form>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @empty
-                                            <tr>
-                                                <td colspan="10" class="text-center py-4">
-                                                    <div class="text-muted">
-                                                        <i class="fas fa-layer-group fa-3x mb-3"></i>
-                                                        <p>No levels found. Create your first level to get started.</p>
-                                                        <a href="{{ route('admin.levels.create') }}" class="btn btn-primary">
-                                                            <i class="fas fa-plus mr-1"></i> Add First Level
-                                                        </a>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        @endforelse
-                                    </tbody>
-                                </table>
-                            </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <button type="button" class="btn btn-outline-warning btn-block" onclick="bulkDeactivate()">
+                                <i class="fas fa-pause mr-2"></i> Deactivate All
+                            </button>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <button type="button" class="btn btn-outline-info btn-block" onclick="reorderLevels()">
+                                <i class="fas fa-sort mr-2"></i> Reorder Levels
+                            </button>
+                        </div>
+                        <div class="col-md-3 col-sm-6 mb-3">
+                            <button type="button" class="btn btn-outline-success btn-block" onclick="duplicateLevel()">
+                                <i class="fas fa-copy mr-2"></i> Duplicate Level
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </section>
+    </div>
+
+    <!-- Levels Table -->
+    <div class="card card-outline card-primary shadow-sm mb-4">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+            <div class="card-title mb-2 mb-md-0">
+                <i class="fas fa-layer-group mr-2"></i> Dynamic Levels
+                <span class="badge badge-primary ml-2">{{ $levels->count() }}</span>
+            </div>
+            <div class="card-tools d-flex align-items-center">
+                <div class="input-group input-group-sm mr-3" style="width: 200px;">
+                    <input type="text" class="form-control" placeholder="Search levels..." id="levelSearch">
+                    <div class="input-group-append">
+                        <span class="input-group-text"><i class="fas fa-search"></i></span>
+                    </div>
+                </div>
+                <div class="btn-group btn-group-sm mr-2">
+                    <button type="button" class="btn btn-outline-secondary" onclick="toggleView('grid')">
+                        <i class="fas fa-th"></i>
+                    </button>
+                    <button type="button" class="btn btn-outline-secondary active" onclick="toggleView('table')">
+                        <i class="fas fa-list"></i>
+                    </button>
+                </div>
+                <a href="{{ route('levels.create') }}" class="btn btn-primary btn-sm">
+                    <i class="fas fa-plus mr-1"></i> Add New Level
+                </a>
+            </div>
+        </div>
+        <div class="card-body table-responsive p-0">
+            <table class="table table-hover table-striped table-bordered align-middle" id="levels-table">
+                <thead class="thead-light">
+                    <tr>
+                        <th width="50">#</th>
+                        <th width="80">Icon</th>
+                        <th>Name (AR)</th>
+                        <th>Name (EN)</th>
+                        <th>Color</th>
+                        <th>Points/Day</th>
+                        <th>View Boost</th>
+                        <th>Order</th>
+                        <th>Status</th>
+                        <th width="180">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($levels as $level)
+                        <tr data-level-id="{{ $level->id }}">
+                            <td>
+                                <span class="badge badge-secondary">{{ $level->id }}</span>
+                            </td>
+                            <td>
+                                @if($level->icon)
+                                    <i class="{{ $level->icon }}" style="color: {{ $level->color }}; font-size: 18px;"></i>
+                                @else
+                                    <div class="w-3 h-3 rounded-full" style="background-color: {{ $level->color }};"></div>
+                                @endif
+                            </td>
+                            <td>
+                                <strong>{{ $level->name['ar'] ?? 'N/A' }}</strong>
+                                @if($level->is_premium)
+                                    <span class="badge badge-warning ml-1">Premium</span>
+                                @endif
+                            </td>
+                            <td>{{ $level->name['en'] ?? 'N/A' }}</td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="w-4 h-4 rounded mr-2" style="background-color: {{ $level->color }};"></div>
+                                    <span class="text-sm">{{ $level->color }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ $level->points_per_day > 0 ? 'warning' : 'secondary' }}">
+                                    {{ $level->points_per_day }} pts/day
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ $level->view_boost_percentage > 0 ? 'info' : 'secondary' }}">
+                                    +{{ $level->view_boost_percentage }}%
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-primary">{{ $level->display_order }}</span>
+                            </td>
+                            <td>
+                                <span class="badge badge-{{ $level->is_active ? 'success' : 'danger' }}" id="status-{{ $level->id }}">
+                                    {{ $level->is_active ? 'Active' : 'Inactive' }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('levels.edit', $level->id) }}" 
+                                       class="btn btn-outline-primary" title="Edit Level">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" 
+                                            class="btn btn-outline-{{ $level->is_active ? 'warning' : 'success' }} toggle-status-btn"
+                                            data-level-id="{{ $level->id }}"
+                                            data-current-status="{{ $level->is_active ? '1' : '0' }}"
+                                            title="{{ $level->is_active ? 'Deactivate' : 'Activate' }}">
+                                        <i class="fas fa-{{ $level->is_active ? 'pause' : 'play' }}"></i>
+                                    </button>
+                                    <button type="button" 
+                                            class="btn btn-outline-info" 
+                                            onclick="viewLevelDetails({{ $level->id }})"
+                                            title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                    <button type="button" 
+                                            class="btn btn-outline-secondary" 
+                                            onclick="duplicateLevel({{ $level->id }})"
+                                            title="Duplicate Level">
+                                        <i class="fas fa-copy"></i>
+                                    </button>
+                                    <form action="{{ route('levels.destroy', $level->id) }}" 
+                                          method="POST" class="d-inline delete-level-form"
+                                          data-level-id="{{ $level->id }}">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="btn btn-outline-danger" 
+                                                title="Delete Level">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="10" class="text-center py-5">
+                                <div class="text-muted">
+                                    <i class="fas fa-layer-group fa-4x mb-4 text-muted"></i>
+                                    <h4 class="text-muted">No Levels Found</h4>
+                                    <p class="text-muted mb-4">Create your first level to get started with dynamic service post management.</p>
+                                    <a href="{{ route('levels.create') }}" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-plus mr-2"></i> Create First Level
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
 <script>
 $(document).ready(function() {
+    // Initialize DataTable
     $('#levels-table').DataTable({
         "responsive": true,
         "autoWidth": false,
@@ -168,7 +299,371 @@ $(document).ready(function() {
             "infoFiltered": "(filtered from _MAX_ total levels)"
         }
     });
+
+    // Search functionality
+    $('#levelSearch').on('keyup', function() {
+        $('#levels-table').DataTable().search(this.value).draw();
+    });
+
+    // Toggle status functionality
+    $('.toggle-status-btn').on('click', function() {
+        const levelId = $(this).data('level-id');
+        const currentStatus = $(this).data('current-status');
+        const button = $(this);
+        const statusBadge = $(`#status-${levelId}`);
+        
+        // Show confirmation
+        Swal.fire({
+            title: 'Are you sure?',
+            text: `Do you want to ${currentStatus == '1' ? 'deactivate' : 'activate'} this level?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, proceed!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Send AJAX request
+                $.ajax({
+                    url: `{{ route('admin.levels.toggleActive', '') }}/${levelId}`,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            // Update UI
+                            const newStatus = response.is_active;
+                            const newStatusText = newStatus ? 'Active' : 'Inactive';
+                            const newBadgeClass = newStatus ? 'badge-success' : 'badge-danger';
+                            
+                            statusBadge.removeClass('badge-success badge-danger').addClass(newBadgeClass).text(newStatusText);
+                            
+                            // Update button
+                            button.data('current-status', newStatus ? '1' : '0');
+                            button.removeClass('btn-outline-success btn-outline-warning').addClass(newStatus ? 'btn-outline-warning' : 'btn-outline-success');
+                            button.find('i').removeClass('fa-play fa-pause').addClass(newStatus ? 'fa-pause' : 'fa-play');
+                            button.attr('title', newStatus ? 'Deactivate' : 'Activate');
+                            
+                            // Show success message
+                            Swal.fire(
+                                'Success!',
+                                response.message,
+                                'success'
+                            );
+                        }
+                    },
+                    error: function(xhr) {
+                        Swal.fire(
+                            'Error!',
+                            'Something went wrong. Please try again.',
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    });
+
+    // Delete level functionality
+    $('.delete-level-form').on('submit', function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const levelId = form.data('level-id');
+        
+        Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: form.attr('action'),
+                    type: 'POST',
+                    data: form.serialize(),
+                    success: function(response) {
+                        if (response.success) {
+                            // Remove the row with animation
+                            form.closest('tr').fadeOut(300, function() {
+                                $(this).remove();
+                                // Reload DataTable
+                                $('#levels-table').DataTable().ajax.reload();
+                            });
+                            
+                            Swal.fire(
+                                'Deleted!',
+                                response.message,
+                                'success'
+                            );
+                        }
+                    },
+                    error: function(xhr) {
+                        let message = 'Something went wrong. Please try again.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            message = xhr.responseJSON.message;
+                        }
+                        
+                        Swal.fire(
+                            'Error!',
+                            message,
+                            'error'
+                        );
+                    }
+                });
+            }
+        });
+    });
 });
+
+// Additional functions
+function exportLevels() {
+    Swal.fire({
+        title: 'Export Levels',
+        text: 'Choose export format:',
+        icon: 'info',
+        showCancelButton: true,
+        showDenyButton: true,
+        confirmButtonText: 'Excel',
+        denyButtonText: 'PDF',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Export to Excel
+            window.open('/admin/levels/export?format=excel', '_blank');
+        } else if (result.isDenied) {
+            // Export to PDF
+            window.open('/admin/levels/export?format=pdf', '_blank');
+        }
+    });
+}
+
+function printLevels() {
+    window.print();
+}
+
+function bulkActivate() {
+    Swal.fire({
+        title: 'Activate All Levels',
+        text: 'This will activate all inactive levels. Continue?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, activate all!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.levels.bulk-activate") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to activate levels.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function bulkDeactivate() {
+    Swal.fire({
+        title: 'Deactivate All Levels',
+        text: 'This will deactivate all active levels. Continue?',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, deactivate all!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.levels.bulk-deactivate") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to deactivate levels.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function reorderLevels() {
+    Swal.fire({
+        title: 'Reorder Levels',
+        text: 'Drag and drop to reorder levels:',
+        icon: 'info',
+        html: '<div id="reorder-container">Reorder functionality will be implemented here</div>',
+        showCancelButton: true,
+        confirmButtonText: 'Save Order'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            // Implement save order functionality
+            $.ajax({
+                url: '{{ route("admin.levels.update-order") }}',
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    order: [] // Will be populated with actual order data
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to update level order.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function duplicateLevel(levelId = null) {
+    if (levelId) {
+        // Duplicate specific level
+        Swal.fire({
+            title: 'Duplicate Level',
+            text: 'Create a copy of this level?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Yes, duplicate!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                $.ajax({
+                    url: '{{ route("admin.levels.duplicate", "") }}/' + levelId,
+                    type: 'POST',
+                    data: {
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        if (response.success) {
+                            Swal.fire('Success!', response.message, 'success').then(() => {
+                                location.reload();
+                            });
+                        } else {
+                            Swal.fire('Error!', response.message, 'error');
+                        }
+                    },
+                    error: function() {
+                        Swal.fire('Error!', 'Failed to duplicate level.', 'error');
+                    }
+                });
+            }
+        });
+    } else {
+        // Duplicate from template
+        Swal.fire({
+            title: 'Duplicate Level',
+            text: 'Select a level to duplicate:',
+            icon: 'info',
+            html: '<select class="form-control" id="levelSelect">' +
+                   '<option value="">Select a level...</option>' +
+                   '@foreach($levels as $level)' +
+                   '<option value="{{ $level->id }}">{{ $level->name["en"] ?? "N/A" }}</option>' +
+                   '@endforeach' +
+                   '</select>',
+            showCancelButton: true,
+            confirmButtonText: 'Duplicate'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const selectedLevel = $('#levelSelect').val();
+                if (selectedLevel) {
+                    duplicateLevel(selectedLevel);
+                }
+            }
+        });
+    }
+}
+
+function viewLevelDetails(levelId) {
+    // Get level data from the table row
+    const row = $(`tr[data-level-id="${levelId}"]`);
+    const nameAr = row.find('td:eq(2) strong').text();
+    const nameEn = row.find('td:eq(3)').text();
+    const color = row.find('td:eq(4) span').text();
+    const pointsPerDay = row.find('td:eq(5) .badge').text();
+    const viewBoost = row.find('td:eq(6) .badge').text();
+    const displayOrder = row.find('td:eq(7) .badge').text();
+    const status = row.find('td:eq(8) .badge').text();
+    
+    Swal.fire({
+        title: 'Level Details',
+        html: `
+            <div class="text-left">
+                <div class="row">
+                    <div class="col-6"><strong>Arabic Name:</strong></div>
+                    <div class="col-6">${nameAr}</div>
+                </div>
+                <div class="row">
+                    <div class="col-6"><strong>English Name:</strong></div>
+                    <div class="col-6">${nameEn}</div>
+                </div>
+                <div class="row">
+                    <div class="col-6"><strong>Color:</strong></div>
+                    <div class="col-6">
+                        <div class="d-flex align-items-center">
+                            <div class="w-3 h-3 rounded mr-2" style="background-color: ${color};"></div>
+                            <span>${color}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-6"><strong>Points Per Day:</strong></div>
+                    <div class="col-6">${pointsPerDay}</div>
+                </div>
+                <div class="row">
+                    <div class="col-6"><strong>View Boost:</strong></div>
+                    <div class="col-6">${viewBoost}</div>
+                </div>
+                <div class="row">
+                    <div class="col-6"><strong>Display Order:</strong></div>
+                    <div class="col-6">${displayOrder}</div>
+                </div>
+                <div class="row">
+                    <div class="col-6"><strong>Status:</strong></div>
+                    <div class="col-6">${status}</div>
+                </div>
+            </div>
+        `,
+        icon: 'info',
+        confirmButtonText: 'Close'
+    });
+}
+
+function toggleView(view) {
+    if (view === 'grid') {
+        // Implement grid view
+        Swal.fire('Grid View', 'Grid view functionality will be implemented.', 'info');
+    } else {
+        // Table view is already active
+    }
+}
 </script>
 @endpush
 @endsection 

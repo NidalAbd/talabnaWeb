@@ -214,4 +214,12 @@ return [
         'Firebase' => Kreait\Firebase\Facades\Firebase::class,
     ])->toArray(),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Demo Data Toggle
+    |--------------------------------------------------------------------------
+    | Set to true to show demo/mock data in advanced admin views. Set to false to hide.
+    */
+    'demo_data' => env('APP_DEMO_DATA', true),
+
 ];

@@ -28,6 +28,11 @@ class countries extends Model
         return $this->hasMany(cities::class, 'country_id');
     }
 
+    public function servicePosts(): HasMany
+    {
+        return $this->hasMany(ServicePost::class, 'country_id');
+    }
+
     public function getTranslatedName($nameArray = null)
     {
         if ($nameArray === null) {

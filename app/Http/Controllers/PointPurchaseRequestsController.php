@@ -147,15 +147,20 @@ class PointPurchaseRequestsController extends Controller
      */
     public function destroy(point_purchase_requests $point_purchase_requests)
     {
-        $purchaseRequest = point_purchase_requests::findOrFail($point_purchase_requests);
-        $purchaseRequest->delete();
+        try {
+            $purchaseRequest = point_purchase_requests::findOrFail($point_purchase_requests);
+            $purchaseRequest->delete();
 
-        return redirect()->route('purchase_requests.index')->with('success', 'Purchase request deleted successfully!');
+            return response()->json(['success' => true, 'message' => 'Purchase request deleted successfully!']);
+        } catch (\Exception $e) {
+            Log::error("Error deleting purchase request: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to delete purchase request.'], 500);
+        }
     }
 
     public function approved(Request $request, point_purchase_requests $purchaseRequest)
     {
-        DB::beginTransaction(); // Start the transaction
+        DB::beginTransaction();
 
         try {
             // First, check if the purchase request has a valid user
@@ -167,7 +172,7 @@ class PointPurchaseRequestsController extends Controller
 
             // Check if device token is registered
             if (empty($userRequest->fcm_token)) {
-                return redirect()->back()->with('error', 'User device token is not registered.');
+                return response()->json(['success' => false, 'message' => 'User device token is not registered.'], 400);
             }
 
             $device_token = $userRequest->fcm_token;
@@ -239,36 +244,41 @@ class PointPurchaseRequestsController extends Controller
             $notification = new point_purchase_notifications($purchaseRequest->points_requested, $subject, $device_token);
             $user->notify($notification);
 
-            DB::commit(); // Commit the transaction
+            DB::commit();
 
-            return redirect()->back()->with('success', ($purchaseRequest->points_requested > 0 ? 'Purchased' : 'Deducted') . ' request approved successfully.');
+            return response()->json(['success' => true, 'message' => ($purchaseRequest->points_requested > 0 ? 'Purchased' : 'Deducted') . ' request approved successfully.']);
         } catch (\Exception $e) {
-            DB::rollBack(); // Rollback the transaction
+            DB::rollBack();
             Log::error('Error approving purchase request: ' . $e->getMessage());
 
             // Check for specific error conditions
             if ($e instanceof \Illuminate\Database\Eloquent\ModelNotFoundException) {
-                return redirect()->back()->with('error', 'User or purchase request not found.');
+                return response()->json(['success' => false, 'message' => 'User or purchase request not found.'], 404);
             } elseif ($e->getMessage() == 'User device token is not registered.') {
-                return redirect()->back()->with('error', 'User device token is not registered.');
+                return response()->json(['success' => false, 'message' => 'User device token is not registered.'], 400);
             } elseif ($e->getMessage() == 'Insufficient balance to approve the purchase request.') {
-                return redirect()->back()->with('error', 'Insufficient balance to approve the purchase request.');
+                return response()->json(['success' => false, 'message' => 'Insufficient balance to approve the purchase request.'], 400);
             } elseif ($e->getMessage() == 'Invalid points requested value.') {
-                return redirect()->back()->with('error', 'Invalid points requested value.');
+                return response()->json(['success' => false, 'message' => 'Invalid points requested value.'], 400);
             } elseif ($e->getMessage() == 'Purchase request has no associated user.') {
-                return redirect()->back()->with('error', 'Purchase request has no associated user.');
+                return response()->json(['success' => false, 'message' => 'Purchase request has no associated user.'], 400);
             }
 
-            return redirect()->back()->with('error', 'An error occurred while approving the purchase request.');
+            return response()->json(['success' => false, 'message' => 'An error occurred while approving the purchase request.'], 500);
         }
     }
 
     public function cancel(Request $request, point_purchase_requests $purchaseRequest)
     {
-        $purchaseRequest->status = 'cancelled';
-        $purchaseRequest->save();
+        try {
+            $purchaseRequest->status = 'cancelled';
+            $purchaseRequest->save();
 
-        return redirect()->back()->with('success', 'Purchase request cancelled successfully.');
+            return response()->json(['success' => true, 'message' => 'Purchase request cancelled successfully.']);
+        } catch (\Exception $e) {
+            Log::error("Error cancelling purchase request: " . $e->getMessage());
+            return response()->json(['success' => false, 'message' => 'Failed to cancel purchase request.'], 500);
+        }
     }
 
     /**
