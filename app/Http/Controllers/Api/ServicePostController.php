@@ -42,7 +42,8 @@ class ServicePostController extends Controller
                 $servicePosts = $user->servicePosts()->with('photos')
                     ->withCount('favorites')
                     ->withCount('comments')
-                    ->orderByRaw("FIELD((SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id), 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                    ->orderBy('level_id', 'desc')
+                    ->orderBy('id', 'desc')
                     ->orderBy('id', 'desc')
                     ->paginate(10);
                 return response()->json(compact('servicePosts'));
@@ -152,7 +153,8 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->orderByRaw("FIELD((SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id), 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->orderBy('level_id', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate(10);
 
         foreach ($servicePosts as $servicePost) {
@@ -549,7 +551,8 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->orderByRaw("FIELD((SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id), 'ماسي', 'ذهبي', 'عادي'), id DESC");
+            ->orderBy('level_id', 'desc')
+            ->orderBy('id', 'desc');
 
         // Only load service post photos if data saver is disabled
         if (!$currentUser->data_saver_enabled) {
@@ -738,19 +741,7 @@ class ServicePostController extends Controller
             // First sort by badge type (Diamond → Gold → Normal)
             // Then within each badge type, sort by location relevance
             // Finally sort by creation date (newest first)
-            $servicePosts->orderByRaw("
-        CASE
-            WHEN (SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id) = 'ماسي' THEN 1
-            WHEN (SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id) = 'ذهبي' THEN 2
-            ELSE 3
-        END,
-        CASE
-            WHEN country_id = ? AND city_id = ? THEN 1
-            WHEN country_id = ? THEN 2
-            ELSE 3
-        END",
-                [$userCountryId, $userCityId, $userCountryId]
-            )
+            $servicePosts->orderBy('level_id', 'desc')
                 ->orderBy('created_at', 'DESC');
 
             $servicePosts->where('categories_id', $category);
@@ -846,19 +837,7 @@ class ServicePostController extends Controller
         // First sort by badge type (Diamond → Gold → Normal)
         // Then within each badge type, sort by location relevance
         // Finally sort by creation date (newest first)
-        $servicePosts->orderByRaw("
-    CASE
-        WHEN (SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id) = 'ماسي' THEN 1
-        WHEN (SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id) = 'ذهبي' THEN 2
-        ELSE 3
-    END,
-    CASE
-        WHEN country_id = ? AND city_id = ? THEN 1
-        WHEN country_id = ? THEN 2
-        ELSE 3
-    END",
-            [$userCountryId, $userCityId, $userCountryId]
-        )
+        $servicePosts->orderBy('level_id', 'desc')
             ->orderBy('created_at', 'DESC');
 
         // Only load service post photos if data saver is disabled
@@ -968,7 +947,8 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->orderByRaw("FIELD((SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id), 'ماسي', 'ذهبي', 'عادي'), id DESC");
+            ->orderBy('level_id', 'desc')
+            ->orderBy('id', 'desc');
 
         // Only load service post photos if data saver is disabled
         if (!$currentUser->data_saver_enabled) {

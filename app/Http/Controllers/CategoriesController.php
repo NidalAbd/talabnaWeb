@@ -100,7 +100,8 @@ class CategoriesController extends Controller
             'servicePosts' => function($query) {
                 $query->with('photos')
                     ->withCount('favorites')
-                    ->orderByRaw("FIELD((SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id), 'ماسي', 'ذهبي', 'عادي'), id DESC");
+                    ->orderBy('level_id', 'desc')
+            ->orderBy('id', 'desc');
             }
         ])->findOrFail($id);
 

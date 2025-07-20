@@ -55,7 +55,8 @@ class HomePageController extends Controller
                 $query->whereIn('name->ar', ['ماسي', 'ذهبي']);
             })
             ->whereHas('photos')  // Only include posts with photos
-            ->orderByRaw("FIELD((SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id), 'ماسي', 'ذهبي'), view_count DESC")
+            ->orderBy('level_id', 'desc')
+            ->orderBy('view_count', 'desc')
             ->limit(6)
             ->get();
 
