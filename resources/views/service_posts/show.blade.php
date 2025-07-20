@@ -25,9 +25,9 @@
                             Service Post Details
                         </h5>
                         <div>
-                            @if($servicePost->have_badge == 'ماسي')
+                            @if($servicePost->level && $servicePost->level->name['ar'] == 'ماسي')
                                 <span class="badge badge-primary py-1 px-2">Diamond</span>
-                            @elseif($servicePost->have_badge == 'ذهبي')
+                            @elseif($servicePost->level && $servicePost->level->name['ar'] == 'ذهبي')
                                 <span class="badge badge-warning py-1 px-2">Gold</span>
                             @endif
 

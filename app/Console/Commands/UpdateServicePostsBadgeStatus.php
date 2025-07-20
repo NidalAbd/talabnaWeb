@@ -31,13 +31,19 @@ class UpdateServicePostsBadgeStatus extends Command
 
     public function handle()
     {
-        $servicePosts = ServicePost::whereIn('have_badge', ['ذهبي', 'ماسي'])
+        // Get premium level IDs
+        $goldLevel = \App\Models\Level::where('name->ar', 'ذهبي')->first();
+        $diamondLevel = \App\Models\Level::where('name->ar', 'ماسي')->first();
+        $standardLevel = \App\Models\Level::where('name->ar', 'عادي')->first();
+        $premiumLevelIds = [$goldLevel->id, $diamondLevel->id];
+        
+        $servicePosts = ServicePost::whereIn('level_id', $premiumLevelIds)
             ->where('created_at', '<=', now()->subHours(24))
             ->get();
         foreach ($servicePosts as $post) {
-            $newDuration = $post->badge_duration - 1;
+            $newDuration = $post->level_duration - 1;
             if ($newDuration <= 0) {
-                $post->have_badge = 'عادي';
+                $post->level_id = $standardLevel->id;
                 $message = "Service Post Badge changed to normal due to duration times up.";
                 $notification = new Notification([
                     'message' => $message,
@@ -46,7 +52,7 @@ class UpdateServicePostsBadgeStatus extends Command
                 ]);
                 $notification->save();
             }
-            $post->badge_duration = $newDuration;
+            $post->level_duration = $newDuration;
             $post->save();
         }
 

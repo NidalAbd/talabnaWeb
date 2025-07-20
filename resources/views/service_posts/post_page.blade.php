@@ -219,9 +219,9 @@
                                         @endif
                                     </a>
 
-                                    @if($post->have_badge == 'ماسي')
+                                    @if($post->level && $post->level->name['ar'] == 'ماسي')
                                         <span class="badge badge-primary position-absolute" style="top: 10px; left: 10px;">Diamond</span>
-                                    @elseif($post->have_badge == 'ذهبي')
+                                    @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
                                         <span class="badge badge-warning position-absolute" style="top: 10px; left: 10px;">Gold</span>
                                     @endif
 
@@ -319,9 +319,9 @@
                                                 </a>
                                             </h5>
                                             <div>
-                                                @if($post->have_badge == 'ماسي')
+                                                @if($post->level && $post->level->name['ar'] == 'ماسي')
                                                     <span class="badge badge-primary">Diamond</span>
-                                                @elseif($post->have_badge == 'ذهبي')
+                                                @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
                                                     <span class="badge badge-warning">Gold</span>
                                                 @endif
 

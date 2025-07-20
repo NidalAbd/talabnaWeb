@@ -1011,10 +1011,10 @@
                                     <i class="fas fa-image"></i>
                                 </div>
                             @endif
-                            <div class="post-badge {{ $post->have_badge }}">
-                                @if($post->have_badge == 'ماسي')
+                            <div class="post-badge {{ $post->level ? $post->level->name['ar'] : 'عادي' }}">
+                                @if($post->level && $post->level->name['ar'] == 'ماسي')
                                     <i class="fas fa-gem"></i> Diamond
-                                @elseif($post->have_badge == 'ذهبي')
+                                @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
                                     <i class="fas fa-medal"></i> Gold
                                 @else
                                     <i class="fas fa-check"></i> Standard
@@ -1109,10 +1109,10 @@
                                                 <i class="fas fa-image"></i>
                                             </div>
                                         @endif
-                                        <div class="post-badge {{ $post->have_badge }}">
-                                            @if($post->have_badge == 'ماسي')
+                                        <div class="post-badge {{ $post->level ? $post->level->name['ar'] : 'عادي' }}">
+                                            @if($post->level && $post->level->name['ar'] == 'ماسي')
                                                 <i class="fas fa-gem"></i> Diamond
-                                            @elseif($post->have_badge == 'ذهبي')
+                                            @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
                                                 <i class="fas fa-medal"></i> Gold
                                             @else
                                                 <i class="fas fa-check"></i> Standard
@@ -1176,10 +1176,10 @@
                                         <i class="fas fa-image"></i>
                                     </div>
                                 @endif
-                                <div class="post-badge {{ $post->have_badge }}">
-                                    @if($post->have_badge == 'ماسي')
+                                <div class="post-badge {{ $post->level ? $post->level->name['ar'] : 'عادي' }}">
+                                    @if($post->level && $post->level->name['ar'] == 'ماسي')
                                         <i class="fas fa-gem"></i> Diamond
-                                    @elseif($post->have_badge == 'ذهبي')
+                                    @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
                                         <i class="fas fa-medal"></i> Gold
                                     @else
                                         <i class="fas fa-check"></i> Standard
@@ -1247,10 +1247,10 @@
                                     <i class="fas fa-image"></i>
                                 </div>
                             @endif
-                            <div class="post-badge {{ $post->have_badge }}">
-                                @if($post->have_badge == 'ماسي')
+                            <div class="post-badge {{ $post->level ? $post->level->name['ar'] : 'عادي' }}">
+                                @if($post->level && $post->level->name['ar'] == 'ماسي')
                                     <i class="fas fa-gem"></i> Diamond
-                                @elseif($post->have_badge == 'ذهبي')
+                                @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
                                     <i class="fas fa-medal"></i> Gold
                                 @else
                                     <i class="fas fa-check"></i> Standard

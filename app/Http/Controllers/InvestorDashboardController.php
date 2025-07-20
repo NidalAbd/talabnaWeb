@@ -4,9 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\ServicePost;
-use App\Models\point_purchase_requests;
-use App\Models\point_transactions;
+use App\Models\Categories;
 use App\Models\palservice_points;
+use App\Models\point_purchase_requests;
+use App\Models\Level;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -15,14 +16,14 @@ class InvestorDashboardController extends Controller
 {
     public function __construct()
     {
-        $this->middleware(['auth', 'investor']);
+        $this->middleware('auth');
+        $this->middleware('role:investor');
     }
 
     public function index()
     {
-        // Get current month and previous month
-        $currentMonth = Carbon::now();
-        $previousMonth = Carbon::now()->subMonth();
+        $currentMonth = Carbon::now()->startOfMonth();
+        $previousMonth = Carbon::now()->subMonth()->startOfMonth();
 
         // User Statistics
         $totalUsers = User::count();
@@ -31,7 +32,7 @@ class InvestorDashboardController extends Controller
         $newUsersLastMonth = User::whereMonth('created_at', $previousMonth->month)->count();
         $userGrowthRate = $newUsersLastMonth > 0 ? (($newUsersThisMonth - $newUsersLastMonth) / $newUsersLastMonth) * 100 : 0;
 
-        // Financial Statistics
+        // Revenue Statistics
         $totalRevenue = $this->calculateTotalRevenue();
         $monthlyRevenue = $this->calculateMonthlyRevenue($currentMonth);
         $previousMonthRevenue = $this->calculateMonthlyRevenue($previousMonth);
@@ -43,10 +44,17 @@ class InvestorDashboardController extends Controller
         $pointsSoldLastMonth = $this->calculatePointsSold($previousMonth);
         $pointsGrowthRate = $pointsSoldLastMonth > 0 ? (($pointsSoldThisMonth - $pointsSoldLastMonth) / $pointsSoldLastMonth) * 100 : 0;
 
+        // Get level IDs for premium post counting
+        $goldLevel = Level::where('name->ar', 'ذهبي')->first();
+        $diamondLevel = Level::where('name->ar', 'ماسي')->first();
+
         // Service Post Statistics
         $totalPosts = ServicePost::count();
         $publishedPosts = ServicePost::where('state', 'published')->count();
-        $premiumPosts = ServicePost::whereIn('have_badge', ['ذهبي', 'ماسي'])->count();
+        $premiumPosts = 0;
+        if ($goldLevel && $diamondLevel) {
+            $premiumPosts = ServicePost::whereIn('level_id', [$goldLevel->id, $diamondLevel->id])->count();
+        }
         $postsThisMonth = ServicePost::whereMonth('created_at', $currentMonth->month)->count();
 
         // Monthly Revenue Chart Data
@@ -158,111 +166,129 @@ class InvestorDashboardController extends Controller
 
     private function getTopPerformingCategories()
     {
-        return ServicePost::select('categories.name', DB::raw('COUNT(*) as post_count'))
-            ->join('categories', 'service_posts.categories_id', '=', 'categories.id')
-            ->where('service_posts.state', 'published')
-            ->groupBy('categories.id', 'categories.name')
-            ->orderBy('post_count', 'desc')
-            ->limit(5)
+        return Categories::withCount('servicePosts')
+            ->orderBy('service_posts_count', 'desc')
+            ->take(5)
             ->get();
     }
 
     private function calculateUserRetentionRate()
     {
-        $totalUsers = User::count();
+        // Simplified calculation - in a real app, you'd track user activity over time
         $activeUsers = User::where('is_active', 'active')->count();
-        
+        $totalUsers = User::count();
         return $totalUsers > 0 ? ($activeUsers / $totalUsers) * 100 : 0;
     }
 
     private function calculatePostEngagementRate()
     {
-        $totalPosts = ServicePost::where('state', 'published')->count();
-        $postsWithViews = ServicePost::where('state', 'published')
-            ->where('view_count', '>', 0)
-            ->count();
-        
-        return $totalPosts > 0 ? ($postsWithViews / $totalPosts) * 100 : 0;
+        // Simplified calculation - average views per post
+        $totalViews = ServicePost::sum('view_count');
+        $totalPosts = ServicePost::count();
+        return $totalPosts > 0 ? $totalViews / $totalPosts : 0;
     }
 
     private function calculatePointUtilizationRate()
     {
-        $totalPointsSold = point_purchase_requests::where('status', 'completed')->sum('points');
-        $totalPointsUsed = point_transactions::where('type', 'used')->sum('points');
-        
-        return $totalPointsSold > 0 ? ($totalPointsUsed / $totalPointsSold) * 100 : 0;
+        // Simplified calculation - points used vs points sold
+        $pointsUsed = DB::table('point_transactions')->where('type', 'used')->sum('point');
+        $pointsSold = point_purchase_requests::where('status', 'completed')->sum('points');
+        return $pointsSold > 0 ? ($pointsUsed / $pointsSold) * 100 : 0;
     }
 
     public function financialReport()
     {
-        // Detailed financial report for investors
-        $currentYear = Carbon::now()->year;
-        
-        $monthlyData = [];
-        for ($month = 1; $month <= 12; $month++) {
-            $monthDate = Carbon::createFromDate($currentYear, $month, 1);
-            $revenue = $this->calculateMonthlyRevenue($monthDate);
-            $expenses = $this->calculateMonthlyExpenses($monthDate);
-            $profit = $revenue - $expenses;
-            
-            $monthlyData[] = [
-                'month' => $monthDate->format('F'),
-                'revenue' => $revenue,
-                'expenses' => $expenses,
-                'profit' => $profit,
-                'profit_margin' => $revenue > 0 ? ($profit / $revenue) * 100 : 0
-            ];
-        }
+        $currentMonth = Carbon::now()->startOfMonth();
+        $previousMonth = Carbon::now()->subMonth()->startOfMonth();
 
-        return view('admin.investor.financial-report', compact('monthlyData'));
+        // Revenue Analysis
+        $currentMonthRevenue = $this->calculateMonthlyRevenue($currentMonth);
+        $previousMonthRevenue = $this->calculateMonthlyRevenue($previousMonth);
+        $revenueGrowth = $previousMonthRevenue > 0 ? (($currentMonthRevenue - $previousMonthRevenue) / $previousMonthRevenue) * 100 : 0;
+
+        // Expense Analysis (estimated)
+        $currentMonthExpenses = $this->calculateMonthlyExpenses($currentMonth);
+        $previousMonthExpenses = $this->calculateMonthlyExpenses($previousMonth);
+        $expenseGrowth = $previousMonthExpenses > 0 ? (($currentMonthExpenses - $previousMonthExpenses) / $previousMonthExpenses) * 100 : 0;
+
+        // Profit Analysis
+        $currentMonthProfit = $currentMonthRevenue - $currentMonthExpenses;
+        $previousMonthProfit = $previousMonthRevenue - $previousMonthExpenses;
+        $profitGrowth = $previousMonthProfit != 0 ? (($currentMonthProfit - $previousMonthProfit) / abs($previousMonthProfit)) * 100 : 0;
+
+        // Key Financial Ratios
+        $profitMargin = $currentMonthRevenue > 0 ? ($currentMonthProfit / $currentMonthRevenue) * 100 : 0;
+        $expenseRatio = $currentMonthRevenue > 0 ? ($currentMonthExpenses / $currentMonthRevenue) * 100 : 0;
+
+        return view('admin.investor.financial_report', compact(
+            'currentMonthRevenue', 'previousMonthRevenue', 'revenueGrowth',
+            'currentMonthExpenses', 'previousMonthExpenses', 'expenseGrowth',
+            'currentMonthProfit', 'previousMonthProfit', 'profitGrowth',
+            'profitMargin', 'expenseRatio'
+        ));
     }
 
     private function calculateMonthlyExpenses($month)
     {
-        // This is a placeholder - you should implement actual expense calculation
-        // based on your expense tracking system
-        return 0;
+        // Estimated monthly expenses - in a real app, you'd have an expenses table
+        return 1000; // Fixed monthly expenses
     }
 
     public function businessMetrics()
     {
-        // Key Performance Indicators (KPIs)
-        $kpis = [
-            'monthly_active_users' => User::where('is_active', 'active')
-                ->whereMonth('updated_at', Carbon::now()->month)
-                ->count(),
-            'average_revenue_per_user' => $this->calculateAverageRevenuePerUser(),
-            'customer_acquisition_cost' => $this->calculateCustomerAcquisitionCost(),
-            'lifetime_value' => $this->calculateCustomerLifetimeValue(),
-            'churn_rate' => $this->calculateChurnRate(),
-        ];
+        $currentMonth = Carbon::now()->startOfMonth();
 
-        return view('admin.investor.business-metrics', compact('kpis'));
+        // Customer Metrics
+        $totalUsers = User::count();
+        $activeUsers = User::where('is_active', 'active')->count();
+        $newUsersThisMonth = User::whereMonth('created_at', $currentMonth->month)->count();
+
+        // Revenue Metrics
+        $totalRevenue = $this->calculateTotalRevenue();
+        $monthlyRevenue = $this->calculateMonthlyRevenue($currentMonth);
+
+        // Business Metrics
+        $averageRevenuePerUser = $this->calculateAverageRevenuePerUser();
+        $customerAcquisitionCost = $this->calculateCustomerAcquisitionCost();
+        $customerLifetimeValue = $this->calculateCustomerLifetimeValue();
+        $churnRate = $this->calculateChurnRate();
+
+        return view('admin.investor.business_metrics', compact(
+            'totalUsers', 'activeUsers', 'newUsersThisMonth',
+            'totalRevenue', 'monthlyRevenue',
+            'averageRevenuePerUser', 'customerAcquisitionCost',
+            'customerLifetimeValue', 'churnRate'
+        ));
     }
 
     private function calculateAverageRevenuePerUser()
     {
         $totalRevenue = $this->calculateTotalRevenue();
         $totalUsers = User::count();
-        
         return $totalUsers > 0 ? $totalRevenue / $totalUsers : 0;
     }
 
     private function calculateCustomerAcquisitionCost()
     {
-        // Placeholder - implement based on your marketing costs
-        return 0;
+        // Simplified calculation - total marketing spend / new users
+        $marketingSpend = 1000; // Estimated monthly marketing spend
+        $newUsersThisMonth = User::whereMonth('created_at', Carbon::now()->startOfMonth())->count();
+        return $newUsersThisMonth > 0 ? $marketingSpend / $newUsersThisMonth : 0;
     }
 
     private function calculateCustomerLifetimeValue()
     {
-        // Placeholder - implement based on your user behavior data
-        return 0;
+        // Simplified calculation - average revenue per user * average customer lifespan
+        $averageRevenuePerUser = $this->calculateAverageRevenuePerUser();
+        $averageLifespan = 12; // Estimated months
+        return $averageRevenuePerUser * $averageLifespan;
     }
 
     private function calculateChurnRate()
     {
-        // Placeholder - implement based on your user activity data
-        return 0;
+        // Simplified calculation - inactive users / total users
+        $inactiveUsers = User::where('is_active', '!=', 'active')->count();
+        $totalUsers = User::count();
+        return $totalUsers > 0 ? ($inactiveUsers / $totalUsers) * 100 : 0;
     }
 } 

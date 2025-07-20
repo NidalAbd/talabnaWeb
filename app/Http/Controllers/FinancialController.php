@@ -5,20 +5,17 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\ServicePost;
 use App\Models\point_purchase_requests;
-use App\Models\point_transactions;
-use App\Models\palservice_points;
+use App\Models\Level;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class FinancialController extends Controller
 {
     /**
-     * Show the revenue overview page with real data.
+     * Show the revenue page with real data.
      */
     public function revenue()
     {
-        // Real revenue calculations
         $currentMonth = Carbon::now()->startOfMonth();
         $previousMonth = Carbon::now()->subMonth()->startOfMonth();
         
@@ -27,10 +24,13 @@ class FinancialController extends Controller
             ->whereMonth('created_at', $currentMonth->month)
             ->sum('amount');
             
+        // Get level IDs for premium revenue calculation
+        $regularLevel = Level::where('name->ar', 'عادي')->first();
+        
         // Premium posts revenue (golden and diamond badges)
-        $premiumRevenue = ServicePost::where('have_badge', '!=', 'عادي')
+        $premiumRevenue = $regularLevel ? ServicePost::where('level_id', '!=', $regularLevel->id)
             ->whereMonth('created_at', $currentMonth->month)
-            ->count() * 50; // Assuming $50 per premium post
+            ->count() * 50 : 0; // Assuming $50 per premium post
             
         $totalRevenue = $pointSalesRevenue + $premiumRevenue;
         
@@ -100,9 +100,14 @@ class FinancialController extends Controller
     {
         $currentMonth = Carbon::now()->startOfMonth();
         
+        // Get level IDs for premium post counting
+        $goldLevel = Level::where('name->ar', 'ذهبي')->first();
+        $diamondLevel = Level::where('name->ar', 'ماسي')->first();
+        $regularLevel = Level::where('name->ar', 'عادي')->first();
+        
         // Premium posts statistics
-        $goldenPosts = ServicePost::where('have_badge', 'ذهبي')->count();
-        $diamondPosts = ServicePost::where('have_badge', 'ماسي')->count();
+        $goldenPosts = $goldLevel ? ServicePost::where('level_id', $goldLevel->id)->count() : 0;
+        $diamondPosts = $diamondLevel ? ServicePost::where('level_id', $diamondLevel->id)->count() : 0;
         $totalPremiumPosts = $goldenPosts + $diamondPosts;
         
         // Revenue calculations (assuming golden = $20, diamond = $50)
@@ -111,16 +116,20 @@ class FinancialController extends Controller
         $totalPremiumRevenue = $goldenRevenue + $diamondRevenue;
         
         // Monthly premium posts
-        $monthlyGoldenPosts = ServicePost::where('have_badge', 'ذهبي')
+        $monthlyGoldenPosts = $goldLevel ? ServicePost::where('level_id', $goldLevel->id)
             ->whereMonth('created_at', $currentMonth->month)
-            ->count();
-        $monthlyDiamondPosts = ServicePost::where('have_badge', 'ماسي')
+            ->count() : 0;
+        $monthlyDiamondPosts = $diamondLevel ? ServicePost::where('level_id', $diamondLevel->id)
             ->whereMonth('created_at', $currentMonth->month)
-            ->count();
+            ->count() : 0;
             
         // Recent premium posts
         $recentPremiumPosts = ServicePost::with('user')
-            ->where('have_badge', '!=', 'عادي')
+            ->whereHas('level', function($query) use ($regularLevel) {
+                if ($regularLevel) {
+                    $query->where('id', '!=', $regularLevel->id);
+                }
+            })
             ->latest()
             ->take(10)
             ->get();
@@ -137,27 +146,32 @@ class FinancialController extends Controller
      */
     public function paymentReports()
     {
+        $currentMonth = Carbon::now()->startOfMonth();
+        
         // Payment statistics
-        $totalPayments = point_purchase_requests::count();
-        $successfulPayments = point_purchase_requests::where('status', 'approved')->count();
-        $failedPayments = point_purchase_requests::where('status', 'cancelled')->count();
-        $pendingPayments = point_purchase_requests::where('status', 'pending')->count();
-        
-        // Success rate
-        $successRate = $totalPayments > 0 ? ($successfulPayments / $totalPayments) * 100 : 0;
-        
+        $totalPayments = point_purchase_requests::where('status', 'approved')->count();
+        $monthlyPayments = point_purchase_requests::where('status', 'approved')
+            ->whereMonth('created_at', $currentMonth->month)
+            ->count();
+        $totalAmount = point_purchase_requests::where('status', 'approved')->sum('amount');
+        $monthlyAmount = point_purchase_requests::where('status', 'approved')
+            ->whereMonth('created_at', $currentMonth->month)
+            ->sum('amount');
+            
         // Payment methods (assuming all are online payments for now)
-        $onlinePayments = $totalPayments;
+        $onlinePayments = point_purchase_requests::where('status', 'approved')->count();
+        $pendingPayments = point_purchase_requests::where('status', 'pending')->count();
+        $failedPayments = point_purchase_requests::where('status', 'cancelled')->count();
         
-        // Recent payment reports
+        // Recent payments
         $recentPayments = point_purchase_requests::with('user')
             ->latest()
-            ->take(20)
+            ->take(15)
             ->get();
 
         return view('admin.financial.payment_reports', compact(
-            'totalPayments', 'successfulPayments', 'failedPayments', 'pendingPayments',
-            'successRate', 'onlinePayments', 'recentPayments'
+            'totalPayments', 'monthlyPayments', 'totalAmount', 'monthlyAmount',
+            'onlinePayments', 'pendingPayments', 'failedPayments', 'recentPayments'
         ));
     }
 
@@ -166,32 +180,35 @@ class FinancialController extends Controller
      */
     public function expenses()
     {
-        // For now, we'll use estimated expenses based on system usage
         $currentMonth = Carbon::now()->startOfMonth();
         
-        // Estimated expenses (in a real app, you'd have an expenses table)
-        $serverHostingCosts = 500; // Monthly server costs
-        $advertisementCosts = 300; // Monthly ad costs
-        $operationalCosts = 200; // Other operational costs
-        $totalExpenses = $serverHostingCosts + $advertisementCosts + $operationalCosts;
+        // Fixed expenses (estimated)
+        $serverHostingCosts = 500; // Monthly server hosting
+        $advertisementCosts = 300; // Monthly advertising
+        $developmentCosts = 200; // Monthly development/maintenance
+        $otherCosts = 100; // Other operational costs
         
-        // Monthly breakdown
-        $monthlyExpenses = [
+        $totalExpenses = $serverHostingCosts + $advertisementCosts + $developmentCosts + $otherCosts;
+        
+        // Revenue for profit calculation
+        $monthlyRevenue = point_purchase_requests::where('status', 'approved')
+            ->whereMonth('created_at', $currentMonth->month)
+            ->sum('amount');
+            
+        $monthlyProfit = $monthlyRevenue - $totalExpenses;
+        $profitMargin = $monthlyRevenue > 0 ? ($monthlyProfit / $monthlyRevenue) * 100 : 0;
+        
+        // Expense breakdown
+        $expenseBreakdown = [
             'server_hosting' => $serverHostingCosts,
             'advertisement' => $advertisementCosts,
-            'operational' => $operationalCosts,
-            'total' => $totalExpenses
-        ];
-        
-        // Expense categories
-        $expenseCategories = [
-            'Server Hosting' => $serverHostingCosts,
-            'Advertisement' => $advertisementCosts,
-            'Operational' => $operationalCosts
+            'development' => $developmentCosts,
+            'other' => $otherCosts
         ];
 
         return view('admin.financial.expenses', compact(
-            'totalExpenses', 'monthlyExpenses', 'expenseCategories'
+            'totalExpenses', 'monthlyRevenue', 'monthlyProfit', 'profitMargin',
+            'expenseBreakdown'
         ));
     }
 
@@ -200,30 +217,31 @@ class FinancialController extends Controller
      */
     public function advertisementCosts()
     {
-        // Estimated ad costs (in a real app, you'd track actual ad spending)
         $currentMonth = Carbon::now()->startOfMonth();
         
+        // Advertisement costs breakdown (estimated)
         $socialMediaAds = 150;
         $googleAds = 100;
-        $otherAds = 50;
-        $totalAdCosts = $socialMediaAds + $googleAds + $otherAds;
+        $contentMarketing = 50;
         
-        // Monthly ad performance
-        $adPerformance = [
-            'social_media' => ['cost' => $socialMediaAds, 'clicks' => 1200, 'conversions' => 45],
-            'google_ads' => ['cost' => $googleAds, 'clicks' => 800, 'conversions' => 30],
-            'other' => ['cost' => $otherAds, 'clicks' => 400, 'conversions' => 15]
+        $totalAdCosts = $socialMediaAds + $googleAds + $contentMarketing;
+        
+        // ROI calculation
+        $monthlyRevenue = point_purchase_requests::where('status', 'approved')
+            ->whereMonth('created_at', $currentMonth->month)
+            ->sum('amount');
+            
+        $roi = $totalAdCosts > 0 ? (($monthlyRevenue - $totalAdCosts) / $totalAdCosts) * 100 : 0;
+        
+        // Cost breakdown
+        $costBreakdown = [
+            'social_media' => $socialMediaAds,
+            'google_ads' => $googleAds,
+            'content_marketing' => $contentMarketing
         ];
-        
-        // ROI calculations
-        $totalClicks = array_sum(array_column($adPerformance, 'clicks'));
-        $totalConversions = array_sum(array_column($adPerformance, 'conversions'));
-        $costPerClick = $totalClicks > 0 ? $totalAdCosts / $totalClicks : 0;
-        $costPerConversion = $totalConversions > 0 ? $totalAdCosts / $totalConversions : 0;
 
         return view('admin.financial.advertisement_costs', compact(
-            'totalAdCosts', 'adPerformance', 'totalClicks', 'totalConversions',
-            'costPerClick', 'costPerConversion'
+            'totalAdCosts', 'monthlyRevenue', 'roi', 'costBreakdown'
         ));
     }
 
@@ -232,71 +250,72 @@ class FinancialController extends Controller
      */
     public function serverHostingCosts()
     {
-        // Estimated server costs (in a real app, you'd track actual hosting bills)
         $currentMonth = Carbon::now()->startOfMonth();
         
-        $serverHosting = 300;
-        $databaseHosting = 100;
-        $cdnCosts = 50;
-        $backupCosts = 30;
-        $totalServerCosts = $serverHosting + $databaseHosting + $cdnCosts + $backupCosts;
+        // Server hosting costs breakdown (estimated)
+        $serverRental = 300;
+        $bandwidthCosts = 100;
+        $maintenanceCosts = 50;
+        $backupCosts = 50;
         
-        // Monthly breakdown
-        $serverCosts = [
-            'server_hosting' => $serverHosting,
-            'database_hosting' => $databaseHosting,
-            'cdn_costs' => $cdnCosts,
-            'backup_costs' => $backupCosts,
-            'total' => $totalServerCosts
-        ];
+        $totalHostingCosts = $serverRental + $bandwidthCosts + $maintenanceCosts + $backupCosts;
         
-        // Usage statistics
-        $usageStats = [
-            'storage_used' => '75%',
-            'bandwidth_used' => '60%',
-            'cpu_usage' => '45%',
-            'memory_usage' => '70%'
+        // Cost per user calculation
+        $totalUsers = User::count();
+        $costPerUser = $totalUsers > 0 ? $totalHostingCosts / $totalUsers : 0;
+        
+        // Cost breakdown
+        $hostingBreakdown = [
+            'server_rental' => $serverRental,
+            'bandwidth' => $bandwidthCosts,
+            'maintenance' => $maintenanceCosts,
+            'backup' => $backupCosts
         ];
 
         return view('admin.financial.server_hosting_costs', compact(
-            'totalServerCosts', 'serverCosts', 'usageStats'
+            'totalHostingCosts', 'totalUsers', 'costPerUser', 'hostingBreakdown'
         ));
     }
 
     /**
-     * Show the monthly profit & loss page with real data.
+     * Show the monthly profit/loss page with real data.
      */
     public function monthlyProfitLoss()
     {
         $currentMonth = Carbon::now()->startOfMonth();
+        $previousMonth = Carbon::now()->subMonth()->startOfMonth();
         
-        // Revenue calculations
-        $revenue = point_purchase_requests::where('status', 'approved')
+        // Revenue
+        $monthlyRevenue = point_purchase_requests::where('status', 'approved')
             ->whereMonth('created_at', $currentMonth->month)
             ->sum('amount');
             
-        // Premium posts revenue
-        $premiumRevenue = ServicePost::where('have_badge', '!=', 'عادي')
+        // Get level IDs for premium revenue
+        $regularLevel = Level::where('name->ar', 'عادي')->first();
+        $premiumRevenue = $regularLevel ? ServicePost::where('level_id', '!=', $regularLevel->id)
             ->whereMonth('created_at', $currentMonth->month)
-            ->count() * 50;
+            ->count() * 50 : 0;
             
-        $totalRevenue = $revenue + $premiumRevenue;
+        $totalRevenue = $monthlyRevenue + $premiumRevenue;
         
-        // Expense calculations
-        $totalExpenses = 1000; // Estimated monthly expenses
+        // Expenses
+        $totalExpenses = 1100; // Fixed monthly expenses
         
-        $profit = $totalRevenue - $totalExpenses;
-        $profitMargin = $totalRevenue > 0 ? ($profit / $totalRevenue) * 100 : 0;
+        // Profit/Loss
+        $netProfit = $totalRevenue - $totalExpenses;
+        $profitMargin = $totalRevenue > 0 ? ($netProfit / $totalRevenue) * 100 : 0;
         
-        // Monthly breakdown
-        $monthlyPL = [
-            'revenue' => $totalRevenue,
-            'expenses' => $totalExpenses,
-            'profit' => $profit,
-            'profit_margin' => $profitMargin
-        ];
+        // Previous month comparison
+        $previousMonthRevenue = point_purchase_requests::where('status', 'approved')
+            ->whereMonth('created_at', $previousMonth->month)
+            ->sum('amount');
+        $previousMonthProfit = $previousMonthRevenue - $totalExpenses;
+        $profitGrowth = $previousMonthProfit != 0 ? (($netProfit - $previousMonthProfit) / abs($previousMonthProfit)) * 100 : 0;
 
-        return view('admin.financial.monthly_profit_loss', compact('monthlyPL'));
+        return view('admin.financial.monthly_profit_loss', compact(
+            'totalRevenue', 'totalExpenses', 'netProfit', 'profitMargin',
+            'profitGrowth'
+        ));
     }
 
     /**
@@ -307,21 +326,21 @@ class FinancialController extends Controller
         $currentMonth = Carbon::now()->startOfMonth();
         
         // Current month cash flow
-        $currentRevenue = point_purchase_requests::where('status', 'approved')
+        $monthlyRevenue = point_purchase_requests::where('status', 'approved')
             ->whereMonth('created_at', $currentMonth->month)
             ->sum('amount');
-        $currentExpenses = 1000; // Estimated
-        $currentCashFlow = $currentRevenue - $currentExpenses;
+        $monthlyExpenses = 1100; // Fixed monthly expenses
+        $netCashFlow = $monthlyRevenue - $monthlyExpenses;
         
-        // Projections for next 6 months
+        // Projections for next 6 months (simplified)
         $projections = [];
         for ($i = 1; $i <= 6; $i++) {
-            $projectedRevenue = $currentRevenue * (1 + ($i * 0.1)); // 10% growth per month
-            $projectedExpenses = $currentExpenses * (1 + ($i * 0.05)); // 5% growth per month
+            $projectedRevenue = $monthlyRevenue * (1 + ($i * 0.1)); // 10% growth per month
+            $projectedExpenses = $monthlyExpenses * (1 + ($i * 0.05)); // 5% growth per month
             $projectedCashFlow = $projectedRevenue - $projectedExpenses;
             
             $projections[] = [
-                'month' => Carbon::now()->addMonths($i)->format('M Y'),
+                'month' => $currentMonth->copy()->addMonths($i)->format('M Y'),
                 'revenue' => $projectedRevenue,
                 'expenses' => $projectedExpenses,
                 'cash_flow' => $projectedCashFlow
@@ -329,7 +348,7 @@ class FinancialController extends Controller
         }
 
         return view('admin.financial.cash_flow_projections', compact(
-            'currentCashFlow', 'projections'
+            'monthlyRevenue', 'monthlyExpenses', 'netCashFlow', 'projections'
         ));
     }
 
@@ -340,31 +359,41 @@ class FinancialController extends Controller
     {
         $currentMonth = Carbon::now()->startOfMonth();
         
-        // Revenue breakdown
+        // Revenue
         $pointSalesRevenue = point_purchase_requests::where('status', 'approved')
             ->whereMonth('created_at', $currentMonth->month)
             ->sum('amount');
-        $premiumPostsRevenue = ServicePost::where('have_badge', '!=', 'عادي')
+            
+        // Get level IDs for premium revenue
+        $regularLevel = Level::where('name->ar', 'عادي')->first();
+        $premiumRevenue = $regularLevel ? ServicePost::where('level_id', '!=', $regularLevel->id)
             ->whereMonth('created_at', $currentMonth->month)
-            ->count() * 50;
-        $totalRevenue = $pointSalesRevenue + $premiumPostsRevenue;
+            ->count() * 50 : 0;
+            
+        $totalRevenue = $pointSalesRevenue + $premiumRevenue;
         
-        // Expense breakdown
-        $operatingExpenses = 800;
-        $marketingExpenses = 200;
-        $totalExpenses = $operatingExpenses + $marketingExpenses;
+        // Expenses
+        $serverHostingCosts = 500;
+        $advertisementCosts = 300;
+        $developmentCosts = 200;
+        $otherCosts = 100;
+        $totalExpenses = $serverHostingCosts + $advertisementCosts + $developmentCosts + $otherCosts;
         
+        // Net Income
         $netIncome = $totalRevenue - $totalExpenses;
         
+        // Statement breakdown
         $incomeStatement = [
             'revenue' => [
                 'point_sales' => $pointSalesRevenue,
-                'premium_posts' => $premiumPostsRevenue,
+                'premium_posts' => $premiumRevenue,
                 'total' => $totalRevenue
             ],
             'expenses' => [
-                'operating' => $operatingExpenses,
-                'marketing' => $marketingExpenses,
+                'server_hosting' => $serverHostingCosts,
+                'advertisement' => $advertisementCosts,
+                'development' => $developmentCosts,
+                'other' => $otherCosts,
                 'total' => $totalExpenses
             ],
             'net_income' => $netIncome

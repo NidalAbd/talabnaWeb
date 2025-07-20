@@ -8,11 +8,11 @@
                         <div class="col-md-8 mb-3">
                             <div class="card ">
                                 <div class="card-header
-                            @if($servicePost->have_badge == 'N')
+                            @if($servicePost->level && $servicePost->level->name['ar'] == 'عادي')
                                 bg-primary
-                            @elseif($servicePost->have_badge == 'G')
+                            @elseif($servicePost->level && $servicePost->level->name['ar'] == 'ذهبي')
                                bg-warning
-                            @elseif($servicePost->have_badge == 'D')
+                            @elseif($servicePost->level && $servicePost->level->name['ar'] == 'ماسي')
                                bg-info
                             @endif
                             ">

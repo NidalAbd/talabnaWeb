@@ -4,10 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\ServicePost;
-use App\Models\point_transactions;
 use App\Models\palservice_points;
+use App\Models\point_transactions;
 use App\Models\point_purchase_requests;
-use Illuminate\Support\Facades\DB;
+use App\Models\Level;
+use Illuminate\Http\Request;
 use Carbon\Carbon;
 
 class AnalyticsController extends Controller
@@ -24,6 +25,8 @@ class AnalyticsController extends Controller
         $totalUsers = User::count();
         $activeUsers = User::where('is_active', 'active')->count();
         $bannedUsers = User::where('is_active', 'banned')->count();
+        
+        // Monthly user growth
         $newUsersThisMonth = User::whereMonth('created_at', $currentMonth->month)->count();
         $newUsersLastMonth = User::whereMonth('created_at', $previousMonth->month)->count();
         
@@ -31,11 +34,16 @@ class AnalyticsController extends Controller
         $userGrowthRate = $newUsersLastMonth > 0 ? 
             (($newUsersThisMonth - $newUsersLastMonth) / $newUsersLastMonth) * 100 : 0;
         
+        // Get level IDs for premium user counting
+        $regularLevel = Level::where('name->ar', 'عادي')->first();
+        
         // User engagement metrics
         $usersWithPosts = User::whereHas('servicePosts')->count();
         $usersWithPoints = User::whereHas('palservicePoints')->count();
-        $premiumUsers = User::whereHas('servicePosts', function($query) {
-            $query->where('have_badge', '!=', 'عادي');
+        $premiumUsers = User::whereHas('servicePosts', function($query) use ($regularLevel) {
+            if ($regularLevel) {
+                $query->where('level_id', '!=', $regularLevel->id);
+            }
         })->count();
         
         // Monthly user activity
@@ -97,8 +105,11 @@ class AnalyticsController extends Controller
         $pointsGrowthRate = $previousMonthPointsSold > 0 ? 
             (($monthlyPointsSold - $previousMonthPointsSold) / $previousMonthPointsSold) * 100 : 0;
         
+        // Get level IDs for badge counting
+        $regularLevel = Level::where('name->ar', 'عادي')->first();
+        
         // Point usage by type
-        $pointsUsedForBadges = ServicePost::where('have_badge', '!=', 'عادي')->count() * 10; // Assuming 10 points per badge
+        $pointsUsedForBadges = $regularLevel ? ServicePost::where('level_id', '!=', $regularLevel->id)->count() * 10 : 0; // Assuming 10 points per badge
         $pointsUsedForFeatures = point_transactions::where('type', 'used')->sum('point');
         $totalPointsUsed = $pointsUsedForBadges + $pointsUsedForFeatures;
         
@@ -127,16 +138,78 @@ class AnalyticsController extends Controller
             'monthly_sold' => $monthlyPointsSold,
             'monthly_used' => $monthlyPointsUsed,
             'growth_rate' => $pointsGrowthRate,
-            'used_for_badges' => $pointsUsedForBadges,
-            'used_for_features' => $pointsUsedForFeatures,
-            'total_used' => $totalPointsUsed
+            'points_used_badges' => $pointsUsedForBadges,
+            'points_used_features' => $pointsUsedForFeatures,
+            'total_used' => $totalPointsUsed,
+            'pending_requests' => $pendingRequests,
+            'approved_requests' => $approvedRequests,
+            'cancelled_requests' => $cancelledRequests
         ];
 
         return view('admin.analytics.point_analytics', compact(
-            'totalPointsInSystem', 'totalTransactions', 'totalPurchaseRequests',
-            'monthlyPointsSold', 'monthlyPointsUsed', 'pointsGrowthRate',
-            'pendingRequests', 'approvedRequests', 'cancelledRequests',
-            'topPointUsers', 'recentTransactions', 'pointMetrics'
+            'pointMetrics', 'topPointUsers', 'recentTransactions'
+        ));
+    }
+
+    /**
+     * Show the post analytics page with real data.
+     */
+    public function postAnalytics()
+    {
+        $currentMonth = Carbon::now()->startOfMonth();
+        $previousMonth = Carbon::now()->subMonth()->startOfMonth();
+        
+        // Post statistics
+        $totalPosts = ServicePost::count();
+        $publishedPosts = ServicePost::where('state', 'published')->count();
+        $pendingPosts = ServicePost::where('state', 'not published')->count();
+        $rejectedPosts = ServicePost::where('state', 'rejected')->count();
+        
+        // Monthly post growth
+        $newPostsThisMonth = ServicePost::whereMonth('created_at', $currentMonth->month)->count();
+        $newPostsLastMonth = ServicePost::whereMonth('created_at', $previousMonth->month)->count();
+        
+        // Growth calculations
+        $postGrowthRate = $newPostsLastMonth > 0 ? 
+            (($newPostsThisMonth - $newPostsLastMonth) / $newPostsLastMonth) * 100 : 0;
+        
+        // Get level IDs for badge counting
+        $goldLevel = Level::where('name->ar', 'ذهبي')->first();
+        $diamondLevel = Level::where('name->ar', 'ماسي')->first();
+        $regularLevel = Level::where('name->ar', 'عادي')->first();
+        
+        // Badge statistics
+        $goldenPosts = $goldLevel ? ServicePost::where('level_id', $goldLevel->id)->count() : 0;
+        $diamondPosts = $diamondLevel ? ServicePost::where('level_id', $diamondLevel->id)->count() : 0;
+        $normalPosts = $regularLevel ? ServicePost::where('level_id', $regularLevel->id)->count() : 0;
+        
+        // Top posts by views
+        $topPostsByViews = ServicePost::with(['user', 'category'])
+            ->orderBy('view_count', 'desc')
+            ->take(10)
+            ->get();
+            
+        // Recent posts
+        $recentPosts = ServicePost::with(['user', 'category'])
+            ->latest()
+            ->take(15)
+            ->get();
+            
+        // Post metrics
+        $postMetrics = [
+            'total' => $totalPosts,
+            'published' => $publishedPosts,
+            'pending' => $pendingPosts,
+            'rejected' => $rejectedPosts,
+            'new_this_month' => $newPostsThisMonth,
+            'growth_rate' => $postGrowthRate,
+            'golden' => $goldenPosts,
+            'diamond' => $diamondPosts,
+            'normal' => $normalPosts
+        ];
+
+        return view('admin.analytics.post_analytics', compact(
+            'postMetrics', 'topPostsByViews', 'recentPosts'
         ));
     }
 } 

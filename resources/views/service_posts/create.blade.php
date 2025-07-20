@@ -306,14 +306,16 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="have_badge" class="font-weight-bold">Badge Type</label>
-                                                <select name="have_badge" id="have_badge"
-                                                        class="form-control @error('have_badge') is-invalid @enderror">
-                                                    <option value="عادي" {{ old('have_badge') == 'عادي' ? 'selected' : '' }}>Standard (Free)</option>
-                                                    <option value="ذهبي" {{ old('have_badge') == 'ذهبي' ? 'selected' : '' }}>Gold (1 point per day)</option>
-                                                    <option value="ماسي" {{ old('have_badge') == 'ماسي' ? 'selected' : '' }}>Diamond (3 points per day)</option>
+                                                <label for="level_id" class="font-weight-bold">Badge Type</label>
+                                                <select name="level_id" id="level_id"
+                                                        class="form-control @error('level_id') is-invalid @enderror">
+                                                    @foreach(\App\Models\Level::all() as $level)
+                                                        <option value="{{ $level->id }}" {{ old('level_id') == $level->id ? 'selected' : '' }}>
+                                                            {{ $level->name['ar'] }} ({{ $level->name['en'] }})
+                                                        </option>
+                                                    @endforeach
                                                 </select>
-                                                @error('have_badge')
+                                                @error('level_id')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                                 <small class="form-text text-muted">
@@ -492,14 +494,18 @@
                 });
 
                 // Calculate points cost when badge type or duration changes
-                $('#have_badge, #badge_duration').on('change input', function() {
-                    const badgeType = $('#have_badge').val();
+                $('#level_id, #badge_duration').on('change input', function() {
+                    const levelId = $('#level_id').val();
                     const duration = parseInt($('#badge_duration').val()) || 0;
                     let cost = 0;
 
-                    if (badgeType === 'ذهبي') { // Gold
+                    // Get level details from the selected option text
+                    const selectedOption = $('#level_id option:selected');
+                    const levelName = selectedOption.text().split(' (')[0]; // Get Arabic name
+                    
+                    if (levelName === 'ذهبي') { // Gold
                         cost = duration * 1;
-                    } else if (badgeType === 'ماسي') { // Diamond
+                    } else if (levelName === 'ماسي') { // Diamond
                         cost = duration * 3;
                     }
 

@@ -133,7 +133,7 @@ class SubcategoriesController extends Controller
         $servicePosts = ServicePost::where('sub_categories_id', $id)
             ->with('photos')
             ->withCount('favorites')
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->orderByRaw("FIELD((SELECT name->'$.ar' FROM levels WHERE levels.id = service_posts.level_id), 'ماسي', 'ذهبي', 'عادي'), id DESC")
             ->paginate(10);
 
         return view('sub_categories.show', compact('subcategory', 'servicePosts'));

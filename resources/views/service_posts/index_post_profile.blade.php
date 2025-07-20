@@ -51,7 +51,7 @@
                                         <td>{{ $post->favorites_count }}</td>
                                         <td>{{ $post->report_count }}</td>
                                         <td>{{ $post->view_count }}</td>
-                                        <td>{{ $post->have_badge }}</td>
+                                        <td>{{ $post->level ? $post->level->name['ar'] : 'عادي' }}</td>
                                         <td>
                                             <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-sm btn-primary">View</a>
                                             <a href="{{ route('service_posts.edit', $post->id) }}" class="btn btn-sm btn-warning">Edit</a>
