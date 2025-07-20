@@ -240,7 +240,16 @@ class HomeController extends Controller
             $data[$post->month] = $post->count;
         }
 
-        return array_values($data);
+        $monthNames = [
+            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+        ];
+
+        return [
+            'labels' => array_values($monthNames),
+            'data' => array_values($data)
+        ];
     }
 
     /**
@@ -261,7 +270,16 @@ class HomeController extends Controller
             $data[$user->month] = $user->count;
         }
 
-        return array_values($data);
+        $monthNames = [
+            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+        ];
+
+        return [
+            'labels' => array_values($monthNames),
+            'data' => array_values($data)
+        ];
     }
 
     /**
@@ -289,17 +307,30 @@ class HomeController extends Controller
      */
     private function getPointTransactionsByMonth()
     {
-        $transactions = point_transactions::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
+        $transactions = point_transactions::selectRaw('MONTH(created_at) as month, COUNT(*) as count, SUM(point) as total_points')
             ->whereYear('created_at', Carbon::now()->year)
             ->groupBy('month')
             ->orderBy('month')
             ->get();
 
-        $data = array_fill(1, 12, 0);
+        $counts = array_fill(1, 12, 0);
+        $points = array_fill(1, 12, 0);
+        
         foreach ($transactions as $transaction) {
-            $data[$transaction->month] = $transaction->count;
+            $counts[$transaction->month] = $transaction->count;
+            $points[$transaction->month] = $transaction->total_points;
         }
 
-        return array_values($data);
+        $monthNames = [
+            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+        ];
+
+        return [
+            'labels' => array_values($monthNames),
+            'counts' => array_values($counts),
+            'points' => array_values($points)
+        ];
     }
 }
