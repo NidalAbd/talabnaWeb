@@ -24,7 +24,6 @@ class ServicePost extends Model
         'location_latitudes',
         'location_longitudes',
         'type',
-        'have_badge',
         'level_id',
         'badge_duration',
         'badge_expires_at',
@@ -190,8 +189,8 @@ class ServicePost extends Model
             return $this->level->localized_name;
         }
         
-        // Fallback to old badge system
-        return $this->have_badge ?? 'عادي';
+        // Fallback for regular level
+        return app()->getLocale() === 'ar' ? 'عادي' : 'Regular';
     }
 
     /**

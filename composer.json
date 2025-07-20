@@ -6,10 +6,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.0.26",
+        "doctrine/dbal": "^3.10",
         "fakerphp/faker": "^1.21",
         "google/apiclient": "^2.13",
-        "jeroennoten/laravel-adminlte": "^3.15",
         "guzzlehttp/guzzle": "^7.2",
+        "jeroennoten/laravel-adminlte": "^3.15",
         "kreait/laravel-firebase": "^4.2",
         "laravel-notification-channels/fcm": "^2.7",
         "laravel/framework": "^9.19",

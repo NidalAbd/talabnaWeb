@@ -123,22 +123,24 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="premium-filter" class="form-label">Type</label>
-                        <select name="premium" id="premium-filter" class="form-control">
+                        <label for="type-filter" class="form-label">Type</label>
+                        <select name="type" id="type-filter" class="form-control">
                             <option value="">All Types</option>
-                            <option value="0" {{ request('premium') == '0' ? 'selected' : '' }}>Regular</option>
-                            <option value="1" {{ request('premium') == '1' ? 'selected' : '' }}>Premium</option>
+                            <option value="عرض" {{ request('type') == 'عرض' ? 'selected' : '' }}>عرض (Offer)</option>
+                            <option value="طلب" {{ request('type') == 'طلب' ? 'selected' : '' }}>طلب (Request)</option>
                         </select>
                     </div>
                     <div class="col-md-2">
                         <label for="level-filter" class="form-label">Level</label>
                         <select name="level" id="level-filter" class="form-control">
                             <option value="">All Levels</option>
-                            @foreach($levels ?? [] as $level)
-                                <option value="{{ $level->id }}" {{ request('level') == $level->id ? 'selected' : '' }}>
-                                    {{ $level->localized_name }}
-                                </option>
-                            @endforeach
+                            @if(isset($levels) && $levels->count() > 0)
+                                @foreach($levels as $level)
+                                    <option value="{{ $level->id }}" {{ request('level') == $level->id ? 'selected' : '' }}>
+                                        {{ $level->localized_name ?? $level->name['ar'] ?? 'Level ' . $level->id }}
+                                    </option>
+                                @endforeach
+                            @endif
                         </select>
                     </div>
                     <div class="col-md-2">
@@ -269,25 +271,27 @@
                             <td>
                                 <div class="d-flex align-items-start">
                                     @if($post->photos && $post->photos->count() > 0)
-                                        <img src="{{ $post->photos->first()->src }}" alt="Post Image" 
-                                             class="img-thumbnail mr-3" style="width: 50px; height: 50px; object-fit: cover;">
+                                        @php
+                                            $photo = $post->photos->first();
+                                            $imgSrc = $photo->is_external ? $photo->src : asset($photo->src);
+                                        @endphp
+                                        <img src="{{ $imgSrc }}" alt="Post Image" 
+                                             class="img-thumbnail mr-3" style="width: 50px; height: 50px; object-fit: cover;"
+                                             data-toggle="tooltip" title="Click to view full image">
                                     @else
-                                        <div class="bg-light rounded mr-3 d-flex align-items-center justify-content-center" 
-                                             style="width: 50px; height: 50px;">
-                                            <i class="fas fa-image text-muted"></i>
+                                        <div class="media-placeholder mr-3" style="width: 50px; height: 50px;" 
+                                             data-toggle="tooltip" title="No media available">
+                                            <i class="fas fa-image"></i>
                                         </div>
                                     @endif
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1 fw-bold" data-toggle="tooltip" title="{{ is_array($post->title) ? ($post->title[app()->getLocale()] ?? $post->title['ar'] ?? $post->title['en'] ?? 'No Title') : $post->title }}">
-                                            {{ Str::limit(is_array($post->title) ? ($post->title[app()->getLocale()] ?? $post->title['ar'] ?? $post->title['en'] ?? 'No Title') : $post->title, 40) }}
-                                        </h6>
-                                        <p class="mb-1 text-muted small" data-toggle="tooltip" title="{{ is_array($post->description) ? ($post->description[app()->getLocale()] ?? $post->description['ar'] ?? $post->description['en'] ?? '') : $post->description }}">
-                                            {{ Str::limit(is_array($post->description) ? ($post->description[app()->getLocale()] ?? $post->description['ar'] ?? $post->description['en'] ?? '') : $post->description, 60) }}
-                                        </p>
-                                        <div class="d-flex align-items-center gap-2">
-                                            <span class="badge badge-info">{{ $post->type ?? 'N/A' }}</span>
+                                        <h6 class="mb-1 font-weight-bold">{{ $post->title }}</h6>
+                                        <p class="mb-1 text-muted small">{{ Str::limit($post->description, 100) }}</p>
+                                        <div class="d-flex align-items-center">
                                             @if($post->price)
-                                                <span class="badge badge-success">{{ $post->price }} {{ $post->price_currency_code ?? 'USD' }}</span>
+                                                <span class="badge badge-warning mr-2">
+                                                    {{ $post->price }} {{ $post->price_currency_code ?? 'USD' }}
+                                                </span>
                                             @endif
                                         </div>
                                     </div>
@@ -324,23 +328,21 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="premium-badge">
-                                    @if($post->is_premium)
-                                        <span class="badge badge-warning">
-                                            <i class="fas fa-star"></i> Premium
-                                        </span>
-                                    @else
-                                        <span class="badge badge-secondary">Regular</span>
-                                    @endif
+                                <span class="badge badge-{{ $post->type == 'عرض' ? 'success' : 'info' }}">
+                                    {{ $post->type }}
                                 </span>
                             </td>
                             <td>
-                                @if($post->level)
-                                    <span class="badge" style="background-color: {{ $post->level->color }}; color: white;">
-                                        <i class="fas {{ $post->level->icon }}"></i> {{ $post->level->localized_name }}
+                                @if($post->level_id && $post->level_id > 0 && $post->level)
+                                    <span class="badge badge-{{ $post->level->color ?? 'primary' }}">
+                                        <i class="fas fa-{{ $post->level->icon ?? 'star' }} mr-1"></i>
+                                        {{ $post->level->localized_name ?? $post->level->name['ar'] ?? 'Premium' }}
                                     </span>
+                                    @if($post->badge_expires_at)
+                                        <br><small class="text-muted">Expires: {{ \Carbon\Carbon::parse($post->badge_expires_at)->format('Y-m-d') }}</small>
+                                    @endif
                                 @else
-                                    <span class="badge badge-secondary">Default</span>
+                                    <span class="badge badge-secondary">Regular</span>
                                 @endif
                             </td>
                             <td>
@@ -356,8 +358,16 @@
                                     <a href="{{ route('service_posts.edit', $post->id) }}" class="btn btn-outline-primary" data-toggle="tooltip" title="Edit">
                                         <i class="fas fa-edit"></i>
                                     </a>
-                                    <button type="button" class="btn btn-outline-success" data-toggle="tooltip" title="Upgrade Level" onclick="showLevelUpgrade({{ $post->id }})">
+                                    <button type="button" class="btn btn-outline-success" data-toggle="tooltip" title="Upgrade Level (Admin)" onclick="adminLevelUpgrade({{ $post->id }})">
                                         <i class="fas fa-level-up-alt"></i>
+                                    </button>
+                                    @if($post->level_id && $post->level_id > 0)
+                                        <button type="button" class="btn btn-outline-danger" data-toggle="tooltip" title="Remove Premium Level" onclick="adminLevelDowngrade({{ $post->id }})">
+                                            <i class="fas fa-level-down-alt"></i>
+                                        </button>
+                                    @endif
+                                    <button type="button" class="btn btn-outline-warning" data-toggle="tooltip" title="Make Level" onclick="makePostLevel({{ $post->id }})">
+                                        <i class="fas fa-crown"></i>
                                     </button>
                                     @if($post->state == 'not published')
                                         <button type="button" class="btn btn-outline-warning" data-toggle="tooltip" title="Approve" onclick="approveServicePost({{ $post->id }})">
@@ -658,7 +668,7 @@
         });
 
         // Auto-submit form on filter changes
-        $('#category-filter, #subcategory-filter, #status-filter, #premium-filter, #user-filter, #city-filter, #country-filter').on('change', function() {
+        $('#category-filter, #subcategory-filter, #status-filter, #type-filter, #user-filter, #city-filter, #country-filter').on('change', function() {
             setTimeout(function() {
                 $('#filterForm').submit();
             }, 100);
@@ -1130,25 +1140,24 @@
         `);
     }
 
-    // Update points calculation
+    // Update points calculation - ADMIN VERSION (no restrictions)
     function updatePointsCalculation(level) {
         const duration = parseInt($('#levelDuration').val()) || 0;
         const requiredPoints = level.points_per_day * duration;
-        const remainingPoints = userPoints - requiredPoints;
         
-        $('#requiredPoints').text(requiredPoints.toLocaleString());
-        $('#remainingPoints').text(remainingPoints.toLocaleString());
+        // For admin users, always show as affordable
+        $('#requiredPoints').text(requiredPoints.toLocaleString() + ' (Admin)');
+        $('#remainingPoints').text('∞ (Admin)');
         
-        // Enable/disable upgrade button
-        const canUpgrade = requiredPoints > 0 && remainingPoints >= 0;
-        $('#upgradeLevelBtn').prop('disabled', !canUpgrade);
+        // Always enable upgrade button for admin
+        $('#upgradeLevelBtn').prop('disabled', false);
         
-        // Update colors
-        $('#requiredPoints').removeClass('text-danger text-success').addClass(requiredPoints > 0 ? 'text-danger' : 'text-success');
-        $('#remainingPoints').removeClass('text-danger text-success').addClass(remainingPoints >= 0 ? 'text-success' : 'text-danger');
+        // Update colors for admin display
+        $('#requiredPoints').removeClass('text-danger text-success').addClass('text-info');
+        $('#remainingPoints').removeClass('text-danger text-success').addClass('text-success');
     }
 
-    // Upgrade service post level
+    // Upgrade service post level - ADMIN VERSION
     function upgradeServicePostLevel() {
         const levelId = $('#levelSelect').val();
         const duration = $('#levelDuration').val();
@@ -1159,8 +1168,8 @@
         }
         
         Swal.fire({
-            title: 'Confirm Upgrade',
-            text: `Are you sure you want to upgrade this service post for ${duration} days?`,
+            title: 'Confirm Admin Upgrade',
+            text: `Are you sure you want to upgrade this service post to the selected level for ${duration} days? (Admin action - no point restrictions)`,
             icon: 'question',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -1180,7 +1189,7 @@
                         if (response.success) {
                             Swal.fire({
                                 title: 'Success!',
-                                text: response.message,
+                                text: response.message || 'Post has been upgraded successfully!',
                                 icon: 'success',
                                 timer: 2000,
                                 showConfirmButton: false
@@ -1389,6 +1398,215 @@
                     error: function(xhr) {
                         const response = xhr.responseJSON;
                         Swal.fire('Error', response?.message || 'An error occurred', 'error');
+                    }
+                });
+            }
+        });
+    }
+
+    // Handle image clicks for full-size view
+    $(document).on('click', '.img-thumbnail', function() {
+        const imgSrc = $(this).attr('src');
+        const imgAlt = $(this).attr('alt');
+        
+        // Create modal for full-size image view
+        const modal = `
+            <div class="modal fade" id="imageModal" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">Service Post Image</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-center">
+                            <img src="${imgSrc}" alt="${imgAlt}" class="img-fluid" style="max-height: 70vh;">
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Remove existing modal if any
+        $('#imageModal').remove();
+        
+        // Add new modal to body
+        $('body').append(modal);
+        
+        // Show modal
+        $('#imageModal').modal('show');
+    });
+    
+    // Clean up modal on hide
+    $(document).on('hidden.bs.modal', '#imageModal', function() {
+        $(this).remove();
+    });
+    
+    // Make Post Level function
+    function makePostLevel(postId) {
+        Swal.fire({
+            title: 'Make Post Level',
+            text: 'Are you sure you want to make this post a level post?',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#ffc107',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, make it level!',
+            cancelButtonText: 'Cancel'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Making post level...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // AJAX call to make post level
+                $.ajax({
+                    url: `/service-posts/${postId}/make-level`,
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: response.message || 'Post has been made level successfully!',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'An error occurred while making the post level.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        
+                        Swal.fire({
+                            title: 'Error!',
+                            text: errorMessage,
+                            icon: 'error'
+                        });
+                    }
+                });
+            }
+        });
+    }
+
+    // Admin Level Upgrade function
+    function adminLevelUpgrade(postId) {
+        currentServicePostId = postId;
+        $('#levelUpgradeModal').modal('show');
+        loadAdminLevels(postId);
+    }
+    
+    // Load available levels for admin (no point restrictions)
+    function loadAdminLevels(postId) {
+        $.ajax({
+            url: `/service_posts/${postId}/available-levels`,
+            method: 'GET',
+            success: function(response) {
+                if (response.success) {
+                    availableLevels = response.data.levels;
+                    userPoints = response.data.user_points;
+                    
+                    // Populate level select - ADMIN VERSION (no restrictions)
+                    const $levelSelect = $('#levelSelect');
+                    $levelSelect.html('<option value="">Choose a level...</option>');
+                    
+                    availableLevels.forEach(function(level) {
+                        // Remove point restrictions for admin - all levels are enabled
+                        const option = `<option value="${level.id}" data-level='${JSON.stringify(level)}'>${level.name} (${level.points_per_day} points/day)</option>`;
+                        $levelSelect.append(option);
+                    });
+                    
+                    // Update user points display (show as unlimited for admin)
+                    $('#userPoints').text('∞ (Admin)');
+                    $('#requiredPoints').text('0 (Admin)');
+                    $('#remainingPoints').text('∞ (Admin)');
+                    
+                    // Show current level info if exists
+                    if (response.data.current_level) {
+                        const current = response.data.current_level;
+                        $('#levelInfo').show().html(`
+                            <strong>Current Level:</strong> ${current.name}<br>
+                            <strong>Expires:</strong> ${current.expires_at}<br>
+                            <strong>Remaining Days:</strong> ${current.remaining_days || 0}
+                        `);
+                    }
+                    
+                    // Enable upgrade button for admin
+                    $('#upgradeLevelBtn').prop('disabled', false);
+                }
+            },
+            error: function() {
+                Swal.fire('Error', 'Failed to load available levels', 'error');
+            }
+        });
+    }
+    
+    // Admin Level Downgrade function
+    function adminLevelDowngrade(postId) {
+        Swal.fire({
+            title: 'Admin Level Downgrade',
+            text: 'Are you sure you want to remove the premium level from this service post?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545',
+            cancelButtonColor: '#6c757d',
+            confirmButtonText: 'Yes, downgrade!'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Show loading state
+                Swal.fire({
+                    title: 'Processing...',
+                    text: 'Removing premium level...',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                // AJAX call to remove premium level
+                $.ajax({
+                    url: `/service_posts/${postId}/admin-downgrade`,
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                    },
+                    success: function(response) {
+                        Swal.fire({
+                            title: 'Success!',
+                            text: response.message || 'Premium level has been removed successfully!',
+                            icon: 'success',
+                            timer: 2000,
+                            showConfirmButton: false
+                        }).then(() => {
+                            location.reload();
+                        });
+                    },
+                    error: function(xhr) {
+                        let errorMessage = 'An error occurred while downgrading the post.';
+                        if (xhr.responseJSON && xhr.responseJSON.message) {
+                            errorMessage = xhr.responseJSON.message;
+                        }
+                        
+                        Swal.fire({
+                            title: 'Error!',
+                            text: errorMessage,
+                            icon: 'error'
+                        });
                     }
                 });
             }
@@ -1606,5 +1824,76 @@
         background-color: #007bff;
         border-color: #007bff;
     }
+
+    /* Media thumbnail styles */
+    .img-thumbnail {
+        border-radius: 0.375rem;
+        border: 1px solid #dee2e6;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    
+    .img-thumbnail:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    
+    /* Media placeholder styles */
+    .media-placeholder {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+    }
+    
+    .media-placeholder:hover {
+        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+        transform: scale(1.05);
+    }
+    
+    .media-placeholder i {
+        font-size: 1.2rem;
+        color: #6c757d;
+    }
+    
+    /* Crown button styling for level posts */
+    .btn-outline-warning .fa-crown {
+        color: #ffc107;
+    }
+    
+    .btn-outline-warning:hover .fa-crown {
+        color: #fff;
+    }
+    
+    /* Level upgrade/downgrade button styling */
+    .btn-outline-success .fa-level-up-alt {
+        color: #28a745;
+    }
+    
+    .btn-outline-success:hover .fa-level-up-alt {
+        color: #fff;
+    }
+    
+    .btn-outline-danger .fa-level-down-alt {
+        color: #dc3545;
+    }
+    
+    .btn-outline-danger:hover .fa-level-down-alt {
+        color: #fff;
+    }
+    
+    /* Admin level upgrade modal styling */
+    .modal-title:contains('Level') {
+        color: #28a745;
+    }
+    
+    /* Admin points display styling */
+    .text-info {
+        color: #17a2b8 !important;
+    }
+    
+    /* Action button improvements - matching users index */
 </style>
 @endpush

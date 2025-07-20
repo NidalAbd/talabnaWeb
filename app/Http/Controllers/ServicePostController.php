@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class ServicePostController extends Controller
@@ -48,7 +49,7 @@ class ServicePostController extends Controller
         // Check if the user has the required permissions to view all service posts
         if ($user->hasPermission('service_posts_index')) {
             // Start with the base query
-            $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city');
+            $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city', 'level');
 
             // Apply category filter
             if ($request->has('category') && $request->category) {
@@ -150,11 +151,12 @@ class ServicePostController extends Controller
             $totalCount = $query->count();
             $publishedCount = ServicePost::where('state', 'published')->count();
             $pendingCount = ServicePost::where('state', 'not published')->count();
-            $premiumCount = ServicePost::where('is_premium', true)->count();
+            $premiumCount = ServicePost::where('level_id', '>', 0)->count();
 
-            // Order and paginate
+            // Order by level_id (high to low) then by creation date
             $perPage = $request->get('per_page', 15);
-            $servicePosts = $query->orderBy('id', 'desc')
+            $servicePosts = $query->orderBy('level_id', 'desc')
+                ->orderBy('created_at', 'desc')
                 ->paginate($perPage)
                 ->appends($request->query());
 
@@ -181,7 +183,12 @@ class ServicePostController extends Controller
                 ->get();
 
             // Fetch levels for filtering
-            $levels = Level::active()->ordered()->get();
+            try {
+                $levels = Level::active()->ordered()->get();
+            } catch (\Exception $e) {
+                Log::error('Failed to load levels: ' . $e->getMessage());
+                $levels = collect(); // Empty collection as fallback
+            }
 
             // Check if featured functionality is available
             $hasFeaturedColumn = Schema::hasColumn('service_posts', 'is_featured');
@@ -840,8 +847,11 @@ class ServicePostController extends Controller
         $duration = $request->duration;
         $pointsCost = $level->calculatePointsCost($duration);
 
-        // Check if user has enough points
-        if ($user->points < $pointsCost) {
+        // Check if user is admin (has admin role or super admin permissions)
+        $isAdmin = $user->hasRole('admin') || $user->hasRole('super_admin') || $user->hasPermission('admin_access');
+
+        // Check if user has enough points (skip for admin users)
+        if (!$isAdmin && $user->points < $pointsCost) {
             return response()->json([
                 'success' => false,
                 'message' => "Insufficient points. Required: {$pointsCost}, Available: {$user->points}"
@@ -851,9 +861,11 @@ class ServicePostController extends Controller
         try {
             DB::beginTransaction();
 
-            // Deduct points from user
-            $user->points -= $pointsCost;
-            $user->save();
+            // Deduct points from user (skip for admin users)
+            if (!$isAdmin) {
+                $user->points -= $pointsCost;
+                $user->save();
+            }
 
             // Update service post level
             $servicePost->level_id = $level->id;
@@ -861,27 +873,31 @@ class ServicePostController extends Controller
             $servicePost->badge_expires_at = Carbon::now()->addDays($duration);
             $servicePost->save();
 
-            // Create point transaction record
-            point_transactions::create([
-                'user_id' => $user->id,
-                'points' => -$pointsCost,
-                'type' => 'level_upgrade',
-                'description' => "Upgraded service post #{$servicePost->id} to {$level->localized_name} for {$duration} days",
-                'service_post_id' => $servicePost->id,
-                'level_id' => $level->id
-            ]);
+            // Create point transaction record (skip for admin users)
+            if (!$isAdmin) {
+                point_transactions::create([
+                    'user_id' => $user->id,
+                    'points' => -$pointsCost,
+                    'type' => 'level_upgrade',
+                    'description' => "Upgraded service post #{$servicePost->id} to {$level->localized_name} for {$duration} days",
+                    'service_post_id' => $servicePost->id,
+                    'level_id' => $level->id
+                ]);
+            }
 
             DB::commit();
 
+            $adminMessage = $isAdmin ? ' (Admin action - no points deducted)' : '';
             return response()->json([
                 'success' => true,
-                'message' => "Service post upgraded to {$level->localized_name} successfully",
+                'message' => "Service post upgraded to {$level->localized_name} successfully{$adminMessage}",
                 'data' => [
                     'id' => $servicePost->id,
                     'level_id' => $servicePost->level_id,
                     'level_name' => $level->localized_name,
                     'duration' => $duration,
-                    'expires_at' => $servicePost->badge_expires_at->format('Y-m-d H:i:s')
+                    'expires_at' => $servicePost->badge_expires_at->format('Y-m-d H:i:s'),
+                    'is_admin_action' => $isAdmin
                 ]
             ]);
 
@@ -905,10 +921,17 @@ class ServicePostController extends Controller
             return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
+        // Check if user is admin (has admin role or super admin permissions)
+        $isAdmin = $user->hasRole('admin') || $user->hasRole('super_admin') || $user->hasPermission('admin_access');
+
         $levels = Level::active()->ordered()->get();
         $availableLevels = [];
 
         foreach ($levels as $level) {
+            // For admin users, all levels are affordable
+            $canAfford = $isAdmin ? true : ($user->points_balance >= $level->points_per_day);
+            $maxDuration = $isAdmin ? 365 : ($level->points_per_day > 0 ? floor($user->points_balance / $level->points_per_day) : 365);
+            
             $availableLevels[] = [
                 'id' => $level->id,
                 'name' => $level->localized_name,
@@ -918,8 +941,8 @@ class ServicePostController extends Controller
                 'points_per_day' => $level->points_per_day,
                 'view_boost_percentage' => $level->view_boost_percentage,
                 'features' => $level->localized_features,
-                'can_afford' => $user->points >= $level->points_per_day,
-                'max_duration' => $level->points_per_day > 0 ? floor($user->points / $level->points_per_day) : 365
+                'can_afford' => $canAfford,
+                'max_duration' => $maxDuration
             ];
         }
 
@@ -927,12 +950,13 @@ class ServicePostController extends Controller
             'success' => true,
             'data' => [
                 'levels' => $availableLevels,
-                'user_points' => $user->points,
+                'user_points' => $isAdmin ? '∞ (Admin)' : $user->points_balance,
+                'is_admin' => $isAdmin,
                 'current_level' => $servicePost->level ? [
                     'id' => $servicePost->level->id,
                     'name' => $servicePost->level->localized_name,
                     'expires_at' => $servicePost->badge_expires_at ? $servicePost->badge_expires_at->format('Y-m-d H:i:s') : null,
-                    'remaining_days' => $servicePost->getBadgeRemainingDays()
+                    'remaining_days' => $servicePost->getLevelRemainingDays()
                 ] : null
             ]
         ]);
