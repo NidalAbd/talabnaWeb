@@ -434,43 +434,43 @@ return [
             'text' => 'Investor Dashboard',
             'url'  => 'investor-dashboard',
             'icon' => 'fas fa-chart-line',
-            'permission' => ['investor_view']
+            'permission' => ['investor_view', 'view_statistics']
         ],
         [
             'text' => 'Investor Relations',
             'url'  => 'investor-relations',
             'icon' => 'fas fa-handshake',
-            'permission' => ['investor_profile.view']
+            'permission' => ['investor_profile.view', 'view_statistics']
         ],
         [
             'text' => 'Investment Tracking',
             'url'  => 'investment-tracking',
             'icon' => 'fas fa-piggy-bank',
-            'permission' => ['investment_funding.index']
+            'permission' => ['investment_funding.index', 'view_statistics']
         ],
         [
             'text' => 'Strategic Planning',
             'url'  => 'strategic-planning',
             'icon' => 'fas fa-road',
-            'permission' => ['strategic_plan.view']
+            'permission' => ['strategic_plan.view', 'view_statistics']
         ],
         [
             'text' => 'Budget Planning',
             'url'  => 'monthly-budget-planning',
             'icon' => 'fas fa-calendar-week',
-            'permission' => ['monthly_budget.index']
+            'permission' => ['monthly_budget.index', 'view_statistics']
         ],
         [
             'text' => 'Expense Approvals',
             'url'  => 'expense-approvals',
             'icon' => 'fas fa-check-circle',
-            'permission' => ['expense_approvals.index']
+            'permission' => ['expense_approvals.index', 'view_statistics']
         ],
         [
             'text' => 'Budget Controls',
             'url'  => 'budget-limits',
             'icon' => 'fas fa-exclamation-triangle',
-            'permission' => ['budget_limits.index']
+            'permission' => ['budget_limits.index', 'view_statistics']
         ],
     ],
 
