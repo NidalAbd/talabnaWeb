@@ -332,6 +332,10 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
         $cities = App\Models\cities::where('country_id', $countryId)->get();
         return response()->json($cities);
     });
+    Route::get('/get-cities/{countryId}', function($countryId) {
+        $cities = App\Models\cities::where('country_id', $countryId)->get();
+        return response()->json($cities);
+    });
     Route::get('/get-cities-for-form/{countryId}', [ServicePostController::class, 'getCitiesForForm']);
 
     /*
@@ -344,10 +348,15 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::get('users/data', [UserController::class, 'data'])->name('users.data');
     Route::post('users/{id}/update-status', [UserController::class, 'updateStatus'])
         ->name('users.update.status');
-    Route::get('users/{user}/reset-password', [App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.reset_password');
+    Route::post('users/{user}/reset-password', [App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.reset_password');
     Route::post('users/{user}/send-notification', [App\Http\Controllers\UserController::class, 'sendNotification'])->name('users.send_notification');
-    Route::get('users/{user}/impersonate', [App\Http\Controllers\UserController::class, 'impersonate'])->name('users.impersonate');
+    Route::post('users/{user}/impersonate', [App\Http\Controllers\UserController::class, 'impersonate'])->name('users.impersonate');
+    Route::post('users/stop-impersonation', [App\Http\Controllers\UserController::class, 'stopImpersonation'])->name('users.stop_impersonation');
     Route::get('users/{user}/login-history', [App\Http\Controllers\UserController::class, 'loginHistory'])->name('users.login_history');
+
+    // Simple ban/unban routes
+    Route::post('users/{user}/ban', [UserController::class, 'ban'])->name('users.ban');
+    Route::post('users/{user}/unban', [UserController::class, 'unban'])->name('users.unban');
 
     // AJAX Ban/Unban action for users
     Route::post('/users/{user}/toggle-ban', [BanController::class, 'toggleBan'])
@@ -459,13 +468,13 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Ban Management
     Route::get('users/banned', [BanController::class, 'index'])
-        ->name('users.banned');
+        ->name('admin.users.banned');
     Route::get('users/{userId}/ban', [BanController::class, 'banForm'])
-        ->name('users.ban.form');
+        ->name('admin.users.ban.form');
     Route::post('users/{userId}/ban', [BanController::class, 'banUser'])
-        ->name('users.ban');
+        ->name('admin.users.ban');
     Route::post('users/{userId}/unban', [BanController::class, 'unbanUser'])
-        ->name('users.unban');
+        ->name('admin.users.unban');
 
     // Banned Devices
     Route::get('devices/banned', [BanController::class, 'devices'])

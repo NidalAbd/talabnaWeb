@@ -478,7 +478,7 @@
 @stop
 
 @section('js')
-    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtF4Mz-vpzJFGSuOj1o5krujUu-MZuW0k"></script>
     <script>
         $(function() {
             // Initialize Google Maps

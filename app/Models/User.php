@@ -53,6 +53,8 @@ class User extends Authenticatable implements CanResetPasswordContract
         'name',
         'gender',
         'city',
+        'city_id',
+        'country_id',
         'date_of_birth',
         'location_latitudes',
         'location_longitudes',
@@ -64,6 +66,7 @@ class User extends Authenticatable implements CanResetPasswordContract
         'google_id',
         'auth_type',
         'fcm_token',
+        'is_active',
     ];
 
     /**

@@ -115,6 +115,7 @@ class UserController extends Controller
             'date_of_birth' => 'nullable|date',
             'location_latitudes' => 'nullable|numeric',
             'location_longitudes' => 'nullable|numeric',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'roles' => 'array',
             'roles.*' => 'exists:roles,id'
         ]);
@@ -143,11 +144,23 @@ class UserController extends Controller
                 $user->syncRoles($validatedData['roles']);
             }
 
-            // Create default photo
-            $photo = new Photos([
-                'src' => 'storage/photos/avatar1.png',
-            ]);
-            $user->photos()->save($photo);
+            // Handle profile image upload
+            if ($request->hasFile('profile_image')) {
+                $image = $request->file('profile_image');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('storage/photos'), $imageName);
+                
+                $photo = new Photos([
+                    'src' => 'storage/photos/' . $imageName,
+                ]);
+                $user->photos()->save($photo);
+            } else {
+                // Create default photo
+                $photo = new Photos([
+                    'src' => 'storage/photos/avatar1.png',
+                ]);
+                $user->photos()->save($photo);
+            }
 
             DB::commit();
 
@@ -171,7 +184,13 @@ class UserController extends Controller
         $locationDisplay = ($user->location_latitudes && $user->location_longitudes)
             ? $user->location_latitudes . ', ' . $user->location_longitudes
             : 'Not set';
-        return view('users.show', compact('user', 'locationDisplay'));
+        
+        // Load points history
+        $pointsHistory = \App\Models\palservice_points::where('user_id', $user->id)
+            ->orderBy('created_at', 'desc')
+            ->get();
+        
+        return view('users.show', compact('user', 'locationDisplay', 'pointsHistory'));
     }
 
     /**
@@ -183,7 +202,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $countries = countries::all();
-        $cities = cities::all();
+        $cities = cities::where('country_id', $user->country_id)->get();
         $roles = Role::all();
         $user->load(['photos', 'roles']);
         $userRoles = $user->roles->pluck('id')->toArray();
@@ -213,6 +232,7 @@ class UserController extends Controller
             'location_latitudes' => 'nullable|numeric',
             'location_longitudes' => 'nullable|numeric',
             'is_active' => 'required|in:active,inactive,banned',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'roles' => 'array',
             'roles.*' => 'exists:roles,id'
         ]);
@@ -241,6 +261,24 @@ class UserController extends Controller
             }
 
             $user->update($updateData);
+
+            // Handle profile image upload
+            if ($request->hasFile('profile_image')) {
+                $image = $request->file('profile_image');
+                $imageName = time() . '.' . $image->getClientOriginalExtension();
+                $image->move(public_path('storage/photos'), $imageName);
+                
+                // Delete old photo if exists
+                $oldPhoto = $user->photos()->first();
+                if ($oldPhoto) {
+                    $oldPhoto->delete();
+                }
+                
+                $photo = new Photos([
+                    'src' => 'storage/photos/' . $imageName,
+                ]);
+                $user->photos()->save($photo);
+            }
 
             // Update roles if provided
             if (isset($validatedData['roles'])) {
@@ -298,7 +336,7 @@ class UserController extends Controller
     public function updateStatus(Request $request, $id)
     {
         $user = User::findOrFail($id);
-        $status = $request->input('status');
+        $status = $request->input('is_active');
         
         if (!in_array($status, ['active', 'inactive', 'banned'])) {
             return back()->with('error', 'Invalid status');
@@ -310,6 +348,36 @@ class UserController extends Controller
     }
 
     /**
+     * Ban a user
+     */
+    public function ban($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->update(['is_active' => 'banned']);
+            
+            return back()->with('success', 'User has been banned successfully');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to ban user: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Unban a user
+     */
+    public function unban($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->update(['is_active' => 'active']);
+            
+            return back()->with('success', 'User has been unbanned successfully');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Failed to unban user: ' . $e->getMessage());
+        }
+    }
+
+    /**
      * Reset the specified user's password and display the new password.
      *
      * @param int $id
@@ -317,14 +385,18 @@ class UserController extends Controller
      */
     public function resetPassword($id)
     {
-        $user = User::findOrFail($id);
-        $newPassword = \Str::random(10);
-        $user->password = \Hash::make($newPassword);
-        $user->save();
+        try {
+            $user = User::findOrFail($id);
+            $newPassword = \Str::random(10);
+            $user->password = \Hash::make($newPassword);
+            $user->save();
 
-        // Optionally, you can email the new password to the user here.
+            // Optionally, you can email the new password to the user here.
 
-        return redirect()->back()->with('success', 'Password reset successfully! New password: ' . $newPassword);
+            return redirect()->back()->with('success', 'Password reset successfully! New password: ' . $newPassword);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to reset password: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -336,10 +408,14 @@ class UserController extends Controller
      */
     public function sendNotification(Request $request, $id)
     {
-        $user = User::findOrFail($id);
-        $message = $request->input('message', 'This is a notification from the admin panel.');
-        $user->notify(new AdminCustomNotification($message));
-        return redirect()->back()->with('success', 'Notification sent!');
+        try {
+            $user = User::findOrFail($id);
+            $message = $request->input('message', 'This is a notification from the admin panel.');
+            $user->notify(new AdminCustomNotification($message));
+            return redirect()->back()->with('success', 'Notification sent successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to send notification: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -363,15 +439,51 @@ class UserController extends Controller
     }
 
     /**
-     * Impersonate the specified user (placeholder).
+     * Impersonate the specified user.
      *
      * @param int $id
      * @return \Illuminate\Http\RedirectResponse
      */
     public function impersonate($id)
     {
-        // Placeholder: In real use, implement impersonation logic or use a package
-        return redirect()->back()->with('info', 'Impersonation feature is not implemented yet.');
+        try {
+            $user = User::findOrFail($id);
+            
+            // Store current user session
+            session(['impersonator_id' => auth()->id()]);
+            
+            // Login as the target user
+            auth()->login($user);
+            
+            return redirect()->back()->with('success', 'Now impersonating user: ' . $user->name);
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to impersonate user: ' . $e->getMessage());
+        }
+    }
+
+    /**
+     * Stop impersonation and return to original user.
+     *
+     * @return \Illuminate\Http\RedirectResponse
+     */
+    public function stopImpersonation()
+    {
+        try {
+            $impersonatorId = session('impersonator_id');
+            
+            if ($impersonatorId) {
+                $impersonator = User::find($impersonatorId);
+                if ($impersonator) {
+                    auth()->login($impersonator);
+                    session()->forget('impersonator_id');
+                    return redirect()->back()->with('success', 'Stopped impersonation. Back to admin account.');
+                }
+            }
+            
+            return redirect()->back()->with('error', 'No impersonation session found.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to stop impersonation: ' . $e->getMessage());
+        }
     }
 
     /**

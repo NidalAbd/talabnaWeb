@@ -185,9 +185,18 @@
                                         <button type="submit" class="btn btn-xs btn-outline-warning" data-toggle="tooltip" title="Ban"><i class="fas fa-user-slash"></i></button>
                                     </form>
                                 @endif
-                                <a href="{{ route('users.reset_password', $user->id) }}" class="btn btn-xs btn-outline-secondary" data-toggle="tooltip" title="Reset Password"><i class="fas fa-key"></i></a>
-                                <a href="{{ route('users.send_notification', $user->id) }}" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="Send Notification"><i class="fas fa-bell"></i></a>
-                                <a href="{{ route('users.impersonate', $user->id) }}" class="btn btn-xs btn-outline-dark" data-toggle="tooltip" title="Impersonate"><i class="fas fa-user-secret"></i></a>
+                                <form action="{{ route('users.reset_password', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Reset password for this user?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-xs btn-outline-secondary" data-toggle="tooltip" title="Reset Password"><i class="fas fa-key"></i></button>
+                                </form>
+                                <form action="{{ route('users.send_notification', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Send notification to this user?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="Send Notification"><i class="fas fa-bell"></i></button>
+                                </form>
+                                <form action="{{ route('users.impersonate', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Impersonate this user?');">
+                                    @csrf
+                                    <button type="submit" class="btn btn-xs btn-outline-dark" data-toggle="tooltip" title="Impersonate"><i class="fas fa-user-secret"></i></button>
+                                </form>
                                 <a href="{{ route('users.login_history', $user->id) }}" class="btn btn-xs btn-outline-secondary" data-toggle="tooltip" title="Login History"><i class="fas fa-history"></i></a>
                             </td>
                         </tr>
