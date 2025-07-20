@@ -239,7 +239,7 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle mb-0" id="servicePostsTable" style="min-width: 1200px;">
+                <table class="table table-hover table-striped align-middle mb-0" id="servicePostsTable">
                     <thead class="thead-dark sticky-top" style="z-index: 10;">
                         <tr>
                             <th width="40">
@@ -250,13 +250,11 @@
                             <th width="150">User</th>
                             <th width="120">Category</th>
                             <th width="120">Subcategory</th>
-                            <th width="100">Location</th>
                             <th width="100">Status</th>
                             <th width="80">Type</th>
                             <th width="100">Level</th>
                             <th width="80">Views</th>
-                            <th width="100">Created</th>
-                            <th width="200">Actions</th>
+                            <th width="250">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -316,41 +314,14 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="badge badge-secondary">
-                                    {{ $post->subCategory ? ($post->subCategory->name[app()->getLocale()] ?? $post->subCategory->name['en'] ?? 'Unknown') : 'Unknown' }}
+                                <span class="badge badge-{{ $post->subCategory ? 'primary' : 'secondary' }}">
+                                    {{ $post->subCategory ? $post->subCategory->display_name : 'N/A' }}
                                 </span>
                             </td>
                             <td>
-                                <div class="small">
-                                    <div>{{ $post->city ? ($post->city->name[app()->getLocale()] ?? $post->city->name['en'] ?? 'Unknown') : 'Unknown' }}</div>
-                                    <div class="text-muted">{{ $post->country ? ($post->country->name[app()->getLocale()] ?? $post->country->name['en'] ?? 'Unknown') : 'Unknown' }}</div>
-                                </div>
-                            </td>
-                            <td>
-                                @switch($post->state)
-                                    @case('published')
-                                        <span class="badge badge-success status-badge">
-                                            <i class="fas fa-check-circle"></i> Published
-                                        </span>
-                                        @break
-                                    @case('not published')
-                                        <span class="badge badge-warning status-badge">
-                                            <i class="fas fa-clock"></i> Pending
-                                        </span>
-                                        @break
-                                    @case('rejected')
-                                        <span class="badge badge-danger status-badge">
-                                            <i class="fas fa-times-circle"></i> Rejected
-                                        </span>
-                                        @break
-                                    @case('archive')
-                                        <span class="badge badge-secondary status-badge">
-                                            <i class="fas fa-archive"></i> Archived
-                                        </span>
-                                        @break
-                                    @default
-                                        <span class="badge badge-info status-badge">{{ ucfirst($post->state) }}</span>
-                                @endswitch
+                                <span class="badge badge-{{ $post->state == 'published' ? 'success' : ($post->state == 'archive' ? 'warning' : 'secondary') }}">
+                                    {{ ucfirst($post->state) }}
+                                </span>
                             </td>
                             <td>
                                 <span class="premium-badge">
@@ -378,47 +349,35 @@
                                 </span>
                             </td>
                             <td>
-                                <div class="small">
-                                    <div>{{ $post->created_at ? $post->created_at->format('Y-m-d') : '-' }}</div>
-                                    <div class="text-muted">{{ $post->created_at ? $post->created_at->format('H:i') : '-' }}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <div class="btn-group" role="group">
-                                    <button type="button" class="btn btn-sm btn-outline-primary dropdown-toggle" data-toggle="dropdown">
-                                        <i class="fas fa-cog"></i> Actions
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-outline-info" data-toggle="tooltip" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ route('service_posts.edit', $post->id) }}" class="btn btn-outline-primary" data-toggle="tooltip" title="Edit">
+                                        <i class="fas fa-edit"></i>
+                                    </a>
+                                    <button type="button" class="btn btn-outline-success" data-toggle="tooltip" title="Upgrade Level" onclick="showLevelUpgrade({{ $post->id }})">
+                                        <i class="fas fa-level-up-alt"></i>
                                     </button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="{{ route('service_posts.show', $post->id) }}">
-                                            <i class="fas fa-eye mr-2"></i> View
-                                        </a>
-                                        <a class="dropdown-item" href="{{ route('service_posts.edit', $post->id) }}">
-                                            <i class="fas fa-edit mr-2"></i> Edit
-                                        </a>
-                                        <button type="button" class="dropdown-item" onclick="showLevelUpgrade({{ $post->id }})">
-                                            <i class="fas fa-level-up-alt mr-2"></i> Upgrade Level
+                                    @if($post->state == 'not published')
+                                        <button type="button" class="btn btn-outline-warning" data-toggle="tooltip" title="Approve" onclick="approveServicePost({{ $post->id }})">
+                                            <i class="fas fa-check"></i>
                                         </button>
-                                        @if($post->state == 'not published')
-                                            <button type="button" class="dropdown-item" onclick="approveServicePost({{ $post->id }})">
-                                                <i class="fas fa-check mr-2"></i> Approve
-                                            </button>
-                                        @endif
-                                        @if($post->state == 'published')
-                                            <button type="button" class="dropdown-item" onclick="rejectServicePost({{ $post->id }})">
-                                                <i class="fas fa-times mr-2"></i> Reject
-                                            </button>
-                                        @endif
-                                        <div class="dropdown-divider"></div>
-                                        <button type="button" class="dropdown-item text-danger" onclick="deleteServicePost({{ $post->id }})">
-                                            <i class="fas fa-trash mr-2"></i> Delete
+                                    @endif
+                                    @if($post->state == 'published')
+                                        <button type="button" class="btn btn-outline-warning" data-toggle="tooltip" title="Reject" onclick="rejectServicePost({{ $post->id }})">
+                                            <i class="fas fa-times"></i>
                                         </button>
-                                    </div>
+                                    @endif
+                                    <button type="button" class="btn btn-outline-danger" data-toggle="tooltip" title="Delete" onclick="deleteServicePost({{ $post->id }})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="13" class="text-center py-5">
+                            <td colspan="11" class="text-center py-5">
                                 <div class="alert alert-info m-0">
                                     <i class="fas fa-info-circle mr-2"></i>
                                     No service posts found matching your criteria.
@@ -1604,15 +1563,37 @@
         border-radius: 0.5rem 0.5rem 0 0;
     }
     
-    /* Dropdown enhancements */
-    .dropdown-menu {
-        border-radius: 0.375rem;
-        border: none;
-        box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    /* Action button improvements - matching users index */
+    .btn-group .btn {
+        margin-right: 1px;
+        padding: 0.375rem 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.2;
+        border-radius: 0.2rem;
     }
     
-    .dropdown-item:hover {
-        background-color: #f8f9fa;
+    .btn-group .btn:last-child {
+        margin-right: 0;
+    }
+    
+    /* Ensure action buttons are always visible */
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+    
+    /* Responsive improvements for action buttons */
+    @media (max-width: 768px) {
+        .btn-group .btn {
+            padding: 0.25rem 0.4rem;
+            font-size: 0.75rem;
+        }
+        
+        .btn-group-sm .btn {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.7rem;
+        }
     }
     
     /* Pagination enhancements */

@@ -112,8 +112,6 @@
                         <th>User ID</th>
                         <th>Name</th>
                         <th>Email</th>
-                        <th>Phone</th>
-                        <th>Gender</th>
                         <th>Status</th>
                         <th>Roles</th>
                         <th>Posts</th>
@@ -138,14 +136,6 @@
                                 <small class="text-muted">{{ $user->user_name }}</small>
                             </td>
                             <td><a href="mailto:{{ $user->email }}" class="text-primary">{{ $user->email }}</a></td>
-                            <td>{{ $user->phones }}</td>
-                            <td>
-                                @if($user->gender == 'ذكر')
-                                    <span class="badge badge-info"><i class="fas fa-mars"></i> Male</span>
-                                @else
-                                    <span class="badge badge-pink"><i class="fas fa-venus"></i> Female</span>
-                                @endif
-                            </td>
                             <td>
                                 @if($user->is_active == 'active')
                                     <span class="badge badge-success"><i class="fas fa-check-circle"></i> Active</span>
@@ -167,17 +157,17 @@
                             <td><span class="badge badge-danger">{{ $user->reports_count ?? 0 }}</span></td>
                             <td><span class="text-muted">{{ $user->created_at ? $user->created_at->format('Y-m-d') : '-' }}</span></td>
                             <td>
-                                <div class="btn-group" role="group">
-                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
-                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-xs btn-outline-primary" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
+                                <div class="btn-group btn-group-sm" role="group">
+                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-outline-info" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
+                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-outline-primary" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
                                     
                                     <!-- Balance Button -->
-                                    <button type="button" class="btn btn-xs btn-outline-success" data-toggle="tooltip" title="Balance: {{ $user->pointsBalance ?? 0 }} points" onclick="showBalanceModal({{ $user->id }}, '{{ $user->name }}', {{ $user->pointsBalance ?? 0 }})">
+                                    <button type="button" class="btn btn-outline-success" data-toggle="tooltip" title="Balance: {{ $user->pointsBalance ?? 0 }} points" onclick="showBalanceModal({{ $user->id }}, '{{ $user->name }}', {{ $user->pointsBalance ?? 0 }})">
                                         <i class="fas fa-coins"></i>
                                     </button>
                                     
                                     <!-- Role Assignment Link -->
-                                    <a href="{{ route('role-assignments.edit', $user->id) }}" class="btn btn-xs btn-outline-warning" data-toggle="tooltip" title="Assign Roles & Permissions">
+                                    <a href="{{ route('role-assignments.edit', $user->id) }}" class="btn btn-outline-warning" data-toggle="tooltip" title="Assign Roles & Permissions">
                                         <i class="fas fa-user-shield"></i>
                                     </a>
                                     
@@ -185,12 +175,12 @@
                                     @if($user->is_active == 'banned')
                                         <form action="{{ route('users.unban', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Unban this user?');">
                                             @csrf
-                                            <button type="submit" class="btn btn-xs btn-outline-success" data-toggle="tooltip" title="Unban"><i class="fas fa-unlock"></i></button>
+                                            <button type="submit" class="btn btn-outline-success" data-toggle="tooltip" title="Unban"><i class="fas fa-unlock"></i></button>
                                         </form>
                                     @else
                                         <form action="{{ route('users.ban', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Ban this user?');">
                                             @csrf
-                                            <button type="submit" class="btn btn-xs btn-outline-warning" data-toggle="tooltip" title="Ban"><i class="fas fa-user-slash"></i></button>
+                                            <button type="submit" class="btn btn-outline-warning" data-toggle="tooltip" title="Ban"><i class="fas fa-user-slash"></i></button>
                                         </form>
                                     @endif
                                     
@@ -198,17 +188,17 @@
                                     <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this user?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-outline-danger" data-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
+                                        <button type="submit" class="btn btn-outline-danger" data-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
                                     </form>
                                     
                                     <!-- History Button -->
-                                    <a href="{{ route('users.login_history', $user->id) }}" class="btn btn-xs btn-outline-secondary" data-toggle="tooltip" title="Login History"><i class="fas fa-history"></i></a>
+                                    <a href="{{ route('users.login_history', $user->id) }}" class="btn btn-outline-secondary" data-toggle="tooltip" title="Login History"><i class="fas fa-history"></i></a>
                                 </div>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="12" class="text-center py-4">
+                            <td colspan="10" class="text-center py-4">
                                 <div class="alert alert-info m-0">
                                     <i class="fas fa-info-circle mr-2"></i>
                                     No users found.
@@ -388,16 +378,32 @@
     .table td, .table th { vertical-align: middle !important; }
     .card { transition: box-shadow 0.2s; }
     .card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
-    .btn-xs { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
     .badge-pink { background: #e83e8c; color: #fff; }
     .img-circle { border-radius: 50%; }
     
-    /* Button group styling */
+    /* Button group styling - improved for better visibility */
     .btn-group .btn {
-        margin-right: 2px;
+        margin-right: 1px;
+        padding: 0.375rem 0.5rem;
+        font-size: 0.875rem;
+        line-height: 1.2;
+        border-radius: 0.2rem;
     }
     .btn-group .btn:last-child {
         margin-right: 0;
+    }
+    
+    /* Ensure action buttons are always visible */
+    .btn-group-sm .btn {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        line-height: 1.2;
+    }
+    
+    /* Make sure forms inside btn-group don't break layout */
+    .btn-group form {
+        display: inline-block;
+        margin: 0;
     }
     
     /* Modal styling */
@@ -420,6 +426,19 @@
     
     .badge {
         font-size: 0.75rem;
+    }
+    
+    /* Responsive improvements for action buttons */
+    @media (max-width: 768px) {
+        .btn-group .btn {
+            padding: 0.25rem 0.4rem;
+            font-size: 0.75rem;
+        }
+        
+        .btn-group-sm .btn {
+            padding: 0.2rem 0.4rem;
+            font-size: 0.7rem;
+        }
     }
 </style>
 @endpush
