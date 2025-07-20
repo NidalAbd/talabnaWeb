@@ -588,8 +588,15 @@
 @endsection
 
 @push('js')
+<script src="{{ asset('js/sweetalert-config.js') }}"></script>
 <script>
     $(function () {
+        // Test if libraries are loaded
+        console.log('jQuery version:', $.fn.jquery);
+        console.log('SweetAlert2 loaded:', typeof Swal !== 'undefined');
+        console.log('DateRangePicker loaded:', typeof $.fn.daterangepicker !== 'undefined');
+        console.log('Moment.js loaded:', typeof moment !== 'undefined');
+        
         // Initialize tooltips
         $('[data-toggle="tooltip"]').tooltip();
 
