@@ -172,7 +172,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Advanced Filters Collapse -->
                 <div class="collapse mt-3" id="advancedFilters">
                     <div class="card card-body bg-light">
@@ -275,11 +275,11 @@
                                             $photo = $post->photos->first();
                                             $imgSrc = $photo->is_external ? $photo->src : asset($photo->src);
                                         @endphp
-                                        <img src="{{ $imgSrc }}" alt="Post Image" 
+                                        <img src="{{ $imgSrc }}" alt="Post Image"
                                              class="img-thumbnail mr-3" style="width: 50px; height: 50px; object-fit: cover;"
                                              data-toggle="tooltip" title="Click to view full image">
                                     @else
-                                        <div class="media-placeholder mr-3" style="width: 50px; height: 50px;" 
+                                        <div class="media-placeholder mr-3" style="width: 50px; height: 50px;"
                                              data-toggle="tooltip" title="No media available">
                                             <i class="fas fa-image"></i>
                                         </div>
@@ -590,7 +590,7 @@
     $(function () {
         // Initialize tooltips
         $('[data-toggle="tooltip"]').tooltip();
-        
+
         // Initialize Select2
         $('.select2').select2({
             theme: 'bootstrap4',
@@ -618,11 +618,11 @@
             const categoryId = $(this).val();
             const $subcategoryFilter = $('#subcategory-filter');
             const $subcategoryContainer = $subcategoryFilter.closest('.col-md-2');
-            
+
             // Show loading state
             $subcategoryFilter.prop('disabled', true);
             $subcategoryFilter.html('<option value="">Loading...</option>');
-            
+
             if (categoryId) {
                 $.ajax({
                     url: "{{ route('fetchSubcategories') }}",
@@ -630,7 +630,7 @@
                     data: { category_id: categoryId },
                     success: function(subcategories) {
                         $subcategoryFilter.html('<option value="">All Subcategories</option>');
-                        
+
                         if (subcategories.length > 0) {
                             subcategories.forEach(function(subcat) {
                                 const name = subcat.name['{{ app()->getLocale() }}'] || subcat.name['en'] || 'Unknown';
@@ -642,7 +642,7 @@
                             $subcategoryFilter.html('<option value="">No subcategories found</option>');
                             $subcategoryFilter.prop('disabled', true);
                         }
-                        
+
                         $subcategoryFilter.select2('destroy').select2({
                             theme: 'bootstrap4',
                             width: '100%'
@@ -727,7 +727,7 @@
     function updateSelectedCount() {
         const selectedCount = $('.post-checkbox:checked').length;
         $('#selectedCount').text(selectedCount);
-        
+
         // Enable/disable bulk action button
         if (selectedCount > 0) {
             $('#bulkActionsModal .btn-primary').prop('disabled', false);
@@ -740,7 +740,7 @@
     function updateSelectAllState() {
         const totalCheckboxes = $('.post-checkbox').length;
         const checkedCheckboxes = $('.post-checkbox:checked').length;
-        
+
         if (checkedCheckboxes === 0) {
             $('#selectAll').prop('indeterminate', false).prop('checked', false);
         } else if (checkedCheckboxes === totalCheckboxes) {
@@ -754,7 +754,7 @@
     function toggleViewMode() {
         const table = $('#servicePostsTable');
         const icon = $('#viewModeIcon');
-        
+
         if (table.hasClass('compact-view')) {
             table.removeClass('compact-view');
             icon.removeClass('fa-list').addClass('fa-th-large');
@@ -794,7 +794,7 @@
         }
 
         const actionText = $('#bulkAction option:selected').text();
-        
+
         Swal.fire({
             title: 'Confirm Action',
             text: `Are you sure you want to ${actionText.toLowerCase()} ${selectedIds.length} selected posts?`,
@@ -990,7 +990,7 @@
         if (savedFilters.length > 0) {
             const filterSelect = $('<select class="form-control form-control-sm ml-2" style="width: auto;">');
             filterSelect.append('<option value="">Load saved filter...</option>');
-            
+
             savedFilters.forEach(filter => {
                 filterSelect.append(`<option value="${filter}">${filter}</option>`);
             });
@@ -1017,13 +1017,13 @@
             e.preventDefault();
             $('#selectAll').click();
         }
-        
+
         // Ctrl/Cmd + F to focus search
         if ((e.ctrlKey || e.metaKey) && e.keyCode === 70) {
             e.preventDefault();
             $('#search-filter').focus();
         }
-        
+
         // Escape to clear selection
         if (e.keyCode === 27) {
             $('.post-checkbox').prop('checked', false);
@@ -1070,20 +1070,20 @@
                 if (response.success) {
                     availableLevels = response.data.levels;
                     userPoints = response.data.user_points;
-                    
+
                     // Populate level select
                     const $levelSelect = $('#levelSelect');
                     $levelSelect.html('<option value="">Choose a level...</option>');
-                    
+
                     availableLevels.forEach(function(level) {
                         const disabled = !level.can_afford ? 'disabled' : '';
                         const option = `<option value="${level.id}" ${disabled} data-level='${JSON.stringify(level)}'>${level.name}</option>`;
                         $levelSelect.append(option);
                     });
-                    
+
                     // Update user points display
                     $('#userPoints').text(userPoints.toLocaleString());
-                    
+
                     // Show current level info if exists
                     if (response.data.current_level) {
                         const current = response.data.current_level;
@@ -1105,7 +1105,7 @@
     $('#levelSelect').on('change', function() {
         const selectedLevelId = $(this).val();
         const selectedLevel = availableLevels.find(l => l.id == selectedLevelId);
-        
+
         if (selectedLevel) {
             updateLevelInfo(selectedLevel);
             updatePointsCalculation(selectedLevel);
@@ -1119,7 +1119,7 @@
     $('#levelDuration').on('input', function() {
         const selectedLevelId = $('#levelSelect').val();
         const selectedLevel = availableLevels.find(l => l.id == selectedLevelId);
-        
+
         if (selectedLevel) {
             updatePointsCalculation(selectedLevel);
         }
@@ -1144,14 +1144,14 @@
     function updatePointsCalculation(level) {
         const duration = parseInt($('#levelDuration').val()) || 0;
         const requiredPoints = level.points_per_day * duration;
-        
+
         // For admin users, always show as affordable
         $('#requiredPoints').text(requiredPoints.toLocaleString() + ' (Admin)');
         $('#remainingPoints').text('∞ (Admin)');
-        
+
         // Always enable upgrade button for admin
         $('#upgradeLevelBtn').prop('disabled', false);
-        
+
         // Update colors for admin display
         $('#requiredPoints').removeClass('text-danger text-success').addClass('text-info');
         $('#remainingPoints').removeClass('text-danger text-success').addClass('text-success');
@@ -1161,12 +1161,12 @@
     function upgradeServicePostLevel() {
         const levelId = $('#levelSelect').val();
         const duration = $('#levelDuration').val();
-        
+
         if (!levelId || !duration) {
             Swal.fire('Error', 'Please select a level and duration', 'error');
             return;
         }
-        
+
         Swal.fire({
             title: 'Confirm Admin Upgrade',
             text: `Are you sure you want to upgrade this service post to the selected level for ${duration} days? (Admin action - no point restrictions)`,
@@ -1227,7 +1227,7 @@
                     const packages = response.data.packages;
                     const $container = $('#packagesContainer');
                     $container.empty();
-                    
+
                     packages.forEach(function(package) {
                         const features = package.features ? package.features.map(f => `<li>${f}</li>`).join('') : '';
                         const packageHtml = `
@@ -1408,7 +1408,7 @@
     $(document).on('click', '.img-thumbnail', function() {
         const imgSrc = $(this).attr('src');
         const imgAlt = $(this).attr('alt');
-        
+
         // Create modal for full-size image view
         const modal = `
             <div class="modal fade" id="imageModal" tabindex="-1" role="dialog">
@@ -1430,22 +1430,22 @@
                 </div>
             </div>
         `;
-        
+
         // Remove existing modal if any
         $('#imageModal').remove();
-        
+
         // Add new modal to body
         $('body').append(modal);
-        
+
         // Show modal
         $('#imageModal').modal('show');
     });
-    
+
     // Clean up modal on hide
     $(document).on('hidden.bs.modal', '#imageModal', function() {
         $(this).remove();
     });
-    
+
     // Make Post Level function
     function makePostLevel(postId) {
         Swal.fire({
@@ -1468,7 +1468,7 @@
                         Swal.showLoading();
                     }
                 });
-                
+
                 // AJAX call to make post level
                 $.ajax({
                     url: `/service-posts/${postId}/make-level`,
@@ -1492,7 +1492,7 @@
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
                         }
-                        
+
                         Swal.fire({
                             title: 'Error!',
                             text: errorMessage,
@@ -1510,7 +1510,7 @@
         $('#levelUpgradeModal').modal('show');
         loadAdminLevels(postId);
     }
-    
+
     // Load available levels for admin (no point restrictions)
     function loadAdminLevels(postId) {
         $.ajax({
@@ -1520,22 +1520,22 @@
                 if (response.success) {
                     availableLevels = response.data.levels;
                     userPoints = response.data.user_points;
-                    
+
                     // Populate level select - ADMIN VERSION (no restrictions)
                     const $levelSelect = $('#levelSelect');
                     $levelSelect.html('<option value="">Choose a level...</option>');
-                    
+
                     availableLevels.forEach(function(level) {
                         // Remove point restrictions for admin - all levels are enabled
                         const option = `<option value="${level.id}" data-level='${JSON.stringify(level)}'>${level.name} (${level.points_per_day} points/day)</option>`;
                         $levelSelect.append(option);
                     });
-                    
+
                     // Update user points display (show as unlimited for admin)
                     $('#userPoints').text('∞ (Admin)');
                     $('#requiredPoints').text('0 (Admin)');
                     $('#remainingPoints').text('∞ (Admin)');
-                    
+
                     // Show current level info if exists
                     if (response.data.current_level) {
                         const current = response.data.current_level;
@@ -1545,7 +1545,7 @@
                             <strong>Remaining Days:</strong> ${current.remaining_days || 0}
                         `);
                     }
-                    
+
                     // Enable upgrade button for admin
                     $('#upgradeLevelBtn').prop('disabled', false);
                 }
@@ -1555,7 +1555,7 @@
             }
         });
     }
-    
+
     // Admin Level Downgrade function
     function adminLevelDowngrade(postId) {
         Swal.fire({
@@ -1577,7 +1577,7 @@
                         Swal.showLoading();
                     }
                 });
-                
+
                 // AJAX call to remove premium level
                 $.ajax({
                     url: `/service_posts/${postId}/admin-downgrade`,
@@ -1601,7 +1601,7 @@
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMessage = xhr.responseJSON.message;
                         }
-                        
+
                         Swal.fire({
                             title: 'Error!',
                             text: errorMessage,
@@ -1618,169 +1618,169 @@
 @push('css')
 <style>
     /* Enhanced table styles */
-    .table thead th { 
-        background: #f8f9fa; 
+    .table thead th {
+        background: #f8f9fa;
         border-bottom: 2px solid #dee2e6;
         font-weight: 600;
         text-transform: uppercase;
         font-size: 0.8rem;
         letter-spacing: 0.5px;
     }
-    
-    .table td, .table th { 
-        vertical-align: middle !important; 
+
+    .table td, .table th {
+        vertical-align: middle !important;
         padding: 0.75rem;
     }
-    
+
     .table tbody tr:hover {
         background-color: rgba(0,123,255,0.05);
         transform: scale(1.001);
         transition: all 0.2s ease;
     }
-    
+
     /* Card enhancements */
-    .card { 
-        transition: box-shadow 0.3s ease, transform 0.2s ease; 
+    .card {
+        transition: box-shadow 0.3s ease, transform 0.2s ease;
         border: none;
         border-radius: 0.5rem;
     }
-    
-    .card:hover { 
+
+    .card:hover {
         box-shadow: 0 8px 32px rgba(0,0,0,0.12);
         transform: translateY(-2px);
     }
-    
+
     /* Button enhancements */
     .btn-group-sm .btn {
         padding: 0.25rem 0.5rem;
         font-size: 0.8rem;
         border-radius: 0.2rem;
     }
-    
+
     .btn-group-sm .btn:hover {
         transform: translateY(-1px);
         box-shadow: 0 2px 8px rgba(0,0,0,0.15);
     }
-    
+
     /* Badge enhancements */
     .badge {
         font-size: 0.75rem;
         padding: 0.35em 0.65em;
         border-radius: 0.375rem;
     }
-    
+
     /* Avatar styles */
     .avatar {
         border: 2px solid #fff;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
-    
+
     /* Compact view */
     .compact-view td {
         padding: 0.5rem;
         font-size: 0.9rem;
     }
-    
+
     .compact-view .btn-group-sm .btn {
         padding: 0.2rem 0.4rem;
         font-size: 0.75rem;
     }
-    
+
     /* Loading states */
     .loading {
         opacity: 0.6;
         pointer-events: none;
     }
-    
+
     /* Animation for status changes */
     .status-badge, .premium-badge {
         transition: all 0.3s ease;
     }
-    
+
     .status-badge.updated, .premium-badge.updated {
         animation: pulse 0.6s ease-in-out;
     }
-    
+
     @keyframes pulse {
         0% { transform: scale(1); }
         50% { transform: scale(1.1); }
         100% { transform: scale(1); }
     }
-    
+
     /* Responsive improvements */
     @media (max-width: 768px) {
         .table-responsive {
             font-size: 0.9rem;
         }
-        
+
         .btn-group-sm .btn {
             padding: 0.2rem 0.4rem;
             font-size: 0.75rem;
         }
-        
+
         .badge {
             font-size: 0.7rem;
             padding: 0.25em 0.5em;
         }
     }
-    
+
     /* Custom scrollbar */
     .table-responsive::-webkit-scrollbar {
         height: 8px;
     }
-    
+
     .table-responsive::-webkit-scrollbar-track {
         background: #f1f1f1;
         border-radius: 4px;
     }
-    
+
     .table-responsive::-webkit-scrollbar-thumb {
         background: #c1c1c1;
         border-radius: 4px;
     }
-    
+
     .table-responsive::-webkit-scrollbar-thumb:hover {
         background: #a8a8a8;
     }
-    
+
     /* Info box enhancements */
     .info-box {
         border-radius: 0.5rem;
         overflow: hidden;
     }
-    
+
     .info-box-icon {
         border-radius: 0;
     }
-    
+
     .info-box-number {
         font-size: 1.5rem;
         font-weight: 700;
     }
-    
+
     /* Filter form enhancements */
     .form-control:focus {
         border-color: #80bdff;
         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
-    
+
     .select2-container--bootstrap4 .select2-selection--single {
         border-radius: 0.375rem;
     }
-    
+
     /* Modal enhancements */
     .modal-content {
         border-radius: 0.5rem;
         border: none;
         box-shadow: 0 10px 40px rgba(0,0,0,0.2);
     }
-    
+
     .modal-header {
         border-bottom: 1px solid #e9ecef;
         background: #f8f9fa;
         border-radius: 0.5rem 0.5rem 0 0;
     }
-    
+
     /* Action button improvements - matching users index */
     .btn-group .btn {
         margin-right: 1px;
@@ -1789,37 +1789,37 @@
         line-height: 1.2;
         border-radius: 0.2rem;
     }
-    
+
     .btn-group .btn:last-child {
         margin-right: 0;
     }
-    
+
     /* Ensure action buttons are always visible */
     .btn-group-sm .btn {
         padding: 0.25rem 0.5rem;
         font-size: 0.8rem;
         line-height: 1.2;
     }
-    
+
     /* Responsive improvements for action buttons */
     @media (max-width: 768px) {
         .btn-group .btn {
             padding: 0.25rem 0.4rem;
             font-size: 0.75rem;
         }
-        
+
         .btn-group-sm .btn {
             padding: 0.2rem 0.4rem;
             font-size: 0.7rem;
         }
     }
-    
+
     /* Pagination enhancements */
     .pagination .page-link {
         border-radius: 0.25rem;
         margin: 0 0.125rem;
     }
-    
+
     .pagination .page-item.active .page-link {
         background-color: #007bff;
         border-color: #007bff;
@@ -1831,12 +1831,12 @@
         border: 1px solid #dee2e6;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
     }
-    
+
     .img-thumbnail:hover {
         transform: scale(1.05);
         box-shadow: 0 4px 12px rgba(0,0,0,0.15);
     }
-    
+
     /* Media placeholder styles */
     .media-placeholder {
         background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -1847,53 +1847,53 @@
         justify-content: center;
         transition: all 0.2s ease;
     }
-    
+
     .media-placeholder:hover {
         background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
         transform: scale(1.05);
     }
-    
+
     .media-placeholder i {
         font-size: 1.2rem;
         color: #6c757d;
     }
-    
+
     /* Crown button styling for level posts */
     .btn-outline-warning .fa-crown {
         color: #ffc107;
     }
-    
+
     .btn-outline-warning:hover .fa-crown {
         color: #fff;
     }
-    
+
     /* Level upgrade/downgrade button styling */
     .btn-outline-success .fa-level-up-alt {
         color: #28a745;
     }
-    
+
     .btn-outline-success:hover .fa-level-up-alt {
         color: #fff;
     }
-    
+
     .btn-outline-danger .fa-level-down-alt {
         color: #dc3545;
     }
-    
+
     .btn-outline-danger:hover .fa-level-down-alt {
         color: #fff;
     }
-    
+
     /* Admin level upgrade modal styling */
     .modal-title:contains('Level') {
         color: #28a745;
     }
-    
+
     /* Admin points display styling */
     .text-info {
         color: #17a2b8 !important;
     }
-    
+
     /* Action button improvements - matching users index */
 </style>
 @endpush
