@@ -33,6 +33,7 @@ use App\Models\Sub_categories;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -61,6 +62,29 @@ Route::get('/test-users', function() {
         ]
     ]);
 })->name('test.users');
+
+// Test route for debugging
+Route::get('/test-service-posts', function () {
+    try {
+        $user = Auth::user();
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Test route working',
+            'user_id' => $user->id ?? 'not authenticated',
+            'user_permissions' => $user ? $user->permissions()->pluck('name')->toArray() : [],
+            'user_roles' => $user ? $user->roles()->pluck('name')->toArray() : [],
+            'has_service_posts_index' => $user ? $user->hasPermission('service_posts_index') : false,
+            'database_connection' => DB::connection()->getPdo() ? 'connected' : 'failed'
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine()
+        ], 500);
+    }
+});
 
 
 // Deep Link Routes

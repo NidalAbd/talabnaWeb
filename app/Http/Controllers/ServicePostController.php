@@ -44,172 +44,227 @@ class ServicePostController extends Controller
 
     public function index(Request $request)
     {
-        $user = Auth::user();
+        try {
+            $user = Auth::user();
+            
+            // Log the request for debugging
+            \Log::info('ServicePostController@index called', [
+                'user_id' => $user->id ?? 'not authenticated',
+                'user_permissions' => $user->permissions()->pluck('name')->toArray() ?? [],
+                'user_roles' => $user->roles()->pluck('name')->toArray() ?? [],
+                'request_url' => $request->fullUrl(),
+                'request_method' => $request->method()
+            ]);
 
-        // Check if the user has the required permissions to view all service posts
-        if ($user->hasPermission('service_posts_index')) {
-            // Start with the base query
-            $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city', 'level');
+            // Check if the user has the required permissions to view all service posts
+            if ($user->hasPermission('service_posts_index')) {
+                \Log::info('User has service_posts_index permission');
+                
+                // Start with the base query
+                $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city', 'level');
 
-            // Apply category filter
-            if ($request->has('category') && $request->category) {
-                $query->where('categories_id', $request->category);
-            }
-
-            // Apply subcategory filter
-            if ($request->has('subcategory') && $request->subcategory) {
-                $query->where('sub_categories_id', $request->subcategory);
-            }
-
-            // Apply status filter
-            if ($request->has('status') && $request->status) {
-                $query->where('state', $request->status);
-            }
-
-            // Apply type filter
-            if ($request->has('type') && $request->type) {
-                $query->where('type', $request->type);
-            }
-
-            // Apply premium filter
-            if ($request->has('premium') && $request->premium !== '') {
-                $query->where('is_premium', $request->premium);
-            }
-
-            // Apply level filter
-            if ($request->has('level') && $request->level) {
-                $query->where('level_id', $request->level);
-            }
-
-            // Apply user filter
-            if ($request->has('user') && $request->user) {
-                $query->where('user_id', $request->user);
-            }
-
-            // Apply city filter
-            if ($request->has('city') && $request->city) {
-                $query->where('city_id', $request->city);
-            }
-
-            // Apply country filter
-            if ($request->has('country') && $request->country) {
-                $query->where('country_id', $request->country);
-            }
-
-            // Apply minimum views filter
-            if ($request->has('min_views') && $request->min_views) {
-                $query->where('view_count', '>=', $request->min_views);
-            }
-
-            // Apply date range filter
-            if ($request->has('date_range') && $request->date_range) {
-                $dates = explode(' - ', $request->date_range);
-                if (count($dates) === 2) {
-                    $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($dates[0]))->startOfDay();
-                    $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($dates[1]))->endOfDay();
-                    $query->whereBetween('created_at', [$startDate, $endDate]);
+                // Apply category filter
+                if ($request->has('category') && $request->category) {
+                    $query->where('categories_id', $request->category);
                 }
+
+                // Apply subcategory filter
+                if ($request->has('subcategory') && $request->subcategory) {
+                    $query->where('sub_categories_id', $request->subcategory);
+                }
+
+                // Apply status filter
+                if ($request->has('status') && $request->status) {
+                    $query->where('state', $request->status);
+                }
+
+                // Apply type filter
+                if ($request->has('type') && $request->type) {
+                    $query->where('type', $request->type);
+                }
+
+                // Apply premium filter
+                if ($request->has('premium') && $request->premium !== '') {
+                    $query->where('is_premium', $request->premium);
+                }
+
+                // Apply level filter
+                if ($request->has('level') && $request->level) {
+                    $query->where('level_id', $request->level);
+                }
+
+                // Apply user filter
+                if ($request->has('user') && $request->user) {
+                    $query->where('user_id', $request->user);
+                }
+
+                // Apply city filter
+                if ($request->has('city') && $request->city) {
+                    $query->where('city_id', $request->city);
+                }
+
+                // Apply country filter
+                if ($request->has('country') && $request->country) {
+                    $query->where('country_id', $request->country);
+                }
+
+                // Apply minimum views filter
+                if ($request->has('min_views') && $request->min_views) {
+                    $query->where('view_count', '>=', $request->min_views);
+                }
+
+                // Apply date range filter
+                if ($request->has('date_range') && $request->date_range) {
+                    $dates = explode(' - ', $request->date_range);
+                    if (count($dates) === 2) {
+                        $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($dates[0]))->startOfDay();
+                        $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($dates[1]))->endOfDay();
+                        $query->whereBetween('created_at', [$startDate, $endDate]);
+                    }
+                }
+
+                // Apply search filter
+                if ($request->has('search') && $request->search) {
+                    $searchTerm = $request->search;
+                    $query->where(function($q) use ($searchTerm) {
+                        $q->where('title', 'like', "%{$searchTerm}%")
+                            ->orWhere('description', 'like', "%{$searchTerm}%")
+                            ->orWhere('price', 'like', "%{$searchTerm}%")
+                            ->orWhere('type', 'like', "%{$searchTerm}%")
+                            ->orWhereHas('user', function($userQuery) use ($searchTerm) {
+                                $userQuery->where('name', 'like', "%{$searchTerm}%")
+                                    ->orWhere('user_name', 'like', "%{$searchTerm}%")
+                                    ->orWhere('email', 'like', "%{$searchTerm}%");
+                            })
+                            ->orWhereHas('category', function($categoryQuery) use ($searchTerm) {
+                                $categoryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
+                                    ->orWhere('name->en', 'like', "%{$searchTerm}%")
+                                    ->orWhere('name->ar', 'like', "%{$searchTerm}%");
+                            })
+                            ->orWhereHas('subCategory', function($subCategoryQuery) use ($searchTerm) {
+                                $subCategoryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
+                                    ->orWhere('name->en', 'like', "%{$searchTerm}%")
+                                    ->orWhere('name->ar', 'like', "%{$searchTerm}%");
+                            })
+                            ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
+                                $cityQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
+                                    ->orWhere('name->en', 'like', "%{$searchTerm}%")
+                                    ->orWhere('name->ar', 'like', "%{$searchTerm}%");
+                            })
+                            ->orWhereHas('country', function($countryQuery) use ($searchTerm) {
+                                $countryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
+                                    ->orWhere('name->en', 'like', "%{$searchTerm}%")
+                                    ->orWhere('name->ar', 'like', "%{$searchTerm}%");
+                            });
+                    });
+                }
+
+                // Get statistics before pagination
+                $totalCount = $query->count();
+                $publishedCount = ServicePost::where('state', 'published')->count();
+                $pendingCount = ServicePost::where('state', 'not published')->count();
+                $premiumCount = ServicePost::where('level_id', '>', 0)->count();
+
+                \Log::info('Service posts statistics', [
+                    'total_count' => $totalCount,
+                    'published_count' => $publishedCount,
+                    'pending_count' => $pendingCount,
+                    'premium_count' => $premiumCount
+                ]);
+
+                // Order by level_id (high to low) then by creation date
+                $perPage = $request->get('per_page', 15);
+                $servicePosts = $query->orderBy('level_id', 'desc')
+                    ->orderBy('created_at', 'desc')
+                    ->paginate($perPage)
+                    ->appends($request->query());
+
+                \Log::info('Service posts paginated', [
+                    'total_posts' => $servicePosts->total(),
+                    'current_page' => $servicePosts->currentPage(),
+                    'per_page' => $perPage
+                ]);
+
+                // Fetch categories and subcategories for dropdowns
+                $categories = Categories::all();
+                $subcategories = $request->has('category')
+                    ? Sub_categories::where('categories_id', $request->category)->get()
+                    : collect();
+
+                // Fetch additional data for advanced filters
+                $users = User::select('id', 'name', 'user_name', 'email')
+                    ->whereHas('servicePosts')
+                    ->orderBy('name')
+                    ->get();
+
+                $cities = cities::select('id', 'name')
+                    ->whereHas('servicePosts')
+                    ->orderBy('name')
+                    ->get();
+
+                $countries = countries::select('id', 'name')
+                    ->whereHas('servicePosts')
+                    ->orderBy('name')
+                    ->get();
+
+                // Fetch levels for filtering
+                try {
+                    $levels = Level::active()->ordered()->get();
+                } catch (\Exception $e) {
+                    \Log::error('Failed to load levels: ' . $e->getMessage());
+                    $levels = collect(); // Empty collection as fallback
+                }
+
+                // Check if featured functionality is available
+                $hasFeaturedColumn = Schema::hasColumn('service_posts', 'is_featured');
+
+                \Log::info('About to return view with data', [
+                    'categories_count' => $categories->count(),
+                    'subcategories_count' => $subcategories->count(),
+                    'users_count' => $users->count(),
+                    'cities_count' => $cities->count(),
+                    'countries_count' => $countries->count(),
+                    'levels_count' => $levels->count(),
+                    'has_featured_column' => $hasFeaturedColumn
+                ]);
+
+                return view('service_posts.index', compact(
+                    'servicePosts', 
+                    'user', 
+                    'categories', 
+                    'subcategories',
+                    'users',
+                    'cities', 
+                    'countries',
+                    'levels',
+                    'totalCount',
+                    'publishedCount',
+                    'pendingCount',
+                    'premiumCount',
+                    'hasFeaturedColumn'
+                ));
+            } else {
+                \Log::warning('User does not have service_posts_index permission', [
+                    'user_id' => $user->id ?? 'not authenticated',
+                    'user_permissions' => $user->permissions()->pluck('name')->toArray() ?? []
+                ]);
+                return view('errors.403');
             }
-
-            // Apply search filter
-            if ($request->has('search') && $request->search) {
-                $searchTerm = $request->search;
-                $query->where(function($q) use ($searchTerm) {
-                    $q->where('title', 'like', "%{$searchTerm}%")
-                        ->orWhere('description', 'like', "%{$searchTerm}%")
-                        ->orWhere('price', 'like', "%{$searchTerm}%")
-                        ->orWhere('type', 'like', "%{$searchTerm}%")
-                        ->orWhereHas('user', function($userQuery) use ($searchTerm) {
-                            $userQuery->where('name', 'like', "%{$searchTerm}%")
-                                ->orWhere('user_name', 'like', "%{$searchTerm}%")
-                                ->orWhere('email', 'like', "%{$searchTerm}%");
-                        })
-                        ->orWhereHas('category', function($categoryQuery) use ($searchTerm) {
-                            $categoryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
-                                ->orWhere('name->en', 'like', "%{$searchTerm}%")
-                                ->orWhere('name->ar', 'like', "%{$searchTerm}%");
-                        })
-                        ->orWhereHas('subCategory', function($subCategoryQuery) use ($searchTerm) {
-                            $subCategoryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
-                                ->orWhere('name->en', 'like', "%{$searchTerm}%")
-                                ->orWhere('name->ar', 'like', "%{$searchTerm}%");
-                        })
-                        ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
-                            $cityQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
-                                ->orWhere('name->en', 'like', "%{$searchTerm}%")
-                                ->orWhere('name->ar', 'like', "%{$searchTerm}%");
-                        })
-                        ->orWhereHas('country', function($countryQuery) use ($searchTerm) {
-                            $countryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
-                                ->orWhere('name->en', 'like', "%{$searchTerm}%")
-                                ->orWhere('name->ar', 'like', "%{$searchTerm}%");
-                        });
-                });
-            }
-
-            // Get statistics before pagination
-            $totalCount = $query->count();
-            $publishedCount = ServicePost::where('state', 'published')->count();
-            $pendingCount = ServicePost::where('state', 'not published')->count();
-            $premiumCount = ServicePost::where('level_id', '>', 0)->count();
-
-            // Order by level_id (high to low) then by creation date
-            $perPage = $request->get('per_page', 15);
-            $servicePosts = $query->orderBy('level_id', 'desc')
-                ->orderBy('created_at', 'desc')
-                ->paginate($perPage)
-                ->appends($request->query());
-
-            // Fetch categories and subcategories for dropdowns
-            $categories = Categories::all();
-            $subcategories = $request->has('category')
-                ? Sub_categories::where('categories_id', $request->category)->get()
-                : collect();
-
-            // Fetch additional data for advanced filters
-            $users = User::select('id', 'name', 'user_name', 'email')
-                ->whereHas('servicePosts')
-                ->orderBy('name')
-                ->get();
-
-            $cities = cities::select('id', 'name')
-                ->whereHas('servicePosts')
-                ->orderBy('name')
-                ->get();
-
-            $countries = countries::select('id', 'name')
-                ->whereHas('servicePosts')
-                ->orderBy('name')
-                ->get();
-
-            // Fetch levels for filtering
-            try {
-                $levels = Level::active()->ordered()->get();
-            } catch (\Exception $e) {
-                Log::error('Failed to load levels: ' . $e->getMessage());
-                $levels = collect(); // Empty collection as fallback
-            }
-
-            // Check if featured functionality is available
-            $hasFeaturedColumn = Schema::hasColumn('service_posts', 'is_featured');
-
-            return view('service_posts.index', compact(
-                'servicePosts', 
-                'user', 
-                'categories', 
-                'subcategories',
-                'users',
-                'cities', 
-                'countries',
-                'levels',
-                'totalCount',
-                'publishedCount',
-                'pendingCount',
-                'premiumCount',
-                'hasFeaturedColumn'
-            ));
-        } else {
-            return view('errors.403');
+        } catch (\Exception $e) {
+            \Log::error('Error in ServicePostController@index', [
+                'error' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
+            // Return a simple error response for debugging
+            return response()->json([
+                'error' => 'An error occurred while loading service posts',
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
+            ], 500);
         }
     }
 

@@ -23,6 +23,24 @@
 @stop
 
 @section('content')
+<!-- Debug Information (remove in production) -->
+@if(config('app.debug'))
+<div class="alert alert-info">
+    <strong>Debug Info:</strong>
+    <ul>
+        <li>User ID: {{ $user->id ?? 'N/A' }}</li>
+        <li>User Permissions: {{ $user ? implode(', ', $user->permissions()->pluck('name')->toArray()) : 'N/A' }}</li>
+        <li>Service Posts Count: {{ $servicePosts->total() ?? 'N/A' }}</li>
+        <li>Categories Count: {{ $categories->count() ?? 'N/A' }}</li>
+        <li>Subcategories Count: {{ $subcategories->count() ?? 'N/A' }}</li>
+        <li>Users Count: {{ $users->count() ?? 'N/A' }}</li>
+        <li>Cities Count: {{ $cities->count() ?? 'N/A' }}</li>
+        <li>Countries Count: {{ $countries->count() ?? 'N/A' }}</li>
+        <li>Levels Count: {{ $levels->count() ?? 'N/A' }}</li>
+    </ul>
+</div>
+@endif
+
 <div class="container-fluid">
     <!-- Statistics Cards -->
     <div class="row mb-4">
