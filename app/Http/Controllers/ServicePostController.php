@@ -46,19 +46,9 @@ class ServicePostController extends Controller
     {
         try {
             $user = Auth::user();
-            
-            // Log the request for debugging
-            \Log::info('ServicePostController@index called', [
-                'user_id' => $user->id ?? 'not authenticated',
-                'user_permissions' => $user->permissions()->pluck('name')->toArray() ?? [],
-                'user_roles' => $user->roles()->pluck('name')->toArray() ?? [],
-                'request_url' => $request->fullUrl(),
-                'request_method' => $request->method()
-            ]);
 
             // Check if the user has the required permissions to view all service posts
             if ($user->hasPermission('service_posts_index')) {
-                \Log::info('User has service_posts_index permission');
                 
                 // Start with the base query
                 $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city', 'level');
@@ -165,12 +155,7 @@ class ServicePostController extends Controller
                 $pendingCount = ServicePost::where('state', 'not published')->count();
                 $premiumCount = ServicePost::where('level_id', '>', 0)->count();
 
-                \Log::info('Service posts statistics', [
-                    'total_count' => $totalCount,
-                    'published_count' => $publishedCount,
-                    'pending_count' => $pendingCount,
-                    'premium_count' => $premiumCount
-                ]);
+
 
                 // Order by level_id (high to low) then by creation date
                 $perPage = $request->get('per_page', 15);
@@ -179,11 +164,7 @@ class ServicePostController extends Controller
                     ->paginate($perPage)
                     ->appends($request->query());
 
-                \Log::info('Service posts paginated', [
-                    'total_posts' => $servicePosts->total(),
-                    'current_page' => $servicePosts->currentPage(),
-                    'per_page' => $perPage
-                ]);
+
 
                 // Fetch categories and subcategories for dropdowns
                 $categories = Categories::all();
@@ -218,15 +199,7 @@ class ServicePostController extends Controller
                 // Check if featured functionality is available
                 $hasFeaturedColumn = Schema::hasColumn('service_posts', 'is_featured');
 
-                \Log::info('About to return view with data', [
-                    'categories_count' => $categories->count(),
-                    'subcategories_count' => $subcategories->count(),
-                    'users_count' => $users->count(),
-                    'cities_count' => $cities->count(),
-                    'countries_count' => $countries->count(),
-                    'levels_count' => $levels->count(),
-                    'has_featured_column' => $hasFeaturedColumn
-                ]);
+
 
                 return view('service_posts.index', compact(
                     'servicePosts', 
@@ -244,10 +217,6 @@ class ServicePostController extends Controller
                     'hasFeaturedColumn'
                 ));
             } else {
-                \Log::warning('User does not have service_posts_index permission', [
-                    'user_id' => $user->id ?? 'not authenticated',
-                    'user_permissions' => $user->permissions()->pluck('name')->toArray() ?? []
-                ]);
                 return view('errors.403');
             }
         } catch (\Exception $e) {
