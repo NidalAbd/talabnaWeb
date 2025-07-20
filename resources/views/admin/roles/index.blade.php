@@ -15,7 +15,63 @@
 
 @section('content')
 <div class="container-fluid">
-    <!-- Advanced Roles Table -->
+    <!-- Role Statistics Cards -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box bg-gradient-primary shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-user-shield"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total Roles</span>
+                    <span class="info-box-number">{{ number_format($roles->total()) }}</span>
+                    <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-chart-line text-light"></i> All system roles
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box bg-gradient-success shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-users"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total Users</span>
+                    <span class="info-box-number">{{ number_format($roles->sum('users_count')) }}</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-check-circle text-light"></i> Users with roles
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box bg-gradient-info shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-key"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">Total Permissions</span>
+                    <span class="info-box-number">{{ number_format($roles->sum('permissions_count')) }}</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-shield-alt text-light"></i> Assigned permissions
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6">
+            <div class="info-box bg-gradient-warning shadow-sm">
+                <span class="info-box-icon"><i class="fas fa-cog"></i></span>
+                <div class="info-box-content">
+                    <span class="info-box-text">System Roles</span>
+                    <span class="info-box-number">{{ $roles->whereIn('name', ['superadmin', 'admin'])->count() }}</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
+                    <span class="progress-description">
+                        <i class="fas fa-exclamation-triangle text-light"></i> Protected roles
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Roles Table -->
     <div class="card card-outline card-primary shadow-sm mb-4">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
             <div class="card-title mb-2 mb-md-0">
@@ -40,7 +96,7 @@
             </div>
         </div>
         <div class="card-body table-responsive p-0">
-            <table class="table table-hover table-striped table-bordered align-middle" id="admin-table-{{ uniqid() }}">
+            <table class="table table-hover table-striped table-bordered align-middle">
                 <thead class="thead-light">
                     <tr>
                         <th>ID</th>
@@ -55,28 +111,15 @@
                 <tbody>
                     @forelse($roles as $role)
                         <tr>
-                            <td>
-                                <span class="badge badge-secondary">{{ $role->id }}</span>
-                            </td>
+                            <td><span class="badge badge-secondary">{{ $role->id }}</span></td>
                             <td>
                                 <strong>{{ ucfirst($role->name) }}</strong><br>
                                 <small class="text-muted">{{ $role->display_name ?? '' }}</small>
                             </td>
-                            <td>
-                                <span class="text-muted">{{ Str::limit($role->description ?? 'No description', 50) }}</span>
-                            </td>
-                            <td>
-                                <span class="badge badge-secondary">{{ $role->users_count ?? 0 }} users</span>
-                            </td>
-                            <td>
-                                <span class="badge badge-secondary">{{ $role->permissions_count ?? 0 }} permissions</span>
-                                @if($role->permissions_count == 0)
-                                    <br><small class="text-muted">({{ $role->permissions->count() }} actual)</small>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="text-muted">{{ $role->created_at ? $role->created_at->format('M d, Y') : '-' }}</span>
-                            </td>
+                            <td><span class="text-muted">{{ Str::limit($role->description ?? 'No description', 50) }}</span></td>
+                            <td><span class="badge badge-info">{{ $role->users_count ?? 0 }}</span></td>
+                            <td><span class="badge badge-warning">{{ $role->permissions_count ?? 0 }}</span></td>
+                            <td><span class="text-muted">{{ $role->created_at ? $role->created_at->format('Y-m-d') : '-' }}</span></td>
                             <td>
                                 @php
                                     $isSystemRole = in_array($role->name, ['superadmin', 'admin']);
@@ -84,18 +127,12 @@
                                     $deleteDisabled = $isSystemRole ? 'disabled' : '';
                                 @endphp
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('roles.show', $role->id) }}" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-xs btn-outline-primary {{ $editDisabled }}" data-toggle="tooltip" title="{{ $isSystemRole ? 'System roles cannot be edited' : 'Edit Role' }}">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this role?');">
+                                    <a href="{{ route('roles.show', $role->id) }}" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
+                                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-xs btn-outline-primary {{ $editDisabled }}" data-toggle="tooltip" title="{{ $isSystemRole ? 'System roles cannot be edited' : 'Edit' }}"><i class="fas fa-edit"></i></a>
+                                    <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-outline-danger {{ $deleteDisabled }}" data-toggle="tooltip" title="{{ $isSystemRole ? 'System roles cannot be deleted' : 'Delete Role' }}">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
+                                        <button type="submit" class="btn btn-xs btn-outline-danger {{ $deleteDisabled }}" data-toggle="tooltip" title="{{ $isSystemRole ? 'System roles cannot be deleted' : 'Delete' }}"><i class="fas fa-trash"></i></button>
                                     </form>
                                 </div>
                             </td>
@@ -131,89 +168,13 @@
 
 @push('css')
 <style>
-    .table thead th { 
-        background: #f8f9fa;
-        color: #495057;
-        border: none;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.85rem;
-        letter-spacing: 0.5px;
-    }
-    
-    .table tbody tr:hover {
-        background: #f8f9fa;
-        transition: all 0.3s ease;
-    }
-    
-    .badge {
-        font-size: 0.75rem;
-        padding: 0.4em 0.8em;
-        border-radius: 20px;
-        font-weight: 500;
-    }
-    
-    .btn-group .btn {
-        margin-right: 2px;
-        border-radius: 20px;
-        transition: all 0.3s ease;
-    }
-    
-    .btn-group .btn:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    
-    .card {
-        border: none;
-        border-radius: 15px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        overflow: hidden;
-    }
-    
-    .card-header {
-        background: #007bff;
-        color: white;
-        border: none;
-        padding: 1.5rem;
-    }
-    
-    .card-title {
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-    }
-    
-    .table-responsive {
-        border-radius: 10px;
-        overflow: hidden;
-    }
-    
-    .table td {
-        vertical-align: middle;
-        padding: 1rem 0.75rem;
-        border-top: 1px solid #f8f9fa;
-    }
-    
-    /* Custom scrollbar */
-    .table-responsive::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-    
-    .table-responsive::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 10px;
-    }
-    
-    .table-responsive::-webkit-scrollbar-thumb {
-        background: #007bff;
-        border-radius: 10px;
-    }
-    
-    .table-responsive::-webkit-scrollbar-thumb:hover {
-        background: #0056b3;
-    }
+    .table thead th { background: #f8f9fa; }
+    .table td, .table th { vertical-align: middle !important; }
+    .card { transition: box-shadow 0.2s; }
+    .card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
+    .btn-xs { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
+    .badge-pink { background: #e83e8c; color: #fff; }
+    .img-circle { border-radius: 50%; }
 </style>
 @endpush
 
@@ -243,38 +204,17 @@
         a.click();
     }
     
-    $(document).ready(function() {
-        // Initialize tooltips
-        $('[data-toggle="tooltip"]').tooltip();
+    // Debug form submissions
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('Roles index page loaded');
         
-        // Add row hover effects
-        $('.table tbody tr').hover(
-            function() {
-                $(this).addClass('shadow-lg');
-            },
-            function() {
-                $(this).removeClass('shadow-lg');
-            }
-        );
-        
-        // Add click effects to buttons
-        $('.btn').click(function() {
-            $(this).addClass('btn-clicked');
-            setTimeout(() => {
-                $(this).removeClass('btn-clicked');
-            }, 200);
+        // Add event listeners to all action forms
+        const actionForms = document.querySelectorAll('form[action*="/roles/"]');
+        actionForms.forEach(form => {
+            form.addEventListener('submit', function(e) {
+                console.log('Form submitted:', this.action);
+            });
         });
     });
-    
-    // Custom CSS for button click effect
-    $('<style>')
-        .prop('type', 'text/css')
-        .html(`
-            .btn-clicked {
-                transform: scale(0.95) !important;
-                transition: transform 0.1s ease !important;
-            }
-        `)
-        .appendTo('head');
 </script>
 @endpush
