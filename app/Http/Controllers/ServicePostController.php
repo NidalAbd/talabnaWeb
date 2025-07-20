@@ -38,7 +38,7 @@ class ServicePostController extends Controller
         $this->middleware('permission:service_posts_destroy')->only(['destroy']);
         $this->middleware('permission:service_posts_approve')->only(['approve']);
         $this->middleware('permission:service_posts_reject')->only(['reject']);
-        $this->middleware('permission:view_service')->only(['show']);
+        $this->middleware('permission:service_posts_index')->only(['show']);
     }
 
     public function index(Request $request)
@@ -46,7 +46,7 @@ class ServicePostController extends Controller
         $user = Auth::user();
 
         // Check if the user has the required permissions to view all service posts
-        if ($user->hasPermission('view_service')) {
+        if ($user->hasPermission('service_posts_index')) {
             // Start with the base query
             $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city');
 
@@ -210,7 +210,7 @@ class ServicePostController extends Controller
     {
         $user = Auth::user();
         // Check if the user has the required permissions to create a service post
-        if (!$user->hasPermission('create_service')) {
+        if (!$user->hasPermission('service_posts_create')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -227,7 +227,7 @@ class ServicePostController extends Controller
         $user = Auth::user();
 
         // Check if the user has the required permissions to create a service post
-        if (!$user->hasPermission('create_service')) {
+        if (!$user->hasPermission('service_posts_create')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -300,7 +300,7 @@ class ServicePostController extends Controller
         $user = Auth::user();
 
         // Check if the user has the required permissions to view a service post
-        if ($user->hasPermission('show_service')) {
+        if ($user->hasPermission('service_posts_index')) {
             $servicePost->load('photos', 'user', 'category', 'subCategory', 'country', 'city');
             return view('service_posts.show', compact('servicePost'));
         } else {
@@ -313,7 +313,7 @@ class ServicePostController extends Controller
         $user = Auth::user();
 
         // Check if the user has the required permissions to edit a service post
-        if ($user->hasPermission('edit_service')) {
+        if ($user->hasPermission('service_posts_edit')) {
             $servicePost->load('photos', 'user', 'country', 'city');
             $categories = Categories::where('isSuspended', false)->get();
             $subcategories = Sub_categories::where('isSuspended', false)->get();
@@ -331,7 +331,7 @@ class ServicePostController extends Controller
         $user = Auth::user();
 
         // Check if the user has the required permissions to update a service post
-        if (!$user->hasPermission('update_service')) {
+        if (!$user->hasPermission('service_posts_edit')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
