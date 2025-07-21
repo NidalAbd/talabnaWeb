@@ -158,12 +158,15 @@ Route::get('/home', function() {
 | Admin & Authenticated Routes
 |--------------------------------------------------------------------------
 */
-Route::group(['middleware' => ['auth', 'admin']], function() {
-    // Dashboard
-    Route::get('/dashboard', [HomeController::class, 'index'])->name('admin.dashboard');
-    Route::get('statistics', [App\Http\Controllers\dashboard::class, 'index'])->name('statistics.index');
+    Route::group(['middleware' => ['auth', 'admin']], function() {
+        // Dashboard
+        Route::get('/dashboard', [HomeController::class, 'index'])->name('admin.dashboard');
+        Route::get('statistics', [App\Http\Controllers\dashboard::class, 'index'])->name('statistics.index');
+        
+        // Investor Dashboard Routes
+        Route::get('investor-dashboard', [App\Http\Controllers\InvestorDashboardController::class, 'index'])->name('investor-dashboard');
 
-    // Point Packages & Premium Features
+        // Point Packages & Premium Features
     Route::group(['middleware' => ['auth', 'admin']], function() {
         // Point Packages Routes with explicit naming
         Route::get('point-packages', [PointPackageController::class, 'index'])->name('admin.point_packages.index');
@@ -196,9 +199,6 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
         Route::delete('premium-features/{feature}', [PointPackageController::class, 'destroyFeature'])->name('admin.premium-features.destroy');
         Route::get('premium-features/{feature}', [PointPackageController::class, 'showFeature'])->name('admin.premium-features.show');
         Route::get('point-analytics', [PointPackageController::class, 'analytics'])->name('point-analytics');
-        
-        // Investor Dashboard Routes
-        Route::get('investor-dashboard', [App\Http\Controllers\InvestorDashboardController::class, 'index'])->name('investor-dashboard');
         
         // Marketing Dashboard Routes
         Route::get('marketing-dashboard', [App\Http\Controllers\MarketingController::class, 'index'])->name('marketing-dashboard');
