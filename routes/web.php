@@ -497,6 +497,7 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::get('business-dashboard', [App\Http\Controllers\BusinessController::class, 'dashboard'])->name('business.dashboard');
     Route::get('investor-relations', [App\Http\Controllers\BusinessController::class, 'investorRelations'])->name('business.investor_relations');
     Route::get('investment-tracking', [App\Http\Controllers\BusinessController::class, 'investmentTracking'])->name('business.investment_tracking');
+    Route::get('investment-workflow', [App\Http\Controllers\BusinessController::class, 'investmentWorkflow'])->name('business.investment_workflow');
     Route::get('strategic-planning', [App\Http\Controllers\BusinessController::class, 'strategicPlanning'])->name('business.strategic_planning');
     Route::get('monthly-budget-planning', [App\Http\Controllers\BusinessController::class, 'monthlyBudgetPlanning'])->name('business.monthly_budget_planning');
     Route::get('expense-approvals', [App\Http\Controllers\BusinessController::class, 'expenseApprovals'])->name('business.expense_approvals');
@@ -526,6 +527,11 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::post('business/budgets', [App\Http\Controllers\BusinessController::class, 'storeBudget'])->name('business.budgets.store');
     Route::post('business/expenses/{id}/approve', [App\Http\Controllers\BusinessController::class, 'approveExpense'])->name('business.expenses.approve');
     Route::post('business/expenses/{id}/reject', [App\Http\Controllers\BusinessController::class, 'rejectExpense'])->name('business.expenses.reject');
+    
+    // Investment Workflow Routes
+    Route::post('business/investments/{id}/distribute-profit', [App\Http\Controllers\BusinessController::class, 'distributeProfit'])->name('business.investments.distribute-profit');
+    Route::post('business/investments/{id}/update-status', [App\Http\Controllers\BusinessController::class, 'updateInvestmentStatus'])->name('business.investments.update-status');
+    Route::post('business/investments/calculate-profitability', [App\Http\Controllers\BusinessController::class, 'calculateProfitability'])->name('business.investments.calculate-profitability');
 
     // System Management
     Route::get('system-logs', [App\Http\Controllers\SystemController::class, 'systemLogs'])->name('system.logs');

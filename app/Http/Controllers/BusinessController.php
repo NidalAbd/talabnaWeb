@@ -108,6 +108,34 @@ class BusinessController extends Controller
         ));
     }
 
+    public function investmentWorkflow()
+    {
+        $investments = Investment::with(['payments'])
+            ->latest()
+            ->get();
+            
+        // Workflow statistics
+        $activeInvestments = $investments->where('status', 'active')->count();
+        $profitableInvestments = $investments->where('status', 'profitable')->count();
+        $completedInvestments = $investments->where('status', 'completed')->count();
+        $pendingInvestments = $investments->where('status', 'pending')->count();
+        
+        $totalProfitGenerated = $investments->sum('profit_generated');
+        $totalProfitDistributed = $investments->sum('profit_distributed');
+        $totalProfitRemaining = $totalProfitGenerated - $totalProfitDistributed;
+
+        return view('admin.business.investment_workflow', compact(
+            'investments',
+            'activeInvestments',
+            'profitableInvestments',
+            'completedInvestments',
+            'pendingInvestments',
+            'totalProfitGenerated',
+            'totalProfitDistributed',
+            'totalProfitRemaining'
+        ));
+    }
+
     public function strategicPlanning()
     {
         $budgets = BusinessBudget::with(['creator', 'approver'])->latest()->get();
@@ -353,27 +381,52 @@ class BusinessController extends Controller
     {
         $request->validate([
             'investor_name' => 'required|string|max:255',
+            'investor_email' => 'required|email|max:255',
             'investment_type' => 'required|in:equity,loan,grant',
             'investment_amount' => 'required|numeric|min:0',
             'investment_date' => 'required|date',
-            'expected_roi' => 'required|numeric|min:0',
+            'expected_roi' => 'required|numeric|min:0|max:100',
+            'investment_period' => 'required|integer|min:1|max:60',
+            'investor_share' => 'required|numeric|min:0|max:100',
+            'owner_share' => 'required|numeric|min:0|max:100',
+            'agreement_terms' => 'required|in:standard,custom,equity',
+            'purpose' => 'nullable|string|max:255',
             'notes' => 'nullable|string'
         ]);
 
-        Investment::create([
+        // Validate that shares add up to 100%
+        if (($request->investor_share + $request->owner_share) != 100) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Investor and owner shares must add up to 100%'
+            ], 422);
+        }
+
+        $investment = Investment::create([
             'investor_name' => $request->investor_name,
+            'investor_email' => $request->investor_email,
             'investment_type' => $request->investment_type,
             'investment_amount' => $request->investment_amount,
+            'currency' => $request->currency ?? 'USD',
             'investment_date' => $request->investment_date,
             'expected_roi' => $request->expected_roi,
-            'current_roi' => 0,
+            'investment_period' => $request->investment_period,
+            'investor_share' => $request->investor_share,
+            'owner_share' => $request->owner_share,
+            'agreement_terms' => $request->agreement_terms,
+            'purpose' => $request->purpose,
             'status' => 'active',
-            'notes' => $request->notes
+            'notes' => $request->notes,
+            'total_paid' => 0,
+            'remaining_amount' => $request->investment_amount,
+            'profit_generated' => 0,
+            'profit_distributed' => 0,
+            'profit_remaining' => 0
         ]);
 
         return response()->json([
             'success' => true,
-            'message' => 'Investment added successfully'
+            'message' => 'Investment added successfully! Expected ROI: ' . $request->expected_roi . '%, Period: ' . $request->investment_period . ' months'
         ]);
     }
 
@@ -455,13 +508,106 @@ class BusinessController extends Controller
         $expense = BusinessExpense::findOrFail($id);
         $expense->update([
             'status' => 'rejected',
-            'approved_by' => auth()->id(),
-            'approved_at' => now()
+            'rejected_by' => auth()->id(),
+            'rejected_at' => now(),
+            'rejection_reason' => $request->rejection_reason
         ]);
 
         return response()->json([
             'success' => true,
             'message' => 'Expense rejected successfully'
+        ]);
+    }
+
+    public function distributeProfit(Request $request, $id)
+    {
+        $investment = Investment::findOrFail($id);
+        
+        if (!$investment->canDistributeProfit()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Investment is not eligible for profit distribution'
+            ], 422);
+        }
+
+        $distributionAmount = $request->distribution_amount;
+        
+        if ($distributionAmount > $investment->profit_remaining) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Distribution amount exceeds remaining profit'
+            ], 422);
+        }
+
+        $profitSharing = $investment->profit_sharing;
+        $investorAmount = $distributionAmount * ($investment->investor_share / 100);
+        $ownerAmount = $distributionAmount * ($investment->owner_share / 100);
+
+        $investment->distributeProfit($distributionAmount);
+
+        // Create profit distribution records
+        InvestmentPayment::create([
+            'investment_id' => $investment->id,
+            'payment_amount' => $investorAmount,
+            'payment_date' => now(),
+            'payment_type' => 'profit_distribution',
+            'status' => 'completed',
+            'notes' => 'Profit distribution to investor'
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profit distributed successfully. Investor: $' . number_format($investorAmount, 2) . ', Owner: $' . number_format($ownerAmount, 2)
+        ]);
+    }
+
+    public function updateInvestmentStatus(Request $request, $id)
+    {
+        $investment = Investment::findOrFail($id);
+        $newStatus = $request->status;
+
+        $investment->update(['status' => $newStatus]);
+
+        $message = 'Investment status updated to ' . ucfirst($newStatus);
+        
+        if ($newStatus === 'profitable') {
+            $message .= '. Investment is now generating profit and can distribute earnings.';
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => $message
+        ]);
+    }
+
+    public function calculateProfitability()
+    {
+        $investments = Investment::where('status', 'active')->get();
+        $totalProfit = 0;
+
+        foreach ($investments as $investment) {
+            // Calculate profit based on ROI and time passed
+            $monthsPassed = $investment->investment_date->diffInMonths(now());
+            $expectedProfit = $investment->expected_profit;
+            $actualProfit = ($expectedProfit / $investment->investment_period) * min($monthsPassed, $investment->investment_period);
+            
+            if ($actualProfit > 0) {
+                $investment->update([
+                    'profit_generated' => $actualProfit,
+                    'profit_remaining' => $actualProfit - $investment->profit_distributed
+                ]);
+                
+                if ($actualProfit >= $investment->expected_profit * 0.8) { // 80% of expected profit
+                    $investment->update(['status' => 'profitable']);
+                }
+                
+                $totalProfit += $actualProfit;
+            }
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Profitability calculated. Total profit generated: $' . number_format($totalProfit, 2)
         ]);
     }
 } 
