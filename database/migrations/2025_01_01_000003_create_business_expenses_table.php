@@ -24,13 +24,17 @@ return new class extends Migration
             $table->string('invoice_number')->nullable();
             $table->string('receipt_file')->nullable();
             $table->enum('status', ['pending', 'approved', 'paid', 'rejected'])->default('pending');
-            $table->foreignId('approved_by')->nullable()->constrained('users')->onDelete('set null');
+            $table->unsignedBigInteger('approved_by')->nullable();
             $table->timestamp('approved_at')->nullable();
-            $table->foreignId('investment_id')->nullable()->constrained()->onDelete('set null');
+            $table->unsignedBigInteger('investment_id')->nullable();
             $table->text('notes')->nullable();
             $table->boolean('recurring')->default(false);
             $table->date('next_due_date')->nullable();
             $table->timestamps();
+            
+            // Add foreign key constraints after table creation
+            $table->foreign('approved_by')->references('id')->on('users')->onDelete('set null');
+            $table->foreign('investment_id')->references('id')->on('investments')->onDelete('set null');
         });
     }
 
