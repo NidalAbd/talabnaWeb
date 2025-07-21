@@ -49,7 +49,7 @@
                         <th>{{ $col['label'] }}</th>
                     @endforeach
                     @if($actions)
-                        <th>Actions</th>
+                        <th>{{ __('components\admin\table.actions') }}</th>
                     @endif
                 </tr>
             </thead>
@@ -86,7 +86,7 @@
         <div class="card-footer bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    Showing <strong>{{ $data->firstItem() }}</strong> to <strong>{{ $data->lastItem() }}</strong> of <strong>{{ $data->total() }}</strong> records
+                    Showing <strong>{{ $data->field</strong> to <strong>{{ $data->field</strong> of <strong>{{ $data->field</strong> records
                 </div>
                 <div>
                     {{ $data->links('pagination::bootstrap-4') }}
@@ -101,11 +101,7 @@
     function printTable(btn) {
         let table = btn.closest('.card').querySelector('table');
         let w = window.open();
-        w.document.write('<html><head><title>Print Table</title>');
-        w.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">');
-        w.document.write('</head><body>');
-        w.document.write(table.outerHTML);
-        w.document.write('</body></html>');
+        w.document.write('<html><head><title>{{ __('components\admin\table.print_table') }}</title>{{ __('components\admin\table._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{ __('components\admin\table._w_document_write_') }}</head><body>{{ __('components\admin\table._w_document_write_table_oute') }}</body></html>');
         w.print();
         w.close();
     }

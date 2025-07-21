@@ -10,13 +10,13 @@
             <!-- Filter Tabs -->
             <ul class="nav nav-tabs mb-3" id="filterTabs" role="tablist">
                 <li class="nav-item">
-                    <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab">All</a>
+                    <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab">{{ __('service_posts\job_index.all') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="offers-tab" data-toggle="tab" href="#offers" role="tab">Offers</a>
+                    <a class="nav-link" id="offers-tab" data-toggle="tab" href="#offers" role="tab">{{ __('service_posts\job_index.offers') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" id="requests-tab" data-toggle="tab" href="#requests" role="tab">Requests</a>
+                    <a class="nav-link" id="requests-tab" data-toggle="tab" href="#requests" role="tab">{{ __('service_posts\job_index.requests') }}</a>
                 </li>
             </ul>
             <!-- Table -->
@@ -24,28 +24,28 @@
                 <table class="table table-bordered table-hover" id="servicePostsTable">
                     <thead class="thead-light">
                         <tr>
-                            <th>Title</th>
-                            <th>Category</th>
-                            <th>Type</th>
-                            <th>Price</th>
-                            <th>User</th>
-                            <th>Status</th>
-                            <th>Created</th>
-                            <th>Actions</th>
+                            <th>{{ __('service_posts\job_index.title') }}</th>
+                            <th>{{ __('service_posts\job_index.category') }}</th>
+                            <th>{{ __('service_posts\job_index.type') }}</th>
+                            <th>{{ __('service_posts\job_index.price') }}</th>
+                            <th>{{ __('service_posts\job_index.user') }}</th>
+                            <th>{{ __('service_posts\job_index.status') }}</th>
+                            <th>{{ __('service_posts\job_index.created') }}</th>
+                            <th>{{ __('service_posts\job_index.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($servicePosts as $post)
                         <tr>
-                            <td>{{ Str::limit($post->title, 40) }}</td>
-                            <td>{{ $post->category->name[app()->getLocale()] ?? $post->category->name['en'] ?? 'Unknown' }}</td>
+                            <td>{{ Str::limit($post->field</td>
+                            <td>{{ $post->field</td>
                             <td><span class="badge {{ $post->type == 'عرض' ? 'badge-info' : 'badge-secondary' }}">{{ $post->type == 'عرض' ? 'Offer' : 'Request' }}</span></td>
                             <td>{{ number_format($post->price, 0) }} {{ $post->price_currency_code }}</td>
-                            <td>{{ $post->user->user_name ?? 'N/A' }}</td>
+                            <td>{{ $post->field</td>
                             <td><span class="badge {{ $post->state == 'published' ? 'badge-success' : 'badge-warning' }}">{{ ucfirst($post->state) }}</span></td>
-                            <td>{{ $post->created_at->diffForHumans() }}</td>
+                            <td>{{ $post->field</td>
                             <td>
-                                <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-sm btn-primary"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('service_posts.show', $post->field<i class="fas fa-eye"></i></a>
                             </td>
                         </tr>
                         @endforeach

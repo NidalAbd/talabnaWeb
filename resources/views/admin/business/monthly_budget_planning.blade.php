@@ -14,7 +14,7 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>${{ number_format($monthlyExpenses->sum('amount'), 2) }}</h3>
-                    <p>Total Expenses</p>
+                    <p>{{ __('admin\business\monthly_budget_planning.total_expenses') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-receipt"></i>
@@ -26,7 +26,7 @@
             <div class="small-box bg-success">
                 <div class="inner">
                     <h3>${{ number_format($monthlyRevenue->sum('amount'), 2) }}</h3>
-                    <p>Total Revenue</p>
+                    <p>{{ __('admin\business\monthly_budget_planning.total_revenue') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-dollar-sign"></i>
@@ -38,7 +38,7 @@
             <div class="small-box {{ ($monthlyRevenue->sum('amount') - $monthlyExpenses->sum('amount')) >= 0 ? 'bg-success' : 'bg-danger' }}">
                 <div class="inner">
                     <h3>${{ number_format($monthlyRevenue->sum('amount') - $monthlyExpenses->sum('amount'), 2) }}</h3>
-                    <p>Net Profit/Loss</p>
+                    <p>{{ __('admin\business\monthly_budget_planning.net_profit_loss') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-chart-line"></i>
@@ -49,8 +49,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-warning">
                 <div class="inner">
-                    <h3>{{ $budgets->count() }}</h3>
-                    <p>Active Budgets</p>
+                    <h3>{{ $budgets->field</h3>
+                    <p>{{ __('admin\business\monthly_budget_planning.active_budgets') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-piggy-bank"></i>
@@ -64,20 +64,20 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Budget vs Actual Performance</h3>
+                    <h3 class="card-title">{{ __('admin\business\monthly_budget_planning.budget_vs_actual_performance') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Budget Title</th>
-                                    <th>Category</th>
-                                    <th>Planned Budget</th>
-                                    <th>Actual Spent</th>
-                                    <th>Variance</th>
-                                    <th>Utilization</th>
-                                    <th>Status</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.budget_title') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.category') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.planned_budget') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.actual_spent') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.variance') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.utilization') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -88,9 +88,9 @@
                                     $utilization = $budget->total_budget > 0 ? ($actualSpent / $budget->total_budget) * 100 : 0;
                                 @endphp
                                 <tr class="{{ $actualSpent > $budget->total_budget ? 'table-danger' : ($utilization >= 80 ? 'table-warning' : '') }}">
-                                    <td>{{ $budget->budget_title }}</td>
+                                    <td>{{ $budget->field</td>
                                     <td>
-                                        <span class="badge badge-info">{{ ucfirst($budget->category) }}</span>
+                                        <span class="badge badge-info">{{ ucfirst($budget->field</span>
                                     </td>
                                     <td>${{ number_format($budget->total_budget, 2) }}</td>
                                     <td>${{ number_format($actualSpent, 2) }}</td>
@@ -107,11 +107,11 @@
                                     </td>
                                     <td>
                                         @if($actualSpent > $budget->total_budget)
-                                            <span class="badge badge-danger">Over Budget</span>
+                                            <span class="badge badge-danger">{{ __('admin\business\monthly_budget_planning.over_budget') }}</span>
                                         @elseif($utilization >= 80)
-                                            <span class="badge badge-warning">Near Limit</span>
+                                            <span class="badge badge-warning">{{ __('admin\business\monthly_budget_planning.near_limit') }}</span>
                                         @else
-                                            <span class="badge badge-success">On Track</span>
+                                            <span class="badge badge-success">{{ __('admin\business\monthly_budget_planning.on_track') }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -129,7 +129,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Monthly Expenses by Category</h3>
+                    <h3 class="card-title">{{ __('admin\business\monthly_budget_planning.monthly_expenses_by_category') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="expensesChart" style="height: 300px;"></canvas>
@@ -140,7 +140,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Monthly Revenue by Type</h3>
+                    <h3 class="card-title">{{ __('admin\business\monthly_budget_planning.monthly_revenue_by_type') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="revenueChart" style="height: 300px;"></canvas>
@@ -161,24 +161,24 @@
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Title</th>
-                                    <th>Category</th>
-                                    <th>Amount</th>
-                                    <th>Vendor</th>
-                                    <th>Date</th>
-                                    <th>Status</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.title') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.category') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.amount') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.vendor') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.date') }}</th>
+                                    <th>{{ __('admin\business\monthly_budget_planning.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($monthlyExpenses->sortByDesc('amount')->take(10) as $expense)
                                 <tr>
-                                    <td>{{ $expense->expense_title }}</td>
+                                    <td>{{ $expense->field</td>
                                     <td>
-                                        <span class="badge badge-info">{{ ucfirst($expense->expense_category) }}</span>
+                                        <span class="badge badge-info">{{ ucfirst($expense->field</span>
                                     </td>
                                     <td>${{ number_format($expense->amount, 2) }}</td>
-                                    <td>{{ $expense->vendor_name }}</td>
-                                    <td>{{ $expense->expense_date->format('M d, Y') }}</td>
+                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->field</td>
                                     <td>
                                         <span class="badge badge-{{ $expense->status === 'approved' ? 'success' : ($expense->status === 'pending' ? 'warning' : 'danger') }}">
                                             {{ ucfirst($expense->status) }}
@@ -199,7 +199,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Budget Planning Actions</h3>
+                    <h3 class="card-title">{{ __('admin\business\monthly_budget_planning.budget_planning_actions') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -239,9 +239,9 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Create New Budget</h5>
+                <h5 class="modal-title">{{ __('admin\business\monthly_budget_planning.create_new_budget') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('admin\business\monthly_budget_planning._times_') }}</span>
                 </button>
             </div>
             <form id="createBudgetForm">
@@ -249,13 +249,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="budget_title">Budget Title *</label>
+                                <label for="budget_title">{{ __('admin\business\monthly_budget_planning.budget_title_') }}</label>
                                 <input type="text" class="form-control" id="budget_title" name="budget_title" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="total_budget">Total Budget *</label>
+                                <label for="total_budget">{{ __('admin\business\monthly_budget_planning.total_budget_') }}</label>
                                 <input type="number" step="0.01" class="form-control" id="total_budget" name="total_budget" required>
                             </div>
                         </div>
@@ -263,36 +263,36 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="category">Category *</label>
+                                <label for="category">{{ __('admin\business\monthly_budget_planning.category_') }}</label>
                                 <select class="form-control" id="category" name="category" required>
-                                    <option value="">Select Category</option>
-                                    <option value="marketing">Marketing</option>
-                                    <option value="development">Development</option>
-                                    <option value="operations">Operations</option>
-                                    <option value="office">Office</option>
-                                    <option value="other">Other</option>
+                                    <option value="">{{ __('admin\business\monthly_budget_planning.select_category') }}</option>
+                                    <option value="marketing">{{ __('admin\business\monthly_budget_planning.marketing') }}</option>
+                                    <option value="development">{{ __('admin\business\monthly_budget_planning.development') }}</option>
+                                    <option value="operations">{{ __('admin\business\monthly_budget_planning.operations') }}</option>
+                                    <option value="office">{{ __('admin\business\monthly_budget_planning.office') }}</option>
+                                    <option value="other">{{ __('admin\business\monthly_budget_planning.other') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="budget_period">Budget Period *</label>
+                                <label for="budget_period">{{ __('admin\business\monthly_budget_planning.budget_period_') }}</label>
                                 <select class="form-control" id="budget_period" name="budget_period" required>
-                                    <option value="monthly">Monthly</option>
-                                    <option value="quarterly">Quarterly</option>
-                                    <option value="yearly">Yearly</option>
+                                    <option value="monthly">{{ __('admin\business\monthly_budget_planning.monthly') }}</option>
+                                    <option value="quarterly">{{ __('admin\business\monthly_budget_planning.quarterly') }}</option>
+                                    <option value="yearly">{{ __('admin\business\monthly_budget_planning.yearly') }}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="notes">Notes</label>
+                        <label for="notes">{{ __('admin\business\monthly_budget_planning.notes') }}</label>
                         <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Create Budget</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\business\monthly_budget_planning.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('admin\business\monthly_budget_planning.create_budget') }}</button>
                 </div>
             </form>
         </div>

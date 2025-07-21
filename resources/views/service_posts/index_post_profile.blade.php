@@ -29,36 +29,36 @@
                                 <thead>
                                 <tr class="btn-dark">
                                     <th><input type="checkbox" id="select-all"></th>
-                                    <th>id</th>
-                                    <th>Title</th>
-                                    <th>Category</th>
-                                    <th>User</th>
-                                    <th>favorites</th>
-                                    <th>reports</th>
-                                    <th>views</th>
-                                    <th>type</th>
-                                    <th>Action</th>
+                                    <th>{{ __('service_posts\index_post_profile.id') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.title') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.category') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.user') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.favorites') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.reports') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.views') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.type') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.action') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @foreach($servicePosts as $post)
                                     <tr>
-                                        <td><input type="checkbox" name="selected[]" value="{{ $post->id }}"></td>
-                                        <th>{{ $post->id }}</th>
-                                        <td>{{ $post->title }}</td>
-                                        <td>{{ $post->category }}</td>
-                                        <td>{{ $post->user->user_name }}</td>
-                                        <td>{{ $post->favorites_count }}</td>
-                                        <td>{{ $post->report_count }}</td>
-                                        <td>{{ $post->view_count }}</td>
-                                        <td>{{ $post->level ? $post->level->name['ar'] : 'عادي' }}</td>
+                                        <td><input type="checkbox" name="selected[]" value="{{ $post->field</td>
+                                        <th>{{ $post->field</th>
+                                        <td>{{ $post->field</td>
+                                        <td>{{ $post->field</td>
+                                        <td>{{ $post->field</td>
+                                        <td>{{ $post->field</td>
+                                        <td>{{ $post->field</td>
+                                        <td>{{ $post->field</td>
+                                        <td>{{ $post->field</td>
                                         <td>
-                                            <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-sm btn-primary">View</a>
-                                            <a href="{{ route('service_posts.edit', $post->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                            <a href="{{ route('service_posts.show', $post->field</a>
+                                            <a href="{{ route('service_posts.edit', $post->field</a>
                                             <form action="{{ route('service_posts.destroy', $post->id) }}" method="POST" style="display: inline-block;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" >Delete</button>
+                                                <button type="submit" class="btn btn-sm btn-danger" >{{ __('service_posts\index_post_profile.delete') }}</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -67,15 +67,15 @@
                                 <thead>
                                 <tr class="btn-dark">
                                     <th><input type="checkbox" id="select-all"></th>
-                                    <th>id</th>
-                                    <th>Title</th>
-                                    <th>Category</th>
-                                    <th>User</th>
-                                    <th>favorites</th>
-                                    <th>reports</th>
-                                    <th>views</th>
-                                    <th>type</th>
-                                    <th>Action</th>
+                                    <th>{{ __('service_posts\index_post_profile.id') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.title') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.category') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.user') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.favorites') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.reports') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.views') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.type') }}</th>
+                                    <th>{{ __('service_posts\index_post_profile.action') }}</th>
                                 </tr>
                                 </thead>
                             </table>

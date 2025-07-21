@@ -9,7 +9,7 @@
                 <i class="fas fa-ban mr-2"></i> 
                 Access Denied
             </h1>
-            <p class="text-muted mb-0">You do not have permission to access this resource</p>
+            <p class="text-muted mb-0">{{ __('errors3.you_do_not_have_permission_to_access_thi') }}</p>
         </div>
     </div>
 @stop
@@ -23,9 +23,9 @@
                     <div class="mb-4">
                         <i class="fas fa-exclamation-triangle text-warning" style="font-size: 4rem;"></i>
                     </div>
-                    <h2 class="text-danger mb-3">403 - Access Denied</h2>
-                    <p class="lead mb-4">You do not have the required permissions to access this page.</p>
-                    <p class="text-muted mb-4">Please contact your administrator if you believe this is an error.</p>
+                    <h2 class="text-danger mb-3">{{ __('errors3.403_access_denied') }}</h2>
+                    <p class="lead mb-4">{{ __('errors3.you_do_not_have_the_required_permissions') }}</p>
+                    <p class="text-muted mb-4">{{ __('errors3.please_contact_your_administrator_if_you') }}</p>
                     
                     <div class="mt-4">
                         <a href="{{ route('admin.dashboard') }}" class="btn btn-primary mr-2">

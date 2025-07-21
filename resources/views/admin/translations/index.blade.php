@@ -1,0 +1,216 @@
+@extends('adminlte::page')
+@section('title', __('Translations Management'))
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h1><i class="fas fa-language text-primary mr-2"></i> {{ __('Translations Management') }}</h1>
+        <a href="{{ route('translations.create') }}" class="btn btn-success">
+            <i class="fas fa-plus mr-1"></i> {{ __('Add Translation') }}
+        </a>
+    </div>
+@stop
+
+@section('content')
+<div class="card card-outline card-primary">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <form method="GET" action="" class="form-inline d-flex flex-wrap gap-2 mb-0">
+            <input type="text" name="search" value="{{ request('search') }}" class="form-control mr-2 mb-2" placeholder="{{ __('Search group, key, or text...') }}">
+            <select name="lang" class="form-control mr-2 mb-2">
+                <option value="">{{ __('All Languages') }}</option>
+                <option value="en" {{ request('lang') == 'en' ? 'selected' : '' }}>English</option>
+                <option value="ar" {{ request('lang') == 'ar' ? 'selected' : '' }}>Arabic</option>
+            </select>
+            <button type="submit" class="btn btn-primary mb-2">
+                <i class="fas fa-search"></i> {{ __('Search') }}
+            </button>
+        </form>
+        <div>
+            <button class="btn btn-info mb-2 mr-2" data-toggle="modal" data-target="#autoTranslateModal" data-lang="ar" id="autoTranslateArBtn">
+                <i class="fas fa-globe mr-1"></i> {{ __('Auto-Translate to Arabic') }}
+            </button>
+            <button class="btn btn-info mb-2" data-toggle="modal" data-target="#autoTranslateModal">
+                <i class="fas fa-globe mr-1"></i> {{ __('Auto-Translate') }}
+            </button>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover table-striped mb-0">
+                <thead class="thead-light">
+                    <tr>
+                        <th>{{ __('Group') }}</th>
+                        <th>{{ __('Key') }}</th>
+                        <th>{{ __('English') }}</th>
+                        <th>{{ __('Arabic') }}</th>
+                        <th>{{ __('Other Languages') }}</th>
+                        <th class="text-center">{{ __('Actions') }}</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @forelse($translations as $t)
+                        <tr data-id="{{ $t->id }}">
+                            <td><span class="badge badge-info">{{ $t->group }}</span></td>
+                            <td><code>{{ $t->key }}</code></td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm translation-input" data-lang="en" value="{{ $t->text['en'] ?? '' }}">
+                            </td>
+                            <td>
+                                <input type="text" class="form-control form-control-sm translation-input" data-lang="ar" value="{{ $t->text['ar'] ?? '' }}">
+                            </td>
+                            <td>
+                                @foreach($t->text as $lang => $val)
+                                    @if(!in_array($lang, ['en','ar']))
+                                        <span class="badge badge-secondary">{{ $lang }}
+                                            <button class="btn btn-xs btn-danger ml-1 delete-lang-btn" data-lang="{{ $lang }}" title="Delete {{ $lang }}">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </span>
+                                    @endif
+                                @endforeach
+                            </td>
+                            <td class="text-center">
+                                <a href="{{ route('translations.edit', $t) }}" class="btn btn-sm btn-warning mr-1" title="{{ __('Edit') }}"><i class="fas fa-edit"></i></a>
+                                <form action="{{ route('translations.destroy', $t) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this translation?');">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="btn btn-sm btn-danger" title="{{ __('Delete') }}"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    @empty
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="fas fa-info-circle mr-2"></i> {{ __('No translations found.') }}
+                            </td>
+                        </tr>
+                    @endforelse
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="card-footer clearfix">
+        {{ $translations->appends(request()->query())->links('pagination::bootstrap-4') }}
+    </div>
+</div>
+
+<!-- Auto-Translate Modal -->
+<div class="modal fade" id="autoTranslateModal" tabindex="-1" role="dialog" aria-labelledby="autoTranslateModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="autoTranslateModalLabel"><i class="fas fa-globe mr-2"></i> {{ __('Auto-Translate All') }}</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="autoTranslateForm">
+                    <div class="form-group">
+                        <label for="autoLang">{{ __('Select Language') }}</label>
+                        <select id="autoLang" name="lang" class="form-control">
+                            <option value="ar">Arabic</option>
+                            <option value="fr">French</option>
+                            <option value="de">German</option>
+                            <option value="es">Spanish</option>
+                            <option value="tr">Turkish</option>
+                            <option value="it">Italian</option>
+                            <option value="ru">Russian</option>
+                            <option value="zh">Chinese</option>
+                            <option value="ja">Japanese</option>
+                            <!-- Add more as needed -->
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-info">
+                        <i class="fas fa-magic mr-1"></i> {{ __('Auto-Translate') }}
+                    </button>
+                </form>
+                <div id="autoTranslateStatus" class="mt-3"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('js')
+<script>
+$(function() {
+    // Inline editing
+    $('.translation-input').on('change blur', function() {
+        var $input = $(this);
+        var $row = $input.closest('tr');
+        var id = $row.data('id');
+        var lang = $input.data('lang');
+        var value = $input.val();
+        $input.addClass('is-loading');
+        $.ajax({
+            url: '/admin/translations/' + id + '/inline',
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                lang: lang,
+                value: value
+            },
+            success: function(res) {
+                $input.removeClass('is-loading').addClass('is-valid');
+                setTimeout(function() { $input.removeClass('is-valid'); }, 1200);
+            },
+            error: function() {
+                $input.removeClass('is-loading').addClass('is-invalid');
+                setTimeout(function() { $input.removeClass('is-invalid'); }, 2000);
+            }
+        });
+    });
+
+    // Auto-translate
+    $('#autoTranslateForm').on('submit', function(e) {
+        e.preventDefault();
+        var lang = $('#autoLang').val();
+        var $status = $('#autoTranslateStatus');
+        $status.html('<div class="text-info"><i class="fas fa-spinner fa-spin"></i> {{ __('Translating...') }}</div>');
+        $.ajax({
+            url: '/admin/translations/auto-translate',
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                lang: lang
+            },
+            success: function(res) {
+                $status.html('<div class="text-success"><i class="fas fa-check-circle"></i> ' + res.message + '</div>');
+                setTimeout(function() { location.reload(); }, 2000);
+            },
+            error: function(xhr) {
+                $status.html('<div class="text-danger"><i class="fas fa-times-circle"></i> ' + (xhr.responseJSON && xhr.responseJSON.message ? xhr.responseJSON.message : 'Error') + '</div>');
+            }
+        });
+    });
+
+    // Auto-select Arabic when clicking the dedicated button
+    $('#autoTranslateArBtn').on('click', function() {
+        setTimeout(function() {
+            $('#autoLang').val('ar');
+        }, 200);
+    });
+
+    // Delete language
+    $('.delete-lang-btn').on('click', function(e) {
+        e.preventDefault();
+        var $btn = $(this);
+        var $row = $btn.closest('tr');
+        var id = $row.data('id');
+        var lang = $btn.data('lang');
+        if (!confirm('Delete ' + lang + ' translation for this key?')) return;
+        $.ajax({
+            url: '/admin/translations/' + id + '/inline',
+            method: 'POST',
+            data: {
+                _token: '{{ csrf_token() }}',
+                lang: lang,
+                value: ''
+            },
+            success: function() { location.reload(); },
+            error: function() { alert('Error deleting translation.'); }
+        });
+    });
+});
+</script>
+@endpush
+@endsection 

@@ -9,7 +9,7 @@
                 <i class="fas fa-gift text-primary mr-2"></i> 
                 Point Package Details
             </h1>
-            <p class="text-muted mb-0">View detailed information about the point package</p>
+            <p class="text-muted mb-0">{{ __('admin\point_packages\show.view_detailed_information_about_the_poin') }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('admin.point_packages.edit', $pointPackage->id) }}" class="btn btn-primary">
@@ -27,7 +27,7 @@
     <!-- Success/Error Messages -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{ __('admin\point_packages\show._') }}</button>
             <h5><i class="icon fas fa-check"></i> Success!</h5>
             {{ session('success') }}
         </div>
@@ -35,7 +35,7 @@
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{ __('admin\point_packages\show._') }}</button>
             <h5><i class="icon fas fa-ban"></i> Error!</h5>
             {{ session('error') }}
         </div>
@@ -54,7 +54,7 @@
                             {{ $pointPackage->is_active ? 'Active' : 'Inactive' }}
                         </span>
                         @if($pointPackage->is_popular)
-                            <span class="badge badge-warning">Popular</span>
+                            <span class="badge badge-warning">{{ __('admin\point_packages\show.popular') }}</span>
                         @endif
                     </div>
                 </div>
@@ -64,9 +64,9 @@
                         <div class="col-md-2 text-center mb-3">
                             <div class="package-icon">
                                 @if($pointPackage->icon)
-                                    <i class="{{ $pointPackage->icon }}" style="font-size: 48px; color: {{ $pointPackage->color ?? '#007bff' }};"></i>
+                                    <i class="{{ $pointPackage->icon }}" style="font-size: 48px; color: {{ $pointPackage->field</i>
                                 @else
-                                    <i class="fas fa-gift" style="font-size: 48px; color: {{ $pointPackage->color ?? '#007bff' }};"></i>
+                                    <i class="fas fa-gift" style="font-size: 48px; color: {{ $pointPackage->field</i>
                                 @endif
                             </div>
                         </div>
@@ -75,12 +75,12 @@
                         <div class="col-md-10">
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h4 class="text-primary">{{ $pointPackage->name['en'] ?? 'N/A' }}</h4>
-                                    <p class="text-muted">{{ $pointPackage->name['ar'] ?? 'N/A' }}</p>
+                                    <h4 class="text-primary">{{ $pointPackage->field</h4>
+                                    <p class="text-muted">{{ $pointPackage->field</p>
                                 </div>
                                 <div class="col-md-6 text-right">
-                                    <h3 class="text-success">{{ $pointPackage->price }} {{ $pointPackage->currency_code }}</h3>
-                                    <h5 class="text-primary">{{ number_format($pointPackage->points_amount) }} Points</h5>
+                                    <h3 class="text-success">{{ $pointPackage->price }} {{ $pointPackage->field</h3>
+                                    <h5 class="text-primary">{{ number_format($pointPackage->field</h5>
                                 </div>
                             </div>
                         </div>
@@ -90,15 +90,15 @@
                     @if($pointPackage->description)
                         <div class="row mt-3">
                             <div class="col-12">
-                                <h6 class="text-muted">Description</h6>
+                                <h6 class="text-muted">{{ __('admin\point_packages\show.description') }}</h6>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>English:</strong></p>
-                                        <p class="text-muted">{{ $pointPackage->description['en'] ?? 'No description available' }}</p>
+                                        <p><strong>{{ __('admin\point_packages\show.english_') }}</strong></p>
+                                        <p class="text-muted">{{ $pointPackage->field</p>
                                     </div>
                                     <div class="col-md-6">
-                                        <p><strong>Arabic:</strong></p>
-                                        <p class="text-muted">{{ $pointPackage->description['ar'] ?? 'لا يوجد وصف متاح' }}</p>
+                                        <p><strong>{{ __('admin\point_packages\show.arabic_') }}</strong></p>
+                                        <p class="text-muted">{{ $pointPackage->field</p>
                                     </div>
                                 </div>
                             </div>
@@ -109,15 +109,15 @@
                     @if($pointPackage->features)
                         <div class="row mt-3">
                             <div class="col-12">
-                                <h6 class="text-muted">Features</h6>
+                                <h6 class="text-muted">{{ __('admin\point_packages\show.features') }}</h6>
                                 <div class="row">
                                     <div class="col-md-6">
-                                        <p><strong>English:</strong></p>
-                                        <p class="text-muted">{{ $pointPackage->features['en'] ?? 'No features listed' }}</p>
+                                        <p><strong>{{ __('admin\point_packages\show.english_') }}</strong></p>
+                                        <p class="text-muted">{{ $pointPackage->field</p>
                                     </div>
                                     <div class="col-md-6">
-                                        <p><strong>Arabic:</strong></p>
-                                        <p class="text-muted">{{ $pointPackage->features['ar'] ?? 'لا توجد ميزات مدرجة' }}</p>
+                                        <p><strong>{{ __('admin\point_packages\show.arabic_') }}</strong></p>
+                                        <p class="text-muted">{{ $pointPackage->field</p>
                                     </div>
                                 </div>
                             </div>
@@ -139,8 +139,8 @@
                             <div class="info-box bg-gradient-info">
                                 <span class="info-box-icon"><i class="fas fa-calendar"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Validity Period</span>
-                                    <span class="info-box-number">{{ $pointPackage->validity_days ?? 0 }} Days</span>
+                                    <span class="info-box-text">{{ __('admin\point_packages\show.validity_period') }}</span>
+                                    <span class="info-box-number">{{ $pointPackage->field</span>
                                 </div>
                             </div>
                         </div>
@@ -148,8 +148,8 @@
                             <div class="info-box bg-gradient-success">
                                 <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Total Sales</span>
-                                    <span class="info-box-number">{{ $pointPackage->sales->count() }}</span>
+                                    <span class="info-box-text">{{ __('admin\point_packages\show.total_sales') }}</span>
+                                    <span class="info-box-number">{{ $pointPackage->field</span>
                                 </div>
                             </div>
                         </div>
@@ -157,8 +157,8 @@
                             <div class="info-box bg-gradient-warning">
                                 <span class="info-box-icon"><i class="fas fa-star"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Display Order</span>
-                                    <span class="info-box-number">{{ $pointPackage->display_order ?? 0 }}</span>
+                                    <span class="info-box-text">{{ __('admin\point_packages\show.display_order') }}</span>
+                                    <span class="info-box-number">{{ $pointPackage->field</span>
                                 </div>
                             </div>
                         </div>
@@ -166,8 +166,8 @@
                             <div class="info-box bg-gradient-secondary">
                                 <span class="info-box-icon"><i class="fas fa-clock"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">Created</span>
-                                    <span class="info-box-number">{{ $pointPackage->created_at->format('M d, Y') }}</span>
+                                    <span class="info-box-text">{{ __('admin\point_packages\show.created') }}</span>
+                                    <span class="info-box-number">{{ $pointPackage->field</span>
                                 </div>
                             </div>
                         </div>
@@ -189,7 +189,7 @@
                     <div class="d-grid gap-2">
                         <button type="button" class="btn btn-outline-{{ $pointPackage->is_active ? 'warning' : 'success' }}" 
                                 onclick="toggleStatus({{ $pointPackage->id }})">
-                            <i class="fas fa-{{ $pointPackage->is_active ? 'pause' : 'play' }} mr-2"></i>
+                            <i class="fas fa-{{ $pointPackage->field</i>
                             {{ $pointPackage->is_active ? 'Deactivate' : 'Activate' }} Package
                         </button>
                         
@@ -228,11 +228,11 @@
                 <div class="card-body">
                     <table class="table table-sm">
                         <tr>
-                            <td><strong>ID:</strong></td>
-                            <td><span class="badge badge-secondary">{{ $pointPackage->id }}</span></td>
+                            <td><strong>{{ __('admin\point_packages\show.id_') }}</strong></td>
+                            <td><span class="badge badge-secondary">{{ $pointPackage->field</span></td>
                         </tr>
                         <tr>
-                            <td><strong>Status:</strong></td>
+                            <td><strong>{{ __('admin\point_packages\show.status_') }}</strong></td>
                             <td>
                                 <span class="badge badge-{{ $pointPackage->is_active ? 'success' : 'danger' }}">
                                     {{ $pointPackage->is_active ? 'Active' : 'Inactive' }}
@@ -240,7 +240,7 @@
                             </td>
                         </tr>
                         <tr>
-                            <td><strong>Popular:</strong></td>
+                            <td><strong>{{ __('admin\point_packages\show.popular_') }}</strong></td>
                             <td>
                                 <span class="badge badge-{{ $pointPackage->is_popular ? 'warning' : 'secondary' }}">
                                     {{ $pointPackage->is_popular ? 'Yes' : 'No' }}
@@ -248,16 +248,16 @@
                             </td>
                         </tr>
                         <tr>
-                            <td><strong>Currency:</strong></td>
-                            <td>{{ $pointPackage->currency_code }}</td>
+                            <td><strong>{{ __('admin\point_packages\show.currency_') }}</strong></td>
+                            <td>{{ $pointPackage->field</td>
                         </tr>
                         <tr>
-                            <td><strong>Created:</strong></td>
-                            <td>{{ $pointPackage->created_at->format('M d, Y H:i') }}</td>
+                            <td><strong>{{ __('admin\point_packages\show.created_') }}</strong></td>
+                            <td>{{ $pointPackage->field</td>
                         </tr>
                         <tr>
-                            <td><strong>Updated:</strong></td>
-                            <td>{{ $pointPackage->updated_at->format('M d, Y H:i') }}</td>
+                            <td><strong>{{ __('admin\point_packages\show.updated_') }}</strong></td>
+                            <td>{{ $pointPackage->field</td>
                         </tr>
                     </table>
                 </div>

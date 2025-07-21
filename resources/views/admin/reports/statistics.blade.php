@@ -29,7 +29,7 @@
                 <div class="small-box bg-info">
                     <div class="inner">
                         <h3>{{ number_format($resolutionStats['resolved'] + $resolutionStats['pending'] + $resolutionStats['dismissed']) }}</h3>
-                        <p>Total Reports</p>
+                        <p>{{ __('admin\reports\statistics.total_reports') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-flag"></i>
@@ -40,7 +40,7 @@
                 <div class="small-box bg-success">
                     <div class="inner">
                         <h3>{{ number_format($resolutionStats['resolved']) }}</h3>
-                        <p>Resolved Reports</p>
+                        <p>{{ __('admin\reports\statistics.resolved_reports') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-check-circle"></i>
@@ -51,7 +51,7 @@
                 <div class="small-box bg-warning">
                     <div class="inner">
                         <h3>{{ number_format($resolutionStats['pending']) }}</h3>
-                        <p>Pending Reports</p>
+                        <p>{{ __('admin\reports\statistics.pending_reports') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-clock"></i>
@@ -62,7 +62,7 @@
                 <div class="small-box bg-secondary">
                     <div class="inner">
                         <h3>{{ number_format($resolutionStats['dismissed']) }}</h3>
-                        <p>Dismissed Reports</p>
+                        <p>{{ __('admin\reports\statistics.dismissed_reports') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-times-circle"></i>
@@ -135,10 +135,10 @@
                         <table class="table table-striped">
                             <thead>
                             <tr>
-                                <th style="width: 10px">#</th>
-                                <th>Reason</th>
-                                <th style="width: 120px">Count</th>
-                                <th style="width: 120px">Percentage</th>
+                                <th style="width: 10px">{{ __('admin\reports\statistics._') }}</th>
+                                <th>{{ __('admin\reports\statistics.reason') }}</th>
+                                <th style="width: 120px">{{ __('admin\reports\statistics.count') }}</th>
+                                <th style="width: 120px">{{ __('admin\reports\statistics.percentage') }}</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -149,15 +149,15 @@
                             @foreach($reportsByReason as $reasonStat)
                                 <tr>
                                     <td>{{ $counter++ }}</td>
-                                    <td>{{ $reasonStat->reason }}</td>
+                                    <td>{{ $reasonStat->field</td>
                                     <td>
-                                        <span class="badge bg-primary">{{ number_format($reasonStat->total) }}</span>
+                                        <span class="badge bg-primary">{{ number_format($reasonStat->field</span>
                                     </td>
                                     <td>
                                         <div class="progress progress-xs">
-                                            <div class="progress-bar progress-bar-danger" style="width: {{ ($reasonStat->total / $total) * 100 }}%"></div>
+                                            <div class="progress-bar progress-bar-danger" style="width: {{ ($reasonStat->field</div>
                                         </div>
-                                        <span class="badge bg-secondary">{{ round(($reasonStat->total / $total) * 100, 1) }}%</span>
+                                        <span class="badge bg-secondary">{{ round(($reasonStat->field</span>
                                     </td>
                                 </tr>
                             @endforeach

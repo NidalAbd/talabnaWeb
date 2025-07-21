@@ -24,7 +24,7 @@
             <div class="info-box bg-gradient-primary">
                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Total Users</span>
+                    <span class="info-box-text">{{ __('admin\statistics.total_users') }}</span>
                     <span class="info-box-number">{{ number_format($totalUsers ?? 0) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 100%"></div>
@@ -41,7 +41,7 @@
             <div class="info-box bg-gradient-success">
                 <span class="info-box-icon"><i class="fas fa-file-alt"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Service Posts</span>
+                    <span class="info-box-text">{{ __('admin\statistics.service_posts') }}</span>
                     <span class="info-box-number">{{ number_format($totalPosts ?? 0) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 85%"></div>
@@ -58,7 +58,7 @@
             <div class="info-box bg-gradient-warning">
                 <span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Revenue</span>
+                    <span class="info-box-text">{{ __('admin\statistics.revenue') }}</span>
                     <span class="info-box-number">${{ number_format($totalRevenue ?? 0, 2) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 70%"></div>
@@ -75,7 +75,7 @@
             <div class="info-box bg-gradient-info">
                 <span class="info-box-icon"><i class="fas fa-coins"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Points Sold</span>
+                    <span class="info-box-text">{{ __('admin\statistics.points_sold') }}</span>
                     <span class="info-box-number">{{ number_format($totalPoints ?? 0) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 90%"></div>
@@ -146,7 +146,7 @@
                         Recent Activity
                     </h3>
                     <div class="card-tools">
-                        <a href="#" class="btn btn-sm btn-primary">View All</a>
+                        <a href="#" class="btn btn-sm btn-primary">{{ __('admin\statistics.view_all') }}</a>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -154,10 +154,10 @@
                         <table class="table table-hover">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Activity</th>
-                                    <th>User</th>
-                                    <th>Time</th>
-                                    <th>Status</th>
+                                    <th>{{ __('admin\statistics.activity') }}</th>
+                                    <th>{{ __('admin\statistics.user') }}</th>
+                                    <th>{{ __('admin\statistics.time') }}</th>
+                                    <th>{{ __('admin\statistics.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -249,20 +249,20 @@
                     
                     <div class="system-status">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>Database</span>
-                            <span class="badge badge-success">Healthy</span>
+                            <span>{{ __('admin\statistics.database') }}</span>
+                            <span class="badge badge-success">{{ __('admin\statistics.healthy') }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>Storage</span>
-                            <span class="badge badge-warning">75% Used</span>
+                            <span>{{ __('admin\statistics.storage') }}</span>
+                            <span class="badge badge-warning">{{ __('admin\statistics.75_used') }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>Cache</span>
-                            <span class="badge badge-success">Active</span>
+                            <span>{{ __('admin\statistics.cache') }}</span>
+                            <span class="badge badge-success">{{ __('admin\statistics.active') }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span>Performance</span>
-                            <span class="badge badge-info">Good</span>
+                            <span>{{ __('admin\statistics.performance') }}</span>
+                            <span class="badge badge-info">{{ __('admin\statistics.good') }}</span>
                         </div>
                     </div>
                 </div>
@@ -286,28 +286,28 @@
                             <div class="stat-item">
                                 <i class="fas fa-users fa-2x text-primary mb-2"></i>
                                 <h4>{{ number_format($activeUsers ?? 0) }}</h4>
-                                <p class="text-muted">Active Users</p>
+                                <p class="text-muted">{{ __('admin\statistics.active_users') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3 text-center">
                             <div class="stat-item">
                                 <i class="fas fa-star fa-2x text-warning mb-2"></i>
                                 <h4>{{ number_format($premiumUsers ?? 0) }}</h4>
-                                <p class="text-muted">Premium Users</p>
+                                <p class="text-muted">{{ __('admin\statistics.premium_users') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3 text-center">
                             <div class="stat-item">
                                 <i class="fas fa-coins fa-2x text-success mb-2"></i>
                                 <h4>{{ number_format($totalPoints ?? 0) }}</h4>
-                                <p class="text-muted">Points Sold</p>
+                                <p class="text-muted">{{ __('admin\statistics.points_sold') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3 text-center">
                             <div class="stat-item">
                                 <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
                                 <h4>{{ number_format($growthRate ?? 0, 1) }}%</h4>
-                                <p class="text-muted">Growth Rate</p>
+                                <p class="text-muted">{{ __('admin\statistics.growth_rate') }}</p>
                             </div>
                         </div>
                     </div>

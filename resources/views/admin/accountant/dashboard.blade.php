@@ -3,7 +3,7 @@
 @section('title', 'Accountant Dashboard')
 
 @section('content_header')
-    <h1>Accountant Dashboard</h1>
+    <h1>{{ __('admin\accountant\dashboard.accountant_dashboard') }}</h1>
 @stop
 
 @section('content')
@@ -14,7 +14,7 @@
             <div class="small-box bg-success">
                 <div class="inner">
                     <h3>${{ number_format($totalRevenue, 2) }}</h3>
-                    <p>Total Revenue</p>
+                    <p>{{ __('admin\accountant\dashboard.total_revenue') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-dollar-sign"></i>
@@ -29,7 +29,7 @@
             <div class="small-box bg-warning">
                 <div class="inner">
                     <h3>${{ number_format($totalExpenses, 2) }}</h3>
-                    <p>Total Expenses</p>
+                    <p>{{ __('admin\accountant\dashboard.total_expenses') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-receipt"></i>
@@ -44,7 +44,7 @@
             <div class="small-box {{ $netProfit >= 0 ? 'bg-info' : 'bg-danger' }}">
                 <div class="inner">
                     <h3>${{ number_format($netProfit, 2) }}</h3>
-                    <p>Net Profit</p>
+                    <p>{{ __('admin\accountant\dashboard.net_profit') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-chart-line"></i>
@@ -59,7 +59,7 @@
             <div class="small-box bg-primary">
                 <div class="inner">
                     <h3>{{ $pendingExpenses }}</h3>
-                    <p>Pending Approvals</p>
+                    <p>{{ __('admin\accountant\dashboard.pending_approvals') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-clock"></i>
@@ -87,7 +87,7 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Revenue vs Expenses</h3>
+                    <h3 class="card-title">{{ __('admin\accountant\dashboard.revenue_vs_expenses') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="pieChart" style="height: 300px;"></canvas>
@@ -101,30 +101,30 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Recent Expenses</h3>
+                    <h3 class="card-title">{{ __('admin\accountant\dashboard.recent_expenses') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Title</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
-                                    <th>Date</th>
+                                    <th>{{ __('admin\accountant\dashboard.title') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.amount') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.status') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.date') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($recentExpenses as $expense)
                                 <tr>
-                                    <td>{{ $expense->expense_title }}</td>
+                                    <td>{{ $expense->field</td>
                                     <td>${{ number_format($expense->amount, 2) }}</td>
                                     <td>
                                         <span class="badge badge-{{ $expense->status === 'approved' ? 'success' : ($expense->status === 'pending' ? 'warning' : 'danger') }}">
                                             {{ ucfirst($expense->status) }}
                                         </span>
                                     </td>
-                                    <td>{{ $expense->expense_date->format('M d, Y') }}</td>
+                                    <td>{{ $expense->field</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -137,30 +137,30 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Recent Revenue</h3>
+                    <h3 class="card-title">{{ __('admin\accountant\dashboard.recent_revenue') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Title</th>
-                                    <th>Amount</th>
-                                    <th>Type</th>
-                                    <th>Date</th>
+                                    <th>{{ __('admin\accountant\dashboard.title') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.amount') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.type') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.date') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($recentRevenue as $revenue)
                                 <tr>
-                                    <td>{{ $revenue->revenue_title }}</td>
+                                    <td>{{ $revenue->field</td>
                                     <td>${{ number_format($revenue->amount, 2) }}</td>
                                     <td>
                                         <span class="badge badge-info">
                                             {{ ucfirst(str_replace('_', ' ', $revenue->revenue_type)) }}
                                         </span>
                                     </td>
-                                    <td>{{ $revenue->revenue_date->format('M d, Y') }}</td>
+                                    <td>{{ $revenue->field</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -176,29 +176,29 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Pending Expense Approvals</h3>
+                    <h3 class="card-title">{{ __('admin\accountant\dashboard.pending_expense_approvals') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Title</th>
-                                    <th>Amount</th>
-                                    <th>Category</th>
-                                    <th>Vendor</th>
-                                    <th>Date</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('admin\accountant\dashboard.title') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.amount') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.category') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.vendor') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.date') }}</th>
+                                    <th>{{ __('admin\accountant\dashboard.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($pendingApprovals as $expense)
                                 <tr>
-                                    <td>{{ $expense->expense_title }}</td>
+                                    <td>{{ $expense->field</td>
                                     <td>${{ number_format($expense->amount, 2) }}</td>
-                                    <td>{{ ucfirst($expense->expense_category) }}</td>
-                                    <td>{{ $expense->vendor_name }}</td>
-                                    <td>{{ $expense->expense_date->format('M d, Y') }}</td>
+                                    <td>{{ ucfirst($expense->field</td>
+                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->field</td>
                                     <td>
                                         <button class="btn btn-sm btn-success approve-expense" data-id="{{ $expense->id }}">
                                             <i class="fas fa-check"></i> Approve

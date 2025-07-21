@@ -8,12 +8,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1>Investment Workflow Management</h1>
+                    <h1>{{ __('admin\business\investment_workflow.investment_workflow_management') }}</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Investment Workflow</li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('admin\business\investment_workflow.dashboard') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('admin\business\investment_workflow.investment_workflow') }}</li>
                     </ol>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                     <div class="small-box bg-info">
                         <div class="inner">
                             <h3>{{ $activeInvestments ?? 0 }}</h3>
-                            <p>Active Investments</p>
+                            <p>{{ __('admin\business\investment_workflow.active_investments') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-chart-line"></i>
@@ -39,7 +39,7 @@
                     <div class="small-box bg-success">
                         <div class="inner">
                             <h3>${{ number_format($totalProfitGenerated ?? 0, 2) }}</h3>
-                            <p>Total Profit Generated</p>
+                            <p>{{ __('admin\business\investment_workflow.total_profit_generated') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-dollar-sign"></i>
@@ -50,7 +50,7 @@
                     <div class="small-box bg-warning">
                         <div class="inner">
                             <h3>${{ number_format($totalProfitDistributed ?? 0, 2) }}</h3>
-                            <p>Profit Distributed</p>
+                            <p>{{ __('admin\business\investment_workflow.profit_distributed') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-share-alt"></i>
@@ -61,7 +61,7 @@
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ $profitableInvestments ?? 0 }}</h3>
-                            <p>Profitable Investments</p>
+                            <p>{{ __('admin\business\investment_workflow.profitable_investments') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-trophy"></i>
@@ -75,7 +75,7 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Workflow Actions</h3>
+                            <h3 class="card-title">{{ __('admin\business\investment_workflow.workflow_actions') }}</h3>
                         </div>
                         <div class="card-body">
                             <div class="row">
@@ -105,32 +105,32 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Investment Workflow</h3>
+                            <h3 class="card-title">{{ __('admin\business\investment_workflow.investment_workflow') }}</h3>
                         </div>
                         <div class="card-body">
                             <table id="workflowTable" class="table table-bordered table-striped">
                                 <thead>
                                     <tr>
-                                        <th>Investor</th>
-                                        <th>Amount</th>
-                                        <th>ROI</th>
-                                        <th>Period</th>
-                                        <th>Profit Generated</th>
-                                        <th>Profit Distributed</th>
-                                        <th>Status</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('admin\business\investment_workflow.investor') }}</th>
+                                        <th>{{ __('admin\business\investment_workflow.amount') }}</th>
+                                        <th>{{ __('admin\business\investment_workflow.roi') }}</th>
+                                        <th>{{ __('admin\business\investment_workflow.period') }}</th>
+                                        <th>{{ __('admin\business\investment_workflow.profit_generated') }}</th>
+                                        <th>{{ __('admin\business\investment_workflow.profit_distributed') }}</th>
+                                        <th>{{ __('admin\business\investment_workflow.status') }}</th>
+                                        <th>{{ __('admin\business\investment_workflow.actions') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     @forelse($investments ?? [] as $investment)
                                     <tr>
                                         <td>
-                                            <strong>{{ $investment->investor_name }}</strong><br>
-                                            <small class="text-muted">{{ $investment->investor_email }}</small>
+                                            <strong>{{ $investment->field</strong><br>
+                                            <small class="text-muted">{{ $investment->field</small>
                                         </td>
                                         <td>${{ number_format($investment->investment_amount, 2) }}</td>
-                                        <td>{{ $investment->expected_roi }}%</td>
-                                        <td>{{ $investment->investment_period }} months</td>
+                                        <td>{{ $investment->field</td>
+                                        <td>{{ $investment->field</td>
                                         <td>
                                             <span class="badge badge-success">${{ number_format($investment->profit_generated, 2) }}</span>
                                         </td>
@@ -140,16 +140,16 @@
                                         <td>
                                             @switch($investment->status)
                                                 @case('active')
-                                                    <span class="badge badge-primary">Active</span>
+                                                    <span class="badge badge-primary">{{ __('admin\business\investment_workflow.active') }}</span>
                                                     @break
                                                 @case('profitable')
-                                                    <span class="badge badge-success">Profitable</span>
+                                                    <span class="badge badge-success">{{ __('admin\business\investment_workflow.profitable') }}</span>
                                                     @break
                                                 @case('completed')
-                                                    <span class="badge badge-secondary">Completed</span>
+                                                    <span class="badge badge-secondary">{{ __('admin\business\investment_workflow.completed') }}</span>
                                                     @break
                                                 @default
-                                                    <span class="badge badge-warning">Pending</span>
+                                                    <span class="badge badge-warning">{{ __('admin\business\investment_workflow.pending') }}</span>
                                             @endswitch
                                         </td>
                                         <td>
@@ -170,7 +170,7 @@
                                     </tr>
                                     @empty
                                     <tr>
-                                        <td colspan="8" class="text-center">No investments found</td>
+                                        <td colspan="8" class="text-center">{{ __('admin\business\investment_workflow.no_investments_found') }}</td>
                                     </tr>
                                     @endforelse
                                 </tbody>
@@ -185,7 +185,7 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Profit Distribution</h3>
+                            <h3 class="card-title">{{ __('admin\business\investment_workflow.profit_distribution') }}</h3>
                         </div>
                         <div class="card-body">
                             <canvas id="profitChart" height="200"></canvas>
@@ -195,7 +195,7 @@
                 <div class="col-md-6">
                     <div class="card">
                         <div class="card-header">
-                            <h3 class="card-title">Investment Status</h3>
+                            <h3 class="card-title">{{ __('admin\business\investment_workflow.investment_status') }}</h3>
                         </div>
                         <div class="card-body">
                             <canvas id="statusChart" height="200"></canvas>
@@ -212,17 +212,17 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Distribute Profit</h5>
+                <h5 class="modal-title">{{ __('admin\business\investment_workflow.distribute_profit') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('admin\business\investment_workflow._times_') }}</span>
                 </button>
             </div>
             <form id="distributeProfitForm">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Distribution Amount</label>
+                        <label>{{ __('admin\business\investment_workflow.distribution_amount') }}</label>
                         <input type="number" name="distribution_amount" class="form-control" step="0.01" required>
-                        <small class="text-muted">Available profit: $<span id="availableProfit">0.00</span></small>
+                        <small class="text-muted">{{ __('admin\business\investment_workflow.available_profit_') }}<span id="availableProfit">{{ __('admin\business\investment_workflow.0_00') }}</span></small>
                     </div>
                     <div class="form-group">
                         <label>Investor Share ({{ $investment->investor_share ?? 55 }}%)</label>
@@ -234,8 +234,8 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">Distribute Profit</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\business\investment_workflow.cancel') }}</button>
+                    <button type="submit" class="btn btn-success">{{ __('admin\business\investment_workflow.distribute_profit') }}</button>
                 </div>
             </form>
         </div>
@@ -247,26 +247,26 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Update Investment Status</h5>
+                <h5 class="modal-title">{{ __('admin\business\investment_workflow.update_investment_status') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('admin\business\investment_workflow._times_') }}</span>
                 </button>
             </div>
             <form id="updateStatusForm">
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>New Status</label>
+                        <label>{{ __('admin\business\investment_workflow.new_status') }}</label>
                         <select name="status" class="form-control" required>
-                            <option value="active">Active</option>
-                            <option value="profitable">Profitable</option>
-                            <option value="completed">Completed</option>
-                            <option value="pending">Pending</option>
+                            <option value="active">{{ __('admin\business\investment_workflow.active') }}</option>
+                            <option value="profitable">{{ __('admin\business\investment_workflow.profitable') }}</option>
+                            <option value="completed">{{ __('admin\business\investment_workflow.completed') }}</option>
+                            <option value="pending">{{ __('admin\business\investment_workflow.pending') }}</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Status</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\business\investment_workflow.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('admin\business\investment_workflow.update_status') }}</button>
                 </div>
             </form>
         </div>

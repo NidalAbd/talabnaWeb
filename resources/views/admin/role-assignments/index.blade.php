@@ -45,7 +45,7 @@
                     <!-- Role Filter -->
                     <div class="col-md-3">
                         <select class="form-control" name="role">
-                            <option value="">All Roles</option>
+                            <option value="">{{ __('admin\role-assignments\index.all_roles') }}</option>
                             @foreach(App\Models\Role::orderBy('name')->get() as $role)
                                 <option value="{{ $role->id }}" {{ request('role') == $role->id ? 'selected' : '' }}>
                                     {{ $role->display_name ?? $role->name }}
@@ -58,14 +58,14 @@
                     <div class="col-md-4">
                         <div class="input-group">
                             <select class="form-control" name="sort">
-                                <option value="id" {{ request('sort') == 'id' || !request('sort') ? 'selected' : '' }}>Sort by ID</option>
-                                <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Sort by Name</option>
-                                <option value="email" {{ request('sort') == 'email' ? 'selected' : '' }}>Sort by Email</option>
-                                <option value="roles_count" {{ request('sort') == 'roles_count' ? 'selected' : '' }}>Sort by Roles Count</option>
+                                <option value="id" {{ request('sort') == 'id' || !request('sort') ? 'selected' : '' }}>{{ __('admin\role-assignments\index.sort_by_id') }}</option>
+                                <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>{{ __('admin\role-assignments\index.sort_by_name') }}</option>
+                                <option value="email" {{ request('sort') == 'email' ? 'selected' : '' }}>{{ __('admin\role-assignments\index.sort_by_email') }}</option>
+                                <option value="roles_count" {{ request('sort') == 'roles_count' ? 'selected' : '' }}>{{ __('admin\role-assignments\index.sort_by_roles_count') }}</option>
                             </select>
                             <select class="form-control" name="direction">
-                                <option value="asc" {{ request('direction') == 'asc' ? 'selected' : '' }}>Ascending</option>
-                                <option value="desc" {{ request('direction') == 'desc' || !request('direction') ? 'selected' : '' }}>Descending</option>
+                                <option value="asc" {{ request('direction') == 'asc' ? 'selected' : '' }}>{{ __('admin\role-assignments\index.ascending') }}</option>
+                                <option value="desc" {{ request('direction') == 'desc' || !request('direction') ? 'selected' : '' }}>{{ __('admin\role-assignments\index.descending') }}</option>
                             </select>
                         </div>
                     </div>
@@ -98,19 +98,19 @@
                     <table class="table table-hover">
                         <thead>
                         <tr>
-                            <th style="width: 5%">ID</th>
-                            <th style="width: 20%">User</th>
-                            <th style="width: 20%">Email</th>
-                            <th style="width: 20%">Roles</th>
-                            <th style="width: 15%">Direct Permissions</th>
-                            <th style="width: 20%">Actions</th>
+                            <th style="width: 5%">{{ __('admin\role-assignments\index.id') }}</th>
+                            <th style="width: 20%">{{ __('admin\role-assignments\index.user') }}</th>
+                            <th style="width: 20%">{{ __('admin\role-assignments\index.email') }}</th>
+                            <th style="width: 20%">{{ __('admin\role-assignments\index.roles') }}</th>
+                            <th style="width: 15%">{{ __('admin\role-assignments\index.direct_permissions') }}</th>
+                            <th style="width: 20%">{{ __('admin\role-assignments\index.actions') }}</th>
                         </tr>
                         </thead>
                         <tbody>
                         @if(count($users) > 0)
                             @foreach($users as $user)
                                 <tr>
-                                    <td>{{ $user->id }}</td>
+                                    <td>{{ $user->field</td>
                                     <td>
                                         <div class="user-block">
                                             @if($user->photos && $user->photos->count() > 0)
@@ -124,11 +124,11 @@
                                             @endif
                                             <span class="username">
                                                     {{ $user->name }}
-                                                    <small>{{ $user->user_name ?? '' }}</small>
+                                                    <small>{{ $user->field</small>
                                                 </span>
                                         </div>
                                     </td>
-                                    <td>{{ $user->email }}</td>
+                                    <td>{{ $user->field</td>
                                     <td>
                                         @if($user->roles && $user->roles->count() > 0)
                                             @foreach($user->roles as $role)
@@ -137,7 +137,7 @@
                                                     </span>
                                             @endforeach
                                         @else
-                                            <span class="badge badge-secondary">No Roles Assigned</span>
+                                            <span class="badge badge-secondary">{{ __('admin\role-assignments\index.no_roles_assigned') }}</span>
                                         @endif
                                     </td>
                                     <td>

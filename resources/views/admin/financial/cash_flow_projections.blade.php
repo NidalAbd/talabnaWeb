@@ -7,39 +7,39 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>Demo Data:</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">Remove Demo Data</a>
+            <strong>{{ __('admin\financial\cash_flow_projections.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\financial\cash_flow_projections.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>Projected Inflow</h5>
-                    <h3>$15,000</h3>
+                    <h5>{{ __('admin\financial\cash_flow_projections.projected_inflow') }}</h5>
+                    <h3>{{ __('admin\financial\cash_flow_projections._15_000') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-danger text-white">
                 <div class="card-body">
-                    <h5>Projected Outflow</h5>
-                    <h3>$10,200</h3>
+                    <h5>{{ __('admin\financial\cash_flow_projections.projected_outflow') }}</h5>
+                    <h3>{{ __('admin\financial\cash_flow_projections._10_200') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Net Cash Flow</h5>
-                    <h3>$4,800</h3>
+                    <h5>{{ __('admin\financial\cash_flow_projections.net_cash_flow') }}</h5>
+                    <h3>{{ __('admin\financial\cash_flow_projections._4_800') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5>Projection Period</h5>
-                    <h3>Q3 2024</h3>
+                    <h5>{{ __('admin\financial\cash_flow_projections.projection_period') }}</h5>
+                    <h3>{{ __('admin\financial\cash_flow_projections.q3_2024') }}</h3>
                 </div>
             </div>
         </div>
@@ -47,14 +47,14 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">Projection Period:</label>
+                <label class="mr-2">{{ __('admin\financial\cash_flow_projections.projection_period_') }}</label>
                 <select class="form-control mr-2" name="period">
-                    <option>Q3 2024</option>
-                    <option>Q2 2024</option>
-                    <option>Q1 2024</option>
+                    <option>{{ __('admin\financial\cash_flow_projections.q3_2024') }}</option>
+                    <option>{{ __('admin\financial\cash_flow_projections.q2_2024') }}</option>
+                    <option>{{ __('admin\financial\cash_flow_projections.q1_2024') }}</option>
                 </select>
-                <button class="btn btn-primary mr-2">Filter</button>
-                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-primary mr-2">{{ __('admin\financial\cash_flow_projections.filter') }}</button>
+                <button class="btn btn-secondary">{{ __('admin\financial\cash_flow_projections.export') }}</button>
             </form>
         </div>
     </div>
@@ -66,34 +66,34 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Period</th>
-                        <th>Inflow</th>
-                        <th>Outflow</th>
-                        <th>Net Flow</th>
-                        <th>Notes</th>
+                        <th>{{ __('admin\financial\cash_flow_projections.period') }}</th>
+                        <th>{{ __('admin\financial\cash_flow_projections.inflow') }}</th>
+                        <th>{{ __('admin\financial\cash_flow_projections.outflow') }}</th>
+                        <th>{{ __('admin\financial\cash_flow_projections.net_flow') }}</th>
+                        <th>{{ __('admin\financial\cash_flow_projections.notes') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>Q3 2024</td>
-                        <td>$15,000</td>
-                        <td>$10,200</td>
-                        <td>$4,800</td>
-                        <td>Expected growth in premium sales</td>
+                        <td>{{ __('admin\financial\cash_flow_projections.q3_2024') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections._15_000') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections._10_200') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections._4_800') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections.expected_growth_in_premium_sales') }}</td>
                     </tr>
                     <tr>
-                        <td>Q2 2024</td>
-                        <td>$13,500</td>
-                        <td>$9,800</td>
-                        <td>$3,700</td>
-                        <td>Stable ad revenue</td>
+                        <td>{{ __('admin\financial\cash_flow_projections.q2_2024') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections._13_500') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections._9_800') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections._3_700') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections.stable_ad_revenue') }}</td>
                     </tr>
                     <tr>
-                        <td>Q1 2024</td>
-                        <td>$12,000</td>
-                        <td>$8,900</td>
-                        <td>$3,100</td>
-                        <td>Initial marketing push</td>
+                        <td>{{ __('admin\financial\cash_flow_projections.q1_2024') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections._12_000') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections._8_900') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections._3_100') }}</td>
+                        <td>{{ __('admin\financial\cash_flow_projections.initial_marketing_push') }}</td>
                     </tr>
                 </tbody>
             </table>

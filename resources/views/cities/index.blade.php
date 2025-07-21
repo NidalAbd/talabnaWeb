@@ -21,33 +21,7 @@
         :data="$cities"
         :columns="[
             ['label' => 'ID', 'field' => 'id', 'render' => function($city) {
-                return '<span class="badge badge-secondary">' . $city->id . '</span>';
-            }],
-            ['label' => 'Name', 'field' => 'name', 'render' => function($city) {
-                $name = is_array($city->name) ? $city->name['en'] : $city->name;
-                return '<strong>' . $name . '</strong>';
-            }],
-            ['label' => 'Country', 'field' => 'countries_id', 'render' => function($city) {
-                $countryName = is_array($city->country->name) ? $city->country->name['en'] : $city->country->name;
-                return '<span class="badge badge-info">' . $countryName . '</span>';
-            }],
-            ['label' => 'Status', 'field' => 'isSuspended', 'render' => function($city) {
-                if($city->isSuspended) {
-                    return '<span class="badge badge-danger"><i class="fas fa-ban"></i> Suspended</span>';
-                } else {
-                    return '<span class="badge badge-success"><i class="fas fa-check-circle"></i> Active</span>';
-                }
-            }],
-            ['label' => 'Users', 'field' => 'id', 'render' => function($city) {
-                $count = $city->users->count();
-                return '<span class="badge badge-primary">' . $count . '</span>';
-            }],
-            ['label' => 'Posts', 'field' => 'id', 'render' => function($city) {
-                $count = $city->servicePosts->count();
-                return '<span class="badge badge-success">' . $count . '</span>';
-            }],
-            ['label' => 'Created', 'field' => 'created_at', 'render' => function($city) {
-                return '<span class="text-muted">' . ($city->created_at ? $city->created_at->format('Y-m-d') : '-') . '</span>';
+                return '<span class="badge badge-secondary">{{ __('cities\index._city_id_') }}</span>{{ __('cities\index._label_') }}<strong>{{ __('cities\index._name_') }}</strong>{{ __('cities\index._label_') }}<span class="badge badge-info">{{ __('cities\index._countryname_') }}</span>{{ __('cities\index._label_') }}<span class="badge badge-danger"><i class="fas fa-ban"></i> Suspended</span>{{ __('cities\index._else_') }}<span class="badge badge-success"><i class="fas fa-check-circle"></i> Active</span>{{ __('cities\index._') }}<span class="badge badge-primary">{{ __('cities\index._count_') }}</span>{{ __('cities\index._label_') }}<span class="badge badge-success">{{ __('cities\index._count_') }}</span>{{ __('cities\index._label_') }}<span class="text-muted">{{ __('cities\index._city_created_at_city_created_') }}</span>';
             }],
         ]"
         :filters="[
@@ -57,8 +31,8 @@
         ]"
         :actions="function($city) {
             return '
-                <a href="' . route('cities.show', $city->id) . '" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
-                <a href="' . route('cities.edit', $city->id) . '" class="btn btn-xs btn-outline-primary" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
+                <a href="' . route('cities.show', $city->field<i class="fas fa-eye"></i></a>
+                <a href="' . route('cities.edit', $city->field<i class="fas fa-edit"></i></a>
                 <form action="' . route('cities.destroy', $city->id) . '" method="POST" class="d-inline-block" onsubmit="return confirm(\'Are you sure?\');">
                     ' . csrf_field() . '
                     ' . method_field('DELETE') . '

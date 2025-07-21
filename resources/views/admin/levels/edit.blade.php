@@ -8,13 +8,13 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Edit Level</h1>
+                    <h1 class="m-0">{{ __('admin\levels\edit.edit_level') }}</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item"><a href="{{ route('levels.index') }}">Levels</a></li>
-                        <li class="breadcrumb-item active">Edit</li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('admin\levels\edit.dashboard') }}</a></li>
+                        <li class="breadcrumb-item"><a href="{{ route('levels.index') }}">{{ __('admin\levels\edit.levels') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('admin\levels\edit.edit') }}</li>
                     </ol>
                 </div>
             </div>
@@ -40,7 +40,7 @@
                                     <!-- Arabic Name -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name_ar">Name (Arabic) <span class="text-danger">*</span></label>
+                                            <label for="name_ar">Name (Arabic) <span class="text-danger">{{ __('admin\levels\edit._') }}</span></label>
                                             <input type="text" class="form-control @error('name.ar') is-invalid @enderror" 
                                                    id="name_ar" name="name[ar]" 
                                                    value="{{ old('name.ar', $level->name['ar'] ?? '') }}" 
@@ -54,7 +54,7 @@
                                     <!-- English Name -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name_en">Name (English) <span class="text-danger">*</span></label>
+                                            <label for="name_en">Name (English) <span class="text-danger">{{ __('admin\levels\edit._') }}</span></label>
                                             <input type="text" class="form-control @error('name.en') is-invalid @enderror" 
                                                    id="name_en" name="name[en]" 
                                                    value="{{ old('name.en', $level->name['en'] ?? '') }}" 
@@ -70,10 +70,10 @@
                                     <!-- Arabic Description -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="description_ar">Description (Arabic)</label>
+                                            <label for="description_ar">{{ __('admin\levels\edit.description_arabic_') }}</label>
                                             <textarea class="form-control @error('description.ar') is-invalid @enderror" 
                                                       id="description_ar" name="description[ar]" rows="3" 
-                                                      placeholder="وصف المستوى">{{ old('description.ar', $level->description['ar'] ?? '') }}</textarea>
+                                                      placeholder="وصف المستوى">{{ old('description.ar', $level->field</textarea>
                                             @error('description.ar')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -83,10 +83,10 @@
                                     <!-- English Description -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="description_en">Description (English)</label>
+                                            <label for="description_en">{{ __('admin\levels\edit.description_english_') }}</label>
                                             <textarea class="form-control @error('description.en') is-invalid @enderror" 
                                                       id="description_en" name="description[en]" rows="3" 
-                                                      placeholder="Level description">{{ old('description.en', $level->description['en'] ?? '') }}</textarea>
+                                                      placeholder="Level description">{{ old('description.en', $level->field</textarea>
                                             @error('description.en')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -98,12 +98,12 @@
                                     <!-- Icon -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="icon">Icon</label>
+                                            <label for="icon">{{ __('admin\levels\edit.icon') }}</label>
                                             <input type="text" class="form-control @error('icon') is-invalid @enderror" 
                                                    id="icon" name="icon" 
                                                    value="{{ old('icon', $level->icon) }}" 
                                                    placeholder="fas fa-star">
-                                            <small class="form-text text-muted">FontAwesome icon class (e.g., fas fa-star)</small>
+                                            <small class="form-text text-muted">{{ __('admin\levels\edit.fontawesome_icon_class_e_g_fas_fa_sta') }}</small>
                                             @error('icon')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -113,7 +113,7 @@
                                     <!-- Color -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="color">Color <span class="text-danger">*</span></label>
+                                            <label for="color">Color <span class="text-danger">{{ __('admin\levels\edit._') }}</span></label>
                                             <input type="color" class="form-control @error('color') is-invalid @enderror" 
                                                    id="color" name="color" 
                                                    value="{{ old('color', $level->color) }}" required>
@@ -126,7 +126,7 @@
                                     <!-- Display Order -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="display_order">Display Order</label>
+                                            <label for="display_order">{{ __('admin\levels\edit.display_order') }}</label>
                                             <input type="number" class="form-control @error('display_order') is-invalid @enderror" 
                                                    id="display_order" name="display_order" 
                                                    value="{{ old('display_order', $level->display_order) }}" 
@@ -142,12 +142,12 @@
                                     <!-- Points Per Day -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="points_per_day">Points Per Day</label>
+                                            <label for="points_per_day">{{ __('admin\levels\edit.points_per_day') }}</label>
                                             <input type="number" class="form-control @error('points_per_day') is-invalid @enderror" 
                                                    id="points_per_day" name="points_per_day" 
                                                    value="{{ old('points_per_day', $level->points_per_day) }}" 
                                                    min="0" max="1000">
-                                            <small class="form-text text-muted">Cost in points per day for this level</small>
+                                            <small class="form-text text-muted">{{ __('admin\levels\edit.cost_in_points_per_day_for_this_level') }}</small>
                                             @error('points_per_day')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -157,12 +157,12 @@
                                     <!-- View Boost Percentage -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="view_boost_percentage">View Boost (%)</label>
+                                            <label for="view_boost_percentage">{{ __('admin\levels\edit.view_boost_') }}</label>
                                             <input type="number" class="form-control @error('view_boost_percentage') is-invalid @enderror" 
                                                    id="view_boost_percentage" name="view_boost_percentage" 
                                                    value="{{ old('view_boost_percentage', $level->view_boost_percentage) }}" 
                                                    min="0" max="1000">
-                                            <small class="form-text text-muted">Percentage increase in views for posts with this level</small>
+                                            <small class="form-text text-muted">{{ __('admin\levels\edit.percentage_increase_in_views_for_posts_w') }}</small>
                                             @error('view_boost_percentage')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -174,11 +174,11 @@
                                     <!-- Features -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="features_ar">Features (Arabic)</label>
+                                            <label for="features_ar">{{ __('admin\levels\edit.features_arabic_') }}</label>
                                             <textarea class="form-control @error('features.ar') is-invalid @enderror" 
                                                       id="features_ar" name="features[ar]" rows="3" 
-                                                      placeholder="مميزات المستوى (سطر واحد لكل مميزة)">{{ old('features.ar', implode("\n", $level->features['ar'] ?? [])) }}</textarea>
-                                            <small class="form-text text-muted">One feature per line</small>
+                                                      placeholder="مميزات المستوى (سطر واحد لكل مميزة)">{{ old('features.ar', implode("\n", $level->field</textarea>
+                                            <small class="form-text text-muted">{{ __('admin\levels\edit.one_feature_per_line') }}</small>
                                             @error('features.ar')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -188,11 +188,11 @@
                                     <!-- Features English -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="features_en">Features (English)</label>
+                                            <label for="features_en">{{ __('admin\levels\edit.features_english_') }}</label>
                                             <textarea class="form-control @error('features.en') is-invalid @enderror" 
                                                       id="features_en" name="features[en]" rows="3" 
-                                                      placeholder="Level features (one per line)">{{ old('features.en', implode("\n", $level->features['en'] ?? [])) }}</textarea>
-                                            <small class="form-text text-muted">One feature per line</small>
+                                                      placeholder="Level features (one per line)">{{ old('features.en', implode("\n", $level->field</textarea>
+                                            <small class="form-text text-muted">{{ __('admin\levels\edit.one_feature_per_line') }}</small>
                                             @error('features.en')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -208,7 +208,7 @@
                                                 <input type="checkbox" class="custom-control-input" id="is_active" 
                                                        name="is_active" value="1" 
                                                        {{ old('is_active', $level->is_active) ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="is_active">Active</label>
+                                                <label class="custom-control-label" for="is_active">{{ __('admin\levels\edit.active') }}</label>
                                             </div>
                                         </div>
                                     </div>
@@ -220,7 +220,7 @@
                                                 <input type="checkbox" class="custom-control-input" id="is_premium" 
                                                        name="is_premium" value="1" 
                                                        {{ old('is_premium', $level->is_premium) ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="is_premium">Premium Level</label>
+                                                <label class="custom-control-label" for="is_premium">{{ __('admin\levels\edit.premium_level') }}</label>
                                             </div>
                                         </div>
                                     </div>
@@ -253,13 +253,13 @@
                             <div class="level-preview">
                                 <div class="text-center mb-3">
                                     <div class="level-badge mx-auto" id="preview-badge" style="background-color: {{ $level->color }};">
-                                        <i class="{{ $level->icon ?? 'fas fa-star' }}" id="preview-icon"></i>
+                                        <i class="{{ $level->field</i>
                                     </div>
                                 </div>
                                 <div class="text-center">
                                     <h5 id="preview-name">{{ $level->getLocalizedName('ar') }} / {{ $level->getLocalizedName('en') }}</h5>
-                                    <p class="text-muted" id="preview-description">{{ $level->getLocalizedDescription('ar') }}</p>
-                                    <div class="badge badge-info" id="preview-points">{{ $level->points_per_day }} pts/day</div>
+                                    <p class="text-muted" id="preview-description">{{ $level->field</p>
+                                    <div class="badge badge-info" id="preview-points">{{ $level->field</div>
                                     <div class="badge badge-success" id="preview-boost">+{{ $level->view_boost_percentage }}%</div>
                                 </div>
                             </div>
@@ -280,8 +280,8 @@
                                     <div class="info-box bg-info">
                                         <span class="info-box-icon"><i class="fas fa-file-alt"></i></span>
                                         <div class="info-box-content">
-                                            <span class="info-box-text">Posts</span>
-                                            <span class="info-box-number">{{ $level->servicePosts()->count() }}</span>
+                                            <span class="info-box-text">{{ __('admin\levels\edit.posts') }}</span>
+                                            <span class="info-box-number">{{ $level->field</span>
                                         </div>
                                     </div>
                                 </div>
@@ -289,8 +289,8 @@
                                     <div class="info-box bg-success">
                                         <span class="info-box-icon"><i class="fas fa-eye"></i></span>
                                         <div class="info-box-content">
-                                            <span class="info-box-text">Total Views</span>
-                                            <span class="info-box-number">{{ $level->servicePosts()->sum('view_count') }}</span>
+                                            <span class="info-box-text">{{ __('admin\levels\edit.total_views') }}</span>
+                                            <span class="info-box-number">{{ $level->field</span>
                                         </div>
                                     </div>
                                 </div>

@@ -33,7 +33,7 @@
                             <!-- Arabic Name -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="name_ar">Name (Arabic) <span class="text-danger">*</span></label>
+                                    <label for="name_ar">Name (Arabic) <span class="text-danger">{{ __('admin\premium_features\edit._') }}</span></label>
                                     <input type="text" class="form-control @error('name.ar') is-invalid @enderror" 
                                            id="name_ar" name="name[ar]" value="{{ old('name.ar', $feature->name['ar'] ?? '') }}" required>
                                     @error('name.ar')
@@ -45,7 +45,7 @@
                             <!-- English Name -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="name_en">Name (English) <span class="text-danger">*</span></label>
+                                    <label for="name_en">Name (English) <span class="text-danger">{{ __('admin\premium_features\edit._') }}</span></label>
                                     <input type="text" class="form-control @error('name.en') is-invalid @enderror" 
                                            id="name_en" name="name[en]" value="{{ old('name.en', $feature->name['en'] ?? '') }}" required>
                                     @error('name.en')
@@ -59,9 +59,9 @@
                             <!-- Arabic Description -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="description_ar">Description (Arabic)</label>
+                                    <label for="description_ar">{{ __('admin\premium_features\edit.description_arabic_') }}</label>
                                     <textarea class="form-control @error('description.ar') is-invalid @enderror" 
-                                              id="description_ar" name="description[ar]" rows="3">{{ old('description.ar', $feature->description['ar'] ?? '') }}</textarea>
+                                              id="description_ar" name="description[ar]" rows="3">{{ old('description.ar', $feature->field</textarea>
                                     @error('description.ar')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
@@ -71,9 +71,9 @@
                             <!-- English Description -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="description_en">Description (English)</label>
+                                    <label for="description_en">{{ __('admin\premium_features\edit.description_english_') }}</label>
                                     <textarea class="form-control @error('description.en') is-invalid @enderror" 
-                                              id="description_en" name="description[en]" rows="3">{{ old('description.en', $feature->description['en'] ?? '') }}</textarea>
+                                              id="description_en" name="description[en]" rows="3">{{ old('description.en', $feature->field</textarea>
                                     @error('description.en')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
@@ -85,7 +85,7 @@
                             <!-- Points Cost -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="points_cost">Points Cost <span class="text-danger">*</span></label>
+                                    <label for="points_cost">Points Cost <span class="text-danger">{{ __('admin\premium_features\edit._') }}</span></label>
                                     <input type="number" class="form-control @error('points_cost') is-invalid @enderror" 
                                            id="points_cost" name="points_cost" value="{{ old('points_cost', $feature->points_cost) }}" min="1" required>
                                     @error('points_cost')
@@ -97,7 +97,7 @@
                             <!-- Duration Days -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="duration_days">Duration (Days) <span class="text-danger">*</span></label>
+                                    <label for="duration_days">Duration (Days) <span class="text-danger">{{ __('admin\premium_features\edit._') }}</span></label>
                                     <input type="number" class="form-control @error('duration_days') is-invalid @enderror" 
                                            id="duration_days" name="duration_days" value="{{ old('duration_days', $feature->duration_days) }}" min="1" required>
                                     @error('duration_days')
@@ -109,14 +109,14 @@
                             <!-- Category -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="category">Category <span class="text-danger">*</span></label>
+                                    <label for="category">Category <span class="text-danger">{{ __('admin\premium_features\edit._') }}</span></label>
                                     <select class="form-control @error('category') is-invalid @enderror" id="category" name="category" required>
-                                        <option value="">Select Category</option>
-                                        <option value="post_enhancement" {{ old('category', $feature->category) == 'post_enhancement' ? 'selected' : '' }}>Post Enhancement</option>
-                                        <option value="user_benefit" {{ old('category', $feature->category) == 'user_benefit' ? 'selected' : '' }}>User Benefit</option>
-                                        <option value="system_feature" {{ old('category', $feature->category) == 'system_feature' ? 'selected' : '' }}>System Feature</option>
-                                        <option value="premium_access" {{ old('category', $feature->category) == 'premium_access' ? 'selected' : '' }}>Premium Access</option>
-                                        <option value="analytics" {{ old('category', $feature->category) == 'analytics' ? 'selected' : '' }}>Analytics</option>
+                                        <option value="">{{ __('admin\premium_features\edit.select_category') }}</option>
+                                        <option value="post_enhancement" {{ old('category', $feature->field</option>
+                                        <option value="user_benefit" {{ old('category', $feature->field</option>
+                                        <option value="system_feature" {{ old('category', $feature->field</option>
+                                        <option value="premium_access" {{ old('category', $feature->field</option>
+                                        <option value="analytics" {{ old('category', $feature->field</option>
                                     </select>
                                     @error('category')
                                         <span class="invalid-feedback">{{ $message }}</span>
@@ -129,11 +129,11 @@
                             <!-- Icon -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="icon">Icon (FontAwesome Class)</label>
+                                    <label for="icon">{{ __('admin\premium_features\edit.icon_fontawesome_class_') }}</label>
                                     <input type="text" class="form-control @error('icon') is-invalid @enderror" 
                                            id="icon" name="icon" value="{{ old('icon', $feature->icon) }}" 
                                            placeholder="fas fa-crown">
-                                    <small class="form-text text-muted">Enter FontAwesome icon class (e.g., fas fa-crown)</small>
+                                    <small class="form-text text-muted">{{ __('admin\premium_features\edit.enter_fontawesome_icon_class_e_g_fas_') }}</small>
                                     @error('icon')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
@@ -143,7 +143,7 @@
                             <!-- Color -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="color">Color</label>
+                                    <label for="color">{{ __('admin\premium_features\edit.color') }}</label>
                                     <input type="color" class="form-control @error('color') is-invalid @enderror" 
                                            id="color" name="color" value="{{ old('color', $feature->color ?? '#ffc107') }}">
                                     @error('color')
@@ -155,16 +155,16 @@
                             <!-- Status -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>Status</label>
+                                    <label>{{ __('admin\premium_features\edit.status') }}</label>
                                     <div class="custom-control custom-switch">
                                         <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" value="1" 
                                                {{ old('is_active', $feature->is_active) ? 'checked' : '' }}>
-                                        <label class="custom-control-label" for="is_active">Active</label>
+                                        <label class="custom-control-label" for="is_active">{{ __('admin\premium_features\edit.active') }}</label>
                                     </div>
                                     <div class="custom-control custom-switch mt-2">
                                         <input type="checkbox" class="custom-control-input" id="is_popular" name="is_popular" value="1" 
                                                {{ old('is_popular', $feature->is_popular) ? 'checked' : '' }}>
-                                        <label class="custom-control-label" for="is_popular">Popular Feature</label>
+                                        <label class="custom-control-label" for="is_popular">{{ __('admin\premium_features\edit.popular_feature') }}</label>
                                     </div>
                                 </div>
                             </div>
@@ -186,12 +186,12 @@
                                                 <i class="{{ $feature->icon ?? 'fas fa-crown' }}" 
                                                    style="font-size: 48px; color: {{ $feature->color ?? '#ffc107' }};"></i>
                                             </div>
-                                            <h4>{{ $feature->name['en'] ?? 'Feature Name' }}</h4>
-                                            <p class="text-muted">{{ $feature->description['en'] ?? 'Feature description' }}</p>
-                                            <div class="badge badge-primary mr-2">{{ number_format($feature->points_cost) }} pts</div>
-                                            <div class="badge badge-info">{{ $feature->duration_days }} days</div>
+                                            <h4>{{ $feature->field</h4>
+                                            <p class="text-muted">{{ $feature->field</p>
+                                            <div class="badge badge-primary mr-2">{{ number_format($feature->field</div>
+                                            <div class="badge badge-info">{{ $feature->field</div>
                                             @if($feature->is_popular)
-                                                <div class="badge badge-warning ml-2">Popular</div>
+                                                <div class="badge badge-warning ml-2">{{ __('admin\premium_features\edit.popular') }}</div>
                                             @endif
                                         </div>
                                     </div>

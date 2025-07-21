@@ -24,7 +24,7 @@
             <div class="info-box bg-gradient-primary">
                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Total Users</span>
+                    <span class="info-box-text">{{ __('admin\analytics\user_analytics.total_users') }}</span>
                     <span class="info-box-number">{{ number_format($totalUsers) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 100%"></div>
@@ -41,7 +41,7 @@
             <div class="info-box bg-gradient-success">
                 <span class="info-box-icon"><i class="fas fa-user-check"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Active Users</span>
+                    <span class="info-box-text">{{ __('admin\analytics\user_analytics.active_users') }}</span>
                     <span class="info-box-number">{{ number_format($activeUsers) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: {{ $totalUsers > 0 ? ($activeUsers / $totalUsers) * 100 : 0 }}%"></div>
@@ -58,13 +58,13 @@
             <div class="info-box bg-gradient-warning">
                 <span class="info-box-icon"><i class="fas fa-user-plus"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">New This Month</span>
+                    <span class="info-box-text">{{ __('admin\analytics\user_analytics.new_this_month') }}</span>
                     <span class="info-box-number">{{ number_format($newUsersThisMonth) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: {{ $newUsersThisMonth > 0 ? min($newUsersThisMonth * 10, 100) : 0 }}%"></div>
                     </div>
                     <span class="progress-description">
-                        <i class="fas fa-{{ $userGrowthRate >= 0 ? 'arrow-up text-success' : 'arrow-down text-danger' }}"></i>
+                        <i class="fas fa-{{ $userGrowthRate >{{ __('admin\analytics\user_analytics._0_arrow_up_text_success_arrow_d') }}</i>
                         {{ number_format($userGrowthRate, 1) }}% growth
                     </span>
                 </div>
@@ -75,7 +75,7 @@
             <div class="info-box bg-gradient-danger">
                 <span class="info-box-icon"><i class="fas fa-user-slash"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Banned Users</span>
+                    <span class="info-box-text">{{ __('admin\analytics\user_analytics.banned_users') }}</span>
                     <span class="info-box-number">{{ number_format($bannedUsers) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: {{ $totalUsers > 0 ? ($bannedUsers / $totalUsers) * 100 : 0 }}%"></div>
@@ -149,7 +149,7 @@
                         Top Users by Posts
                     </h3>
                     <div class="card-tools">
-                        <a href="#" class="btn btn-sm btn-primary">View All</a>
+                        <a href="#" class="btn btn-sm btn-primary">{{ __('admin\analytics\user_analytics.view_all') }}</a>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -157,10 +157,10 @@
                         <table class="table table-hover">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>User</th>
-                                    <th>Posts</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('admin\analytics\user_analytics.user') }}</th>
+                                    <th>{{ __('admin\analytics\user_analytics.posts') }}</th>
+                                    <th>{{ __('admin\analytics\user_analytics.status') }}</th>
+                                    <th>{{ __('admin\analytics\user_analytics.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -171,8 +171,8 @@
                                                 <img src="{{ $user->photos->first()?->src ?? 'img/default-avatar.png' }}" 
                                                      class="img-circle mr-2" width="30" height="30" alt="User">
                                                 <div>
-                                                    <div class="font-weight-bold">{{ $user->user_name ?? 'N/A' }}</div>
-                                                    <small class="text-muted">{{ $user->email ?? 'N/A' }}</small>
+                                                    <div class="font-weight-bold">{{ $user->field</div>
+                                                    <small class="text-muted">{{ $user->field</small>
                                                 </div>
                                             </div>
                                         </td>
@@ -229,7 +229,7 @@
                         Recent Registrations
                     </h3>
                     <div class="card-tools">
-                        <a href="#" class="btn btn-sm btn-primary">View All</a>
+                        <a href="#" class="btn btn-sm btn-primary">{{ __('admin\analytics\user_analytics.view_all') }}</a>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -237,10 +237,10 @@
                         <table class="table table-hover">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>User</th>
-                                    <th>Joined</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('admin\analytics\user_analytics.user') }}</th>
+                                    <th>{{ __('admin\analytics\user_analytics.joined') }}</th>
+                                    <th>{{ __('admin\analytics\user_analytics.status') }}</th>
+                                    <th>{{ __('admin\analytics\user_analytics.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -251,8 +251,8 @@
                                                 <img src="{{ $user->photos->first()?->src ?? 'img/default-avatar.png' }}" 
                                                      class="img-circle mr-2" width="30" height="30" alt="User">
                                                 <div>
-                                                    <div class="font-weight-bold">{{ $user->user_name ?? 'N/A' }}</div>
-                                                    <small class="text-muted">{{ $user->email ?? 'N/A' }}</small>
+                                                    <div class="font-weight-bold">{{ $user->field</div>
+                                                    <small class="text-muted">{{ $user->field</small>
                                                 </div>
                                             </div>
                                         </td>

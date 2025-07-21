@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <div>
             <h1 class="mb-0"><i class="fas fa-briefcase text-primary mr-2"></i> Service Posts Management</h1>
-            <p class="text-muted mb-0">Manage and monitor all service posts across the platform</p>
+            <p class="text-muted mb-0">{{ __('service_posts\index.manage_and_monitor_all_service_posts_acr') }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ route('service_posts.create') }}" class="btn btn-success">
@@ -32,8 +32,8 @@
             <div class="info-box bg-gradient-primary shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-briefcase"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Total Posts</span>
-                    <span class="info-box-number">{{ number_format($servicePosts->total()) }}</span>
+                    <span class="info-box-text">{{ __('service_posts\index.total_posts') }}</span>
+                    <span class="info-box-number">{{ number_format($servicePosts->field</span>
                     <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
                     <span class="progress-description">
                         <i class="fas fa-chart-line text-light"></i> All service posts
@@ -45,9 +45,9 @@
             <div class="info-box bg-gradient-success shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Published</span>
+                    <span class="info-box-text">{{ __('service_posts\index.published') }}</span>
                     <span class="info-box-number">{{ number_format($publishedCount ?? 0) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $servicePosts->total() > 0 ? (($publishedCount ?? 0) / $servicePosts->total()) * 100 : 0 }}%"></div></div>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $servicePosts->field</div></div>
                     <span class="progress-description">
                         <i class="fas fa-check text-light"></i> {{ $servicePosts->total() > 0 ? number_format((($publishedCount ?? 0) / $servicePosts->total()) * 100, 1) : 0 }}% of total
                     </span>
@@ -58,9 +58,9 @@
             <div class="info-box bg-gradient-warning shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-clock"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Pending</span>
+                    <span class="info-box-text">{{ __('service_posts\index.pending') }}</span>
                     <span class="info-box-number">{{ number_format($pendingCount ?? 0) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $servicePosts->total() > 0 ? (($pendingCount ?? 0) / $servicePosts->total()) * 100 : 0 }}%"></div></div>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $servicePosts->field</div></div>
                     <span class="progress-description">
                         <i class="fas fa-clock text-light"></i> {{ $servicePosts->total() > 0 ? number_format((($pendingCount ?? 0) / $servicePosts->total()) * 100, 1) : 0 }}% of total
                     </span>
@@ -71,9 +71,9 @@
             <div class="info-box bg-gradient-danger shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-star"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Premium</span>
+                    <span class="info-box-text">{{ __('service_posts\index.premium') }}</span>
                     <span class="info-box-number">{{ number_format($premiumCount ?? 0) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $servicePosts->total() > 0 ? (($premiumCount ?? 0) / $servicePosts->total()) * 100 : 0 }}%"></div></div>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $servicePosts->field</div></div>
                     <span class="progress-description">
                         <i class="fas fa-star text-light"></i> {{ $servicePosts->total() > 0 ? number_format((($premiumCount ?? 0) / $servicePosts->total()) * 100, 1) : 0 }}% of total
                     </span>
@@ -93,9 +93,9 @@
             <form method="GET" id="filterForm">
                 <div class="row g-3">
                     <div class="col-md-2">
-                        <label for="category-filter" class="form-label">Category</label>
+                        <label for="category-filter" class="form-label">{{ __('service_posts\index.category') }}</label>
                         <select name="category" id="category-filter" class="form-control select2">
-                            <option value="">All Categories</option>
+                            <option value="">{{ __('service_posts\index.all_categories') }}</option>
                             @foreach($categories as $cat)
                                 <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>
                                     {{ $cat->name[app()->getLocale()] ?? $cat->name['en'] ?? 'Unknown' }}
@@ -104,9 +104,9 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="subcategory-filter" class="form-label">Subcategory</label>
+                        <label for="subcategory-filter" class="form-label">{{ __('service_posts\index.subcategory') }}</label>
                         <select name="subcategory" id="subcategory-filter" class="form-control select2" {{ $subcategories->isEmpty() ? 'disabled' : '' }}>
-                            <option value="">All Subcategories</option>
+                            <option value="">{{ __('service_posts\index.all_subcategories') }}</option>
                             @foreach($subcategories as $subcat)
                                 <option value="{{ $subcat->id }}" {{ request('subcategory') == $subcat->id ? 'selected' : '' }}>
                                     {{ $subcat->name[app()->getLocale()] ?? $subcat->name['en'] ?? 'Unknown' }}
@@ -115,27 +115,27 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="status-filter" class="form-label">Status</label>
+                        <label for="status-filter" class="form-label">{{ __('service_posts\index.status') }}</label>
                         <select name="status" id="status-filter" class="form-control">
-                            <option value="">All Statuses</option>
-                            <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
-                            <option value="not published" {{ request('status') == 'not published' ? 'selected' : '' }}>Pending</option>
-                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
-                            <option value="archive" {{ request('status') == 'archive' ? 'selected' : '' }}>Archived</option>
+                            <option value="">{{ __('service_posts\index.all_statuses') }}</option>
+                            <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>{{ __('service_posts\index.published') }}</option>
+                            <option value="not published" {{ request('status') == 'not published' ? 'selected' : '' }}>{{ __('service_posts\index.pending') }}</option>
+                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{ __('service_posts\index.rejected') }}</option>
+                            <option value="archive" {{ request('status') == 'archive' ? 'selected' : '' }}>{{ __('service_posts\index.archived') }}</option>
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="type-filter" class="form-label">Type</label>
+                        <label for="type-filter" class="form-label">{{ __('service_posts\index.type') }}</label>
                         <select name="type" id="type-filter" class="form-control">
-                            <option value="">All Types</option>
-                            <option value="عرض" {{ request('type') == 'عرض' ? 'selected' : '' }}>عرض (Offer)</option>
-                            <option value="طلب" {{ request('type') == 'طلب' ? 'selected' : '' }}>طلب (Request)</option>
+                            <option value="">{{ __('service_posts\index.all_types') }}</option>
+                            <option value="عرض" {{ request('type') == 'عرض' ? 'selected' : '' }}>{{ __('service_posts\index._offer_') }}</option>
+                            <option value="طلب" {{ request('type') == 'طلب' ? 'selected' : '' }}>{{ __('service_posts\index._request_') }}</option>
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="level-filter" class="form-label">Level</label>
+                        <label for="level-filter" class="form-label">{{ __('service_posts\index.level') }}</label>
                         <select name="level" id="level-filter" class="form-control">
-                            <option value="">All Levels</option>
+                            <option value="">{{ __('service_posts\index.all_levels') }}</option>
                             @if(isset($levels) && $levels->count() > 0)
                                 @foreach($levels as $level)
                                     <option value="{{ $level->id }}" {{ request('level') == $level->id ? 'selected' : '' }}>
@@ -146,11 +146,11 @@
                         </select>
                     </div>
                     <div class="col-md-2">
-                        <label for="date-range" class="form-label">Date Range</label>
+                        <label for="date-range" class="form-label">{{ __('service_posts\index.date_range') }}</label>
                         <input type="text" name="date_range" id="date-range" class="form-control" placeholder="Select date range" value="{{ request('date_range') }}">
                     </div>
                     <div class="col-md-2">
-                        <label for="search-filter" class="form-label">Search</label>
+                        <label for="search-filter" class="form-label">{{ __('service_posts\index.search') }}</label>
                         <input type="text" name="search" id="search-filter" class="form-control" placeholder="Search posts..." value="{{ request('search') }}">
                     </div>
                 </div>
@@ -180,9 +180,9 @@
                     <div class="card card-body bg-light">
                         <div class="row g-3">
                             <div class="col-md-3">
-                                <label for="user-filter" class="form-label">User</label>
+                                <label for="user-filter" class="form-label">{{ __('service_posts\index.user') }}</label>
                                 <select name="user" id="user-filter" class="form-control select2">
-                                    <option value="">All Users</option>
+                                    <option value="">{{ __('service_posts\index.all_users') }}</option>
                                     @foreach($users ?? [] as $user)
                                         <option value="{{ $user->id }}" {{ request('user') == $user->id ? 'selected' : '' }}>
                                             {{ $user->name ?? $user->user_name ?? 'Unknown' }}
@@ -191,9 +191,9 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label for="city-filter" class="form-label">City</label>
+                                <label for="city-filter" class="form-label">{{ __('service_posts\index.city') }}</label>
                                 <select name="city" id="city-filter" class="form-control select2">
-                                    <option value="">All Cities</option>
+                                    <option value="">{{ __('service_posts\index.all_cities') }}</option>
                                     @foreach($cities ?? [] as $city)
                                         <option value="{{ $city->id }}" {{ request('city') == $city->id ? 'selected' : '' }}>
                                             {{ $city->name[app()->getLocale()] ?? $city->name['en'] ?? 'Unknown' }}
@@ -202,9 +202,9 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label for="country-filter" class="form-label">Country</label>
+                                <label for="country-filter" class="form-label">{{ __('service_posts\index.country') }}</label>
                                 <select name="country" id="country-filter" class="form-control select2">
-                                    <option value="">All Countries</option>
+                                    <option value="">{{ __('service_posts\index.all_countries') }}</option>
                                     @foreach($countries ?? [] as $country)
                                         <option value="{{ $country->id }}" {{ request('country') == $country->id ? 'selected' : '' }}>
                                             {{ $country->name[app()->getLocale()] ?? $country->name['en'] ?? 'Unknown' }}
@@ -213,7 +213,7 @@
                                 </select>
                             </div>
                             <div class="col-md-3">
-                                <label for="views-filter" class="form-label">Min Views</label>
+                                <label for="views-filter" class="form-label">{{ __('service_posts\index.min_views') }}</label>
                                 <input type="number" name="min_views" id="views-filter" class="form-control" placeholder="0" value="{{ request('min_views') }}">
                             </div>
                         </div>
@@ -228,7 +228,7 @@
         <div class="card-header d-flex justify-content-between align-items-center">
             <div class="card-title">
                 <i class="fas fa-list mr-2"></i> Service Posts List
-                <span class="badge badge-primary ml-2">{{ $servicePosts->total() }}</span>
+                <span class="badge badge-primary ml-2">{{ $servicePosts->field</span>
             </div>
             <div class="card-tools">
                 <div class="btn-group btn-group-sm">
@@ -249,16 +249,16 @@
                             <th width="40">
                                 <input type="checkbox" id="selectAll" class="form-check-input">
                             </th>
-                            <th width="60">ID</th>
-                            <th width="300">Post Details</th>
-                            <th width="150">User</th>
-                            <th width="120">Category</th>
-                            <th width="120">Subcategory</th>
-                            <th width="100">Status</th>
-                            <th width="80">Type</th>
-                            <th width="100">Level</th>
-                            <th width="80">Views</th>
-                            <th width="250">Actions</th>
+                            <th width="60">{{ __('service_posts\index.id') }}</th>
+                            <th width="300">{{ __('service_posts\index.post_details') }}</th>
+                            <th width="150">{{ __('service_posts\index.user') }}</th>
+                            <th width="120">{{ __('service_posts\index.category') }}</th>
+                            <th width="120">{{ __('service_posts\index.subcategory') }}</th>
+                            <th width="100">{{ __('service_posts\index.status') }}</th>
+                            <th width="80">{{ __('service_posts\index.type') }}</th>
+                            <th width="100">{{ __('service_posts\index.level') }}</th>
+                            <th width="80">{{ __('service_posts\index.views') }}</th>
+                            <th width="250">{{ __('service_posts\index.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -287,8 +287,8 @@
                                         </div>
                                     @endif
                                     <div class="flex-grow-1">
-                                        <h6 class="mb-1 font-weight-bold">{{ $post->title }}</h6>
-                                        <p class="mb-1 text-muted small">{{ Str::limit($post->description, 100) }}</p>
+                                        <h6 class="mb-1 font-weight-bold">{{ $post->field</h6>
+                                        <p class="mb-1 text-muted small">{{ Str::limit($post->field</p>
                                         <div class="d-flex align-items-center">
                                             @if($post->price)
                                                 <span class="badge badge-warning mr-2">
@@ -306,12 +306,12 @@
                                             <i class="fas fa-user"></i>
                                         </div>
                                         <div>
-                                            <div class="fw-semibold small">{{ $post->user->name ?? $post->user->user_name ?? 'N/A' }}</div>
-                                            <div class="text-muted small">{{ $post->user->email ?? 'N/A' }}</div>
+                                            <div class="fw-semibold small">{{ $post->field</div>
+                                            <div class="text-muted small">{{ $post->field</div>
                                         </div>
                                     </div>
                                 @else
-                                    <span class="text-muted small">N/A</span>
+                                    <span class="text-muted small">{{ __('service_posts\index.n_a') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -337,14 +337,14 @@
                             <td>
                                 @if($post->level_id && $post->level_id > 0 && $post->level)
                                     <span class="badge badge-{{ $post->level->color ?? 'primary' }}">
-                                        <i class="fas fa-{{ $post->level->icon ?? 'star' }} mr-1"></i>
+                                        <i class="fas fa-{{ $post->field</i>
                                         {{ $post->level->localized_name ?? $post->level->name['ar'] ?? 'Premium' }}
                                     </span>
                                     @if($post->badge_expires_at)
                                         <br><small class="text-muted">Expires: {{ \Carbon\Carbon::parse($post->badge_expires_at)->format('Y-m-d') }}</small>
                                     @endif
                                 @else
-                                    <span class="badge badge-secondary">Regular</span>
+                                    <span class="badge badge-secondary">{{ __('service_posts\index.regular') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -403,14 +403,14 @@
         </div>
         <div class="card-footer bg-white border-top-0 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
             <div class="d-flex align-items-center gap-3">
-                <span class="text-muted">Showing <b>{{ $servicePosts->firstItem() ?? 0 }}</b> to <b>{{ $servicePosts->lastItem() ?? 0 }}</b> of <b>{{ $servicePosts->total() }}</b> results</span>
+                <span class="text-muted">Showing <b>{{ $servicePosts->field</b> to <b>{{ $servicePosts->field</b> of <b>{{ $servicePosts->field</b> results</span>
                 <div class="d-flex align-items-center gap-2">
-                    <label class="mb-0 small">Per page:</label>
+                    <label class="mb-0 small">{{ __('service_posts\index.per_page_') }}</label>
                     <select class="form-control form-control-sm" style="width: auto;" onchange="changePerPage(this.value)">
-                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>15</option>
-                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>25</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>50</option>
-                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>100</option>
+                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>{{ __('service_posts\index.15') }}</option>
+                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>{{ __('service_posts\index.25') }}</option>
+                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>{{ __('service_posts\index.50') }}</option>
+                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>{{ __('service_posts\index.100') }}</option>
                     </select>
                 </div>
             </div>
@@ -426,29 +426,29 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Bulk Actions</h5>
+                <h5 class="modal-title">{{ __('service_posts\index.bulk_actions') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('service_posts\index._times_') }}</span>
                 </button>
             </div>
             <div class="modal-body">
                 <p>Selected <span id="selectedCount">0</span> posts</p>
                 <div class="form-group">
-                    <label>Action:</label>
+                    <label>{{ __('service_posts\index.action_') }}</label>
                     <select class="form-control" id="bulkAction">
-                        <option value="">Choose action...</option>
-                        <option value="approve">Approve Selected</option>
-                        <option value="reject">Reject Selected</option>
-                        <option value="archive">Archive Selected</option>
-                        <option value="make_premium">Make Premium</option>
-                        <option value="remove_premium">Remove Premium</option>
-                        <option value="delete">Delete Selected</option>
+                        <option value="">{{ __('service_posts\index.choose_action_') }}</option>
+                        <option value="approve">{{ __('service_posts\index.approve_selected') }}</option>
+                        <option value="reject">{{ __('service_posts\index.reject_selected') }}</option>
+                        <option value="archive">{{ __('service_posts\index.archive_selected') }}</option>
+                        <option value="make_premium">{{ __('service_posts\index.make_premium') }}</option>
+                        <option value="remove_premium">{{ __('service_posts\index.remove_premium') }}</option>
+                        <option value="delete">{{ __('service_posts\index.delete_selected') }}</option>
                     </select>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="executeBulkAction()">Execute</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('service_posts\index.cancel') }}</button>
+                <button type="button" class="btn btn-primary" onclick="executeBulkAction()">{{ __('service_posts\index.execute') }}</button>
             </div>
         </div>
     </div>
@@ -459,39 +459,39 @@
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Export Service Posts</h5>
+                <h5 class="modal-title">{{ __('service_posts\index.export_service_posts') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('service_posts\index._times_') }}</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
-                    <label>Format:</label>
+                    <label>{{ __('service_posts\index.format_') }}</label>
                     <select class="form-control" id="exportFormat">
-                        <option value="csv">CSV</option>
-                        <option value="excel">Excel</option>
-                        <option value="pdf">PDF</option>
+                        <option value="csv">{{ __('service_posts\index.csv') }}</option>
+                        <option value="excel">{{ __('service_posts\index.excel') }}</option>
+                        <option value="pdf">{{ __('service_posts\index.pdf') }}</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>Include:</label>
+                    <label>{{ __('service_posts\index.include_') }}</label>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="includePhotos" checked>
-                        <label class="form-check-label" for="includePhotos">Photos</label>
+                        <label class="form-check-label" for="includePhotos">{{ __('service_posts\index.photos') }}</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="includeUserInfo" checked>
-                        <label class="form-check-label" for="includeUserInfo">User Information</label>
+                        <label class="form-check-label" for="includeUserInfo">{{ __('service_posts\index.user_information') }}</label>
                     </div>
                     <div class="form-check">
                         <input class="form-check-input" type="checkbox" id="includeStats" checked>
-                        <label class="form-check-label" for="includeStats">Statistics</label>
+                        <label class="form-check-label" for="includeStats">{{ __('service_posts\index.statistics') }}</label>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="exportData()">Export</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('service_posts\index.cancel') }}</button>
+                <button type="button" class="btn btn-primary" onclick="exportData()">{{ __('service_posts\index.export') }}</button>
             </div>
         </div>
     </div>
@@ -502,22 +502,22 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Upgrade Service Post Level</h5>
+                <h5 class="modal-title">{{ __('service_posts\index.upgrade_service_post_level') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('service_posts\index._times_') }}</span>
                 </button>
             </div>
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-8">
                         <div class="form-group">
-                            <label>Select Level:</label>
+                            <label>{{ __('service_posts\index.select_level_') }}</label>
                             <select class="form-control" id="levelSelect">
-                                <option value="">Choose a level...</option>
+                                <option value="">{{ __('service_posts\index.choose_a_level_') }}</option>
                             </select>
                         </div>
                         <div class="form-group">
-                            <label>Duration (Days):</label>
+                            <label>{{ __('service_posts\index.duration_days_') }}</label>
                             <input type="number" class="form-control" id="levelDuration" min="1" max="365" value="30">
                         </div>
                         <div class="alert alert-info" id="levelInfo" style="display: none;">
@@ -528,20 +528,20 @@
                     <div class="col-md-4">
                         <div class="card">
                             <div class="card-header">
-                                <h6 class="mb-0">Your Points</h6>
+                                <h6 class="mb-0">{{ __('service_posts\index.your_points') }}</h6>
                             </div>
                             <div class="card-body">
                                 <div class="d-flex justify-content-between">
-                                    <span>Available:</span>
+                                    <span>{{ __('service_posts\index.available_') }}</span>
                                     <span id="userPoints" class="font-weight-bold">0</span>
                                 </div>
                                 <div class="d-flex justify-content-between">
-                                    <span>Required:</span>
+                                    <span>{{ __('service_posts\index.required_') }}</span>
                                     <span id="requiredPoints" class="font-weight-bold text-danger">0</span>
                                 </div>
                                 <hr>
                                 <div class="d-flex justify-content-between">
-                                    <span>Remaining:</span>
+                                    <span>{{ __('service_posts\index.remaining_') }}</span>
                                     <span id="remainingPoints" class="font-weight-bold text-success">0</span>
                                 </div>
                             </div>
@@ -555,7 +555,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('service_posts\index.cancel') }}</button>
                 <button type="button" class="btn btn-primary" id="upgradeLevelBtn" onclick="upgradeServicePostLevel()" disabled>
                     Upgrade Level
                 </button>
@@ -569,9 +569,9 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Buy Point Packages</h5>
+                <h5 class="modal-title">{{ __('service_posts\index.buy_point_packages') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('service_posts\index._times_') }}</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -580,7 +580,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('service_posts\index.close') }}</button>
             </div>
         </div>
     </div>
@@ -630,7 +630,7 @@
 
             // Show loading state
             $subcategoryFilter.prop('disabled', true);
-            $subcategoryFilter.html('<option value="">Loading...</option>');
+            $subcategoryFilter.html('<option value="">{{ __('service_posts\index.loading_') }}</option>');
 
             if (categoryId) {
                 $.ajax({
@@ -638,36 +638,12 @@
                     method: 'GET',
                     data: { category_id: categoryId },
                     success: function(subcategories) {
-                        $subcategoryFilter.html('<option value="">All Subcategories</option>');
+                        $subcategoryFilter.html('<option value="">{{ __('service_posts\index.all_subcategories') }}</option>');
 
                         if (subcategories.length > 0) {
                             subcategories.forEach(function(subcat) {
                                 const name = subcat.name['{{ app()->getLocale() }}'] || subcat.name['en'] || 'Unknown';
-                                $subcategoryFilter.append(`<option value="${subcat.id}">${name}</option>`);
-                            });
-                            $subcategoryFilter.prop('disabled', false);
-                            $subcategoryContainer.show();
-                        } else {
-                            $subcategoryFilter.html('<option value="">No subcategories found</option>');
-                            $subcategoryFilter.prop('disabled', true);
-                        }
-
-                        $subcategoryFilter.select2('destroy').select2({
-                            theme: 'bootstrap4',
-                            width: '100%'
-                        });
-                    },
-                    error: function() {
-                        $subcategoryFilter.html('<option value="">Error loading subcategories</option>');
-                        $subcategoryFilter.prop('disabled', true);
-                        $subcategoryFilter.select2('destroy').select2({
-                            theme: 'bootstrap4',
-                            width: '100%'
-                        });
-                    }
-                });
-            } else {
-                $subcategoryFilter.html('<option value="">All Subcategories</option>');
+                                $subcategoryFilter.append(`<option value="${subcat.id}">{{ __('service_posts\index._name_') }}</option>{{ __('service_posts\index._') }}<option value="">{{ __('service_posts\index.no_subcategories_found') }}</option>{{ __('service_posts\index._subcate') }}<option value="">{{ __('service_posts\index.error_loading_subcategories') }}</option>{{ __('service_posts\index._subcategory') }}<option value="">{{ __('service_posts\index.all_subcategories') }}</option>');
                 $subcategoryFilter.prop('disabled', true);
                 $subcategoryFilter.select2('destroy').select2({
                     theme: 'bootstrap4',
@@ -997,11 +973,7 @@
         }
 
         if (savedFilters.length > 0) {
-            const filterSelect = $('<select class="form-control form-control-sm ml-2" style="width: auto;">');
-            filterSelect.append('<option value="">Load saved filter...</option>');
-
-            savedFilters.forEach(filter => {
-                filterSelect.append(`<option value="${filter}">${filter}</option>`);
+            const filterSelect = $('<select class="form-control form-control-sm ml-2" style="width: auto;">{{ __('service_posts\index._filterselect_append_') }}<option value="">{{ __('service_posts\index.load_saved_filter_') }}</option>{{ __('service_posts\index._savedfilters_foreach_fi') }}<option value="${filter}">{{ __('service_posts\index._filter_') }}</option>`);
             });
 
             filterSelect.on('change', function() {
@@ -1082,11 +1054,7 @@
 
                     // Populate level select
                     const $levelSelect = $('#levelSelect');
-                    $levelSelect.html('<option value="">Choose a level...</option>');
-
-                    availableLevels.forEach(function(level) {
-                        const disabled = !level.can_afford ? 'disabled' : '';
-                        const option = `<option value="${level.id}" ${disabled} data-level='${JSON.stringify(level)}'>${level.name}</option>`;
+                    $levelSelect.html('<option value="">{{ __('service_posts\index.choose_a_level_') }}</option>{{ __('service_posts\index._availablelevels') }}<option value="${level.id}" ${disabled} data-level='${JSON.stringify(level)}'>{{ __('service_posts\index._level_name_') }}</option>`;
                         $levelSelect.append(option);
                     });
 
@@ -1097,9 +1065,9 @@
                     if (response.data.current_level) {
                         const current = response.data.current_level;
                         $('#levelInfo').show().html(`
-                            <strong>Current Level:</strong> ${current.name}<br>
-                            <strong>Expires:</strong> ${current.expires_at}<br>
-                            <strong>Remaining Days:</strong> ${current.remaining_days || 0}
+                            <strong>{{ __('service_posts\index.current_level_') }}</strong> ${current.name}<br>
+                            <strong>{{ __('service_posts\index.expires_') }}</strong> ${current.expires_at}<br>
+                            <strong>{{ __('service_posts\index.remaining_days_') }}</strong> ${current.remaining_days || 0}
                         `);
                     }
                 }
@@ -1136,15 +1104,15 @@
 
     // Update level information display
     function updateLevelInfo(level) {
-        const features = level.features.map(f => `<li>${f}</li>`).join('');
+        const features = level.features.map(f => `<li>{{ __('service_posts\index._f_') }}</li>`).join('');
         $('#levelInfo').show().html(`
             <div id="levelDescription">
-                <strong>${level.name}</strong><br>
+                <strong>{{ __('service_posts\index._level_name_') }}</strong><br>
                 ${level.description}
             </div>
             <div id="levelFeatures" class="mt-2">
-                <strong>Features:</strong>
-                <ul class="mb-0">${features}</ul>
+                <strong>{{ __('service_posts\index.features_') }}</strong>
+                <ul class="mb-0">{{ __('service_posts\index._features_') }}</ul>
             </div>
         `);
     }
@@ -1238,20 +1206,20 @@
                     $container.empty();
 
                     packages.forEach(function(package) {
-                        const features = package.features ? package.features.map(f => `<li>${f}</li>`).join('') : '';
+                        const features = package.features ? package.features.map(f => `<li>{{ __('service_posts\index._f_') }}</li>`).join('') : '';
                         const packageHtml = `
                             <div class="col-md-6 mb-3">
                                 <div class="card h-100">
                                     <div class="card-header">
-                                        <h6 class="mb-0">${package.name}</h6>
+                                        <h6 class="mb-0">{{ __('service_posts\index._package_name_') }}</h6>
                                     </div>
                                     <div class="card-body">
                                         <div class="text-center mb-3">
-                                            <h4 class="text-primary">${package.formatted_price}</h4>
-                                            <p class="text-muted mb-0">${package.formatted_points}</p>
+                                            <h4 class="text-primary">{{ __('service_posts\index._package_formatted_price_') }}</h4>
+                                            <p class="text-muted mb-0">{{ __('service_posts\index._package_formatted_points_') }}</p>
                                         </div>
-                                        <p class="small">${package.description}</p>
-                                        ${features ? `<ul class="small mb-0">${features}</ul>` : ''}
+                                        <p class="small">{{ __('service_posts\index._package_description_') }}</p>
+                                        ${features ? `<ul class="small mb-0">{{ __('service_posts\index._features_') }}</ul>` : ''}
                                     </div>
                                     <div class="card-footer">
                                         <button type="button" class="btn btn-primary btn-sm w-100" onclick="purchasePackage(${package.id})">
@@ -1424,16 +1392,16 @@
                 <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">Service Post Image</h5>
+                            <h5 class="modal-title">{{ __('service_posts\index.service_post_image') }}</h5>
                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
+                                <span aria-hidden="true">{{ __('service_posts\index._times_') }}</span>
                             </button>
                         </div>
                         <div class="modal-body text-center">
                             <img src="${imgSrc}" alt="${imgAlt}" class="img-fluid" style="max-height: 70vh;">
                         </div>
                         <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('service_posts\index.close') }}</button>
                         </div>
                     </div>
                 </div>
@@ -1532,11 +1500,7 @@
 
                     // Populate level select - ADMIN VERSION (no restrictions)
                     const $levelSelect = $('#levelSelect');
-                    $levelSelect.html('<option value="">Choose a level...</option>');
-
-                    availableLevels.forEach(function(level) {
-                        // Remove point restrictions for admin - all levels are enabled
-                        const option = `<option value="${level.id}" data-level='${JSON.stringify(level)}'>${level.name} (${level.points_per_day} points/day)</option>`;
+                    $levelSelect.html('<option value="">{{ __('service_posts\index.choose_a_level_') }}</option>{{ __('service_posts\index._availablelevels') }}<option value="${level.id}" data-level='${JSON.stringify(level)}'>{{ __('service_posts\index._level_name_level_points_per_day_p') }}</option>`;
                         $levelSelect.append(option);
                     });
 
@@ -1549,9 +1513,9 @@
                     if (response.data.current_level) {
                         const current = response.data.current_level;
                         $('#levelInfo').show().html(`
-                            <strong>Current Level:</strong> ${current.name}<br>
-                            <strong>Expires:</strong> ${current.expires_at}<br>
-                            <strong>Remaining Days:</strong> ${current.remaining_days || 0}
+                            <strong>{{ __('service_posts\index.current_level_') }}</strong> ${current.name}<br>
+                            <strong>{{ __('service_posts\index.expires_') }}</strong> ${current.expires_at}<br>
+                            <strong>{{ __('service_posts\index.remaining_days_') }}</strong> ${current.remaining_days || 0}
                         `);
                     }
 

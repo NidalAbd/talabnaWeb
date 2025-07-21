@@ -8,12 +8,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Premium Features Management</h1>
+                    <h1 class="m-0">{{ __('admin\premium_features\index.premium_features_management') }}</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Premium Features</li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('admin\premium_features\index.dashboard') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('admin\premium_features\index.premium_features') }}</li>
                     </ol>
                 </div>
             </div>
@@ -25,7 +25,7 @@
             <!-- Success/Error Messages -->
             @if(session('success'))
                 <div class="alert alert-success alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{ __('admin\premium_features\index._') }}</button>
                     <h5><i class="icon fas fa-check"></i> Success!</h5>
                     {{ session('success') }}
                 </div>
@@ -33,7 +33,7 @@
 
             @if(session('error'))
                 <div class="alert alert-danger alert-dismissible">
-                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{ __('admin\premium_features\index._') }}</button>
                     <h5><i class="icon fas fa-ban"></i> Error!</h5>
                     {{ session('error') }}
                 </div>
@@ -44,8 +44,8 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-info">
                         <div class="inner">
-                            <h3>{{ $features->count() }}</h3>
-                            <p>Total Features</p>
+                            <h3>{{ $features->field</h3>
+                            <p>{{ __('admin\premium_features\index.total_features') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-crown"></i>
@@ -55,8 +55,8 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-success">
                         <div class="inner">
-                            <h3>{{ $features->where('is_active', true)->count() }}</h3>
-                            <p>Active Features</p>
+                            <h3>{{ $features->field</h3>
+                            <p>{{ __('admin\premium_features\index.active_features') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-check-circle"></i>
@@ -66,8 +66,8 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-warning">
                         <div class="inner">
-                            <h3>{{ $features->where('is_popular', true)->count() }}</h3>
-                            <p>Popular Features</p>
+                            <h3>{{ $features->field</h3>
+                            <p>{{ __('admin\premium_features\index.popular_features') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-star"></i>
@@ -77,8 +77,8 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-danger">
                         <div class="inner">
-                            <h3>{{ $features->where('is_active', false)->count() }}</h3>
-                            <p>Inactive Features</p>
+                            <h3>{{ $features->field</h3>
+                            <p>{{ __('admin\premium_features\index.inactive_features') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-pause-circle"></i>
@@ -106,47 +106,47 @@
                                 <table class="table table-bordered table-striped" id="features-table">
                                     <thead>
                                         <tr>
-                                            <th width="50">#</th>
-                                            <th width="80">Icon</th>
-                                            <th>Name (AR)</th>
-                                            <th>Name (EN)</th>
-                                            <th>Category</th>
-                                            <th>Points Cost</th>
-                                            <th>Duration</th>
-                                            <th>Status</th>
-                                            <th width="150">Actions</th>
+                                            <th width="50">{{ __('admin\premium_features\index._') }}</th>
+                                            <th width="80">{{ __('admin\premium_features\index.icon') }}</th>
+                                            <th>{{ __('admin\premium_features\index.name_ar_') }}</th>
+                                            <th>{{ __('admin\premium_features\index.name_en_') }}</th>
+                                            <th>{{ __('admin\premium_features\index.category') }}</th>
+                                            <th>{{ __('admin\premium_features\index.points_cost') }}</th>
+                                            <th>{{ __('admin\premium_features\index.duration') }}</th>
+                                            <th>{{ __('admin\premium_features\index.status') }}</th>
+                                            <th width="150">{{ __('admin\premium_features\index.actions') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($features as $feature)
                                             <tr>
-                                                <td>{{ $feature->id }}</td>
+                                                <td>{{ $feature->field</td>
                                                 <td>
                                                     @if($feature->icon)
-                                                        <i class="{{ $feature->icon }}" style="font-size: 18px; color: {{ $feature->color ?? '#ffc107' }};"></i>
+                                                        <i class="{{ $feature->icon }}" style="font-size: 18px; color: {{ $feature->field</i>
                                                     @else
-                                                        <i class="fas fa-crown" style="font-size: 18px; color: {{ $feature->color ?? '#ffc107' }};"></i>
+                                                        <i class="fas fa-crown" style="font-size: 18px; color: {{ $feature->field</i>
                                                     @endif
                                                 </td>
-                                                <td>{{ $feature->name['ar'] ?? 'N/A' }}</td>
-                                                <td>{{ $feature->name['en'] ?? 'N/A' }}</td>
+                                                <td>{{ $feature->field</td>
+                                                <td>{{ $feature->field</td>
                                                 <td>
-                                                    <span class="badge badge-info">{{ $feature->category }}</span>
+                                                    <span class="badge badge-info">{{ $feature->field</span>
                                                 </td>
                                                 <td>
-                                                    <span class="badge badge-primary">{{ number_format($feature->points_cost) }} pts</span>
+                                                    <span class="badge badge-primary">{{ number_format($feature->field</span>
                                                 </td>
                                                 <td>
-                                                    <span class="badge badge-success">{{ $feature->duration_days }} days</span>
+                                                    <span class="badge badge-success">{{ $feature->field</span>
                                                 </td>
                                                 <td>
                                                     @if($feature->is_active)
-                                                        <span class="badge badge-success">Active</span>
+                                                        <span class="badge badge-success">{{ __('admin\premium_features\index.active') }}</span>
                                                     @else
-                                                        <span class="badge badge-danger">Inactive</span>
+                                                        <span class="badge badge-danger">{{ __('admin\premium_features\index.inactive') }}</span>
                                                     @endif
                                                     @if($feature->is_popular)
-                                                        <span class="badge badge-warning ml-1">Popular</span>
+                                                        <span class="badge badge-warning ml-1">{{ __('admin\premium_features\index.popular') }}</span>
                                                     @endif
                                                 </td>
                                                 <td>
@@ -177,7 +177,7 @@
                                                 <td colspan="9" class="text-center py-4">
                                                     <div class="text-muted">
                                                         <i class="fas fa-crown fa-3x mb-3"></i>
-                                                        <p>No premium features found. Create your first feature to get started.</p>
+                                                        <p>{{ __('admin\premium_features\index.no_premium_features_found_create_your_f') }}</p>
                                                         <a href="{{ route('admin.premium-features.create') }}" class="btn btn-primary">
                                                             <i class="fas fa-plus mr-1"></i> Add First Feature
                                                         </a>

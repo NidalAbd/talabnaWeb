@@ -820,8 +820,8 @@
             <div class="container">
                 <div class="d-flex flex-column flex-md-row align-items-center justify-content-between">
                     <div class="mb-3 mb-md-0">
-                        <h5 class="mb-1">Use the Talabna App for Full Features!</h5>
-                        <p class="mb-0">Post services, manage your listings, and connect with others directly from the app.</p>
+                        <h5 class="mb-1">{{ __('welcome.use_the_talabna_app_for_full_features_') }}</h5>
+                        <p class="mb-0">{{ __('welcome.post_services_manage_your_listings_and') }}</p>
                     </div>
                     <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" class="btn btn-light" style="color: var(--primary);" target="_blank">
                         <i class="fab fa-google-play me-2"></i> Download Now
@@ -838,11 +838,11 @@
         <div class="row align-items-center">
             <div class="col-lg-6">
                 <div class="hero-content">
-                    <h1 class="hero-title">Find & Offer Services with Talabna</h1>
-                    <p class="hero-subtitle">Connect with local service providers or offer your services to thousands of users. Your one-stop platform for all service needs.</p>
+                    <h1 class="hero-title">{{ __('welcome.find_offer_services_with_talabna') }}</h1>
+                    <p class="hero-subtitle">{{ __('welcome.connect_with_local_service_providers_or_') }}</p>
                     <div class="hero-buttons">
-                        <a href="#categories" class="btn btn-light">Explore Services</a>
-                        <a href="{{ route('register') }}" class="btn btn-outline-light">Join Now</a>
+                        <a href="#categories" class="btn btn-light">{{ __('welcome.explore_services') }}</a>
+                        <a href="{{ route('register') }}" class="btn btn-outline-light">{{ __('welcome.join_now') }}</a>
                     </div>
                 </div>
             </div>
@@ -884,8 +884,8 @@
                             <rect width="180" height="220" rx="15" fill="url(#cardGradient)" />
                             <circle cx="90" cy="70" r="40" fill="#f0edff" />
                             <path d="M78 50 L78 90 L102 90 L102 50 L78 50 Z M90 82 C88.3 82 87 83.3 87 85 C87 86.7 88.3 88 90 88 C91.7 88 93 86.7 93 85 C93 83.3 91.7 82 90 82 Z" fill="#5035FF" />
-                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">Mobile</text>
-                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">350+ Services</text>
+                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">{{ __('welcome.mobile') }}</text>
+                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">{{ __('welcome.350_services') }}</text>
                         </g>
 
                         <!-- Card 2: Real Estate -->
@@ -893,8 +893,8 @@
                             <rect width="180" height="220" rx="15" fill="url(#cardGradient)" />
                             <circle cx="90" cy="70" r="40" fill="#f0edff" />
                             <path d="M65 90 L90 55 L115 90 L65 90 Z M75 90 L75 105 L105 105 L105 90 L75 90 Z" fill="#5035FF" />
-                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">Real Estate</text>
-                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">420+ Listings</text>
+                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">{{ __('welcome.real_estate') }}</text>
+                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">{{ __('welcome.420_listings') }}</text>
                         </g>
 
                         <!-- Card 3: Jobs -->
@@ -902,8 +902,8 @@
                             <rect width="180" height="220" rx="15" fill="url(#cardGradient)" />
                             <circle cx="90" cy="70" r="40" fill="#f0edff" />
                             <path d="M75 50 L105 50 L105 60 L115 60 L115 100 L65 100 L65 60 L75 60 L75 50 Z M90 60 L90.001 60 Z" fill="#5035FF" />
-                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">Jobs</text>
-                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">280+ Positions</text>
+                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">{{ __('welcome.jobs') }}</text>
+                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">{{ __('welcome.280_positions') }}</text>
                         </g>
 
                         <!-- Search bar -->
@@ -911,14 +911,14 @@
                             <rect width="300" height="60" rx="30" fill="white" />
                             <circle cx="40" cy="30" r="15" fill="none" stroke="#5035FF" stroke-width="3" />
                             <line x1="50" y1="40" x2="60" y2="50" stroke="#5035FF" stroke-width="3" stroke-linecap="round" />
-                            <text x="115" y="35" font-family="Arial, sans-serif" font-size="16" fill="#6C757D" text-anchor="middle">Find services...</text>
+                            <text x="115" y="35" font-family="Arial, sans-serif" font-size="16" fill="#6C757D" text-anchor="middle">{{ __('welcome.find_services_') }}</text>
                             <rect x="200" y="10" width="80" height="40" rx="20" fill="#5035FF" />
-                            <text x="240" y="35" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">Search</text>
+                            <text x="240" y="35" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">{{ __('welcome.search') }}</text>
                         </g>
 
                         <!-- Logo text -->
-                        <text x="120" y="80" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white">TALABNA</text>
-                        <text x="120" y="110" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.8)">Find & Offer Services</text>
+                        <text x="120" y="80" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white">{{ __('welcome.talabna') }}</text>
+                        <text x="120" y="110" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.8)">{{ __('welcome.find_offer_services') }}</text>
                     </svg>
                 </div>.
         </div>
@@ -931,19 +931,19 @@
         <div class="stats-container">
             <div class="stat-item">
                 <div class="stat-number">{{ number_format($allService) }}</div>
-                <div class="stat-label">Active Services</div>
+                <div class="stat-label">{{ __('welcome.active_services') }}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">{{ number_format($users) }}</div>
-                <div class="stat-label">Registered Users</div>
+                <div class="stat-label">{{ __('welcome.registered_users') }}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">{{ number_format($allDiamond + $allGolden) }}</div>
-                <div class="stat-label">Premium Services</div>
+                <div class="stat-label">{{ __('welcome.premium_services') }}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">{{ number_format($purchaseRequests) }}</div>
-                <div class="stat-label">Transactions</div>
+                <div class="stat-label">{{ __('welcome.transactions') }}</div>
             </div>
         </div>
     </div>
@@ -952,8 +952,8 @@
 <!-- Categories Section -->
 <section class="section" id="categories">
     <div class="container">
-        <h2 class="section-title">Browse Service Categories</h2>
-        <p class="section-description">Explore our wide range of service categories and find exactly what you're looking for.</p>
+        <h2 class="section-title">{{ __('welcome.browse_service_categories') }}</h2>
+        <p class="section-description">{{ __('welcome.explore_our_wide_range_of_service_catego') }}</p>
 
         <div class="row">
             @php
@@ -971,10 +971,10 @@
                 <div class="col-lg-4 col-md-6">
                     <a href="#" class="category-card">
                         <div class="category-icon">
-                            <i class="{{ $categoryIcons[$category->id] ?? 'fas fa-list' }}"></i>
+                            <i class="{{ $categoryIcons[$category->id] ?? 'FIXME' }}"></i>
                         </div>
-                        <h3 class="category-name">{{ is_array($category->name) ? $category->name[app()->getLocale()] : $category->name }}</h3>
-                        <div class="category-count">{{ number_format($category->service_posts_count) }} Services</div>
+                        <h3 class="category-name">{{ is_array($category->name) ? ($category->name[app()->getLocale()] ?? reset($category->name)) : $category->name }}</h3>
+                        <div class="category-count">{{ number_format($category->service_posts_count ?? 0) }}</div>
                     </a>
                 </div>
             @endforeach
@@ -985,8 +985,8 @@
 <!-- Featured Posts -->
 <section class="featured-posts section-light">
     <div class="container">
-        <h2 class="section-title">Featured Services</h2>
-        <p class="section-description">Discover our top-rated premium services with excellent reviews from our users.</p>
+        <h2 class="section-title">{{ __('welcome.featured_services') }}</h2>
+        <p class="section-description">{{ __('welcome.discover_our_top_rated_premium_services_') }}</p>
 
         <div class="row">
             @forelse($featuredPosts as $post)
@@ -1023,12 +1023,12 @@
                         </div>
                         <div class="post-content">
                             <span class="post-category">
-                                {{ is_array($post->category->name) ? $post->category->name[app()->getLocale()] : $post->category->name }}
+                                {{ is_array($post->category->name) ? ($post->category->name[app()->getLocale()] ?? reset($post->category->name)) : $post->category->name }}
                                 -
-                                {{ is_array($post->subCategory->name) ? $post->subCategory->name[app()->getLocale()] : $post->subCategory->name }}
+                                {{ is_array($post->subCategory->name) ? ($post->subCategory->name[app()->getLocale()] ?? reset($post->subCategory->name)) : $post->subCategory->name }}
                             </span>
                             <h3 class="post-title">{{ $post->title }}</h3>
-                            <p class="post-description">{{ Str::limit($post->description, 100) }}</p>
+                            <p class="post-description">{{ Str::limit($post->description) }}</p>
                             <div class="post-price">{{ number_format($post->price) }} {{ $post->price_currency_code }}</div>
                             <div class="post-meta">
                                 <span class="post-date"><i class="far fa-clock"></i> {{ $post->created_at->diffForHumans() }}</span>
@@ -1040,7 +1040,7 @@
                 </div>
             @empty
                 <div class="col-12 text-center">
-                    <p>No featured posts available at the moment.</p>
+                    <p>{{ __('welcome.no_featured_posts_available_at_the_momen') }}</p>
                 </div>
             @endforelse
         </div>
@@ -1050,14 +1050,14 @@
 <!-- Subcategory Section -->
 <section class="subcategory-section">
     <div class="container">
-        <h2 class="section-title">Explore Subcategories</h2>
-        <p class="section-description">Find specific services by browsing through our detailed subcategories.</p>
+        <h2 class="section-title">{{ __('welcome.explore_subcategories') }}</h2>
+        <p class="section-description">{{ __('welcome.find_specific_services_by_browsing_throu') }}</p>
 
         <!-- Tabs for different main categories -->
         <div class="subcategory-tabs">
             @foreach($categories as $index => $category)
                 <div class="subcategory-tab {{ $index === 0 ? 'active' : '' }}" data-category="{{ $category->id }}">
-                    {{ is_array($category->name) ? $category->name[app()->getLocale()] : $category->name }}
+                    {{ is_array($category->name) ? ($category->name[app()->getLocale()] ?? reset($category->name)) : $category->name }}
                 </div>
             @endforeach
         </div>
@@ -1070,22 +1070,22 @@
                         <div class="col-lg-3 col-md-4 col-6">
                             <a href="#" class="category-card">
                                 <div class="category-icon">
-                                    <i class="{{ $categoryIcons[$category->id] ?? 'fas fa-list' }}"></i>
+                                    <i class="{{ $categoryIcons[$category->field] ?? 'FIXME' }}"></i>
                                 </div>
-                                <h3 class="category-name">{{ is_array($subcategory->name) ? $subcategory->name[app()->getLocale()] : $subcategory->name }}</h3>
-                                <div class="category-count">{{ number_format($subcategory->service_posts_count) }} Items</div>
+                                <h3 class="category-name">{{ is_array($subcategory->name) ? ($subcategory->name[app()->getLocale()] ?? reset($subcategory->name)) : $subcategory->name }}</h3>
+                                <div class="category-count">{{ number_format($subcategory->service_posts_count ?? 0) }}</div>
                             </a>
                         </div>
                     @empty
                         <div class="col-12 text-center">
-                            <p>No subcategories available for this category.</p>
+                            <p>{{ __('welcome.no_subcategories_available_for_this_cate') }}</p>
                         </div>
                     @endforelse
                 </div>
 
                 <!-- Latest posts for this category -->
                 <div class="mt-5">
-                    <h3 class="mb-4">Latest in {{ is_array($category->name) ? $category->name[app()->getLocale()] : $category->name }}</h3>
+                    <h3 class="mb-4">Latest in {{ is_array($category->name) ? ($category->name[app()->getLocale()] ?? reset($category->name)) : $category->name }}</h3>
                     <div class="row">
                         @forelse($latestByCategory[$category->id] as $post)
                             <div class="col-lg-4 col-md-6 mb-4">
@@ -1121,10 +1121,10 @@
                                     </div>
                                     <div class="post-content">
                                     <span class="post-category">
-                                        {{ is_array($post->subCategory->name) ? $post->subCategory->name[app()->getLocale()] : $post->subCategory->name }}
+                                        {{ is_array($post->subCategory->name) ? ($post->subCategory->name[app()->getLocale()] ?? reset($post->subCategory->name)) : $post->subCategory->name }}
                                     </span>
                                         <h3 class="post-title">{{ $post->title }}</h3>
-                                        <p class="post-description">{{ Str::limit($post->description, 80) }}</p>
+                                        <p class="post-description">{{ Str::limit($post->description) }}</p>
                                         <div class="post-price">{{ number_format($post->price) }} {{ $post->price_currency_code }}</div>
                                         <div class="post-meta">
                                             <span class="post-date"><i class="far fa-clock"></i> {{ $post->created_at->diffForHumans() }}</span>
@@ -1135,7 +1135,7 @@
                             </div>
                         @empty
                             <div class="col-12 text-center">
-                                <p>No posts available in this category yet.</p>
+                                <p>{{ __('welcome.no_posts_available_in_this_category_yet_') }}</p>
                             </div>
                         @endforelse
                     </div>
@@ -1148,8 +1148,8 @@
 <!-- Latest Posts Section -->
 <section class="latest-posts">
     <div class="container">
-        <h2 class="section-title">Latest Services</h2>
-        <p class="section-description">Check out the newest services added to our platform.</p>
+        <h2 class="section-title">{{ __('welcome.latest_services') }}</h2>
+        <p class="section-description">{{ __('welcome.check_out_the_newest_services_added_to_o') }}</p>
 
         <!-- Swiper slider for latest posts -->
         <div class="swiper">
@@ -1188,10 +1188,10 @@
                             </div>
                             <div class="post-content">
                                 <span class="post-category">
-                                    {{ is_array($post->category->name) ? $post->category->name[app()->getLocale()] : $post->category->name }}
+                                    {{ is_array($post->category->name) ? ($post->category->name[app()->getLocale()] ?? reset($post->category->name)) : $post->category->name }}
                                 </span>
                                 <h3 class="post-title">{{ $post->title }}</h3>
-                                <p class="post-description">{{ Str::limit($post->description, 80) }}</p>
+                                <p class="post-description">{{ Str::limit($post->description) }}</p>
                                 <div class="post-price">{{ number_format($post->price) }} {{ $post->price_currency_code }}</div>
                                 <div class="post-meta">
                                     <span class="post-date"><i class="far fa-clock"></i> {{ $post->created_at->diffForHumans() }}</span>
@@ -1204,7 +1204,7 @@
                 @empty
                     <div class="swiper-slide">
                         <div class="text-center">
-                            <p>No posts available yet.</p>
+                            <p>{{ __('welcome.no_posts_available_yet_') }}</p>
                         </div>
                     </div>
                 @endforelse
@@ -1221,8 +1221,8 @@
 <!-- Popular Posts Section (Most Viewed) -->
 <section class="section">
     <div class="container">
-        <h2 class="section-title">Popular Services</h2>
-        <p class="section-description">Discover the most viewed services on our platform.</p>
+        <h2 class="section-title">{{ __('welcome.popular_services') }}</h2>
+        <p class="section-description">{{ __('welcome.discover_the_most_viewed_services_on_our') }}</p>
 
         <div class="row">
             @forelse($popularPosts as $post)
@@ -1259,10 +1259,10 @@
                         </div>
                         <div class="post-content">
                             <span class="post-category">
-                                {{ is_array($post->category->name) ? $post->category->name[app()->getLocale()] : $post->category->name }}
+                                {{ is_array($post->category->name) ? ($post->category->name[app()->getLocale()] ?? reset($post->category->name)) : $post->category->name }}
                             </span>
                             <h3 class="post-title">{{ $post->title }}</h3>
-                            <p class="post-description">{{ Str::limit($post->description, 80) }}</p>
+                            <p class="post-description">{{ Str::limit($post->description) }}</p>
                             <div class="post-price">{{ number_format($post->price) }} {{ $post->price_currency_code }}</div>
                             <div class="post-meta">
                                 <span class="post-date"><i class="far fa-clock"></i> {{ $post->created_at->diffForHumans() }}</span>
@@ -1274,7 +1274,7 @@
                 </div>
             @empty
                 <div class="col-12 text-center">
-                    <p>No popular posts available yet.</p>
+                    <p>{{ __('welcome.no_popular_posts_available_yet_') }}</p>
                 </div>
             @endforelse
         </div>
@@ -1287,8 +1287,8 @@
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-lg-8">
-                        <h2>Experience Talabna on Your Mobile</h2>
-                        <p class="lead">Get the full experience with our mobile app. Post services, manage your listings, receive notifications, and connect with service providers on the go.</p>
+                        <h2>{{ __('welcome.experience_talabna_on_your_mobile') }}</h2>
+                        <p class="lead">{{ __('welcome.get_the_full_experience_with_our_mobile_') }}</p>
                         <div class="mt-4">
                             <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" class="btn btn-primary btn-lg" target="_blank">
                                 <i class="fab fa-google-play me-2"></i> Download on Google Play
@@ -1310,7 +1310,7 @@
         <div class="row">
             <div class="col-lg-3 mb-5 mb-lg-0">
                 <a href="{{ url('/') }}" class="footer-logo">{{ config('app.name', 'Talabna') }}</a>
-                <p class="footer-description">Talabna is your one-stop platform for finding and offering services. Connect with providers or offer your expertise to thousands of users.</p>
+                <p class="footer-description">{{ __('welcome.talabna_is_your_one_stop_platform_for_fi') }}</p>
                 <ul class="footer-social">
                     <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
                     <li><a href="#"><i class="fab fa-twitter"></i></a></li>
@@ -1319,27 +1319,27 @@
                 </ul>
             </div>
             <div class="col-lg-2 col-md-2 mb-5 mb-md-0">
-                <h4 class="footer-heading">Quick Links</h4>
+                <h4 class="footer-heading">{{ __('welcome.quick_links') }}</h4>
                 <ul class="footer-links">
-                    <li><a href="{{ url('/') }}">Home</a></li>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Services</a></li>
-                    <li><a href="#">Contact</a></li>
-                    <li><a href="{{ route('login') }}">Login</a></li>
+                    <li><a href="{{ url('/') }}">{{ __('welcome.home') }}</a></li>
+                    <li><a href="#">{{ __('welcome.about_us') }}</a></li>
+                    <li><a href="#">{{ __('welcome.services') }}</a></li>
+                    <li><a href="#">{{ __('welcome.contact') }}</a></li>
+                    <li><a href="{{ route('login') }}">{{ __('welcome.login') }}</a></li>
                 </ul>
             </div>
             <div class="col-lg-2 col-md-2 mb-5 mb-md-0">
-                <h4 class="footer-heading">Categories</h4>
+                <h4 class="footer-heading">{{ __('welcome.categories') }}</h4>
                 <ul class="footer-links">
                     @foreach($categories as $category)
                         <li>
-                            <a href="#">{{ is_array($category->name) ? $category->name[app()->getLocale()] : $category->name }}</a>
+                            <a href="#">{{ is_array($category->name) ? ($category->name[app()->getLocale()] ?? reset($category->name)) : $category->name }}</a>
                         </li>
                     @endforeach
                 </ul>
             </div>
             <div class="col-lg-3 col-md-2">
-                <h4 class="footer-heading">Contact Info</h4>
+                <h4 class="footer-heading">{{ __('welcome.contact_info') }}</h4>
                 <ul class="footer-links">
                     <li><i class="fas fa-map-marker-alt me-2"></i> 123 Business Street, City, Country</li>
                     <li><i class="fas fa-phone-alt me-2"></i> +123 456 7890</li>
@@ -1347,7 +1347,7 @@
                 </ul>
             </div>
             <div class="col-lg-2 col-md-2">
-                <h4 class="footer-heading">Policy and Privacy</h4>
+                <h4 class="footer-heading">{{ __('welcome.policy_and_privacy') }}</h4>
 
                 <ul class="footer-links">
                     <li><a href="{{ route('policy.index') }}"><i class="fas fa-shield-alt me-2"></i> Privacy Policy</a></li>

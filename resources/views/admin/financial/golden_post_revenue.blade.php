@@ -7,39 +7,39 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>Demo Data:</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">Remove Demo Data</a>
+            <strong>{{ __('admin\financial\golden_post_revenue.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\financial\golden_post_revenue.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
-                    <h5>Total Golden Revenue</h5>
-                    <h3>$2,800</h3>
+                    <h5>{{ __('admin\financial\golden_post_revenue.total_golden_revenue') }}</h5>
+                    <h3>{{ __('admin\financial\golden_post_revenue._2_800') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>Golden Posts</h5>
-                    <h3>70</h3>
+                    <h5>{{ __('admin\financial\golden_post_revenue.golden_posts') }}</h5>
+                    <h3>{{ __('admin\financial\golden_post_revenue.70') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Avg. Revenue/Post</h5>
-                    <h3>$40</h3>
+                    <h5>{{ __('admin\financial\golden_post_revenue.avg_revenue_post') }}</h5>
+                    <h3>{{ __('admin\financial\golden_post_revenue._40') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5>Growth Rate</h5>
-                    <h3>+5.1%</h3>
+                    <h5>{{ __('admin\financial\golden_post_revenue.growth_rate') }}</h5>
+                    <h3>{{ __('admin\financial\golden_post_revenue._5_1_') }}</h3>
                 </div>
             </div>
         </div>
@@ -47,11 +47,11 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">Date Range:</label>
+                <label class="mr-2">{{ __('admin\financial\golden_post_revenue.date_range_') }}</label>
                 <input type="date" class="form-control mr-2" name="from" value="2024-06-01">
                 <input type="date" class="form-control mr-2" name="to" value="2024-06-30">
-                <button class="btn btn-primary mr-2">Filter</button>
-                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-primary mr-2">{{ __('admin\financial\golden_post_revenue.filter') }}</button>
+                <button class="btn btn-secondary">{{ __('admin\financial\golden_post_revenue.export') }}</button>
             </form>
         </div>
     </div>
@@ -63,41 +63,41 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Date</th>
-                        <th>User</th>
-                        <th>Post Title</th>
-                        <th>Amount</th>
-                        <th>Status</th>
+                        <th>{{ __('admin\financial\golden_post_revenue.date') }}</th>
+                        <th>{{ __('admin\financial\golden_post_revenue.user') }}</th>
+                        <th>{{ __('admin\financial\golden_post_revenue.post_title') }}</th>
+                        <th>{{ __('admin\financial\golden_post_revenue.amount') }}</th>
+                        <th>{{ __('admin\financial\golden_post_revenue.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>2024-06-01</td>
-                        <td>John Doe</td>
-                        <td>Golden Car Sale</td>
-                        <td>$40</td>
-                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>{{ __('admin\financial\golden_post_revenue.2024_06_01') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue.john_doe') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue.golden_car_sale') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue._40') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\golden_post_revenue.completed') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-02</td>
-                        <td>Jane Smith</td>
-                        <td>Golden House Listing</td>
-                        <td>$60</td>
-                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>{{ __('admin\financial\golden_post_revenue.2024_06_02') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue.jane_smith') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue.golden_house_listing') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue._60') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\golden_post_revenue.completed') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-03</td>
-                        <td>Ali Hassan</td>
-                        <td>Golden Job Offer</td>
-                        <td>$30</td>
-                        <td><span class="badge badge-warning">Pending</span></td>
+                        <td>{{ __('admin\financial\golden_post_revenue.2024_06_03') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue.ali_hassan') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue.golden_job_offer') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue._30') }}</td>
+                        <td><span class="badge badge-warning">{{ __('admin\financial\golden_post_revenue.pending') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-04</td>
-                        <td>Maria Garcia</td>
-                        <td>Golden Device Sale</td>
-                        <td>$50</td>
-                        <td><span class="badge badge-danger">Failed</span></td>
+                        <td>{{ __('admin\financial\golden_post_revenue.2024_06_04') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue.maria_garcia') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue.golden_device_sale') }}</td>
+                        <td>{{ __('admin\financial\golden_post_revenue._50') }}</td>
+                        <td><span class="badge badge-danger">{{ __('admin\financial\golden_post_revenue.failed') }}</span></td>
                     </tr>
                 </tbody>
             </table>

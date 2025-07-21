@@ -34,40 +34,40 @@
                             @else
                                 <div class="text-center p-4 bg-light rounded">
                                     <i class="fas fa-flag fa-3x text-muted"></i>
-                                    <p class="mt-2 text-muted">No flag image available</p>
+                                    <p class="mt-2 text-muted">{{ __('countries\show.no_flag_image_available') }}</p>
                                 </div>
                             @endif
                         </div>
 
                         <table class="table table-bordered">
                             <tr>
-                                <th style="width: 40%;">ID</th>
+                                <th style="width: 40%;">{{ __('countries\show.id') }}</th>
                                 <td>{{ $country->id }}</td>
                             </tr>
                             <tr>
-                                <th>Name (English)</th>
-                                <td>{{ $country->name['en'] ?? 'N/A' }}</td>
+                                <th>{{ __('countries\show.name_english_') }}</th>
+                                <td>{{ $country->name['en'] }}</td>
                             </tr>
                             <tr>
-                                <th>Name (Arabic)</th>
-                                <td dir="rtl">{{ $country->name['ar'] ?? 'N/A' }}</td>
+                                <th>{{ __('countries\show.name_arabic_') }}</th>
+                                <td dir="rtl">{{ $country->name['ar'] }}</td>
                             </tr>
                             <tr>
-                                <th>Country Code</th>
-                                <td>{{ $country->country_code ?? 'N/A' }}</td>
+                                <th>{{ __('countries\show.country_code') }}</th>
+                                <td>{{ $country->country_code }}</td>
                             </tr>
                             <tr>
-                                <th>Created At</th>
-                                <td>{{ $country->created_at->format('M d, Y H:i') }}</td>
+                                <th>{{ __('countries\show.created_at') }}</th>
+                                <td>{{ $country->created_at }}</td>
                             </tr>
                             <tr>
-                                <th>Updated At</th>
-                                <td>{{ $country->updated_at->format('M d, Y H:i') }}</td>
+                                <th>{{ __('countries\show.updated_at') }}</th>
+                                <td>{{ $country->updated_at }}</td>
                             </tr>
                             <tr>
-                                <th>Status</th>
+                                <th>{{ __('countries\show.status') }}</th>
                                 <td>
-                                    <span class="badge badge-success">Active</span>
+                                    <span class="badge badge-success">{{ __('countries\show.active') }}</span>
                                 </td>
                             </tr>
                         </table>
@@ -84,16 +84,16 @@
                     <div class="card-body">
                         <table class="table table-bordered">
                             <tr>
-                                <th style="width: 40%;">Currency Code</th>
-                                <td>{{ $country->currency_code ?? 'N/A' }}</td>
+                                <th style="width: 40%;">{{ __('countries\show.currency_code') }}</th>
+                                <td>{{ $country->currency_code }}</td>
                             </tr>
                             <tr>
-                                <th>Currency Name (English)</th>
-                                <td>{{ $country->currency_name['en'] ?? 'N/A' }}</td>
+                                <th>{{ __('countries\show.currency_name_english_') }}</th>
+                                <td>{{ $country->currency_name['en'] }}</td>
                             </tr>
                             <tr>
-                                <th>Currency Name (Arabic)</th>
-                                <td dir="rtl">{{ $country->currency_name['ar'] ?? 'N/A' }}</td>
+                                <th>{{ __('countries\show.currency_name_arabic_') }}</th>
+                                <td dir="rtl">{{ $country->currency_name['ar'] }}</td>
                             </tr>
                         </table>
                     </div>
@@ -116,11 +116,11 @@
                             <table class="table table-hover table-striped mb-0">
                                 <thead class="thead-light">
                                 <tr>
-                                    <th>#</th>
-                                    <th>Image</th>
-                                    <th>City Name</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('countries\show._') }}</th>
+                                    <th>{{ __('countries\show.image') }}</th>
+                                    <th>{{ __('countries\show.city_name') }}</th>
+                                    <th>{{ __('countries\show.status') }}</th>
+                                    <th>{{ __('countries\show.actions') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -133,11 +133,11 @@
                                                      class="img-thumbnail" alt="{{ $city->getTranslatedName() }}"
                                                      style="max-height: 50px;">
                                             @else
-                                                <span class="badge badge-secondary">No Image</span>
+                                                <span class="badge badge-secondary">{{ __('countries\show.no_image') }}</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <div class="font-weight-bold">{{ $city->getTranslatedName() }}</div>
+                                            <div class="font-weight-bold">{{ $city->getTranslatedName() ?? 'FIXME' }}</div>
                                             <small class="text-muted">
                                                 @if(app()->getLocale() != 'en' && isset($city->name['en']))
                                                     ({{ $city->name['en'] }})
@@ -147,7 +147,7 @@
                                             </small>
                                         </td>
                                         <td>
-                                            <span class="badge badge-success">Active</span>
+                                            <span class="badge badge-success">{{ __('countries\show.active') }}</span>
                                         </td>
                                         <td>
                                             <div class="btn-group">
@@ -175,7 +175,7 @@
                                         <td colspan="5" class="text-center py-4">
                                             <div class="d-flex flex-column align-items-center">
                                                 <i class="fas fa-city fa-3x text-muted mb-3"></i>
-                                                <h5 class="font-weight-normal text-muted">No cities found for this country</h5>
+                                                <h5 class="font-weight-normal text-muted">{{ __('countries\show.no_cities_found_for_this_country') }}</h5>
                                                 <a href="{{ route('cities.create') }}" class="btn btn-primary mt-3">
                                                     <i class="fas fa-plus mr-1"></i> Add First City
                                                 </a>

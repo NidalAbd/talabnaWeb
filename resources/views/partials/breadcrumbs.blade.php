@@ -5,7 +5,7 @@
 
 <nav aria-label="breadcrumb" class="">
     <ol class="breadcrumb">
-        <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
+        <li class="breadcrumb-item"><a href="{{ url('/') }}">{{ __('partials\breadcrumbs.home') }}</a></li>
         @foreach($segments as $key => $segment)
             @php
                 $url = url(implode('/', array_slice($segments, 0, $key + 1)));

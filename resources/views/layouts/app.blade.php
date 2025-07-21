@@ -55,16 +55,19 @@
 <!-- Left Side Of Navbar -->
             <div class="mx-auto"> <!-- mx-auto centers the content -->
                 <div id="subcategory-container" class="d-flex flex-wrap mt-2" style="display: none;">
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory2">All</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory1">Jobs</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory2">Devices</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory3">Real estate</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory4">Cars</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory5">Service</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory2">{{ __('layouts\app.all') }}</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory1">{{ __('layouts\app.jobs') }}</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory2">{{ __('layouts\app.devices') }}</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory3">{{ __('layouts\app.real_estate') }}</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory4">{{ __('layouts\app.cars') }}</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory5">{{ __('layouts\app.service') }}</a>
                 </div>
             </div>
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
+                        <li class="nav-item">
+                            <x-language-switcher />
+                        </li>
                         <!-- Authentication Links -->
                         @guest
                             @if (Route::has('login'))

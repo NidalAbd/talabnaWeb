@@ -4,14 +4,14 @@
 <div class="container">
     <h3>Login History for {{ $user->name }}</h3>
     @if(count($logins) === 0)
-        <div class="alert alert-info mt-4">No login history found for this user.</div>
+        <div class="alert alert-info mt-4">{{ __('users\login_history.no_login_history_found_for_this_user_') }}</div>
     @else
         <table class="table table-bordered mt-4">
             <thead>
                 <tr>
-                    <th>Date</th>
-                    <th>IP Address</th>
-                    <th>User Agent</th>
+                    <th>{{ __('users\login_history.date') }}</th>
+                    <th>{{ __('users\login_history.ip_address') }}</th>
+                    <th>{{ __('users\login_history.user_agent') }}</th>
                 </tr>
             </thead>
             <tbody>
@@ -25,6 +25,6 @@
             </tbody>
         </table>
     @endif
-    <a href="{{ route('users.index') }}" class="btn btn-secondary mt-3">Back to Users</a>
+    <a href="{{ route('users.index') }}" class="btn btn-secondary mt-3">{{ __('users\login_history.back_to_users') }}</a>
 </div>
 @endsection 

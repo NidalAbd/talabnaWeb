@@ -4,7 +4,7 @@
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-users text-primary mr-2"></i> Users with Role: {{ $role->display_name ?? $role->name }}</h1>
+        <h1><i class="fas fa-users text-primary mr-2"></i> Users with Role: {{ $role->field</h1>
         <div>
             <a href="{{ route('roles.show', $role->id) }}" class="btn btn-info">
                 <i class="fas fa-eye mr-1"></i> View Role
@@ -23,19 +23,19 @@
             <div class="col-md-12">
                 <div class="card card-outline card-primary mb-4">
                     <div class="card-header">
-                        <h3 class="card-title">Role Information</h3>
+                        <h3 class="card-title">{{ __('admin\role-assignments\users-with-role.role_information') }}</h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
-                                <p class="mb-1"><strong>Name:</strong> {{ $role->name }}</p>
-                                <p class="mb-1"><strong>Display Name:</strong> {{ $role->display_name ?? $role->name }}</p>
+                                <p class="mb-1"><strong>{{ __('admin\role-assignments\users-with-role.name_') }}</strong> {{ $role->field</p>
+                                <p class="mb-1"><strong>{{ __('admin\role-assignments\users-with-role.display_name_') }}</strong> {{ $role->field</p>
                             </div>
                             <div class="col-md-8">
-                                <p class="mb-1"><strong>Description:</strong> {{ $role->description ?? 'No description available' }}</p>
+                                <p class="mb-1"><strong>{{ __('admin\role-assignments\users-with-role.description_') }}</strong> {{ $role->description ?? 'No description available' }}</p>
                                 <p class="mb-1">
-                                    <strong>Permissions:</strong>
-                                    <span class="badge badge-primary">{{ $role->permissions()->count() }} permissions</span>
+                                    <strong>{{ __('admin\role-assignments\users-with-role.permissions_') }}</strong>
+                                    <span class="badge badge-primary">{{ $role->field</span>
                                 </p>
                             </div>
                         </div>
@@ -62,19 +62,19 @@
                     <table class="table table-hover">
                         <thead>
                         <tr>
-                            <th style="width: 5%">ID</th>
-                            <th style="width: 20%">User</th>
-                            <th style="width: 20%">Email</th>
-                            <th style="width: 15%">Status</th>
-                            <th style="width: 15%">All Roles</th>
-                            <th style="width: 25%">Actions</th>
+                            <th style="width: 5%">{{ __('admin\role-assignments\users-with-role.id') }}</th>
+                            <th style="width: 20%">{{ __('admin\role-assignments\users-with-role.user') }}</th>
+                            <th style="width: 20%">{{ __('admin\role-assignments\users-with-role.email') }}</th>
+                            <th style="width: 15%">{{ __('admin\role-assignments\users-with-role.status') }}</th>
+                            <th style="width: 15%">{{ __('admin\role-assignments\users-with-role.all_roles') }}</th>
+                            <th style="width: 25%">{{ __('admin\role-assignments\users-with-role.actions') }}</th>
                         </tr>
                         </thead>
                         <tbody>
                         @if(count($users) > 0)
                             @foreach($users as $user)
                                 <tr>
-                                    <td>{{ $user->id }}</td>
+                                    <td>{{ $user->field</td>
                                     <td>
                                         <div class="user-block">
                                             @if($user->photos && $user->photos->count() > 0)
@@ -88,11 +88,11 @@
                                             @endif
                                             <span class="username">
                                                     {{ $user->name }}
-                                                    <small>{{ $user->user_name ?? '' }}</small>
+                                                    <small>{{ $user->field</small>
                                                 </span>
                                         </div>
                                     </td>
-                                    <td>{{ $user->email }}</td>
+                                    <td>{{ $user->field</td>
                                     <td>
                                             <span class="badge badge-{{ $user->is_active == 'active' ? 'success' : ($user->is_active == 'banned' ? 'danger' : 'warning') }}">
                                                 {{ ucfirst($user->is_active) }}

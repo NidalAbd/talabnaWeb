@@ -3,7 +3,7 @@
 @section('title', 'Investment Tracking')
 
 @section('content_header')
-    <h1>Investment Tracking</h1>
+    <h1>{{ __('admin\business\investment_tracking.investment_tracking') }}</h1>
 @stop
 
 @section('content')
@@ -13,8 +13,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-info">
                 <div class="inner">
-                    <h3>{{ $investments->count() }}</h3>
-                    <p>Active Investments</p>
+                    <h3>{{ $investments->field</h3>
+                    <p>{{ __('admin\business\investment_tracking.active_investments') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-chart-line"></i>
@@ -25,8 +25,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>{{ $pendingPayments->count() }}</h3>
-                    <p>Pending Payments</p>
+                    <h3>{{ $pendingPayments->field</h3>
+                    <p>{{ __('admin\business\investment_tracking.pending_payments') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-clock"></i>
@@ -37,8 +37,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-warning">
                 <div class="inner">
-                    <h3>{{ $upcomingPayments->count() }}</h3>
-                    <p>Upcoming Payments (30 days)</p>
+                    <h3>{{ $upcomingPayments->field</h3>
+                    <p>{{ __('admin\business\investment_tracking.upcoming_payments_30_days_') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-calendar"></i>
@@ -49,8 +49,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-primary">
                 <div class="inner">
-                    <h3>{{ number_format($investments->avg('roi'), 1) }}%</h3>
-                    <p>Average ROI</p>
+                    <h3>{{ number_format($investments->field</h3>
+                    <p>{{ __('admin\business\investment_tracking.average_roi') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-percentage"></i>
@@ -64,7 +64,7 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">ROI Performance by Investment</h3>
+                    <h3 class="card-title">{{ __('admin\business\investment_tracking.roi_performance_by_investment') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="roiChart" style="height: 300px;"></canvas>
@@ -75,7 +75,7 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Investment Status Distribution</h3>
+                    <h3 class="card-title">{{ __('admin\business\investment_tracking.investment_status_distribution') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="statusChart" style="height: 300px;"></canvas>
@@ -89,25 +89,25 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Upcoming Payments (Next 30 Days)</h3>
+                    <h3 class="card-title">{{ __('admin\business\investment_tracking.upcoming_payments_next_30_days_') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Investor</th>
-                                    <th>Investment Amount</th>
-                                    <th>Next Payment Date</th>
-                                    <th>Payment Amount</th>
-                                    <th>Payment Type</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('admin\business\investment_tracking.investor') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.investment_amount') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.next_payment_date') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.payment_amount') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.payment_type') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($upcomingPayments as $payment)
                                 <tr>
-                                    <td>{{ $payment->investor_name }}</td>
+                                    <td>{{ $payment->field</td>
                                     <td>${{ number_format($payment->investment_amount, 2) }}</td>
                                     <td>
                                         <span class="badge badge-{{ $payment->next_payment_date->diffInDays(now()) <= 7 ? 'danger' : 'warning' }}">
@@ -115,7 +115,7 @@
                                         </span>
                                     </td>
                                     <td>${{ number_format($payment->expected_return, 2) }}</td>
-                                    <td>{{ ucfirst($payment->investment_type) }}</td>
+                                    <td>{{ ucfirst($payment->field</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#makePaymentModal{{ $payment->id }}">
                                             <i class="fas fa-dollar-sign"></i> Make Payment
@@ -124,7 +124,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">No upcoming payments</td>
+                                    <td colspan="6" class="text-center">{{ __('admin\business\investment_tracking.no_upcoming_payments') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -140,29 +140,29 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Investment Portfolio with ROI</h3>
+                    <h3 class="card-title">{{ __('admin\business\investment_tracking.investment_portfolio_with_roi') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped" id="investmentsTable">
                             <thead>
                                 <tr>
-                                    <th>Investor</th>
-                                    <th>Investment</th>
-                                    <th>Type</th>
-                                    <th>Date</th>
-                                    <th>Total Paid</th>
-                                    <th>ROI</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('admin\business\investment_tracking.investor') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.investment') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.type') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.date') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.total_paid') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.roi') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.status') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($investments as $investment)
                                 <tr>
                                     <td>
-                                        <strong>{{ $investment->investor_name }}</strong><br>
-                                        <small class="text-muted">{{ $investment->investor_email }}</small>
+                                        <strong>{{ $investment->field</strong><br>
+                                        <small class="text-muted">{{ $investment->field</small>
                                     </td>
                                     <td>${{ number_format($investment->investment_amount, 2) }}</td>
                                     <td>
@@ -170,7 +170,7 @@
                                             {{ ucfirst($investment->investment_type) }}
                                         </span>
                                     </td>
-                                    <td>{{ $investment->investment_date->format('M d, Y') }}</td>
+                                    <td>{{ $investment->field</td>
                                     <td>${{ number_format($investment->payments->sum('payment_amount'), 2) }}</td>
                                     <td>
                                         <span class="badge badge-{{ $investment->roi >= 0 ? 'success' : 'danger' }}">
@@ -198,7 +198,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="text-center">No investments found</td>
+                                    <td colspan="8" class="text-center">{{ __('admin\business\investment_tracking.no_investments_found') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -214,38 +214,38 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Recent Payment History</h3>
+                    <h3 class="card-title">{{ __('admin\business\investment_tracking.recent_payment_history') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>Investor</th>
-                                    <th>Payment Amount</th>
-                                    <th>Payment Type</th>
-                                    <th>Payment Date</th>
-                                    <th>Status</th>
-                                    <th>Reference</th>
+                                    <th>{{ __('admin\business\investment_tracking.investor') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.payment_amount') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.payment_type') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.payment_date') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.status') }}</th>
+                                    <th>{{ __('admin\business\investment_tracking.reference') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($pendingPayments as $payment)
                                 <tr>
-                                    <td>{{ $payment->investment->investor_name }}</td>
+                                    <td>{{ $payment->field</td>
                                     <td>${{ number_format($payment->payment_amount, 2) }}</td>
-                                    <td>{{ ucfirst($payment->payment_type) }}</td>
-                                    <td>{{ $payment->payment_date->format('M d, Y') }}</td>
+                                    <td>{{ ucfirst($payment->field</td>
+                                    <td>{{ $payment->field</td>
                                     <td>
                                         <span class="badge badge-{{ $payment->status == 'completed' ? 'success' : ($payment->status == 'pending' ? 'warning' : 'danger') }}">
                                             {{ ucfirst($payment->status) }}
                                         </span>
                                     </td>
-                                    <td>{{ $payment->reference_number ?? 'N/A' }}</td>
+                                    <td>{{ $payment->field</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">No recent payments</td>
+                                    <td colspan="6" class="text-center">{{ __('admin\business\investment_tracking.no_recent_payments') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -262,16 +262,16 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add Payment</h5>
+                <h5 class="modal-title">{{ __('admin\business\investment_tracking.add_payment') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('admin\business\investment_tracking._times_') }}</span>
                 </button>
             </div>
             <form action="{{ route('business.payments.store') }}" method="POST">
                 @csrf
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Investment</label>
+                        <label>{{ __('admin\business\investment_tracking.investment') }}</label>
                         <select name="investment_id" class="form-control" required>
                             @foreach($investments as $investment)
                             <option value="{{ $investment->id }}">{{ $investment->investor_name }} - ${{ number_format($investment->investment_amount, 2) }}</option>
@@ -279,41 +279,41 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Payment Amount</label>
+                        <label>{{ __('admin\business\investment_tracking.payment_amount') }}</label>
                         <input type="number" name="payment_amount" class="form-control" step="0.01" required>
                     </div>
                     <div class="form-group">
-                        <label>Payment Type</label>
+                        <label>{{ __('admin\business\investment_tracking.payment_type') }}</label>
                         <select name="payment_type" class="form-control" required>
-                            <option value="return">Return</option>
-                            <option value="dividend">Dividend</option>
-                            <option value="interest">Interest</option>
+                            <option value="return">{{ __('admin\business\investment_tracking.return') }}</option>
+                            <option value="dividend">{{ __('admin\business\investment_tracking.dividend') }}</option>
+                            <option value="interest">{{ __('admin\business\investment_tracking.interest') }}</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Payment Date</label>
+                        <label>{{ __('admin\business\investment_tracking.payment_date') }}</label>
                         <input type="date" name="payment_date" class="form-control" required>
                     </div>
                     <div class="form-group">
-                        <label>Payment Method</label>
+                        <label>{{ __('admin\business\investment_tracking.payment_method') }}</label>
                         <select name="payment_method" class="form-control" required>
-                            <option value="bank_transfer">Bank Transfer</option>
-                            <option value="check">Check</option>
-                            <option value="cash">Cash</option>
+                            <option value="bank_transfer">{{ __('admin\business\investment_tracking.bank_transfer') }}</option>
+                            <option value="check">{{ __('admin\business\investment_tracking.check') }}</option>
+                            <option value="cash">{{ __('admin\business\investment_tracking.cash') }}</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Reference Number</label>
+                        <label>{{ __('admin\business\investment_tracking.reference_number') }}</label>
                         <input type="text" name="reference_number" class="form-control">
                     </div>
                     <div class="form-group">
-                        <label>Notes</label>
+                        <label>{{ __('admin\business\investment_tracking.notes') }}</label>
                         <textarea name="notes" class="form-control" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Payment</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\business\investment_tracking.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('admin\business\investment_tracking.add_payment') }}</button>
                 </div>
             </form>
         </div>

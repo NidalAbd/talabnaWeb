@@ -8,12 +8,12 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Investor Dashboard</h1>
+                    <h1 class="m-0">{{ __('admin\investor\dashboard.investor_dashboard') }}</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                        <li class="breadcrumb-item active">Investor</li>
+                        <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('admin\investor\dashboard.dashboard') }}</a></li>
+                        <li class="breadcrumb-item active">{{ __('admin\investor\dashboard.investor') }}</li>
                     </ol>
                 </div>
             </div>
@@ -28,7 +28,7 @@
                     <div class="small-box bg-success">
                         <div class="inner">
                             <h3>{{ number_format($metrics['total_revenue']) }}</h3>
-                            <p>Total Revenue (SAR)</p>
+                            <p>{{ __('admin\investor\dashboard.total_revenue_sar_') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-dollar-sign"></i>
@@ -39,7 +39,7 @@
                     <div class="small-box bg-info">
                         <div class="inner">
                             <h3>{{ number_format($metrics['monthly_revenue']) }}</h3>
-                            <p>Monthly Revenue (SAR)</p>
+                            <p>{{ __('admin\investor\dashboard.monthly_revenue_sar_') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-chart-line"></i>
@@ -50,7 +50,7 @@
                     <div class="small-box bg-warning">
                         <div class="inner">
                             <h3>{{ number_format($metrics['total_users']) }}</h3>
-                            <p>Total Users</p>
+                            <p>{{ __('admin\investor\dashboard.total_users') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-users"></i>
@@ -61,7 +61,7 @@
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ number_format($metrics['active_posts']) }}</h3>
-                            <p>Active Posts</p>
+                            <p>{{ __('admin\investor\dashboard.active_posts') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-file-alt"></i>
@@ -76,7 +76,7 @@
                     <div class="info-box bg-gradient-success">
                         <span class="info-box-icon"><i class="fas fa-arrow-up"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">User Growth</span>
+                            <span class="info-box-text">{{ __('admin\investor\dashboard.user_growth') }}</span>
                             <span class="info-box-number">{{ $metrics['user_growth'] }}%</span>
                             <div class="progress">
                                 <div class="progress-bar" style="width: {{ min($metrics['user_growth'], 100) }}%"></div>
@@ -88,7 +88,7 @@
                     <div class="info-box bg-gradient-info">
                         <span class="info-box-icon"><i class="fas fa-chart-bar"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">Revenue Growth</span>
+                            <span class="info-box-text">{{ __('admin\investor\dashboard.revenue_growth') }}</span>
                             <span class="info-box-number">{{ $metrics['revenue_growth'] }}%</span>
                             <div class="progress">
                                 <div class="progress-bar" style="width: {{ min($metrics['revenue_growth'], 100) }}%"></div>
@@ -100,7 +100,7 @@
                     <div class="info-box bg-gradient-warning">
                         <span class="info-box-icon"><i class="fas fa-eye"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">Engagement Rate</span>
+                            <span class="info-box-text">{{ __('admin\investor\dashboard.engagement_rate') }}</span>
                             <span class="info-box-number">{{ $metrics['engagement_rate'] }}%</span>
                             <div class="progress">
                                 <div class="progress-bar" style="width: {{ min($metrics['engagement_rate'], 100) }}%"></div>
@@ -112,7 +112,7 @@
                     <div class="info-box bg-gradient-danger">
                         <span class="info-box-icon"><i class="fas fa-star"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">Premium Users</span>
+                            <span class="info-box-text">{{ __('admin\investor\dashboard.premium_users') }}</span>
                             <span class="info-box-number">{{ $metrics['premium_users'] }}</span>
                             <div class="progress">
                                 <div class="progress-bar" style="width: {{ $metrics['premium_percentage'] }}%"></div>
@@ -171,14 +171,14 @@
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>Metric</th>
-                                            <th>Value</th>
-                                            <th>Change</th>
+                                            <th>{{ __('admin\investor\dashboard.metric') }}</th>
+                                            <th>{{ __('admin\investor\dashboard.value') }}</th>
+                                            <th>{{ __('admin\investor\dashboard.change') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>New Users (This Month)</td>
+                                            <td>{{ __('admin\investor\dashboard.new_users_this_month_') }}</td>
                                             <td>{{ number_format($metrics['new_users_month']) }}</td>
                                             <td>
                                                 <span class="badge badge-{{ $metrics['new_users_growth'] >= 0 ? 'success' : 'danger' }}">
@@ -187,7 +187,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>Active Users (This Week)</td>
+                                            <td>{{ __('admin\investor\dashboard.active_users_this_week_') }}</td>
                                             <td>{{ number_format($metrics['active_users_week']) }}</td>
                                             <td>
                                                 <span class="badge badge-{{ $metrics['active_users_growth'] >= 0 ? 'success' : 'danger' }}">
@@ -196,7 +196,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>Premium Subscriptions</td>
+                                            <td>{{ __('admin\investor\dashboard.premium_subscriptions') }}</td>
                                             <td>{{ number_format($metrics['premium_subscriptions']) }}</td>
                                             <td>
                                                 <span class="badge badge-{{ $metrics['premium_growth'] >= 0 ? 'success' : 'danger' }}">
@@ -205,7 +205,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>Average Session Duration</td>
+                                            <td>{{ __('admin\investor\dashboard.average_session_duration') }}</td>
                                             <td>{{ $metrics['avg_session_duration'] }} min</td>
                                             <td>
                                                 <span class="badge badge-{{ $metrics['session_growth'] >= 0 ? 'success' : 'danger' }}">
@@ -234,14 +234,14 @@
                                 <table class="table table-bordered">
                                     <thead>
                                         <tr>
-                                            <th>Period</th>
-                                            <th>Revenue</th>
-                                            <th>Growth</th>
+                                            <th>{{ __('admin\investor\dashboard.period') }}</th>
+                                            <th>{{ __('admin\investor\dashboard.revenue') }}</th>
+                                            <th>{{ __('admin\investor\dashboard.growth') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         <tr>
-                                            <td>This Month</td>
+                                            <td>{{ __('admin\investor\dashboard.this_month') }}</td>
                                             <td>{{ number_format($metrics['monthly_revenue']) }} SAR</td>
                                             <td>
                                                 <span class="badge badge-{{ $metrics['monthly_growth'] >= 0 ? 'success' : 'danger' }}">
@@ -250,7 +250,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>Last Month</td>
+                                            <td>{{ __('admin\investor\dashboard.last_month') }}</td>
                                             <td>{{ number_format($metrics['last_month_revenue']) }} SAR</td>
                                             <td>
                                                 <span class="badge badge-{{ $metrics['last_month_growth'] >= 0 ? 'success' : 'danger' }}">
@@ -259,7 +259,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>This Quarter</td>
+                                            <td>{{ __('admin\investor\dashboard.this_quarter') }}</td>
                                             <td>{{ number_format($metrics['quarterly_revenue']) }} SAR</td>
                                             <td>
                                                 <span class="badge badge-{{ $metrics['quarterly_growth'] >= 0 ? 'success' : 'danger' }}">
@@ -268,7 +268,7 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td>This Year</td>
+                                            <td>{{ __('admin\investor\dashboard.this_year') }}</td>
                                             <td>{{ number_format($metrics['yearly_revenue']) }} SAR</td>
                                             <td>
                                                 <span class="badge badge-{{ $metrics['yearly_growth'] >= 0 ? 'success' : 'danger' }}">
@@ -299,20 +299,20 @@
                                 <table class="table table-bordered table-striped">
                                     <thead>
                                         <tr>
-                                            <th>Date</th>
-                                            <th>User</th>
-                                            <th>Package</th>
-                                            <th>Amount</th>
-                                            <th>Status</th>
+                                            <th>{{ __('admin\investor\dashboard.date') }}</th>
+                                            <th>{{ __('admin\investor\dashboard.user') }}</th>
+                                            <th>{{ __('admin\investor\dashboard.package') }}</th>
+                                            <th>{{ __('admin\investor\dashboard.amount') }}</th>
+                                            <th>{{ __('admin\investor\dashboard.status') }}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         @forelse($recent_transactions as $transaction)
                                             <tr>
-                                                <td>{{ $transaction->created_at->format('M d, Y H:i') }}</td>
-                                                <td>{{ $transaction->user->name ?? 'N/A' }}</td>
+                                                <td>{{ $transaction->field</td>
+                                                <td>{{ $transaction->field</td>
                                                 <td>Points Package ({{ $transaction->points_requested }} points)</td>
-                                                <td>{{ number_format($transaction->total_price, 2) }} SAR</td>
+                                                <td>{{ number_format($transaction->field</td>
                                                 <td>
                                                     <span class="badge badge-{{ $transaction->status === 'approved' ? 'success' : ($transaction->status === 'pending' ? 'warning' : 'danger') }}">
                                                         {{ ucfirst($transaction->status) }}
@@ -321,7 +321,7 @@
                                             </tr>
                                         @empty
                                             <tr>
-                                                <td colspan="5" class="text-center">No recent transactions found.</td>
+                                                <td colspan="5" class="text-center">{{ __('admin\investor\dashboard.no_recent_transactions_found_') }}</td>
                                             </tr>
                                         @endforelse
                                     </tbody>

@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1>
             <i class="fas fa-edit text-primary mr-2"></i>
-            Edit Subcategory: <span class="text-muted">{{ $subcategory->name[app()->getLocale()] ?? 'Subcategory' }}</span>
+            Edit Subcategory: <span class="text-muted">{{ $subcategory->field</span>
         </h1>
         <div>
             <a href="{{ route('indexSubCategory.index') }}" class="btn btn-secondary">
@@ -31,7 +31,7 @@
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     {{ session('success') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
+                                        <span aria-hidden="true">{{ __('sub_categories\edit._times_') }}</span>
                                     </button>
                                 </div>
                             @endif
@@ -40,7 +40,7 @@
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     {{ session('error') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">&times;</span>
+                                        <span aria-hidden="true">{{ __('sub_categories\edit._times_') }}</span>
                                     </button>
                                 </div>
                             @endif
@@ -50,7 +50,7 @@
                                     <div class="form-group">
                                         <label for="categories_id" class="font-weight-bold">
                                             <i class="fas fa-th-large mr-1"></i>
-                                            Parent Category <span class="text-danger">*</span>
+                                            Parent Category <span class="text-danger">{{ __('sub_categories\edit._') }}</span>
                                         </label>
                                         <select name="categories_id" id="categories_id"
                                                 class="form-control @error('categories_id') is-invalid @enderror" required>
@@ -73,7 +73,7 @@
                                     <div class="form-group">
                                         <label for="name_ar" class="font-weight-bold">
                                             <i class="fas fa-language mr-1"></i>
-                                            Arabic Name <span class="text-danger">*</span>
+                                            Arabic Name <span class="text-danger">{{ __('sub_categories\edit._') }}</span>
                                         </label>
                                         <input type="text" id="name_ar" name="name[ar]"
                                                class="form-control @error('name.ar') is-invalid @enderror"
@@ -88,7 +88,7 @@
                                     <div class="form-group">
                                         <label for="name_en" class="font-weight-bold">
                                             <i class="fas fa-language mr-1"></i>
-                                            English Name <span class="text-danger">*</span>
+                                            English Name <span class="text-danger">{{ __('sub_categories\edit._') }}</span>
                                         </label>
                                         <input type="text" id="name_en" name="name[en]"
                                                class="form-control @error('name.en') is-invalid @enderror"
@@ -108,8 +108,8 @@
                                             Status
                                         </label>
                                         <select name="isSuspended" id="status" class="form-control @error('isSuspended') is-invalid @enderror">
-                                            <option value="0" {{ old('isSuspended', $subcategory->isSuspended) ? '' : 'selected' }}>Active</option>
-                                            <option value="1" {{ old('isSuspended', $subcategory->isSuspended) ? 'selected' : '' }}>Suspended</option>
+                                            <option value="0" {{ old('isSuspended', $subcategory->field</option>
+                                            <option value="1" {{ old('isSuspended', $subcategory->field</option>
                                         </select>
                                         @error('isSuspended')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -126,7 +126,7 @@
                                         <div class="custom-file">
                                             <input type="file" class="custom-file-input @error('photo') is-invalid @enderror"
                                                    id="photo" name="photo" onchange="previewImage(this)">
-                                            <label class="custom-file-label" for="photo">Choose new image (or keep existing)</label>
+                                            <label class="custom-file-label" for="photo">{{ __('sub_categories\edit.choose_new_image_or_keep_existing_') }}</label>
                                             @error('photo')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -143,7 +143,7 @@
                                 <div class="col-md-12">
                                     <div class="card">
                                         <div class="card-header bg-light">
-                                            <h6 class="mb-0">Current Image</h6>
+                                            <h6 class="mb-0">{{ __('sub_categories\edit.current_image') }}</h6>
                                         </div>
                                         <div class="card-body text-center">
                                             <div id="image-preview-container" class="{{ $subcategory->photos->count() > 0 ? '' : 'd-none' }}">

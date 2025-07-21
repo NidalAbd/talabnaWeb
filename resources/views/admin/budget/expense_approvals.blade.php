@@ -1,10 +1,10 @@
 @extends('adminlte::page')
 @section('title', 'Expense Approvals')
 @section('content_header')
-    <h1>Expense Approvals</h1>
+    <h1>{{ __('admin\budget\expense_approvals.expense_approvals') }}</h1>
 @stop
 @section('content')
     <div class="container-fluid">
-        <p>This is the Expense Approvals page.</p>
+        <p>{{ __('admin\budget\expense_approvals.this_is_the_expense_approvals_page_') }}</p>
     </div>
 @stop 

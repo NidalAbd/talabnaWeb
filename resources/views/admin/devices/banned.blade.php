@@ -26,8 +26,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3>{{ $bannedDevices->total() }}</h3>
-                        <p>Total Banned Devices</p>
+                        <h3>{{ $bannedDevices->field</h3>
+                        <p>{{ __('admin\devices\banned.total_banned_devices') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-mobile-alt"></i>
@@ -38,7 +38,7 @@
                 <div class="small-box bg-danger">
                     <div class="inner">
                         <h3>{{ $activeDevicesCount }}</h3>
-                        <p>Currently Banned</p>
+                        <p>{{ __('admin\devices\banned.currently_banned') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-ban"></i>
@@ -49,7 +49,7 @@
                 <div class="small-box bg-success">
                     <div class="inner">
                         <h3>{{ $unbannedDevicesCount }}</h3>
-                        <p>Unbanned Devices</p>
+                        <p>{{ __('admin\devices\banned.unbanned_devices') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-check-circle"></i>
@@ -59,8 +59,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-primary">
                     <div class="inner">
-                        <h3>{{ App\Models\User::where('is_active', 'banned')->count() }}</h3>
-                        <p>Banned Users</p>
+                        <h3>{{ App\Models\User::where('is_active', 'banned')->{{ __('admin\devices\banned.count_') }}</h3>
+                        <p>{{ __('admin\devices\banned.banned_users') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-slash"></i>
@@ -90,27 +90,27 @@
                     <div class="row">
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>Device Status:</label>
+                                <label>{{ __('admin\devices\banned.device_status_') }}</label>
                                 <select class="form-control" name="status">
-                                    <option value="">All Devices</option>
-                                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Currently Banned</option>
-                                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Unbanned</option>
+                                    <option value="">{{ __('admin\devices\banned.all_devices') }}</option>
+                                    <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>{{ __('admin\devices\banned.currently_banned') }}</option>
+                                    <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>{{ __('admin\devices\banned.unbanned') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="form-group">
-                                <label>User Filter:</label>
+                                <label>{{ __('admin\devices\banned.user_filter_') }}</label>
                                 <select class="form-control" name="user_filter">
-                                    <option value="">All Devices</option>
-                                    <option value="with_user" {{ request('user_filter') == 'with_user' ? 'selected' : '' }}>With User</option>
-                                    <option value="without_user" {{ request('user_filter') == 'without_user' ? 'selected' : '' }}>Without User</option>
+                                    <option value="">{{ __('admin\devices\banned.all_devices') }}</option>
+                                    <option value="with_user" {{ request('user_filter') == 'with_user' ? 'selected' : '' }}>{{ __('admin\devices\banned.with_user') }}</option>
+                                    <option value="without_user" {{ request('user_filter') == 'without_user' ? 'selected' : '' }}>{{ __('admin\devices\banned.without_user') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Search:</label>
+                                <label>{{ __('admin\devices\banned.search_') }}</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="Search by device ID, email, phone...">
                                     <div class="input-group-append">
@@ -147,21 +147,21 @@
                     <table class="table table-hover text-nowrap">
                         <thead>
                         <tr>
-                            <th style="width: 5%">ID</th>
-                            <th style="width: 15%">Device Info</th>
-                            <th style="width: 15%">User</th>
-                            <th style="width: 20%">Ban Reason</th>
-                            <th style="width: 10%">Status</th>
-                            <th style="width: 15%">Dates</th>
-                            <th style="width: 20%">Actions</th>
+                            <th style="width: 5%">{{ __('admin\devices\banned.id') }}</th>
+                            <th style="width: 15%">{{ __('admin\devices\banned.device_info') }}</th>
+                            <th style="width: 15%">{{ __('admin\devices\banned.user') }}</th>
+                            <th style="width: 20%">{{ __('admin\devices\banned.ban_reason') }}</th>
+                            <th style="width: 10%">{{ __('admin\devices\banned.status') }}</th>
+                            <th style="width: 15%">{{ __('admin\devices\banned.dates') }}</th>
+                            <th style="width: 20%">{{ __('admin\devices\banned.actions') }}</th>
                         </tr>
                         </thead>
                         <tbody>
                         @forelse($bannedDevices as $device)
                             <tr>
-                                <td>{{ $device->id }}</td>
+                                <td>{{ $device->field</td>
                                 <td>
-                                    <strong>ID:</strong> <code class="text-truncate d-block" style="max-width: 150px;">{{ $device->device_id }}</code>
+                                    <strong>{{ __('admin\devices\banned.id_') }}</strong> <code class="text-truncate d-block" style="max-width: 150px;">{{ $device->field</code>
                                     <small>{{ $device->device_brand ?? 'Unknown' }} {{ $device->device_model ?? 'Device' }}</small><br>
                                     <small>OS: {{ $device->os_version ?? 'Unknown' }}</small>
                                 </td>
@@ -185,7 +185,7 @@
                                             </span>
                                         </div>
                                     @else
-                                        <em>No associated user</em><br>
+                                        <em>{{ __('admin\devices\banned.no_associated_user') }}</em><br>
                                         @if($device->email)
                                             <small>Email: {{ $device->email }}</small><br>
                                         @endif
@@ -194,18 +194,18 @@
                                         @endif
                                     @endif
                                 </td>
-                                <td>{{ \Illuminate\Support\Str::limit($device->ban_reason, 100) }}</td>
+                                <td>{{ \Illuminate\Support\Str::limit($device->field</td>
                                 <td>
                                     @if($device->isActive())
-                                        <span class="badge badge-danger">Banned</span>
+                                        <span class="badge badge-danger">{{ __('admin\devices\banned.banned') }}</span>
                                     @else
-                                        <span class="badge badge-success">Unbanned</span>
+                                        <span class="badge badge-success">{{ __('admin\devices\banned.unbanned') }}</span>
                                     @endif
                                 </td>
                                 <td>
-                                    <strong>Banned:</strong> {{ $device->banned_at->format('Y-m-d H:i') }}<br>
+                                    <strong>{{ __('admin\devices\banned.banned_') }}</strong> {{ $device->banned_at->format('Y-m-d H:i') }}<br>
                                     @if($device->unban_at)
-                                        <strong>Unbanned:</strong> {{ $device->unban_at->format('Y-m-d H:i') }}
+                                        <strong>{{ __('admin\devices\banned.unbanned_') }}</strong> {{ $device->unban_at->format('Y-m-d H:i') }}
                                     @endif
                                 </td>
                                 <td>

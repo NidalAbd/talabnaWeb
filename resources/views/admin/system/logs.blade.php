@@ -1,10 +1,10 @@
 @extends('adminlte::page')
 @section('title', 'System Logs')
 @section('content_header')
-    <h1>System Logs</h1>
+    <h1>{{ __('admin\system\logs.system_logs') }}</h1>
 @stop
 @section('content')
     <div class="container-fluid">
-        <p>This is the System Logs page.</p>
+        <p>{{ __('admin\system\logs.this_is_the_system_logs_page_') }}</p>
     </div>
 @stop 

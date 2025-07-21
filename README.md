@@ -64,3 +64,40 @@ If you discover a security vulnerability within Laravel, please send an e-mail t
 ## License
 
 The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+
+# Database-Driven Translations (Spatie Laravel Translation Loader)
+
+## Overview
+This project uses [spatie/laravel-translation-loader](https://github.com/spatie/laravel-translation-loader) for advanced, dynamic, and professional multi-language support. Translations are managed in the database and can be updated via an admin panel.
+
+## Key Features
+- User language selection (default: English)
+- Dynamic locale switching via middleware
+- Admin panel for CRUD translation management
+- Modern language switcher UI in the navbar
+- All translation usage (`__()`, `@lang`) is database-aware
+
+## Affected Files/Folders
+- `composer.json`, `vendor/` — Spatie package
+- `config/translation-loader.php` — Package config
+- `database/migrations/` — Migration for `language_lines` table
+- `app/Http/Middleware/SetLocale.php` — Locale switching middleware
+- `app/Http/Kernel.php` — Middleware registration
+- `resources/views/components/language-switcher.blade.php` — Language switcher UI
+- `resources/views/layouts/app.blade.php` — Navbar integration
+- `app/Http/Controllers/Admin/TranslationController.php` — Admin CRUD
+- `resources/views/admin/translations/` — Admin panel views
+- `routes/web.php` — Admin translation routes
+
+## Usage
+- Use `__('group.key')` or `@lang('group.key')` in your code and views.
+- Admins can manage translations at `/admin/translations` (requires authentication).
+- Users can select their language from the navbar dropdown.
+
+## Adding Languages
+- Add new language codes to the middleware and language switcher.
+- Add translations via the admin panel.
+
+## Notes
+- File-based translations are still supported as fallback.
+- You can further customize the admin panel and UI as needed.

@@ -11,23 +11,23 @@
         class="align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 p-8"
       >
         <label class="flex justify-between w-4/12">
-          <span class="text-gray-900 font-bold">Name/Code:</span>
-          <span class="ml-4 text-gray-800">{{$role->name}}</span>
+          <span class="text-gray-900 font-bold">{{ __('vendor\laratrust\panel\roles\show.name_code_') }}</span>
+          <span class="ml-4 text-gray-800">{{$role->field</span>
         </label>
 
         <label class="flex justify-between w-4/12 my-4">
-          <span class="text-gray-900 font-bold">Display Name:</span>
-          <span class="ml-4 text-gray-800">{{$role->display_name}}</span>
+          <span class="text-gray-900 font-bold">{{ __('vendor\laratrust\panel\roles\show.display_name_') }}</span>
+          <span class="ml-4 text-gray-800">{{$role->field</span>
         </label>
 
         <label class="flex justify-between w-4/12 my-4">
-          <span class="text-gray-900 font-bold">Description:</span>
-          <span class="ml-4 text-gray-800">{{$role->description}}</span>
+          <span class="text-gray-900 font-bold">{{ __('vendor\laratrust\panel\roles\show.description_') }}</span>
+          <span class="ml-4 text-gray-800">{{$role->field</span>
         </label>
-        <span class="text-gray-900 font-bold">Permissions:</span>
+        <span class="text-gray-900 font-bold">{{ __('vendor\laratrust\panel\roles\show.permissions_') }}</span>
         <ul class="grid grid-cols-1 md:grid-cols-4 list-inside">
           @foreach ($role->permissions as $permission)
-            <li class="text-gray-800 list-disc" >{{$permission->display_name ?? $permission->name}}</li>
+            <li class="text-gray-800 list-disc" >{{$permission->field</li>
           @endforeach
         </ul>
         <div class="flex justify-end">

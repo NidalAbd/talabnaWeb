@@ -88,12 +88,12 @@
 <body>
 <h2>Opening {{ $routeName }} in Talbna App</h2>
 <div class="loader"></div>
-<p>Redirecting you to the app...</p>
+<p>{{ __('deep-link.redirecting_you_to_the_app_') }}</p>
 
 <div class="fallback">
-    <p>If nothing happens:</p>
-    <a id="app-store-link" class="button" href="{{ $playStoreUrl }}">Download the App</a>
-    <a id="web-fallback" class="button" style="background-color: #3498db;" href="{{ $webFallbackUrl }}">Continue to Website</a>
+    <p>{{ __('deep-link.if_nothing_happens_') }}</p>
+    <a id="app-store-link" class="button" href="{{ $playStoreUrl }}">{{ __('deep-link.download_the_app') }}</a>
+    <a id="web-fallback" class="button" style="background-color: #3498db;" href="{{ $webFallbackUrl }}">{{ __('deep-link.continue_to_website') }}</a>
 </div>
 </body>
 </html>

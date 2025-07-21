@@ -42,7 +42,7 @@
                                     <label for="description" class="col-md-4 col-form-label text-md-right">{{ __('Description') }}</label>
 
                                     <div class="col-md-6">
-                                        <textarea id="description" class="form-control @error('description') is-invalid @enderror" name="description" required autocomplete="description">{{ old('description', $pointTransaction->description) }}</textarea>
+                                        <textarea id="description" class="form-control @error('description') is-invalid @enderror" name="description" required autocomplete="description">{{ old('description', $pointTransaction->field</textarea>
 
                                         @error('description')
                                         <span class="invalid-feedback" role="alert">
@@ -56,7 +56,7 @@
                         <div class="card-footer  ">
                             <div class="row justify-content-center col-md-12">
                                 <div class="form-group col-md-6">
-                                    <a href="{{ url()->previous() }}" class="btn btn-primary col-md-4">cancel</a>
+                                    <a href="{{ url()->{{ __('point_transactions\edit.previous_class_btn_btn_primary_co') }}</a>
                                 </div>
                                 <div class="form-group col-md-6">
                                     <button type="submit" class="btn btn-primary">

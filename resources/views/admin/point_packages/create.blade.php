@@ -10,13 +10,13 @@
                 <i class="fas fa-gift mr-2"></i>
                 Create New Point Package
             </h1>
-            <p class="text-muted mt-1">Add a new point package with pricing and features</p>
+            <p class="text-muted mt-1">{{ __('admin\point_packages\create.add_a_new_point_package_with_pricing_and') }}</p>
         </div>
         <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('admin.point_packages.index') }}">Point Packages</a></li>
-                <li class="breadcrumb-item active">Create</li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('admin\point_packages\create.dashboard') }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.point_packages.index') }}">{{ __('admin\point_packages\create.point_packages') }}</a></li>
+                <li class="breadcrumb-item active">{{ __('admin\point_packages\create.create') }}</li>
             </ol>
         </div>
     </div>
@@ -26,7 +26,7 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>{{ \App\Models\PointPackage::count() }}</h3>
-                    <p>Total Packages</p>
+                    <p>{{ __('admin\point_packages\create.total_packages') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-gift"></i>
@@ -36,8 +36,8 @@
         <div class="col-lg-4 col-6">
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>{{ \App\Models\PointPackage::where('is_active', true)->count() }}</h3>
-                    <p>Active Packages</p>
+                    <h3>{{ \App\Models\PointPackage::where('is_active', true)->{{ __('admin\point_packages\create.count_') }}</h3>
+                    <p>{{ __('admin\point_packages\create.active_packages') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-check-circle"></i>
@@ -47,8 +47,8 @@
         <div class="col-lg-4 col-6">
             <div class="small-box bg-warning">
                 <div class="inner">
-                    <h3>{{ \App\Models\PointPackage::where('is_popular', true)->count() }}</h3>
-                    <p>Popular Packages</p>
+                    <h3>{{ \App\Models\PointPackage::where('is_popular', true)->{{ __('admin\point_packages\create.count_') }}</h3>
+                    <p>{{ __('admin\point_packages\create.popular_packages') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-star"></i>
@@ -80,7 +80,7 @@
                                     <!-- Arabic Name -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name_ar">Name (Arabic) <span class="text-danger">*</span></label>
+                                            <label for="name_ar">Name (Arabic) <span class="text-danger">{{ __('admin\point_packages\create._') }}</span></label>
                                             <input type="text" class="form-control @error('name.ar') is-invalid @enderror" 
                                                    id="name_ar" name="name[ar]" value="{{ old('name.ar') }}" 
                                                    placeholder="اسم الباقة" required>
@@ -93,7 +93,7 @@
                                     <!-- English Name -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name_en">Name (English) <span class="text-danger">*</span></label>
+                                            <label for="name_en">Name (English) <span class="text-danger">{{ __('admin\point_packages\create._') }}</span></label>
                                             <input type="text" class="form-control @error('name.en') is-invalid @enderror" 
                                                    id="name_en" name="name[en]" value="{{ old('name.en') }}" 
                                                    placeholder="Package Name" required>
@@ -108,7 +108,7 @@
                                     <!-- Arabic Description -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="description_ar">Description (Arabic)</label>
+                                            <label for="description_ar">{{ __('admin\point_packages\create.description_arabic_') }}</label>
                                             <textarea class="form-control @error('description.ar') is-invalid @enderror" 
                                                       id="description_ar" name="description[ar]" rows="3" 
                                                       placeholder="وصف الباقة">{{ old('description.ar') }}</textarea>
@@ -121,7 +121,7 @@
                                     <!-- English Description -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="description_en">Description (English)</label>
+                                            <label for="description_en">{{ __('admin\point_packages\create.description_english_') }}</label>
                                             <textarea class="form-control @error('description.en') is-invalid @enderror" 
                                                       id="description_en" name="description[en]" rows="3" 
                                                       placeholder="Package description">{{ old('description.en') }}</textarea>
@@ -136,11 +136,11 @@
                                     <!-- Points -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="points">Points <span class="text-danger">*</span></label>
+                                            <label for="points">Points <span class="text-danger">{{ __('admin\point_packages\create._') }}</span></label>
                                             <input type="number" class="form-control @error('points') is-invalid @enderror" 
                                                    id="points" name="points" value="{{ old('points', 100) }}" 
                                                    min="1" max="1000000" required>
-                                            <small class="form-text text-muted">Number of points in this package</small>
+                                            <small class="form-text text-muted">{{ __('admin\point_packages\create.number_of_points_in_this_package') }}</small>
                                             @error('points')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -150,11 +150,11 @@
                                     <!-- Price -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="price">Price <span class="text-danger">*</span></label>
+                                            <label for="price">Price <span class="text-danger">{{ __('admin\point_packages\create._') }}</span></label>
                                             <input type="number" class="form-control @error('price') is-invalid @enderror" 
                                                    id="price" name="price" value="{{ old('price', 10) }}" 
                                                    min="0" max="10000" step="0.01" required>
-                                            <small class="form-text text-muted">Price in the selected currency</small>
+                                            <small class="form-text text-muted">{{ __('admin\point_packages\create.price_in_the_selected_currency') }}</small>
                                             @error('price')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -164,13 +164,13 @@
                                     <!-- Currency -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="currency">Currency <span class="text-danger">*</span></label>
+                                            <label for="currency">Currency <span class="text-danger">{{ __('admin\point_packages\create._') }}</span></label>
                                             <select class="form-control @error('currency') is-invalid @enderror" 
                                                     id="currency" name="currency" required>
-                                                <option value="SAR" {{ old('currency', 'SAR') == 'SAR' ? 'selected' : '' }}>SAR</option>
-                                                <option value="USD" {{ old('currency') == 'USD' ? 'selected' : '' }}>USD</option>
-                                                <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>EUR</option>
-                                                <option value="AED" {{ old('currency') == 'AED' ? 'selected' : '' }}>AED</option>
+                                                <option value="SAR" {{ old('currency', 'SAR') == 'SAR' ? 'selected' : '' }}>{{ __('admin\point_packages\create.sar') }}</option>
+                                                <option value="USD" {{ old('currency') == 'USD' ? 'selected' : '' }}>{{ __('admin\point_packages\create.usd') }}</option>
+                                                <option value="EUR" {{ old('currency') == 'EUR' ? 'selected' : '' }}>{{ __('admin\point_packages\create.eur') }}</option>
+                                                <option value="AED" {{ old('currency') == 'AED' ? 'selected' : '' }}>{{ __('admin\point_packages\create.aed') }}</option>
                                             </select>
                                             @error('currency')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -183,11 +183,11 @@
                                     <!-- Duration Days -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="duration_days">Duration (Days) <span class="text-danger">*</span></label>
+                                            <label for="duration_days">Duration (Days) <span class="text-danger">{{ __('admin\point_packages\create._') }}</span></label>
                                             <input type="number" class="form-control @error('duration_days') is-invalid @enderror" 
                                                    id="duration_days" name="duration_days" value="{{ old('duration_days', 30) }}" 
                                                    min="1" max="365" required>
-                                            <small class="form-text text-muted">How long the points are valid</small>
+                                            <small class="form-text text-muted">{{ __('admin\point_packages\create.how_long_the_points_are_valid') }}</small>
                                             @error('duration_days')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -197,11 +197,11 @@
                                     <!-- Discount Percentage -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="discount_percentage">Discount (%)</label>
+                                            <label for="discount_percentage">{{ __('admin\point_packages\create.discount_') }}</label>
                                             <input type="number" class="form-control @error('discount_percentage') is-invalid @enderror" 
                                                    id="discount_percentage" name="discount_percentage" 
                                                    value="{{ old('discount_percentage', 0) }}" min="0" max="100">
-                                            <small class="form-text text-muted">Discount percentage (0-100)</small>
+                                            <small class="form-text text-muted">{{ __('admin\point_packages\create.discount_percentage_0_100_') }}</small>
                                             @error('discount_percentage')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -211,11 +211,11 @@
                                     <!-- Max Purchases -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="max_purchases">Max Purchases</label>
+                                            <label for="max_purchases">{{ __('admin\point_packages\create.max_purchases') }}</label>
                                             <input type="number" class="form-control @error('max_purchases') is-invalid @enderror" 
                                                    id="max_purchases" name="max_purchases" 
                                                    value="{{ old('max_purchases', 0) }}" min="0" max="1000">
-                                            <small class="form-text text-muted">0 = unlimited</small>
+                                            <small class="form-text text-muted">{{ __('admin\point_packages\create.0_unlimited') }}</small>
                                             @error('max_purchases')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -227,11 +227,11 @@
                                     <!-- Icon -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="icon">Icon</label>
+                                            <label for="icon">{{ __('admin\point_packages\create.icon') }}</label>
                                             <input type="text" class="form-control @error('icon') is-invalid @enderror" 
                                                    id="icon" name="icon" value="{{ old('icon', 'fas fa-gift') }}" 
                                                    placeholder="fas fa-gift">
-                                            <small class="form-text text-muted">FontAwesome icon class</small>
+                                            <small class="form-text text-muted">{{ __('admin\point_packages\create.fontawesome_icon_class') }}</small>
                                             @error('icon')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -241,7 +241,7 @@
                                     <!-- Color -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="color">Color</label>
+                                            <label for="color">{{ __('admin\point_packages\create.color') }}</label>
                                             <input type="color" class="form-control @error('color') is-invalid @enderror" 
                                                    id="color" name="color" value="{{ old('color', '#007bff') }}">
                                             @error('color')
@@ -253,7 +253,7 @@
                                     <!-- Display Order -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="display_order">Display Order</label>
+                                            <label for="display_order">{{ __('admin\point_packages\create.display_order') }}</label>
                                             <input type="number" class="form-control @error('display_order') is-invalid @enderror" 
                                                    id="display_order" name="display_order" value="{{ old('display_order', 1) }}" 
                                                    min="1" max="100">
@@ -268,11 +268,11 @@
                                     <!-- Features -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="features_ar">Features (Arabic)</label>
+                                            <label for="features_ar">{{ __('admin\point_packages\create.features_arabic_') }}</label>
                                             <textarea class="form-control @error('features.ar') is-invalid @enderror" 
                                                       id="features_ar" name="features[ar]" rows="3" 
                                                       placeholder="مميزات الباقة (سطر واحد لكل مميزة)">{{ old('features.ar') }}</textarea>
-                                            <small class="form-text text-muted">One feature per line</small>
+                                            <small class="form-text text-muted">{{ __('admin\point_packages\create.one_feature_per_line') }}</small>
                                             @error('features.ar')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -282,11 +282,11 @@
                                     <!-- Features English -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="features_en">Features (English)</label>
+                                            <label for="features_en">{{ __('admin\point_packages\create.features_english_') }}</label>
                                             <textarea class="form-control @error('features.en') is-invalid @enderror" 
                                                       id="features_en" name="features[en]" rows="3" 
                                                       placeholder="Package features (one per line)">{{ old('features.en') }}</textarea>
-                                            <small class="form-text text-muted">One feature per line</small>
+                                            <small class="form-text text-muted">{{ __('admin\point_packages\create.one_feature_per_line') }}</small>
                                             @error('features.en')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -301,7 +301,7 @@
                                             <div class="custom-control custom-switch">
                                                 <input type="checkbox" class="custom-control-input" id="is_active" 
                                                        name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="is_active">Active</label>
+                                                <label class="custom-control-label" for="is_active">{{ __('admin\point_packages\create.active') }}</label>
                                             </div>
                                         </div>
                                     </div>
@@ -312,7 +312,7 @@
                                             <div class="custom-control custom-switch">
                                                 <input type="checkbox" class="custom-control-input" id="is_popular" 
                                                        name="is_popular" value="1" {{ old('is_popular') ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="is_popular">Popular Package</label>
+                                                <label class="custom-control-label" for="is_popular">{{ __('admin\point_packages\create.popular_package') }}</label>
                                             </div>
                                         </div>
                                     </div>
@@ -356,11 +356,11 @@
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <h5 id="preview-name">Package Name</h5>
-                                    <p class="text-muted" id="preview-description">Package description</p>
-                                    <div class="badge badge-primary" id="preview-points">100 pts</div>
-                                    <div class="badge badge-success" id="preview-price">10 SAR</div>
-                                    <div class="badge badge-info" id="preview-duration">30 days</div>
+                                    <h5 id="preview-name">{{ __('admin\point_packages\create.package_name') }}</h5>
+                                    <p class="text-muted" id="preview-description">{{ __('admin\point_packages\create.package_description') }}</p>
+                                    <div class="badge badge-primary" id="preview-points">{{ __('admin\point_packages\create.100_pts') }}</div>
+                                    <div class="badge badge-success" id="preview-price">{{ __('admin\point_packages\create.10_sar') }}</div>
+                                    <div class="badge badge-info" id="preview-duration">{{ __('admin\point_packages\create.30_days') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -536,11 +536,11 @@ $(document).ready(function() {
                     <div class="package-badge mx-auto mb-3" style="background-color: ${$('#color').val() || '#007bff'};">
                         <i class="${$('#icon').val() || 'fas fa-gift'}" style="color: white; font-size: 24px;"></i>
                     </div>
-                    <h5>${$('#name_ar').val() || 'اسم الباقة'} / ${$('#name_en').val() || 'Package Name'}</h5>
-                    <p class="text-muted">${$('#description_ar').val() || 'وصف الباقة'}</p>
-                    <div class="badge badge-primary mr-2">${$('#points').val() || 0} pts</div>
-                    <div class="badge badge-success mr-2">${$('#price').val() || 0} ${$('#currency').val() || 'SAR'}</div>
-                    <div class="badge badge-info">${$('#duration_days').val() || 0} days</div>
+                    <h5>{{ __('admin\point_packages\create._name_ar_val_') }}</h5>
+                    <p class="text-muted">{{ __('admin\point_packages\create._description_ar_val_') }}</p>
+                    <div class="badge badge-primary mr-2">{{ __('admin\point_packages\create._points_val_0_pts') }}</div>
+                    <div class="badge badge-success mr-2">{{ __('admin\point_packages\create._price_val_0_currency') }}</div>
+                    <div class="badge badge-info">{{ __('admin\point_packages\create._duration_days_val_0_days') }}</div>
                 </div>
             `,
             confirmButtonText: 'OK'

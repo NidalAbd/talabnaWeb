@@ -47,7 +47,7 @@
                             @endif
                         </div>
 
-                        <h3 class="profile-username text-center">{{ $user->name }}</h3>
+                        <h3 class="profile-username text-center">{{ $user->field</h3>
                         <p class="text-muted text-center">
                             <i class="fas fa-at text-secondary"></i> {{ $user->user_name ?? $user->email }}
                         </p>
@@ -55,11 +55,11 @@
                         <div class="list-group list-group-flush mb-3">
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-id-badge text-primary mr-2"></i> ID</span>
-                                <span class="badge badge-light">{{ $user->id }}</span>
+                                <span class="badge badge-light">{{ $user->field</span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-envelope text-primary mr-2"></i> Email</span>
-                                <span class="text-truncate ml-2" style="max-width: 160px;">{{ $user->email }}</span>
+                                <span class="text-truncate ml-2" style="max-width: 160px;">{{ $user->field</span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-toggle-on text-primary mr-2"></i> Status</span>
@@ -69,15 +69,15 @@
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-calendar-alt text-primary mr-2"></i> Joined</span>
-                                <span>{{ $user->created_at->format('M d, Y') }}</span>
+                                <span>{{ $user->field</span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-user-tag text-primary mr-2"></i> Roles</span>
-                                <span class="badge badge-primary">{{ $user->roles->count() }}</span>
+                                <span class="badge badge-primary">{{ $user->field</span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-key text-primary mr-2"></i> Permissions</span>
-                                <span class="badge badge-info">{{ $user->permissions->count() }}</span>
+                                <span class="badge badge-info">{{ $user->field</span>
                             </div>
                         </div>
 
@@ -131,7 +131,7 @@
                                                                 {{ $role->display_name ?? $role->name }}
                                                             </label>
                                                         </div>
-                                                        <small class="text-muted d-block mt-1">{{ $role->description ?? $role->name }}</small>
+                                                        <small class="text-muted d-block mt-1">{{ $role->field</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -144,7 +144,7 @@
                                     @if($groupedPermissions)
                                         <div class="alert alert-warning">
                                             <i class="icon fas fa-exclamation-triangle"></i>
-                                            <strong>Note:</strong> Direct permissions override role-based permissions.
+                                            <strong>{{ __('admin\role-assignments\edit.note_') }}</strong> Direct permissions override role-based permissions.
                                             Only assign direct permissions when you need to give a user special access outside of their roles.
                                         </div>
 
@@ -191,7 +191,7 @@
                                                                                 {{ $permission->assigned ? 'checked' : '' }}>
                                                                             <label class="custom-control-label" for="permission_{{ $permission->id }}">
                                                                                 {{ $permission->display_name ?? $permission->name }}
-                                                                                <small class="d-block text-muted">{{ $permission->name }}</small>
+                                                                                <small class="d-block text-muted">{{ $permission->field</small>
                                                                             </label>
                                                                         </div>
                                                                     </div>

@@ -24,13 +24,13 @@
             <div class="info-box bg-gradient-success">
                 <span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Total Revenue</span>
+                    <span class="info-box-text">{{ __('admin\financial\revenue.total_revenue') }}</span>
                     <span class="info-box-number">${{ number_format($totalRevenue, 2) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 100%"></div>
                     </div>
                     <span class="progress-description">
-                        <i class="fas fa-{{ $growthRate >= 0 ? 'arrow-up text-success' : 'arrow-down text-danger' }}"></i>
+                        <i class="fas fa-{{ $growthRate >{{ __('admin\financial\revenue._0_arrow_up_text_success_arrow_d') }}</i>
                         {{ number_format(abs($growthRate), 1) }}% from last month
                     </span>
                 </div>
@@ -41,7 +41,7 @@
             <div class="info-box bg-gradient-info">
                 <span class="info-box-icon"><i class="fas fa-exchange-alt"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Total Transactions</span>
+                    <span class="info-box-text">{{ __('admin\financial\revenue.total_transactions') }}</span>
                     <span class="info-box-number">{{ number_format($totalTransactions) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 85%"></div>
@@ -58,7 +58,7 @@
             <div class="info-box bg-gradient-primary">
                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Avg. Revenue/User</span>
+                    <span class="info-box-text">{{ __('admin\financial\revenue.avg_revenue_user') }}</span>
                     <span class="info-box-number">${{ number_format($avgRevenuePerUser, 2) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 70%"></div>
@@ -75,13 +75,13 @@
             <div class="info-box bg-gradient-warning">
                 <span class="info-box-icon"><i class="fas fa-chart-line"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Growth Rate</span>
+                    <span class="info-box-text">{{ __('admin\financial\revenue.growth_rate') }}</span>
                     <span class="info-box-number">{{ number_format($growthRate, 1) }}%</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: {{ min(abs($growthRate), 100) }}%"></div>
                     </div>
                     <span class="progress-description">
-                        <i class="fas fa-{{ $growthRate >= 0 ? 'arrow-up text-success' : 'arrow-down text-danger' }}"></i>
+                        <i class="fas fa-{{ $growthRate >{{ __('admin\financial\revenue._0_arrow_up_text_success_arrow_d') }}</i>
                         Monthly growth
                     </span>
                 </div>
@@ -124,7 +124,7 @@
                         Recent Transactions
                     </h3>
                     <div class="card-tools">
-                        <a href="#" class="btn btn-sm btn-primary">View All</a>
+                        <a href="#" class="btn btn-sm btn-primary">{{ __('admin\financial\revenue.view_all') }}</a>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -132,12 +132,12 @@
                         <table class="table table-hover">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>Date</th>
-                                    <th>User</th>
-                                    <th>Amount</th>
-                                    <th>Source</th>
-                                    <th>Status</th>
-                                    <th>Actions</th>
+                                    <th>{{ __('admin\financial\revenue.date') }}</th>
+                                    <th>{{ __('admin\financial\revenue.user') }}</th>
+                                    <th>{{ __('admin\financial\revenue.amount') }}</th>
+                                    <th>{{ __('admin\financial\revenue.source') }}</th>
+                                    <th>{{ __('admin\financial\revenue.status') }}</th>
+                                    <th>{{ __('admin\financial\revenue.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -151,7 +151,7 @@
                                             <div class="d-flex align-items-center">
                                                 <img src="{{ $transaction->user->photos->first()?->src ?? 'img/default-avatar.png' }}" 
                                                      class="img-circle mr-2" width="30" height="30" alt="User">
-                                                <span>{{ $transaction->user->user_name ?? 'N/A' }}</span>
+                                                <span>{{ $transaction->field</span>
                                             </div>
                                         </td>
                                         <td>
@@ -206,7 +206,7 @@
                 </div>
                 <div class="card-footer clearfix">
                     <div class="float-right">
-                        <a href="#" class="btn btn-primary">View All Transactions</a>
+                        <a href="#" class="btn btn-primary">{{ __('admin\financial\revenue.view_all_transactions') }}</a>
                     </div>
                 </div>
             </div>

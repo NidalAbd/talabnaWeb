@@ -61,54 +61,54 @@
 
                         <ul class="list-group list-group-unbordered mb-3">
                             <li class="list-group-item">
-                                <b>ID</b> <a class="float-right">{{ $reportable->id }}</a>
+                                <b>{{ __('admin\reports\details.id') }}</b> <a class="float-right">{{ $reportable->field</a>
                             </li>
                             @if ($isUser)
                                 <li class="list-group-item">
-                                    <b>Email</b> <a class="float-right">{{ $reportable->email }}</a>
+                                    <b>{{ __('admin\reports\details.email') }}</b> <a class="float-right">{{ $reportable->field</a>
                                 </li>
                                 <li class="list-group-item">
-                                    <b>Phone</b> <a class="float-right">{{ $reportable->phone ?? 'Not provided' }}</a>
+                                    <b>{{ __('admin\reports\details.phone') }}</b> <a class="float-right">{{ $reportable->field</a>
                                 </li>
                                 <li class="list-group-item">
-                                    <b>Joined</b> <a class="float-right">{{ $reportable->created_at->format('M d, Y') }}</a>
+                                    <b>{{ __('admin\reports\details.joined') }}</b> <a class="float-right">{{ $reportable->field</a>
                                 </li>
                                 <li class="list-group-item">
-                                    <b>Status</b>
+                                    <b>{{ __('admin\reports\details.status') }}</b>
                                     <a class="float-right">
                                         @if ($reportable->is_active === 'banned')
-                                            <span class="badge badge-danger">Banned</span>
+                                            <span class="badge badge-danger">{{ __('admin\reports\details.banned') }}</span>
                                         @elseif ($reportable->is_active === 'inactive')
-                                            <span class="badge badge-warning">Inactive</span>
+                                            <span class="badge badge-warning">{{ __('admin\reports\details.inactive') }}</span>
                                         @else
-                                            <span class="badge badge-success">Active</span>
+                                            <span class="badge badge-success">{{ __('admin\reports\details.active') }}</span>
                                         @endif
                                     </a>
                                 </li>
                             @else
                                 <li class="list-group-item">
-                                    <b>Owner</b>
+                                    <b>{{ __('admin\reports\details.owner') }}</b>
                                     <a class="float-right">
                                         {{ $reportable->user->name ?? 'Unknown' }}
                                     </a>
                                 </li>
                                 <li class="list-group-item">
-                                    <b>Category</b> <a class="float-right">{{ $reportable->category->name['en'] ?? 'Unknown' }}</a>
+                                    <b>{{ __('admin\reports\details.category') }}</b> <a class="float-right">{{ $reportable->field</a>
                                 </li>
                                 <li class="list-group-item">
-                                    <b>Created</b> <a class="float-right">{{ $reportable->created_at->format('M d, Y') }}</a>
+                                    <b>{{ __('admin\reports\details.created') }}</b> <a class="float-right">{{ $reportable->field</a>
                                 </li>
                                 <li class="list-group-item">
-                                    <b>Status</b>
+                                    <b>{{ __('admin\reports\details.status') }}</b>
                                     <a class="float-right">
                                         @if ($reportable->state === 'published')
-                                            <span class="badge badge-success">Published</span>
+                                            <span class="badge badge-success">{{ __('admin\reports\details.published') }}</span>
                                         @elseif ($reportable->state === 'archive')
-                                            <span class="badge badge-warning">Archived</span>
+                                            <span class="badge badge-warning">{{ __('admin\reports\details.archived') }}</span>
                                         @elseif ($reportable->state === 'not published')
-                                            <span class="badge badge-secondary">Not Published</span>
+                                            <span class="badge badge-secondary">{{ __('admin\reports\details.not_published') }}</span>
                                         @elseif ($reportable->state === 'rejected')
-                                            <span class="badge badge-danger">Rejected</span>
+                                            <span class="badge badge-danger">{{ __('admin\reports\details.rejected') }}</span>
                                         @endif
                                     </a>
                                 </li>
@@ -163,10 +163,10 @@
                             <table class="table table-hover">
                                 <thead>
                                 <tr class="bg-light">
-                                    <th style="width: 25%">Reporter</th>
-                                    <th style="width: 45%">Reason</th>
-                                    <th style="width: 15%">Date</th>
-                                    <th style="width: 15%">Actions</th>
+                                    <th style="width: 25%">{{ __('admin\reports\details.reporter') }}</th>
+                                    <th style="width: 45%">{{ __('admin\reports\details.reason') }}</th>
+                                    <th style="width: 15%">{{ __('admin\reports\details.date') }}</th>
+                                    <th style="width: 15%">{{ __('admin\reports\details.actions') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -249,7 +249,7 @@
                         <i class="fas fa-gavel mr-1"></i> Take Action on {{ ucfirst($type) }}
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">{{ __('admin\reports\details._times_') }}</span>
                     </button>
                 </div>
                 <form action="{{ route('reports.handle-reported', [$type, $reportable->id]) }}" method="POST">
@@ -257,21 +257,21 @@
                     <div class="modal-body">
                         <div class="alert alert-info">
                             <i class="fas fa-info-circle mr-1"></i>
-                            You are about to take action on: <strong>{{ $isUser ? $reportable->name : $reportable->title }}</strong>
+                            You are about to take action on: <strong>{{ $isUser ? $reportable->field</strong>
                         </div>
 
                         <div class="form-group">
-                            <label for="action">Select Action</label>
+                            <label for="action">{{ __('admin\reports\details.select_action') }}</label>
                             <select class="form-control" id="action" name="action" required>
-                                <option value="">-- Select Action --</option>
-                                <option value="warning">Send Warning</option>
+                                <option value="">{{ __('admin\reports\details._select_action_') }}</option>
+                                <option value="warning">{{ __('admin\reports\details.send_warning') }}</option>
                                 <option value="suspend">{{ $isUser ? 'Ban User' : 'Archive Post' }}</option>
                                 <option value="delete">Delete {{ ucfirst($type) }}</option>
                             </select>
                         </div>
 
                         <div class="form-group">
-                            <label for="reason">Reason for Action</label>
+                            <label for="reason">{{ __('admin\reports\details.reason_for_action') }}</label>
                             <textarea class="form-control" id="reason" name="reason" rows="3" required
                                       placeholder="Explain why you're taking this action..."></textarea>
                         </div>
@@ -298,7 +298,7 @@
                         <i class="fas fa-ban mr-1"></i> {{ $isUser ? 'Ban User' : 'Archive Post' }}
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">{{ __('admin\reports\details._times_') }}</span>
                     </button>
                 </div>
                 <form action="{{ route('reports.handle-reported', [$type, $reportable->id]) }}" method="POST">
@@ -307,7 +307,7 @@
                     <div class="modal-body">
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-triangle mr-1"></i>
-                            You are about to {{ $isUser ? 'ban' : 'archive' }}: <strong>{{ $isUser ? $reportable->name : $reportable->title }}</strong>
+                            You are about to {{ $isUser ? 'ban' : 'archive' }}: <strong>{{ $isUser ? $reportable->field</strong>
                         </div>
 
                         <div class="form-group">
@@ -317,7 +317,7 @@
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\reports\details.cancel') }}</button>
                         <button type="submit" class="btn btn-warning">
                             <i class="fas fa-ban mr-1"></i> {{ $isUser ? 'Ban User' : 'Archive Post' }}
                         </button>

@@ -4,7 +4,7 @@
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-key text-info mr-2"></i> Permission Details: {{ $permission->display_name ?? $permission->name }}</h1>
+        <h1><i class="fas fa-key text-info mr-2"></i> Permission Details: {{ $permission->display_name ?? $permission->field</h1>
         <div>
             @can('edit_permission')
                 <a href="{{ route('permissions.edit', $permission->id) }}" class="btn btn-warning">
@@ -25,7 +25,7 @@
                 <!-- Permission Info Card -->
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">Permission Information</h3>
+                        <h3 class="card-title">{{ __('admin\permissions\show.permission_information') }}</h3>
                     </div>
                     <div class="card-body box-profile">
                         <h3 class="profile-username text-center">
@@ -33,26 +33,26 @@
                                 {{ $permission->name }}
                             </span>
                         </h3>
-                        <p class="text-muted text-center">{{ $permission->display_name }}</p>
+                        <p class="text-muted text-center">{{ $permission->field</p>
 
                         <ul class="list-group list-group-unbordered mb-3">
                             <li class="list-group-item">
-                                <b>ID</b> <a class="float-right">{{ $permission->id }}</a>
+                                <b>{{ __('admin\permissions\show.id') }}</b> <a class="float-right">{{ $permission->field</a>
                             </li>
                             <li class="list-group-item">
-                                <b>Name</b> <a class="float-right">{{ $permission->name }}</a>
+                                <b>{{ __('admin\permissions\show.name') }}</b> <a class="float-right">{{ $permission->field</a>
                             </li>
                             <li class="list-group-item">
-                                <b>Display Name</b> <a class="float-right">{{ $permission->display_name ?? 'Not set' }}</a>
+                                <b>{{ __('admin\permissions\show.display_name') }}</b> <a class="float-right">{{ $permission->field</a>
                             </li>
                             <li class="list-group-item">
-                                <b>Created</b> <a class="float-right">{{ $permission->created_at->format('M d, Y') }}</a>
+                                <b>{{ __('admin\permissions\show.created') }}</b> <a class="float-right">{{ $permission->field</a>
                             </li>
                             <li class="list-group-item">
-                                <b>Last Updated</b> <a class="float-right">{{ $permission->updated_at->format('M d, Y') }}</a>
+                                <b>{{ __('admin\permissions\show.last_updated') }}</b> <a class="float-right">{{ $permission->field</a>
                             </li>
                             <li class="list-group-item">
-                                <b>Assigned to Roles</b> <a class="float-right">{{ count($roles) }}</a>
+                                <b>{{ __('admin\permissions\show.assigned_to_roles') }}</b> <a class="float-right">{{ count($roles) }}</a>
                             </li>
                         </ul>
 
@@ -95,13 +95,13 @@
                 <!-- Permission Description Card -->
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">Permission Description</h3>
+                        <h3 class="card-title">{{ __('admin\permissions\show.permission_description') }}</h3>
                     </div>
                     <div class="card-body">
                         @if($permission->description)
                             {{ $permission->description }}
                         @else
-                            <div class="text-muted">No description available for this permission.</div>
+                            <div class="text-muted">{{ __('admin\permissions\show.no_description_available_for_this_permis') }}</div>
                         @endif
                     </div>
                 </div>
@@ -109,7 +109,7 @@
                 <!-- Roles Using Permission Card -->
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">Roles Using This Permission</h3>
+                        <h3 class="card-title">{{ __('admin\permissions\show.roles_using_this_permission') }}</h3>
                         <div class="card-tools">
                             <span class="badge badge-primary">
                                 {{ count($roles) }} Roles
@@ -122,22 +122,22 @@
                                 <table class="table table-hover">
                                     <thead>
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Role Name</th>
-                                        <th>Display Name</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('admin\permissions\show.id') }}</th>
+                                        <th>{{ __('admin\permissions\show.role_name') }}</th>
+                                        <th>{{ __('admin\permissions\show.display_name') }}</th>
+                                        <th>{{ __('admin\permissions\show.actions') }}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     @foreach($roles as $role)
                                         <tr>
-                                            <td>{{ $role->id }}</td>
+                                            <td>{{ $role->field</td>
                                             <td>
                                                     <span class="badge badge-{{ $role->name == 'superadmin' ? 'danger' : ($role->name == 'admin' ? 'warning' : 'info') }}">
                                                         {{ $role->name }}
                                                     </span>
                                             </td>
-                                            <td>{{ $role->display_name ?? $role->name }}</td>
+                                            <td>{{ $role->field</td>
                                             <td>
                                                 <a href="{{ route('roles.show', $role->id) }}" class="btn btn-sm btn-info">
                                                     <i class="fas fa-eye mr-1"></i> View Role
@@ -160,15 +160,15 @@
                 <!-- Permission Usage Guide Card -->
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">How to Use This Permission</h3>
+                        <h3 class="card-title">{{ __('admin\permissions\show.how_to_use_this_permission') }}</h3>
                     </div>
                     <div class="card-body">
-                        <h5>In Blade Templates</h5>
+                        <h5>{{ __('admin\permissions\show.in_blade_templates') }}</h5>
                         <pre><code>@can('{{ $permission->name }}')
                                     <!-- Your protected content here -->
                                 @endcan</code></pre>
 
-                        <h5 class="mt-4">In Controllers</h5>
+                        <h5 class="mt-4">{{ __('admin\permissions\show.in_controllers') }}</h5>
                         <pre><code>// Check if user has permission
 if (auth()->user()->can('{{ $permission->name }}')) {
     // User has permission
@@ -178,7 +178,7 @@ if (auth()->user()->can('{{ $permission->name }}')) {
 $this->middleware('permission:{{ $permission->name }}');
 </code></pre>
 
-                        <h5 class="mt-4">In Routes</h5>
+                        <h5 class="mt-4">{{ __('admin\permissions\show.in_routes') }}</h5>
                         <pre><code>// Protect routes with middleware
 Route::group(['middleware' => ['permission:{{ $permission->name }}']], function () {
     // Your protected routes here

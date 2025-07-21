@@ -31,37 +31,37 @@
                         <table class="table table-bordered table-sm text-center">
                             <thead>
                             <tr class="btn-secondary">
-                                <th>Title</th>
-                                <th>Category</th>
-                                <th>User</th>
-                                <th>favorites</th>
-                                <th>reports</th>
-                                <th>views</th>
-                                <th>type</th>
+                                <th>{{ __('service_posts\user_favorite.title') }}</th>
+                                <th>{{ __('service_posts\user_favorite.category') }}</th>
+                                <th>{{ __('service_posts\user_favorite.user') }}</th>
+                                <th>{{ __('service_posts\user_favorite.favorites') }}</th>
+                                <th>{{ __('service_posts\user_favorite.reports') }}</th>
+                                <th>{{ __('service_posts\user_favorite.views') }}</th>
+                                <th>{{ __('service_posts\user_favorite.type') }}</th>
 
-                                <th>Action</th>
+                                <th>{{ __('service_posts\user_favorite.action') }}</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($servicePosts as $post)
                                 <tr>
-                                    <td>{{ $post->title }}</td>
-                                    <td>{{ $post->category }}</td>
-                                    <td>{{ $post->user->user_name }}</td>
-                                    <td>{{ $post->favorites_count }}</td>
-                                    <td>{{ $post->report_count }}</td>
-                                    <td>{{ $post->view_count }}</td>
-                                    <td>{{ $post->level ? $post->level->name['ar'] : 'عادي' }}</td>
+                                    <td>{{ $post->field</td>
+                                    <td>{{ $post->field</td>
+                                    <td>{{ $post->field</td>
+                                    <td>{{ $post->field</td>
+                                    <td>{{ $post->field</td>
+                                    <td>{{ $post->field</td>
+                                    <td>{{ $post->field</td>
                                     <td>
-                                        <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-sm btn-primary">View</a>
+                                        <a href="{{ route('service_posts.show', $post->field</a>
                                         {{--                                            @can('update_service', $post)--}}
-                                        <a href="{{ route('service_posts.edit', $post->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                        <a href="{{ route('service_posts.edit', $post->field</a>
                                         {{--                                            @endcan--}}
                                         {{--                                            @can('destroy_service', $post)--}}
                                         <form action="{{ route('service_posts.destroy', $post->id) }}" method="POST" style="display: inline-block;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">{{ __('service_posts\user_favorite.delete') }}</button>
                                         </form>
                                         {{--                                            @endcan--}}
                                     </td>
@@ -70,15 +70,15 @@
                             </tbody>
                             <thead>
                             <tr class="btn-secondary">
-                                <th>Title</th>
-                                <th>Category</th>
-                                <th>User</th>
-                                <th>favorites</th>
-                                <th>reports</th>
-                                <th>views</th>
-                                <th>type</th>
+                                <th>{{ __('service_posts\user_favorite.title') }}</th>
+                                <th>{{ __('service_posts\user_favorite.category') }}</th>
+                                <th>{{ __('service_posts\user_favorite.user') }}</th>
+                                <th>{{ __('service_posts\user_favorite.favorites') }}</th>
+                                <th>{{ __('service_posts\user_favorite.reports') }}</th>
+                                <th>{{ __('service_posts\user_favorite.views') }}</th>
+                                <th>{{ __('service_posts\user_favorite.type') }}</th>
 
-                                <th>Action</th>
+                                <th>{{ __('service_posts\user_favorite.action') }}</th>
                             </tr>
                             </thead>
                         </table>

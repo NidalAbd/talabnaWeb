@@ -7,39 +7,39 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>Demo Data:</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">Remove Demo Data</a>
+            <strong>{{ __('admin\financial\monthly_profit_loss.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\financial\monthly_profit_loss.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Total Profit</h5>
-                    <h3>$4,200</h3>
+                    <h5>{{ __('admin\financial\monthly_profit_loss.total_profit') }}</h5>
+                    <h3>{{ __('admin\financial\monthly_profit_loss._4_200') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-danger text-white">
                 <div class="card-body">
-                    <h5>Total Loss</h5>
-                    <h3>$1,100</h3>
+                    <h5>{{ __('admin\financial\monthly_profit_loss.total_loss') }}</h5>
+                    <h3>{{ __('admin\financial\monthly_profit_loss._1_100') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>Net Profit</h5>
-                    <h3>$3,100</h3>
+                    <h5>{{ __('admin\financial\monthly_profit_loss.net_profit') }}</h5>
+                    <h3>{{ __('admin\financial\monthly_profit_loss._3_100') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5>Profit Margin</h5>
-                    <h3>28.2%</h3>
+                    <h5>{{ __('admin\financial\monthly_profit_loss.profit_margin') }}</h5>
+                    <h3>{{ __('admin\financial\monthly_profit_loss.28_2_') }}</h3>
                 </div>
             </div>
         </div>
@@ -47,14 +47,14 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">Month:</label>
+                <label class="mr-2">{{ __('admin\financial\monthly_profit_loss.month_') }}</label>
                 <select class="form-control mr-2" name="month">
-                    <option>June 2024</option>
-                    <option>May 2024</option>
-                    <option>April 2024</option>
+                    <option>{{ __('admin\financial\monthly_profit_loss.june_2024') }}</option>
+                    <option>{{ __('admin\financial\monthly_profit_loss.may_2024') }}</option>
+                    <option>{{ __('admin\financial\monthly_profit_loss.april_2024') }}</option>
                 </select>
-                <button class="btn btn-primary mr-2">Filter</button>
-                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-primary mr-2">{{ __('admin\financial\monthly_profit_loss.filter') }}</button>
+                <button class="btn btn-secondary">{{ __('admin\financial\monthly_profit_loss.export') }}</button>
             </form>
         </div>
     </div>
@@ -66,38 +66,38 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Month</th>
-                        <th>Revenue</th>
-                        <th>Expenses</th>
-                        <th>Profit</th>
-                        <th>Loss</th>
-                        <th>Net</th>
+                        <th>{{ __('admin\financial\monthly_profit_loss.month') }}</th>
+                        <th>{{ __('admin\financial\monthly_profit_loss.revenue') }}</th>
+                        <th>{{ __('admin\financial\monthly_profit_loss.expenses') }}</th>
+                        <th>{{ __('admin\financial\monthly_profit_loss.profit') }}</th>
+                        <th>{{ __('admin\financial\monthly_profit_loss.loss') }}</th>
+                        <th>{{ __('admin\financial\monthly_profit_loss.net') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>June 2024</td>
-                        <td>$12,500</td>
-                        <td>$9,400</td>
-                        <td>$4,200</td>
-                        <td>$1,100</td>
-                        <td>$3,100</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss.june_2024') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._12_500') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._9_400') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._4_200') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._1_100') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._3_100') }}</td>
                     </tr>
                     <tr>
-                        <td>May 2024</td>
-                        <td>$11,800</td>
-                        <td>$8,900</td>
-                        <td>$3,900</td>
-                        <td>$1,000</td>
-                        <td>$2,900</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss.may_2024') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._11_800') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._8_900') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._3_900') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._1_000') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._2_900') }}</td>
                     </tr>
                     <tr>
-                        <td>April 2024</td>
-                        <td>$10,900</td>
-                        <td>$8,200</td>
-                        <td>$3,200</td>
-                        <td>$900</td>
-                        <td>$2,300</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss.april_2024') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._10_900') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._8_200') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._3_200') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._900') }}</td>
+                        <td>{{ __('admin\financial\monthly_profit_loss._2_300') }}</td>
                     </tr>
                 </tbody>
             </table>

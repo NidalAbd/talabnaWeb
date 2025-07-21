@@ -7,39 +7,39 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>Demo Data:</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">Remove Demo Data</a>
+            <strong>{{ __('admin\financial\server_hosting_costs.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\financial\server_hosting_costs.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-secondary text-white">
                 <div class="card-body">
-                    <h5>Total Hosting Costs</h5>
-                    <h3>$3,500</h3>
+                    <h5>{{ __('admin\financial\server_hosting_costs.total_hosting_costs') }}</h5>
+                    <h3>{{ __('admin\financial\server_hosting_costs._3_500') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>Servers</h5>
-                    <h3>5</h3>
+                    <h5>{{ __('admin\financial\server_hosting_costs.servers') }}</h5>
+                    <h3>{{ __('admin\financial\server_hosting_costs.5') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Avg. Cost/Server</h5>
-                    <h3>$700</h3>
+                    <h5>{{ __('admin\financial\server_hosting_costs.avg_cost_server') }}</h5>
+                    <h3>{{ __('admin\financial\server_hosting_costs._700') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
-                    <h5>Growth Rate</h5>
-                    <h3>+2.5%</h3>
+                    <h5>{{ __('admin\financial\server_hosting_costs.growth_rate') }}</h5>
+                    <h3>{{ __('admin\financial\server_hosting_costs._2_5_') }}</h3>
                 </div>
             </div>
         </div>
@@ -47,11 +47,11 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">Date Range:</label>
+                <label class="mr-2">{{ __('admin\financial\server_hosting_costs.date_range_') }}</label>
                 <input type="date" class="form-control mr-2" name="from" value="2024-06-01">
                 <input type="date" class="form-control mr-2" name="to" value="2024-06-30">
-                <button class="btn btn-primary mr-2">Filter</button>
-                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-primary mr-2">{{ __('admin\financial\server_hosting_costs.filter') }}</button>
+                <button class="btn btn-secondary">{{ __('admin\financial\server_hosting_costs.export') }}</button>
             </form>
         </div>
     </div>
@@ -63,41 +63,41 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Date</th>
-                        <th>Server</th>
-                        <th>Provider</th>
-                        <th>Amount</th>
-                        <th>Status</th>
+                        <th>{{ __('admin\financial\server_hosting_costs.date') }}</th>
+                        <th>{{ __('admin\financial\server_hosting_costs.server') }}</th>
+                        <th>{{ __('admin\financial\server_hosting_costs.provider') }}</th>
+                        <th>{{ __('admin\financial\server_hosting_costs.amount') }}</th>
+                        <th>{{ __('admin\financial\server_hosting_costs.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>2024-06-01</td>
-                        <td>Web Server 1</td>
-                        <td>AWS</td>
-                        <td>$800</td>
-                        <td><span class="badge badge-success">Paid</span></td>
+                        <td>{{ __('admin\financial\server_hosting_costs.2024_06_01') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs.web_server_1') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs.aws') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs._800') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\server_hosting_costs.paid') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-02</td>
-                        <td>DB Server</td>
-                        <td>Azure</td>
-                        <td>$600</td>
-                        <td><span class="badge badge-success">Paid</span></td>
+                        <td>{{ __('admin\financial\server_hosting_costs.2024_06_02') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs.db_server') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs.azure') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs._600') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\server_hosting_costs.paid') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-03</td>
-                        <td>Backup Server</td>
-                        <td>Google Cloud</td>
-                        <td>$500</td>
-                        <td><span class="badge badge-warning">Pending</span></td>
+                        <td>{{ __('admin\financial\server_hosting_costs.2024_06_03') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs.backup_server') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs.google_cloud') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs._500') }}</td>
+                        <td><span class="badge badge-warning">{{ __('admin\financial\server_hosting_costs.pending') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-04</td>
-                        <td>App Server</td>
-                        <td>DigitalOcean</td>
-                        <td>$700</td>
-                        <td><span class="badge badge-danger">Failed</span></td>
+                        <td>{{ __('admin\financial\server_hosting_costs.2024_06_04') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs.app_server') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs.digitalocean') }}</td>
+                        <td>{{ __('admin\financial\server_hosting_costs._700') }}</td>
+                        <td><span class="badge badge-danger">{{ __('admin\financial\server_hosting_costs.failed') }}</span></td>
                     </tr>
                 </tbody>
             </table>

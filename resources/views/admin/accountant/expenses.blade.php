@@ -3,7 +3,7 @@
 @section('title', 'Expense Management')
 
 @section('content_header')
-    <h1>Expense Management</h1>
+    <h1>{{ __('admin\accountant\expenses.expense_management') }}</h1>
 @stop
 
 @section('content')
@@ -11,14 +11,14 @@
     <!-- Filters -->
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Filters</h3>
+            <h3 class="card-title">{{ __('admin\accountant\expenses.filters') }}</h3>
         </div>
         <div class="card-body">
             <form method="GET" action="{{ route('accountant.expenses') }}" class="row">
                 <div class="col-md-2">
-                    <label for="status">Status</label>
+                    <label for="status">{{ __('admin\accountant\expenses.status') }}</label>
                     <select name="status" id="status" class="form-control">
-                        <option value="">All Statuses</option>
+                        <option value="">{{ __('admin\accountant\expenses.all_statuses') }}</option>
                         @foreach($statuses as $status)
                             <option value="{{ $status }}" {{ request('status') == $status ? 'selected' : '' }}>
                                 {{ ucfirst($status) }}
@@ -27,9 +27,9 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label for="category">Category</label>
+                    <label for="category">{{ __('admin\accountant\expenses.category') }}</label>
                     <select name="category" id="category" class="form-control">
-                        <option value="">All Categories</option>
+                        <option value="">{{ __('admin\accountant\expenses.all_categories') }}</option>
                         @foreach($categories as $category)
                             <option value="{{ $category }}" {{ request('category') == $category ? 'selected' : '' }}>
                                 {{ ucfirst($category) }}
@@ -38,15 +38,15 @@
                     </select>
                 </div>
                 <div class="col-md-2">
-                    <label for="date_from">From Date</label>
+                    <label for="date_from">{{ __('admin\accountant\expenses.from_date') }}</label>
                     <input type="date" name="date_from" id="date_from" class="form-control" value="{{ request('date_from') }}">
                 </div>
                 <div class="col-md-2">
-                    <label for="date_to">To Date</label>
+                    <label for="date_to">{{ __('admin\accountant\expenses.to_date') }}</label>
                     <input type="date" name="date_to" id="date_to" class="form-control" value="{{ request('date_to') }}">
                 </div>
                 <div class="col-md-2">
-                    <label>&nbsp;</label>
+                    <label>{{ __('admin\accountant\expenses._nbsp_') }}</label>
                     <div>
                         <button type="submit" class="btn btn-primary">
                             <i class="fas fa-search"></i> Filter
@@ -63,7 +63,7 @@
     <!-- Expenses Table -->
     <div class="card">
         <div class="card-header">
-            <h3 class="card-title">Expenses</h3>
+            <h3 class="card-title">{{ __('admin\accountant\expenses.expenses') }}</h3>
             <div class="card-tools">
                 <button type="button" class="btn btn-success" data-toggle="modal" data-target="#addExpenseModal">
                     <i class="fas fa-plus"></i> Add Expense
@@ -75,35 +75,35 @@
                 <table class="table table-striped">
                     <thead>
                         <tr>
-                            <th>Title</th>
-                            <th>Amount</th>
-                            <th>Category</th>
-                            <th>Vendor</th>
-                            <th>Status</th>
-                            <th>Date</th>
-                            <th>Approved By</th>
-                            <th>Actions</th>
+                            <th>{{ __('admin\accountant\expenses.title') }}</th>
+                            <th>{{ __('admin\accountant\expenses.amount') }}</th>
+                            <th>{{ __('admin\accountant\expenses.category') }}</th>
+                            <th>{{ __('admin\accountant\expenses.vendor') }}</th>
+                            <th>{{ __('admin\accountant\expenses.status') }}</th>
+                            <th>{{ __('admin\accountant\expenses.date') }}</th>
+                            <th>{{ __('admin\accountant\expenses.approved_by') }}</th>
+                            <th>{{ __('admin\accountant\expenses.actions') }}</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($expenses as $expense)
                         <tr>
-                            <td>{{ $expense->expense_title }}</td>
+                            <td>{{ $expense->field</td>
                             <td>${{ number_format($expense->amount, 2) }}</td>
                             <td>
-                                <span class="badge badge-info">{{ ucfirst($expense->expense_category) }}</span>
+                                <span class="badge badge-info">{{ ucfirst($expense->field</span>
                             </td>
-                            <td>{{ $expense->vendor_name }}</td>
+                            <td>{{ $expense->field</td>
                             <td>
                                 <span class="badge badge-{{ $expense->status === 'approved' ? 'success' : ($expense->status === 'pending' ? 'warning' : ($expense->status === 'rejected' ? 'danger' : 'secondary')) }}">
                                     {{ ucfirst($expense->status) }}
                                 </span>
                             </td>
-                            <td>{{ $expense->expense_date->format('M d, Y') }}</td>
+                            <td>{{ $expense->field</td>
                             <td>
                                 @if($expense->approver)
                                     {{ $expense->approver->name }}
-                                    <br><small>{{ $expense->approved_at ? $expense->approved_at->format('M d, Y H:i') : '' }}</small>
+                                    <br><small>{{ $expense->field</small>
                                 @else
                                     -
                                 @endif
@@ -138,9 +138,9 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Add New Expense</h5>
+                <h5 class="modal-title">{{ __('admin\accountant\expenses.add_new_expense') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('admin\accountant\expenses._times_') }}</span>
                 </button>
             </div>
             <form id="addExpenseForm">
@@ -148,13 +148,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="expense_title">Expense Title *</label>
+                                <label for="expense_title">{{ __('admin\accountant\expenses.expense_title_') }}</label>
                                 <input type="text" class="form-control" id="expense_title" name="expense_title" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="amount">Amount *</label>
+                                <label for="amount">{{ __('admin\accountant\expenses.amount_') }}</label>
                                 <input type="number" step="0.01" class="form-control" id="amount" name="amount" required>
                             </div>
                         </div>
@@ -162,23 +162,23 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="expense_category">Category *</label>
+                                <label for="expense_category">{{ __('admin\accountant\expenses.category_') }}</label>
                                 <select class="form-control" id="expense_category" name="expense_category" required>
-                                    <option value="">Select Category</option>
-                                    <option value="advertising">Advertising</option>
-                                    <option value="development">Development</option>
-                                    <option value="license">License</option>
-                                    <option value="office">Office</option>
-                                    <option value="marketing">Marketing</option>
-                                    <option value="legal">Legal</option>
-                                    <option value="salary">Salary</option>
-                                    <option value="other">Other</option>
+                                    <option value="">{{ __('admin\accountant\expenses.select_category') }}</option>
+                                    <option value="advertising">{{ __('admin\accountant\expenses.advertising') }}</option>
+                                    <option value="development">{{ __('admin\accountant\expenses.development') }}</option>
+                                    <option value="license">{{ __('admin\accountant\expenses.license') }}</option>
+                                    <option value="office">{{ __('admin\accountant\expenses.office') }}</option>
+                                    <option value="marketing">{{ __('admin\accountant\expenses.marketing') }}</option>
+                                    <option value="legal">{{ __('admin\accountant\expenses.legal') }}</option>
+                                    <option value="salary">{{ __('admin\accountant\expenses.salary') }}</option>
+                                    <option value="other">{{ __('admin\accountant\expenses.other') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="expense_date">Date *</label>
+                                <label for="expense_date">{{ __('admin\accountant\expenses.date_') }}</label>
                                 <input type="date" class="form-control" id="expense_date" name="expense_date" required>
                             </div>
                         </div>
@@ -186,30 +186,30 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="vendor_name">Vendor</label>
+                                <label for="vendor_name">{{ __('admin\accountant\expenses.vendor') }}</label>
                                 <input type="text" class="form-control" id="vendor_name" name="vendor_name">
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label for="payment_method">Payment Method</label>
+                                <label for="payment_method">{{ __('admin\accountant\expenses.payment_method') }}</label>
                                 <select class="form-control" id="payment_method" name="payment_method">
-                                    <option value="bank_transfer">Bank Transfer</option>
-                                    <option value="credit_card">Credit Card</option>
-                                    <option value="check">Check</option>
-                                    <option value="cash">Cash</option>
+                                    <option value="bank_transfer">{{ __('admin\accountant\expenses.bank_transfer') }}</option>
+                                    <option value="credit_card">{{ __('admin\accountant\expenses.credit_card') }}</option>
+                                    <option value="check">{{ __('admin\accountant\expenses.check') }}</option>
+                                    <option value="cash">{{ __('admin\accountant\expenses.cash') }}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label for="notes">Notes</label>
+                        <label for="notes">{{ __('admin\accountant\expenses.notes') }}</label>
                         <textarea class="form-control" id="notes" name="notes" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Expense</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\accountant\expenses.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{ __('admin\accountant\expenses.add_expense') }}</button>
                 </div>
             </form>
         </div>

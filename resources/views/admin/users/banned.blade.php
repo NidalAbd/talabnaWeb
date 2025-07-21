@@ -26,8 +26,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-danger">
                     <div class="inner">
-                        <h3>{{ $bannedUsers->total() }}</h3>
-                        <p>Banned Users</p>
+                        <h3>{{ $bannedUsers->field</h3>
+                        <p>{{ __('admin\users\banned.banned_users') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-slash"></i>
@@ -37,8 +37,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3>{{ App\Models\BannedDevice::whereNull('unban_at')->count() }}</h3>
-                        <p>Banned Devices</p>
+                        <h3>{{ App\Models\BannedDevice::whereNull('unban_at')->{{ __('admin\users\banned.count_') }}</h3>
+                        <p>{{ __('admin\users\banned.banned_devices') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-mobile-alt"></i>
@@ -51,8 +51,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>{{ App\Models\BanHistory::where('action', 'ban')->count() }}</h3>
-                        <p>Ban Actions</p>
+                        <h3>{{ App\Models\BanHistory::where('action', 'ban')->{{ __('admin\users\banned.count_') }}</h3>
+                        <p>{{ __('admin\users\banned.ban_actions') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-lock"></i>
@@ -65,8 +65,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>{{ App\Models\BanHistory::where('action', 'unban')->count() }}</h3>
-                        <p>Unban Actions</p>
+                        <h3>{{ App\Models\BanHistory::where('action', 'unban')->{{ __('admin\users\banned.count_') }}</h3>
+                        <p>{{ __('admin\users\banned.unban_actions') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-check"></i>
@@ -132,19 +132,19 @@
                     <table class="table table-hover text-nowrap">
                         <thead>
                         <tr>
-                            <th style="width: 5%">ID</th>
-                            <th style="width: 15%">User</th>
-                            <th style="width: 15%">Contact Info</th>
-                            <th style="width: 15%">Banned Devices</th>
-                            <th style="width: 20%">Ban Reason</th>
-                            <th style="width: 10%">Banned At</th>
-                            <th style="width: 20%">Actions</th>
+                            <th style="width: 5%">{{ __('admin\users\banned.id') }}</th>
+                            <th style="width: 15%">{{ __('admin\users\banned.user') }}</th>
+                            <th style="width: 15%">{{ __('admin\users\banned.contact_info') }}</th>
+                            <th style="width: 15%">{{ __('admin\users\banned.banned_devices') }}</th>
+                            <th style="width: 20%">{{ __('admin\users\banned.ban_reason') }}</th>
+                            <th style="width: 10%">{{ __('admin\users\banned.banned_at') }}</th>
+                            <th style="width: 20%">{{ __('admin\users\banned.actions') }}</th>
                         </tr>
                         </thead>
                         <tbody>
                         @forelse($bannedUsers as $user)
                             <tr>
-                                <td>{{ $user->id }}</td>
+                                <td>{{ $user->field</td>
                                 <td>
                                     <div class="user-block">
                                         @if($user->photos && $user->photos->count() > 0)
@@ -165,8 +165,8 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <strong>Email:</strong> {{ $user->email }}<br>
-                                    <strong>Phone:</strong> {{ $user->phones ?? 'N/A' }}
+                                    <strong>{{ __('admin\users\banned.email_') }}</strong> {{ $user->email }}<br>
+                                    <strong>{{ __('admin\users\banned.phone_') }}</strong> {{ $user->phones ?? 'N/A' }}
                                 </td>
                                 <td>
                                     @php
@@ -198,7 +198,7 @@
                                             @include('components.device-info-modal', ['device' => $device])
                                         @endforeach
                                     @else
-                                        <span class="badge badge-secondary">No banned devices</span>
+                                        <span class="badge badge-secondary">{{ __('admin\users\banned.no_banned_devices') }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -215,7 +215,7 @@
                                     @if($banHistory)
                                         {{ $banHistory->created_at->format('Y-m-d H:i') }}
                                     @else
-                                        <span class="text-muted">Unknown</span>
+                                        <span class="text-muted">{{ __('admin\users\banned.unknown') }}</span>
                                     @endif
                                 </td>
                                 <td>
@@ -246,7 +246,7 @@
                                                         <i class="fas fa-history mr-2"></i> Ban History for {{ $user->name }}
                                                     </h5>
                                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                        <span aria-hidden="true">&times;</span>
+                                                        <span aria-hidden="true">{{ __('admin\users\banned._times_') }}</span>
                                                     </button>
                                                 </div>
                                                 <div class="modal-body">
@@ -260,15 +260,15 @@
                                                         <div class="timeline">
                                                             @foreach($banHistories as $history)
                                                                 <div>
-                                                                    <i class="fas fa-{{ $history->action === 'ban' ? 'ban bg-danger' : 'check-circle bg-success' }}"></i>
+                                                                    <i class="fas fa-{{ $history->field</i>
                                                                     <div class="timeline-item">
                                                                         <span class="time">
                                                                             <i class="fas fa-clock"></i> {{ $history->created_at->format('Y-m-d H:i') }}
                                                                         </span>
                                                                         <h3 class="timeline-header">
-                                                                            <strong>{{ ucfirst($history->action) }}</strong> action
+                                                                            <strong>{{ ucfirst($history->field</strong> action
                                                                             @if($history->performer)
-                                                                                by <a href="{{ route('users.show', $history->performed_by) }}">{{ $history->performer->name }}</a>
+                                                                                by <a href="{{ route('users.show', $history->performed_by) }}">{{ $history->performer->{{ __('admin\users\banned.name_') }}</a>
                                                                             @endif
                                                                         </h3>
                                                                         <div class="timeline-body">
@@ -276,7 +276,7 @@
 
                                                                             @if($history->bannedDevice)
                                                                                 <div class="mt-2">
-                                                                                    <strong>Device:</strong>
+                                                                                    <strong>{{ __('admin\users\banned.device_') }}</strong>
                                                                                     {{ $history->bannedDevice->device_brand }} {{ $history->bannedDevice->device_model }}
                                                                                     ({{ \Illuminate\Support\Str::limit($history->bannedDevice->device_id, 20) }})
                                                                                 </div>
@@ -293,7 +293,7 @@
                                                     @endif
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\users\banned.close') }}</button>
                                                 </div>
                                             </div>
                                         </div>

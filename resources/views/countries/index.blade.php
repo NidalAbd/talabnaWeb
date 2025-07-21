@@ -35,15 +35,15 @@
             <table class="table table-hover table-striped table-bordered align-middle">
                 <thead class="thead-light">
                     <tr>
-                        <th>ID</th>
-                        <th>Flag</th>
-                        <th>Name</th>
-                        <th>Code</th>
-                        <th>Currency</th>
-                        <th>Cities</th>
-                        <th>Users</th>
-                        <th>Created</th>
-                        <th>Actions</th>
+                        <th>{{ __('countries\index.id') }}</th>
+                        <th>{{ __('countries\index.flag') }}</th>
+                        <th>{{ __('countries\index.name') }}</th>
+                        <th>{{ __('countries\index.code') }}</th>
+                        <th>{{ __('countries\index.currency') }}</th>
+                        <th>{{ __('countries\index.cities') }}</th>
+                        <th>{{ __('countries\index.users') }}</th>
+                        <th>{{ __('countries\index.created') }}</th>
+                        <th>{{ __('countries\index.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -57,7 +57,7 @@
                                 @if($photo)
                                     <img src="{{ asset($photo->src) }}" alt="Flag" class="img-thumbnail" style="max-height: 30px;">
                                 @else
-                                    <span class="badge badge-secondary">No Flag</span>
+                                    <span class="badge badge-secondary">{{ __('countries\index.no_flag') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -66,10 +66,10 @@
                                 @endphp
                                 <strong>{{ $name }}</strong>
                             </td>
-                            <td>{{ $country->country_code }}</td>
-                            <td><span class="badge badge-info">{{ $country->currency_code }}</span></td>
-                            <td><span class="badge badge-primary">{{ $country->cities->count() }}</span></td>
-                            <td><span class="badge badge-success">{{ $country->users->count() }}</span></td>
+                            <td>{{ $country->country_code ?? 'FIXME' }}</td>
+                            <td><span class="badge badge-info">{{ $country->currency_code ?? 'FIXME' }}</span></td>
+                            <td><span class="badge badge-primary">{{ $country->cities->count() ?? 'FIXME' }}</span></td>
+                            <td><span class="badge badge-success">{{ $country->users->count() ?? 'FIXME' }}</span></td>
                             <td><span class="text-muted">{{ $country->created_at ? $country->created_at->format('Y-m-d') : '-' }}</span></td>
                             <td>
                                 <a href="{{ route('countries.show', $country->id) }}" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
@@ -112,11 +112,7 @@
     function printTable(btn) {
         let table = btn.closest('.card').querySelector('table');
         let w = window.open();
-        w.document.write('<html><head><title>Print Table</title>');
-        w.document.write('<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">');
-        w.document.write('</head><body>');
-        w.document.write(table.outerHTML);
-        w.document.write('</body></html>');
+        w.document.write('<html><head><title>{{ __('countries\index.print_table') }}</title>{{ __('countries\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{ __('countries\index._w_document_write_') }}</head><body>{{ __('countries\index._w_document_write_table_outer') }}</body></html>');
         w.print();
         w.close();
     }

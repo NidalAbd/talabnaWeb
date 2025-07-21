@@ -49,7 +49,7 @@
                     </div>
 
                     <div class="card-footer ">
-                        <a href="{{ url()->previous() }}" class="btn btn-primary ">Back</a>
+                        <a href="{{ url()->{{ __('palservice_points\edit.previous_class_btn_btn_primary_') }}</a>
                     </div>
                 </div>
             </div>

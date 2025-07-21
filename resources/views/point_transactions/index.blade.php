@@ -26,8 +26,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-info"><i class="fas fa-sync-alt"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">Total Transactions</span>
-                                <span class="info-box-number">{{ $pointTransactions->total() }}</span>
+                                <span class="info-box-text">{{ __('point_transactions\index.total_transactions') }}</span>
+                                <span class="info-box-number">{{ $pointTransactions->field</span>
                             </div>
                         </div>
                     </div>
@@ -35,8 +35,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-success"><i class="fas fa-arrow-up"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">Points Transferred</span>
-                                <span class="info-box-number">{{ $pointTransactions->sum('point') }}</span>
+                                <span class="info-box-text">{{ __('point_transactions\index.points_transferred') }}</span>
+                                <span class="info-box-number">{{ $pointTransactions->field</span>
                             </div>
                         </div>
                     </div>
@@ -44,8 +44,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-warning"><i class="fas fa-calendar-week"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">This Week</span>
-                                <span class="info-box-number">{{ $pointTransactions->where('created_at', '>=', now()->startOfWeek())->count() }}</span>
+                                <span class="info-box-text">{{ __('point_transactions\index.this_week') }}</span>
+                                <span class="info-box-number">{{ $pointTransactions->field</span>
                             </div>
                         </div>
                     </div>
@@ -53,8 +53,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-danger"><i class="fas fa-user-friends"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">Active Users</span>
-                                <span class="info-box-number">{{ $pointTransactions->pluck('from_user_id')->merge($pointTransactions->pluck('to_user_id'))->unique()->count() }}</span>
+                                <span class="info-box-text">{{ __('point_transactions\index.active_users') }}</span>
+                                <span class="info-box-number">{{ $pointTransactions->field</span>
                             </div>
                         </div>
                     </div>
@@ -78,7 +78,7 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>From Date:</label>
+                                        <label>{{ __('point_transactions\index.from_date_') }}</label>
                                         <div class="input-group date" id="from-date" data-target-input="nearest">
                                             <input type="text" class="form-control datetimepicker-input" data-target="#from-date" placeholder="From date"/>
                                             <div class="input-group-append" data-target="#from-date" data-toggle="datetimepicker">
@@ -89,7 +89,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>To Date:</label>
+                                        <label>{{ __('point_transactions\index.to_date_') }}</label>
                                         <div class="input-group date" id="to-date" data-target-input="nearest">
                                             <input type="text" class="form-control datetimepicker-input" data-target="#to-date" placeholder="To date"/>
                                             <div class="input-group-append" data-target="#to-date" data-toggle="datetimepicker">
@@ -100,20 +100,20 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>Transaction Type:</label>
+                                        <label>{{ __('point_transactions\index.transaction_type_') }}</label>
                                         <select class="form-control">
-                                            <option value="">All Types</option>
-                                            <option value="purchase">Purchase</option>
-                                            <option value="transfer">Transfer</option>
-                                            <option value="reward">Reward</option>
+                                            <option value="">{{ __('point_transactions\index.all_types') }}</option>
+                                            <option value="purchase">{{ __('point_transactions\index.purchase') }}</option>
+                                            <option value="transfer">{{ __('point_transactions\index.transfer') }}</option>
+                                            <option value="reward">{{ __('point_transactions\index.reward') }}</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>User:</label>
+                                        <label>{{ __('point_transactions\index.user_') }}</label>
                                         <select class="form-control select2">
-                                            <option value="">All Users</option>
+                                            <option value="">{{ __('point_transactions\index.all_users') }}</option>
                                         </select>
                                     </div>
                                 </div>
@@ -158,23 +158,23 @@
                             <table class="table table-striped table-hover">
                                 <thead>
                                 <tr>
-                                    <th style="width: 5%">ID</th>
-                                    <th style="width: 20%">From User</th>
-                                    <th style="width: 20%">To User</th>
-                                    <th style="width: 10%">Points</th>
-                                    <th style="width: 15%">Type</th>
-                                    <th style="width: 20%">Created At</th>
-                                    <th style="width: 10%">Actions</th>
+                                    <th style="width: 5%">{{ __('point_transactions\index.id') }}</th>
+                                    <th style="width: 20%">{{ __('point_transactions\index.from_user') }}</th>
+                                    <th style="width: 20%">{{ __('point_transactions\index.to_user') }}</th>
+                                    <th style="width: 10%">{{ __('point_transactions\index.points') }}</th>
+                                    <th style="width: 15%">{{ __('point_transactions\index.type') }}</th>
+                                    <th style="width: 20%">{{ __('point_transactions\index.created_at') }}</th>
+                                    <th style="width: 10%">{{ __('point_transactions\index.actions') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @if(is_countable($pointTransactions) && count($pointTransactions) > 0)
                                     @foreach ($pointTransactions as $pointTransaction)
                                         <tr>
-                                            <td><span class="badge badge-secondary">{{ $pointTransaction->id }}</span></td>
+                                            <td><span class="badge badge-secondary">{{ $pointTransaction->field</span></td>
                                             <td>
                                                 <div class="user-info">
-                                                    <span class="user-name">{{ $pointTransaction->fromUser?->name ?? 'System' }}</span>
+                                                    <span class="user-name">{{ $pointTransaction->field</span>
                                                     @if($pointTransaction->fromUser)
                                                         <small class="d-block text-muted">ID: {{ $pointTransaction->fromUser->id }}</small>
                                                     @endif
@@ -182,14 +182,14 @@
                                             </td>
                                             <td>
                                                 <div class="user-info">
-                                                    <span class="user-name">{{ $pointTransaction->toUser?->name ?? 'System' }}</span>
+                                                    <span class="user-name">{{ $pointTransaction->field</span>
                                                     @if($pointTransaction->toUser)
                                                         <small class="d-block text-muted">ID: {{ $pointTransaction->toUser->id }}</small>
                                                     @endif
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge badge-success badge-pill px-3">{{ $pointTransaction->point }} pts</span>
+                                                <span class="badge badge-success badge-pill px-3">{{ $pointTransaction->field</span>
                                             </td>
                                             <td>
                                                 @php
@@ -200,7 +200,7 @@
                                                         'refund' => 'danger'
                                                     ][$pointTransaction->type] ?? 'secondary';
                                                 @endphp
-                                                <span class="badge badge-{{ $typeClass }}">{{ ucfirst($pointTransaction->type) }}</span>
+                                                <span class="badge badge-{{ $typeClass }}">{{ ucfirst($pointTransaction->field</span>
                                             </td>
                                             <td>
                                                 <i class="far fa-clock mr-1"></i>
@@ -250,35 +250,35 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exportModalLabel">Export Transactions</h5>
+                    <h5 class="modal-title" id="exportModalLabel">{{ __('point_transactions\index.export_transactions') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">{{ __('point_transactions\index._times_') }}</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>Export Format</label>
+                        <label>{{ __('point_transactions\index.export_format') }}</label>
                         <select class="form-control">
-                            <option value="csv">CSV</option>
-                            <option value="excel">Excel</option>
-                            <option value="pdf">PDF</option>
+                            <option value="csv">{{ __('point_transactions\index.csv') }}</option>
+                            <option value="excel">{{ __('point_transactions\index.excel') }}</option>
+                            <option value="pdf">{{ __('point_transactions\index.pdf') }}</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Date Range</label>
+                        <label>{{ __('point_transactions\index.date_range') }}</label>
                         <select class="form-control">
-                            <option value="all">All Time</option>
-                            <option value="today">Today</option>
-                            <option value="week">This Week</option>
-                            <option value="month">This Month</option>
-                            <option value="year">This Year</option>
-                            <option value="custom">Custom Range</option>
+                            <option value="all">{{ __('point_transactions\index.all_time') }}</option>
+                            <option value="today">{{ __('point_transactions\index.today') }}</option>
+                            <option value="week">{{ __('point_transactions\index.this_week') }}</option>
+                            <option value="month">{{ __('point_transactions\index.this_month') }}</option>
+                            <option value="year">{{ __('point_transactions\index.this_year') }}</option>
+                            <option value="custom">{{ __('point_transactions\index.custom_range') }}</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-primary">Export</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('point_transactions\index.cancel') }}</button>
+                    <button type="button" class="btn btn-primary">{{ __('point_transactions\index.export') }}</button>
                 </div>
             </div>
         </div>

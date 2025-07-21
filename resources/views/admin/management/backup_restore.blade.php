@@ -7,38 +7,38 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>Demo Data:</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">Remove Demo Data</a>
+            <strong>{{ __('admin\management\backup_restore.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\management\backup_restore.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Last Backup</h5>
-                    <h3>2024-06-20</h3>
+                    <h5>{{ __('admin\management\backup_restore.last_backup') }}</h5>
+                    <h3>{{ __('admin\management\backup_restore.2024_06_20') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5>Total Backups</h5>
-                    <h3>15</h3>
+                    <h5>{{ __('admin\management\backup_restore.total_backups') }}</h5>
+                    <h3>{{ __('admin\management\backup_restore.15') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
-                    <h5>Pending Restores</h5>
-                    <h3>1</h3>
+                    <h5>{{ __('admin\management\backup_restore.pending_restores') }}</h5>
+                    <h3>{{ __('admin\management\backup_restore.1') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-danger text-white">
                 <div class="card-body">
-                    <h5>Failed Backups</h5>
+                    <h5>{{ __('admin\management\backup_restore.failed_backups') }}</h5>
                     <h3>0</h3>
                 </div>
             </div>
@@ -47,14 +47,14 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">Action:</label>
+                <label class="mr-2">{{ __('admin\management\backup_restore.action_') }}</label>
                 <select class="form-control mr-2" name="action">
-                    <option>Backup Now</option>
-                    <option>Restore</option>
-                    <option>View Logs</option>
+                    <option>{{ __('admin\management\backup_restore.backup_now') }}</option>
+                    <option>{{ __('admin\management\backup_restore.restore') }}</option>
+                    <option>{{ __('admin\management\backup_restore.view_logs') }}</option>
                 </select>
-                <button class="btn btn-primary mr-2">Execute</button>
-                <button class="btn btn-secondary">Export Logs</button>
+                <button class="btn btn-primary mr-2">{{ __('admin\management\backup_restore.execute') }}</button>
+                <button class="btn btn-secondary">{{ __('admin\management\backup_restore.export_logs') }}</button>
             </form>
         </div>
     </div>
@@ -66,41 +66,41 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Date</th>
-                        <th>Action</th>
-                        <th>User</th>
-                        <th>Status</th>
-                        <th>Details</th>
+                        <th>{{ __('admin\management\backup_restore.date') }}</th>
+                        <th>{{ __('admin\management\backup_restore.action') }}</th>
+                        <th>{{ __('admin\management\backup_restore.user') }}</th>
+                        <th>{{ __('admin\management\backup_restore.status') }}</th>
+                        <th>{{ __('admin\management\backup_restore.details') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>2024-06-20</td>
-                        <td>Backup</td>
-                        <td>Admin</td>
-                        <td><span class="badge badge-success">Success</span></td>
-                        <td>Full backup completed</td>
+                        <td>{{ __('admin\management\backup_restore.2024_06_20') }}</td>
+                        <td>{{ __('admin\management\backup_restore.backup') }}</td>
+                        <td>{{ __('admin\management\backup_restore.admin') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\management\backup_restore.success') }}</span></td>
+                        <td>{{ __('admin\management\backup_restore.full_backup_completed') }}</td>
                     </tr>
                     <tr>
-                        <td>2024-06-15</td>
-                        <td>Restore</td>
-                        <td>Admin</td>
-                        <td><span class="badge badge-warning">Partial</span></td>
-                        <td>Restored users and posts tables</td>
+                        <td>{{ __('admin\management\backup_restore.2024_06_15') }}</td>
+                        <td>{{ __('admin\management\backup_restore.restore') }}</td>
+                        <td>{{ __('admin\management\backup_restore.admin') }}</td>
+                        <td><span class="badge badge-warning">{{ __('admin\management\backup_restore.partial') }}</span></td>
+                        <td>{{ __('admin\management\backup_restore.restored_users_and_posts_tables') }}</td>
                     </tr>
                     <tr>
-                        <td>2024-06-10</td>
-                        <td>Backup</td>
-                        <td>Admin</td>
-                        <td><span class="badge badge-danger">Failed</span></td>
-                        <td>Disk full</td>
+                        <td>{{ __('admin\management\backup_restore.2024_06_10') }}</td>
+                        <td>{{ __('admin\management\backup_restore.backup') }}</td>
+                        <td>{{ __('admin\management\backup_restore.admin') }}</td>
+                        <td><span class="badge badge-danger">{{ __('admin\management\backup_restore.failed') }}</span></td>
+                        <td>{{ __('admin\management\backup_restore.disk_full') }}</td>
                     </tr>
                     <tr>
-                        <td>2024-06-05</td>
-                        <td>Backup</td>
-                        <td>Admin</td>
-                        <td><span class="badge badge-success">Success</span></td>
-                        <td>Incremental backup completed</td>
+                        <td>{{ __('admin\management\backup_restore.2024_06_05') }}</td>
+                        <td>{{ __('admin\management\backup_restore.backup') }}</td>
+                        <td>{{ __('admin\management\backup_restore.admin') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\management\backup_restore.success') }}</span></td>
+                        <td>{{ __('admin\management\backup_restore.incremental_backup_completed') }}</td>
                     </tr>
                 </tbody>
             </table>

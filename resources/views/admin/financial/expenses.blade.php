@@ -7,39 +7,39 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>Demo Data:</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">Remove Demo Data</a>
+            <strong>{{ __('admin\financial\expenses.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\financial\expenses.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-danger text-white">
                 <div class="card-body">
-                    <h5>Total Expenses</h5>
-                    <h3>$8,400</h3>
+                    <h5>{{ __('admin\financial\expenses.total_expenses') }}</h5>
+                    <h3>{{ __('admin\financial\expenses._8_400') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>Transactions</h5>
-                    <h3>95</h3>
+                    <h5>{{ __('admin\financial\expenses.transactions') }}</h5>
+                    <h3>{{ __('admin\financial\expenses.95') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
-                    <h5>Pending</h5>
-                    <h3>$1,100</h3>
+                    <h5>{{ __('admin\financial\expenses.pending') }}</h5>
+                    <h3>{{ __('admin\financial\expenses._1_100') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Approved</h5>
-                    <h3>$7,300</h3>
+                    <h5>{{ __('admin\financial\expenses.approved') }}</h5>
+                    <h3>{{ __('admin\financial\expenses._7_300') }}</h3>
                 </div>
             </div>
         </div>
@@ -47,11 +47,11 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">Date Range:</label>
+                <label class="mr-2">{{ __('admin\financial\expenses.date_range_') }}</label>
                 <input type="date" class="form-control mr-2" name="from" value="2024-06-01">
                 <input type="date" class="form-control mr-2" name="to" value="2024-06-30">
-                <button class="btn btn-primary mr-2">Filter</button>
-                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-primary mr-2">{{ __('admin\financial\expenses.filter') }}</button>
+                <button class="btn btn-secondary">{{ __('admin\financial\expenses.export') }}</button>
             </form>
         </div>
     </div>
@@ -63,41 +63,41 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Date</th>
-                        <th>Category</th>
-                        <th>Description</th>
-                        <th>Amount</th>
-                        <th>Status</th>
+                        <th>{{ __('admin\financial\expenses.date') }}</th>
+                        <th>{{ __('admin\financial\expenses.category') }}</th>
+                        <th>{{ __('admin\financial\expenses.description') }}</th>
+                        <th>{{ __('admin\financial\expenses.amount') }}</th>
+                        <th>{{ __('admin\financial\expenses.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>2024-06-01</td>
-                        <td>Marketing</td>
-                        <td>Facebook Ads</td>
-                        <td>$500</td>
-                        <td><span class="badge badge-success">Approved</span></td>
+                        <td>{{ __('admin\financial\expenses.2024_06_01') }}</td>
+                        <td>{{ __('admin\financial\expenses.marketing') }}</td>
+                        <td>{{ __('admin\financial\expenses.facebook_ads') }}</td>
+                        <td>{{ __('admin\financial\expenses._500') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\expenses.approved') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-02</td>
-                        <td>Operations</td>
-                        <td>Office Supplies</td>
-                        <td>$120</td>
-                        <td><span class="badge badge-warning">Pending</span></td>
+                        <td>{{ __('admin\financial\expenses.2024_06_02') }}</td>
+                        <td>{{ __('admin\financial\expenses.operations') }}</td>
+                        <td>{{ __('admin\financial\expenses.office_supplies') }}</td>
+                        <td>{{ __('admin\financial\expenses._120') }}</td>
+                        <td><span class="badge badge-warning">{{ __('admin\financial\expenses.pending') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-03</td>
-                        <td>Infrastructure</td>
-                        <td>Server Hosting</td>
-                        <td>$1,200</td>
-                        <td><span class="badge badge-success">Approved</span></td>
+                        <td>{{ __('admin\financial\expenses.2024_06_03') }}</td>
+                        <td>{{ __('admin\financial\expenses.infrastructure') }}</td>
+                        <td>{{ __('admin\financial\expenses.server_hosting') }}</td>
+                        <td>{{ __('admin\financial\expenses._1_200') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\expenses.approved') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-04</td>
-                        <td>HR</td>
-                        <td>Staff Training</td>
-                        <td>$300</td>
-                        <td><span class="badge badge-danger">Rejected</span></td>
+                        <td>{{ __('admin\financial\expenses.2024_06_04') }}</td>
+                        <td>{{ __('admin\financial\expenses.hr') }}</td>
+                        <td>{{ __('admin\financial\expenses.staff_training') }}</td>
+                        <td>{{ __('admin\financial\expenses._300') }}</td>
+                        <td><span class="badge badge-danger">{{ __('admin\financial\expenses.rejected') }}</span></td>
                     </tr>
                 </tbody>
             </table>

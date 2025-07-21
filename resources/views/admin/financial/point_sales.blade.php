@@ -7,39 +7,39 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>Demo Data:</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">Remove Demo Data</a>
+            <strong>{{ __('admin\financial\point_sales.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\financial\point_sales.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
-                    <h5>Total Points Sold</h5>
-                    <h3>25,000</h3>
+                    <h5>{{ __('admin\financial\point_sales.total_points_sold') }}</h5>
+                    <h3>{{ __('admin\financial\point_sales.25_000') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>Transactions</h5>
-                    <h3>180</h3>
+                    <h5>{{ __('admin\financial\point_sales.transactions') }}</h5>
+                    <h3>{{ __('admin\financial\point_sales.180') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Revenue</h5>
-                    <h3>$7,200</h3>
+                    <h5>{{ __('admin\financial\point_sales.revenue') }}</h5>
+                    <h3>{{ __('admin\financial\point_sales._7_200') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5>Avg. Points/User</h5>
-                    <h3>139</h3>
+                    <h5>{{ __('admin\financial\point_sales.avg_points_user') }}</h5>
+                    <h3>{{ __('admin\financial\point_sales.139') }}</h3>
                 </div>
             </div>
         </div>
@@ -47,11 +47,11 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">Date Range:</label>
+                <label class="mr-2">{{ __('admin\financial\point_sales.date_range_') }}</label>
                 <input type="date" class="form-control mr-2" name="from" value="2024-06-01">
                 <input type="date" class="form-control mr-2" name="to" value="2024-06-30">
-                <button class="btn btn-primary mr-2">Filter</button>
-                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-primary mr-2">{{ __('admin\financial\point_sales.filter') }}</button>
+                <button class="btn btn-secondary">{{ __('admin\financial\point_sales.export') }}</button>
             </form>
         </div>
     </div>
@@ -63,41 +63,41 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Date</th>
-                        <th>User</th>
-                        <th>Points</th>
-                        <th>Amount</th>
-                        <th>Status</th>
+                        <th>{{ __('admin\financial\point_sales.date') }}</th>
+                        <th>{{ __('admin\financial\point_sales.user') }}</th>
+                        <th>{{ __('admin\financial\point_sales.points') }}</th>
+                        <th>{{ __('admin\financial\point_sales.amount') }}</th>
+                        <th>{{ __('admin\financial\point_sales.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>2024-06-01</td>
-                        <td>John Doe</td>
-                        <td>1,000</td>
-                        <td>$40</td>
-                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>{{ __('admin\financial\point_sales.2024_06_01') }}</td>
+                        <td>{{ __('admin\financial\point_sales.john_doe') }}</td>
+                        <td>{{ __('admin\financial\point_sales.1_000') }}</td>
+                        <td>{{ __('admin\financial\point_sales._40') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\point_sales.completed') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-02</td>
-                        <td>Jane Smith</td>
-                        <td>2,500</td>
-                        <td>$100</td>
-                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>{{ __('admin\financial\point_sales.2024_06_02') }}</td>
+                        <td>{{ __('admin\financial\point_sales.jane_smith') }}</td>
+                        <td>{{ __('admin\financial\point_sales.2_500') }}</td>
+                        <td>{{ __('admin\financial\point_sales._100') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\point_sales.completed') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-03</td>
-                        <td>Ali Hassan</td>
-                        <td>500</td>
-                        <td>$20</td>
-                        <td><span class="badge badge-warning">Pending</span></td>
+                        <td>{{ __('admin\financial\point_sales.2024_06_03') }}</td>
+                        <td>{{ __('admin\financial\point_sales.ali_hassan') }}</td>
+                        <td>{{ __('admin\financial\point_sales.500') }}</td>
+                        <td>{{ __('admin\financial\point_sales._20') }}</td>
+                        <td><span class="badge badge-warning">{{ __('admin\financial\point_sales.pending') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-04</td>
-                        <td>Maria Garcia</td>
-                        <td>3,000</td>
-                        <td>$120</td>
-                        <td><span class="badge badge-danger">Failed</span></td>
+                        <td>{{ __('admin\financial\point_sales.2024_06_04') }}</td>
+                        <td>{{ __('admin\financial\point_sales.maria_garcia') }}</td>
+                        <td>{{ __('admin\financial\point_sales.3_000') }}</td>
+                        <td>{{ __('admin\financial\point_sales._120') }}</td>
+                        <td><span class="badge badge-danger">{{ __('admin\financial\point_sales.failed') }}</span></td>
                     </tr>
                 </tbody>
             </table>

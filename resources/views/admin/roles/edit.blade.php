@@ -4,7 +4,7 @@
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-edit text-warning mr-2"></i> Edit Role: {{ $role->display_name ?? $role->name }}</h1>
+        <h1><i class="fas fa-edit text-warning mr-2"></i> Edit Role: {{ $role->display_name ?? $role->field</h1>
         <div>
             <a href="{{ route('roles.show', $role->id) }}" class="btn btn-info">
                 <i class="fas fa-eye mr-1"></i> View Role
@@ -22,7 +22,7 @@
             <div class="col-md-12">
                 <div class="card card-warning card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">Role Information</h3>
+                        <h3 class="card-title">{{ __('admin\roles\edit.role_information') }}</h3>
                     </div>
 
                     <form action="{{ route('roles.update', $role->id) }}" method="POST">
@@ -39,7 +39,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name">Role Name</label>
+                                        <label for="name">{{ __('admin\roles\edit.role_name') }}</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-tag"></i></span>
@@ -54,7 +54,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="display_name">Display Name</label>
+                                        <label for="display_name">{{ __('admin\roles\edit.display_name') }}</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-eye"></i></span>
@@ -75,10 +75,10 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="description">Description</label>
+                                <label for="description">{{ __('admin\roles\edit.description') }}</label>
                                 <textarea class="form-control @error('description') is-invalid @enderror"
                                           id="description" name="description" rows="3"
-                                          placeholder="Enter a description of this role's purpose and capabilities">{{ old('description', $role->description) }}</textarea>
+                                          placeholder="Enter a description of this role's purpose and capabilities">{{ old('description', $role->field</textarea>
                                 @error('description')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -87,7 +87,7 @@
                             <hr>
 
                             <h4><i class="fas fa-key mr-2"></i> Role Permissions</h4>
-                            <p class="text-muted">Select the permissions that will be assigned to this role:</p>
+                            <p class="text-muted">{{ __('admin\roles\edit.select_the_permissions_that_will_be_assi') }}</p>
 
                             <div class="permissions-container">
                                 @foreach($groupedPermissions as $group => $permissions)
@@ -119,7 +119,7 @@
                                                                 <label class="custom-control-label" for="permission_{{ $permission->id }}">
                                                                     {{ $permission->display_name ?? $permission->name }}
                                                                 </label>
-                                                                <small class="d-block text-muted">{{ $permission->name }}</small>
+                                                                <small class="d-block text-muted">{{ $permission->field</small>
                                                             </div>
                                                         </div>
                                                     </div>

@@ -653,3 +653,9 @@ Route::middleware(['auth', 'admin'])->group(function() {
     Route::get('cash-flow-projections', [App\Http\Controllers\FinancialController::class, 'cashFlowProjections'])->name('financial.cash_flow_projections');
     Route::get('income-statement', [App\Http\Controllers\FinancialController::class, 'incomeStatement'])->name('financial.income_statement');
 });
+
+Route::prefix('admin')->middleware(['auth'])->group(function () {
+    Route::resource('translations', \App\Http\Controllers\Admin\TranslationController::class);
+    Route::post('translations/{translation}/inline', [\App\Http\Controllers\Admin\TranslationController::class, 'inlineUpdate'])->name('translations.inline');
+    Route::post('translations/auto-translate', [\App\Http\Controllers\Admin\TranslationController::class, 'autoTranslate'])->name('translations.auto_translate');
+});

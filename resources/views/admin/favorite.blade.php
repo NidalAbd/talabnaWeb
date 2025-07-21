@@ -21,26 +21,26 @@
                         <table class="table table-bordered table-sm text-center">
                             <thead>
                             <tr class="btn-secondary">
-                                <th>ID</th>
-                                <th>Post</th>
-                                <th>Number of Favorite</th>
-                                <th>Action</th>
+                                <th>{{ __('admin\favorite.id') }}</th>
+                                <th>{{ __('admin\favorite.post') }}</th>
+                                <th>{{ __('admin\favorite.number_of_favorite') }}</th>
+                                <th>{{ __('admin\favorite.action') }}</th>
                             </tr>
                             </thead>
                             <tbody>
                             @if ($favorites->count() > 0)
                                 @foreach($favorites as $favorite)
                                     <tr>
-                                        <td>{{ $favorite->favoritable_id }}</td>
-                                        <td>{{ $favorite->favoritable->title }}</td>
-                                        <td>{{ $favorite->favorite_count }}</td>
+                                        <td>{{ $favorite->field</td>
+                                        <td>{{ $favorite->field</td>
+                                        <td>{{ $favorite->field</td>
                                         <td>
-                                            <a href="{{ route('admin.posts.show', $favorite->favoritable_id) }}" class="btn btn-info btn-sm">View</a>
-                                            <a href="{{ route('admin.posts.edit', $favorite->favoritable_id) }}" class="btn btn-primary btn-sm">Edit</a>
+                                            <a href="{{ route('admin.posts.show', $favorite->field</a>
+                                            <a href="{{ route('admin.posts.edit', $favorite->field</a>
                                             <form action="{{ route('admin.posts.destroy', $favorite->favoritable_id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                                                <button type="submit" class="btn btn-danger btn-sm">{{ __('admin\favorite.delete') }}</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -53,10 +53,10 @@
                             </tbody>
                             <thead>
                             <tr class="btn-secondary">
-                                <th>ID</th>
-                                <th>Type</th>
-                                <th>Number of Reports</th>
-                                <th>Action</th>
+                                <th>{{ __('admin\favorite.id') }}</th>
+                                <th>{{ __('admin\favorite.type') }}</th>
+                                <th>{{ __('admin\favorite.number_of_reports') }}</th>
+                                <th>{{ __('admin\favorite.action') }}</th>
                             </tr>
                             </thead>
                         </table>

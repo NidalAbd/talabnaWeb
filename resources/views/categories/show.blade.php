@@ -34,7 +34,7 @@
                             @else
                                 <div class="bg-light p-4 rounded mb-3">
                                     <i class="fas fa-image fa-4x text-muted"></i>
-                                    <p class="mt-2 text-muted">No image available</p>
+                                    <p class="mt-2 text-muted">{{ __('categories\show.no_image_available') }}</p>
                                 </div>
                             @endif
                         </div>
@@ -42,39 +42,39 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-hashtag mr-2"></i> ID</span>
-                                <span class="badge badge-primary badge-pill">{{ $category->id }}</span>
+                                <span class="badge badge-primary badge-pill">{{ $category->field</span>
                             </li>
                             <li class="list-group-item">
                                 <span class="font-weight-bold mb-2 d-block"><i class="fas fa-language mr-2"></i> Name (Arabic)</span>
-                                <span class="d-block text-right">{{ $category->name['ar'] ?? 'N/A' }}</span>
+                                <span class="d-block text-right">{{ $category->field</span>
                             </li>
                             <li class="list-group-item">
                                 <span class="font-weight-bold mb-2 d-block"><i class="fas fa-language mr-2"></i> Name (English)</span>
-                                <span class="d-block text-right">{{ $category->name['en'] ?? 'N/A' }}</span>
+                                <span class="d-block text-right">{{ $category->field</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-toggle-on mr-2"></i> Status</span>
                                 @if($category->isSuspended)
-                                    <span class="badge badge-danger">Suspended</span>
+                                    <span class="badge badge-danger">{{ __('categories\show.suspended') }}</span>
                                 @else
-                                    <span class="badge badge-success">Active</span>
+                                    <span class="badge badge-success">{{ __('categories\show.active') }}</span>
                                 @endif
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-list mr-2"></i> Subcategories</span>
-                                <span class="badge badge-info badge-pill">{{ $category->sub_categories->count() }}</span>
+                                <span class="badge badge-info badge-pill">{{ $category->field</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-clipboard-list mr-2"></i> Service Posts</span>
-                                <span class="badge badge-primary badge-pill">{{ $category->servicePosts->count() }}</span>
+                                <span class="badge badge-primary badge-pill">{{ $category->field</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-calendar-alt mr-2"></i> Created</span>
-                                <span>{{ $category->created_at->format('M d, Y') }}</span>
+                                <span>{{ $category->field</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-edit mr-2"></i> Last Updated</span>
-                                <span>{{ $category->updated_at->format('M d, Y') }}</span>
+                                <span>{{ $category->field</span>
                             </li>
                         </ul>
                     </div>
@@ -115,25 +115,25 @@
                                 <table class="table table-hover mb-0">
                                     <thead class="thead-light">
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Image</th>
-                                        <th>Name</th>
-                                        <th>Status</th>
-                                        <th>Posts</th>
-                                        <th>Actions</th>
+                                        <th>{{ __('categories\show.id') }}</th>
+                                        <th>{{ __('categories\show.image') }}</th>
+                                        <th>{{ __('categories\show.name') }}</th>
+                                        <th>{{ __('categories\show.status') }}</th>
+                                        <th>{{ __('categories\show.posts') }}</th>
+                                        <th>{{ __('categories\show.actions') }}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     @foreach($category->sub_categories as $subcategory)
                                         <tr>
-                                            <td>{{ $subcategory->id }}</td>
+                                            <td>{{ $subcategory->field</td>
                                             <td class="text-center">
                                                 @if($subcategory->photos->count() > 0)
                                                     <img src="{{ asset($subcategory->photos->first()->src) }}"
                                                          class="img-thumbnail" alt="{{ $subcategory->name[app()->getLocale()] }}"
                                                          style="max-height: 40px;">
                                                 @else
-                                                    <span class="badge badge-secondary">No Image</span>
+                                                    <span class="badge badge-secondary">{{ __('categories\show.no_image') }}</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -141,9 +141,9 @@
                                             </td>
                                             <td>
                                                 @if($subcategory->isSuspended)
-                                                    <span class="badge badge-danger">Suspended</span>
+                                                    <span class="badge badge-danger">{{ __('categories\show.suspended') }}</span>
                                                 @else
-                                                    <span class="badge badge-success">Active</span>
+                                                    <span class="badge badge-success">{{ __('categories\show.active') }}</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -172,7 +172,7 @@
                             <div class="text-center py-4">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                                    <h5 class="font-weight-normal text-muted">No subcategories found</h5>
+                                    <h5 class="font-weight-normal text-muted">{{ __('categories\show.no_subcategories_found') }}</h5>
                                     <a href="{{ route('subcategories.create') }}" class="btn btn-primary mt-3">
                                         <i class="fas fa-plus mr-1"></i> Add Subcategory
                                     </a>
@@ -195,18 +195,18 @@
                                 <table class="table table-hover mb-0">
                                     <thead class="thead-light">
                                     <tr>
-                                        <th>ID</th>
-                                        <th>Title</th>
-                                        <th>Subcategory</th>
-                                        <th>User</th>
-                                        <th>Status</th>
-                                        <th>Posted</th>
+                                        <th>{{ __('categories\show.id') }}</th>
+                                        <th>{{ __('categories\show.title') }}</th>
+                                        <th>{{ __('categories\show.subcategory') }}</th>
+                                        <th>{{ __('categories\show.user') }}</th>
+                                        <th>{{ __('categories\show.status') }}</th>
+                                        <th>{{ __('categories\show.posted') }}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     @foreach($category->servicePosts()->orderBy('created_at', 'desc')->take(5)->get() as $post)
                                         <tr>
-                                            <td>{{ $post->id }}</td>
+                                            <td>{{ $post->field</td>
                                             <td>
                                                 <a href="{{ route('service_posts.show', $post->id) }}" class="text-decoration-none">
                                                     {{ \Illuminate\Support\Str::limit($post->title, 30) }}
@@ -228,16 +228,16 @@
                                             </td>
                                             <td>
                                                 @if($post->state == 'published')
-                                                    <span class="badge badge-success">Published</span>
+                                                    <span class="badge badge-success">{{ __('categories\show.published') }}</span>
                                                 @elseif($post->state == 'archive')
-                                                    <span class="badge badge-warning">Archived</span>
+                                                    <span class="badge badge-warning">{{ __('categories\show.archived') }}</span>
                                                 @elseif($post->state == 'not published')
-                                                    <span class="badge badge-secondary">Draft</span>
+                                                    <span class="badge badge-secondary">{{ __('categories\show.draft') }}</span>
                                                 @elseif($post->state == 'rejected')
-                                                    <span class="badge badge-danger">Rejected</span>
+                                                    <span class="badge badge-danger">{{ __('categories\show.rejected') }}</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $post->created_at->diffForHumans() }}</td>
+                                            <td>{{ $post->field</td>
                                         </tr>
                                     @endforeach
                                     </tbody>
@@ -247,7 +247,7 @@
                             <div class="text-center py-4">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
-                                    <h5 class="font-weight-normal text-muted">No service posts found in this category</h5>
+                                    <h5 class="font-weight-normal text-muted">{{ __('categories\show.no_service_posts_found_in_this_category') }}</h5>
                                 </div>
                             </div>
                         @endif

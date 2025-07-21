@@ -7,39 +7,39 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>Demo Data:</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">Remove Demo Data</a>
+            <strong>{{ __('admin\financial\advertisement_costs.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\financial\advertisement_costs.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5>Total Ad Costs</h5>
-                    <h3>$2,200</h3>
+                    <h5>{{ __('admin\financial\advertisement_costs.total_ad_costs') }}</h5>
+                    <h3>{{ __('admin\financial\advertisement_costs._2_200') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>Campaigns</h5>
-                    <h3>12</h3>
+                    <h5>{{ __('admin\financial\advertisement_costs.campaigns') }}</h5>
+                    <h3>{{ __('admin\financial\advertisement_costs.12') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Avg. Cost/Campaign</h5>
-                    <h3>$183</h3>
+                    <h5>{{ __('admin\financial\advertisement_costs.avg_cost_campaign') }}</h5>
+                    <h3>{{ __('admin\financial\advertisement_costs._183') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
-                    <h5>Growth Rate</h5>
-                    <h3>+3.2%</h3>
+                    <h5>{{ __('admin\financial\advertisement_costs.growth_rate') }}</h5>
+                    <h3>{{ __('admin\financial\advertisement_costs._3_2_') }}</h3>
                 </div>
             </div>
         </div>
@@ -47,11 +47,11 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">Date Range:</label>
+                <label class="mr-2">{{ __('admin\financial\advertisement_costs.date_range_') }}</label>
                 <input type="date" class="form-control mr-2" name="from" value="2024-06-01">
                 <input type="date" class="form-control mr-2" name="to" value="2024-06-30">
-                <button class="btn btn-primary mr-2">Filter</button>
-                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-primary mr-2">{{ __('admin\financial\advertisement_costs.filter') }}</button>
+                <button class="btn btn-secondary">{{ __('admin\financial\advertisement_costs.export') }}</button>
             </form>
         </div>
     </div>
@@ -63,41 +63,41 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Date</th>
-                        <th>Campaign</th>
-                        <th>Platform</th>
-                        <th>Amount</th>
-                        <th>Status</th>
+                        <th>{{ __('admin\financial\advertisement_costs.date') }}</th>
+                        <th>{{ __('admin\financial\advertisement_costs.campaign') }}</th>
+                        <th>{{ __('admin\financial\advertisement_costs.platform') }}</th>
+                        <th>{{ __('admin\financial\advertisement_costs.amount') }}</th>
+                        <th>{{ __('admin\financial\advertisement_costs.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>2024-06-01</td>
-                        <td>Summer Sale</td>
-                        <td>Facebook</td>
-                        <td>$400</td>
-                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>{{ __('admin\financial\advertisement_costs.2024_06_01') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs.summer_sale') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs.facebook') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs._400') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\advertisement_costs.completed') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-02</td>
-                        <td>App Launch</td>
-                        <td>Google Ads</td>
-                        <td>$600</td>
-                        <td><span class="badge badge-success">Completed</span></td>
+                        <td>{{ __('admin\financial\advertisement_costs.2024_06_02') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs.app_launch') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs.google_ads') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs._600') }}</td>
+                        <td><span class="badge badge-success">{{ __('admin\financial\advertisement_costs.completed') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-03</td>
-                        <td>Brand Awareness</td>
-                        <td>Instagram</td>
-                        <td>$300</td>
-                        <td><span class="badge badge-warning">Pending</span></td>
+                        <td>{{ __('admin\financial\advertisement_costs.2024_06_03') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs.brand_awareness') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs.instagram') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs._300') }}</td>
+                        <td><span class="badge badge-warning">{{ __('admin\financial\advertisement_costs.pending') }}</span></td>
                     </tr>
                     <tr>
-                        <td>2024-06-04</td>
-                        <td>Referral Program</td>
-                        <td>Twitter</td>
-                        <td>$200</td>
-                        <td><span class="badge badge-danger">Failed</span></td>
+                        <td>{{ __('admin\financial\advertisement_costs.2024_06_04') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs.referral_program') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs.twitter') }}</td>
+                        <td>{{ __('admin\financial\advertisement_costs._200') }}</td>
+                        <td><span class="badge badge-danger">{{ __('admin\financial\advertisement_costs.failed') }}</span></td>
                     </tr>
                 </tbody>
             </table>

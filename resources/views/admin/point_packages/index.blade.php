@@ -9,7 +9,7 @@
                 <i class="fas fa-gift text-primary mr-2"></i> 
                 Point Packages Management
             </h1>
-            <p class="text-muted mb-0">Manage point packages and pricing plans for users</p>
+            <p class="text-muted mb-0">{{ __('admin\point_packages\index.manage_point_packages_and_pricing_plans_') }}</p>
         </div>
         <div class="d-flex gap-2">
             <button type="button" class="btn btn-outline-secondary" onclick="exportPackages()">
@@ -30,7 +30,7 @@
     <!-- Success/Error Messages -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{ __('admin\point_packages\index._') }}</button>
             <h5><i class="icon fas fa-check"></i> Success!</h5>
             {{ session('success') }}
         </div>
@@ -38,7 +38,7 @@
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">×</button>
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{ __('admin\point_packages\index._') }}</button>
             <h5><i class="icon fas fa-ban"></i> Error!</h5>
             {{ session('error') }}
         </div>
@@ -50,8 +50,8 @@
             <div class="info-box bg-gradient-info shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-gift"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Total Packages</span>
-                    <span class="info-box-number">{{ $packages->count() }}</span>
+                    <span class="info-box-text">{{ __('admin\point_packages\index.total_packages') }}</span>
+                    <span class="info-box-number">{{ $packages->field</span>
                     <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
                     <span class="progress-description">
                         <i class="fas fa-chart-line text-light"></i> All available packages
@@ -63,9 +63,9 @@
             <div class="info-box bg-gradient-success shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Active Packages</span>
-                    <span class="info-box-number">{{ $packages->where('is_active', true)->count() }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $packages->count() > 0 ? ($packages->where('is_active', true)->count() / $packages->count()) * 100 : 0 }}%"></div></div>
+                    <span class="info-box-text">{{ __('admin\point_packages\index.active_packages') }}</span>
+                    <span class="info-box-number">{{ $packages->field</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $packages->field</div></div>
                     <span class="progress-description">
                         <i class="fas fa-check-circle text-light"></i> {{ $packages->count() > 0 ? number_format(($packages->where('is_active', true)->count() / $packages->count()) * 100, 1) : 0 }}% of total
                     </span>
@@ -76,9 +76,9 @@
             <div class="info-box bg-gradient-warning shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-star"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Popular Packages</span>
-                    <span class="info-box-number">{{ $packages->where('is_popular', true)->count() }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $packages->count() > 0 ? ($packages->where('is_popular', true)->count() / $packages->count()) * 100 : 0 }}%"></div></div>
+                    <span class="info-box-text">{{ __('admin\point_packages\index.popular_packages') }}</span>
+                    <span class="info-box-number">{{ $packages->field</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $packages->field</div></div>
                     <span class="progress-description">
                         <i class="fas fa-star text-light"></i> {{ $packages->count() > 0 ? number_format(($packages->where('is_popular', true)->count() / $packages->count()) * 100, 1) : 0 }}% of total
                     </span>
@@ -89,9 +89,9 @@
             <div class="info-box bg-gradient-danger shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-pause-circle"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Inactive Packages</span>
-                    <span class="info-box-number">{{ $packages->where('is_active', false)->count() }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $packages->count() > 0 ? ($packages->where('is_active', false)->count() / $packages->count()) * 100 : 0 }}%"></div></div>
+                    <span class="info-box-text">{{ __('admin\point_packages\index.inactive_packages') }}</span>
+                    <span class="info-box-number">{{ $packages->field</span>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $packages->field</div></div>
                     <span class="progress-description">
                         <i class="fas fa-pause-circle text-light"></i> {{ $packages->count() > 0 ? number_format(($packages->where('is_active', false)->count() / $packages->count()) * 100, 1) : 0 }}% of total
                     </span>
@@ -142,7 +142,7 @@
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
             <div class="card-title mb-2 mb-md-0">
                 <i class="fas fa-gift mr-2"></i> Point Packages
-                <span class="badge badge-primary ml-2">{{ $packages->count() }}</span>
+                <span class="badge badge-primary ml-2">{{ $packages->field</span>
             </div>
             <div class="card-tools d-flex align-items-center">
                 <div class="input-group input-group-sm mr-3" style="width: 200px;">
@@ -168,40 +168,40 @@
             <table class="table table-hover table-striped table-bordered align-middle" id="packages-table">
                 <thead class="thead-light">
                     <tr>
-                        <th width="50">#</th>
-                        <th width="80">Icon</th>
-                        <th>Name (AR)</th>
-                        <th>Name (EN)</th>
-                        <th>Points</th>
-                        <th>Price</th>
-                        <th>Discount</th>
-                        <th>Duration</th>
-                        <th>Status</th>
-                        <th width="180">Actions</th>
+                        <th width="50">{{ __('admin\point_packages\index._') }}</th>
+                        <th width="80">{{ __('admin\point_packages\index.icon') }}</th>
+                        <th>{{ __('admin\point_packages\index.name_ar_') }}</th>
+                        <th>{{ __('admin\point_packages\index.name_en_') }}</th>
+                        <th>{{ __('admin\point_packages\index.points') }}</th>
+                        <th>{{ __('admin\point_packages\index.price') }}</th>
+                        <th>{{ __('admin\point_packages\index.discount') }}</th>
+                        <th>{{ __('admin\point_packages\index.duration') }}</th>
+                        <th>{{ __('admin\point_packages\index.status') }}</th>
+                        <th width="180">{{ __('admin\point_packages\index.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($packages as $package)
                         <tr data-package-id="{{ $package->id }}">
                             <td>
-                                <span class="badge badge-secondary">{{ $package->id }}</span>
+                                <span class="badge badge-secondary">{{ $package->field</span>
                             </td>
                             <td>
                                 @if($package->icon)
-                                    <i class="{{ $package->icon }}" style="font-size: 18px; color: {{ $package->color ?? '#007bff' }};"></i>
+                                    <i class="{{ $package->icon }}" style="font-size: 18px; color: {{ $package->field</i>
                                 @else
-                                    <i class="fas fa-gift" style="font-size: 18px; color: {{ $package->color ?? '#007bff' }};"></i>
+                                    <i class="fas fa-gift" style="font-size: 18px; color: {{ $package->field</i>
                                 @endif
                             </td>
                             <td>
-                                <strong>{{ $package->name['ar'] ?? 'N/A' }}</strong>
+                                <strong>{{ $package->field</strong>
                                 @if($package->is_popular)
-                                    <span class="badge badge-warning ml-1">Popular</span>
+                                    <span class="badge badge-warning ml-1">{{ __('admin\point_packages\index.popular') }}</span>
                                 @endif
                             </td>
-                            <td>{{ $package->name['en'] ?? 'N/A' }}</td>
+                            <td>{{ $package->field</td>
                             <td>
-                                <span class="badge badge-primary">{{ number_format($package->points) }} pts</span>
+                                <span class="badge badge-primary">{{ number_format($package->field</span>
                             </td>
                             <td>
                                 <span class="badge badge-success">{{ $package->price }} {{ $package->currency }}</span>
@@ -210,20 +210,20 @@
                                 @if($package->discount_percentage > 0)
                                     <span class="badge badge-warning">-{{ $package->discount_percentage }}%</span>
                                 @else
-                                    <span class="badge badge-secondary">No Discount</span>
+                                    <span class="badge badge-secondary">{{ __('admin\point_packages\index.no_discount') }}</span>
                                 @endif
                             </td>
                             <td>
-                                <span class="badge badge-info">{{ $package->duration_days }} days</span>
+                                <span class="badge badge-info">{{ $package->field</span>
                             </td>
                             <td>
                                 @if($package->is_active)
-                                    <span class="badge badge-success">Active</span>
+                                    <span class="badge badge-success">{{ __('admin\point_packages\index.active') }}</span>
                                 @else
-                                    <span class="badge badge-danger">Inactive</span>
+                                    <span class="badge badge-danger">{{ __('admin\point_packages\index.inactive') }}</span>
                                 @endif
                                 @if($package->is_popular)
-                                    <span class="badge badge-warning ml-1">Popular</span>
+                                    <span class="badge badge-warning ml-1">{{ __('admin\point_packages\index.popular') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -268,8 +268,8 @@
                             <td colspan="10" class="text-center py-5">
                                 <div class="text-muted">
                                     <i class="fas fa-gift fa-4x mb-4 text-muted"></i>
-                                    <h4 class="text-muted">No Packages Found</h4>
-                                    <p class="text-muted mb-4">Create your first point package to get started with pricing plans.</p>
+                                    <h4 class="text-muted">{{ __('admin\point_packages\index.no_packages_found') }}</h4>
+                                    <p class="text-muted mb-4">{{ __('admin\point_packages\index.create_your_first_point_package_to_get_s') }}</p>
                                     <a href="{{ route('admin.point_packages.create') }}" class="btn btn-primary btn-lg">
                                         <i class="fas fa-plus mr-2"></i> Create First Package
                                     </a>
@@ -511,20 +511,7 @@ function setPopular() {
         type: 'GET',
         success: function(response) {
             if (response.success) {
-                let packagesHtml = '<div class="form-group">';
-                packagesHtml += '<label>Select packages to mark as popular:</label>';
-                packagesHtml += '<div class="mt-2" style="max-height: 200px; overflow-y: auto;">';
-                
-                response.data.forEach(function(package) {
-                    packagesHtml += '<div class="custom-control custom-checkbox">';
-                    packagesHtml += '<input type="checkbox" class="custom-control-input" id="package_' + package.id + '" value="' + package.id + '">';
-                    packagesHtml += '<label class="custom-control-label" for="package_' + package.id + '">';
-                    packagesHtml += package.name.en + ' (' + package.points + ' pts)';
-                    packagesHtml += '</label>';
-                    packagesHtml += '</div>';
-                });
-                
-                packagesHtml += '</div></div>';
+                let packagesHtml = '<div class="form-group">{{ __('admin\point_packages\index._packageshtml_') }}<label>{{ __('admin\point_packages\index.select_packages_to_mark_as_popular_') }}</label>{{ __('admin\point_packages\index._packageshtml_') }}<div class="mt-2" style="max-height: 200px; overflow-y: auto;">{{ __('admin\point_packages\index._resp') }}<div class="custom-control custom-checkbox">{{ __('admin\point_packages\index._packageshtml_') }}<input type="checkbox" class="custom-control-input" id="package_' + package.id + '" value="' + package.id + '">{{ __('admin\point_packages\index._packageshtml_') }}<label class="custom-control-label" for="package_' + package.id + '">{{ __('admin\point_packages\index._packageshtml_p') }}</label>{{ __('admin\point_packages\index._packageshtml_') }}</div>{{ __('admin\point_packages\index._') }}</div></div>';
 
                 Swal.fire({
                     title: 'Set Popular Packages',
@@ -606,14 +593,7 @@ function duplicatePackage(packageId = null) {
             type: 'GET',
             success: function(response) {
                 if (response.success) {
-                    let selectHtml = '<select class="form-control" id="packageSelect">';
-                    selectHtml += '<option value="">Select a package...</option>';
-                    
-                    response.data.forEach(function(package) {
-                        selectHtml += '<option value="' + package.id + '">' + package.name.en + ' (' + package.points + ' pts)</option>';
-                    });
-                    
-                    selectHtml += '</select>';
+                    let selectHtml = '<select class="form-control" id="packageSelect">{{ __('admin\point_packages\index._selecthtml_') }}<option value="">{{ __('admin\point_packages\index.select_a_package_') }}</option>{{ __('admin\point_packages\index._') }}<option value="' + package.id + '">{{ __('admin\point_packages\index._package_name_en_package_poi') }}</option>{{ __('admin\point_packages\index._') }}</select>';
 
                     Swal.fire({
                         title: 'Duplicate Package',
@@ -684,44 +664,9 @@ function updateTableData(packages) {
     
     packages.forEach(function(package) {
         var row = [
-            '<span class="badge badge-secondary">' + package.id + '</span>',
-            package.icon ? '<i class="' + package.icon + '" style="font-size: 18px; color: ' + (package.color || '#007bff') + ';"></i>' : 
-                          '<i class="fas fa-gift" style="font-size: 18px; color: ' + (package.color || '#007bff') + ';"></i>',
-            '<strong>' + (package.name.ar || 'N/A') + '</strong>' + 
-            (package.is_popular ? '<span class="badge badge-warning ml-1">Popular</span>' : ''),
-            package.name.en || 'N/A',
-            '<span class="badge badge-primary">' + package.points.toLocaleString() + ' pts</span>',
-            '<span class="badge badge-success">' + package.price + ' ' + package.currency + '</span>',
-            package.discount_percentage > 0 ? 
-                '<span class="badge badge-warning">-' + package.discount_percentage + '%</span>' : 
-                '<span class="badge badge-secondary">No Discount</span>',
-            '<span class="badge badge-info">' + package.duration_days + ' days</span>',
-            (package.is_active ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-danger">Inactive</span>') +
-            (package.is_popular ? '<span class="badge badge-warning ml-1">Popular</span>' : ''),
-            generateActionButtons(package)
-        ];
-        
-        table.row.add(row).draw();
-    });
-}
-
-// Function to generate action buttons HTML
-function generateActionButtons(package) {
-    return '<div class="btn-group btn-group-sm" role="group">' +
-           '<a href="{{ route("admin.point_packages.edit", "") }}/' + package.id + '" class="btn btn-outline-primary" title="Edit Package">' +
-           '<i class="fas fa-edit"></i></a>' +
-           '<a href="{{ route("admin.point_packages.show", "") }}/' + package.id + '" class="btn btn-outline-secondary" title="View Details">' +
-           '<i class="fas fa-eye"></i></a>' +
-           '<button type="button" class="btn btn-outline-' + (package.is_popular ? 'warning' : 'info') + '" ' +
-           'onclick="togglePopular(' + package.id + ')" title="' + (package.is_popular ? 'Remove Popular' : 'Set Popular') + '">' +
-           '<i class="fas fa-star"></i></button>' +
-           '<button type="button" class="btn btn-outline-success" onclick="duplicatePackage(' + package.id + ')" title="Duplicate Package">' +
-           '<i class="fas fa-copy"></i></button>' +
-           '<form action="{{ route("admin.point_packages.destroy", "") }}/' + package.id + '" method="POST" class="d-inline ajax-form" ' +
-           'data-confirm="Are you sure you want to delete this package?" data-success-message="Package deleted successfully!" data-row-id="' + package.id + '">' +
-           '@csrf @method("DELETE")' +
-           '<button type="submit" class="btn btn-outline-danger" title="Delete Package"><i class="fas fa-trash"></i></button>' +
-           '</form></div>';
+            '<span class="badge badge-secondary">{{ __('admin\point_packages\index._package_id_') }}</span>{{ __('admin\point_packages\index._package_icon_') }}<i class="' + package.icon + '" style="font-size: 18px; color: ' + (package.color || '#007bff') + ';"></i>{{ __('admin\point_packages\index._') }}<i class="fas fa-gift" style="font-size: 18px; color: ' + (package.color || '#007bff') + ';"></i>{{ __('admin\point_packages\index._') }}<strong>{{ __('admin\point_packages\index._package_name_ar_n_a_') }}</strong>{{ __('admin\point_packages\index._package_is_popular_') }}<span class="badge badge-warning ml-1">{{ __('admin\point_packages\index.popular') }}</span>{{ __('admin\point_packages\index._package_name_en_') }}<span class="badge badge-primary">{{ __('admin\point_packages\index._package_points_tolocalestring_') }}</span>{{ __('admin\point_packages\index._') }}<span class="badge badge-success">{{ __('admin\point_packages\index._package_price_package_curren') }}</span>{{ __('admin\point_packages\index._package_discount_percenta') }}<span class="badge badge-warning">{{ __('admin\point_packages\index._package_discount_percentage_') }}</span>{{ __('admin\point_packages\index._') }}<span class="badge badge-secondary">{{ __('admin\point_packages\index.no_discount') }}</span>{{ __('admin\point_packages\index._') }}<span class="badge badge-info">{{ __('admin\point_packages\index._package_duration_days_days') }}</span>{{ __('admin\point_packages\index._package_is_active_') }}<span class="badge badge-success">{{ __('admin\point_packages\index.active') }}</span>{{ __('admin\point_packages\index._') }}<span class="badge badge-danger">{{ __('admin\point_packages\index.inactive') }}</span>{{ __('admin\point_packages\index._package_is_popular_') }}<span class="badge badge-warning ml-1">{{ __('admin\point_packages\index.popular') }}</span>{{ __('admin\point_packages\index._generateactionbutto') }}<div class="btn-group btn-group-sm" role="group">{{ __('admin\point_packages\index._') }}<a href="{{ route("admin.point_packages.edit", "") }}/' + package.id + '" class="btn btn-outline-primary" title="Edit Package">{{ __('admin\point_packages\index._') }}<i class="fas fa-edit"></i></a>{{ __('admin\point_packages\index._') }}<a href="{{ route("admin.point_packages.show", "") }}/' + package.id + '" class="btn btn-outline-secondary" title="View Details">{{ __('admin\point_packages\index._') }}<i class="fas fa-eye"></i></a>{{ __('admin\point_packages\index._') }}<button type="button" class="btn btn-outline-' + (package.is_popular ? 'warning' : 'info') + '" ' +
+           'onclick="togglePopular(' + package.id + ')" title="' + (package.is_popular ? 'Remove Popular' : 'Set Popular') + '">{{ __('admin\point_packages\index._') }}<i class="fas fa-star"></i></button>{{ __('admin\point_packages\index._') }}<button type="button" class="btn btn-outline-success" onclick="duplicatePackage(' + package.id + ')" title="Duplicate Package">{{ __('admin\point_packages\index._') }}<i class="fas fa-copy"></i></button>{{ __('admin\point_packages\index._') }}<form action="{{ route("admin.point_packages.destroy", "") }}/' + package.id + '" method="POST" class="d-inline ajax-form" ' +
+           'data-confirm="Are you sure you want to delete this package?" data-success-message="Package deleted successfully!" data-row-id="' + package.id + '">{{ __('admin\point_packages\index._csrf_method_delete_') }}<button type="submit" class="btn btn-outline-danger" title="Delete Package"><i class="fas fa-trash"></i></button>{{ __('admin\point_packages\index._') }}</form></div>';
 }
 
 // Function to update stats

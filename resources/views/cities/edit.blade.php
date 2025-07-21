@@ -34,7 +34,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_en">City Name (English) <span class="text-danger">*</span></label>
+                                        <label for="name_en">City Name (English) <span class="text-danger">{{ __('cities\edit._') }}</span></label>
                                         <input type="text" class="form-control @error('name_en') is-invalid @enderror"
                                                id="name_en" name="name_en" value="{{ old('name_en', $nameArray['en'] ?? '') }}" required>
                                         @error('name_en')
@@ -45,7 +45,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_ar">City Name (Arabic)</label>
+                                        <label for="name_ar">{{ __('cities\edit.city_name_arabic_') }}</label>
                                         <input type="text" class="form-control @error('name_ar') is-invalid @enderror"
                                                id="name_ar" name="name_ar" value="{{ old('name_ar', $nameArray['ar'] ?? '') }}" dir="rtl">
                                         @error('name_ar')
@@ -56,10 +56,10 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="country_id">Country <span class="text-danger">*</span></label>
+                                <label for="country_id">Country <span class="text-danger">{{ __('cities\edit._') }}</span></label>
                                 <select class="form-control @error('country_id') is-invalid @enderror"
                                         id="country_id" name="country_id" required>
-                                    <option value="">-- Select Country --</option>
+                                    <option value="">{{ __('cities\edit._select_country_') }}</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country->id }}"
                                             {{ (old('country_id', $city->country_id) == $country->id) ? 'selected' : '' }}>
@@ -73,30 +73,30 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="image">City Image</label>
+                                <label for="image">{{ __('cities\edit.city_image') }}</label>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input @error('image') is-invalid @enderror"
                                            id="image" name="image" accept="image/*">
-                                    <label class="custom-file-label" for="image">Choose file</label>
+                                    <label class="custom-file-label" for="image">{{ __('cities\edit.choose_file') }}</label>
                                     @error('image')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <small class="form-text text-muted">Recommended size: 200x120 pixels</small>
+                                <small class="form-text text-muted">{{ __('cities\edit.recommended_size_200x120_pixels') }}</small>
                             </div>
 
                             <div class="form-group">
                                 <div class="img-preview mt-3">
                                     @if($city->photos && $city->photos->count() > 0)
-                                        <p>Current image:</p>
+                                        <p>{{ __('cities\edit.current_image_') }}</p>
                                         <img src="{{ asset($city->photos->first()->src) }}" alt="{{ $city->getTranslatedName() }}"
                                              class="img-thumbnail" style="max-height: 200px;">
                                     @else
-                                        <p>No image currently uploaded.</p>
+                                        <p>{{ __('cities\edit.no_image_currently_uploaded_') }}</p>
                                     @endif
                                 </div>
                                 <div class="new-img-preview mt-3" style="display: none;">
-                                    <p>New image:</p>
+                                    <p>{{ __('cities\edit.new_image_') }}</p>
                                     <img id="preview-image" src="#" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
                                 </div>
                             </div>

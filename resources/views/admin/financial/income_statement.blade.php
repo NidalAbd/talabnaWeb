@@ -7,39 +7,39 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>Demo Data:</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">Remove Demo Data</a>
+            <strong>{{ __('admin\financial\income_statement.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\financial\income_statement.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5>Total Revenue</h5>
-                    <h3>$45,000</h3>
+                    <h5>{{ __('admin\financial\income_statement.total_revenue') }}</h5>
+                    <h3>{{ __('admin\financial\income_statement._45_000') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-danger text-white">
                 <div class="card-body">
-                    <h5>Total Expenses</h5>
-                    <h3>$32,000</h3>
+                    <h5>{{ __('admin\financial\income_statement.total_expenses') }}</h5>
+                    <h3>{{ __('admin\financial\income_statement._32_000') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>Net Income</h5>
-                    <h3>$13,000</h3>
+                    <h5>{{ __('admin\financial\income_statement.net_income') }}</h5>
+                    <h3>{{ __('admin\financial\income_statement._13_000') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>Reporting Period</h5>
-                    <h3>2024 YTD</h3>
+                    <h5>{{ __('admin\financial\income_statement.reporting_period') }}</h5>
+                    <h3>{{ __('admin\financial\income_statement.2024_ytd') }}</h3>
                 </div>
             </div>
         </div>
@@ -47,14 +47,14 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">Period:</label>
+                <label class="mr-2">{{ __('admin\financial\income_statement.period_') }}</label>
                 <select class="form-control mr-2" name="period">
-                    <option>2024 YTD</option>
-                    <option>2023</option>
-                    <option>2022</option>
+                    <option>{{ __('admin\financial\income_statement.2024_ytd') }}</option>
+                    <option>{{ __('admin\financial\income_statement.2023') }}</option>
+                    <option>{{ __('admin\financial\income_statement.2022') }}</option>
                 </select>
-                <button class="btn btn-primary mr-2">Filter</button>
-                <button class="btn btn-secondary">Export</button>
+                <button class="btn btn-primary mr-2">{{ __('admin\financial\income_statement.filter') }}</button>
+                <button class="btn btn-secondary">{{ __('admin\financial\income_statement.export') }}</button>
             </form>
         </div>
     </div>
@@ -66,38 +66,38 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>Period</th>
-                        <th>Revenue</th>
-                        <th>COGS</th>
-                        <th>Gross Profit</th>
-                        <th>Expenses</th>
-                        <th>Net Income</th>
+                        <th>{{ __('admin\financial\income_statement.period') }}</th>
+                        <th>{{ __('admin\financial\income_statement.revenue') }}</th>
+                        <th>{{ __('admin\financial\income_statement.cogs') }}</th>
+                        <th>{{ __('admin\financial\income_statement.gross_profit') }}</th>
+                        <th>{{ __('admin\financial\income_statement.expenses') }}</th>
+                        <th>{{ __('admin\financial\income_statement.net_income') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>2024 YTD</td>
-                        <td>$45,000</td>
-                        <td>$12,000</td>
-                        <td>$33,000</td>
-                        <td>$20,000</td>
-                        <td>$13,000</td>
+                        <td>{{ __('admin\financial\income_statement.2024_ytd') }}</td>
+                        <td>{{ __('admin\financial\income_statement._45_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._12_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._33_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._20_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._13_000') }}</td>
                     </tr>
                     <tr>
-                        <td>2023</td>
-                        <td>$38,000</td>
-                        <td>$10,000</td>
-                        <td>$28,000</td>
-                        <td>$17,000</td>
-                        <td>$11,000</td>
+                        <td>{{ __('admin\financial\income_statement.2023') }}</td>
+                        <td>{{ __('admin\financial\income_statement._38_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._10_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._28_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._17_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._11_000') }}</td>
                     </tr>
                     <tr>
-                        <td>2022</td>
-                        <td>$32,000</td>
-                        <td>$8,000</td>
-                        <td>$24,000</td>
-                        <td>$15,000</td>
-                        <td>$9,000</td>
+                        <td>{{ __('admin\financial\income_statement.2022') }}</td>
+                        <td>{{ __('admin\financial\income_statement._32_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._8_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._24_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._15_000') }}</td>
+                        <td>{{ __('admin\financial\income_statement._9_000') }}</td>
                     </tr>
                 </tbody>
             </table>

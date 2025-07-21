@@ -22,7 +22,7 @@
             <div class="col-md-12">
                 <div class="card card-warning card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">Permission Information</h3>
+                        <h3 class="card-title">{{ __('admin\permissions\edit.permission_information') }}</h3>
                     </div>
 
                     <form action="{{ route('permissions.update', $permission->id) }}" method="POST">
@@ -39,7 +39,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name">Permission Name</label>
+                                        <label for="name">{{ __('admin\permissions\edit.permission_name') }}</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-key"></i></span>
@@ -68,7 +68,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="display_name">Display Name</label>
+                                        <label for="display_name">{{ __('admin\permissions\edit.display_name') }}</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-eye"></i></span>
@@ -89,10 +89,10 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="description">Description</label>
+                                <label for="description">{{ __('admin\permissions\edit.description') }}</label>
                                 <textarea class="form-control @error('description') is-invalid @enderror"
                                           id="description" name="description" rows="3"
-                                          placeholder="Enter a description of this permission">{{ old('description', $permission->description) }}</textarea>
+                                          placeholder="Enter a description of this permission">{{ old('description', $permission->field</textarea>
                                 @error('description')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror

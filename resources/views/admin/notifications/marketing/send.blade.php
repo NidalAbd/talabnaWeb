@@ -60,7 +60,7 @@
 
                 let counter = $(this).closest('.form-group').find('.character-counter');
                 if (counter.length === 0) {
-                    $(this).closest('.form-group').append('<small class="text-muted character-counter float-right">' + remaining + ' characters remaining</small>');
+                    $(this).closest('.form-group').append('<small class="text-muted character-counter float-right">{{ __('admin\notifications\marketing\send._remaining_characters_remaining') }}</small>');
                 } else {
                     counter.text(remaining + ' characters remaining');
                 }
@@ -79,7 +79,7 @@
 
                 let counter = $(this).closest('.form-group').find('.character-counter');
                 if (counter.length === 0) {
-                    $(this).closest('.form-group').append('<small class="text-muted character-counter float-right">' + remaining + ' characters remaining</small>');
+                    $(this).closest('.form-group').append('<small class="text-muted character-counter float-right">{{ __('admin\notifications\marketing\send._remaining_characters_remaining') }}</small>');
                 } else {
                     counter.text(remaining + ' characters remaining');
                 }
@@ -162,10 +162,7 @@
                 method: 'GET',
                 success: function(data) {
                     let roleSelect = $('#role-filter');
-                    roleSelect.empty().append('<option value="">All Roles</option>');
-
-                    data.forEach(function(role) {
-                        roleSelect.append('<option value="' + role.id + '">' + role.name + '</option>');
+                    roleSelect.empty().append('<option value="">{{ __('admin\notifications\marketing\send.all_roles') }}</option>{{ __('admin\notifications\marketing\send._data_foreach_fu') }}<option value="' + role.id + '">{{ __('admin\notifications\marketing\send._role_name_') }}</option>');
                     });
                 }
             });
@@ -176,10 +173,7 @@
                 method: 'GET',
                 success: function(data) {
                     let countrySelect = $('#country-filter');
-                    countrySelect.empty().append('<option value="">All Countries</option>');
-
-                    data.forEach(function(country) {
-                        countrySelect.append('<option value="' + country.id + '">' + country.name + '</option>');
+                    countrySelect.empty().append('<option value="">{{ __('admin\notifications\marketing\send.all_countries') }}</option>{{ __('admin\notifications\marketing\send._data_foreach_fu') }}<option value="' + country.id + '">{{ __('admin\notifications\marketing\send._country_name_') }}</option>');
                     });
                 }
             });
@@ -203,7 +197,7 @@
                     tbody.empty();
 
                     if (data.length === 0) {
-                        tbody.append('<tr><td colspan="5" class="text-center">No users found matching your criteria</td></tr>');
+                        tbody.append('<tr><td colspan="5" class="text-center">{{ __('admin\notifications\marketing\send.no_users_found_matching_your_criteria') }}</td></tr>');
                         return;
                     }
 
@@ -219,10 +213,10 @@
             <label class="custom-control-label" for="user-${user.id}"></label>
         </div>
     </td>
-    <td>${user.user_name}</td>
-    <td>${user.email}</td>
-    <td>${user.roles.map(r => r.name).join(', ') || 'No Role'}</td>
-    <td><span class="badge badge-${statusClass}">${statusText}</span></td>
+    <td>{{ __('admin\notifications\marketing\send._user_user_name_') }}</td>
+    <td>{{ __('admin\notifications\marketing\send._user_email_') }}</td>
+    <td>{{ __('admin\notifications\marketing\send._user_roles_map_r_r_name_join_') }}</td>
+    <td><span class="badge badge-${statusClass}">{{ __('admin\notifications\marketing\send._statustext_') }}</span></td>
 </tr>
 `;
 
@@ -305,7 +299,7 @@
                 <div class="info-box shadow">
                     <span class="info-box-icon bg-primary"><i class="fas fa-users"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">Users with FCM Tokens</span>
+                        <span class="info-box-text">{{ __('admin\notifications\marketing\send.users_with_fcm_tokens') }}</span>
                         <span class="info-box-number">{{ number_format($fcmUsersCount) }}</span>
                         <div class="progress">
                             <div class="progress-bar bg-primary" style="width: 100%"></div>
@@ -322,7 +316,7 @@
                     <div class="info-box shadow">
                         <span class="info-box-icon bg-success"><i class="fas fa-check-circle"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">Successfully Sent</span>
+                            <span class="info-box-text">{{ __('admin\notifications\marketing\send.successfully_sent') }}</span>
                             <span class="info-box-number">{{ number_format($notificationResult['successful']) }}</span>
                             <div class="progress">
                                 <div class="progress-bar bg-success" style="width: {{ $notificationResult['total'] > 0 ? ($notificationResult['successful'] / $notificationResult['total']) * 100 : 0 }}%"></div>
@@ -338,7 +332,7 @@
                     <div class="info-box shadow">
                         <span class="info-box-icon bg-danger"><i class="fas fa-times-circle"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">Failed Deliveries</span>
+                            <span class="info-box-text">{{ __('admin\notifications\marketing\send.failed_deliveries') }}</span>
                             <span class="info-box-number">{{ number_format($notificationResult['failed']) }}</span>
                             <div class="progress">
                                 <div class="progress-bar bg-danger" style="width: {{ $notificationResult['total'] > 0 ? ($notificationResult['failed'] / $notificationResult['total']) * 100 : 0 }}%"></div>
@@ -354,7 +348,7 @@
                     <div class="info-box shadow">
                         <span class="info-box-icon bg-info"><i class="fas fa-paper-plane"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">Total Attempts</span>
+                            <span class="info-box-text">{{ __('admin\notifications\marketing\send.total_attempts') }}</span>
                             <span class="info-box-number">{{ number_format($notificationResult['total']) }}</span>
                             <div class="progress">
                                 <div class="progress-bar bg-info" style="width: 100%"></div>
@@ -375,7 +369,7 @@
                     <h5><i class="icon fas fa-check"></i> Notification Campaign Completed!</h5>
                     <p class="mb-0">Your notification "{{ $notificationResult['title'] }}" has been sent to {{ number_format($notificationResult['total']) }} users with {{ number_format($notificationResult['successful']) }} successful deliveries.</p>
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">{{ __('admin\notifications\marketing\send._times_') }}</span>
                     </button>
                 </div>
             @else
@@ -383,7 +377,7 @@
                     <h5><i class="icon fas fa-ban"></i> Notification Campaign Failed!</h5>
                     <p class="mb-0">{{ $notificationResult['message'] }}</p>
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">{{ __('admin\notifications\marketing\send._times_') }}</span>
                     </button>
                 </div>
             @endif
@@ -408,7 +402,7 @@
                         <form action="{{ route('admin.notifications.marketing.send-all') }}" method="POST">
                             @csrf
                             <div class="form-group">
-                                <label for="title">Notification Title <span class="text-danger">*</span></label>
+                                <label for="title">Notification Title <span class="text-danger">{{ __('admin\notifications\marketing\send._') }}</span></label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-heading"></i></span>
@@ -420,11 +414,11 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <small class="form-text text-muted">Keep titles short and attention-grabbing (max 100 characters)</small>
+                                <small class="form-text text-muted">{{ __('admin\notifications\marketing\send.keep_titles_short_and_attention_grabbing') }}</small>
                             </div>
 
                             <div class="form-group">
-                                <label for="body">Notification Message <span class="text-danger">*</span></label>
+                                <label for="body">Notification Message <span class="text-danger">{{ __('admin\notifications\marketing\send._') }}</span></label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-comment"></i></span>
@@ -436,11 +430,11 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <small class="form-text text-muted">Provide clear and valuable information (max 500 characters)</small>
+                                <small class="form-text text-muted">{{ __('admin\notifications\marketing\send.provide_clear_and_valuable_information_') }}</small>
                             </div>
 
                             <div class="form-group">
-                                <label for="image_url">Image URL (Optional)</label>
+                                <label for="image_url">{{ __('admin\notifications\marketing\send.image_url_optional_') }}</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-image"></i></span>
@@ -452,11 +446,11 @@
                                     <div class="invalid-feedback">{{ $message }}</div>
                                     @enderror
                                 </div>
-                                <small class="form-text text-muted">Adding an image can increase engagement (must be a valid URL)</small>
+                                <small class="form-text text-muted">{{ __('admin\notifications\marketing\send.adding_an_image_can_increase_engagement_') }}</small>
                             </div>
 
                             <div class="form-group">
-                                <label for="deep_link">Deep Link (Optional)</label>
+                                <label for="deep_link">{{ __('admin\notifications\marketing\send.deep_link_optional_') }}</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-link"></i></span>
@@ -469,7 +463,7 @@
                                     @enderror
                                 </div>
                                 <small class="form-text text-muted">
-                                    Use format: <code>https://talbna.cloud/api/deep-link/[type]/[id]</code> where type is 'reels', 'service-post', 'user', or 'category'
+                                    Use format: <code>{{ __('admin\notifications\marketing\send.https_talbna_cloud_api_deep_link_type') }}</code> where type is 'reels', 'service-post', 'user', or 'category'
                                 </small>
                             </div>
 
@@ -507,7 +501,7 @@
                         <form action="{{ route('admin.notifications.marketing.send-specific') }}" method="POST">
                             @csrf
                             <div class="form-group">
-                                <label for="title_specific">Notification Title <span class="text-danger">*</span></label>
+                                <label for="title_specific">Notification Title <span class="text-danger">{{ __('admin\notifications\marketing\send._') }}</span></label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-heading"></i></span>
@@ -522,7 +516,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="body_specific">Notification Message <span class="text-danger">*</span></label>
+                                <label for="body_specific">Notification Message <span class="text-danger">{{ __('admin\notifications\marketing\send._') }}</span></label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-comment"></i></span>
@@ -537,7 +531,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="user_ids">Select Users <span class="text-danger">*</span></label>
+                                <label for="user_ids">Select Users <span class="text-danger">{{ __('admin\notifications\marketing\send._') }}</span></label>
                                 <div class="d-flex mb-2">
                                     <select class="form-control select2 @error('user_ids') is-invalid @enderror"
                                             id="user_ids" name="user_ids[]" multiple="multiple"
@@ -551,11 +545,11 @@
                                 @error('user_ids')
                                 <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
-                                <small class="form-text text-muted">Search and select specific users or use advanced filters</small>
+                                <small class="form-text text-muted">{{ __('admin\notifications\marketing\send.search_and_select_specific_users_or_use_') }}</small>
                             </div>
 
                             <div class="form-group">
-                                <label for="image_url_specific">Image URL (Optional)</label>
+                                <label for="image_url_specific">{{ __('admin\notifications\marketing\send.image_url_optional_') }}</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-image"></i></span>
@@ -570,7 +564,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="deep_link_specific">Deep Link (Optional)</label>
+                                <label for="deep_link_specific">{{ __('admin\notifications\marketing\send.deep_link_optional_') }}</label>
                                 <div class="input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text"><i class="fas fa-link"></i></span>
@@ -619,20 +613,20 @@
                     <table class="table table-hover table-striped">
                         <thead class="thead-light">
                         <tr>
-                            <th>ID</th>
-                            <th>Title</th>
-                            <th>Sent By</th>
-                            <th>Recipients</th>
-                            <th>Success Rate</th>
-                            <th>Date Sent</th>
-                            <th>Actions</th>
+                            <th>{{ __('admin\notifications\marketing\send.id') }}</th>
+                            <th>{{ __('admin\notifications\marketing\send.title') }}</th>
+                            <th>{{ __('admin\notifications\marketing\send.sent_by') }}</th>
+                            <th>{{ __('admin\notifications\marketing\send.recipients') }}</th>
+                            <th>{{ __('admin\notifications\marketing\send.success_rate') }}</th>
+                            <th>{{ __('admin\notifications\marketing\send.date_sent') }}</th>
+                            <th>{{ __('admin\notifications\marketing\send.actions') }}</th>
                         </tr>
                         </thead>
                         <tbody>
                         @if(isset($notificationLogs) && count($notificationLogs) > 0)
                             @foreach($notificationLogs as $log)
                                 <tr>
-                                    <td>{{ $log->id }}</td>
+                                    <td>{{ $log->field</td>
                                     <td>
                                             <span class="d-inline-block text-truncate" style="max-width: 150px;">
                                                 {{ $log->title }}
@@ -649,10 +643,10 @@
                                             @else
                                                 <img class="img-circle img-size-32 mr-2" src="{{ asset('vendor/adminlte/dist/img/user-default.jpg') }}" alt="Admin Image">
                                             @endif
-                                            <span>{{ $log->admin->user_name ?? 'Unknown' }}</span>
+                                            <span>{{ $log->field</span>
                                         </div>
                                     </td>
-                                    <td>{{ number_format($log->total_recipients) }}</td>
+                                    <td>{{ number_format($log->field</td>
                                     <td>
                                         @php
                                             $successRate = $log->total_recipients > 0 ? ($log->successful_count / $log->total_recipients) * 100 : 0;
@@ -666,7 +660,7 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ $log->created_at->format('M d, Y h:i A') }}</td>
+                                    <td>{{ $log->field</td>
                                     <td>
                                         <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailsModal{{ $log->id }}">
                                             <i class="fas fa-eye"></i> Details
@@ -702,9 +696,9 @@
         <div class="modal-dialog modal-dialog-centered" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="previewModalLabel"><i class="fas fa-mobile-alt mr-2"></i>Notification Preview</h5>
+                    <h5 class="modal-title" id="previewModalLabel"><i class="fas fa-mobile-alt mr-2"></i>{{ __('admin\notifications\marketing\send.notification_preview') }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">{{ __('admin\notifications\marketing\send._times_') }}</span>
                     </button>
                 </div>
                 <div class="modal-body">
@@ -719,13 +713,13 @@
                                         <div class="notification-preview-header">
                                             <img src="{{ asset('img/logo.png') }}" alt="App Logo" class="notification-logo">
                                             <div class="notification-app-info">
-                                                <div class="notification-app-name">Talabna</div>
-                                                <div class="notification-time">Just now</div>
+                                                <div class="notification-app-name">{{ __('admin\notifications\marketing\send.talabna') }}</div>
+                                                <div class="notification-time">{{ __('admin\notifications\marketing\send.just_now') }}</div>
                                             </div>
                                         </div>
                                         <div class="notification-preview-body">
-                                            <div class="notification-title" id="preview-title">Notification Title</div>
-                                            <div class="notification-message" id="preview-body">Notification message will appear here.</div>
+                                            <div class="notification-title" id="preview-title">{{ __('admin\notifications\marketing\send.notification_title') }}</div>
+                                            <div class="notification-message" id="preview-body">{{ __('admin\notifications\marketing\send.notification_message_will_appear_here_') }}</div>
                                         </div>
                                         <div class="notification-preview-image" id="preview-image-container">
                                             <img src="" alt="Notification Image" id="preview-image" style="display: none;">
@@ -740,7 +734,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\notifications\marketing\send.close') }}</button>
                 </div>
             </div>
         </div>
@@ -751,27 +745,27 @@
         <div class="modal-dialog modal-lg" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-info text-white">
-                    <h5 class="modal-title" id="userSearchModalLabel"><i class="fas fa-users mr-2"></i>Advanced User Selection</h5>
+                    <h5 class="modal-title" id="userSearchModalLabel"><i class="fas fa-users mr-2"></i>{{ __('admin\notifications\marketing\send.advanced_user_selection') }}</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
+                        <span aria-hidden="true">{{ __('admin\notifications\marketing\send._times_') }}</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Filter by Role</label>
+                                <label>{{ __('admin\notifications\marketing\send.filter_by_role') }}</label>
                                 <select class="form-control" id="role-filter">
-                                    <option value="">All Roles</option>
+                                    <option value="">{{ __('admin\notifications\marketing\send.all_roles') }}</option>
                                     <!-- Roles will be populated via JavaScript -->
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Filter by Country</label>
+                                <label>{{ __('admin\notifications\marketing\send.filter_by_country') }}</label>
                                 <select class="form-control" id="country-filter">
-                                    <option value="">All Countries</option>
+                                    <option value="">{{ __('admin\notifications\marketing\send.all_countries') }}</option>
                                     <!-- Countries will be populated via JavaScript -->
                                 </select>
                             </div>
@@ -780,22 +774,22 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Activity Status</label>
+                                <label>{{ __('admin\notifications\marketing\send.activity_status') }}</label>
                                 <select class="form-control" id="status-filter">
-                                    <option value="">All Statuses</option>
-                                    <option value="active">Active</option>
-                                    <option value="inactive">Inactive</option>
+                                    <option value="">{{ __('admin\notifications\marketing\send.all_statuses') }}</option>
+                                    <option value="active">{{ __('admin\notifications\marketing\send.active') }}</option>
+                                    <option value="inactive">{{ __('admin\notifications\marketing\send.inactive') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>Last Active</label>
+                                <label>{{ __('admin\notifications\marketing\send.last_active') }}</label>
                                 <select class="form-control" id="last-active-filter">
-                                    <option value="">Any Time</option>
-                                    <option value="7">Last 7 Days</option>
-                                    <option value="30">Last 30 Days</option>
-                                    <option value="90">Last 90 Days</option>
+                                    <option value="">{{ __('admin\notifications\marketing\send.any_time') }}</option>
+                                    <option value="7">{{ __('admin\notifications\marketing\send.last_7_days') }}</option>
+                                    <option value="30">{{ __('admin\notifications\marketing\send.last_30_days') }}</option>
+                                    <option value="90">{{ __('admin\notifications\marketing\send.last_90_days') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -818,10 +812,10 @@
                                         <label class="custom-control-label" for="select-all"></label>
                                     </div>
                                 </th>
-                                <th>User</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Status</th>
+                                <th>{{ __('admin\notifications\marketing\send.user') }}</th>
+                                <th>{{ __('admin\notifications\marketing\send.email') }}</th>
+                                <th>{{ __('admin\notifications\marketing\send.role') }}</th>
+                                <th>{{ __('admin\notifications\marketing\send.status') }}</th>
                             </tr>
                             </thead>
                             <tbody id="user-results">
@@ -831,7 +825,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\notifications\marketing\send.cancel') }}</button>
                     <button type="button" class="btn btn-info" id="select-users">
                         <i class="fas fa-check mr-1"></i> Select Users (<span id="selected-count">0</span>)
                     </button>

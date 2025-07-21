@@ -24,7 +24,7 @@
             <div class="info-box bg-gradient-primary">
                 <span class="info-box-icon"><i class="fas fa-flag"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Total Reports</span>
+                    <span class="info-box-text">{{ __('admin\reports\index.total_reports') }}</span>
                     <span class="info-box-number">{{ number_format($stats['total_reports']) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 100%"></div>
@@ -40,7 +40,7 @@
             <div class="info-box bg-gradient-danger">
                 <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Reported Items</span>
+                    <span class="info-box-text">{{ __('admin\reports\index.reported_items') }}</span>
                     <span class="info-box-number">{{ number_format($stats['unique_reported_items']) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 100%"></div>
@@ -56,7 +56,7 @@
             <div class="info-box bg-gradient-warning">
                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">User Reports</span>
+                    <span class="info-box-text">{{ __('admin\reports\index.user_reports') }}</span>
                     <span class="info-box-number">{{ number_format($stats['user_reports']) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['user_reports'] / $stats['total_reports']) * 100 : 0 }}%"></div>
@@ -72,7 +72,7 @@
             <div class="info-box bg-gradient-info">
                 <span class="info-box-icon"><i class="fas fa-clipboard-list"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Post Reports</span>
+                    <span class="info-box-text">{{ __('admin\reports\index.post_reports') }}</span>
                     <span class="info-box-number">{{ number_format($stats['post_reports']) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['post_reports'] / $stats['total_reports']) * 100 : 0 }}%"></div>
@@ -88,7 +88,7 @@
             <div class="info-box bg-gradient-success">
                 <span class="info-box-icon"><i class="fas fa-calendar-day"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">Today</span>
+                    <span class="info-box-text">{{ __('admin\reports\index.today') }}</span>
                     <span class="info-box-number">{{ number_format($stats['today_reports']) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['today_reports'] / $stats['total_reports']) * 100 : 0 }}%"></div>
@@ -104,7 +104,7 @@
             <div class="info-box bg-gradient-secondary">
                 <span class="info-box-icon"><i class="fas fa-calendar-week"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">This Week</span>
+                    <span class="info-box-text">{{ __('admin\reports\index.this_week') }}</span>
                     <span class="info-box-number">{{ number_format($stats['this_week_reports']) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['this_week_reports'] / $stats['total_reports']) * 100 : 0 }}%"></div>
@@ -145,7 +145,7 @@
                                                     #{{ $item->reportable_id }}
                                                 </h6>
                                                 <p class="card-text mb-2">
-                                                    <strong>{{ $item->report_count }}</strong> reports
+                                                    <strong>{{ $item->field</strong> reports
                                                 </p>
                                             </div>
                                             <div class="btn-group-vertical">
@@ -194,13 +194,13 @@
             <table class="table table-hover text-nowrap">
                 <thead class="thead-dark">
                     <tr>
-                        <th style="width: 5%">#</th>
-                        <th style="width: 15%">Type</th>
-                        <th style="width: 25%">Reported Item</th>
-                        <th style="width: 10%">Reports</th>
-                        <th style="width: 15%">Latest Report</th>
-                        <th style="width: 10%">Status</th>
-                        <th style="width: 20%">Actions</th>
+                        <th style="width: 5%">{{ __('admin\reports\index._') }}</th>
+                        <th style="width: 15%">{{ __('admin\reports\index.type') }}</th>
+                        <th style="width: 25%">{{ __('admin\reports\index.reported_item') }}</th>
+                        <th style="width: 10%">{{ __('admin\reports\index.reports') }}</th>
+                        <th style="width: 15%">{{ __('admin\reports\index.latest_report') }}</th>
+                        <th style="width: 10%">{{ __('admin\reports\index.status') }}</th>
+                        <th style="width: 20%">{{ __('admin\reports\index.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -224,20 +224,20 @@
                                             <img src="{{ $reportable->photos->first()?->src ?? asset('img/default-avatar.png') }}" 
                                                  class="img-circle mr-2" width="30" height="30" alt="User">
                                             <div>
-                                                <strong>{{ $reportable->name ?? 'Unknown User' }}</strong><br>
-                                                <small class="text-muted">{{ $reportable->email ?? 'N/A' }}</small>
+                                                <strong>{{ $reportable->field</strong><br>
+                                                <small class="text-muted">{{ $reportable->field</small>
                                             </div>
                                         </div>
                                     @elseif($type === 'ServicePost')
                                         <div>
-                                            <strong>{{ Str::limit($reportable->title ?? 'Untitled Post', 30) }}</strong><br>
+                                            <strong>{{ Str::limit($reportable->field</strong><br>
                                             <small class="text-muted">by {{ $reportable->user->name ?? 'Unknown' }}</small>
                                         </div>
                                     @else
-                                        <strong>{{ $type }} #{{ $item->reportable_id }}</strong>
+                                        <strong>{{ $type }} #{{ $item->field</strong>
                                     @endif
                                 @else
-                                    <em class="text-muted">Item not found</em>
+                                    <em class="text-muted">{{ __('admin\reports\index.item_not_found') }}</em>
                                 @endif
                             </td>
                             <td>
@@ -246,15 +246,15 @@
                                 </span>
                             </td>
                             <td>
-                                <span class="text-muted">{{ $item->latest_report ? \Carbon\Carbon::parse($item->latest_report)->format('M d, H:i') : '-' }}</span>
+                                <span class="text-muted">{{ $item->field</span>
                             </td>
                             <td>
                                 @if($item->report_count >= 5)
-                                    <span class="badge badge-danger">Critical</span>
+                                    <span class="badge badge-danger">{{ __('admin\reports\index.critical') }}</span>
                                 @elseif($item->report_count >= 3)
-                                    <span class="badge badge-warning">Warning</span>
+                                    <span class="badge badge-warning">{{ __('admin\reports\index.warning') }}</span>
                                 @else
-                                    <span class="badge badge-info">Normal</span>
+                                    <span class="badge badge-info">{{ __('admin\reports\index.normal') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -328,17 +328,17 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="actionModalTitle">Confirm Action</h5>
+                <h5 class="modal-title" id="actionModalTitle">{{ __('admin\reports\index.confirm_action') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>&times;</span>
+                    <span>{{ __('admin\reports\index._times_') }}</span>
                 </button>
             </div>
             <div class="modal-body" id="actionModalBody">
                 <!-- Content will be loaded here -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" id="confirmAction">Confirm</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\reports\index.cancel') }}</button>
+                <button type="button" class="btn btn-primary" id="confirmAction">{{ __('admin\reports\index.confirm') }}</button>
             </div>
         </div>
     </div>
