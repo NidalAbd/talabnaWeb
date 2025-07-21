@@ -3,7 +3,7 @@
         'name' => 'laravel/talbna',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => 'b26e299d447c1d28084bba415949a3c62742ee0f',
+        'reference' => '1f4a272b12c0cfd25a8f7787aadb3008b27e8661',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -673,7 +673,7 @@
         'laravel/talbna' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => 'b26e299d447c1d28084bba415949a3c62742ee0f',
+            'reference' => '1f4a272b12c0cfd25a8f7787aadb3008b27e8661',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
