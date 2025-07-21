@@ -109,8 +109,8 @@ class InvestorDashboardController extends Controller
     private function calculateTotalRevenue()
     {
         // Calculate revenue from point sales
-        $pointRevenue = point_purchase_requests::where('status', 'completed')
-            ->sum(DB::raw('points * price_per_point'));
+        $pointRevenue = point_purchase_requests::where('status', 'approved')
+            ->sum(DB::raw('points_requested * price_per_point'));
 
         // Add premium post revenue (if you have this data)
         $premiumRevenue = 0; // You can add premium post revenue calculation here
@@ -120,18 +120,18 @@ class InvestorDashboardController extends Controller
 
     private function calculateMonthlyRevenue($month)
     {
-        return point_purchase_requests::where('status', 'completed')
+        return point_purchase_requests::where('status', 'approved')
             ->whereMonth('created_at', $month->month)
             ->whereYear('created_at', $month->year)
-            ->sum(DB::raw('points * price_per_point'));
+            ->sum(DB::raw('points_requested * price_per_point'));
     }
 
     private function calculatePointsSold($month)
     {
-        return point_purchase_requests::where('status', 'completed')
+        return point_purchase_requests::where('status', 'approved')
             ->whereMonth('created_at', $month->month)
             ->whereYear('created_at', $month->year)
-            ->sum('points');
+            ->sum('points_requested');
     }
 
     private function getMonthlyRevenueData()
@@ -192,7 +192,7 @@ class InvestorDashboardController extends Controller
     {
         // Simplified calculation - points used vs points sold
         $pointsUsed = DB::table('point_transactions')->where('type', 'used')->sum('point');
-        $pointsSold = point_purchase_requests::where('status', 'completed')->sum('points');
+        $pointsSold = point_purchase_requests::where('status', 'approved')->sum('points_requested');
         return $pointsSold > 0 ? ($pointsUsed / $pointsSold) * 100 : 0;
     }
 
