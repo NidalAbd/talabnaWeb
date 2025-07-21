@@ -3,7 +3,7 @@
 @section('title', 'Investor Dashboard')
 
 @section('content')
-<div class="content-wrapper">
+<div class="container-fluid">
     <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
@@ -311,10 +311,10 @@
                                             <tr>
                                                 <td>{{ $transaction->created_at->format('M d, Y H:i') }}</td>
                                                 <td>{{ $transaction->user->name ?? 'N/A' }}</td>
-                                                <td>{{ $transaction->package->name['en'] ?? 'N/A' }}</td>
-                                                <td>{{ $transaction->amount }} {{ $transaction->currency }}</td>
+                                                <td>Points Package ({{ $transaction->points_requested }} points)</td>
+                                                <td>{{ number_format($transaction->total_price, 2) }} SAR</td>
                                                 <td>
-                                                    <span class="badge badge-{{ $transaction->status === 'completed' ? 'success' : ($transaction->status === 'pending' ? 'warning' : 'danger') }}">
+                                                    <span class="badge badge-{{ $transaction->status === 'approved' ? 'success' : ($transaction->status === 'pending' ? 'warning' : 'danger') }}">
                                                         {{ ucfirst($transaction->status) }}
                                                     </span>
                                                 </td>

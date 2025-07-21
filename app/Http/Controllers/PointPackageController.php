@@ -390,7 +390,7 @@ class PointPackageController extends Controller
         $user = Auth::user();
         
         // Check if user has enough points
-        $userPoints = $user->palservice_points->sum('points') ?? 0;
+        $userPoints = $user->palservice_points->sum('point') ?? 0;
         
         if ($userPoints < $package->points) {
             return back()->with('error', 'Insufficient points to purchase this package.');
