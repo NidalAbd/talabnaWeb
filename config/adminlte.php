@@ -327,6 +327,116 @@ return [
             'permission' => ['revenue_view', 'expense_view']
         ],
         [
+            'text' => 'Business Management',
+            'icon' => 'fas fa-briefcase',
+            'permission' => ['business_dashboard'],
+            'submenu' => [
+                [
+                    'text' => 'Dashboard',
+                    'url'  => 'business-dashboard',
+                    'icon' => 'fas fa-tachometer-alt',
+                    'permission' => ['business_dashboard']
+                ],
+                [
+                    'text' => 'Investor Relations',
+                    'url'  => 'investor-relations',
+                    'icon' => 'fas fa-handshake',
+                    'permission' => ['business_investor_relations']
+                ],
+                [
+                    'text' => 'Investment Tracking',
+                    'url'  => 'investment-tracking',
+                    'icon' => 'fas fa-chart-line',
+                    'permission' => ['business_investment_tracking']
+                ],
+                [
+                    'text' => 'Revenue Analysis',
+                    'url'  => 'revenue-analysis',
+                    'icon' => 'fas fa-dollar-sign',
+                    'permission' => ['business_revenue_analysis']
+                ],
+                [
+                    'text' => 'Expense Analysis',
+                    'url'  => 'expense-analysis',
+                    'icon' => 'fas fa-receipt',
+                    'permission' => ['business_expense_analysis']
+                ],
+                [
+                    'text' => 'Profit & Loss',
+                    'url'  => 'profit-loss',
+                    'icon' => 'fas fa-chart-pie',
+                    'permission' => ['business_profit_loss']
+                ],
+                [
+                    'text' => 'Growth Metrics',
+                    'url'  => 'growth-metrics',
+                    'icon' => 'fas fa-chart-bar',
+                    'permission' => ['business_growth_metrics']
+                ],
+                [
+                    'text' => 'Strategic Planning',
+                    'url'  => 'strategic-planning',
+                    'icon' => 'fas fa-chess',
+                    'permission' => ['business_strategic_planning']
+                ],
+            ]
+        ],
+        [
+            'text' => 'Accountant',
+            'icon' => 'fas fa-calculator',
+            'permission' => ['accountant_dashboard'],
+            'submenu' => [
+                [
+                    'text' => 'Dashboard',
+                    'url'  => 'accountant-dashboard',
+                    'icon' => 'fas fa-tachometer-alt',
+                    'permission' => ['accountant_dashboard']
+                ],
+                [
+                    'text' => 'Expenses',
+                    'url'  => 'accountant-expenses',
+                    'icon' => 'fas fa-receipt',
+                    'permission' => ['accountant_expenses']
+                ],
+                [
+                    'text' => 'Revenues',
+                    'url'  => 'accountant-revenues',
+                    'icon' => 'fas fa-dollar-sign',
+                    'permission' => ['accountant_revenues']
+                ],
+                [
+                    'text' => 'Budgets',
+                    'url'  => 'accountant-budgets',
+                    'icon' => 'fas fa-piggy-bank',
+                    'permission' => ['accountant_budgets']
+                ],
+                [
+                    'text' => 'Investments',
+                    'url'  => 'accountant-investments',
+                    'icon' => 'fas fa-chart-line',
+                    'permission' => ['accountant_investments']
+                ],
+                [
+                    'text' => 'Financial Reports',
+                    'url'  => 'accountant-financial-reports',
+                    'icon' => 'fas fa-file-alt',
+                    'permission' => ['accountant_financial_reports']
+                ],
+                [
+                    'text' => 'Tax Reports',
+                    'url'  => 'accountant-tax-reports',
+                    'icon' => 'fas fa-file-invoice-dollar',
+                    'permission' => ['accountant_tax_reports']
+                ],
+                [
+                    'text' => 'Audit Trail',
+                    'url'  => 'accountant-audit-trail',
+                    'icon' => 'fas fa-history',
+                    'permission' => ['accountant_audit_trail']
+                ],
+            ]
+        ],
+        [
             'text' => 'Points',
             'url'  => 'palservice_points',
             'icon' => 'fas fa-coins',

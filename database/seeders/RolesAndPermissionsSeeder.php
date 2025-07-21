@@ -103,12 +103,28 @@ class RolesAndPermissionsSeeder extends Seeder
             ['name' => 'management_backup_restore', 'display_name' => 'Backup & Restore','created_at' => Carbon::now()],
             
             // Business permissions
+            ['name' => 'business_dashboard', 'display_name' => 'View Business Dashboard','created_at' => Carbon::now()],
             ['name' => 'business_investor_relations', 'display_name' => 'View Investor Relations','created_at' => Carbon::now()],
             ['name' => 'business_investment_tracking', 'display_name' => 'View Investment Tracking','created_at' => Carbon::now()],
             ['name' => 'business_strategic_planning', 'display_name' => 'View Strategic Planning','created_at' => Carbon::now()],
             ['name' => 'business_monthly_budget_planning', 'display_name' => 'View Monthly Budget Planning','created_at' => Carbon::now()],
             ['name' => 'business_expense_approvals', 'display_name' => 'View Expense Approvals','created_at' => Carbon::now()],
             ['name' => 'business_budget_limits', 'display_name' => 'View Budget Limits','created_at' => Carbon::now()],
+            ['name' => 'business_revenue_analysis', 'display_name' => 'View Revenue Analysis','created_at' => Carbon::now()],
+            ['name' => 'business_expense_analysis', 'display_name' => 'View Expense Analysis','created_at' => Carbon::now()],
+            ['name' => 'business_profit_loss', 'display_name' => 'View Profit & Loss','created_at' => Carbon::now()],
+            ['name' => 'business_growth_metrics', 'display_name' => 'View Growth Metrics','created_at' => Carbon::now()],
+            
+            // Accountant permissions
+            ['name' => 'accountant_dashboard', 'display_name' => 'View Accountant Dashboard','created_at' => Carbon::now()],
+            ['name' => 'accountant_expenses', 'display_name' => 'Manage Expenses','created_at' => Carbon::now()],
+            ['name' => 'accountant_revenues', 'display_name' => 'Manage Revenues','created_at' => Carbon::now()],
+            ['name' => 'accountant_budgets', 'display_name' => 'Manage Budgets','created_at' => Carbon::now()],
+            ['name' => 'accountant_investments', 'display_name' => 'View Investments','created_at' => Carbon::now()],
+            ['name' => 'accountant_approve_expenses', 'display_name' => 'Approve Expenses','created_at' => Carbon::now()],
+            ['name' => 'accountant_financial_reports', 'display_name' => 'Generate Financial Reports','created_at' => Carbon::now()],
+            ['name' => 'accountant_tax_reports', 'display_name' => 'Generate Tax Reports','created_at' => Carbon::now()],
+            ['name' => 'accountant_audit_trail', 'display_name' => 'View Audit Trail','created_at' => Carbon::now()],
             
             // Categories and Subcategories
             ['name' => 'categories_index', 'display_name' => 'View Categories','created_at' => Carbon::now()],
@@ -226,6 +242,12 @@ class RolesAndPermissionsSeeder extends Seeder
             'description' => 'Content moderator with user and content management permissions'
         ]);
 
+        $accountantRole = Role::create([
+            'name' => 'accountant',
+            'display_name' => 'Accountant',
+            'description' => 'Financial accountant with business and financial management permissions'
+        ]);
+
         $userRole = Role::create([
             'name' => 'user',
             'display_name' => 'User',
@@ -304,6 +326,31 @@ class RolesAndPermissionsSeeder extends Seeder
             'sub_categories_index',
             'countries_index',
             'cities_index',
+        ])->get();
+
+        $accountantPermissions = Permission::whereIn('name', [
+            // Business dashboard access
+            'business_dashboard', 'business_revenue_analysis', 'business_expense_analysis',
+            'business_profit_loss', 'business_growth_metrics',
+            
+            // Accountant specific permissions
+            'accountant_dashboard', 'accountant_expenses', 'accountant_revenues',
+            'accountant_budgets', 'accountant_investments', 'accountant_approve_expenses',
+            'accountant_financial_reports', 'accountant_tax_reports', 'accountant_audit_trail',
+            
+            // Financial permissions
+            'financial_revenue', 'financial_point_sales', 'financial_expenses',
+            'financial_monthly_profit_loss', 'financial_cash_flow_projections',
+            'financial_income_statement',
+            
+            // Analytics for financial insights
+            'analytics_user_analytics', 'analytics_point_analytics',
+            
+            // Basic system access
+            'view_statistics',
+            
+            // Reports
+            'reports_index', 'reports_show',
         ])->get();
 
         $userPermissions = Permission::whereIn('name', [
@@ -422,6 +469,39 @@ class RolesAndPermissionsSeeder extends Seeder
                 'src' => fake()->randomElement(['storage/photos/avatar1.png', 'storage/photos/avatar2.png', 'storage/photos/avatar3.png', 'storage/photos/avatar4.png', 'storage/photos/avatar5.png']),
             ]);
             $ModeratorUser->photos()->save($photo);
+        }
+        
+        // Create or update accountant user
+        $accountantUser = User::updateOrCreate(
+            ['id' => 100100100103],
+            [
+                'user_name' => 'accountant',
+                'name' => 'Financial Accountant',
+                'gender' => 'ذكر',
+                'country_id' => '1',
+                'city_id' => '1',
+                'date_of_birth' => fake()->dateTime(),
+                'location_latitudes' => 31.317908,
+                'location_longitudes' => 34.345558,
+                'phones' => '00970598826058',
+                'WatsNumber' => '00970598826058',
+                'email' => 'accountant@talabna.com',
+                'email_verified_at' => now(),
+                'password' =>  bcrypt('accountant123'),
+                'is_active' => 'active',
+                'remember_token' => Str::random(10),
+            ]
+        );
+        
+        $accountantUser->roles()->sync([$accountantRole->id => ['user_type' => User::class]]);
+        $accountantUser->permissions()->sync($accountantPermissions->pluck('id')->mapWithKeys(function($id) {
+            return [$id => ['user_type' => User::class]];
+        })->toArray());
+        if (!$accountantUser->photos()->exists()) {
+            $photo = new Photos([
+                'src' => fake()->randomElement(['storage/photos/avatar1.png', 'storage/photos/avatar2.png', 'storage/photos/avatar3.png', 'storage/photos/avatar4.png', 'storage/photos/avatar5.png']),
+            ]);
+            $accountantUser->photos()->save($photo);
         }
     }
 }

@@ -1,0 +1,334 @@
+@extends('adminlte::page')
+
+@section('title', 'Business Dashboard')
+
+@section('content_header')
+    <h1>Business Dashboard</h1>
+@stop
+
+@section('content')
+<div class="container-fluid">
+    <!-- Key Metrics Cards -->
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>${{ number_format($totalInvestments, 2) }}</h3>
+                    <p>Total Investments</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <a href="{{ route('business.investment_tracking') }}" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>${{ number_format($totalRevenue, 2) }}</h3>
+                    <p>Total Revenue</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <a href="{{ route('business.revenue_analysis') }}" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>${{ number_format($totalExpenses, 2) }}</h3>
+                    <p>Total Expenses</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <a href="{{ route('business.expense_analysis') }}" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box {{ $netProfit >= 0 ? 'bg-success' : 'bg-danger' }}">
+                <div class="inner">
+                    <h3>${{ number_format($netProfit, 2) }}</h3>
+                    <p>Net Profit</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+                <a href="{{ route('business.profit_loss') }}" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Financial Overview ({{ date('Y') }})</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="financialChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Revenue vs Expenses</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="pieChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row">
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Investments</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Investor</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentInvestments as $investment)
+                                <tr>
+                                    <td>{{ $investment->investor_name }}</td>
+                                    <td>${{ number_format($investment->investment_amount, 2) }}</td>
+                                    <td>{{ $investment->investment_date->format('M d, Y') }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">No recent investments</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Expenses</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentExpenses as $expense)
+                                <tr>
+                                    <td>{{ Str::limit($expense->expense_title, 20) }}</td>
+                                    <td>${{ number_format($expense->amount, 2) }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ $expense->status == 'approved' ? 'success' : ($expense->status == 'pending' ? 'warning' : 'danger') }}">
+                                            {{ ucfirst($expense->status) }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">No recent expenses</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Revenue</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Source</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($recentRevenue as $revenue)
+                                <tr>
+                                    <td>{{ Str::limit($revenue->revenue_title, 20) }}</td>
+                                    <td>${{ number_format($revenue->amount, 2) }}</td>
+                                    <td>{{ $revenue->revenue_date->format('M d, Y') }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="3" class="text-center">No recent revenue</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Quick Actions</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{{ route('business.investor_relations') }}" class="btn btn-info btn-block">
+                                <i class="fas fa-users"></i> Manage Investors
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ route('business.expense_approvals') }}" class="btn btn-warning btn-block">
+                                <i class="fas fa-check-circle"></i> Approve Expenses
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ route('business.monthly_budget_planning') }}" class="btn btn-success btn-block">
+                                <i class="fas fa-calendar"></i> Budget Planning
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{{ route('business.profit_loss') }}" class="btn btn-primary btn-block">
+                                <i class="fas fa-chart-bar"></i> P&L Report
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@stop
+
+@section('css')
+<style>
+    .small-box {
+        margin-bottom: 20px;
+    }
+    .card {
+        margin-bottom: 20px;
+    }
+</style>
+@stop
+
+@section('js')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Financial Overview Chart
+    const financialCtx = document.getElementById('financialChart').getContext('2d');
+    const financialChart = new Chart(financialCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Revenue',
+                data: @json($monthlyRevenue->pluck('total')),
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Expenses',
+                data: @json($monthlyExpenses->pluck('total')),
+                borderColor: '#ffc107',
+                backgroundColor: 'rgba(255, 193, 7, 0.1)',
+                tension: 0.4,
+                fill: true
+            }, {
+                label: 'Investments',
+                data: @json($monthlyInvestments->pluck('total')),
+                borderColor: '#17a2b8',
+                backgroundColor: 'rgba(23, 162, 184, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+
+    // Pie Chart for Revenue vs Expenses
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const pieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Revenue', 'Expenses'],
+            datasets: [{
+                data: [{{ $totalRevenue }}, {{ $totalExpenses }}],
+                backgroundColor: ['#28a745', '#ffc107'],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+});
+</script>
+@stop 

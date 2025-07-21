@@ -1,0 +1,339 @@
+@extends('adminlte::page')
+
+@section('title', 'Accountant Dashboard')
+
+@section('content_header')
+    <h1>Accountant Dashboard</h1>
+@stop
+
+@section('content')
+<div class="container-fluid">
+    <!-- Key Financial Metrics Cards -->
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>${{ number_format($totalRevenue, 2) }}</h3>
+                    <p>Total Revenue</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+                <a href="{{ route('accountant.revenues') }}" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>${{ number_format($totalExpenses, 2) }}</h3>
+                    <p>Total Expenses</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+                <a href="{{ route('accountant.expenses') }}" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box {{ $netProfit >= 0 ? 'bg-info' : 'bg-danger' }}">
+                <div class="inner">
+                    <h3>${{ number_format($netProfit, 2) }}</h3>
+                    <p>Net Profit</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <a href="{{ route('accountant.financial_reports') }}" class="small-box-footer">
+                    More info <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-primary">
+                <div class="inner">
+                    <h3>{{ $pendingExpenses }}</h3>
+                    <p>Pending Approvals</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <a href="{{ route('accountant.expenses') }}?status=pending" class="small-box-footer">
+                    Review <i class="fas fa-arrow-circle-right"></i>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Financial Overview ({{ date('Y') }})</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="financialChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Revenue vs Expenses</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="pieChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Expenses</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($recentExpenses as $expense)
+                                <tr>
+                                    <td>{{ $expense->expense_title }}</td>
+                                    <td>${{ number_format($expense->amount, 2) }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ $expense->status === 'approved' ? 'success' : ($expense->status === 'pending' ? 'warning' : 'danger') }}">
+                                            {{ ucfirst($expense->status) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $expense->expense_date->format('M d, Y') }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Revenue</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Amount</th>
+                                    <th>Type</th>
+                                    <th>Date</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($recentRevenue as $revenue)
+                                <tr>
+                                    <td>{{ $revenue->revenue_title }}</td>
+                                    <td>${{ number_format($revenue->amount, 2) }}</td>
+                                    <td>
+                                        <span class="badge badge-info">
+                                            {{ ucfirst(str_replace('_', ' ', $revenue->revenue_type)) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $revenue->revenue_date->format('M d, Y') }}</td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pending Approvals -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Pending Expense Approvals</h3>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Amount</th>
+                                    <th>Category</th>
+                                    <th>Vendor</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach($pendingApprovals as $expense)
+                                <tr>
+                                    <td>{{ $expense->expense_title }}</td>
+                                    <td>${{ number_format($expense->amount, 2) }}</td>
+                                    <td>{{ ucfirst($expense->expense_category) }}</td>
+                                    <td>{{ $expense->vendor_name }}</td>
+                                    <td>{{ $expense->expense_date->format('M d, Y') }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success approve-expense" data-id="{{ $expense->id }}">
+                                            <i class="fas fa-check"></i> Approve
+                                        </button>
+                                        <button class="btn btn-sm btn-danger reject-expense" data-id="{{ $expense->id }}">
+                                            <i class="fas fa-times"></i> Reject
+                                        </button>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@stop
+
+@section('css')
+<style>
+    .small-box .icon {
+        color: rgba(0,0,0,.15);
+    }
+</style>
+@stop
+
+@section('js')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Financial Chart
+    const financialCtx = document.getElementById('financialChart').getContext('2d');
+    const financialChart = new Chart(financialCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+            datasets: [{
+                label: 'Revenue',
+                data: @json($monthlyRevenue->pluck('total')),
+                borderColor: 'rgb(75, 192, 192)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                tension: 0.1
+            }, {
+                label: 'Expenses',
+                data: @json($monthlyExpenses->pluck('total')),
+                borderColor: 'rgb(255, 99, 132)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Pie Chart
+    const pieCtx = document.getElementById('pieChart').getContext('2d');
+    const pieChart = new Chart(pieCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Revenue', 'Expenses'],
+            datasets: [{
+                data: [{{ $totalRevenue }}, {{ $totalExpenses }}],
+                backgroundColor: [
+                    'rgba(75, 192, 192, 0.8)',
+                    'rgba(255, 99, 132, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(75, 192, 192, 1)',
+                    'rgba(255, 99, 132, 1)'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Expense approval handlers
+    $('.approve-expense').click(function() {
+        const expenseId = $(this).data('id');
+        if (confirm('Are you sure you want to approve this expense?')) {
+            $.ajax({
+                url: `/accountant-expenses/${expenseId}/approve`,
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                },
+                error: function() {
+                    alert('Error approving expense');
+                }
+            });
+        }
+    });
+
+    $('.reject-expense').click(function() {
+        const expenseId = $(this).data('id');
+        if (confirm('Are you sure you want to reject this expense?')) {
+            $.ajax({
+                url: `/accountant-expenses/${expenseId}/reject`,
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+                },
+                success: function(response) {
+                    if (response.success) {
+                        location.reload();
+                    }
+                },
+                error: function() {
+                    alert('Error rejecting expense');
+                }
+            });
+        }
+    });
+});
+</script>
+@stop 

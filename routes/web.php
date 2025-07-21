@@ -494,12 +494,38 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::get('backup-restore', [App\Http\Controllers\ManagementController::class, 'backupRestore'])->name('management.backup_restore');
 
     // Business Operations & Planning
+    Route::get('business-dashboard', [App\Http\Controllers\BusinessController::class, 'dashboard'])->name('business.dashboard');
     Route::get('investor-relations', [App\Http\Controllers\BusinessController::class, 'investorRelations'])->name('business.investor_relations');
     Route::get('investment-tracking', [App\Http\Controllers\BusinessController::class, 'investmentTracking'])->name('business.investment_tracking');
     Route::get('strategic-planning', [App\Http\Controllers\BusinessController::class, 'strategicPlanning'])->name('business.strategic_planning');
     Route::get('monthly-budget-planning', [App\Http\Controllers\BusinessController::class, 'monthlyBudgetPlanning'])->name('business.monthly_budget_planning');
     Route::get('expense-approvals', [App\Http\Controllers\BusinessController::class, 'expenseApprovals'])->name('business.expense_approvals');
     Route::get('budget-limits', [App\Http\Controllers\BusinessController::class, 'budgetLimits'])->name('business.budget_limits');
+    Route::get('revenue-analysis', [App\Http\Controllers\BusinessController::class, 'revenueAnalysis'])->name('business.revenue_analysis');
+    Route::get('expense-analysis', [App\Http\Controllers\BusinessController::class, 'expenseAnalysis'])->name('business.expense_analysis');
+    Route::get('profit-loss', [App\Http\Controllers\BusinessController::class, 'profitLoss'])->name('business.profit_loss');
+    Route::get('growth-metrics', [App\Http\Controllers\BusinessController::class, 'growthMetrics'])->name('business.growth_metrics');
+
+    // Accountant Routes
+    Route::get('accountant-dashboard', [App\Http\Controllers\AccountantController::class, 'dashboard'])->name('accountant.dashboard');
+    Route::get('accountant-expenses', [App\Http\Controllers\AccountantController::class, 'expenses'])->name('accountant.expenses');
+    Route::post('accountant-expenses/{id}/approve', [App\Http\Controllers\AccountantController::class, 'approveExpense'])->name('accountant.approve_expense');
+    Route::post('accountant-expenses/{id}/reject', [App\Http\Controllers\AccountantController::class, 'rejectExpense'])->name('accountant.reject_expense');
+    Route::get('accountant-revenues', [App\Http\Controllers\AccountantController::class, 'revenues'])->name('accountant.revenues');
+    Route::post('accountant-revenues', [App\Http\Controllers\AccountantController::class, 'addRevenue'])->name('accountant.add_revenue');
+    Route::get('accountant-budgets', [App\Http\Controllers\AccountantController::class, 'budgets'])->name('accountant.budgets');
+    Route::post('accountant-budgets', [App\Http\Controllers\AccountantController::class, 'createBudget'])->name('accountant.create_budget');
+    Route::get('accountant-investments', [App\Http\Controllers\AccountantController::class, 'investments'])->name('accountant.investments');
+    Route::get('accountant-financial-reports', [App\Http\Controllers\AccountantController::class, 'financialReports'])->name('accountant.financial_reports');
+    Route::get('accountant-tax-reports', [App\Http\Controllers\AccountantController::class, 'taxReports'])->name('accountant.tax_reports');
+    Route::get('accountant-audit-trail', [App\Http\Controllers\AccountantController::class, 'auditTrail'])->name('accountant.audit_trail');
+
+    // Business CRUD Routes
+    Route::post('business/investments', [App\Http\Controllers\BusinessController::class, 'storeInvestment'])->name('business.investments.store');
+    Route::post('business/payments', [App\Http\Controllers\BusinessController::class, 'storePayment'])->name('business.payments.store');
+    Route::post('business/budgets', [App\Http\Controllers\BusinessController::class, 'storeBudget'])->name('business.budgets.store');
+    Route::post('business/expenses/{id}/approve', [App\Http\Controllers\BusinessController::class, 'approveExpense'])->name('business.expenses.approve');
+    Route::post('business/expenses/{id}/reject', [App\Http\Controllers\BusinessController::class, 'rejectExpense'])->name('business.expenses.reject');
 
     // System Management
     Route::get('system-logs', [App\Http\Controllers\SystemController::class, 'systemLogs'])->name('system.logs');
