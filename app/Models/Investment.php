@@ -37,11 +37,16 @@ class Investment extends Model
     protected $casts = [
         'investment_date' => 'date',
         'next_payment_date' => 'date',
-        'expected_return' => 'decimal:2',
-        'return_percentage' => 'decimal:2',
+        'expected_roi' => 'decimal:2',
+        'investment_period' => 'integer',
+        'investor_share' => 'decimal:2',
+        'owner_share' => 'decimal:2',
         'investment_amount' => 'decimal:2',
         'total_paid' => 'decimal:2',
         'remaining_amount' => 'decimal:2',
+        'profit_generated' => 'decimal:2',
+        'profit_distributed' => 'decimal:2',
+        'profit_remaining' => 'decimal:2',
         'payment_schedule' => 'array'
     ];
 
@@ -71,5 +76,43 @@ class Investment extends Model
             return round(($this->total_paid / $this->investment_amount) * 100, 2);
         }
         return 0;
+    }
+
+    public function getProfitSharingAttribute()
+    {
+        return [
+            'investor_share' => $this->investor_share,
+            'owner_share' => $this->owner_share,
+            'investor_amount' => $this->profit_generated * ($this->investor_share / 100),
+            'owner_amount' => $this->profit_generated * ($this->owner_share / 100)
+        ];
+    }
+
+    public function getExpectedProfitAttribute()
+    {
+        return $this->investment_amount * ($this->expected_roi / 100);
+    }
+
+    public function getMonthsRemainingAttribute()
+    {
+        $monthsPassed = $this->investment_date->diffInMonths(now());
+        return max(0, $this->investment_period - $monthsPassed);
+    }
+
+    public function isProfitable()
+    {
+        return $this->profit_generated > 0;
+    }
+
+    public function canDistributeProfit()
+    {
+        return $this->status === 'active' && $this->profit_generated > 0;
+    }
+
+    public function distributeProfit($amount)
+    {
+        $this->profit_distributed += $amount;
+        $this->profit_remaining = $this->profit_generated - $this->profit_distributed;
+        $this->save();
     }
 } 
