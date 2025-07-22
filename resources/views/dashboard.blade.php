@@ -3,7 +3,7 @@
 @section('content_header')
     @include('partials.breadcrumbs')
     @include('partials.alert')
-
+@endsection
 @section('content')
     @include('partials.alert')
     <div class="container-fluid">
