@@ -26,7 +26,6 @@
         "yajra/laravel-datatables-oracle": "^10.4"
     },
     "require-dev": {
-        "joedixon/laravel-translation": "^2.2",
         "laravel/pint": "^1.0",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",

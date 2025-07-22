@@ -34,7 +34,6 @@ class ComposerStaticInit3303c15f6740c8e0ebf0d0f1b63a8cc8
         'f0906e6318348a765ffb6eb24e0d0938' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Foundation/helpers.php',
         '58571171fd5812e6e447dce228f52f4d' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Support/helpers.php',
         '1f87db08236948d07391152dccb70f04' => __DIR__ . '/..' . '/google/apiclient-services/autoload.php',
-        'a1af1fc0cffb5f61cbaf64dbe030fdb9' => __DIR__ . '/..' . '/laravel/legacy-factories/helpers.php',
         '6124b4c8570aa390c21fafd04a26c69f' => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy/deep_copy.php',
         '801c31d8ed748cfa537fa45402288c95' => __DIR__ . '/..' . '/psy/psysh/src/functions.php',
         'a8d3953fd9959404dd22d3dfcd0a79f0' => __DIR__ . '/..' . '/google/apiclient/src/aliases.php',
@@ -178,7 +177,6 @@ class ComposerStaticInit3303c15f6740c8e0ebf0d0f1b63a8cc8
         ),
         'J' => 
         array (
-            'JoeDixon\\Translation\\' => 21,
             'JmesPath\\' => 9,
             'JeroenNoten\\LaravelAdminLte\\' => 28,
         ),
@@ -186,7 +184,6 @@ class ComposerStaticInit3303c15f6740c8e0ebf0d0f1b63a8cc8
         array (
             'Illuminate\\Support\\' => 19,
             'Illuminate\\Foundation\\Auth\\' => 27,
-            'Illuminate\\Database\\Eloquent\\' => 29,
             'Illuminate\\' => 11,
         ),
         'G' => 
@@ -645,10 +642,6 @@ class ComposerStaticInit3303c15f6740c8e0ebf0d0f1b63a8cc8
         array (
             0 => __DIR__ . '/..' . '/kreait/firebase-php/src/Firebase',
         ),
-        'JoeDixon\\Translation\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/joedixon/laravel-translation/src',
-        ),
         'JmesPath\\' => 
         array (
             0 => __DIR__ . '/..' . '/mtdowling/jmespath.php/src',
@@ -666,10 +659,6 @@ class ComposerStaticInit3303c15f6740c8e0ebf0d0f1b63a8cc8
         'Illuminate\\Foundation\\Auth\\' => 
         array (
             0 => __DIR__ . '/..' . '/laravel/ui/auth-backend',
-        ),
-        'Illuminate\\Database\\Eloquent\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/laravel/legacy-factories/src',
         ),
         'Illuminate\\' => 
         array (
@@ -902,10 +891,12 @@ class ComposerStaticInit3303c15f6740c8e0ebf0d0f1b63a8cc8
         'App\\Console\\Commands\\CleanupBadTranslationKeys' => __DIR__ . '/../..' . '/app/Console/Commands/CleanupBadTranslationKeys.php',
         'App\\Console\\Commands\\ExpireBadges' => __DIR__ . '/../..' . '/app/Console/Commands/ExpireBadges.php',
         'App\\Console\\Commands\\ExportDatabaseStructure' => __DIR__ . '/../..' . '/app/Console/Commands/ExportDatabaseStructure.php',
+        'App\\Console\\Commands\\FillEmptyEnglishTranslations' => __DIR__ . '/../..' . '/app/Console/Commands/FillEmptyEnglishTranslations.php',
         'App\\Console\\Commands\\FixBladeOptionSyntax' => __DIR__ . '/../..' . '/app/Console/Commands/FixBladeOptionSyntax.php',
         'App\\Console\\Commands\\FixBladeSelectOptions' => __DIR__ . '/../..' . '/app/Console/Commands/FixBladeSelectOptions.php',
         'App\\Console\\Commands\\ReplaceBladeTextWithTranslations' => __DIR__ . '/../..' . '/app/Console/Commands/ReplaceBladeTextWithTranslations.php',
         'App\\Console\\Commands\\ScanBladeTranslations' => __DIR__ . '/../..' . '/app/Console/Commands/ScanBladeTranslations.php',
+        'App\\Console\\Commands\\SyncLtmToLanguageLines' => __DIR__ . '/../..' . '/app/Console/Commands/SyncLtmToLanguageLines.php',
         'App\\Console\\Commands\\UpdateServicePostsBadgeStatus' => __DIR__ . '/../..' . '/app/Console/Commands/UpdateServicePostsBadgeStatus.php',
         'App\\Console\\Kernel' => __DIR__ . '/../..' . '/app/Console/Kernel.php',
         'App\\Exceptions\\Handler' => __DIR__ . '/../..' . '/app/Exceptions/Handler.php',
@@ -1022,6 +1013,7 @@ class ComposerStaticInit3303c15f6740c8e0ebf0d0f1b63a8cc8
         'App\\Models\\Investment' => __DIR__ . '/../..' . '/app/Models/Investment.php',
         'App\\Models\\InvestmentPayment' => __DIR__ . '/../..' . '/app/Models/InvestmentPayment.php',
         'App\\Models\\Level' => __DIR__ . '/../..' . '/app/Models/Level.php',
+        'App\\Models\\LtmTranslation' => __DIR__ . '/../..' . '/app/Models/LtmTranslation.php',
         'App\\Models\\Notification' => __DIR__ . '/../..' . '/app/Models/Notification.php',
         'App\\Models\\NotificationLog' => __DIR__ . '/../..' . '/app/Models/NotificationLog.php',
         'App\\Models\\Permission' => __DIR__ . '/../..' . '/app/Models/Permission.php',
@@ -33113,12 +33105,9 @@ class ComposerStaticInit3303c15f6740c8e0ebf0d0f1b63a8cc8
         'Illuminate\\Database\\Eloquent\\Factories\\HasFactory' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Database/Eloquent/Factories/HasFactory.php',
         'Illuminate\\Database\\Eloquent\\Factories\\Relationship' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Relationship.php',
         'Illuminate\\Database\\Eloquent\\Factories\\Sequence' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Database/Eloquent/Factories/Sequence.php',
-        'Illuminate\\Database\\Eloquent\\Factory' => __DIR__ . '/..' . '/laravel/legacy-factories/src/Factory.php',
-        'Illuminate\\Database\\Eloquent\\FactoryBuilder' => __DIR__ . '/..' . '/laravel/legacy-factories/src/FactoryBuilder.php',
         'Illuminate\\Database\\Eloquent\\HigherOrderBuilderProxy' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Database/Eloquent/HigherOrderBuilderProxy.php',
         'Illuminate\\Database\\Eloquent\\InvalidCastException' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Database/Eloquent/InvalidCastException.php',
         'Illuminate\\Database\\Eloquent\\JsonEncodingException' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Database/Eloquent/JsonEncodingException.php',
-        'Illuminate\\Database\\Eloquent\\LegacyFactoryServiceProvider' => __DIR__ . '/..' . '/laravel/legacy-factories/src/LegacyFactoryServiceProvider.php',
         'Illuminate\\Database\\Eloquent\\MassAssignmentException' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Database/Eloquent/MassAssignmentException.php',
         'Illuminate\\Database\\Eloquent\\MassPrunable' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Database/Eloquent/MassPrunable.php',
         'Illuminate\\Database\\Eloquent\\MissingAttributeException' => __DIR__ . '/..' . '/laravel/framework/src/Illuminate/Database/Eloquent/MissingAttributeException.php',
@@ -33962,33 +33951,6 @@ class ComposerStaticInit3303c15f6740c8e0ebf0d0f1b63a8cc8
         'JmesPath\\TreeCompiler' => __DIR__ . '/..' . '/mtdowling/jmespath.php/src/TreeCompiler.php',
         'JmesPath\\TreeInterpreter' => __DIR__ . '/..' . '/mtdowling/jmespath.php/src/TreeInterpreter.php',
         'JmesPath\\Utils' => __DIR__ . '/..' . '/mtdowling/jmespath.php/src/Utils.php',
-        'JoeDixon\\Translation\\Console\\Commands\\AddLanguageCommand' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Console/Commands/AddLanguageCommand.php',
-        'JoeDixon\\Translation\\Console\\Commands\\AddTranslationKeyCommand' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Console/Commands/AddTranslationKeyCommand.php',
-        'JoeDixon\\Translation\\Console\\Commands\\BaseCommand' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Console/Commands/BaseCommand.php',
-        'JoeDixon\\Translation\\Console\\Commands\\ListLanguagesCommand' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Console/Commands/ListLanguagesCommand.php',
-        'JoeDixon\\Translation\\Console\\Commands\\ListMissingTranslationKeys' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Console/Commands/ListMissingTranslationKeys.php',
-        'JoeDixon\\Translation\\Console\\Commands\\SynchroniseMissingTranslationKeys' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Console/Commands/SynchroniseMissingTranslationKeys.php',
-        'JoeDixon\\Translation\\Console\\Commands\\SynchroniseTranslationsCommand' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Console/Commands/SynchroniseTranslationsCommand.php',
-        'JoeDixon\\Translation\\ContractDatabaseLoader' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/ContractDatabaseLoader.php',
-        'JoeDixon\\Translation\\Drivers\\Database' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Drivers/Database.php',
-        'JoeDixon\\Translation\\Drivers\\DriverInterface' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Drivers/DriverInterface.php',
-        'JoeDixon\\Translation\\Drivers\\File' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Drivers/File.php',
-        'JoeDixon\\Translation\\Drivers\\Translation' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Drivers/Translation.php',
-        'JoeDixon\\Translation\\Events\\TranslationAdded' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Events/TranslationAdded.php',
-        'JoeDixon\\Translation\\Exceptions\\LanguageExistsException' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Exceptions/LanguageExistsException.php',
-        'JoeDixon\\Translation\\Exceptions\\LanguageKeyExistsException' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Exceptions/LanguageKeyExistsException.php',
-        'JoeDixon\\Translation\\Http\\Controllers\\LanguageController' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Http/Controllers/LanguageController.php',
-        'JoeDixon\\Translation\\Http\\Controllers\\LanguageTranslationController' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Http/Controllers/LanguageTranslationController.php',
-        'JoeDixon\\Translation\\Http\\Requests\\LanguageRequest' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Http/Requests/LanguageRequest.php',
-        'JoeDixon\\Translation\\Http\\Requests\\TranslationRequest' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Http/Requests/TranslationRequest.php',
-        'JoeDixon\\Translation\\InterfaceDatabaseLoader' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/InterfaceDatabaseLoader.php',
-        'JoeDixon\\Translation\\Language' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Language.php',
-        'JoeDixon\\Translation\\Rules\\LanguageNotExists' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Rules/LanguageNotExists.php',
-        'JoeDixon\\Translation\\Scanner' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Scanner.php',
-        'JoeDixon\\Translation\\Translation' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/Translation.php',
-        'JoeDixon\\Translation\\TranslationBindingsServiceProvider' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/TranslationBindingsServiceProvider.php',
-        'JoeDixon\\Translation\\TranslationManager' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/TranslationManager.php',
-        'JoeDixon\\Translation\\TranslationServiceProvider' => __DIR__ . '/..' . '/joedixon/laravel-translation/src/TranslationServiceProvider.php',
         'JsonException' => __DIR__ . '/..' . '/symfony/polyfill-php73/Resources/stubs/JsonException.php',
         'Kreait\\Firebase\\Auth' => __DIR__ . '/..' . '/kreait/firebase-php/src/Firebase/Auth.php',
         'Kreait\\Firebase\\Auth\\ActionCodeSettings' => __DIR__ . '/..' . '/kreait/firebase-php/src/Firebase/Auth/ActionCodeSettings.php',
