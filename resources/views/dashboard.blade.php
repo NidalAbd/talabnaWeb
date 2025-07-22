@@ -1,10 +1,8 @@
 @extends('adminlte::page')
 @section('title', 'Dashboard')
-
 @section('content_header')
     @include('partials.breadcrumbs')
     @include('partials.alert')
-@stop
 
 @section('content')
     @include('partials.alert')
