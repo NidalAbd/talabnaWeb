@@ -53,11 +53,6 @@ Route::get('/api/validate-deep-link/{route}/{id}', [DeepLinkController::class, '
 // Authentication Routes
 Auth::routes();
 
-// Redirect regular users trying to access dashboard
-Route::get('/home', function() {
-    return redirect('/');
-})->middleware(['auth'])->name('home.redirect');
-
 /*
 |--------------------------------------------------------------------------
 | Admin & Authenticated Routes
