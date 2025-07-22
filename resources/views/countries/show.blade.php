@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-globe text-primary mr-2"></i> Country Details</h1>
         <div>
-            <a href="{{ route('countries.edit', $country->count()) }}" class="btn btn-warning">
+            <a href="{{ route('countries.edit', $country->id) }}" class="btn btn-warning">
                 <i class="fas fa-edit mr-1"></i> Edit
             </a>
             <a href="{{ route('countries.index') }}" class="btn btn-secondary">
@@ -34,40 +34,40 @@
                             @else
                                 <div class="text-center p-4 bg-light rounded">
                                     <i class="fas fa-flag fa-3x text-muted"></i>
-                                    <p class="mt-2 text-muted">{{('countries\show.no_flag_image_available') }}</p>
+                                    <p class="mt-2 text-muted">No flag image available</p>
                                 </div>
                             @endif
                         </div>
 
                         <table class="table table-bordered">
                             <tr>
-                                <th style="width: 40%;">{{('countries\show.id') }}</th>
-                                <td>{{ $country->count() }}</td>
+                                <th style="width: 40%;">ID</th>
+                                <td>{{ $country->id }}</td>
                             </tr>
                             <tr>
-                                <th>{{('countries\show.name_english_') }}</th>
-                                <td>{{ $country->name['en'] }}</td>
+                                <th>Name (English)</th>
+                                <td>{{ $country->name['en'] ?? 'N/A' }}</td>
                             </tr>
                             <tr>
-                                <th>{{('countries\show.name_arabic_') }}</th>
-                                <td dir="rtl">{{ $country->name['ar'] }}</td>
+                                <th>Name (Arabic)</th>
+                                <td dir="rtl">{{ $country->name['ar'] ?? 'N/A' }}</td>
                             </tr>
                             <tr>
-                                <th>{{('countries\show.country_code') }}</th>
-                                <td>{{ $country->country_code }}</td>
+                                <th>Country Code</th>
+                                <td>{{ $country->country_code ?? 'N/A' }}</td>
                             </tr>
                             <tr>
-                                <th>{{('countries\show.created_at') }}</th>
-                                <td>{{ $country->created_at }}</td>
+                                <th>Created At</th>
+                                <td>{{ $country->created_at->format('M d, Y H:i') }}</td>
                             </tr>
                             <tr>
-                                <th>{{('countries\show.updated_at') }}</th>
-                                <td>{{ $country->updated_at }}</td>
+                                <th>Updated At</th>
+                                <td>{{ $country->updated_at->format('M d, Y H:i') }}</td>
                             </tr>
                             <tr>
-                                <th>{{('countries\show.status') }}</th>
+                                <th>Status</th>
                                 <td>
-                                    <span class="badge badge-success">{{('countries\show.active') }}</span>
+                                    <span class="badge badge-success">Active</span>
                                 </td>
                             </tr>
                         </table>
@@ -84,16 +84,16 @@
                     <div class="card-body">
                         <table class="table table-bordered">
                             <tr>
-                                <th style="width: 40%;">{{('countries\show.currency_code') }}</th>
-                                <td>{{ $country->currency_code }}</td>
+                                <th style="width: 40%;">Currency Code</th>
+                                <td>{{ $country->currency_code ?? 'N/A' }}</td>
                             </tr>
                             <tr>
-                                <th>{{('countries\show.currency_name_english_') }}</th>
-                                <td>{{ $country->currency_name['en'] }}</td>
+                                <th>Currency Name (English)</th>
+                                <td>{{ $country->currency_name['en'] ?? 'N/A' }}</td>
                             </tr>
                             <tr>
-                                <th>{{('countries\show.currency_name_arabic_') }}</th>
-                                <td dir="rtl">{{ $country->currency_name['ar'] }}</td>
+                                <th>Currency Name (Arabic)</th>
+                                <td dir="rtl">{{ $country->currency_name['ar'] ?? 'N/A' }}</td>
                             </tr>
                         </table>
                     </div>
@@ -116,28 +116,28 @@
                             <table class="table table-hover table-striped mb-0">
                                 <thead class="thead-light">
                                 <tr>
-                                    <th>{{('countries\show._') }}</th>
-                                    <th>{{('countries\show.image') }}</th>
-                                    <th>{{('countries\show.city_name') }}</th>
-                                    <th>{{('countries\show.status') }}</th>
-                                    <th>{{('countries\show.actions') }}</th>
+                                    <th>#</th>
+                                    <th>Image</th>
+                                    <th>City Name</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @forelse($country->cities as $city)
                                     <tr>
-                                        <td>{{ $city->count() }}</td>
+                                        <td>{{ $city->id }}</td>
                                         <td class="text-center">
                                             @if($city->photos->count() > 0)
                                                 <img src="{{ asset($city->photos->first()->src) }}"
                                                      class="img-thumbnail" alt="{{ $city->getTranslatedName() }}"
                                                      style="max-height: 50px;">
                                             @else
-                                                <span class="badge badge-secondary">{{('countries\show.no_image') }}</span>
+                                                <span class="badge badge-secondary">No Image</span>
                                             @endif
                                         </td>
                                         <td>
-                                            <div class="font-weight-bold">{{ $city->getTranslatedName() ?? 'FIXME' }}</div>
+                                            <div class="font-weight-bold">{{ $city->getTranslatedName() }}</div>
                                             <small class="text-muted">
                                                 @if(app()->getLocale() != 'en' && isset($city->name['en']))
                                                     ({{ $city->name['en'] }})
@@ -147,19 +147,19 @@
                                             </small>
                                         </td>
                                         <td>
-                                            <span class="badge badge-success">{{('countries\show.active') }}</span>
+                                            <span class="badge badge-success">Active</span>
                                         </td>
                                         <td>
                                             <div class="btn-group">
-                                                <a href="{{ route('cities.show', $city->count()) }}"
+                                                <a href="{{ route('cities.show', $city->id) }}"
                                                    class="btn btn-sm btn-info" title="View">
                                                     <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{{ route('cities.edit', $city->count()) }}"
+                                                <a href="{{ route('cities.edit', $city->id) }}"
                                                    class="btn btn-sm btn-warning" title="Edit">
                                                     <i class="fas fa-edit"></i>
                                                 </a>
-                                                <form action="{{ route('cities.destroy', $city->count()) }}"
+                                                <form action="{{ route('cities.destroy', $city->id) }}"
                                                       method="POST" class="d-inline delete-form">
                                                     @csrf
                                                     @method('DELETE')
@@ -175,7 +175,7 @@
                                         <td colspan="5" class="text-center py-4">
                                             <div class="d-flex flex-column align-items-center">
                                                 <i class="fas fa-city fa-3x text-muted mb-3"></i>
-                                                <h5 class="font-weight-normal text-muted">{{('countries\show.no_cities_found_for_this_country') }}</h5>
+                                                <h5 class="font-weight-normal text-muted">No cities found for this country</h5>
                                                 <a href="{{ route('cities.create') }}" class="btn btn-primary mt-3">
                                                     <i class="fas fa-plus mr-1"></i> Add First City
                                                 </a>
@@ -219,10 +219,3 @@
         </script>
     @endpush
 @endsection
-
-
-
-
-
-
-

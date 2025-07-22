@@ -30,7 +30,7 @@
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     {{ session('success') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">{{('service_posts\create._times_') }}</span>
+                                        <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                             @endif
@@ -39,7 +39,7 @@
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     {{ session('error') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">{{('service_posts\create._times_') }}</span>
+                                        <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                             @endif
@@ -48,7 +48,7 @@
                                 <div class="col-12">
                                     <div class="alert alert-info">
                                         <i class="fas fa-info-circle mr-1"></i>
-                                        <strong>{{('service_posts\create.your_point_balance_') }}</strong> {{ Auth::user()->pointsBalance ?? 0 }} points
+                                        <strong>Your Point Balance:</strong> {{ Auth::user()->pointsBalance ?? 0 }} points
                                     </div>
                                 </div>
                             </div>
@@ -66,7 +66,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="title" class="font-weight-bold">
-                                                    Title <span class="text-danger">{{('service_posts\create._') }}</span>
+                                                    Title <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="text" id="title" name="title"
                                                        class="form-control @error('title') is-invalid @enderror"
@@ -82,7 +82,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="description" class="font-weight-bold">
-                                                    Description <span class="text-danger">{{('service_posts\create._') }}</span>
+                                                    Description <span class="text-danger">*</span>
                                                 </label>
                                                 <textarea id="description" name="description" rows="5"
                                                           class="form-control @error('description') is-invalid @enderror"
@@ -98,12 +98,12 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="type" class="font-weight-bold">
-                                                    Type <span class="text-danger">{{('service_posts\create._') }}</span>
+                                                    Type <span class="text-danger">*</span>
                                                 </label>
                                                 <select name="type" id="type"
                                                         class="form-control @error('type') is-invalid @enderror" required>
-                                                    <option value="عرض" {{ old('type') == 'عرض' ? 'selected' : '' }}>{{('service_posts\create.offer') }}</option>
-                                                    <option value="طلب" {{ old('type') == 'طلب' ? 'selected' : '' }}>{{('service_posts\create.request') }}</option>
+                                                    <option value="عرض" {{ old('type') == 'عرض' ? 'selected' : '' }}>Offer</option>
+                                                    <option value="طلب" {{ old('type') == 'طلب' ? 'selected' : '' }}>Request</option>
                                                 </select>
                                                 @error('type')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -113,13 +113,13 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="state" class="font-weight-bold">
-                                                    Status <span class="text-danger">{{('service_posts\create._') }}</span>
+                                                    Status <span class="text-danger">*</span>
                                                 </label>
                                                 <select name="state" id="state"
                                                         class="form-control @error('state') is-invalid @enderror" required>
-                                                    <option value="published" {{ old('state') == 'published' ? 'selected' : '' }}>{{('service_posts\create.published') }}</option>
-                                                    <option value="archive" {{ old('state') == 'archive' ? 'selected' : '' }}>{{('service_posts\create.archive') }}</option>
-                                                    <option value="not published" {{ old('state') == 'not published' ? 'selected' : '' }}>{{('service_posts\create.draft') }}</option>
+                                                    <option value="published" {{ old('state') == 'published' ? 'selected' : '' }}>Published</option>
+                                                    <option value="archive" {{ old('state') == 'archive' ? 'selected' : '' }}>Archive</option>
+                                                    <option value="not published" {{ old('state') == 'not published' ? 'selected' : '' }}>Draft</option>
                                                 </select>
                                                 @error('state')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -143,13 +143,13 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="categories_id" class="font-weight-bold">
-                                                    Category <span class="text-danger">{{('service_posts\create._') }}</span>
+                                                    Category <span class="text-danger">*</span>
                                                 </label>
                                                 <select name="categories_id" id="categories_id"
                                                         class="form-control @error('categories_id') is-invalid @enderror" required>
-                                                    <option value="">{{('service_posts\create.select_category') }}</option>
+                                                    <option value="">Select Category</option>
                                                     @foreach($categories as $category)
-                                                        <option value="{{ $category->count() }}" {{ old('categories_id') == $category->id ? 'selected' : '' }}>
+                                                        <option value="{{ $category->id }}" {{ old('categories_id') == $category->id ? 'selected' : '' }}>
                                                             {{ $category->name[app()->getLocale()] ?? $category->name['en'] ?? 'Unknown' }}
                                                         </option>
                                                     @endforeach
@@ -162,11 +162,11 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="sub_categories_id" class="font-weight-bold">
-                                                    Subcategory <span class="text-danger">{{('service_posts\create._') }}</span>
+                                                    Subcategory <span class="text-danger">*</span>
                                                 </label>
                                                 <select name="sub_categories_id" id="sub_categories_id"
                                                         class="form-control @error('sub_categories_id') is-invalid @enderror" required>
-                                                    <option value="">{{('service_posts\create.select_category_first') }}</option>
+                                                    <option value="">Select Category First</option>
                                                 </select>
                                                 @error('sub_categories_id')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -189,7 +189,7 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="price" class="font-weight-bold">{{('service_posts\create.price') }}</label>
+                                                <label for="price" class="font-weight-bold">Price</label>
                                                 <input type="number" id="price" name="price"
                                                        class="form-control @error('price') is-invalid @enderror"
                                                        value="{{ old('price', 0) }}">
@@ -200,10 +200,10 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="price_currency_code" class="font-weight-bold">{{('service_posts\create.currency') }}</label>
+                                                <label for="price_currency_code" class="font-weight-bold">Currency</label>
                                                 <select name="price_currency_code" id="price_currency_code"
                                                         class="form-control @error('price_currency_code') is-invalid @enderror">
-                                                    <option value="USD" {{ old('price_currency_code') == 'USD' ? 'selected' : '' }}>{{('service_posts\create.usd') }}</option>
+                                                    <option value="USD" {{ old('price_currency_code') == 'USD' ? 'selected' : '' }}>USD</option>
                                                     @foreach($countries ?? [] as $country)
                                                         @if($country->currency_code)
                                                             <option value="{{ $country->currency_code }}" {{ old('price_currency_code') == $country->currency_code ? 'selected' : '' }}>
@@ -219,12 +219,12 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="country_id" class="font-weight-bold">{{('service_posts\create.country') }}</label>
+                                                <label for="country_id" class="font-weight-bold">Country</label>
                                                 <select name="country_id" id="country_id"
                                                         class="form-control @error('country_id') is-invalid @enderror">
-                                                    <option value="">{{('service_posts\create.select_country') }}</option>
+                                                    <option value="">Select Country</option>
                                                     @foreach($countries ?? [] as $country)
-                                                        <option value="{{ $country->count() }}"
+                                                        <option value="{{ $country->id }}"
                                                                 data-currency="{{ $country->currency_code }}"
                                                             {{ old('country_id') == $country->id ? 'selected' : '' }}>
                                                             {{ getTranslatedName($country->name) }}
@@ -241,10 +241,10 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="city_id" class="font-weight-bold">{{('service_posts\create.city') }}</label>
+                                                <label for="city_id" class="font-weight-bold">City</label>
                                                 <select name="city_id" id="city_id"
                                                         class="form-control @error('city_id') is-invalid @enderror">
-                                                    <option value="">{{('service_posts\create.select_country_first') }}</option>
+                                                    <option value="">Select Country First</option>
                                                 </select>
                                                 @error('city_id')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -254,7 +254,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="location_latitudes" class="font-weight-bold">
-                                                    Latitude <span class="text-danger">{{('service_posts\create._') }}</span>
+                                                    Latitude <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="number" step="any" id="location_latitudes" name="location_latitudes"
                                                        class="form-control @error('location_latitudes') is-invalid @enderror"
@@ -267,7 +267,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="location_longitudes" class="font-weight-bold">
-                                                    Longitude <span class="text-danger">{{('service_posts\create._') }}</span>
+                                                    Longitude <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="number" step="any" id="location_longitudes" name="location_longitudes"
                                                        class="form-control @error('location_longitudes') is-invalid @enderror"
@@ -306,16 +306,14 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="level_id" class="font-weight-bold">{{('service_posts\create.badge_type') }}</label>
-                                                <select name="level_id" id="level_id"
-                                                        class="form-control @error('level_id') is-invalid @enderror">
-                                                    @foreach(\App\Models\Level::all() as $level)
-                                                        <option value="{{ $level->count() }}" {{ old('level_id') == $level->id ? 'selected' : '' }}>
-                                                            {{ $level->name['ar'] }} ({{ $level->name['en'] }})
-                                                        </option>
-                                                    @endforeach
+                                                <label for="have_badge" class="font-weight-bold">Badge Type</label>
+                                                <select name="have_badge" id="have_badge"
+                                                        class="form-control @error('have_badge') is-invalid @enderror">
+                                                    <option value="عادي" {{ old('have_badge') == 'عادي' ? 'selected' : '' }}>Standard (Free)</option>
+                                                    <option value="ذهبي" {{ old('have_badge') == 'ذهبي' ? 'selected' : '' }}>Gold (1 point per day)</option>
+                                                    <option value="ماسي" {{ old('have_badge') == 'ماسي' ? 'selected' : '' }}>Diamond (3 points per day)</option>
                                                 </select>
-                                                @error('level_id')
+                                                @error('have_badge')
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                                 <small class="form-text text-muted">
@@ -325,7 +323,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="badge_duration" class="font-weight-bold">{{('service_posts\create.duration_days_') }}</label>
+                                                <label for="badge_duration" class="font-weight-bold">Duration (days)</label>
                                                 <input type="number" id="badge_duration" name="badge_duration"
                                                        class="form-control @error('badge_duration') is-invalid @enderror"
                                                        value="{{ old('badge_duration', 0) }}" min="0">
@@ -333,7 +331,7 @@
                                                 <div class="invalid-feedback">{{ $message }}</div>
                                                 @enderror
                                                 <small class="form-text text-muted">
-                                                    <span id="total-cost">{{('service_posts\create.total_cost_0_points') }}</span>
+                                                    <span id="total-cost">Total cost: 0 points</span>
                                                 </small>
                                             </div>
                                         </div>
@@ -346,7 +344,7 @@
                                 <div class="card-header bg-light">
                                     <h6 class="mb-0">
                                         <i class="fas fa-images mr-1"></i>
-                                        Photos <span class="text-danger">{{('service_posts\create._') }}</span>
+                                        Photos <span class="text-danger">*</span>
                                     </h6>
                                 </div>
                                 <div class="card-body">
@@ -354,7 +352,7 @@
                                         <div class="custom-file">
                                             <input type="file" class="custom-file-input @error('images') is-invalid @enderror @error('images.*') is-invalid @enderror"
                                                    id="photos" name="images[]" multiple required onchange="previewImages(this)">
-                                            <label class="custom-file-label" for="images">{{('service_posts\create.choose_files_') }}</label>
+                                            <label class="custom-file-label" for="images">Choose files...</label>
                                             @error('photos')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -411,28 +409,97 @@
                             data: { category_id: categoryId },
                             success: function(data) {
                                 console.log("Data received:", data);
-                                let options = '<option value="">{{('service_posts\create.select_subcategory') }}</option>';
+                                let options = '<option value="">Select Subcategory</option>';
                                 data.forEach(function(subcategory, index) {
                                     const name = subcategory.name['{{ app()->getLocale() }}'] || subcategory.name['en'] || 'Unknown';
                                     // Set selected attribute on the first subcategory
                                     const selected = index === 0 ? 'selected' : '';
-                                    options += `<option value="${subcategory.id}" ${selected}>{{('service_posts\create._name_') }}</option>{{('service_posts\create._') }}<option value="">{{('service_posts\create.error_loading_subcategories') }}</option>{{('service_posts\create._') }}<option value="">{{('service_posts\create.select_category_first') }}</option>{{('service_posts\create._') }}<option value="">{{('service_posts\create.select_city') }}</option>{{('service_posts\create._da') }}<option value="${city.id}" ${selected}>{{('service_posts\create._cityname_') }}</option>{{('service_posts\create._') }}<option value="">{{('service_posts\create.error_loading_cities') }}</option>{{('service_posts\create._') }}<option value="">{{('service_posts\create.select_country_first') }}</option>');
+                                    options += `<option value="${subcategory.id}" ${selected}>${name}</option>`;
+                                });
+                                $('#sub_categories_id').html(options);
+
+                                // Trigger change event to ensure any dependent fields update
+                                $('#sub_categories_id').trigger('change');
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error:", error);
+                                $('#sub_categories_id').html('<option value="">Error loading subcategories</option>');
+                            }
+                        });
+                    } else {
+                        $('#sub_categories_id').html('<option value="">Select Category First</option>');
+                    }
+                });
+
+                // Country change event
+                $('#country_id').on('change', function() {
+                    const countryId = $(this).val();
+                    console.log("Country changed:", countryId);
+
+                    if (countryId) {
+                        $.ajax({
+                            url: `/get-cities-for-form/${countryId}`,
+                            type: 'GET',
+                            success: function(data) {
+                                console.log("Cities received:", data);
+                                let options = '<option value="">Select City</option>';
+
+                                data.forEach(function(city, index) {
+                                    let cityName;
+
+                                    // Handle various name formats
+                                    if (typeof city.name === 'string' && city.name.startsWith('{')) {
+                                        try {
+                                            const nameObj = JSON.parse(city.name);
+                                            const locale = $('html').attr('lang') || 'en';
+                                            cityName = nameObj[locale] || nameObj['en'] || Object.values(nameObj)[0];
+                                        } catch (e) {
+                                            cityName = city.name;
+                                        }
+                                    }
+                                    else if (typeof city.name === 'object') {
+                                        const locale = $('html').attr('lang') || 'en';
+                                        cityName = city.name[locale] || city.name['en'] || Object.values(city.name)[0];
+                                    }
+                                    else {
+                                        cityName = city.name;
+                                    }
+
+                                    // Set selected attribute on the first city
+                                    const selected = index === 0 ? 'selected' : '';
+                                    options += `<option value="${city.id}" ${selected}>${cityName}</option>`;
+                                });
+
+                                $('#city_id').html(options);
+
+                                // Trigger change event to ensure any dependent fields update
+                                $('#city_id').trigger('change');
+                            },
+                            error: function(xhr, status, error) {
+                                console.error("Error loading cities:", error);
+                                $('#city_id').html('<option value="">Error loading cities</option>');
+                            }
+                        });
+
+                        // Update currency code
+                        const currencyCode = $(this).find('option:selected').data('currency');
+                        if (currencyCode) {
+                            $('#price_currency_code').val(currencyCode);
+                        }
+                    } else {
+                        $('#city_id').html('<option value="">Select Country First</option>');
                     }
                 });
 
                 // Calculate points cost when badge type or duration changes
-                $('#level_id, #badge_duration').on('change input', function() {
-                    const levelId = $('#level_id').val();
+                $('#have_badge, #badge_duration').on('change input', function() {
+                    const badgeType = $('#have_badge').val();
                     const duration = parseInt($('#badge_duration').val()) || 0;
                     let cost = 0;
 
-                    // Get level details from the selected option text
-                    const selectedOption = $('#level_id option:selected');
-                    const levelName = selectedOption.text().split(' (')[0]; // Get Arabic name
-                    
-                    if (levelName === 'ذهبي') { // Gold
+                    if (badgeType === 'ذهبي') { // Gold
                         cost = duration * 1;
-                    } else if (levelName === 'ماسي') { // Diamond
+                    } else if (badgeType === 'ماسي') { // Diamond
                         cost = duration * 3;
                     }
 
@@ -508,7 +575,7 @@
 
                             const cardFooter = document.createElement('div');
                             cardFooter.className = 'card-footer bg-light p-1';
-                            cardFooter.innerHTML = `<small class="text-muted">{{('service_posts\create._file_name_substring_0_20_file_name') }}</small>`;
+                            cardFooter.innerHTML = `<small class="text-muted">${file.name.substring(0, 20)}${file.name.length > 20 ? '...' : ''}</small>`;
 
                             card.appendChild(cardBody);
                             card.appendChild(cardFooter);
@@ -523,10 +590,3 @@
         </script>
     @stop
 @endsection
-
-
-
-
-
-
-

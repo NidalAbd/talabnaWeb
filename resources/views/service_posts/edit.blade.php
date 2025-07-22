@@ -23,7 +23,7 @@
                     <div class="card-header bg-white">
                         <h5 class="mb-0">
                             <i class="fas fa-edit text-warning mr-2"></i>
-                            Edit Service Post: <span class="text-primary">{{ $servicePost->id }}</span>
+                            Edit Service Post: <span class="text-primary">{{ $servicePost->title }}</span>
                         </h5>
                     </div>
 
@@ -35,7 +35,7 @@
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     {{ session('success') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">{{('service_posts\edit._times_') }}</span>
+                                        <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                             @endif
@@ -44,7 +44,7 @@
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     {{ session('error') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">{{('service_posts\edit._times_') }}</span>
+                                        <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                             @endif
@@ -53,14 +53,14 @@
                                 <div class="col-md-6">
                                     <div class="alert alert-info">
                                         <i class="fas fa-info-circle mr-1"></i>
-                                        <strong>{{('service_posts\edit.your_point_balance_') }}</strong> {{ Auth::user()->pointsBalance ?? 0 }} points
+                                        <strong>Your Point Balance:</strong> {{ Auth::user()->pointsBalance ?? 0 }} points
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="alert alert-secondary">
                                         <i class="fas fa-clock mr-1"></i>
-                                        <strong>{{('service_posts\edit.created_') }}</strong> {{ $servicePost->created_at->format('M d, Y H:i') }} |
-                                        <strong>{{('service_posts\edit.last_updated_') }}</strong> {{ $servicePost->updated_at->format('M d, Y H:i') }}
+                                        <strong>Created:</strong> {{ $servicePost->created_at->format('M d, Y H:i') }} |
+                                        <strong>Last Updated:</strong> {{ $servicePost->updated_at->format('M d, Y H:i') }}
                                     </div>
                                 </div>
                             </div>
@@ -78,7 +78,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="title" class="font-weight-bold">
-                                                    Title <span class="text-danger">{{('service_posts\edit._') }}</span>
+                                                    Title <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="text" id="title" name="title"
                                                        class="form-control @error('title') is-invalid @enderror"
@@ -94,7 +94,7 @@
                                         <div class="col-md-12">
                                             <div class="form-group">
                                                 <label for="description" class="font-weight-bold">
-                                                    Description <span class="text-danger">{{('service_posts\edit._') }}</span>
+                                                    Description <span class="text-danger">*</span>
                                                 </label>
                                                 <textarea id="description" name="description" rows="5"
                                                           class="form-control @error('description') is-invalid @enderror"
@@ -110,12 +110,12 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="type" class="font-weight-bold">
-                                                    Type <span class="text-danger">{{('service_posts\edit._') }}</span>
+                                                    Type <span class="text-danger">*</span>
                                                 </label>
                                                 <select name="type" id="type"
                                                         class="form-control @error('type') is-invalid @enderror" required>
-                                                    <option value="عرض" {{ old('type', $servicePost->type) == 'عرض' ? 'selected' : '' }}>عرض</option>
-                                                    <option value="طلب" {{ old('type', $servicePost->type) == 'طلب' ? 'selected' : '' }}>طلب</option>
+                                                    <option value="عرض" {{ old('type', $servicePost->type) == 'عرض' ? 'selected' : '' }}>Offer</option>
+                                                    <option value="طلب" {{ old('type', $servicePost->type) == 'طلب' ? 'selected' : '' }}>Request</option>
                                                 </select>
                                                 @error('type')
                                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -125,7 +125,7 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="state" class="font-weight-bold">
-                                                    Status <span class="text-danger">{{('service_posts\edit._') }}</span>
+                                                    Status <span class="text-danger">*</span>
                                                 </label>
                                                 <select name="state" id="state"
                                                         class="form-control @error('state') is-invalid @enderror" required>
@@ -156,11 +156,11 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="categories_id" class="font-weight-bold">
-                                                    Category <span class="text-danger">{{('service_posts\edit._') }}</span>
+                                                    Category <span class="text-danger">*</span>
                                                 </label>
                                                 <select name="categories_id" id="categories_id"
                                                         class="form-control @error('categories_id') is-invalid @enderror" required>
-                                                    <option value="">{{('service_posts\edit.select_category') }}</option>
+                                                    <option value="">Select Category</option>
                                                     @foreach($categories as $category)
                                                         <option value="{{ $category->id }}" {{ old('categories_id', $servicePost->categories_id) == $category->id ? 'selected' : '' }}>
                                                             {{ $category->name[app()->getLocale()] ?? $category->name['en'] ?? 'Unknown' }}
@@ -175,11 +175,11 @@
                                         <div class="col-md-6">
                                             <div class="form-group">
                                                 <label for="sub_categories_id" class="font-weight-bold">
-                                                    Subcategory <span class="text-danger">{{('service_posts\edit._') }}</span>
+                                                    Subcategory <span class="text-danger">*</span>
                                                 </label>
                                                 <select name="sub_categories_id" id="sub_categories_id"
                                                         class="form-control @error('sub_categories_id') is-invalid @enderror" required>
-                                                    <option value="">{{('service_posts\edit.select_category_first') }}</option>
+                                                    <option value="">Select Category First</option>
                                                     @foreach($subcategories->where('categories_id', $servicePost->categories_id) as $subcategory)
                                                         <option value="{{ $subcategory->id }}" {{ old('sub_categories_id', $servicePost->sub_categories_id) == $subcategory->id ? 'selected' : '' }}>
                                                             {{ $subcategory->name[app()->getLocale()] ?? $subcategory->name['en'] ?? 'Unknown' }}
@@ -207,7 +207,7 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="price" class="font-weight-bold">{{('service_posts\edit.price') }}</label>
+                                                <label for="price" class="font-weight-bold">Price</label>
                                                 <input type="number" id="price" name="price"
                                                        class="form-control @error('price') is-invalid @enderror"
                                                        value="{{ old('price', $servicePost->price) }}">
@@ -218,7 +218,7 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="price_currency_code" class="font-weight-bold">{{('service_posts\edit.currency') }}</label>
+                                                <label for="price_currency_code" class="font-weight-bold">Currency</label>
                                                 <select name="price_currency_code" id="price_currency_code"
                                                         class="form-control @error('price_currency_code') is-invalid @enderror">
                                                     <option value="USD" {{ old('price_currency_code', $servicePost->price_currency_code) == 'USD' ? 'selected' : '' }}>USD</option>
@@ -237,10 +237,10 @@
                                         </div>
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="country_id" class="font-weight-bold">{{('service_posts\edit.country') }}</label>
+                                                <label for="country_id" class="font-weight-bold">Country</label>
                                                 <select name="country_id" id="country_id"
                                                         class="form-control @error('country_id') is-invalid @enderror">
-                                                    <option value="">{{('service_posts\edit.select_country') }}</option>
+                                                    <option value="">Select Country</option>
                                                     @foreach($countries ?? [] as $country)
                                                         <option value="{{ $country->id }}"
                                                                 data-currency="{{ $country->currency_code }}"
@@ -259,7 +259,7 @@
                                     <div class="row">
                                         <div class="col-md-4">
                                             <div class="form-group">
-                                                <label for="city_id" class="font-weight-bold">{{('service_posts\edit.city') }}</label>
+                                                <label for="city_id" class="font-weight-bold">City</label>
                                                 <select name="city_id" id="city_id"
                                                         class="form-control @error('city_id') is-invalid @enderror">
                                                     <option value="{{ $country->id }}"
@@ -276,7 +276,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="location_latitudes" class="font-weight-bold">
-                                                    Latitude <span class="text-danger">{{('service_posts\edit._') }}</span>
+                                                    Latitude <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="number" step="any" id="location_latitudes" name="location_latitudes"
                                                        class="form-control @error('location_latitudes') is-invalid @enderror"
@@ -289,7 +289,7 @@
                                         <div class="col-md-4">
                                             <div class="form-group">
                                                 <label for="location_longitudes" class="font-weight-bold">
-                                                    Longitude <span class="text-danger">{{('service_posts\edit._') }}</span>
+                                                    Longitude <span class="text-danger">*</span>
                                                 </label>
                                                 <input type="number" step="any" id="location_longitudes" name="location_longitudes"
                                                        class="form-control @error('location_longitudes') is-invalid @enderror"
@@ -329,32 +329,32 @@
                                         <div class="col-md-3 mb-3">
                                             <div class="card bg-light">
                                                 <div class="card-body text-center py-3">
-                                                    <h2 class="mb-0">{{ $servicePost->view_count ?? 0 }}</h2>
-                                                    <small class="text-muted">{{('service_posts\edit.views') }}</small>
+                                                    <h2 class="mb-0">{{ $servicePost->view_count }}</h2>
+                                                    <small class="text-muted">Views</small>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <div class="card bg-light">
                                                 <div class="card-body text-center py-3">
-                                                    <h2 class="mb-0">{{ $servicePost->favorites_count ?? 0 }}</h2>
-                                                    <small class="text-muted">{{('service_posts\edit.favorites') }}</small>
+                                                    <h2 class="mb-0">{{ $servicePost->favorites()->count() }}</h2>
+                                                    <small class="text-muted">Favorites</small>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <div class="card bg-light">
                                                 <div class="card-body text-center py-3">
-                                                    <h2 class="mb-0">{{ $servicePost->comments_count ?? 0 }}</h2>
-                                                    <small class="text-muted">{{('service_posts\edit.comments') }}</small>
+                                                    <h2 class="mb-0">{{ $servicePost->comments()->count() }}</h2>
+                                                    <small class="text-muted">Comments</small>
                                                 </div>
                                             </div>
                                         </div>
                                         <div class="col-md-3 mb-3">
                                             <div class="card bg-light">
                                                 <div class="card-body text-center py-3">
-                                                    <h2 class="mb-0">{{ $servicePost->reports_count ?? 0 }}</h2>
-                                                    <small class="text-muted">{{('service_posts\edit.reports') }}</small>
+                                                    <h2 class="mb-0">{{ $servicePost->reports()->count() }}</h2>
+                                                    <small class="text-muted">Reports</small>
                                                 </div>
                                             </div>
                                         </div>
@@ -381,19 +381,19 @@
                                                                 <img src="{{ asset($photo->src) }}" class="img-fluid" style="max-height: 150px;">
                                                             @elseif(Str::contains($photo->src, ['.mp3', '.wav']))
                                                                 <i class="fas fa-music fa-3x text-info mb-2"></i>
-                                                                <p class="mb-0">{{('service_posts\edit.audio_file') }}</p>
+                                                                <p class="mb-0">Audio File</p>
                                                             @elseif(Str::contains($photo->src, ['.mp4', '.avi', '.mov']))
                                                                 <i class="fas fa-video fa-3x text-danger mb-2"></i>
-                                                                <p class="mb-0">{{('service_posts\edit.video_file') }}</p>
+                                                                <p class="mb-0">Video File</p>
                                                             @else
                                                                 <i class="fas fa-file fa-3x text-secondary mb-2"></i>
-                                                                <p class="mb-0">{{('service_posts\edit.file') }}</p>
+                                                                <p class="mb-0">File</p>
                                                             @endif
                                                         </div>
                                                         <div class="card-footer bg-light p-2">
                                                             <div class="custom-control custom-checkbox">
                                                                 <input type="checkbox" class="custom-control-input" id="delete_photo_{{ $photo->id }}" name="delete_photos[]" value="{{ $photo->id }}">
-                                                                <label class="custom-control-label" for="delete_photo_{{ $photo->id }}"></label>
+                                                                <label class="custom-control-label" for="delete_photo_{{ $photo->id }}">Delete</label>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -422,7 +422,7 @@
                                         <div class="custom-file">
                                             <input type="file" class="custom-file-input @error('images') is-invalid @enderror @error('images.*') is-invalid @enderror"
                                                    id="images" name="images[]" multiple onchange="previewImages(this)">
-                                            <label class="custom-file-label" for="images">{{('service_posts\edit.choose_files_') }}</label>
+                                            <label class="custom-file-label" for="images">Choose files...</label>
                                             @error('photos')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -484,7 +484,7 @@
                             data: { category_id: categoryId },
                             success: function(data) {
                                 console.log("Data received:", data);
-                                let options = '<option value="">{{('service_posts\edit.select_subcategory') }}</option>';
+                                let options = '<option value="">Select Subcategory</option>';
                                 data.forEach(function(subcategory, index) {
                                     const name = subcategory.name['{{ app()->getLocale() }}'] || subcategory.name['en'] || 'Unknown';
                                     // Set selected attribute on the first subcategory
@@ -492,44 +492,76 @@
                                     options += `<option value="${subcategory.id}" ${selected}>${name}</option>`;
                                 });
                                 $('#sub_categories_id').html(options);
+
+                                // Trigger change event to ensure any dependent fields update
+                                $('#sub_categories_id').trigger('change');
                             },
                             error: function(xhr, status, error) {
-                                console.error("Error fetching subcategories:", error);
-                                $('#sub_categories_id').html('<option value="">{{('service_posts\edit.error_loading_subcategories') }}</option><option value="">{{('service_posts\edit.select_category_first') }}</option><option value="">{{('service_posts\edit.select_city') }}</option><option value="">{{('service_posts\edit.error_loading_cities') }}</option><option value="">{{('service_posts\edit.select_country_first') }}</option>');
+                                console.error("Error:", error);
+                                $('#sub_categories_id').html('<option value="">Error loading subcategories</option>');
                             }
                         });
                     } else {
-                        $('#sub_categories_id').html('<option value="">{{('service_posts\edit.select_category_first') }}</option><option value="">{{('service_posts\edit.select_city') }}</option><option value="">{{('service_posts\edit.error_loading_cities') }}</option><option value="">{{('service_posts\edit.select_country_first') }}</option>');
+                        $('#sub_categories_id').html('<option value="">Select Category First</option>');
                     }
                 });
 
-                // Subcategory change event
-                $('#sub_categories_id').on('change', function() {
-                    console.log("Subcategory changed:", $(this).val());
-                    const subcategoryId = $(this).val();
+                // Country change event
+                $('#country_id').on('change', function() {
+                    const countryId = $(this).val();
+                    console.log("Country changed:", countryId);
 
-                    if (subcategoryId) {
+                    if (countryId) {
                         $.ajax({
-                            url: "{{ route('fetchCities') }}",
+                            url: `/get-cities-for-form/${countryId}`,
                             type: 'GET',
-                            data: { subcategory_id: subcategoryId },
                             success: function(data) {
-                                console.log("Data received:", data);
-                                let options = '<option value="">{{('service_posts\edit.select_city') }}</option>';
+                                console.log("Cities received:", data);
+                                let options = '<option value="">Select City</option>';
+
                                 data.forEach(function(city, index) {
-                                    const name = city.name['{{ app()->getLocale() }}'] || city.name['en'] || 'Unknown';
+                                    let cityName;
+
+                                    // Handle various name formats
+                                    if (typeof city.name === 'string' && city.name.startsWith('{')) {
+                                        try {
+                                            const nameObj = JSON.parse(city.name);
+                                            const locale = $('html').attr('lang') || 'en';
+                                            cityName = nameObj[locale] || nameObj['en'] || Object.values(nameObj)[0];
+                                        } catch (e) {
+                                            cityName = city.name;
+                                        }
+                                    }
+                                    else if (typeof city.name === 'object') {
+                                        const locale = $('html').attr('lang') || 'en';
+                                        cityName = city.name[locale] || city.name['en'] || Object.values(city.name)[0];
+                                    }
+                                    else {
+                                        cityName = city.name;
+                                    }
+
+                                    // Set selected attribute on the first city
                                     const selected = index === 0 ? 'selected' : '';
-                                    options += `<option value="${city.id}" ${selected}>${name}</option>`;
+                                    options += `<option value="${city.id}" ${selected}>${cityName}</option>`;
                                 });
+
                                 $('#city_id').html(options);
+
+                                // Trigger change event to ensure any dependent fields update
+                                $('#city_id').trigger('change');
                             },
                             error: function(xhr, status, error) {
-                                console.error("Error fetching cities:", error);
-                                $('#city_id').html('<option value="">{{('service_posts\edit.error_loading_cities') }}</option><option value="">{{('service_posts\edit.select_country_first') }}</option>');
+                                console.error("Error loading cities:", error);
+                                $('#city_id').html('<option value="">Error loading cities</option>');
                             }
                         });
+
+                        const currencyCode = $(this).find('option:selected').data('currency');
+                        if (currencyCode) {
+                            $('#price_currency_code').val(currencyCode);
+                        }
                     } else {
-                        $('#city_id').html('<option value="">{{('service_posts\edit.select_country_first') }}</option>');
+                        $('#city_id').html('<option value="">Select Country First</option>');
                     }
                 });
 
@@ -602,7 +634,7 @@
 
                             const cardFooter = document.createElement('div');
                             cardFooter.className = 'card-footer bg-light p-1';
-                            cardFooter.innerHTML = `<small class="text-muted">{{('service_posts\edit._file_name_substring_0_20_file_name') }}</small>`;
+                            cardFooter.innerHTML = `<small class="text-muted">${file.name.substring(0, 20)}${file.name.length > 20 ? '...' : ''}</small>`;
 
                             card.appendChild(cardBody);
                             card.appendChild(cardFooter);
@@ -617,10 +649,3 @@
         </script>
     @stop
 @endsection
-
-
-
-
-
-
-

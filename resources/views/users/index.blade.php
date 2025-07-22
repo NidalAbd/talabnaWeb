@@ -1,7 +1,5 @@
 @extends('adminlte::page')
-
-@section('title', 'Users Management')
-
+@section('title', 'Users')
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-users text-primary mr-2"></i> Users Management</h1>
@@ -9,437 +7,434 @@
             <a href="{{ route('users.create') }}" class="btn btn-success">
                 <i class="fas fa-user-plus mr-1"></i> Add User
             </a>
+            <a href="{{ route('users.banned') }}" class="btn btn-danger ml-2">
+                <i class="fas fa-ban mr-1"></i> Banned Users
+            </a>
+            <a href="{{ route('devices.banned') }}" class="btn btn-warning ml-2">
+                <i class="fas fa-mobile-alt mr-1"></i> Banned Devices
+            </a>
+            <a href="{{ route('role-assignments.index') }}" class="btn btn-info ml-2">
+                <i class="fas fa-user-shield mr-1"></i> Roles & Permissions
+            </a>
         </div>
     </div>
 @stop
-
 @section('content')
-<div class="container-fluid">
-    <!-- User Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-primary shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-users"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{ __('users.total_users') }}</span>
-                    <span class="info-box-number">{{ number_format($users->count()) }}</span>
-                    <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-chart-line text-light"></i> All registered users
-                    </span>
+    <div class="container-fluid">
+        <!-- User Stats Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info shadow-sm">
+                    <div class="inner">
+                        <h3>{{ $Users->total() }}</h3>
+                        <p>Total Users</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <a href="#" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success shadow-sm">
+                    <div class="inner">
+                        <h3>{{ App\Models\User::where('is_active', 'active')->count() }}</h3>
+                        <p>Active Users</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <a href="#" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger shadow-sm">
+                    <div class="inner">
+                        <h3>{{ App\Models\User::where('is_active', 'banned')->count() }}</h3>
+                        <p>Banned Users</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-ban"></i>
+                    </div>
+                    <a href="{{ route('users.banned') }}" class="small-box-footer">
+                        View all <i class="fas fa-arrow-circle-right"></i>
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning shadow-sm">
+                    <div class="inner">
+                        <h3>{{ $Users->sum('service_posts_count') }}</h3>
+                        <p>Total Posts</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-file-alt"></i>
+                    </div>
+                    <a href="#" class="small-box-footer">
+                        More info <i class="fas fa-arrow-circle-right"></i>
+                    </a>
                 </div>
             </div>
         </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-success shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-user-check"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{ __('users.active_users') }}</span>
-                    <span class="info-box-number">{{ number_format($activeUsersCount) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $users->count() }}"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-check-circle text-light"></i> {{ $users->count() > 0 ? number_format(($activeUsersCount / $users->count()) * 100, 1) : 0 }}% of total
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-danger shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-user-slash"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{ __('users.banned_users') }}</span>
-                    <span class="info-box-number">{{ number_format($bannedUsersCount) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $users->count() }}"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-exclamation-triangle text-light"></i> {{ $users->count() > 0 ? number_format(($bannedUsersCount / $users->count()) * 100, 1) : 0 }}% of total
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-warning shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-user-clock"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{ __('users.inactive_users') }}</span>
-                    <span class="info-box-number">{{ number_format($inactiveUsersCount) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $users->count() }}"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-pause-circle text-light"></i> {{ $users->count() > 0 ? number_format(($inactiveUsersCount / $users->count()) * 100, 1) : 0 }}% of total
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Users Table -->
-    <div class="card card-outline card-primary shadow-sm mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-            <div class="card-title mb-2 mb-md-0">
-                <i class="fas fa-list mr-2"></i> Users List
-            </div>
-            <div class="card-tools d-flex align-items-center flex-wrap">
-                <button type="button" class="btn btn-sm btn-outline-secondary mr-2 mb-2 mb-md-0" onclick="exportTable(this)"><i class="fas fa-file-export mr-1"></i> Export</button>
-                <button type="button" class="btn btn-sm btn-outline-secondary mr-2 mb-2 mb-md-0" onclick="printTable(this)"><i class="fas fa-print mr-1"></i> Print</button>
-                <form method="GET" class="d-flex align-items-center mb-2 mb-md-0" style="gap: 0.5rem;">
-                    <select name="status" class="form-control form-control-sm">
-                        <option value="">{{ __('users.all_status') }}</option>
-                        <option value="active" @if(request('status') == 'active') selected @endif>{{ __('users.active') }}</option>
-                        <option value="inactive" @if(request('status') == 'inactive') selected @endif>{{ __('users.inactive') }}</option>
-                        <option value="banned" @if(request('status') == 'banned') selected @endif>{{ __('users.banned') }}</option>
-                    </select>
-                    <select name="role" class="form-control form-control-sm">
-                        <option value="">{{ __('users.all_roles') }}</option>
-                        @foreach($roles as $role)
-                            <option value="{{ $role->name }}" @if(request('role') == $role->name) selected @endif>{{ ucfirst($role->name) }}</option>
-                        @endforeach
-                    </select>
-                    <select name="gender" class="form-control form-control-sm">
-                        <option value="">{{ __('users.all_genders') }}</option>
-                        <option value="ذكر" @if(request('gender') == 'ذكر') selected @endif>{{ __('users.male') }}</option>
-                        <option value="انثى" @if(request('gender') == 'انثى') selected @endif>{{ __('users.female') }}</option>
-                    </select>
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by name, email, user ID..." value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
-                    <a href="?" class="btn btn-sm btn-secondary ml-1"><i class="fas fa-sync-alt"></i></a>
+        <!-- Modern Filter Section -->
+        <div class="card card-outline card-light mb-3 shadow-sm">
+            <div class="card-body py-2">
+                <form action="{{ route('users.index') }}" method="GET" id="search-form" class="row align-items-end">
+                    <!-- Status Filter -->
+                    <div class="col-md-2">
+                        <select class="form-control" name="status" id="status-filter">
+                            <option value="">All Status</option>
+                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
+                            <option value="inactive" {{ request('status') == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                            <option value="banned" {{ request('status') == 'banned' ? 'selected' : '' }}>Banned</option>
+                        </select>
+                    </div>
+
+                    <!-- Role Filter -->
+                    <div class="col-md-2">
+                        <select class="form-control" name="role" id="role-filter">
+                            <option value="">All Roles</option>
+                            @foreach($roles as $role)
+                                <option value="{{ $role->name }}" {{ request('role') == $role->name ? 'selected' : '' }}>{{ ucfirst($role->name) }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- Search Input -->
+                    <div class="col-md-6">
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="search" id="search-input" value="{{ request('search') }}"
+                                   placeholder="Search by name, email, user ID...">
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary" id="search-button">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Reset Button -->
+                    <div class="col-md-2 text-right">
+                        <a href="{{ route('users.index') }}" class="btn btn-default">
+                            <i class="fas fa-sync-alt mr-1"></i> Reset
+                        </a>
+                    </div>
                 </form>
             </div>
         </div>
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover table-striped table-bordered align-middle">
-                <thead class="thead-light">
-                    <tr>
-                        <th>{{ __('users.avatar') }}</th>
-                        <th>{{ __('users.user_id') }}</th>
-                        <th>{{ __('users.name') }}</th>
-                        <th>{{ __('users.email') }}</th>
-                        <th>{{ __('users.status') }}</th>
-                        <th>{{ __('users.roles') }}</th>
-                        <th>{{ __('users.posts') }}</th>
-                        <th>{{ __('users.reports') }}</th>
-                        <th>{{ __('users.registered') }}</th>
-                        <th>{{ __('users.actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($users as $user)
-                        <tr>
-                            <td>
-                                @php
-                                    $photo = $user->photos->first();
-                                    $src = $photo ? $photo->src : asset('img/avatar1.png');
-                                @endphp
-                                <img src="{{ $src }}" alt="Avatar" class="img-circle elevation-2" width="40" height="40" style="object-fit:cover;">
-                            </td>
-                            <td><span class="badge badge-secondary">{{ $user->id }}</span></td>
-                            <td><strong>{{ $user->name }}</strong><br><small class="text-muted">{{ $user->email }}</small></td>
-                            <td><a href="mailto:{{ $user->email }}" class="text-primary">{{ $user->email }}</a></td>
-                            <td>
-                                @if($user->is_active == 'active')
-                                    <span class="badge badge-success"><i class="fas fa-check-circle"></i> Active</span>
-                                @elseif($user->is_active == 'banned')
-                                    <span class="badge badge-danger"><i class="fas fa-ban"></i> Banned</span>
-                                @else
-                                    <span class="badge badge-warning"><i class="fas fa-pause-circle"></i> Inactive</span>
-                                @endif
-                            </td>
-                            <td>
-                                @foreach($user->roles as $role)
-                                    <span class="badge badge-primary">{{ ucfirst($role->name) }}</span>
-                                @endforeach
-                                @if($user->roles->count() == 0)
-                                    <span class="badge badge-secondary">{{ __('users.no_role') }}</span>
-                                @endif
-                            </td>
-                            <td><span class="badge badge-info">{{ $user->pointsBalance ?? 0 }}</span></td>
-                            <td><span class="badge badge-danger">{{ $user->reports_count ?? 0 }}</span></td>
-                            <td><span class="text-muted">{{ $user->created_at ? $user->created_at->format('Y-m-d') : '-' }}</span></td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-outline-info btn-sm" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
-                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
-                                    
-                                    <!-- Balance Button -->
-                                    <button type="button" class="btn btn-outline-success" data-toggle="tooltip" title="Balance: {{ $user->pointsBalance ?? 0 }} points" onclick="showBalanceModal({{ $user->id }}, '{{ $user->name }}', {{ $user->pointsBalance ?? 0 }})">
-                                        <i class="fas fa-coins"></i>
-                                    </button>
-                                    
-                                    <!-- Role Assignment Link -->
-                                    <a href="{{ route('role-assignments.edit', $user->id) }}" class="btn btn-outline-warning" data-toggle="tooltip" title="Assign Roles & Permissions">
-                                        <i class="fas fa-user-shield"></i>
-                                    </a>
-                                    
-                                    <!-- Ban/Unban Button -->
-                                    @if($user->is_active == 'banned')
-                                        <form action="{{ route('users.unban', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Unban this user?');">
-                                            @csrf
-                                            <button type="submit" class="btn btn-outline-success" data-toggle="tooltip" title="Unban"><i class="fas fa-unlock"></i></button>
-                                        </form>
-                                    @else
-                                        <form action="{{ route('users.ban', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Ban this user?');">
-                                            @csrf
-                                            <button type="submit" class="btn btn-outline-warning" data-toggle="tooltip" title="Ban"><i class="fas fa-user-slash"></i></button>
-                                        </form>
-                                    @endif
-                                    
-                                    <!-- Delete Button -->
-                                    <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this user?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger btn-sm" data-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
-                                    </form>
-                                    
-                                    <!-- History Button -->
-                                    <a href="{{ route('users.login_history', $user->id) }}"><i class="fas fa-history"></i></a>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="10" class="text-center py-4">
-                                <div class="alert alert-info m-0">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    No users found.
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        <div class="card-footer bg-white">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    Showing <strong>{{ $users->count() }}</strong> to <strong>{{ $users->count() }}</strong> of <strong>{{ $users->count() }}</strong> users
+
+        <!-- Main Users Card -->
+        <div class="card card-outline card-primary shadow">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-list mr-1"></i>
+                    Users List
+                    @if(request('search') || request('status') || request('role'))
+                        <span class="badge badge-info ml-2">Filtered Results</span>
+                    @endif
+                </h3>
+                <div class="card-tools">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-file-export mr-1"></i> Export
+                        </button>
+                        <button type="button" class="btn btn-sm btn-outline-secondary">
+                            <i class="fas fa-print mr-1"></i> Print
+                        </button>
+                    </div>
+                    <button type="button" class="btn btn-tool ml-2" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
                 </div>
-                <div>
-                    {{ $users->links('pagination::bootstrap-4') }}
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover text-nowrap">
+                        <thead>
+                        <tr>
+                            <th style="width: 5%">ID</th>
+                            <th style="width: 10%">Username</th>
+                            <th style="width: 10%">Status</th>
+                            <th style="width: 10%">Role</th>
+                            <th style="width: 20%">Email</th>
+                            <th style="width: 8%">Reports</th>
+                            <th style="width: 8%">Posts</th>
+                            <th style="width: 29%">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @if(is_countable($Users) && count($Users) > 0)
+                            @foreach($Users as $user)
+                                <tr>
+                                    <td>{{ $user->id }}</td>
+                                    <td>
+                                        <div class="user-block">
+                                            @if($user->photos && $user->photos->count() > 0)
+                                                @php
+                                                    $photo = $user->photos->first();
+                                                    $imgSrc = isset($photo->is_external) && $photo->is_external ? $photo->src : asset($photo->src);
+                                                @endphp
+                                                <img class="img-circle img-bordered-sm" src="{{ $imgSrc }}" alt="{{ $user->user_name }}">
+                                            @else
+                                                <img class="img-circle img-bordered-sm" src="{{ asset('vendor/adminlte/dist/img/user-default.jpg') }}" alt="User Image">
+                                            @endif
+                                            <span class="username">
+                                                {{ $user->user_name }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if($user->is_active === 'active')
+                                            <span class="badge badge-success">Active</span>
+                                        @elseif($user->is_active === 'banned')
+                                            <span class="badge badge-danger">Banned</span>
+                                        @else
+                                            <span class="badge badge-warning">Inactive</span>
+                                        @endif
+                                    </td>
+                                    <td>
+                                        @if(count($user->roles) > 0)
+                                            @foreach($user->roles as $role)
+                                                <span class="badge badge-info">{{ $role->name }}</span>
+                                            @endforeach
+                                        @else
+                                            <span class="badge badge-secondary">No Role</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $user->email }}</td>
+                                    <td>
+                                        <span class="badge badge-danger badge-pill">{{ $user->reports_count }}</span>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-primary badge-pill">{{ $user->service_posts_count }}</span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ route('users.show', $user->id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+
+                                            <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm btn-warning">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+
+                                            <a href="{{ route('user.profile', ['user' => $user->id]) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-id-card"></i>
+                                            </a>
+
+                                            <a href="{{ route('role-assignments.edit', $user->id) }}" class="btn btn-sm btn-dark">
+                                                <i class="fas fa-user-tag"></i>
+                                            </a>
+
+                                            <a href="{{ route('palservice_points.create', ['user_id' => $user->id]) }}" class="btn btn-sm btn-success">
+                                                <i class="fas fa-coins"></i>
+                                            </a>
+
+                                            <!-- Toggle Ban Button -->
+                                            <button type="button"
+                                                    class="btn btn-sm {{ $user->is_active === 'banned' ? 'btn-success' : 'btn-danger' }} toggle-ban-btn"
+                                                    data-user-id="{{ $user->id }}"
+                                                    data-current-status="{{ $user->is_active }}"
+                                                    data-toggle="tooltip"
+                                                    title="{{ $user->is_active === 'banned' ? 'Unban User' : 'Ban User' }}">
+                                                <i class="fas {{ $user->is_active === 'banned' ? 'fa-check-circle' : 'fa-ban' }}"></i>
+                                            </button>
+
+                                            @include('components.report-button', ['reportableType' => 'user','reportableId' => $user->id,'buttonText' => ''])
+
+                                            <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button class="btn btn-sm btn-danger" type="submit"
+                                                        onclick="return confirm('Are you sure you want to delete this user?')"
+                                                        data-toggle="tooltip" title="Delete User">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="8" class="text-center py-4">
+                                    <div class="alert alert-info m-0">
+                                        <i class="fas fa-info-circle mr-1"></i> {{ __('No users found') }}
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer clearfix">
+                <div class="float-right">
+                    {{ $Users->appends(request()->query())->links() }}
                 </div>
             </div>
         </div>
     </div>
-</div>
-
-<!-- Balance Modal -->
-<div class="modal fade" id="balanceModal" tabindex="-1" role="dialog" aria-labelledby="balanceModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="balanceModalLabel">{{ __('users.user_balance') }}</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">{{ __('users._times_') }}</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="text-center">
-                    <h4 id="balanceUserName"></h4>
-                    <div class="balance-display">
-                        <i class="fas fa-coins text-warning" style="font-size: 3rem;"></i>
-                        <h2 id="balanceAmount" class="text-success mt-2"></h2>
-                        <p class="text-muted">{{ __('users.total_points_balance') }}</p>
-                    </div>
-                    <div class="balance-actions mt-3">
-                        <button type="button" class="btn btn-success" onclick="addPoints()">
-                            <i class="fas fa-plus"></i> Add Points
-                        </button>
-                        <button type="button" class="btn btn-warning" onclick="deductPoints()">
-                            <i class="fas fa-minus"></i> Deduct Points
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('users.close') }}</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-
-
-@push('js')
-<script>
-    function printTable(btn) {
-        let table = btn.closest('.card').querySelector('table');
-        let w = window.open();
-        w.document.write('<html><head><title>{{ __('users.print_table') }}</title>{{ __('users._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{ __('users._w_document_write_') }}</head><body>{{ __('users._w_document_write_table_outer') }}</body></html>');
-        w.print();
-        w.close();
-    }
-    function exportTable(btn) {
-        // Simple CSV export
-        let table = btn.closest('.card').querySelector('table');
-        let rows = Array.from(table.rows);
-        let csv = rows.map(row => Array.from(row.cells).map(cell => '"' + cell.innerText.replace(/"/g, '""') + '"').join(',')).join('\n');
-        let blob = new Blob([csv], { type: 'text/csv' });
-        let a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'users-export.csv';
-        a.click();
-    }
-    
-    // Global variables for modals
-    let currentUserId = null;
-    let currentUserName = null;
-    
-    // Balance Modal Functions
-    function showBalanceModal(userId, userName, balance) {
-        currentUserId = userId;
-        currentUserName = userName;
-        
-        document.getElementById('balanceUserName').textContent = userName;
-        document.getElementById('balanceAmount').textContent = balance + ' points';
-        
-        $('#balanceModal').modal('show');
-    }
-    
-    function addPoints() {
-        const points = prompt('Enter points to add:');
-        if (points && !isNaN(points) && points > 0) {
-            // AJAX call to add points
-            fetch(`/users/${currentUserId}/add-points`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ points: parseInt(points) })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Points added successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error adding points');
-            });
-        }
-    }
-    
-    function deductPoints() {
-        const points = prompt('Enter points to deduct:');
-        if (points && !isNaN(points) && points > 0) {
-            // AJAX call to deduct points
-            fetch(`/users/${currentUserId}/deduct-points`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                },
-                body: JSON.stringify({ points: parseInt(points) })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    alert('Points deducted successfully!');
-                    location.reload();
-                } else {
-                    alert('Error: ' + data.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('Error deducting points');
-            });
-        }
-    }
-    
-
-    
-    // Debug form submissions
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Users index page loaded');
-        
-        // Add event listeners to all action forms
-        const actionForms = document.querySelectorAll('form[action*="/users/"]');
-        actionForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                console.log('Form submitted:', this.action);
-            });
-        });
-    });
-</script>
-@endpush
-
-@push('css')
-<style>
-    .table thead th { background: #f8f9fa; }
-    .table td, .table th { vertical-align: middle !important; }
-    .card { transition: box-shadow 0.2s; }
-    .card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
-    .badge-pink { background: #e83e8c; color: #fff; }
-    .img-circle { border-radius: 50%; }
-    
-    /* Button group styling - improved for better visibility */
-    .btn-group .btn {
-        margin-right: 1px;
-        padding: 0.375rem 0.5rem;
-        font-size: 0.875rem;
-        line-height: 1.2;
-        border-radius: 0.2rem;
-    }
-    .btn-group .btn:last-child {
-        margin-right: 0;
-    }
-    
-    /* Ensure action buttons are always visible */
-    .btn-group-sm .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
-        line-height: 1.2;
-    }
-    
-    /* Make sure forms inside btn-group don't break layout */
-    .btn-group form {
-        display: inline-block;
-        margin: 0;
-    }
-    
-    /* Modal styling */
-    .balance-display {
-        padding: 20px;
-        background: #f8f9fa;
-        border-radius: 10px;
-        margin: 20px 0;
-    }
-    
-    .balance-actions {
-        display: flex;
-        gap: 10px;
-        justify-content: center;
-    }
-    
-    .custom-control {
-        margin-bottom: 8px;
-    }
-    
-    .badge {
-        font-size: 0.75rem;
-    }
-    
-    /* Responsive improvements for action buttons */
-    @media (max-width: 768px) {
-        .btn-group .btn {
-            padding: 0.25rem 0.4rem;
-            font-size: 0.75rem;
-        }
-        
-        .btn-group-sm .btn {
-            padding: 0.2rem 0.4rem;
-            font-size: 0.7rem;
-        }
-    }
-</style>
-@endpush
 @stop
 
+@section('css')
+    <style>
+        /* Modern styling for buttons */
+        .btn-group .btn {
+            margin-right: 2px;
+            border-radius: 4px;
+        }
 
+        /* Add subtle animations */
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            transition: all 0.2s;
+        }
 
+        /* Make status pills more modern */
+        .badge {
+            padding: 5px 8px;
+            font-weight: 500;
+        }
 
+        /* Stats cards enhancements */
+        .small-box {
+            border-radius: 6px;
+            overflow: hidden;
+        }
 
+        .small-box .icon i {
+            transition: all 0.3s linear;
+        }
 
+        .small-box:hover .icon i {
+            transform: scale(1.1);
+        }
 
+        /* Table improvements */
+        .table th {
+            background-color: #f9f9f9;
+            border-top: none;
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(0,123,255,0.03);
+        }
+
+        /* User image enhancements */
+        .user-block img {
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+    </style>
+@stop
+
+@section('js')
+    <script>
+        $(function() {
+            $('[data-toggle="tooltip"]').tooltip();
+
+            // Auto-submit form when filters change
+            $('#status-filter, #role-filter').on('change', function() {
+                $('#search-form').submit();
+            });
+
+            // Confirm delete
+            $('.btn-danger[type="submit"]').click(function(e) {
+                if(!confirm('Are you sure you want to delete this user?')) {
+                    e.preventDefault();
+                }
+            });
+
+            // Toggle ban button click handler
+            $('.toggle-ban-btn').on('click', function() {
+                const btn = $(this);
+                const userId = btn.data('user-id');
+                const currentStatus = btn.data('current-status');
+                const action = currentStatus === 'banned' ? 'unban' : 'ban';
+
+                // Show loading state
+                const originalHtml = btn.html();
+                btn.html('<i class="fas fa-spinner fa-spin"></i>');
+                btn.prop('disabled', true);
+
+                // Get CSRF token from meta tag
+                const csrfToken = $('meta[name="csrf-token"]').attr('content');
+
+                // Send AJAX request to toggle ban status
+                $.ajax({
+                    url: '/users/' + userId + '/toggle-ban',
+                    type: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': csrfToken
+                    },
+                    data: {
+                        action: action
+                    },
+                    success: function(response) {
+                        // Update button appearance
+                        const newStatus = action === 'ban' ? 'banned' : 'active';
+
+                        if (action === 'ban') {
+                            // Update to banned state
+                            btn.removeClass('btn-danger').addClass('btn-success');
+                            btn.html('<i class="fas fa-check-circle"></i>');
+                            btn.attr('title', 'Unban User').tooltip('dispose').tooltip();
+
+                            // Update status badge
+                            btn.closest('tr').find('td:eq(2) span')
+                                .removeClass('badge-success badge-warning')
+                                .addClass('badge-danger')
+                                .text('Banned');
+                        } else {
+                            // Update to active state
+                            btn.removeClass('btn-success').addClass('btn-danger');
+                            btn.html('<i class="fas fa-ban"></i>');
+                            btn.attr('title', 'Ban User').tooltip('dispose').tooltip();
+
+                            // Update status badge
+                            btn.closest('tr').find('td:eq(2) span')
+                                .removeClass('badge-danger badge-warning')
+                                .addClass('badge-success')
+                                .text('Active');
+                        }
+
+                        // Update data attribute
+                        btn.attr('data-current-status', newStatus);
+                        btn.data('current-status', newStatus);
+
+                        // Re-enable the button
+                        btn.prop('disabled', false);
+
+                        // Show success message
+                        if(typeof toastr !== 'undefined') {
+                            toastr.success(response.message);
+                        } else {
+                            alert(response.message);
+                        }
+                    },
+                    error: function(xhr) {
+                        // Reset button
+                        btn.html(originalHtml);
+                        btn.prop('disabled', false);
+
+                        // Show error message
+                        const errorMessage = xhr.responseJSON && xhr.responseJSON.message ?
+                            xhr.responseJSON.message : 'An error occurred while processing your request.';
+
+                        if(typeof toastr !== 'undefined') {
+                            toastr.error(errorMessage);
+                        } else {
+                            alert('Error: ' + errorMessage);
+                        }
+                    }
+                });
+            });
+        });
+    </script>
+@stop

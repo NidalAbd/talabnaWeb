@@ -47,7 +47,7 @@
                             @endif
                         </div>
 
-                        <h3 class="profile-username text-center">{{ $user->id }}</h3>
+                        <h3 class="profile-username text-center">{{ $user->name }}</h3>
                         <p class="text-muted text-center">
                             <i class="fas fa-at text-secondary"></i> {{ $user->user_name ?? $user->email }}
                         </p>
@@ -69,15 +69,15 @@
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-calendar-alt text-primary mr-2"></i> Joined</span>
-                                <span>{{ $user->created_at ? $user->created_at->format('Y-m-d') : '-' }}</span>
+                                <span>{{ $user->created_at->format('M d, Y') }}</span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-user-tag text-primary mr-2"></i> Roles</span>
-                                <span class="badge badge-primary">{{ $user->roles->pluck('name')->join(', ') }}</span>
+                                <span class="badge badge-primary">{{ $user->roles->count() }}</span>
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <span><i class="fas fa-key text-primary mr-2"></i> Permissions</span>
-                                <span class="badge badge-info">{{ $user->permissions->pluck('name')->join(', ') }}</span>
+                                <span class="badge badge-info">{{ $user->permissions->count() }}</span>
                             </div>
                         </div>
 
@@ -131,7 +131,7 @@
                                                                 {{ $role->display_name ?? $role->name }}
                                                             </label>
                                                         </div>
-                                                        <small class="text-muted d-block mt-1">{{ $role->id }}</small>
+                                                        <small class="text-muted d-block mt-1">{{ $role->description ?? $role->name }}</small>
                                                     </div>
                                                 </div>
                                             </div>
@@ -144,7 +144,8 @@
                                     @if($groupedPermissions)
                                         <div class="alert alert-warning">
                                             <i class="icon fas fa-exclamation-triangle"></i>
-                                            <strong>{{ __('admin.role-assignments.edit.note') }}</strong> {{ __('admin.role-assignments.edit.note_override') }}
+                                            <strong>Note:</strong> Direct permissions override role-based permissions.
+                                            Only assign direct permissions when you need to give a user special access outside of their roles.
                                         </div>
 
                                         <div class="accordion" id="permissionsAccordion">
@@ -190,7 +191,7 @@
                                                                                 {{ $permission->assigned ? 'checked' : '' }}>
                                                                             <label class="custom-control-label" for="permission_{{ $permission->id }}">
                                                                                 {{ $permission->display_name ?? $permission->name }}
-                                                                                <small class="d-block text-muted">{{ $permission->id }}</small>
+                                                                                <small class="d-block text-muted">{{ $permission->name }}</small>
                                                                             </label>
                                                                         </div>
                                                                     </div>
@@ -203,7 +204,7 @@
                                         </div>
                                     @else
                                         <div class="alert alert-info">
-                                            <i class="fas fa-info-circle mr-1"></i> {{ __('admin.role-assignments.edit.direct_permission_disabled') }}
+                                            <i class="fas fa-info-circle mr-1"></i> Direct permission assignment is disabled in system settings.
                                         </div>
                                     @endif
                                 </div>
@@ -211,13 +212,13 @@
                         </div>
                         <div class="card-footer">
                             <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-save mr-1"></i> {{ __('admin.role-assignments.edit.save_assignments') }}
+                                <i class="fas fa-save mr-1"></i> Save Assignments
                             </button>
                             <button type="button" class="btn btn-warning ml-2" id="reset-permissions">
-                                <i class="fas fa-sync-alt mr-1"></i> {{ __('admin.role-assignments.edit.reset_to_role_permissions') }}
+                                <i class="fas fa-sync-alt mr-1"></i> Reset to Role Permissions
                             </button>
                             <a href="{{ route('role-assignments.index') }}" class="btn btn-default float-right">
-                                {{ __('admin.role-assignments.edit.cancel') }}
+                                Cancel
                             </a>
 
                         </div>
@@ -284,7 +285,7 @@
 
                 if (selectedRoles.length === 0) {
                     // Fallback to browser alert if SweetAlert is not working
-                    alert('{{ __('admin.role-assignments.edit.reset_permission_select_role') }}');
+                    alert('Please select at least one role to reset permissions.');
                     return;
                 }
 
@@ -315,11 +316,11 @@
                                 });
 
                                 // Fallback alert
-                                alert('{{ __('admin.role-assignments.edit.permissions_reset_default') }}');
+                                alert('Permissions have been reset to the default for the selected roles.');
                             }
                         } catch (err) {
                             console.error('Error processing permissions:', err);
-                            alert('{{ __('admin.role-assignments.edit.error_resetting_permissions') }}');
+                            alert('An error occurred while resetting permissions.');
                         }
                     },
                     error: function(xhr) {
@@ -328,7 +329,7 @@
                         // Fallback error handling
                         const errorMessage = xhr.responseJSON && xhr.responseJSON.details
                             ? xhr.responseJSON.details
-                            : '{{ __('admin.role-assignments.edit.failed_retrieve_default_permissions') }}';
+                            : 'Failed to retrieve default permissions.';
 
                         alert(errorMessage);
                     }
@@ -337,10 +338,3 @@
         });
     </script>
 @stop
-
-
-
-
-
-
-

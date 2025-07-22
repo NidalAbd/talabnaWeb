@@ -33,7 +33,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_en">City Name (English) <span class="text-danger">{{('cities\create._') }}</span></label>
+                                        <label for="name_en">City Name (English) <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('name_en') is-invalid @enderror"
                                                id="name_en" name="name_en" value="{{ old('name_en') }}" required>
                                         @error('name_en')
@@ -44,7 +44,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_ar">{{('cities\create.city_name_arabic_') }}</label>
+                                        <label for="name_ar">City Name (Arabic)</label>
                                         <input type="text" class="form-control @error('name_ar') is-invalid @enderror"
                                                id="name_ar" name="name_ar" value="{{ old('name_ar') }}" dir="rtl">
                                         @error('name_ar')
@@ -55,10 +55,10 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="country_id">Country <span class="text-danger">{{('cities\create._') }}</span></label>
+                                <label for="country_id">Country <span class="text-danger">*</span></label>
                                 <select class="form-control @error('country_id') is-invalid @enderror"
                                         id="country_id" name="country_id" required>
-                                    <option value="">{{('cities\create._select_country_') }}</option>
+                                    <option value="">-- Select Country --</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : '' }}>
                                             {{ $country->getTranslatedName() }}
@@ -71,16 +71,16 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="image">{{('cities\create.city_image') }}</label>
+                                <label for="image">City Image</label>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input @error('image') is-invalid @enderror"
                                            id="image" name="image" accept="image/*">
-                                    <label class="custom-file-label" for="image">{{('cities\create.choose_file') }}</label>
+                                    <label class="custom-file-label" for="image">Choose file</label>
                                     @error('image')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <small class="form-text text-muted">{{('cities\create.recommended_size_200x120_pixels') }}</small>
+                                <small class="form-text text-muted">Recommended size: 200x120 pixels</small>
                             </div>
 
                             <div class="form-group">
@@ -126,10 +126,3 @@
         </script>
     @endpush
 @endsection
-
-
-
-
-
-
-

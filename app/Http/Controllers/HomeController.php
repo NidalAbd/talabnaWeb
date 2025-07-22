@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Categories;
 use App\Models\User;
 use App\Models\ServicePost;
-use App\Models\Categories;
-use App\Models\Sub_categories;
 use App\Models\palservice_points;
 use App\Models\point_transactions;
 use App\Models\point_purchase_requests;
 use App\Models\Report;
-use App\Models\Level;
+use App\Models\Sub_categories;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -37,55 +36,52 @@ class HomeController extends Controller
     {
         $user = Auth::user();
 
-        // User statistics
+        // User stats
         $totalUsers = User::count();
         $activeUsers = User::where('is_active', 'active')->count();
         $bannedUsers = User::where('is_active', 'banned')->count();
-        $recentUsers = User::latest()->take(10)->get();
+        $recentUsers = User::latest()->take(5)->get();
 
-        // Post statistics
+        // Service posts stats
         $totalPosts = ServicePost::count();
         $publishedPosts = ServicePost::where('state', 'published')->count();
         $notPublishedPosts = ServicePost::where('state', 'not published')->count();
         $archivedPosts = ServicePost::where('state', 'archive')->count();
         $rejectedPosts = ServicePost::where('state', 'rejected')->count();
-        $recentPosts = ServicePost::with(['user', 'category'])->latest()->take(10)->get();
+        $recentPosts = ServicePost::with('user')->latest()->take(5)->get();
 
-        // Point statistics
+        // Point stats
         $totalPoints = palservice_points::sum('point');
         $totalTransactions = point_transactions::count();
         $pendingPurchaseRequests = point_purchase_requests::where('status', 'pending')->count();
-        $recentTransactions = point_transactions::with(['fromUser', 'toUser'])->latest()->take(10)->get();
+        $recentTransactions = point_transactions::with(['fromUser', 'toUser'])->latest()->take(5)->get();
 
-        // Points used statistics
+        // Points used statistics for different time periods
         $pointsUsedStats = $this->getPointsUsedStatistics();
+
+        // Pass individual stats for easy access in the view
         $pointsUsedToday = $pointsUsedStats['today'];
         $pointsUsedWeek = $pointsUsedStats['week'];
         $pointsUsedMonth = $pointsUsedStats['month'];
         $pointsUsedYear = $pointsUsedStats['year'];
         $pointsUsedLifetime = $pointsUsedStats['lifetime'];
 
-        // Category statistics
+        // Category stats
         $totalCategories = Categories::count();
         $totalSubCategories = Sub_categories::count();
-        $categoriesWithCounts = Categories::withCount('servicePosts')->get();
+        $categoriesWithCounts = Categories::withCount('servicePosts')->orderBy('service_posts_count', 'desc')->take(5)->get();
 
-        // Report statistics
+        // Report stats
         $totalReports = Report::count();
 
         // Post types
         $offerPosts = ServicePost::where('type', 'عرض')->count();
         $requestPosts = ServicePost::where('type', 'طلب')->count();
 
-        // Get level IDs for badge counting
-        $goldLevel = Level::where('name->ar', 'ذهبي')->first();
-        $diamondLevel = Level::where('name->ar', 'ماسي')->first();
-        $regularLevel = Level::where('name->ar', 'عادي')->first();
-        
         // Badge stats
-        $normalPosts = $regularLevel ? ServicePost::where('level_id', $regularLevel->id)->count() : 0;
-        $goldenPosts = $goldLevel ? ServicePost::where('level_id', $goldLevel->id)->count() : 0;
-        $diamondPosts = $diamondLevel ? ServicePost::where('level_id', $diamondLevel->id)->count() : 0;
+        $normalPosts = ServicePost::where('have_badge', 'عادي')->count();
+        $goldenPosts = ServicePost::where('have_badge', 'ذهبي')->count();
+        $diamondPosts = ServicePost::where('have_badge', 'ماسي')->count();
 
         // Data for charts
         $postsByMonth = $this->getPostsByMonth();
@@ -171,38 +167,20 @@ class HomeController extends Controller
      */
     private function getBadgePointsUsed($startDate = null)
     {
-        // Get level IDs
-        $goldLevel = Level::where('name->ar', 'ذهبي')->first();
-        $diamondLevel = Level::where('name->ar', 'ماسي')->first();
-        $regularLevel = Level::where('name->ar', 'عادي')->first();
-        
-        $query = ServicePost::where('badge_duration', '>', 0);
-
-        // Filter out regular level posts
-        if ($regularLevel) {
-            $query->where('level_id', '!=', $regularLevel->id);
-        }
+        $query = ServicePost::where('have_badge', '!=', 'عادي')
+            ->where('badge_duration', '>', 0);
 
         // Apply date filter if specified
         if ($startDate) {
             $query->where('created_at', '>=', $startDate);
         }
 
-        // Calculate points based on level and duration
-        $goldPoints = 0;
-        $diamondPoints = 0;
-        
-        if ($goldLevel) {
-            $goldPosts = clone $query;
-            $goldPoints = $goldPosts->where('level_id', $goldLevel->id)->sum(DB::raw('badge_duration * 2'));
-        }
-        
-        if ($diamondLevel) {
-            $diamondPosts = clone $query;
-            $diamondPoints = $diamondPosts->where('level_id', $diamondLevel->id)->sum(DB::raw('badge_duration * 10'));
-        }
-        
-        return $goldPoints + $diamondPoints;
+        // Calculate points based on badge type and duration
+        return $query->sum(DB::raw('CASE
+            WHEN have_badge = "ذهبي" THEN badge_duration * 2
+            WHEN have_badge = "ماسي" THEN badge_duration * 10
+            ELSE 0
+          END'));
     }
 
     /**
@@ -213,8 +191,10 @@ class HomeController extends Controller
      */
     private function getTransactionPointsUsed($startDate = null)
     {
-        $query = point_transactions::where('type', 'used');
+        $query = point_transactions::where('type', 'used')
+            ->where('point', '>', 0);
 
+        // Apply date filter if specified
         if ($startDate) {
             $query->where('created_at', '>=', $startDate);
         }
@@ -223,114 +203,131 @@ class HomeController extends Controller
     }
 
     /**
-     * Get posts by month for chart
+     * Get posts count by month for the last 12 months
      *
      * @return array
      */
     private function getPostsByMonth()
     {
-        $posts = ServicePost::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
-            ->whereYear('created_at', Carbon::now()->year)
-            ->groupBy('month')
+        $months = [];
+        $counts = [];
+
+        $postsData = DB::table('service_posts')
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('MONTH(created_at) as month'), DB::raw('YEAR(created_at) as year'))
+            ->whereRaw('created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
             ->orderBy('month')
             ->get();
 
-        $data = array_fill(1, 12, 0);
-        foreach ($posts as $post) {
-            $data[$post->month] = $post->count;
+        foreach ($postsData as $data) {
+            $monthName = date('F', mktime(0, 0, 0, $data->month, 10));
+            $months[] = $monthName . ' ' . $data->year;
+            $counts[] = $data->count;
         }
 
-        $monthNames = [
-            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
-            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
-            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
-        ];
-
         return [
-            'labels' => array_values($monthNames),
-            'data' => array_values($data)
+            'labels' => $months,
+            'data' => $counts
         ];
     }
 
     /**
-     * Get users by month for chart
+     * Get users count by month for the last 12 months
      *
      * @return array
      */
     private function getUsersByMonth()
     {
-        $users = User::selectRaw('MONTH(created_at) as month, COUNT(*) as count')
-            ->whereYear('created_at', Carbon::now()->year)
-            ->groupBy('month')
+        $months = [];
+        $counts = [];
+
+        $usersData = DB::table('users')
+            ->select(DB::raw('COUNT(*) as count'), DB::raw('MONTH(created_at) as month'), DB::raw('YEAR(created_at) as year'))
+            ->whereRaw('created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
             ->orderBy('month')
             ->get();
 
-        $data = array_fill(1, 12, 0);
-        foreach ($users as $user) {
-            $data[$user->month] = $user->count;
+        foreach ($usersData as $data) {
+            $monthName = date('F', mktime(0, 0, 0, $data->month, 10));
+            $months[] = $monthName . ' ' . $data->year;
+            $counts[] = $data->count;
         }
 
-        $monthNames = [
-            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
-            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
-            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
-        ];
-
         return [
-            'labels' => array_values($monthNames),
-            'data' => array_values($data)
+            'labels' => $months,
+            'data' => $counts
         ];
     }
 
     /**
-     * Get posts by category for chart
+     * Get posts count by category
      *
      * @return array
      */
     private function getPostsByCategory()
     {
-        $categories = Categories::withCount('servicePosts')
-            ->orderBy('service_posts_count', 'desc')
+        $categories = [];
+        $counts = [];
+
+        $categoryData = DB::table('service_posts')
+            ->join('categories', 'service_posts.categories_id', '=', 'categories.id')
+            ->select(DB::raw('COUNT(service_posts.id) as count'), 'categories.id', 'categories.name')
+            ->groupBy('categories.id', 'categories.name')
+            ->orderByDesc('count')
             ->take(10)
             ->get();
 
+        foreach ($categoryData as $data) {
+            $name = is_string($data->name) ? json_decode($data->name, true) : $data->name;
+            $categoryName = $name['en'] ?? ($name['ar'] ?? "Category {$data->id}");
+            $categories[] = $categoryName;
+            $counts[] = $data->count;
+        }
+
         return [
-            'labels' => $categories->pluck('name')->toArray(),
-            'data' => $categories->pluck('service_posts_count')->toArray()
+            'labels' => $categories,
+            'data' => $counts
         ];
     }
 
     /**
-     * Get point transactions by month for chart
+     * Get point transactions by month for the last 12 months
      *
      * @return array
      */
     private function getPointTransactionsByMonth()
     {
-        $transactions = point_transactions::selectRaw('MONTH(created_at) as month, COUNT(*) as count, SUM(point) as total_points')
-            ->whereYear('created_at', Carbon::now()->year)
-            ->groupBy('month')
+        $months = [];
+        $counts = [];
+        $points = [];
+
+        $transactionData = DB::table('point_transactions')
+            ->select(
+                DB::raw('COUNT(*) as count'),
+                DB::raw('SUM(point) as total_points'),
+                DB::raw('MONTH(created_at) as month'),
+                DB::raw('YEAR(created_at) as year')
+            )
+            ->whereRaw('created_at >= DATE_SUB(NOW(), INTERVAL 12 MONTH)')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
             ->orderBy('month')
             ->get();
 
-        $counts = array_fill(1, 12, 0);
-        $points = array_fill(1, 12, 0);
-        
-        foreach ($transactions as $transaction) {
-            $counts[$transaction->month] = $transaction->count;
-            $points[$transaction->month] = $transaction->total_points;
+        foreach ($transactionData as $data) {
+            $monthName = date('F', mktime(0, 0, 0, $data->month, 10));
+            $months[] = $monthName . ' ' . $data->year;
+            $counts[] = $data->count;
+            $points[] = $data->total_points;
         }
 
-        $monthNames = [
-            1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
-            5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
-            9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
-        ];
-
         return [
-            'labels' => array_values($monthNames),
-            'counts' => array_values($counts),
-            'points' => array_values($points)
+            'labels' => $months,
+            'counts' => $counts,
+            'points' => $points
         ];
     }
 }

@@ -7,7 +7,7 @@
                     <i class="fas fa-mobile-alt mr-2"></i> Device Information
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">{{('components\device-info-modal._times_') }}</span>
+                    <span aria-hidden="true">&times;</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -15,32 +15,32 @@
                     <div class="col-md-6">
                         <div class="card card-outline card-primary h-100">
                             <div class="card-header">
-                                <h3 class="card-title">{{('components\device-info-modal.device_details') }}</h3>
+                                <h3 class="card-title">Device Details</h3>
                             </div>
                             <div class="card-body">
                                 <table class="table table-striped">
                                     <tr>
-                                        <th style="width: 40%">{{('components\device-info-modal.device_id') }}</th>
-                                        <td><code>{{ $device->id }}</code></td>
+                                        <th style="width: 40%">Device ID</th>
+                                        <td><code>{{ $device->device_id }}</code></td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.brand') }}</th>
-                                        <td>{{ $device->brand }}</td>
+                                        <th>Brand</th>
+                                        <td>{{ $device->device_brand ?? 'N/A' }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.model') }}</th>
-                                        <td>{{ $device->model }}</td>
+                                        <th>Model</th>
+                                        <td>{{ $device->device_model ?? 'N/A' }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.os_version') }}</th>
-                                        <td>{{ $device->os_version }}</td>
+                                        <th>OS Version</th>
+                                        <td>{{ $device->os_version ?? 'N/A' }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.ip_address') }}</th>
-                                        <td>{{ $device->ip_address }}</td>
+                                        <th>IP Address</th>
+                                        <td>{{ $device->ip_address ?? 'N/A' }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.fcm_token') }}</th>
+                                        <th>FCM Token</th>
                                         <td>
                                             @if($device->fcm_token)
                                                 <code class="text-truncate d-block" style="max-width: 220px;">{{ $device->fcm_token }}</code>
@@ -57,34 +57,34 @@
                     <div class="col-md-6">
                         <div class="card card-outline card-danger h-100">
                             <div class="card-header">
-                                <h3 class="card-title">{{('components\device-info-modal.ban_information') }}</h3>
+                                <h3 class="card-title">Ban Information</h3>
                             </div>
                             <div class="card-body">
                                 <table class="table table-striped">
                                     <tr>
-                                        <th style="width: 40%">{{('components\device-info-modal.status') }}</th>
+                                        <th style="width: 40%">Status</th>
                                         <td>
                                             @if($device->isActive())
-                                                <span class="badge badge-danger">{{('components\device-info-modal.banned') }}</span>
+                                                <span class="badge badge-danger">Banned</span>
                                             @else
-                                                <span class="badge badge-success">{{('components\device-info-modal.unbanned') }}</span>
+                                                <span class="badge badge-success">Unbanned</span>
                                             @endif
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.banned_at') }}</th>
-                                        <td>{{ $device->banned_at }}</td>
+                                        <th>Banned At</th>
+                                        <td>{{ $device->banned_at->format('Y-m-d H:i:s') }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.unbanned_at') }}</th>
-                                        <td>{{ $device->unbanned_at }}</td>
+                                        <th>Unbanned At</th>
+                                        <td>{{ $device->unban_at ? $device->unban_at->format('Y-m-d H:i:s') : 'N/A' }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.reason') }}</th>
-                                        <td>{{ $device->reason }}</td>
+                                        <th>Reason</th>
+                                        <td>{{ $device->ban_reason ?? 'No reason provided' }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.associated_user') }}</th>
+                                        <th>Associated User</th>
                                         <td>
                                             @if($device->user)
                                                 <a href="{{ route('users.show', $device->user_id) }}">
@@ -96,12 +96,12 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.email') }}</th>
-                                        <td>{{ $device->email }}</td>
+                                        <th>Email</th>
+                                        <td>{{ $device->email ?? 'N/A' }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{('components\device-info-modal.phone') }}</th>
-                                        <td>{{ $device->phone }}</td>
+                                        <th>Phone</th>
+                                        <td>{{ $device->phone ?? 'N/A' }}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -118,15 +118,8 @@
                         </button>
                     </form>
                 @endif
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('components\device-info-modal.close') }}</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
 </div>
-
-
-
-
-
-
-

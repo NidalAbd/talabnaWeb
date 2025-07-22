@@ -41,21 +41,21 @@
                             @endif
                         </div>
 
-                        <h3 class="profile-username text-center">{{ $user->id }}</h3>
-                        <p class="text-muted text-center">{{ '@' . $user->id }}</p>
+                        <h3 class="profile-username text-center">{{ $user->name }}</h3>
+                        <p class="text-muted text-center">{{ '@' . $user->user_name }}</p>
 
                         <ul class="list-group list-group-unbordered mb-3">
                             <li class="list-group-item">
-                                <b>{{('users\show.service_posts') }}</b> <a class="float-right">{{ $user->id }}</a>
+                                <b>Service Posts</b> <a class="float-right">{{ $user->servicePosts->count() }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{('users\show.followers') }}</b> <a class="float-right">{{ $user->id }}</a>
+                                <b>Followers</b> <a class="float-right">{{ $user->followers->count() }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{('users\show.following') }}</b> <a class="float-right">{{ $user->id }}</a>
+                                <b>Following</b> <a class="float-right">{{ $user->following->count() }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{('users\show.points_balance') }}</b> <a class="float-right">{{ $user->id }}</a>
+                                <b>Points Balance</b> <a class="float-right">{{ $user->pointsBalance }}</a>
                             </li>
                         </ul>
 
@@ -86,7 +86,7 @@
                 <!-- Account Status Card -->
                 <div class="card card-outline card-{{ $user->is_active == 'active' ? 'success' : ($user->is_active == 'banned' ? 'danger' : 'warning') }}">
                     <div class="card-header">
-                        <h3 class="card-title">{{('users\show.account_status') }}</h3>
+                        <h3 class="card-title">Account Status</h3>
                     </div>
                     <div class="card-body">
                         <div class="text-center">
@@ -104,12 +104,12 @@
                                 @method('PATCH')
                                 <div class="form-group">
                                     <select name="is_active" class="form-control" id="status">
-                                        <option value="active" {{ $user->is_active == 'active' ? 'selected' : '' }}>Active</option>
-                                        <option value="inactive" {{ $user->is_active == 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                        <option value="banned" {{ $user->is_active == 'banned' ? 'selected' : '' }}>Banned</option>
+                                        <option value="active" {{ $user->is_active == 'active' ? 'selected' : '' }}>Set as Active</option>
+                                        <option value="inactive" {{ $user->is_active == 'inactive' ? 'selected' : '' }}>Set as Inactive</option>
+                                        <option value="banned" {{ $user->is_active == 'banned' ? 'selected' : '' }}>Ban User</option>
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block">{{('users\show.update_status') }}</button>
+                                <button type="submit" class="btn btn-primary btn-block">Update Status</button>
                             </form>
                         </div>
                     </div>
@@ -118,7 +118,7 @@
                 <!-- Roles Card -->
                 <div class="card card-outline card-info">
                     <div class="card-header">
-                        <h3 class="card-title">{{('users\show.user_roles') }}</h3>
+                        <h3 class="card-title">User Roles</h3>
                     </div>
                     <div class="card-body">
                         @if(count($user->roles) > 0)
@@ -129,7 +129,7 @@
                             @endforeach
                         @else
                             <div class="text-center">
-                                <span class="text-muted">{{('users\show.no_roles_assigned') }}</span>
+                                <span class="text-muted">No roles assigned</span>
                             </div>
                         @endif
                         <div class="mt-3">
@@ -146,30 +146,30 @@
                 <!-- User Details Card -->
                 <div class="card card-outline card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">{{('users\show.user_information') }}</h3>
+                        <h3 class="card-title">User Information</h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.full_name') }}</span>
-                                        <span class="info-box-number">{{ $user->name }}</span>
+                                        <span class="info-box-text text-muted">Full Name</span>
+                                        <span class="info-box-number">{{ $user->name ?? 'Not set' }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.username') }}</span>
-                                        <span class="info-box-number">{{ $user->id }}</span>
+                                        <span class="info-box-text text-muted">Username</span>
+                                        <span class="info-box-number">{{ $user->user_name ?? 'Not set' }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.email') }}</span>
+                                        <span class="info-box-text text-muted">Email</span>
                                         <span class="info-box-number">{{ $user->email }}</span>
                                     </div>
                                 </div>
@@ -177,7 +177,7 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.auth_type') }}</span>
+                                        <span class="info-box-text text-muted">Auth Type</span>
                                         <span class="info-box-number">{{ ucfirst($user->auth_type) }}</span>
                                     </div>
                                 </div>
@@ -185,7 +185,7 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.gender') }}</span>
+                                        <span class="info-box-text text-muted">Gender</span>
                                         <span class="info-box-number">{{ $user->gender }}</span>
                                     </div>
                                 </div>
@@ -193,7 +193,7 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.date_of_birth') }}</span>
+                                        <span class="info-box-text text-muted">Date of Birth</span>
                                         <span class="info-box-number">
                                         {{ $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth)->format('M d, Y') : 'Not set' }}
                                     </span>
@@ -203,23 +203,23 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.phone_number') }}</span>
-                                        <span class="info-box-number">{{ $user->phone_number }}</span>
+                                        <span class="info-box-text text-muted">Phone Number</span>
+                                        <span class="info-box-number">{{ $user->phones ?? 'Not set' }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.whatsapp_number') }}</span>
-                                        <span class="info-box-number">{{ $user->whatsapp_number }}</span>
+                                        <span class="info-box-text text-muted">WhatsApp Number</span>
+                                        <span class="info-box-number">{{ $user->WatsNumber ?? 'Not set' }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.location') }}</span>
+                                        <span class="info-box-text text-muted">Location</span>
                                         <span class="info-box-number">
                 {{ $locationDisplay }}
             </span>
@@ -229,12 +229,12 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.data_saver') }}</span>
+                                        <span class="info-box-text text-muted">Data Saver</span>
                                         <span class="info-box-number">
                                         @if($user->data_saver_enabled)
-                                                <span class="badge badge-success">{{('users\show.enabled') }}</span>
+                                                <span class="badge badge-success">Enabled</span>
                                             @else
-                                                <span class="badge badge-secondary">{{('users\show.disabled') }}</span>
+                                                <span class="badge badge-secondary">Disabled</span>
                                             @endif
                                     </span>
                                     </div>
@@ -243,7 +243,7 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.member_since') }}</span>
+                                        <span class="info-box-text text-muted">Member Since</span>
                                         <span class="info-box-number">{{ $user->created_at->format('M d, Y') }}</span>
                                     </div>
                                 </div>
@@ -251,8 +251,8 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.last_updated') }}</span>
-                                        <span class="info-box-number">{{ $user->updated_at->format('M d, Y H:i') }}</span>
+                                        <span class="info-box-text text-muted">Last Updated</span>
+                                        <span class="info-box-number">{{ $user->updated_at->format('M d, Y') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -260,7 +260,7 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.latitude') }}</span>
+                                        <span class="info-box-text text-muted">Latitude</span>
                                         <span class="info-box-number">
                 @if($user->location_latitudes)
                                                 <div class="d-flex align-items-center">
@@ -281,7 +281,7 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{('users\show.longitude') }}</span>
+                                        <span class="info-box-text text-muted">Longitude</span>
                                         <span class="info-box-number">
                 @if($user->location_longitudes)
                                                 <div class="d-flex align-items-center">
@@ -302,7 +302,7 @@
                         <!-- User Location Map -->
                         @if($user->location_latitudes && $user->location_longitudes)
                             <div class="mt-4">
-                                <h5>{{('users\show.user_location') }}</h5>
+                                <h5>User Location</h5>
                                 <div id="map" style="height: 300px;"></div>
                             </div>
                         @endif
@@ -339,12 +339,12 @@
                                         <table class="table table-striped">
                                             <thead>
                                             <tr>
-                                                <th>{{('users\show.id') }}</th>
-                                                <th>{{('users\show.title') }}</th>
-                                                <th>{{('users\show.category') }}</th>
-                                                <th>{{('users\show.created') }}</th>
-                                                <th>{{('users\show.status') }}</th>
-                                                <th>{{('users\show.actions') }}</th>
+                                                <th>ID</th>
+                                                <th>Title</th>
+                                                <th>Category</th>
+                                                <th>Created</th>
+                                                <th>Status</th>
+                                                <th>Actions</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -352,8 +352,8 @@
                                                 <tr>
                                                     <td>{{ $post->id }}</td>
                                                     <td>{{ $post->title }}</td>
-                                                    <td>{{ $post->category->name }}</td>
-                                                    <td>{{ $post->created_at->format('M d, Y H:i') }}</td>
+                                                    <td>{{ $post->subCategory->display_name }}</td>
+                                                    <td>{{ $post->created_at->format('M d, Y') }}</td>
                                                     <td>
                                                         <span class="badge badge-{{ $post->state ? 'success' : 'danger' }}">
                                                             {{ $post->state ? 'published' : 'Inactive' }}
@@ -371,7 +371,7 @@
                                     </div>
                                 @else
                                     <div class="text-center py-4">
-                                        <span class="text-muted">{{('users\show.no_service_posts_found') }}</span>
+                                        <span class="text-muted">No service posts found</span>
                                     </div>
                                 @endif
                             </div>
@@ -383,23 +383,23 @@
                                         <table class="table table-striped">
                                             <thead>
                                             <tr>
-                                                <th>{{('users\show.date') }}</th>
-                                                <th>{{('users\show.points') }}</th>
-                                                <th>{{('users\show.type') }}</th>
-                                                <th>{{('users\show.description') }}</th>
+                                                <th>Date</th>
+                                                <th>Points</th>
+                                                <th>Type</th>
+                                                <th>Description</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             @foreach($pointsHistory as $point)
                                                 <tr>
-                                                    <td>{{ $point->created_at->format('M d, Y H:i') }}</td>
+                                                    <td>{{ $point->created_at->format('M d, Y') }}</td>
                                                     <td>
                                                         <span class="badge badge-{{ $point->point > 0 ? 'success' : 'danger' }}">
                                                             {{ $point->point > 0 ? '+' : '' }}{{ $point->point }}
                                                         </span>
                                                     </td>
-                                                    <td>{{ $point->type }}</td>
-                                                    <td>{{ $point->description }}</td>
+                                                    <td>{{ $point->type ?? 'N/A' }}</td>
+                                                    <td>{{ $point->description ?? 'N/A' }}</td>
                                                 </tr>
                                             @endforeach
                                             </tbody>
@@ -407,7 +407,7 @@
                                     </div>
                                 @else
                                     <div class="text-center py-4">
-                                        <span class="text-muted">{{('users\show.no_points_history_found') }}</span>
+                                        <span class="text-muted">No points history found</span>
                                     </div>
                                 @endif
                             </div>
@@ -419,10 +419,10 @@
                                         <table class="table table-striped">
                                             <thead>
                                             <tr>
-                                                <th>{{('users\show.reported_by') }}</th>
-                                                <th>{{('users\show.reason') }}</th>
-                                                <th>{{('users\show.date') }}</th>
-                                                <th>{{('users\show.actions') }}</th>
+                                                <th>Reported By</th>
+                                                <th>Reason</th>
+                                                <th>Date</th>
+                                                <th>Actions</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -436,7 +436,7 @@
                                                         @endif
                                                     </td>
                                                     <td>{{ $report->reason }}</td>
-                                                    <td>{{ $report->created_at->format('M d, Y H:i') }}</td>
+                                                    <td>{{ $report->created_at->format('M d, Y') }}</td>
                                                     <td>
                                                         <button class="btn btn-sm btn-danger">
                                                             <i class="fas fa-ban"></i> Action
@@ -449,7 +449,7 @@
                                     </div>
                                 @else
                                     <div class="text-center py-4">
-                                        <span class="text-muted">{{('users\show.no_reports_found') }}</span>
+                                        <span class="text-muted">No reports found</span>
                                     </div>
                                 @endif
                             </div>
@@ -478,7 +478,7 @@
 @stop
 
 @section('js')
-    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtF4Mz-vpzJFGSuOj1o5krujUu-MZuW0k"></script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_MAPS_API_KEY"></script>
     <script>
         $(function() {
             // Initialize Google Maps
@@ -502,10 +502,3 @@
         });
     </script>
 @stop
-
-
-
-
-
-
-

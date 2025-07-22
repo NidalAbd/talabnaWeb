@@ -24,7 +24,7 @@ class ServicePost extends Model
         'location_latitudes',
         'location_longitudes',
         'type',
-        'level_id',
+        'have_badge',
         'badge_duration',
         'badge_expires_at',
         'view_count',
@@ -35,8 +35,6 @@ class ServicePost extends Model
         'sub_categories_id',
         'country_id',
         'city_id',
-        'is_premium',
-        'is_featured'
     ];
 
     protected $casts = [
@@ -46,7 +44,7 @@ class ServicePost extends Model
         'updated_at' => 'datetime',
     ];
 
-    protected $appends = ['currency_name', 'level_name'];
+    protected $appends = ['currency_name'];
 
     /**
      * Boot the model.
@@ -55,21 +53,21 @@ class ServicePost extends Model
     {
         parent::boot();
 
-        // When creating a new service post with a level
+        // When creating a new service post with a badge
         static::creating(function ($servicePost) {
-            // Set level expiration date if level is set and duration is provided
-            if ($servicePost->level_id && $servicePost->badge_duration > 0) {
+            // Set badge expiration date if badge is not 'عادي' and duration is set
+            if ($servicePost->have_badge !== 'عادي' && $servicePost->badge_duration > 0) {
                 $servicePost->badge_expires_at = Carbon::now()->addDays($servicePost->badge_duration);
             }
         });
 
         // When updating a service post
         static::updating(function ($servicePost) {
-            // If level or duration has changed
-            if ($servicePost->isDirty('level_id') || $servicePost->isDirty('badge_duration')) {
-                if ($servicePost->level_id && $servicePost->badge_duration > 0) {
+            // If badge or duration has changed
+            if ($servicePost->isDirty('have_badge') || $servicePost->isDirty('badge_duration')) {
+                if ($servicePost->have_badge !== 'عادي' && $servicePost->badge_duration > 0) {
                     $servicePost->badge_expires_at = Carbon::now()->addDays($servicePost->badge_duration);
-                } else if (!$servicePost->level_id) {
+                } else if ($servicePost->have_badge === 'عادي') {
                     $servicePost->badge_expires_at = null;
                     $servicePost->badge_duration = 0;
                 }
@@ -78,15 +76,15 @@ class ServicePost extends Model
     }
 
     /**
-     * Check if the level has expired and update if necessary.
+     * Check if the badge has expired and update if necessary.
      *
-     * @return bool True if the level was updated, false otherwise
+     * @return bool True if the badge was updated, false otherwise
      */
-    public function checkLevelExpiration()
+    public function checkBadgeExpiration()
     {
         // Method 1: Check using badge_expires_at (preferred method)
-        if ($this->level_id && $this->badge_expires_at && $this->badge_expires_at->isPast()) {
-            $this->level_id = null;
+        if ($this->have_badge !== 'عادي' && $this->badge_expires_at && $this->badge_expires_at->isPast()) {
+            $this->have_badge = 'عادي';
             $this->badge_duration = 0;
             $this->badge_expires_at = null;
             $this->save();
@@ -95,11 +93,11 @@ class ServicePost extends Model
 
         // Method 2: Fallback to calculating based on creation date + duration
         // This ensures backwards compatibility with existing records
-        if ($this->level_id && $this->badge_duration > 0 && !$this->badge_expires_at) {
+        if ($this->have_badge !== 'عادي' && $this->badge_duration > 0 && !$this->badge_expires_at) {
             $expirationDate = Carbon::parse($this->created_at)->addDays($this->badge_duration);
 
             if (Carbon::now()->greaterThanOrEqualTo($expirationDate)) {
-                $this->level_id = null;
+                $this->have_badge = 'عادي';
                 $this->badge_duration = 0;
                 $this->badge_expires_at = null;
                 $this->save();
@@ -115,13 +113,13 @@ class ServicePost extends Model
     }
 
     /**
-     * Calculate remaining days for level
+     * Calculate remaining days for badge
      *
-     * @return int|null Number of days remaining or null if no level
+     * @return int|null Number of days remaining or null if no badge
      */
-    public function getLevelRemainingDays()
+    public function getBadgeRemainingDays()
     {
-        if (!$this->level_id || !$this->badge_duration) {
+        if ($this->have_badge === 'عادي' || !$this->badge_duration) {
             return null;
         }
 
@@ -145,18 +143,18 @@ class ServicePost extends Model
     }
 
     /**
-     * Update level with new level and duration
+     * Update badge with new type and duration
      *
-     * @param int $levelId The new level ID
-     * @param int $duration The new level duration in days
+     * @param string $badgeType The new badge type
+     * @param int $duration The new badge duration in days
      * @return bool Success status
      */
-    public function updateLevel(int $levelId, int $duration)
+    public function updateBadge(string $badgeType, int $duration)
     {
-        $this->level_id = $levelId;
+        $this->have_badge = $badgeType;
         $this->badge_duration = $duration;
 
-        if ($levelId && $duration > 0) {
+        if ($badgeType !== 'عادي' && $duration > 0) {
             $this->badge_expires_at = Carbon::now()->addDays($duration);
         } else {
             $this->badge_expires_at = null;
@@ -178,19 +176,6 @@ class ServicePost extends Model
 
         // Fallback
         return $locale == 'ar' ? 'دولار امريكي' : 'US Dollar';
-    }
-
-    /**
-     * Get level name based on current locale
-     */
-    public function getLevelNameAttribute()
-    {
-        if ($this->level) {
-            return $this->level->localized_name;
-        }
-        
-        // Fallback for regular level
-        return app()->getLocale() === 'ar' ? 'عادي' : 'Regular';
     }
 
     /**
@@ -236,27 +221,6 @@ class ServicePost extends Model
     public function getCurrencyCode()
     {
         return $this->country->currency_code ?? 'USD';
-    }
-
-    public function getCategoryName()
-    {
-        $category = \App\Models\Categories::find($this->categories_id);
-        return $category ? $category->translated_name : __('Unknown');
-    }
-    public function getSubCategoryName()
-    {
-        $sub = \App\Models\Sub_categories::find($this->sub_categories_id);
-        return $sub ? $sub->translated_name : __('Unknown');
-    }
-    public function getCityName()
-    {
-        $city = \App\Models\cities::find($this->city_id);
-        return $city ? $city->translated_name : __('Unknown');
-    }
-    public function getCountryName()
-    {
-        $country = \App\Models\countries::find($this->country_id);
-        return $country ? $country->translated_name : __('Unknown');
     }
 
     /* Relationships */
@@ -324,13 +288,5 @@ class ServicePost extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(cities::class);
-    }
-
-    /**
-     * Get the level for this service post.
-     */
-    public function level(): BelongsTo
-    {
-        return $this->belongsTo(Level::class);
     }
 }

@@ -26,8 +26,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-danger">
                     <div class="inner">
-                        <h3>{{ $bannedUsers->count() }}</h3>
-                        <p>{{('admin\users\banned.banned_users') }}</p>
+                        <h3>{{ $bannedUsers->total() }}</h3>
+                        <p>Banned Users</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-slash"></i>
@@ -37,8 +37,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3>{{ App\Models\BannedDevice::whereNull('unban_at')-> __('admin\users\banned.count_') }}</h3>
-                        <p>{{('admin\users\banned.banned_devices') }}</p>
+                        <h3>{{ App\Models\BannedDevice::whereNull('unban_at')->count() }}</h3>
+                        <p>Banned Devices</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-mobile-alt"></i>
@@ -51,8 +51,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>{{ App\Models\BanHistory::where('action', 'ban')-> __('admin\users\banned.count_') }}</h3>
-                        <p>{{('admin\users\banned.ban_actions') }}</p>
+                        <h3>{{ App\Models\BanHistory::where('action', 'ban')->count() }}</h3>
+                        <p>Ban Actions</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-lock"></i>
@@ -65,8 +65,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>{{ App\Models\BanHistory::where('action', 'unban')-> __('admin\users\banned.count_') }}</h3>
-                        <p>{{('admin\users\banned.unban_actions') }}</p>
+                        <h3>{{ App\Models\BanHistory::where('action', 'unban')->count() }}</h3>
+                        <p>Unban Actions</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-check"></i>
@@ -92,7 +92,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <form action="{{ route('admin.users.banned') }}" method="GET">
+                <form action="{{ route('users.banned') }}" method="GET">
                     <div class="row">
                         <div class="col-md-9">
                             <div class="input-group">
@@ -105,7 +105,7 @@
                             </div>
                         </div>
                         <div class="col-md-3">
-                            <a href="{{ route('admin.users.banned') }}" class="btn btn-outline-secondary btn-block">
+                            <a href="{{ route('users.banned') }}" class="btn btn-outline-secondary btn-block">
                                 <i class="fas fa-sync-alt"></i> Reset
                             </a>
                         </div>
@@ -132,13 +132,13 @@
                     <table class="table table-hover text-nowrap">
                         <thead>
                         <tr>
-                            <th style="width: 5%">{{('admin\users\banned.id') }}</th>
-                            <th style="width: 15%">{{('admin\users\banned.user') }}</th>
-                            <th style="width: 15%">{{('admin\users\banned.contact_info') }}</th>
-                            <th style="width: 15%">{{('admin\users\banned.banned_devices') }}</th>
-                            <th style="width: 20%">{{('admin\users\banned.ban_reason') }}</th>
-                            <th style="width: 10%">{{('admin\users\banned.banned_at') }}</th>
-                            <th style="width: 20%">{{('admin\users\banned.actions') }}</th>
+                            <th style="width: 5%">ID</th>
+                            <th style="width: 15%">User</th>
+                            <th style="width: 15%">Contact Info</th>
+                            <th style="width: 15%">Banned Devices</th>
+                            <th style="width: 20%">Ban Reason</th>
+                            <th style="width: 10%">Banned At</th>
+                            <th style="width: 20%">Actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -165,8 +165,8 @@
                                     </div>
                                 </td>
                                 <td>
-                                    <strong>{{('admin\users\banned.email_') }}</strong> {{ $user->email }}<br>
-                                    <strong>{{('admin\users\banned.phone_') }}</strong> {{ $user->phones ?? 'N/A' }}
+                                    <strong>Email:</strong> {{ $user->email }}<br>
+                                    <strong>Phone:</strong> {{ $user->phones ?? 'N/A' }}
                                 </td>
                                 <td>
                                     @php
@@ -198,7 +198,7 @@
                                             @include('components.device-info-modal', ['device' => $device])
                                         @endforeach
                                     @else
-                                        <span class="badge badge-secondary">{{('admin\users\banned.no_banned_devices') }}</span>
+                                        <span class="badge badge-secondary">No banned devices</span>
                                     @endif
                                 </td>
                                 <td>
@@ -215,7 +215,7 @@
                                     @if($banHistory)
                                         {{ $banHistory->created_at->format('Y-m-d H:i') }}
                                     @else
-                                        <span class="text-muted">{{('admin\users\banned.unknown') }}</span>
+                                        <span class="text-muted">Unknown</span>
                                     @endif
                                 </td>
                                 <td>
@@ -246,7 +246,7 @@
                                                         <i class="fas fa-history mr-2"></i> Ban History for {{ $user->name }}
                                                     </h5>
                                                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                        <span aria-hidden="true">{{('admin\users\banned._times_') }}</span>
+                                                        <span aria-hidden="true">&times;</span>
                                                     </button>
                                                 </div>
                                                 <div class="modal-body">
@@ -260,13 +260,13 @@
                                                         <div class="timeline">
                                                             @foreach($banHistories as $history)
                                                                 <div>
-                                                                    <i class="fas fa-{{ $history->action }}"></i>
+                                                                    <i class="fas fa-{{ $history->action === 'ban' ? 'ban bg-danger' : 'check-circle bg-success' }}"></i>
                                                                     <div class="timeline-item">
                                                                         <span class="time">
                                                                             <i class="fas fa-clock"></i> {{ $history->created_at->format('Y-m-d H:i') }}
                                                                         </span>
                                                                         <h3 class="timeline-header">
-                                                                            <strong>{{ ucfirst($history->action) }}</strong>
+                                                                            <strong>{{ ucfirst($history->action) }}</strong> action
                                                                             @if($history->performer)
                                                                                 by <a href="{{ route('users.show', $history->performed_by) }}">{{ $history->performer->name }}</a>
                                                                             @endif
@@ -276,7 +276,7 @@
 
                                                                             @if($history->bannedDevice)
                                                                                 <div class="mt-2">
-                                                                                    <strong>{{('admin\users\banned.device_') }}</strong>
+                                                                                    <strong>Device:</strong>
                                                                                     {{ $history->bannedDevice->device_brand }} {{ $history->bannedDevice->device_model }}
                                                                                     ({{ \Illuminate\Support\Str::limit($history->bannedDevice->device_id, 20) }})
                                                                                 </div>
@@ -293,7 +293,7 @@
                                                     @endif
                                                 </div>
                                                 <div class="modal-footer">
-                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('admin\users\banned.close') }}</button>
+                                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                                 </div>
                                             </div>
                                         </div>
@@ -413,10 +413,3 @@
         });
     </script>
 @stop
-
-
-
-
-
-
-

@@ -22,7 +22,7 @@
                     <div class="card-header bg-white">
                         <h5 class="mb-0">
                             <i class="fas fa-edit text-warning mr-2"></i>
-                            Edit Category: <span class="text-primary">{{ $category->id }}</span>
+                            Edit Category: <span class="text-primary">{{ $category->name[app()->getLocale()] }}</span>
                         </h5>
                     </div>
 
@@ -34,7 +34,7 @@
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     {{ session('success') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">{{('categories\edit._times_') }}</span>
+                                        <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                             @endif
@@ -43,7 +43,7 @@
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     {{ session('error') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">{{('categories\edit._times_') }}</span>
+                                        <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                             @endif
@@ -53,7 +53,7 @@
                                     <div class="form-group">
                                         <label for="name_ar" class="font-weight-bold">
                                             <i class="fas fa-language mr-1"></i>
-                                            Arabic Name <span class="text-danger">{{('categories\edit._') }}</span>
+                                            Arabic Name <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" id="name_ar" name="name[ar]"
                                                class="form-control @error('name.ar') is-invalid @enderror"
@@ -68,7 +68,7 @@
                                     <div class="form-group">
                                         <label for="name_en" class="font-weight-bold">
                                             <i class="fas fa-language mr-1"></i>
-                                            English Name <span class="text-danger">{{('categories\edit._') }}</span>
+                                            English Name <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" id="name_en" name="name[en]"
                                                class="form-control @error('name.en') is-invalid @enderror"
@@ -88,8 +88,8 @@
                                             Status
                                         </label>
                                         <select name="isSuspended" id="status" class="form-control @error('isSuspended') is-invalid @enderror">
-                                            <option value="0" {{ old('isSuspended', $category->isSuspended) == 0 ? 'selected' : '' }}>Active</option>
-                                            <option value="1" {{ old('isSuspended', $category->isSuspended) == 1 ? 'selected' : '' }}>Suspended</option>
+                                            <option value="0" {{ old('isSuspended', $category->isSuspended) ? '' : 'selected' }}>Active</option>
+                                            <option value="1" {{ old('isSuspended', $category->isSuspended) ? 'selected' : '' }}>Suspended</option>
                                         </select>
                                         @error('isSuspended')
                                         <div class="invalid-feedback">{{ $message }}</div>
@@ -106,7 +106,7 @@
                                         <div class="custom-file">
                                             <input type="file" class="custom-file-input @error('photo') is-invalid @enderror"
                                                    id="photo" name="photo" onchange="previewImage(this)">
-                                            <label class="custom-file-label" for="photo">{{('categories\edit.choose_new_image_or_keep_existing_') }}</label>
+                                            <label class="custom-file-label" for="photo">Choose new image (or keep existing)</label>
                                             @error('photo')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -123,7 +123,7 @@
                                 <div class="col-md-12">
                                     <div class="card">
                                         <div class="card-header bg-light">
-                                            <h6 class="mb-0">{{('categories\edit.current_image') }}</h6>
+                                            <h6 class="mb-0">Current Image</h6>
                                         </div>
                                         <div class="card-body text-center">
                                             <div id="image-preview-container" class="{{ $category->photos->count() > 0 ? '' : 'd-none' }}">
@@ -200,10 +200,3 @@
         </script>
     @endpush
 @endsection
-
-
-
-
-
-
-

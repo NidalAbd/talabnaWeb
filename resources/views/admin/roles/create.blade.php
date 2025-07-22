@@ -17,7 +17,7 @@
             <div class="col-md-12">
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">{{('admin\roles\create.role_information') }}</h3>
+                        <h3 class="card-title">Role Information</h3>
                     </div>
 
                     <form action="{{ route('roles.store') }}" method="POST">
@@ -26,7 +26,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name">Role Name <span class="text-danger">{{('admin\roles\create._') }}</span></label>
+                                        <label for="name">Role Name <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-tag"></i></span>
@@ -46,7 +46,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="display_name">{{('admin\roles\create.display_name') }}</label>
+                                        <label for="display_name">Display Name</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-eye"></i></span>
@@ -66,7 +66,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="description">{{('admin\roles\create.description') }}</label>
+                                <label for="description">Description</label>
                                 <textarea class="form-control @error('description') is-invalid @enderror"
                                           id="description" name="description" rows="3"
                                           placeholder="Enter a description of this role's purpose and capabilities">{{ old('description') }}</textarea>
@@ -78,7 +78,7 @@
                             <hr>
 
                             <h4><i class="fas fa-key mr-2"></i> Role Permissions</h4>
-                            <p class="text-muted">{{('admin\roles\create.select_the_permissions_that_will_be_assi') }}</p>
+                            <p class="text-muted">Select the permissions that will be assigned to this role:</p>
 
                             <div class="permissions-container">
                                 @foreach($groupedPermissions as $group => $permissions)
@@ -102,12 +102,12 @@
                                                         <div class="form-group">
                                                             <div class="custom-control custom-checkbox">
                                                                 <input type="checkbox" class="custom-control-input permission-checkbox {{ $group }}-checkbox"
-                                                                       id="permission_{{ $permission->count() }}" name="permissions[]"
-                                                                       value="{{ $permission->count() }}" {{ in_array($permission->id, old('permissions', [])) ? 'checked' : '' }}>
-                                                                <label class="custom-control-label" for="permission_{{ $permission->count() }}">
+                                                                       id="permission_{{ $permission->id }}" name="permissions[]"
+                                                                       value="{{ $permission->id }}" {{ in_array($permission->id, old('permissions', [])) ? 'checked' : '' }}>
+                                                                <label class="custom-control-label" for="permission_{{ $permission->id }}">
                                                                     {{ $permission->display_name ?? $permission->name }}
                                                                 </label>
-                                                                <small class="d-block text-muted">{{ $permission->id</small> }}
+                                                                <small class="d-block text-muted">{{ $permission->name }}</small>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -163,10 +163,3 @@
         });
     </script>
 @stop
-
-
-
-
-
-
-

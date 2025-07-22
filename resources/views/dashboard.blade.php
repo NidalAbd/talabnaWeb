@@ -6,18 +6,6 @@
     @include('partials.alert')
 @stop
 
-@section('content_top_nav_right')
-    <form method="GET" action="{{ url()->current() }}" class="d-inline my-auto">
-        <select name="lang" onchange="this.form.submit()" class="form-control form-control-sm" style="width:auto;display:inline;">
-            <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>{{ __('dashboard.english') }}</option>
-            <option value="ar" {{ app()->getLocale() == 'ar' ? 'selected' : '' }}>{{ __('dashboard.arabic') }}</option>
-        </select>
-        @foreach(request()->except('lang') as $key => $value)
-            <input type="hidden" name="{{ $key }}" value="{{ $value }}">
-        @endforeach
-    </form>
-@endsection
-
 @section('content')
     @include('partials.alert')
     <div class="container-fluid">
@@ -27,7 +15,7 @@
                 <div class="small-box bg-info">
                     <div class="inner">
                         <h3>{{ $totalUsers }}</h3>
-                        <p>{{('dashboard.registered_users') }}</p>
+                        <p>Registered Users</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-users"></i>
@@ -40,7 +28,7 @@
                 <div class="small-box bg-success">
                     <div class="inner">
                         <h3>{{ $activeUsers }}</h3>
-                        <p>{{('dashboard.active_users') }}</p>
+                        <p>Active Users</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-check"></i>
@@ -53,7 +41,7 @@
                 <div class="small-box bg-warning">
                     <div class="inner">
                         <h3>{{ $bannedUsers }}</h3>
-                        <p>{{('dashboard.banned_users') }}</p>
+                        <p>Banned Users</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-slash"></i>
@@ -66,7 +54,7 @@
                 <div class="small-box bg-danger">
                     <div class="inner">
                         <h3>{{ $totalReports }}</h3>
-                        <p>{{('dashboard.total_reports') }}</p>
+                        <p>Total Reports</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-flag"></i>
@@ -82,7 +70,7 @@
                 <div class="small-box bg-primary">
                     <div class="inner">
                         <h3>{{ $totalPosts }}</h3>
-                        <p>{{('dashboard.total_service_posts') }}</p>
+                        <p>Total Service Posts</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-clipboard-list"></i>
@@ -95,7 +83,7 @@
                 <div class="small-box bg-success">
                     <div class="inner">
                         <h3>{{ $publishedPosts }}</h3>
-                        <p>{{('dashboard.published_posts') }}</p>
+                        <p>Published Posts</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-check-circle"></i>
@@ -108,7 +96,7 @@
                 <div class="small-box bg-warning">
                     <div class="inner">
                         <h3>{{ $notPublishedPosts }}</h3>
-                        <p>{{('dashboard.not_published_posts') }}</p>
+                        <p>Not Published Posts</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-clock"></i>
@@ -121,7 +109,7 @@
                 <div class="small-box bg-danger">
                     <div class="inner">
                         <h3>{{ $rejectedPosts }}</h3>
-                        <p>{{('dashboard.rejected_posts') }}</p>
+                        <p>Rejected Posts</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-ban"></i>
@@ -136,7 +124,7 @@
                 <div class="small-box bg-info">
                     <div class="inner">
                         <h3>{{ number_format($totalPoints) }}</h3>
-                        <p>{{('dashboard.total_points_in_system') }}</p>
+                        <p>Total Points in System</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-coins"></i>
@@ -149,7 +137,7 @@
                 <div class="small-box bg-warning">
                     <div class="inner">
                         <h3>{{ number_format($pointsUsedLifetime) }}</h3>
-                        <p>{{('dashboard.points_used') }}</p>
+                        <p>Points Used</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-hand-holding-usd"></i>
@@ -162,7 +150,7 @@
                 <div class="small-box bg-danger">
                     <div class="inner">
                         <h3>{{ $pendingPurchaseRequests }}</h3>
-                        <p>{{('dashboard.pending_purchase_requests') }}</p>
+                        <p>Pending Purchase Requests</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-shopping-cart"></i>
@@ -185,7 +173,7 @@
                 <!-- Post Badge Stats -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{('dashboard.post_badge_distribution') }}</h3>
+                        <h3 class="card-title">Post Badge Distribution</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="badgeChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -197,7 +185,7 @@
                 <!-- Post Type Stats -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{('dashboard.post_type_distribution') }}</h3>
+                        <h3 class="card-title">Post Type Distribution</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="postTypeChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -212,7 +200,7 @@
                 <!-- Posts by Month Chart -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{('dashboard.posts_by_month') }}</h3>
+                        <h3 class="card-title">Posts by Month</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="postsChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -224,7 +212,7 @@
                 <!-- Users by Month Chart -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{('dashboard.users_by_month') }}</h3>
+                        <h3 class="card-title">Users by Month</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="usersChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -238,7 +226,7 @@
                 <!-- Posts by Category Chart -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{('dashboard.posts_by_category') }}</h3>
+                        <h3 class="card-title">Posts by Category</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="categoryChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -250,7 +238,7 @@
                 <!-- Point Transactions Chart -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{('dashboard.point_transactions_by_month') }}</h3>
+                        <h3 class="card-title">Point Transactions by Month</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="pointsChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -265,7 +253,7 @@
                 <!-- Map Card -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{('dashboard.service_posts_map') }}</h3>
+                        <h3 class="card-title">Service Posts Map</h3>
                     </div>
                     <div class="card-body">
                         <div id="map" style="height: 400px;"></div>
@@ -280,34 +268,34 @@
                 <!-- Latest Service Posts -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{('dashboard.latest_service_posts') }}</h3>
+                        <h3 class="card-title">Latest Service Posts</h3>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-striped">
                             <thead>
                             <tr>
-                                <th>{{('dashboard.id') }}</th>
-                                <th>{{('dashboard.title') }}</th>
-                                <th>{{('dashboard.user') }}</th>
-                                <th>{{('dashboard.status') }}</th>
-                                <th>{{('dashboard.date') }}</th>
+                                <th>ID</th>
+                                <th>Title</th>
+                                <th>User</th>
+                                <th>Status</th>
+                                <th>Date</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($recentPosts as $post)
                                 <tr>
-                                    <td>{{ $post->count() }}</td>
+                                    <td>{{ $post->id }}</td>
                                     <td>{{ $post->title }}</td>
                                     <td>{{ $post->user->user_name ?? 'N/A' }}</td>
                                     <td>
                                         @if($post->state == 'published')
-                                            <span class="badge badge-success">{{('dashboard.published') }}</span>
+                                            <span class="badge badge-success">Published</span>
                                         @elseif($post->state == 'not published')
-                                            <span class="badge badge-warning">{{('dashboard.not_published') }}</span>
+                                            <span class="badge badge-warning">Not Published</span>
                                         @elseif($post->state == 'archive')
-                                            <span class="badge badge-secondary">{{('dashboard.archived') }}</span>
+                                            <span class="badge badge-secondary">Archived</span>
                                         @elseif($post->state == 'rejected')
-                                            <span class="badge badge-danger">{{('dashboard.rejected') }}</span>
+                                            <span class="badge badge-danger">Rejected</span>
                                         @endif
                                     </td>
                                     <td>{{ $post->created_at->format('Y-m-d') }}</td>
@@ -317,7 +305,7 @@
                         </table>
                     </div>
                     <div class="card-footer clearfix">
-                        <a href="{{ route('service_posts.index') }}" class="btn btn-sm btn-info float-right">{{('dashboard.view_all_service_posts') }}</a>
+                        <a href="{{ route('service_posts.index') }}" class="btn btn-sm btn-info float-right">View All Service Posts</a>
                     </div>
                 </div>
             </div>
@@ -326,32 +314,32 @@
                 <!-- Latest Users -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{('dashboard.recent_users') }}</h3>
+                        <h3 class="card-title">Recent Users</h3>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-striped">
                             <thead>
                             <tr>
-                                <th>{{('dashboard.id') }}</th>
-                                <th>{{('dashboard.username') }}</th>
-                                <th>{{('dashboard.email') }}</th>
-                                <th>{{('dashboard.status') }}</th>
-                                <th>{{('dashboard.date') }}</th>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Date</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($recentUsers as $ruser)
                                 <tr>
-                                    <td>{{ $ruser->count() }}</td>
+                                    <td>{{ $ruser->id }}</td>
                                     <td>{{ $ruser->user_name }}</td>
                                     <td>{{ $ruser->email }}</td>
                                     <td>
                                         @if($ruser->is_active == 'active')
-                                            <span class="badge badge-success">{{('dashboard.active') }}</span>
+                                            <span class="badge badge-success">Active</span>
                                         @elseif($ruser->is_active == 'inactive')
-                                            <span class="badge badge-warning">{{('dashboard.inactive') }}</span>
+                                            <span class="badge badge-warning">Inactive</span>
                                         @elseif($ruser->is_active == 'banned')
-                                            <span class="badge badge-danger">{{('dashboard.banned') }}</span>
+                                            <span class="badge badge-danger">Banned</span>
                                         @endif
                                     </td>
                                     <td>{{ $ruser->created_at->format('Y-m-d') }}</td>
@@ -361,7 +349,7 @@
                         </table>
                     </div>
                     <div class="card-footer clearfix">
-                        <a href="{{ route('users.index') }}" class="btn btn-sm btn-info float-right">{{('dashboard.view_all_users') }}</a>
+                        <a href="{{ route('users.index') }}" class="btn btn-sm btn-info float-right">View All Users</a>
                     </div>
                 </div>
             </div>
@@ -380,16 +368,8 @@
 
 @section('js')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    @if(config('services.google.maps_api_key_web'))
-        <script src="https://maps.googleapis.com/maps/api/js?key={{ config('services.google.maps_api_key_web') }}&callback=initMap" async defer></script>
-    @else
-        <script>
-            // Fallback when API key is not configured
-            function initMap() {
-                document.getElementById('map').innerHTML = '<div class="alert alert-warning"><i class="fas fa-exclamation-triangle"></i> Google Maps API key is not configured. Please add GOOGLE_MAPS_API_KEY_WEB to your .env file.</div>';
-            }
-        </script>
-    @endif    <script>
+    <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBtF4Mz-vpzJFGSuOj1o5krujUu-MZuW0k&libraries=places"></script>
+    <script>
         $(function () {
             // Badge Distribution Chart
             var badgeChartCanvas = document.getElementById('badgeChart').getContext('2d');
@@ -568,12 +548,6 @@
 
             // Initialize the map
             function initMap() {
-                // Check if Google Maps API is loaded
-                if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-                    document.getElementById('map').innerHTML = '<div class="alert alert-warning">{{('dashboard.google_maps_could_not_be_loaded_please_') }}</div>';
-                    return;
-                }
-
                 var map = new google.maps.Map(document.getElementById('map'), {
                     center: {lat: 0, lng: 0},
                     zoom: 2
@@ -598,7 +572,8 @@
                 });
 
                 // Create info window content
-                var content = '<div><strong>{{ $post->title }}</strong><br>{{('dashboard._') }}<br><a href="{{ route('service_posts.show', $post->count()) }}">{{('dashboard.view_post') }}</a></div>';
+                var content = '<div><strong>{{ $post->title }}</strong>' +
+                    '<br><a href="{{ route('service_posts.show', $post->id) }}">View Details</a></div>';
 
                 // Add click listener to marker
                 google.maps.event.addListener(marker, 'click', (function(marker, content) {
@@ -620,15 +595,10 @@
             }
 
             // Load the map when the page is fully loaded
-            // Note: initMap is called by the Google Maps API callback
-            // No need to call it again in document.ready
+            $(document).ready(function() {
+                // Initialize Google Maps
+                initMap();
+            });
         });
     </script>
 @stop
-
-
-
-
-
-
-

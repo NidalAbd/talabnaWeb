@@ -26,7 +26,7 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-info"><i class="fas fa-sync-alt"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{ __('Total Transactions') }}</span>
+                                <span class="info-box-text">Total Transactions</span>
                                 <span class="info-box-number">{{ $pointTransactions->total() }}</span>
                             </div>
                         </div>
@@ -35,7 +35,7 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-success"><i class="fas fa-arrow-up"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{ __('Points Transferred') }}</span>
+                                <span class="info-box-text">Points Transferred</span>
                                 <span class="info-box-number">{{ $pointTransactions->sum('point') }}</span>
                             </div>
                         </div>
@@ -44,8 +44,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-warning"><i class="fas fa-calendar-week"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{ __('This Week') }}</span>
-                                <span class="info-box-number">{{ $pointTransactions->whereBetween('created_at', [now()->startOfWeek(), now()->endOfWeek()])->sum('point') }}</span>
+                                <span class="info-box-text">This Week</span>
+                                <span class="info-box-number">{{ $pointTransactions->where('created_at', '>=', now()->startOfWeek())->count() }}</span>
                             </div>
                         </div>
                     </div>
@@ -53,8 +53,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-danger"><i class="fas fa-user-friends"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{ __('Active Users') }}</span>
-                                <span class="info-box-number">{{ $pointTransactions->distinct('from_user_id')->count('from_user_id') }}</span>
+                                <span class="info-box-text">Active Users</span>
+                                <span class="info-box-number">{{ $pointTransactions->pluck('from_user_id')->merge($pointTransactions->pluck('to_user_id'))->unique()->count() }}</span>
                             </div>
                         </div>
                     </div>
@@ -65,7 +65,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-filter mr-1"></i>
-                            {{ __('Filter Transactions') }}
+                            Filter Transactions
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -78,7 +78,7 @@
                             <div class="row">
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>{{ __('From Date') }}</label>
+                                        <label>From Date:</label>
                                         <div class="input-group date" id="from-date" data-target-input="nearest">
                                             <input type="text" class="form-control datetimepicker-input" data-target="#from-date" placeholder="From date"/>
                                             <div class="input-group-append" data-target="#from-date" data-toggle="datetimepicker">
@@ -89,7 +89,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>{{ __('To Date') }}</label>
+                                        <label>To Date:</label>
                                         <div class="input-group date" id="to-date" data-target-input="nearest">
                                             <input type="text" class="form-control datetimepicker-input" data-target="#to-date" placeholder="To date"/>
                                             <div class="input-group-append" data-target="#to-date" data-toggle="datetimepicker">
@@ -100,20 +100,20 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>{{ __('Transaction Type') }}</label>
+                                        <label>Transaction Type:</label>
                                         <select class="form-control">
-                                            <option value="">{{ __('All Types') }}</option>
-                                            <option value="purchase">{{ __('Purchase') }}</option>
-                                            <option value="transfer">{{ __('Transfer') }}</option>
-                                            <option value="reward">{{ __('Reward') }}</option>
+                                            <option value="">All Types</option>
+                                            <option value="purchase">Purchase</option>
+                                            <option value="transfer">Transfer</option>
+                                            <option value="reward">Reward</option>
                                         </select>
                                     </div>
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label>{{ __('User') }}</label>
+                                        <label>User:</label>
                                         <select class="form-control select2">
-                                            <option value="">{{ __('All Users') }}</option>
+                                            <option value="">All Users</option>
                                         </select>
                                     </div>
                                 </div>
@@ -121,10 +121,10 @@
                             <div class="row">
                                 <div class="col-12 text-right">
                                     <button type="submit" class="btn btn-primary">
-                                        <i class="fas fa-search mr-1"></i> {{ __('Apply Filters') }}
+                                        <i class="fas fa-search mr-1"></i> Apply Filters
                                     </button>
                                     <button type="reset" class="btn btn-default">
-                                        <i class="fas fa-redo mr-1"></i> {{ __('Reset') }}
+                                        <i class="fas fa-redo mr-1"></i> Reset
                                     </button>
                                 </div>
                             </div>
@@ -137,7 +137,7 @@
                     <div class="card-header">
                         <h3 class="card-title">
                             <i class="fas fa-list mr-1"></i>
-                            {{ __('Transaction History') }}
+                            Transaction History
                         </h3>
                         <div class="card-tools">
                             <button type="button" class="btn btn-tool" data-card-widget="collapse">
@@ -158,13 +158,13 @@
                             <table class="table table-striped table-hover">
                                 <thead>
                                 <tr>
-                                    <th style="width: 5%">{{ __('ID') }}</th>
-                                    <th style="width: 20%">{{ __('From User') }}</th>
-                                    <th style="width: 20%">{{ __('To User') }}</th>
-                                    <th style="width: 10%">{{ __('Points') }}</th>
-                                    <th style="width: 15%">{{ __('Type') }}</th>
-                                    <th style="width: 20%">{{ __('Created At') }}</th>
-                                    <th style="width: 10%">{{ __('Actions') }}</th>
+                                    <th style="width: 5%">ID</th>
+                                    <th style="width: 20%">From User</th>
+                                    <th style="width: 20%">To User</th>
+                                    <th style="width: 10%">Points</th>
+                                    <th style="width: 15%">Type</th>
+                                    <th style="width: 20%">Created At</th>
+                                    <th style="width: 10%">Actions</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -174,7 +174,7 @@
                                             <td><span class="badge badge-secondary">{{ $pointTransaction->id }}</span></td>
                                             <td>
                                                 <div class="user-info">
-                                                    <span class="user-name">{{ $pointTransaction->fromUser->name ?? 'N/A' }}</span>
+                                                    <span class="user-name">{{ $pointTransaction->fromUser?->name ?? 'System' }}</span>
                                                     @if($pointTransaction->fromUser)
                                                         <small class="d-block text-muted">ID: {{ $pointTransaction->fromUser->id }}</small>
                                                     @endif
@@ -182,14 +182,14 @@
                                             </td>
                                             <td>
                                                 <div class="user-info">
-                                                    <span class="user-name">{{ $pointTransaction->toUser->name ?? 'N/A' }}</span>
+                                                    <span class="user-name">{{ $pointTransaction->toUser?->name ?? 'System' }}</span>
                                                     @if($pointTransaction->toUser)
                                                         <small class="d-block text-muted">ID: {{ $pointTransaction->toUser->id }}</small>
                                                     @endif
                                                 </div>
                                             </td>
                                             <td>
-                                                <span class="badge badge-success badge-pill px-3">{{ $pointTransaction->point ?? 0 }}</span>
+                                                <span class="badge badge-success badge-pill px-3">{{ $pointTransaction->point }} pts</span>
                                             </td>
                                             <td>
                                                 @php
@@ -250,35 +250,35 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exportModalLabel">{{ __('Export Transactions') }}</h5>
+                    <h5 class="modal-title" id="exportModalLabel">Export Transactions</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ __('times') }}</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <div class="form-group">
-                        <label>{{ __('Export Format') }}</label>
+                        <label>Export Format</label>
                         <select class="form-control">
-                            <option value="csv">{{ __('CSV') }}</option>
-                            <option value="excel">{{ __('Excel') }}</option>
-                            <option value="pdf">{{ __('PDF') }}</option>
+                            <option value="csv">CSV</option>
+                            <option value="excel">Excel</option>
+                            <option value="pdf">PDF</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>{{ __('Date Range') }}</label>
+                        <label>Date Range</label>
                         <select class="form-control">
-                            <option value="all">{{ __('All Time') }}</option>
-                            <option value="today">{{ __('Today') }}</option>
-                            <option value="week">{{ __('This Week') }}</option>
-                            <option value="month">{{ __('This Month') }}</option>
-                            <option value="year">{{ __('This Year') }}</option>
-                            <option value="custom">{{ __('Custom Range') }}</option>
+                            <option value="all">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                            <option value="custom">Custom Range</option>
                         </select>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('Cancel') }}</button>
-                    <button type="button" class="btn btn-primary">{{ __('Export') }}</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Export</button>
                 </div>
             </div>
         </div>
@@ -319,7 +319,7 @@
             $('.delete-btn').on('click', function(e) {
                 e.preventDefault();
 
-                if (confirm('{{ __('Are you sure you want to delete this transaction? This action cannot be undone.') }}')) {
+                if (confirm('Are you sure you want to delete this transaction? This action cannot be undone.')) {
                     // Submit the parent form when confirmed
                     $(this).closest('form.delete-form').submit();
                 }
@@ -348,10 +348,3 @@
         });
     </script>
 @stop
-
-
-
-
-
-
-

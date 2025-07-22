@@ -19,20 +19,20 @@
                 <!-- User Balance Card -->
                 <div class="card card-outline card-info mb-4">
                     <div class="card-header">
-                        <h3 class="card-title">{{('palservice_points\create.user_information') }}</h3>
+                        <h3 class="card-title">User Information</h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
-                                <p><strong>{{('palservice_points\create.username_') }}</strong> {{ $user->id }}</p>
-                                <p><strong>{{('palservice_points\create.name_') }}</strong> {{ $user->name }}</p>
-                                <p><strong>{{('palservice_points\create.email_') }}</strong> {{ $user->email }}</p>
+                                <p><strong>Username:</strong> {{ $user->user_name }}</p>
+                                <p><strong>Name:</strong> {{ $user->name }}</p>
+                                <p><strong>Email:</strong> {{ $user->email }}</p>
                             </div>
                             <div class="col-md-6 text-right">
                                 @php
                                     $userBalance = App\Models\palservice_points::where('user_id', $user->id)->value('point') ?? 0;
                                 @endphp
-                                <h4>{{('palservice_points\create.current_balance') }}</h4>
+                                <h4>Current Balance</h4>
                                 <div class="h2">
                                     <span class="badge bg-success p-2">{{ $userBalance }} points</span>
                                 </div>
@@ -45,17 +45,17 @@
                 <div class="card">
                     <form method="POST" action="{{ route('palservice_points.store') }}">
                         @csrf
-                        <div class="card-header">{{('Transfer Palservice Points') }}</div>
+                        <div class="card-header">{{ __('Transfer Palservice Points') }}</div>
                         <div class="card-body table-responsive p-0">
                             <div class="form-inline m-2">
                                 <div class="form-group col-md-4">
-                                    <label for="user_id">{{('User ID') }}</label>
-                                    <span class="form-control col-md-12">{{ $user->id }}</span>
+                                    <label for="user_id">{{ __('User ID') }}</label>
+                                    <span class="form-control col-md-12">{{ $user->user_name }}</span>
                                     <input type="hidden" name="to_user_id" value="{{$user->id}}">
                                     <input type="hidden" name="from_user_id" value="{{auth()->user()->id}}">
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label for="points">{{('Points') }}</label>
+                                    <label for="points">{{ __('Points') }}</label>
                                     <input id="points" type="number"
                                            class="form-control col-md-12 @error('points') is-invalid @enderror"
                                            name="points" value="{{ old('points') }}" required autocomplete="points">
@@ -66,14 +66,14 @@
                                     @enderror
                                 </div>
                                 <div class="form-group col-md-4">
-                                    <label for="type">{{('palservice_points\create.type') }}</label>
+                                    <label for="type">type</label>
                                     <select class="form-control col-md-12" id="type" name="type" required>
                                         @if(auth()->user()->hasPermission('grant_points'))
-                                            <option value="admin_grant">{{('palservice_points\create.admin_grant') }}</option>
-                                            <option value="admin_deduct">{{('palservice_points\create.admin_deduct') }}</option>
-                                            <option value="transfer">{{('palservice_points\create.transfer') }}</option>
+                                            <option value="admin_grant">Admin Grant</option>
+                                            <option value="admin_deduct">Admin Deduct</option>
+                                            <option value="transfer">Transfer</option>
                                         @else
-                                            <option value="transfer">{{('palservice_points\create.transfer') }}</option>
+                                            <option value="transfer">Transfer</option>
                                         @endif
                                     </select>
                                 </div>
@@ -83,14 +83,14 @@
                         <div class="card-footer col-md-12">
                             <div class="row justify-content-around">
                                 <div class="form-group col-md-4">
-                                    <a href="{{ url()-> __('palservice_points\create.previous_class_btn_btn_primary_') }}</a>
+                                    <a href="{{ url()->previous() }}" class="btn btn-primary ">Back</a>
                                 </div>
                                 <div class="form-group col-md-4">
 
                                 </div>
                                 <div class="form-group col-md-4">
                                     <button type="submit" class="btn btn-primary">
-                                        {{('Create') }}
+                                        {{ __('Create') }}
                                     </button>
                                 </div>
                             </div>
@@ -101,10 +101,3 @@
         </div>
     </div>
 @endsection
-
-
-
-
-
-
-

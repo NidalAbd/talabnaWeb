@@ -18,7 +18,7 @@
                         </h5>
                     </div>
 
-                    <form action="{{ route('countries.update', $country->count()) }}" method="POST" enctype="multipart/form-data">
+                    <form action="{{ route('countries.update', $country->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -36,7 +36,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_en">Name (English) <span class="text-danger">{{('countries\edit._') }}</span></label>
+                                        <label for="name_en">Name (English) <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('name_en') is-invalid @enderror"
                                                id="name_en" name="name_en" value="{{ old('name_en', $country->name['en'] ?? '') }}" required>
                                         @error('name_en')
@@ -47,7 +47,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_ar">{{('countries\edit.name_arabic_') }}</label>
+                                        <label for="name_ar">Name (Arabic)</label>
                                         <input type="text" class="form-control @error('name_ar') is-invalid @enderror"
                                                id="name_ar" name="name_ar" value="{{ old('name_ar', $country->name['ar'] ?? '') }}" dir="rtl">
                                         @error('name_ar')
@@ -60,10 +60,10 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="country_code">{{('countries\edit.country_code') }}</label>
+                                        <label for="country_code">Country Code</label>
                                         <input type="text" class="form-control @error('country_code') is-invalid @enderror"
                                                id="country_code" name="country_code" value="{{ old('country_code', $country->country_code) }}">
-                                        <small class="form-text text-muted">{{('countries\edit.two_letter_country_code_e_g_us_gb_') }}</small>
+                                        <small class="form-text text-muted">Two letter country code (e.g. US, GB)</small>
                                         @error('country_code')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -72,10 +72,10 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="currency_code">{{('countries\edit.currency_code') }}</label>
+                                        <label for="currency_code">Currency Code</label>
                                         <input type="text" class="form-control @error('currency_code') is-invalid @enderror"
                                                id="currency_code" name="currency_code" value="{{ old('currency_code', $country->currency_code) }}">
-                                        <small class="form-text text-muted">{{('countries\edit.three_letter_currency_code_e_g_usd_eu') }}</small>
+                                        <small class="form-text text-muted">Three letter currency code (e.g. USD, EUR)</small>
                                         @error('currency_code')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -86,7 +86,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="currency_name_en">{{('countries\edit.currency_name_english_') }}</label>
+                                        <label for="currency_name_en">Currency Name (English)</label>
                                         <input type="text" class="form-control @error('currency_name_en') is-invalid @enderror"
                                                id="currency_name_en" name="currency_name_en"
                                                value="{{ old('currency_name_en', $country->currency_name['en'] ?? '') }}">
@@ -98,7 +98,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="currency_name_ar">{{('countries\edit.currency_name_arabic_') }}</label>
+                                        <label for="currency_name_ar">Currency Name (Arabic)</label>
                                         <input type="text" class="form-control @error('currency_name_ar') is-invalid @enderror"
                                                id="currency_name_ar" name="currency_name_ar"
                                                value="{{ old('currency_name_ar', $country->currency_name['ar'] ?? '') }}" dir="rtl">
@@ -110,30 +110,30 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="image">{{('countries\edit.flag_image') }}</label>
+                                <label for="image">Flag Image</label>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input @error('image') is-invalid @enderror"
                                            id="image" name="image" accept="image/*">
-                                    <label class="custom-file-label" for="image">{{('countries\edit.choose_file') }}</label>
+                                    <label class="custom-file-label" for="image">Choose file</label>
                                     @error('image')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <small class="form-text text-muted">{{('countries\edit.recommended_size_200x120_pixels') }}</small>
+                                <small class="form-text text-muted">Recommended size: 200x120 pixels</small>
                             </div>
 
                             <div class="form-group">
                                 <div class="img-preview mt-3">
                                     @if($country->photos->count() > 0)
-                                        <p>{{('countries\edit.current_image_') }}</p>
+                                        <p>Current image:</p>
                                         <img src="{{ asset($country->photos->first()->src) }}" alt="{{ $country->getTranslatedName() }}"
                                              class="img-thumbnail" style="max-height: 200px;">
                                     @else
-                                        <p>{{('countries\edit.no_image_currently_uploaded_') }}</p>
+                                        <p>No image currently uploaded.</p>
                                     @endif
                                 </div>
                                 <div class="new-img-preview mt-3" style="display: none;">
-                                    <p>{{('countries\edit.new_image_') }}</p>
+                                    <p>New image:</p>
                                     <img id="preview-image" src="#" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
                                 </div>
                             </div>
@@ -175,10 +175,3 @@
         </script>
     @endpush
 @endsection
-
-
-
-
-
-
-

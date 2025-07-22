@@ -34,7 +34,7 @@
                             @else
                                 <div class="bg-light p-4 rounded mb-3">
                                     <i class="fas fa-image fa-4x text-muted"></i>
-                                    <p class="mt-2 text-muted">{{('categories\show.no_image_available') }}</p>
+                                    <p class="mt-2 text-muted">No image available</p>
                                 </div>
                             @endif
                         </div>
@@ -46,18 +46,18 @@
                             </li>
                             <li class="list-group-item">
                                 <span class="font-weight-bold mb-2 d-block"><i class="fas fa-language mr-2"></i> Name (Arabic)</span>
-                                <span class="d-block text-right">{{ $category->name['ar'] ?? '' }}</span>
+                                <span class="d-block text-right">{{ $category->name['ar'] ?? 'N/A' }}</span>
                             </li>
                             <li class="list-group-item">
                                 <span class="font-weight-bold mb-2 d-block"><i class="fas fa-language mr-2"></i> Name (English)</span>
-                                <span class="d-block text-right">{{ $category->name['en'] ?? '' }}</span>
+                                <span class="d-block text-right">{{ $category->name['en'] ?? 'N/A' }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-toggle-on mr-2"></i> Status</span>
                                 @if($category->isSuspended)
-                                    <span class="badge badge-danger">{{('categories\show.suspended') }}</span>
+                                    <span class="badge badge-danger">Suspended</span>
                                 @else
-                                    <span class="badge badge-success">{{('categories\show.active') }}</span>
+                                    <span class="badge badge-success">Active</span>
                                 @endif
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -70,11 +70,11 @@
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-calendar-alt mr-2"></i> Created</span>
-                                <span>{{ $category->created_at }}</span>
+                                <span>{{ $category->created_at->format('M d, Y') }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-edit mr-2"></i> Last Updated</span>
-                                <span>{{ $category->updated_at }}</span>
+                                <span>{{ $category->updated_at->format('M d, Y') }}</span>
                             </li>
                         </ul>
                     </div>
@@ -115,12 +115,12 @@
                                 <table class="table table-hover mb-0">
                                     <thead class="thead-light">
                                     <tr>
-                                        <th>{{('categories\show.id') }}</th>
-                                        <th>{{('categories\show.image') }}</th>
-                                        <th>{{('categories\show.name') }}</th>
-                                        <th>{{('categories\show.status') }}</th>
-                                        <th>{{('categories\show.posts') }}</th>
-                                        <th>{{('categories\show.actions') }}</th>
+                                        <th>ID</th>
+                                        <th>Image</th>
+                                        <th>Name</th>
+                                        <th>Status</th>
+                                        <th>Posts</th>
+                                        <th>Actions</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -133,7 +133,7 @@
                                                          class="img-thumbnail" alt="{{ $subcategory->name[app()->getLocale()] }}"
                                                          style="max-height: 40px;">
                                                 @else
-                                                    <span class="badge badge-secondary">{{('categories\show.no_image') }}</span>
+                                                    <span class="badge badge-secondary">No Image</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -141,9 +141,9 @@
                                             </td>
                                             <td>
                                                 @if($subcategory->isSuspended)
-                                                    <span class="badge badge-danger">{{('categories\show.suspended') }}</span>
+                                                    <span class="badge badge-danger">Suspended</span>
                                                 @else
-                                                    <span class="badge badge-success">{{('categories\show.active') }}</span>
+                                                    <span class="badge badge-success">Active</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -172,7 +172,7 @@
                             <div class="text-center py-4">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="fas fa-folder-open fa-3x text-muted mb-3"></i>
-                                    <h5 class="font-weight-normal text-muted">{{('categories\show.no_subcategories_found') }}</h5>
+                                    <h5 class="font-weight-normal text-muted">No subcategories found</h5>
                                     <a href="{{ route('subcategories.create') }}" class="btn btn-primary mt-3">
                                         <i class="fas fa-plus mr-1"></i> Add Subcategory
                                     </a>
@@ -195,12 +195,12 @@
                                 <table class="table table-hover mb-0">
                                     <thead class="thead-light">
                                     <tr>
-                                        <th>{{('categories\show.id') }}</th>
-                                        <th>{{('categories\show.title') }}</th>
-                                        <th>{{('categories\show.subcategory') }}</th>
-                                        <th>{{('categories\show.user') }}</th>
-                                        <th>{{('categories\show.status') }}</th>
-                                        <th>{{('categories\show.posted') }}</th>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Subcategory</th>
+                                        <th>User</th>
+                                        <th>Status</th>
+                                        <th>Posted</th>
                                     </tr>
                                     </thead>
                                     <tbody>
@@ -228,16 +228,16 @@
                                             </td>
                                             <td>
                                                 @if($post->state == 'published')
-                                                    <span class="badge badge-success">{{('categories\show.published') }}</span>
+                                                    <span class="badge badge-success">Published</span>
                                                 @elseif($post->state == 'archive')
-                                                    <span class="badge badge-warning">{{('categories\show.archived') }}</span>
+                                                    <span class="badge badge-warning">Archived</span>
                                                 @elseif($post->state == 'not published')
-                                                    <span class="badge badge-secondary">{{('categories\show.draft') }}</span>
+                                                    <span class="badge badge-secondary">Draft</span>
                                                 @elseif($post->state == 'rejected')
-                                                    <span class="badge badge-danger">{{('categories\show.rejected') }}</span>
+                                                    <span class="badge badge-danger">Rejected</span>
                                                 @endif
                                             </td>
-                                            <td>{{ $post->created_at }}</td>
+                                            <td>{{ $post->created_at->diffForHumans() }}</td>
                                         </tr>
                                     @endforeach
                                     </tbody>
@@ -247,7 +247,7 @@
                             <div class="text-center py-4">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
-                                    <h5 class="font-weight-normal text-muted">{{('categories\show.no_service_posts_found_in_this_category') }}</h5>
+                                    <h5 class="font-weight-normal text-muted">No service posts found in this category</h5>
                                 </div>
                             </div>
                         @endif
@@ -284,10 +284,3 @@
         </script>
     @endpush
 @endsection
-
-
-
-
-
-
-

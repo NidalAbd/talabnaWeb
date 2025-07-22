@@ -57,8 +57,7 @@ class UserFactory extends Factory
             $role = Role::where('name', 'user')->first();
             $permissions = $role->permissions;
             $user->syncPermissions($permissions);
-            // Assign role with user_type in pivot
-            $user->roles()->attach($role->id, ['user_type' => User::class]);
+            $user->attachRole($role);
             $usersFollowing = User::inRandomOrder()->take(rand(10,22))->get();
             foreach ($usersFollowing as $following) {
                 $user->following()->attach($following->id, ['created_at' => now()]);

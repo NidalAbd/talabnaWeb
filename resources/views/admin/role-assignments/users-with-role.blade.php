@@ -4,9 +4,9 @@
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-users text-primary mr-2"></i> Users with Role: {{ $role->id</h1> }}
+        <h1><i class="fas fa-users text-primary mr-2"></i> Users with Role: {{ $role->display_name ?? $role->name }}</h1>
         <div>
-            <a href="{{ route('roles.show', $role->count()) }}" class="btn btn-info">
+            <a href="{{ route('roles.show', $role->id) }}" class="btn btn-info">
                 <i class="fas fa-eye mr-1"></i> View Role
             </a>
             <a href="{{ route('roles.index') }}" class="btn btn-primary ml-2">
@@ -23,19 +23,19 @@
             <div class="col-md-12">
                 <div class="card card-outline card-primary mb-4">
                     <div class="card-header">
-                        <h3 class="card-title">{{('admin\role-assignments\users-with-role.role_information') }}</h3>
+                        <h3 class="card-title">Role Information</h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-4">
-                                <p class="mb-1"><strong>{{('admin\role-assignments\users-with-role.name_') }}</strong> {{ $role->id</p> }}
-                                <p class="mb-1"><strong>{{('admin\role-assignments\users-with-role.display_name_') }}</strong> {{ $role->id</p> }}
+                                <p class="mb-1"><strong>Name:</strong> {{ $role->name }}</p>
+                                <p class="mb-1"><strong>Display Name:</strong> {{ $role->display_name ?? $role->name }}</p>
                             </div>
                             <div class="col-md-8">
-                                <p class="mb-1"><strong>{{('admin\role-assignments\users-with-role.description_') }}</strong> {{ $role->description ?? 'No description available' }}</p>
+                                <p class="mb-1"><strong>Description:</strong> {{ $role->description ?? 'No description available' }}</p>
                                 <p class="mb-1">
-                                    <strong>{{('admin\role-assignments\users-with-role.permissions_') }}</strong>
-                                    <span class="badge badge-primary">{{ $role->id</span> }}
+                                    <strong>Permissions:</strong>
+                                    <span class="badge badge-primary">{{ $role->permissions()->count() }} permissions</span>
                                 </p>
                             </div>
                         </div>
@@ -62,19 +62,19 @@
                     <table class="table table-hover">
                         <thead>
                         <tr>
-                            <th style="width: 5%">{{('admin\role-assignments\users-with-role.id') }}</th>
-                            <th style="width: 20%">{{('admin\role-assignments\users-with-role.user') }}</th>
-                            <th style="width: 20%">{{('admin\role-assignments\users-with-role.email') }}</th>
-                            <th style="width: 15%">{{('admin\role-assignments\users-with-role.status') }}</th>
-                            <th style="width: 15%">{{('admin\role-assignments\users-with-role.all_roles') }}</th>
-                            <th style="width: 25%">{{('admin\role-assignments\users-with-role.actions') }}</th>
+                            <th style="width: 5%">ID</th>
+                            <th style="width: 20%">User</th>
+                            <th style="width: 20%">Email</th>
+                            <th style="width: 15%">Status</th>
+                            <th style="width: 15%">All Roles</th>
+                            <th style="width: 25%">Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         @if(count($users) > 0)
                             @foreach($users as $user)
                                 <tr>
-                                    <td>{{ $user->id</td> }}
+                                    <td>{{ $user->id }}</td>
                                     <td>
                                         <div class="user-block">
                                             @if($user->photos && $user->photos->count() > 0)
@@ -88,11 +88,11 @@
                                             @endif
                                             <span class="username">
                                                     {{ $user->name }}
-                                                    <small>{{ $user->id</small> }}
+                                                    <small>{{ $user->user_name ?? '' }}</small>
                                                 </span>
                                         </div>
                                     </td>
-                                    <td>{{ $user->id</td> }}
+                                    <td>{{ $user->email }}</td>
                                     <td>
                                             <span class="badge badge-{{ $user->is_active == 'active' ? 'success' : ($user->is_active == 'banned' ? 'danger' : 'warning') }}">
                                                 {{ ucfirst($user->is_active) }}
@@ -107,18 +107,18 @@
                                     </td>
                                     <td>
                                         <div class="btn-group">
-                                            <a href="{{ route('users.show', $user->count()) }}" class="btn btn-sm btn-info">
+                                            <a href="{{ route('users.show', $user->id) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye mr-1"></i> View User
                                             </a>
 
                                             @can('edit_role')
-                                                <a href="{{ route('role-assignments.edit', $user->count()) }}" class="btn btn-sm btn-warning">
+                                                <a href="{{ route('role-assignments.edit', $user->id) }}" class="btn btn-sm btn-warning">
                                                     <i class="fas fa-user-tag mr-1"></i> Edit Roles
                                                 </a>
                                             @endcan
 
                                             @can('edit_user')
-                                                <a href="{{ route('users.edit', $user->count()) }}" class="btn btn-sm btn-primary">
+                                                <a href="{{ route('users.edit', $user->id) }}" class="btn btn-sm btn-primary">
                                                     <i class="fas fa-edit mr-1"></i> Edit User
                                                 </a>
                                             @endcan
@@ -147,10 +147,3 @@
         </div>
     </div>
 @stop
-
-
-
-
-
-
-

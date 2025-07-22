@@ -6,7 +6,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-edit text-warning mr-2"></i> Edit Permission: {{ $permission->display_name ?? $permission->name }}</h1>
         <div>
-            <a href="{{ route('permissions.show', $permission->count()) }}" class="btn btn-info">
+            <a href="{{ route('permissions.show', $permission->id) }}" class="btn btn-info">
                 <i class="fas fa-eye mr-1"></i> View Permission
             </a>
             <a href="{{ route('permissions.index') }}" class="btn btn-primary ml-2">
@@ -22,10 +22,10 @@
             <div class="col-md-12">
                 <div class="card card-warning card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">{{('admin\permissions\edit.permission_information') }}</h3>
+                        <h3 class="card-title">Permission Information</h3>
                     </div>
 
-                    <form action="{{ route('permissions.update', $permission->count()) }}" method="POST">
+                    <form action="{{ route('permissions.update', $permission->id) }}" method="POST">
                         @csrf
                         @method('PUT')
                         <div class="card-body">
@@ -39,7 +39,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name">{{('admin\permissions\edit.permission_name') }}</label>
+                                        <label for="name">Permission Name</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-key"></i></span>
@@ -68,7 +68,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="display_name">{{('admin\permissions\edit.display_name') }}</label>
+                                        <label for="display_name">Display Name</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-eye"></i></span>
@@ -89,10 +89,10 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="description">{{('admin\permissions\edit.description') }}</label>
+                                <label for="description">Description</label>
                                 <textarea class="form-control @error('description') is-invalid @enderror"
                                           id="description" name="description" rows="3"
-                                          placeholder="Enter a description of this permission">{{ old('description', $permission->id</textarea> }}
+                                          placeholder="Enter a description of this permission">{{ old('description', $permission->description) }}</textarea>
                                 @error('description')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -113,10 +113,3 @@
         </div>
     </div>
 @stop
-
-
-
-
-
-
-

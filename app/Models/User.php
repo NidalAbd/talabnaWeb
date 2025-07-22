@@ -53,8 +53,6 @@ class User extends Authenticatable implements CanResetPasswordContract
         'name',
         'gender',
         'city',
-        'city_id',
-        'country_id',
         'date_of_birth',
         'location_latitudes',
         'location_longitudes',
@@ -66,7 +64,6 @@ class User extends Authenticatable implements CanResetPasswordContract
         'google_id',
         'auth_type',
         'fcm_token',
-        'is_active',
     ];
 
     /**
@@ -156,11 +153,6 @@ class User extends Authenticatable implements CanResetPasswordContract
         return palservice_points::where('user_id', $this->id)->sum('point');
     }
 
-    public function palservicePoints()
-    {
-        return $this->hasMany(palservice_points::class, 'user_id');
-    }
-
     public function adminlte_profile_url()
     {
         // Using your existing user.profile route instead of a non-existent 'profile' route
@@ -189,20 +181,7 @@ class User extends Authenticatable implements CanResetPasswordContract
         }
 
         // Return default image if no photo is found
-        return asset('vendor/adminlte/dist/img/user2-160x160.jpg');
-    }
-
-    public function getProfileImageAttribute()
-    {
-        return $this->adminlte_image();
-    }
-
-    /**
-     * Helper method to check if user has a profile photo
-     */
-    public function hasProfilePhoto()
-    {
-        return $this->photos()->where('isVideo', false)->exists();
+        return 'https://example.com/default-profile.png';
     }
 
     public function bannedDevices(): HasMany

@@ -4,557 +4,482 @@
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-flag text-primary mr-2"></i> Reports Management</h1>
+        <h1><i class="fas fa-flag text-danger mr-2"></i> Reports Management</h1>
         <div>
-            <a href="{{ route('reports.statistics') }}" class="btn btn-info">
+            <a href="{{ route('reports.statistics') }}" class="btn btn-primary">
                 <i class="fas fa-chart-bar mr-1"></i> View Statistics
             </a>
-            <button class="btn btn-warning ml-2" onclick="exportReports()">
-                <i class="fas fa-download mr-1"></i> Export
-            </button>
         </div>
     </div>
 @stop
 
 @section('content')
-<div class="container-fluid">
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="info-box bg-gradient-primary">
-                <span class="info-box-icon"><i class="fas fa-flag"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\reports\index.total_reports') }}</span>
-                    <span class="info-box-number">{{ number_format($stats['total_reports']) }}</span>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: 100%"></div>
+    <div class="container-fluid">
+        <!-- Stats Row -->
+        <div class="row">
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box bg-gradient-info">
+                    <span class="info-box-icon"><i class="fas fa-flag"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Total Reports</span>
+                        <span class="info-box-number">{{ number_format($stats['total_reports']) }}</span>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: 100%"></div>
+                        </div>
                     </div>
-                    <span class="progress-description">
-                        All time reports
-                    </span>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box bg-gradient-warning">
+                    <span class="info-box-icon"><i class="fas fa-user-shield"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">User Reports</span>
+                        <span class="info-box-number">{{ number_format($stats['user_reports']) }}</span>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['user_reports'] / $stats['total_reports'] * 100) : 0 }}%"></div>
+                        </div>
+                        <span class="progress-description">
+                            {{ $stats['total_reports'] > 0 ? round(($stats['user_reports'] / $stats['total_reports'] * 100), 1) : 0 }}% of total
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box bg-gradient-danger">
+                    <span class="info-box-icon"><i class="fas fa-file-alt"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Post Reports</span>
+                        <span class="info-box-number">{{ number_format($stats['post_reports']) }}</span>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['post_reports'] / $stats['total_reports'] * 100) : 0 }}%"></div>
+                        </div>
+                        <span class="progress-description">
+                            {{ $stats['total_reports'] > 0 ? round(($stats['post_reports'] / $stats['total_reports'] * 100), 1) : 0 }}% of total
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6 col-12">
+                <div class="info-box bg-gradient-success">
+                    <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
+                    <div class="info-box-content">
+                        <span class="info-box-text">Pending Review</span>
+                        <span class="info-box-number">{{ number_format($stats['total_reports']) }}</span>
+                        <div class="progress">
+                            <div class="progress-bar" style="width: 100%"></div>
+                        </div>
+                        <span class="progress-description">
+                            All reports require review
+                        </span>
+                    </div>
                 </div>
             </div>
         </div>
-        
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="info-box bg-gradient-danger">
-                <span class="info-box-icon"><i class="fas fa-exclamation-triangle"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\reports\index.reported_items') }}</span>
-                    <span class="info-box-number">{{ number_format($stats['unique_reported_items']) }}</span>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: 100%"></div>
-                    </div>
-                    <span class="progress-description">
-                        Unique items reported
-                    </span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="info-box bg-gradient-warning">
-                <span class="info-box-icon"><i class="fas fa-users"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\reports\index.user_reports') }}</span>
-                    <span class="info-box-number">{{ number_format($stats['user_reports']) }}</span>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['user_reports'] / $stats['total_reports']) * 100 : 0 }}%"></div>
-                    </div>
-                    <span class="progress-description">
-                        Reports against users
-                    </span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="info-box bg-gradient-info">
-                <span class="info-box-icon"><i class="fas fa-clipboard-list"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\reports\index.post_reports') }}</span>
-                    <span class="info-box-number">{{ number_format($stats['post_reports']) }}</span>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['post_reports'] / $stats['total_reports']) * 100 : 0 }}%"></div>
-                    </div>
-                    <span class="progress-description">
-                        Reports against posts
-                    </span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="info-box bg-gradient-success">
-                <span class="info-box-icon"><i class="fas fa-calendar-day"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\reports\index.today') }}</span>
-                    <span class="info-box-number">{{ number_format($stats['today_reports']) }}</span>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['today_reports'] / $stats['total_reports']) * 100 : 0 }}%"></div>
-                    </div>
-                    <span class="progress-description">
-                        Reports today
-                    </span>
-                </div>
-            </div>
-        </div>
-        
-        <div class="col-lg-2 col-md-4 col-sm-6">
-            <div class="info-box bg-gradient-secondary">
-                <span class="info-box-icon"><i class="fas fa-calendar-week"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\reports\index.this_week') }}</span>
-                    <span class="info-box-number">{{ number_format($stats['this_week_reports']) }}</span>
-                    <div class="progress">
-                        <div class="progress-bar" style="width: {{ $stats['total_reports'] > 0 ? ($stats['this_week_reports'] / $stats['total_reports']) * 100 : 0 }}%"></div>
-                    </div>
-                    <span class="progress-description">
-                        Reports this week
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Quick Actions for Top Reported Items -->
-    @if($topReportedItems->count() > 0)
-    <div class="row mb-4">
-        <div class="col-12">
-            <div class="card card-outline card-warning">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        <i class="fas fa-exclamation-triangle mr-2"></i>
-                        Top Reported Items - Quick Actions
-                    </h3>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        @foreach($topReportedItems as $item)
-                            @php
-                                $type = class_basename($item->reportable_type);
-                                $typeLower = strtolower($type);
-                            @endphp
-                            <div class="col-md-6 col-lg-4 mb-3">
-                                <div class="card border-warning">
-                                    <div class="card-body p-3">
-                                        <div class="d-flex justify-content-between align-items-start">
-                                            <div>
-                                                <h6 class="card-title mb-1">
-                                                    <span class="badge badge-warning">{{ $type }}</span>
-                                                    #{{ $item->reportable_id }}
-                                                </h6>
-                                                <p class="card-text mb-2">
-                                                    <strong>{{ $item->id }}</strong> reports
-                                                </p>
-                                            </div>
-                                            <div class="btn-group-vertical">
-                                                <a href="{{ route('reports.details', ['type' => $typeLower, 'id' => $item->reportable_id]) }}" 
-                                                   class="btn btn-sm btn-outline-info">
-                                                    <i class="fas fa-eye"></i> View
-                                                </a>
-                                                @if($type === 'User')
-                                                    <button class="btn btn-sm btn-outline-warning" onclick="banUser({{ $item->reportable_id }})">
-                                                        <i class="fas fa-ban"></i> Ban
+        <div class="row">
+            <!-- Main Reports Table -->
+            <div class="col-md-8">
+                <div class="card card-outline card-danger">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-exclamation-circle mr-1"></i>
+                            Most Reported Items
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                            <button type="button" class="btn btn-tool" data-card-widget="maximize">
+                                <i class="fas fa-expand"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table table-hover text-nowrap">
+                                <thead>
+                                <tr class="bg-dark">
+                                    <th style="width: 5%">#</th>
+                                    <th style="width: 12%">Type</th>
+                                    <th style="width: 28%">Item</th>
+                                    <th style="width: 15%">Status</th>
+                                    <th style="width: 15%" class="text-center">Reports</th>
+                                    <th style="width: 25%">Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @forelse ($reports as $report)
+                                    @if ($report->reportable)
+                                        @php
+                                            $reportable = $report->reportable;
+                                            $isUser = $report->reportable_type == App\Models\User::class;
+                                            $type = $isUser ? 'user' : 'post';
+                                            $typeLabel = $isUser ? 'User' : 'Service Post';
+                                            $typeIcon = $isUser ? 'user' : 'file-alt';
+                                            $typeClass = $isUser ? 'info' : 'warning';
+                                            $name = $isUser ? $reportable->name : $reportable->title;
+
+                                            // Get status based on model type
+                                            if ($isUser) {
+                                                if ($reportable->is_active === 'banned') {
+                                                    $statusBadge = '<span class="badge badge-danger">Banned</span>';
+                                                    $statusClass = 'danger';
+                                                    $statusText = 'Banned';
+                                                } elseif ($reportable->is_active === 'inactive') {
+                                                    $statusBadge = '<span class="badge badge-warning">Inactive</span>';
+                                                    $statusClass = 'warning';
+                                                    $statusText = 'Inactive';
+                                                } else {
+                                                    $statusBadge = '<span class="badge badge-success">Active</span>';
+                                                    $statusClass = 'success';
+                                                    $statusText = 'Active';
+                                                }
+                                            } else {
+                                                if ($reportable->state === 'archive') {
+                                                    $statusBadge = '<span class="badge badge-warning">Archived</span>';
+                                                    $statusClass = 'warning';
+                                                    $statusText = 'Archived';
+                                                } elseif ($reportable->state === 'not published') {
+                                                    $statusBadge = '<span class="badge badge-secondary">Not Published</span>';
+                                                    $statusClass = 'secondary';
+                                                    $statusText = 'Not Published';
+                                                } elseif ($reportable->state === 'rejected') {
+                                                    $statusBadge = '<span class="badge badge-danger">Rejected</span>';
+                                                    $statusClass = 'danger';
+                                                    $statusText = 'Rejected';
+                                                } else {
+                                                    $statusBadge = '<span class="badge badge-success">Published</span>';
+                                                    $statusClass = 'success';
+                                                    $statusText = 'Published';
+                                                }
+                                            }
+                                        @endphp
+                                        <tr>
+                                            <td>
+                                                <span class="badge badge-dark">{{ $reportable->id }}</span>
+                                            </td>
+                                            <td>
+                                                <span class="badge badge-{{ $typeClass }} px-2 py-1">
+                                                    <i class="fas fa-{{ $typeIcon }} mr-1"></i>
+                                                    {{ $typeLabel }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    @if ($isUser && $reportable->photos->first())
+                                                        <img src="{{ asset($reportable->photos->first()->src) }}"
+                                                             alt="{{ $reportable->name }}"
+                                                             class="img-circle mr-2"
+                                                             style="width: 40px; height: 40px;">
+                                                    @elseif (!$isUser && $reportable->photos->first())
+                                                        <img src="{{ asset($reportable->photos->first()->src) }}"
+                                                             alt="{{ $reportable->title }}"
+                                                             class="img-thumbnail mr-2"
+                                                             style="width: 40px; height: 40px;">
+                                                    @else
+                                                        <div class="bg-secondary mr-2 d-flex align-items-center justify-content-center"
+                                                             style="width: 40px; height: 40px; border-radius: {{ $isUser ? '50%' : '3px' }}">
+                                                            <i class="fas fa-{{ $typeIcon }}"></i>
+                                                        </div>
+                                                    @endif
+                                                    <div>
+                                                        <div class="font-weight-bold text-truncate" style="max-width: 250px;">
+                                                            {{ $name }}
+                                                        </div>
+                                                        <small class="text-muted">
+                                                            ID: {{ $reportable->id }} |
+                                                            @if ($isUser)
+                                                                Email: {{ $reportable->email }}
+                                                            @else
+                                                                Created: {{ $reportable->created_at->format('M d, Y') }}
+                                                            @endif
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex align-items-center">
+                                                    <span class="badge badge-{{ $statusClass }} px-2 py-1" style="font-size: 0.9rem;">
+                                                        @if ($statusClass === 'success')
+                                                            <i class="fas fa-check-circle mr-1"></i>
+                                                        @elseif ($statusClass === 'warning')
+                                                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                                                        @elseif ($statusClass === 'danger')
+                                                            <i class="fas fa-ban mr-1"></i>
+                                                        @else
+                                                            <i class="fas fa-info-circle mr-1"></i>
+                                                        @endif
+                                                        {{ $statusText }}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge badge-danger badge-pill px-3 py-2" style="font-size: 14px;">
+                                                    {{ $report->total }}
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <div class="btn-group">
+                                                    <a href="{{ route('reports.details', [$type, $reportable->id]) }}" class="btn btn-sm btn-info">
+                                                        <i class="fas fa-eye mr-1"></i> Details
+                                                    </a>
+                                                    <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#takeActionModal"
+                                                            data-type="{{ $type }}"
+                                                            data-id="{{ $reportable->id }}"
+                                                            data-name="{{ $name }}">
+                                                        <i class="fas fa-gavel mr-1"></i> Take Action
                                                     </button>
-                                                @elseif($type === 'ServicePost')
-                                                    <button class="btn btn-sm btn-outline-danger" onclick="deletePost({{ $item->reportable_id }})">
-                                                        <i class="fas fa-trash"></i> Delete
-                                                    </button>
-                                                @endif
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                @empty
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4">
+                                            <div class="empty-state">
+                                                <i class="fas fa-check-circle text-success display-4"></i>
+                                                <p class="mt-3 mb-0">No reports found! Everything looks good.</p>
                                             </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        @endforeach
+                                        </td>
+                                    </tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <div class="card-footer clearfix">
+                        <div class="float-right">
+                            {{ $reports->links() }}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-    @endif
 
-    <!-- Main Reports Table -->
-    <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">
-                <i class="fas fa-list mr-2"></i> Reported Items (Ordered by Report Count)
-            </h3>
-            <div class="card-tools">
-                <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                    <i class="fas fa-minus"></i>
-                </button>
-                <button type="button" class="btn btn-tool" data-card-widget="maximize">
-                    <i class="fas fa-expand"></i>
-                </button>
-            </div>
-        </div>
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover text-nowrap">
-                <thead class="thead-dark">
-                    <tr>
-                        <th style="width: 5%">{{('admin\reports\index._') }}</th>
-                        <th style="width: 15%">{{('admin\reports\index.type') }}</th>
-                        <th style="width: 25%">{{('admin\reports\index.reported_item') }}</th>
-                        <th style="width: 10%">{{('admin\reports\index.reports') }}</th>
-                        <th style="width: 15%">{{('admin\reports\index.latest_report') }}</th>
-                        <th style="width: 10%">{{('admin\reports\index.status') }}</th>
-                        <th style="width: 20%">{{('admin\reports\index.actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($reportedItems as $index => $item)
-                        @php
-                            $type = class_basename($item->reportable_type);
-                            $typeLower = strtolower($type);
-                            $reportable = $item->reportable;
-                        @endphp
-                        <tr class="{{ $item->report_count >= 5 ? 'table-danger' : ($item->report_count >= 3 ? 'table-warning' : '') }}">
-                            <td>
-                                <span class="badge badge-secondary">{{ $index + 1 }}</span>
-                            </td>
-                            <td>
-                                <span class="badge badge-info">{{ $type }}</span>
-                            </td>
-                            <td>
-                                @if($reportable)
-                                    @if($type === 'User')
-                                        <div class="d-flex align-items-center">
-                                            <img src="{{ $reportable->photos->first()?->src ?? asset('img/default-avatar.png') }}" 
-                                                 class="img-circle mr-2" width="30" height="30" alt="User">
-                                            <div>
-                                                <strong>{{ $reportable->id }}</strong><br>
-                                                <small class="text-muted">{{ $reportable->id }}</small>
-                                            </div>
-                                        </div>
-                                    @elseif($type === 'ServicePost')
+            <!-- Recent Activity -->
+            <div class="col-md-4">
+                <div class="card card-outline card-primary">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-history mr-1"></i>
+                            Recent Reports
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            @forelse($stats['recent_reports'] as $recentReport)
+                                @php
+                                    $isUser = $recentReport->reportable_type == App\Models\User::class;
+                                    $reportable = $recentReport->reportable;
+                                    $name = $isUser ? ($reportable->name ?? 'Deleted User') : ($reportable->title ?? 'Deleted Post');
+                                    $reporter = $recentReport->reporter->name ?? 'Unknown User';
+                                @endphp
+                                <li class="list-group-item">
+                                    <div class="d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong>{{ Str::limit($reportable->id) }}</strong><br>
-                                            <small class="text-muted">by {{ $reportable->user->name ?? 'Unknown' }}</small>
+                                            <span class="badge badge-{{ $isUser ? 'info' : 'warning' }} mr-1">
+                                                <i class="fas fa-{{ $isUser ? 'user' : 'file-alt' }}"></i>
+                                                {{ $isUser ? 'User' : 'Post' }}
+                                            </span>
+                                            <span class="font-weight-bold">{{ $name }}</span>
                                         </div>
-                                    @else
-                                        <strong>{{ $type }} #{{ $item->id }}</strong>
-                                    @endif
-                                @else
-                                    <em class="text-muted">{{('admin\reports\index.item_not_found') }}</em>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge badge-{{ $item->report_count >= 5 ? 'danger' : ($item->report_count >= 3 ? 'warning' : 'info') }} badge-lg">
-                                    {{ $item->report_count }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="text-muted">{{ $item->id }}</span>
-                            </td>
-                            <td>
-                                @if($item->report_count >= 5)
-                                    <span class="badge badge-danger">{{('admin\reports\index.critical') }}</span>
-                                @elseif($item->report_count >= 3)
-                                    <span class="badge badge-warning">{{('admin\reports\index.warning') }}</span>
-                                @else
-                                    <span class="badge badge-info">{{('admin\reports\index.normal') }}</span>
-                                @endif
-                            </td>
-                            <td>
-                                <div class="btn-group">
-                                    <a href="{{ route('reports.details', ['type' => $typeLower, 'id' => $item->reportable_id]) }}" 
-                                       class="btn btn-sm btn-outline-info" 
-                                       data-toggle="tooltip" 
-                                       title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    
-                                    @if($type === 'User' && $reportable)
-                                        @if($reportable->is_active === 'active')
-                                            <button class="btn btn-sm btn-outline-warning" 
-                                                    onclick="banUser({{ $item->reportable_id }})"
-                                                    data-toggle="tooltip" 
-                                                    title="Ban User">
-                                                <i class="fas fa-ban"></i>
-                                            </button>
-                                        @else
-                                            <button class="btn btn-sm btn-outline-success" 
-                                                    onclick="unbanUser({{ $item->reportable_id }})"
-                                                    data-toggle="tooltip" 
-                                                    title="Unban User">
-                                                <i class="fas fa-check"></i>
-                                            </button>
-                                        @endif
-                                    @elseif($type === 'ServicePost' && $reportable)
-                                        <button class="btn btn-sm btn-outline-danger" 
-                                                onclick="deletePost({{ $item->reportable_id }})"
-                                                data-toggle="tooltip" 
-                                                title="Delete Post">
-                                            <i class="fas fa-trash"></i>
-                                        </button>
-                                    @endif
-                                    
-                                    <button class="btn btn-sm btn-outline-secondary" 
-                                            onclick="viewReports({{ $item->reportable_id }}, '{{ $type }}')"
-                                            data-toggle="tooltip" 
-                                            title="View All Reports">
-                                        <i class="fas fa-list"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4">
-                                <div class="alert alert-info m-0">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    No reported items found.
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if($reportedItems->hasPages())
-            <div class="card-footer clearfix">
-                <div class="float-right">
-                    {{ $reportedItems->links() }}
+                                        <small class="text-muted">{{ $recentReport->created_at->diffForHumans() }}</small>
+                                    </div>
+                                    <div class="mt-2">
+                                        <small class="text-muted">Reported by:</small>
+                                        <span class="ml-1">{{ $reporter }}</span>
+                                    </div>
+                                    <div class="mt-1">
+                                        <small class="text-muted">Reason:</small>
+                                        <span class="ml-1 text-truncate d-inline-block" style="max-width: 100%;">
+                                            {{ Str::limit($recentReport->reason, 50) }}
+                                        </span>
+                                    </div>
+                                </li>
+                            @empty
+                                <li class="list-group-item text-center text-muted py-4">
+                                    No recent reports
+                                </li>
+                            @endforelse
+                        </ul>
+                    </div>
+                    @if(count($stats['recent_reports']) > 0)
+                        <div class="card-footer text-center">
+                            <a href="{{ route('reports.statistics') }}" class="btn btn-sm btn-default">
+                                View All Activity
+                            </a>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Quick Help Card -->
+                <div class="card card-outline card-success">
+                    <div class="card-header">
+                        <h3 class="card-title">
+                            <i class="fas fa-question-circle mr-1"></i>
+                            Report Handling Guide
+                        </h3>
+                        <div class="card-tools">
+                            <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <h5>Common Actions:</h5>
+                        <ul class="pl-3">
+                            <li><strong>Review Details</strong>: Check all reports against an item before taking action</li>
+                            <li><strong>Warning</strong>: For first-time or minor offenses</li>
+                            <li><strong>Ban/Archive</strong>: For repeated or moderate violations</li>
+                            <li><strong>Deletion</strong>: For severe violations or harmful content</li>
+                        </ul>
+                        <div class="alert alert-warning mt-3 mb-0">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>
+                            Remember to document your decisions when handling reports for accountability.
+                        </div>
+                    </div>
                 </div>
             </div>
-        @endif
+        </div>
     </div>
-</div>
 
-<!-- Action Modals -->
-<div class="modal fade" id="actionModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="actionModalTitle">{{('admin\reports\index.confirm_action') }}</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>{{('admin\reports\index._times_') }}</span>
-                </button>
-            </div>
-            <div class="modal-body" id="actionModalBody">
-                <!-- Content will be loaded here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('admin\reports\index.cancel') }}</button>
-                <button type="button" class="btn btn-primary" id="confirmAction">{{('admin\reports\index.confirm') }}</button>
+    <!-- Take Action Modal -->
+    <div class="modal fade" id="takeActionModal" tabindex="-1" role="dialog" aria-labelledby="takeActionModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header bg-warning">
+                    <h5 class="modal-title" id="takeActionModalLabel">
+                        <i class="fas fa-gavel mr-1"></i> Take Action
+                    </h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <form id="takeActionForm" action="" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle mr-1"></i>
+                            You are about to take action on <strong id="reportedItemName"></strong>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="action">Select Action</label>
+                            <select class="form-control" id="action" name="action" required>
+                                <option value="">-- Select Action --</option>
+                                <option value="warning">Send Warning</option>
+                                <option value="suspend" id="suspendOption">Ban/Archive</option>
+                                <option value="delete">Delete</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reason">Reason for Action</label>
+                            <textarea class="form-control" id="reason" name="reason" rows="3" required
+                                      placeholder="Explain why you're taking this action..."></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">
+                            <i class="fas fa-times mr-1"></i> Cancel
+                        </button>
+                        <button type="submit" class="btn btn-warning action-btn">
+                            <i class="fas fa-gavel mr-1"></i> Proceed with Action
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-</div>
 @stop
 
 @section('css')
-<style>
-.info-box {
-    box-shadow: 0 0 1px rgba(0,0,0,.125), 0 1px 3px rgba(0,0,0,.2);
-    border-radius: 0.25rem;
-    background-color: #fff;
-    display: flex;
-    margin-bottom: 1rem;
-    min-height: 80px;
-    padding: 0;
-    position: relative;
-    width: 100%;
-}
-
-.info-box .info-box-icon {
-    border-radius: 0.25rem 0 0 0.25rem;
-    display: flex;
-    align-items: center;
-    font-size: 1.875rem;
-    font-weight: 300;
-    justify-content: center;
-    text-align: center;
-    width: 70px;
-    color: #fff;
-}
-
-.info-box .info-box-content {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    line-height: 1.8;
-    flex: 1;
-    padding: 0 10px;
-}
-
-.info-box .info-box-text {
-    display: block;
-    font-size: 1rem;
-    font-weight: 400;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.info-box .info-box-number {
-    display: block;
-    font-weight: 700;
-    font-size: 1.25rem;
-}
-
-.progress-description {
-    font-size: 0.875rem;
-    margin-top: 0.25rem;
-}
-
-.table-danger {
-    background-color: rgba(220, 53, 69, 0.1) !important;
-}
-
-.table-warning {
-    background-color: rgba(255, 193, 7, 0.1) !important;
-}
-
-.badge-lg {
-    font-size: 1rem;
-    padding: 0.5rem 0.75rem;
-}
-</style>
+    <style>
+        .badge-pill {
+            border-radius: 50rem;
+        }
+        .table td, .table th {
+            vertical-align: middle;
+        }
+        .empty-state {
+            padding: 20px;
+            text-align: center;
+        }
+        .pagination {
+            margin-bottom: 0;
+        }
+        .info-box-content .progress {
+            height: 5px;
+            margin: 5px 0;
+        }
+        .info-box-content .progress-description {
+            white-space: nowrap;
+            font-size: 12px;
+        }
+        .badge {
+            font-weight: 500;
+        }
+        .list-group-item {
+            border-left: none;
+            border-right: none;
+        }
+    </style>
 @stop
 
 @section('js')
-<script>
-    $(function() {
-        // Initialize tooltips
-        $('[data-toggle="tooltip"]').tooltip();
-    });
+    <script>
+        $(function() {
+            // Initialize tooltips
+            $('[data-toggle="tooltip"]').tooltip();
 
-    function banUser(userId) {
-        if (confirm('Are you sure you want to ban this user? This action cannot be undone.')) {
-            $.ajax({
-                url: `/admin/reports/ban-user/${userId}`,
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
-                        alert('User has been banned successfully.');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + (response.message || 'Unknown error'));
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Ban user error:', xhr.responseText);
-                    let errorMessage = 'An error occurred while banning the user.';
-                    
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    } else if (xhr.status === 403) {
-                        errorMessage = 'You do not have permission to ban users.';
-                    } else if (xhr.status === 404) {
-                        errorMessage = 'User not found.';
-                    } else if (xhr.status === 500) {
-                        errorMessage = 'Server error occurred. Please try again.';
-                    }
-                    
-                    alert('Error: ' + errorMessage);
+            // Handle action modal
+            $('#takeActionModal').on('show.bs.modal', function (event) {
+                var button = $(event.relatedTarget);
+                var type = button.data('type');
+                var id = button.data('id');
+                var name = button.data('name');
+
+                var modal = $(this);
+                modal.find('#reportedItemName').text(name);
+
+                // Update form action URL
+                var actionUrl = "{{ url('admin/reports/handle') }}/" + type + "/" + id;
+                modal.find('#takeActionForm').attr('action', actionUrl);
+
+                // Update suspend option text based on type
+                if (type === 'user') {
+                    modal.find('#suspendOption').text('Ban User');
+                } else {
+                    modal.find('#suspendOption').text('Archive Post');
                 }
             });
-        }
-    }
 
-    function unbanUser(userId) {
-        if (confirm('Are you sure you want to unban this user?')) {
-            $.ajax({
-                url: `/admin/reports/unban-user/${userId}`,
-                type: 'POST',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
-                        alert('User has been unbanned successfully.');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + (response.message || 'Unknown error'));
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Unban user error:', xhr.responseText);
-                    let errorMessage = 'An error occurred while unbanning the user.';
-                    
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    } else if (xhr.status === 403) {
-                        errorMessage = 'You do not have permission to unban users.';
-                    } else if (xhr.status === 404) {
-                        errorMessage = 'User not found.';
-                    } else if (xhr.status === 500) {
-                        errorMessage = 'Server error occurred. Please try again.';
-                    }
-                    
-                    alert('Error: ' + errorMessage);
+            // Change button text based on selected action
+            $('#action').on('change', function() {
+                var action = $(this).val();
+                var buttonText = 'Proceed with Action';
+                var suspendText = $('#suspendOption').text();
+
+                switch(action) {
+                    case 'warning':
+                        buttonText = 'Send Warning';
+                        break;
+                    case 'suspend':
+                        buttonText = suspendText;
+                        break;
+                    case 'delete':
+                        buttonText = 'Delete Item';
+                        break;
                 }
+
+                $('.modal-footer button[type="submit"]').html('<i class="fas fa-gavel mr-1"></i> ' + buttonText);
             });
-        }
-    }
-
-    function deletePost(postId) {
-        if (confirm('Are you sure you want to delete this post? This action cannot be undone.')) {
-            $.ajax({
-                url: `/admin/reports/delete-post/${postId}`,
-                type: 'DELETE',
-                data: {
-                    _token: $('meta[name="csrf-token"]').attr('content')
-                },
-                success: function(response) {
-                    if (response.success) {
-                        alert('Post has been deleted successfully.');
-                        location.reload();
-                    } else {
-                        alert('Error: ' + (response.message || 'Unknown error'));
-                    }
-                },
-                error: function(xhr, status, error) {
-                    console.error('Delete post error:', xhr.responseText);
-                    let errorMessage = 'An error occurred while deleting the post.';
-                    
-                    if (xhr.responseJSON && xhr.responseJSON.message) {
-                        errorMessage = xhr.responseJSON.message;
-                    } else if (xhr.status === 403) {
-                        errorMessage = 'You do not have permission to delete posts.';
-                    } else if (xhr.status === 404) {
-                        errorMessage = 'Post not found.';
-                    } else if (xhr.status === 500) {
-                        errorMessage = 'Server error occurred. Please try again.';
-                    }
-                    
-                    alert('Error: ' + errorMessage);
-                }
-            });
-        }
-    }
-
-    function viewReports(itemId, type) {
-        // Navigate to reports details page
-        window.location.href = `/admin/reports/${type.toLowerCase()}/${itemId}`;
-    }
-
-    function showActionModal(title, message, confirmCallback) {
-        $('#actionModalTitle').text(title);
-        $('#actionModalBody').text(message);
-        $('#confirmAction').off('click').on('click', function() {
-            confirmCallback();
-            $('#actionModal').modal('hide');
         });
-        $('#actionModal').modal('show');
-    }
-
-    function exportReports() {
-        // Add export functionality
-        window.location.href = '/admin/reports/export';
-    }
-</script>
+    </script>
 @stop
-
-
-
-
-
-
-

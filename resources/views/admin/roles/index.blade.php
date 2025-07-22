@@ -4,220 +4,240 @@
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-user-shield text-primary mr-2"></i> Roles Management</h1>
+        <h1><i class="fas fa-user-tag text-primary mr-2"></i> Roles Management</h1>
         <div>
-            <a href="{{ route('roles.create') }}" class="btn btn-success">
-                <i class="fas fa-plus mr-1"></i> Add Role
+            @can('create_role')
+                <a href="{{ route('roles.create') }}" class="btn btn-success">
+                    <i class="fas fa-plus-circle mr-1"></i> Create New Role
+                </a>
+            @endcan
+            @can('view_permission')
+                <a href="{{ route('permissions.index') }}" class="btn btn-info ml-2">
+                    <i class="fas fa-key mr-1"></i> Manage Permissions
+                </a>
+            @endcan
+            <a href="{{ route('role-assignments.index') }}" class="btn btn-primary ml-2">
+                <i class="fas fa-user-cog mr-1"></i> Assign Roles to Users
             </a>
         </div>
     </div>
 @stop
 
 @section('content')
-<div class="container-fluid">
-    <!-- Role Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-primary shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-user-shield"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\roles\index.total_roles') }}</span>
-                    <span class="info-box-number">{{ number_format($roles->count()) }}</span>
-                    <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-chart-line text-light"></i> All system roles
-                    </span>
+    <div class="container-fluid">
+        <!-- Role Stats Cards -->
+        <div class="row">
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-info">
+                    <div class="inner">
+                        <h3>{{ $roles->total() }}</h3>
+                        <p>Total Roles</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-tag"></i>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-success shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-users"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\roles\index.total_users') }}</span>
-                    <span class="info-box-number">{{ number_format($roles->count()) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-check-circle text-light"></i> Users with roles
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-info shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-key"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\roles\index.total_permissions') }}</span>
-                    <span class="info-box-number">{{ number_format($roles->count()) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-shield-alt text-light"></i> Assigned permissions
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-warning shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-cog"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('admin\roles\index.system_roles') }}</span>
-                    <span class="info-box-number">{{ $roles->count() }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-exclamation-triangle text-light"></i> Protected roles
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- Roles Table -->
-    <div class="card card-outline card-primary shadow-sm mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-            <div class="card-title mb-2 mb-md-0">
-                <i class="fas fa-list mr-2"></i> Roles List
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-success">
+                    <div class="inner">
+                        <h3>{{ $roles->sum('permissions_count') }}</h3>
+                        <p>Total Permission Assignments</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-key"></i>
+                    </div>
+                </div>
             </div>
-            <div class="card-tools d-flex align-items-center flex-wrap">
-                <button type="button" class="btn btn-sm btn-outline-secondary mr-2 mb-2 mb-md-0" onclick="exportTable(this)">
-                    <i class="fas fa-file-export mr-1"></i> Export
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-secondary mr-2 mb-2 mb-md-0" onclick="printTable(this)">
-                    <i class="fas fa-print mr-1"></i> Print
-                </button>
-                <form method="GET" class="d-flex align-items-center mb-2 mb-md-0" style="gap: 0.5rem;">
-                    <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by name..." value="{{ request('search') }}">
-                    <button type="submit" class="btn btn-sm btn-primary">
-                        <i class="fas fa-search"></i>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-warning">
+                    <div class="inner">
+                        <h3>{{ $roles->where('name', '!=', 'user')->count() }}</h3>
+                        <p>Administrative Roles</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-shield"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-3 col-6">
+                <div class="small-box bg-danger">
+                    <div class="inner">
+                        <h3>{{ App\Models\User::whereHas('roles', function($q) { $q->where('name', 'admin'); })->count() }}</h3>
+                        <p>Admin Users</p>
+                    </div>
+                    <div class="icon">
+                        <i class="fas fa-user-cog"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search & Filter Card -->
+        <div class="card card-outline card-primary collapsed-card mb-3">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-filter mr-1"></i>
+                    Search & Filters
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-plus"></i>
                     </button>
-                    <a href="?" class="btn btn-sm btn-secondary ml-1">
-                        <i class="fas fa-sync-alt"></i>
-                    </a>
+                </div>
+            </div>
+            <div class="card-body">
+                <form action="{{ route('roles.index') }}" method="GET">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Search by Name or Description:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="search" value="{{ request('search') }}" placeholder="Search roles...">
+                                    <div class="input-group-append">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="fas fa-search"></i> Search
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Sort By:</label>
+                                <select class="form-control" name="sort_by">
+                                    <option value="name" {{ request('sort_by') == 'name' ? 'selected' : '' }}>Name</option>
+                                    <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Creation Date</option>
+                                    <option value="permissions_count" {{ request('sort_by') == 'permissions_count' ? 'selected' : '' }}>Permissions Count</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label>Sort Direction:</label>
+                                <select class="form-control" name="sort_dir">
+                                    <option value="asc" {{ request('sort_dir') == 'asc' ? 'selected' : '' }}>Ascending</option>
+                                    <option value="desc" {{ request('sort_dir') == 'desc' ? 'selected' : '' }}>Descending</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
-        <div class="card-body table-responsive p-0">
-            <table class="table table-hover table-striped table-bordered align-middle">
-                <thead class="thead-light">
-                    <tr>
-                        <th>{{('admin\roles\index.id') }}</th>
-                        <th>{{('admin\roles\index.name') }}</th>
-                        <th>{{('admin\roles\index.description') }}</th>
-                        <th>{{('admin\roles\index.users') }}</th>
-                        <th>{{('admin\roles\index.permissions') }}</th>
-                        <th>{{('admin\roles\index.created') }}</th>
-                        <th>{{('admin\roles\index.actions') }}</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @forelse($roles as $role)
-                        <tr>
-                            <td><span class="badge badge-secondary">{{ $role->id }}</span></td>
-                            <td>
-                                <strong>{{ ucfirst($role->name) }}</strong><br>
-                                <small class="text-muted">{{ $role->id }}</small>
-                            </td>
-                            <td><span class="text-muted">{{ Str::limit($role->description) }}</span></td>
-                            <td><span class="badge badge-info">{{ $role->users->count() }}</span></td>
-                            <td><span class="badge badge-warning">{{ $role->permissions->count() }}</span></td>
-                            <td><span class="text-muted">{{ $role->created_at->format('Y-m-d H:i') }}</span></td>
-                            <td>
-                                @php
-                                    $isSystemRole = in_array($role->name, ['superadmin', 'admin']);
-                                    $editDisabled = $isSystemRole ? 'disabled' : '';
-                                    $deleteDisabled = $isSystemRole ? 'disabled' : '';
-                                @endphp
-                                <div class="btn-group" role="group">
-                                    <a href="{{ route('roles.show', $role->id) }}" class="btn btn-xs btn-outline-primary" data-toggle="tooltip" title="View Role"><i class="fas fa-eye"></i></a>
-                                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-xs btn-outline-primary {{ $editDisabled }}" data-toggle="tooltip" title="{{ $isSystemRole ? 'System roles cannot be edited' : 'Edit' }}"><i class="fas fa-edit"></i></a>
-                                    <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" class="btn btn-xs btn-outline-danger {{ $deleteDisabled }}" data-toggle="tooltip" title="{{ $isSystemRole ? 'System roles cannot be deleted' : 'Delete' }}"><i class="fas fa-trash"></i></button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="7" class="text-center py-4">
-                                <div class="alert alert-info m-0">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    No roles found.
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                </tbody>
-            </table>
-        </div>
-        @if($roles->hasPages())
-            <div class="card-footer bg-white">
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        Showing <strong>{{ $roles->firstItem() }}</strong> to <strong>{{ $roles->lastItem() }}</strong> of <strong>{{ $roles->total() }}</strong> records
-                    </div>
-                    <div>
-                        {{ $roles->links('pagination::bootstrap-4') }}
-                    </div>
+
+        <!-- Main Roles Card -->
+        <div class="card card-outline card-primary">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-list mr-1"></i>
+                    Roles List
+                </h3>
+                <div class="card-tools">
+                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                        <i class="fas fa-minus"></i>
+                    </button>
                 </div>
             </div>
-        @endif
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-hover text-nowrap">
+                        <thead>
+                        <tr>
+                            <th style="width: 5%">ID</th>
+                            <th style="width: 15%">Name</th>
+                            <th style="width: 20%">Display Name</th>
+                            <th style="width: 25%">Description</th>
+                            <th style="width: 10%">Permissions</th>
+                            <th style="width: 25%">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @if(count($roles) > 0)
+                            @foreach($roles as $role)
+                                <tr>
+                                    <td>{{ $role->id }}</td>
+                                    <td>
+                                            <span class="badge badge-{{ $role->name == 'superadmin' ? 'danger' : ($role->name == 'admin' ? 'warning' : 'info') }}">
+                                                {{ $role->name }}
+                                            </span>
+                                    </td>
+                                    <td>{{ $role->display_name ?? $role->name }}</td>
+                                    <td>{{ Str::limit($role->description, 50) }}</td>
+                                    <td>
+                                            <span class="badge badge-primary">
+                                                {{ $role->permissions_count }}
+                                            </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <a href="{{ route('roles.show', $role->id) }}" class="btn btn-sm btn-info">
+                                                <i class="fas fa-eye mr-1"></i> View
+                                            </a>
+
+                                            <a href="{{ route('role-assignments.users-with-role', $role->id) }}" class="btn btn-sm btn-primary">
+                                                <i class="fas fa-users mr-1"></i> Users
+                                            </a>
+
+                                            @can('edit_role')
+                                                @if($role->name != 'superadmin' && $role->name != 'admin')
+                                                    <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-sm btn-warning">
+                                                        <i class="fas fa-edit mr-1"></i> Edit
+                                                    </a>
+                                                @endif
+                                            @endcan
+                                        </div>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @else
+                            <tr>
+                                <td colspan="6" class="text-center py-4">
+                                    <div class="alert alert-info m-0">
+                                        <i class="fas fa-info-circle mr-1"></i> No roles found
+                                    </div>
+                                </td>
+                            </tr>
+                        @endif
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="card-footer clearfix">
+                <div class="float-right">
+                    {{ $roles->links() }}
+                </div>
+            </div>
+        </div>
     </div>
-</div>
 @stop
 
-@push('css')
-<style>
-    .table thead th { background: #f8f9fa; }
-    .table td, .table th { vertical-align: middle !important; }
-    .card { transition: box-shadow 0.2s; }
-    .card:hover { box-shadow: 0 4px 24px rgba(0,0,0,0.12); }
-    .btn-xs { padding: 0.25rem 0.5rem; font-size: 0.8rem; }
-    .badge-pink { background: #e83e8c; color: #fff; }
-    .img-circle { border-radius: 50%; }
-</style>
-@endpush
+@section('js')
+    <script>
+        $(function() {
+            $('[data-toggle="tooltip"]').tooltip();
 
-@push('js')
-<script>
-    function printTable(btn) {
-        let table = btn.closest('.card').querySelector('table');
-        let w = window.open();
-        w.document.write('<html><head><title>{{('admin\roles\index.print_table') }}</title>{{('admin\roles\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{('admin\roles\index._w_document_write_') }}</head><body>{{('admin\roles\index._w_document_write_table_outer') }}</body></html>');
-        w.print();
-        w.close();
-    }
-    
-    function exportTable(btn) {
-        // Simple CSV export
-        let table = btn.closest('.card').querySelector('table');
-        let rows = Array.from(table.rows);
-        let csv = rows.map(row => Array.from(row.cells).map(cell => '"' + cell.innerText.replace(/"/g, '""') + '"').join(',')).join('\n');
-        let blob = new Blob([csv], { type: 'text/csv' });
-        let a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'roles-export.csv';
-        a.click();
-    }
-    
-    // Debug form submissions
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('Roles index page loaded');
-        
-        // Add event listeners to all action forms
-        const actionForms = document.querySelectorAll('form[action*="/roles/"]');
-        actionForms.forEach(form => {
-            form.addEventListener('submit', function(e) {
-                console.log('Form submitted:', this.action);
+            // Confirm delete
+            $('.btn-danger[type="submit"]').click(function(e) {
+                if(!confirm('Are you sure you want to delete this role?')) {
+                    e.preventDefault();
+                }
             });
         });
-    });
-</script>
-@endpush
+    </script>
+@stop
 
-
-
-
-
-
-
+@can('delete_role')
+    @if($role->name != 'superadmin' && $role->name != 'admin' && $role->name != 'user')
+        <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="d-inline">
+            @csrf
+            @method('DELETE')
+            <button class="btn btn-sm btn-danger" type="submit" onclick="return confirm('Are you sure you want to delete this role?')">
+                <i class="fas fa-trash mr-1"></i> Delete
+            </button>
+        </form>
+    @endif
+@endcan

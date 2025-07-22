@@ -10,7 +10,7 @@
                             <div class="input-group mt-0 input-group-md">
                                 <a href="{{ route('service_posts.create') }}" class="btn btn-success ">
                                     <i class="fa fa-plus fa-1x"></i>
-                                    {{(' Add') }}
+                                    {{ __(' Add') }}
                                 </a>
                             </div>
                         </li>
@@ -29,15 +29,15 @@
                                 <thead>
                                 <tr class="btn-dark">
                                     <th><input type="checkbox" id="select-all"></th>
-                                    <th>{{('service_posts\index_post_profile.id') }}</th>
-                                    <th>{{('service_posts\index_post_profile.title') }}</th>
-                                    <th>{{('service_posts\index_post_profile.category') }}</th>
-                                    <th>{{('service_posts\index_post_profile.user') }}</th>
-                                    <th>{{('service_posts\index_post_profile.favorites') }}</th>
-                                    <th>{{('service_posts\index_post_profile.reports') }}</th>
-                                    <th>{{('service_posts\index_post_profile.views') }}</th>
-                                    <th>{{('service_posts\index_post_profile.type') }}</th>
-                                    <th>{{('service_posts\index_post_profile.action') }}</th>
+                                    <th>id</th>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>User</th>
+                                    <th>favorites</th>
+                                    <th>reports</th>
+                                    <th>views</th>
+                                    <th>type</th>
+                                    <th>Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -46,19 +46,19 @@
                                         <td><input type="checkbox" name="selected[]" value="{{ $post->id }}"></td>
                                         <th>{{ $post->id }}</th>
                                         <td>{{ $post->title }}</td>
-                                        <td>{{ $post->category->name ?? '' }}</td>
-                                        <td>{{ $post->user->user_name ?? '' }}</td>
-                                        <td>{{ $post->favorites_count ?? 0 }}</td>
-                                        <td>{{ $post->reports_count ?? 0 }}</td>
-                                        <td>{{ $post->view_count ?? 0 }}</td>
-                                        <td>{{ $post->type ?? '' }}</td>
+                                        <td>{{ $post->category }}</td>
+                                        <td>{{ $post->user->user_name }}</td>
+                                        <td>{{ $post->favorites_count }}</td>
+                                        <td>{{ $post->report_count }}</td>
+                                        <td>{{ $post->view_count }}</td>
+                                        <td>{{ $post->have_badge }}</td>
                                         <td>
-                                            <a href="{{ route('service_posts.show', $post->id) }}">Show</a>
-                                            <a href="{{ route('service_posts.edit', $post->id) }}">Edit</a>
+                                            <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-sm btn-primary">View</a>
+                                            <a href="{{ route('service_posts.edit', $post->id) }}" class="btn btn-sm btn-warning">Edit</a>
                                             <form action="{{ route('service_posts.destroy', $post->id) }}" method="POST" style="display: inline-block;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger">{{ __('service_posts/index_post_profile.delete') }}</button>
+                                                <button type="submit" class="btn btn-sm btn-danger" >Delete</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -67,15 +67,15 @@
                                 <thead>
                                 <tr class="btn-dark">
                                     <th><input type="checkbox" id="select-all"></th>
-                                    <th>{{('service_posts\index_post_profile.id') }}</th>
-                                    <th>{{('service_posts\index_post_profile.title') }}</th>
-                                    <th>{{('service_posts\index_post_profile.category') }}</th>
-                                    <th>{{('service_posts\index_post_profile.user') }}</th>
-                                    <th>{{('service_posts\index_post_profile.favorites') }}</th>
-                                    <th>{{('service_posts\index_post_profile.reports') }}</th>
-                                    <th>{{('service_posts\index_post_profile.views') }}</th>
-                                    <th>{{('service_posts\index_post_profile.type') }}</th>
-                                    <th>{{('service_posts\index_post_profile.action') }}</th>
+                                    <th>id</th>
+                                    <th>Title</th>
+                                    <th>Category</th>
+                                    <th>User</th>
+                                    <th>favorites</th>
+                                    <th>reports</th>
+                                    <th>views</th>
+                                    <th>type</th>
+                                    <th>Action</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -91,10 +91,3 @@
         </div>
     </div>
 @endsection
-
-
-
-
-
-
-

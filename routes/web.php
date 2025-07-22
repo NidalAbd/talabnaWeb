@@ -19,9 +19,7 @@ use App\Http\Controllers\PermissionsController;
 use App\Http\Controllers\PointPurchaseRequestsController;
 use App\Http\Controllers\PointTransactionsController;
 use App\Http\Controllers\PolicyController;
-use App\Http\Controllers\PointPackageController;
 use App\Http\Controllers\ReportController;
-use App\Http\Controllers\LevelController;
 use App\Http\Controllers\RolesAssignmentController;
 use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ServicePostController;
@@ -33,7 +31,6 @@ use App\Models\Sub_categories;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,45 +44,6 @@ Route::get('/policy', [PolicyController::class, 'index'])->name('policy.index');
 Route::post('/facebook/data-deletion', [App\Http\Controllers\FacebookController::class, 'handleDataDeletion']);
 Route::get('/facebook/deletion-status', [App\Http\Controllers\FacebookController::class, 'getDeletionStatus']);
 
-// Test route for debugging
-Route::get('/test-users', function() {
-    return response()->json([
-        'status' => 'success',
-        'message' => 'User routes are working',
-        'routes' => [
-            'users.index' => route('users.index'),
-            'users.ban' => route('users.ban', 1),
-            'users.unban' => route('users.unban', 1),
-            'users.reset_password' => route('users.reset_password', 1),
-            'users.send_notification' => route('users.send_notification', 1),
-            'users.impersonate' => route('users.impersonate', 1),
-        ]
-    ]);
-})->name('test.users');
-
-// Test route for debugging
-Route::get('/test-service-posts', function () {
-    try {
-        $user = Auth::user();
-        return response()->json([
-            'status' => 'success',
-            'message' => 'Test route working',
-            'user_id' => $user->id ?? 'not authenticated',
-            'user_permissions' => $user ? $user->permissions()->pluck('name')->toArray() : [],
-            'user_roles' => $user ? $user->roles()->pluck('name')->toArray() : [],
-            'has_service_posts_index' => $user ? $user->hasPermission('service_posts_index') : false,
-            'database_connection' => DB::connection()->getPdo() ? 'connected' : 'failed'
-        ]);
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage(),
-            'file' => $e->getFile(),
-            'line' => $e->getLine()
-        ], 500);
-    }
-});
-
 
 // Deep Link Routes
 Route::get('api/deep-link/{route}/{id?}', [DeepLinkController::class, 'redirect'])->name('deep.link');
@@ -94,59 +52,6 @@ Route::get('/api/validate-deep-link/{route}/{id}', [DeepLinkController::class, '
 
 // Authentication Routes
 Auth::routes();
-
-// Google OAuth routes for web login
-Route::get('login/google', [App\Http\Controllers\Auth\LoginController::class, 'redirectToGoogle'])->name('login.google');
-Route::get('login/google/callback', [App\Http\Controllers\Auth\LoginController::class, 'handleGoogleCallback']);
-
-// API-style Google callback route (for existing Google OAuth configuration)
-Route::get('api/auth/google/callback', [App\Http\Controllers\Auth\LoginController::class, 'handleGoogleCallback']);
-
-// Test route to verify Google login setup
-Route::get('test/google-login', function() {
-    return response()->json([
-        'status' => 'success',
-        'message' => 'Google login routes are working',
-        'routes' => [
-            'redirect' => route('login.google'),
-            'callback' => url('api/auth/google/callback'),
-            'config' => [
-                'client_id' => config('services.google.client_id') ? 'Set' : 'Not Set',
-                'redirect_uri' => config('services.google.redirect') ? 'Set' : 'Not Set'
-            ]
-        ]
-    ]);
-})->name('test.google.login');
-
-// Test route to simulate Google login
-Route::get('test/google-simulation', function() {
-    try {
-        // Simulate a Google user
-        $user = \App\Models\User::first();
-        if ($user) {
-            auth()->login($user);
-            return response()->json([
-                'status' => 'success',
-                'message' => 'User logged in successfully',
-                'user' => [
-                    'id' => $user->id,
-                    'email' => $user->email,
-                    'auth_type' => $user->auth_type
-                ]
-            ]);
-        } else {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No users found in database'
-            ]);
-        }
-    } catch (\Exception $e) {
-        return response()->json([
-            'status' => 'error',
-            'message' => $e->getMessage()
-        ]);
-    }
-})->name('test.google.simulation');
 
 // Redirect regular users trying to access dashboard
 Route::get('/home', function() {
@@ -158,77 +63,10 @@ Route::get('/home', function() {
 | Admin & Authenticated Routes
 |--------------------------------------------------------------------------
 */
-    Route::group(['middleware' => ['auth', 'admin']], function() {
-        // Dashboard
-        Route::get('/dashboard', [HomeController::class, 'index'])->name('admin.dashboard');
-        Route::get('statistics', [App\Http\Controllers\dashboard::class, 'index'])->name('statistics.index');
-        
-        // Investor Dashboard Routes
-        Route::get('investor-dashboard', [App\Http\Controllers\InvestorDashboardController::class, 'index'])->name('investor-dashboard');
-
-        // Point Packages & Premium Features
-    Route::group(['middleware' => ['auth', 'admin']], function() {
-        // Point Packages Routes with explicit naming
-        Route::get('point-packages', [PointPackageController::class, 'index'])->name('admin.point_packages.index');
-        Route::get('point-packages/create', [PointPackageController::class, 'create'])->name('admin.point_packages.create');
-        Route::post('point-packages', [PointPackageController::class, 'store'])->name('admin.point_packages.store');
-        Route::get('point-packages/{pointPackage}/edit', [PointPackageController::class, 'edit'])->name('admin.point_packages.edit');
-        Route::put('point-packages/{pointPackage}', [PointPackageController::class, 'update'])->name('admin.point_packages.update');
-        Route::delete('point-packages/{pointPackage}', [PointPackageController::class, 'destroy'])->name('admin.point_packages.destroy');
-        Route::get('point-packages/{pointPackage}', [PointPackageController::class, 'show'])->name('admin.point_packages.show');
-        
-        // Point Package AJAX Actions
-        Route::patch('point-packages/{pointPackage}/toggle-status', [PointPackageController::class, 'toggleStatus'])->name('admin.point_packages.toggle-status');
-        Route::patch('point-packages/{pointPackage}/toggle-popular', [PointPackageController::class, 'togglePopular'])->name('admin.point_packages.toggle-popular');
-        Route::post('point-packages/{pointPackage}/duplicate', [PointPackageController::class, 'duplicate'])->name('admin.point_packages.duplicate');
-        Route::post('point-packages/bulk-activate', [PointPackageController::class, 'bulkActivate'])->name('admin.point_packages.bulk-activate');
-        Route::post('point-packages/bulk-deactivate', [PointPackageController::class, 'bulkDeactivate'])->name('admin.point_packages.bulk-deactivate');
-        Route::post('point-packages/set-popular', [PointPackageController::class, 'setPopular'])->name('admin.point_packages.set-popular');
-        Route::get('point-packages/list', [PointPackageController::class, 'list'])->name('admin.point_packages.list');
-        Route::get('point-packages/stats', [PointPackageController::class, 'stats'])->name('admin.point_packages.stats');
-        Route::get('point-packages/export', [PointPackageController::class, 'export'])->name('admin.point_packages.export');
-        
-        // Ensure DELETE route is properly registered
-        Route::delete('point-packages/{pointPackage}', [PointPackageController::class, 'destroy'])->name('admin.point_packages.destroy');
-        
-        Route::get('premium-features', [PointPackageController::class, 'features'])->name('admin.premium-features.index');
-        Route::get('premium-features/create', [PointPackageController::class, 'createFeature'])->name('admin.premium-features.create');
-        Route::post('premium-features', [PointPackageController::class, 'storeFeature'])->name('admin.premium-features.store');
-        Route::get('premium-features/{feature}/edit', [PointPackageController::class, 'editFeature'])->name('admin.premium-features.edit');
-        Route::put('premium-features/{feature}', [PointPackageController::class, 'updateFeature'])->name('admin.premium-features.update');
-        Route::delete('premium-features/{feature}', [PointPackageController::class, 'destroyFeature'])->name('admin.premium-features.destroy');
-        Route::get('premium-features/{feature}', [PointPackageController::class, 'showFeature'])->name('admin.premium-features.show');
-        Route::get('point-analytics', [PointPackageController::class, 'analytics'])->name('point-analytics');
-        
-        // Marketing Dashboard Routes
-        Route::get('marketing-dashboard', [App\Http\Controllers\MarketingController::class, 'index'])->name('marketing-dashboard');
-        Route::post('marketing/send-notification', [App\Http\Controllers\MarketingController::class, 'sendNotification'])->name('admin.marketing.send-notification');
-        Route::get('marketing/export-data', [App\Http\Controllers\MarketingController::class, 'exportData'])->name('admin.marketing.export-data');
-        Route::get('marketing/refresh-metrics', [App\Http\Controllers\MarketingController::class, 'refreshMetrics'])->name('admin.marketing.refresh-metrics');
-        Route::get('marketing/refresh-activities', [App\Http\Controllers\MarketingController::class, 'refreshActivities'])->name('admin.marketing.refresh-activities');
-        Route::get('marketing/export', [App\Http\Controllers\MarketingController::class, 'export'])->name('admin.marketing.export');
-        
-        // System Health Routes
-        Route::get('system-health', [App\Http\Controllers\SystemHealthController::class, 'index'])->name('system-health');
-    });
-
-    // Level Management Routes
-    Route::group(['middleware' => ['auth', 'admin'], 'prefix' => 'admin'], function() {
-        Route::resource('levels', LevelController::class);
-        Route::post('levels/update-order', [LevelController::class, 'updateOrder'])->name('admin.levels.update-order');
-        Route::post('levels/{level}/toggle-active', [LevelController::class, 'toggleActive'])->name('admin.levels.toggleActive');
-        Route::post('levels/bulk-activate', [LevelController::class, 'bulkActivate'])->name('admin.levels.bulk-activate');
-        Route::post('levels/bulk-deactivate', [LevelController::class, 'bulkDeactivate'])->name('admin.levels.bulk-deactivate');
-        Route::post('levels/{level}/duplicate', [LevelController::class, 'duplicate'])->name('admin.levels.duplicate');
-        Route::get('levels/export', [LevelController::class, 'export'])->name('admin.levels.export');
-    });
-
-    // Investor Dashboard Routes
-    Route::group(['middleware' => ['auth', 'investor'], 'prefix' => 'investor'], function() {
-        Route::get('dashboard', [App\Http\Controllers\InvestorDashboardController::class, 'index'])->name('investor.dashboard');
-        Route::get('financial-report', [App\Http\Controllers\InvestorDashboardController::class, 'financialReport'])->name('investor.financial-report');
-        Route::get('business-metrics', [App\Http\Controllers\InvestorDashboardController::class, 'businessMetrics'])->name('investor.business-metrics');
-    });
+Route::group(['middleware' => ['auth', 'admin']], function() {
+    // Dashboard
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
+    Route::get('statistics', [App\Http\Controllers\dashboard::class, 'index'])->name('statistics.index');
 
     /*
     |--------------------------------------------------------------------------
@@ -237,40 +75,10 @@ Route::get('/home', function() {
     */
     // Service Posts Resources and Actions
     Route::resource('service_posts', ServicePostController::class);
-    Route::post('service_posts/bulk-destroy', [ServicePostController::class, 'bulkDestroy'])
+    Route::delete('service-posts/bulk-destroy', [ServicePostController::class, 'bulkDestroy'])
         ->name('service_posts.bulk-destroy');
-    Route::patch('service_posts/{servicePost}/approve', [ServicePostController::class, 'approve'])
-        ->name('service_posts.approve');
-    Route::patch('service_posts/{servicePost}/reject', [ServicePostController::class, 'reject'])
-        ->name('service_posts.reject');
-    Route::patch('service_posts/{servicePost}/toggle-premium', [ServicePostController::class, 'togglePremium'])
-        ->name('service_posts.toggle-premium');
-    
-    // Enhanced Service Posts Routes
-    Route::post('service_posts/bulk-action', [ServicePostController::class, 'bulkAction'])
-        ->name('service_posts.bulk-action');
-    Route::get('service_posts/export', [ServicePostController::class, 'export'])
-        ->name('service_posts.export');
-    Route::get('service_posts/statistics', [ServicePostController::class, 'statistics'])
-        ->name('service_posts.statistics');
-    Route::post('service_posts/{servicePost}/duplicate', [ServicePostController::class, 'duplicate'])
-        ->name('service_posts.duplicate');
-    Route::patch('service_posts/{servicePost}/archive', [ServicePostController::class, 'archive'])
-        ->name('service_posts.archive');
-    Route::patch('service_posts/{servicePost}/feature', [ServicePostController::class, 'feature'])
-        ->name('service_posts.feature');
-    Route::patch('service_posts/{servicePost}/unarchive', [ServicePostController::class, 'unarchive'])
-        ->name('service_posts.unarchive');
-    Route::patch('service_posts/{servicePost}/unfeature', [ServicePostController::class, 'unfeature'])
-        ->name('service_posts.unfeature');
-    
-    // Dynamic Level Management Routes
-    Route::patch('service_posts/{servicePost}/update-level', [ServicePostController::class, 'updateLevel'])
-        ->name('service_posts.update-level');
-    Route::get('service_posts/{servicePost}/available-levels', [ServicePostController::class, 'getAvailableLevels'])
-        ->name('service_posts.available-levels');
-    Route::get('service_posts/point-packages', [ServicePostController::class, 'getPointPackages'])
-        ->name('service_posts.point-packages');
+    Route::post('inViewCount/{servicePost}', [ServicePostController::class, 'inViewCount'])
+        ->name('inViewCount.view');
 
     // User Profile Service Posts
     Route::get('service_posts/user/{user}', [ServicePostController::class, 'indexProfile'])
@@ -372,10 +180,6 @@ Route::get('/home', function() {
         $cities = App\Models\cities::where('country_id', $countryId)->get();
         return response()->json($cities);
     });
-    Route::get('/get-cities/{countryId}', function($countryId) {
-        $cities = App\Models\cities::where('country_id', $countryId)->get();
-        return response()->json($cities);
-    });
     Route::get('/get-cities-for-form/{countryId}', [ServicePostController::class, 'getCitiesForForm']);
 
     /*
@@ -388,21 +192,6 @@ Route::get('/home', function() {
     Route::get('users/data', [UserController::class, 'data'])->name('users.data');
     Route::post('users/{id}/update-status', [UserController::class, 'updateStatus'])
         ->name('users.update.status');
-    Route::post('users/{user}/reset-password', [App\Http\Controllers\UserController::class, 'resetPassword'])->name('users.reset_password');
-    Route::post('users/{user}/send-notification', [App\Http\Controllers\UserController::class, 'sendNotification'])->name('users.send_notification');
-    Route::post('users/{user}/impersonate', [App\Http\Controllers\UserController::class, 'impersonate'])->name('users.impersonate');
-    Route::post('users/stop-impersonation', [App\Http\Controllers\UserController::class, 'stopImpersonation'])->name('users.stop_impersonation');
-    Route::get('users/{user}/login-history', [App\Http\Controllers\UserController::class, 'loginHistory'])->name('users.login_history');
-    
-    // Balance management routes
-    Route::post('users/{user}/add-points', [App\Http\Controllers\UserController::class, 'addPoints'])->name('users.add_points');
-    Route::post('users/{user}/deduct-points', [App\Http\Controllers\UserController::class, 'deductPoints'])->name('users.deduct_points');
-    
-
-
-    // Simple ban/unban routes
-    Route::post('users/{user}/ban', [UserController::class, 'ban'])->name('users.ban');
-    Route::post('users/{user}/unban', [UserController::class, 'unban'])->name('users.unban');
 
     // AJAX Ban/Unban action for users
     Route::post('/users/{user}/toggle-ban', [BanController::class, 'toggleBan'])
@@ -418,6 +207,7 @@ Route::get('/home', function() {
     Route::resource('favorites', FavoriteController::class);
     Route::post('{reported}/{reportedId}/reports', [ReportController::class, 'store'])
         ->name('reports.store');
+    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
     /*
     |--------------------------------------------------------------------------
@@ -488,54 +278,6 @@ Route::get('/home', function() {
     Route::get('/app', function () {
         return view('vendor/laratrust/panel/layout');
     });
-    Route::get('user-analytics', [App\Http\Controllers\AnalyticsController::class, 'userAnalytics'])->name('analytics.user_analytics');
-    Route::get('point-analytics', [App\Http\Controllers\AnalyticsController::class, 'pointAnalytics'])->name('analytics.point_analytics');
-    Route::get('database-management', [App\Http\Controllers\ManagementController::class, 'databaseManagement'])->name('management.database_management');
-    Route::get('backup-restore', [App\Http\Controllers\ManagementController::class, 'backupRestore'])->name('management.backup_restore');
-
-    // Business Operations & Planning
-    Route::get('business-dashboard', [App\Http\Controllers\BusinessController::class, 'dashboard'])->name('business.dashboard');
-    Route::get('investor-relations', [App\Http\Controllers\BusinessController::class, 'investorRelations'])->name('business.investor_relations');
-    Route::get('investment-tracking', [App\Http\Controllers\BusinessController::class, 'investmentTracking'])->name('business.investment_tracking');
-    Route::get('investment-workflow', [App\Http\Controllers\BusinessController::class, 'investmentWorkflow'])->name('business.investment_workflow');
-    Route::get('strategic-planning', [App\Http\Controllers\BusinessController::class, 'strategicPlanning'])->name('business.strategic_planning');
-    Route::get('monthly-budget-planning', [App\Http\Controllers\BusinessController::class, 'monthlyBudgetPlanning'])->name('business.monthly_budget_planning');
-    Route::get('expense-approvals', [App\Http\Controllers\BusinessController::class, 'expenseApprovals'])->name('business.expense_approvals');
-    Route::get('budget-limits', [App\Http\Controllers\BusinessController::class, 'budgetLimits'])->name('business.budget_limits');
-    Route::get('revenue-analysis', [App\Http\Controllers\BusinessController::class, 'revenueAnalysis'])->name('business.revenue_analysis');
-    Route::get('expense-analysis', [App\Http\Controllers\BusinessController::class, 'expenseAnalysis'])->name('business.expense_analysis');
-    Route::get('profit-loss', [App\Http\Controllers\BusinessController::class, 'profitLoss'])->name('business.profit_loss');
-    Route::get('growth-metrics', [App\Http\Controllers\BusinessController::class, 'growthMetrics'])->name('business.growth_metrics');
-
-    // Accountant Routes
-    Route::get('accountant-dashboard', [App\Http\Controllers\AccountantController::class, 'dashboard'])->name('accountant.dashboard');
-    Route::get('accountant-expenses', [App\Http\Controllers\AccountantController::class, 'expenses'])->name('accountant.expenses');
-    Route::post('accountant-expenses/{id}/approve', [App\Http\Controllers\AccountantController::class, 'approveExpense'])->name('accountant.approve_expense');
-    Route::post('accountant-expenses/{id}/reject', [App\Http\Controllers\AccountantController::class, 'rejectExpense'])->name('accountant.reject_expense');
-    Route::get('accountant-revenues', [App\Http\Controllers\AccountantController::class, 'revenues'])->name('accountant.revenues');
-    Route::post('accountant-revenues', [App\Http\Controllers\AccountantController::class, 'addRevenue'])->name('accountant.add_revenue');
-    Route::get('accountant-budgets', [App\Http\Controllers\AccountantController::class, 'budgets'])->name('accountant.budgets');
-    Route::post('accountant-budgets', [App\Http\Controllers\AccountantController::class, 'createBudget'])->name('accountant.create_budget');
-    Route::get('accountant-investments', [App\Http\Controllers\AccountantController::class, 'investments'])->name('accountant.investments');
-    Route::get('accountant-financial-reports', [App\Http\Controllers\AccountantController::class, 'financialReports'])->name('accountant.financial_reports');
-    Route::get('accountant-tax-reports', [App\Http\Controllers\AccountantController::class, 'taxReports'])->name('accountant.tax_reports');
-    Route::get('accountant-audit-trail', [App\Http\Controllers\AccountantController::class, 'auditTrail'])->name('accountant.audit_trail');
-
-    // Business CRUD Routes
-    Route::post('business/investments', [App\Http\Controllers\BusinessController::class, 'storeInvestment'])->name('business.investments.store');
-    Route::post('business/payments', [App\Http\Controllers\BusinessController::class, 'storePayment'])->name('business.payments.store');
-    Route::post('business/budgets', [App\Http\Controllers\BusinessController::class, 'storeBudget'])->name('business.budgets.store');
-    Route::post('business/expenses/{id}/approve', [App\Http\Controllers\BusinessController::class, 'approveExpense'])->name('business.expenses.approve');
-    Route::post('business/expenses/{id}/reject', [App\Http\Controllers\BusinessController::class, 'rejectExpense'])->name('business.expenses.reject');
-    
-    // Investment Workflow Routes
-    Route::post('business/investments/{id}/distribute-profit', [App\Http\Controllers\BusinessController::class, 'distributeProfit'])->name('business.investments.distribute-profit');
-    Route::post('business/investments/{id}/update-status', [App\Http\Controllers\BusinessController::class, 'updateInvestmentStatus'])->name('business.investments.update-status');
-    Route::post('business/investments/calculate-profitability', [App\Http\Controllers\BusinessController::class, 'calculateProfitability'])->name('business.investments.calculate-profitability');
-
-    // System Management
-    Route::get('system-logs', [App\Http\Controllers\SystemController::class, 'systemLogs'])->name('system.logs');
-    Route::get('api-management', [App\Http\Controllers\SystemController::class, 'apiManagement'])->name('system.api_management');
 });
 
 /*
@@ -546,13 +288,13 @@ Route::get('/home', function() {
 Route::middleware(['auth'])->prefix('admin')->group(function () {
     // Ban Management
     Route::get('users/banned', [BanController::class, 'index'])
-        ->name('admin.users.banned');
+        ->name('users.banned');
     Route::get('users/{userId}/ban', [BanController::class, 'banForm'])
-        ->name('admin.users.ban.form');
+        ->name('users.ban.form');
     Route::post('users/{userId}/ban', [BanController::class, 'banUser'])
-        ->name('admin.users.ban');
+        ->name('users.ban');
     Route::post('users/{userId}/unban', [BanController::class, 'unbanUser'])
-        ->name('admin.users.unban');
+        ->name('users.unban');
 
     // Banned Devices
     Route::get('devices/banned', [BanController::class, 'devices'])
@@ -575,17 +317,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         ->name('reports.handle-reported');
     Route::delete('/reports/{id}', [ReportController::class, 'destroy'])
         ->name('reports.destroy');
-    
-    // Report actions
-    Route::post('/reports/ban-user/{user}', [ReportController::class, 'banUser'])->name('reports.ban-user');
-    Route::post('/reports/unban-user/{user}', [ReportController::class, 'unbanUser'])->name('reports.unban-user');
-    Route::delete('/reports/delete-post/{post}', [ReportController::class, 'deletePost'])->name('reports.delete-post');
-    Route::get('/reports/export', [ReportController::class, 'export'])->name('reports.export');
-    
-    // Test route for debugging
-    Route::get('/reports/test', function() {
-        return response()->json(['success' => true, 'message' => 'Reports test route working']);
-    })->name('reports.test');
 
     // Point Transactions Fix
     Route::get('/point-transactions/fix', [PointTransactionsController::class, 'fixTransactionRecords'])
@@ -638,29 +369,4 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(fun
         Route::get('/roles/list', [ApiController::class, 'getRoles'])->name('roles.list');
         Route::get('/countries/list', [ApiController::class, 'getCountries'])->name('countries.list');
     });
-});
-
-// Financial Management
-Route::middleware(['auth', 'admin'])->group(function() {
-    Route::get('financial/revenue', [App\Http\Controllers\FinancialController::class, 'revenue'])->name('financial.revenue');
-    Route::get('point-sales', [App\Http\Controllers\FinancialController::class, 'pointSales'])->name('financial.point_sales');
-    Route::get('golden-post-revenue', [App\Http\Controllers\FinancialController::class, 'goldenPostRevenue'])->name('financial.golden_post_revenue');
-    Route::get('payment-reports', [App\Http\Controllers\FinancialController::class, 'paymentReports'])->name('financial.payment_reports');
-    Route::get('financial/expenses', [App\Http\Controllers\FinancialController::class, 'expenses'])->name('financial.expenses');
-    Route::get('advertisement-costs', [App\Http\Controllers\FinancialController::class, 'advertisementCosts'])->name('financial.advertisement_costs');
-    Route::get('server-hosting-costs', [App\Http\Controllers\FinancialController::class, 'serverHostingCosts'])->name('financial.server_hosting_costs');
-    Route::get('monthly-profit-loss', [App\Http\Controllers\FinancialController::class, 'monthlyProfitLoss'])->name('financial.monthly_profit_loss');
-    Route::get('cash-flow-projections', [App\Http\Controllers\FinancialController::class, 'cashFlowProjections'])->name('financial.cash_flow_projections');
-    Route::get('income-statement', [App\Http\Controllers\FinancialController::class, 'incomeStatement'])->name('financial.income_statement');
-});
-
-// Translation Manager Routes
-Route::group(['middleware' => ['web', 'auth'], 'prefix' => 'admin'], function () {
-    Route::get('translations/view/{groupKey?}', '\Barryvdh\TranslationManager\Controller@getView');
-    Route::post('translations/add/{groupKey}', '\Barryvdh\TranslationManager\Controller@postAdd');
-    Route::post('translations/edit/{groupKey}', '\Barryvdh\TranslationManager\Controller@postEdit');
-    Route::post('translations/delete/{groupKey}/{translationKey}', '\Barryvdh\TranslationManager\Controller@postDelete');
-    Route::post('translations/import', '\Barryvdh\TranslationManager\Controller@postImport');
-    Route::post('translations/find', '\Barryvdh\TranslationManager\Controller@postFind');
-    Route::post('translations/publish/{groupKey}', '\Barryvdh\TranslationManager\Controller@postPublish');
 });

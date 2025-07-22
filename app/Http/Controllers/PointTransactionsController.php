@@ -4,18 +4,22 @@ namespace App\Http\Controllers;
 
 use App\Models\point_transactions;
 use App\Models\ServicePost;
-use App\Models\Level;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
-use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class PointTransactionsController extends Controller
 {
+    /**
+     * Display a listing of the resource.
+     *
+     * @return Application|Factory|View
+     */
     public function index(Request $request)
     {
         $user = Auth::user();
@@ -25,33 +29,17 @@ class PointTransactionsController extends Controller
 
         $query = point_transactions::with(['fromUser', 'toUser']);
 
-        // Apply filters
-        if ($request->has('type') && $request->type) {
+        // Filter by transaction type if specified
+        if ($request->has('type') && !empty($request->type)) {
             $query->where('type', $request->type);
         }
 
-        if ($request->has('user') && $request->user) {
-            $query->where(function($q) use ($request) {
-                $q->where('from_user_id', $request->user)
-                  ->orWhere('to_user_id', $request->user);
-            });
-        }
+        $pointTransactions = $query->latest()->paginate(7);
 
-        if ($request->has('date_range') && $request->date_range) {
-            $dates = explode(' - ', $request->date_range);
-            if (count($dates) === 2) {
-                $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($dates[0]))->startOfDay();
-                $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($dates[1]))->endOfDay();
-                $query->whereBetween('created_at', [$startDate, $endDate]);
-            }
-        }
-
-        $transactions = $query->orderBy('created_at', 'desc')->paginate(20);
-
-        // Calculate total points used
+        // Calculate totals for the dashboard and transaction metrics
         $totalPointsUsed = $this->calculateTotalPointsUsed();
 
-        return view('point_transactions.index', compact('transactions', 'totalPointsUsed'));
+        return view('point_transactions.index', compact('pointTransactions', 'totalPointsUsed'));
     }
 
     /**
@@ -60,28 +48,14 @@ class PointTransactionsController extends Controller
      */
     private function calculateTotalPointsUsed()
     {
-        // Get level IDs
-        $goldLevel = Level::where('name->ar', 'ذهبي')->first();
-        $diamondLevel = Level::where('name->ar', 'ماسي')->first();
-        $regularLevel = Level::where('name->ar', 'عادي')->first();
-        
         // Get points used from service posts with badges
-        $badgePointsUsed = 0;
-        
-        if ($regularLevel) {
-            $query = ServicePost::where('level_id', '!=', $regularLevel->id)
-                ->where('badge_duration', '>', 0);
-                
-            if ($goldLevel) {
-                $goldPoints = clone $query;
-                $badgePointsUsed += $goldPoints->where('level_id', $goldLevel->id)->sum(DB::raw('badge_duration * 2'));
-            }
-            
-            if ($diamondLevel) {
-                $diamondPoints = clone $query;
-                $badgePointsUsed += $diamondPoints->where('level_id', $diamondLevel->id)->sum(DB::raw('badge_duration * 10'));
-            }
-        }
+        $badgePointsUsed = ServicePost::where('have_badge', '!=', 'عادي')
+            ->where('badge_duration', '>', 0)
+            ->sum(DB::raw('CASE
+                WHEN have_badge = "ذهبي" THEN badge_duration * 2
+                WHEN have_badge = "ماسي" THEN badge_duration * 10
+                ELSE 0
+              END'));
 
         // Get any additional "used" points from transactions that have proper values
         $transactionPointsUsed = point_transactions::where('type', 'used')
@@ -210,40 +184,34 @@ class PointTransactionsController extends Controller
             if($transaction->from_user_id === $transaction->to_user_id && $transaction->from_user_id !== null) {
                 // Try to find a related service post from around the same time
                 $relatedPost = ServicePost::where('user_id', $transaction->from_user_id)
-                    ->where('level_id', '!=', null)
+                    ->where('have_badge', '!=', 'عادي')
                     ->where('created_at', '>=', $transaction->created_at->subMinutes(5))
                     ->where('created_at', '<=', $transaction->created_at->addMinutes(5))
                     ->first();
 
                 if($relatedPost) {
-                    // Get level IDs for point calculation
-                    $goldLevel = Level::where('name->ar', 'ذهبي')->first();
-                    $diamondLevel = Level::where('name->ar', 'ماسي')->first();
-                    
-                    // Calculate the correct points based on level type and duration
+                    // Calculate the correct points based on badge type and duration
                     $badgePointCost = 0;
 
-                    if($goldLevel && $relatedPost->level_id === $goldLevel->id) {
+                    if($relatedPost->have_badge === 'ذهبي') {
                         $badgePointCost = $relatedPost->badge_duration * 2;
-                    } elseif($diamondLevel && $relatedPost->level_id === $diamondLevel->id) {
+                    } elseif($relatedPost->have_badge === 'ماسي') {
                         $badgePointCost = $relatedPost->badge_duration * 10;
                     }
 
                     if($badgePointCost > 0) {
-                        // Update the transaction with the correct point value
-                        $transaction->update(['point' => $badgePointCost]);
+                        $transaction->point = $badgePointCost;
+                        $transaction->save();
                         $fixedCount++;
-                        
-                        Log::info('Fixed transaction record', [
-                            'transaction_id' => $transaction->id,
-                            'post_id' => $relatedPost->id,
-                            'corrected_points' => $badgePointCost
-                        ]);
                     }
                 }
             }
         }
 
-        return redirect()->back()->with('success', "Fixed {$fixedCount} transaction records.");
+        return redirect()->route('point_transactions.index')
+            ->with('success', "Fixed $fixedCount transaction records with incorrect point values.");
     }
+
+
+
 }

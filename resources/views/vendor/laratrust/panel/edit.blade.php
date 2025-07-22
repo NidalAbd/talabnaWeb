@@ -19,7 +19,7 @@
           @method('PUT')
         @endif
         <label class="block">
-          <span class="text-gray-700">{{('vendor\laratrust\panel\edit.name_code') }}</span>
+          <span class="text-gray-700">Name/Code</span>
           <input
             class="form-input mt-1 block w-full bg-gray-200 text-gray-600 @error('name') border-red-500 @enderror"
             name="name"
@@ -34,7 +34,7 @@
         </label>
 
         <label class="block my-4">
-          <span class="text-gray-700">{{('vendor\laratrust\panel\edit.display_name') }}</span>
+          <span class="text-gray-700">Display Name</span>
           <input
             class="form-input mt-1 block w-full"
             name="display_name"
@@ -45,16 +45,16 @@
         </label>
 
         <label class="block my-4">
-          <span class="text-gray-700">{{('vendor\laratrust\panel\edit.description') }}</span>
+          <span class="text-gray-700">Description</span>
           <textarea
             class="form-textarea mt-1 block w-full"
             rows="3"
             name="description"
             placeholder="Some description for the {{$type}}"
-          >{{ $model->id</textarea> }}
+          >{{ $model->description ?? old('description') }}</textarea>
         </label>
         @if($type == 'role')
-          <span class="block text-gray-700">{{('vendor\laratrust\panel\edit.permissions') }}</span>
+          <span class="block text-gray-700">Permissions</span>
           <div class="flex flex-wrap justify-start mb-4">
             @foreach ($permissions as $permission)
               <label class="inline-flex items-center mr-6 my-2 text-sm" style="flex: 1 0 20%;">
@@ -65,7 +65,7 @@
                   value="{{$permission->getKey()}}"
                   {!! $permission->assigned ? 'checked' : '' !!}
                 >
-                <span class="ml-2">{{$permission->id</span> }}
+                <span class="ml-2">{{$permission->display_name ?? $permission->name}}</span>
               </label>
             @endforeach
           </div>
@@ -77,7 +77,7 @@
           >
             Cancel
           </a>
-          <button class="btn btn-blue" type="submit">{{('vendor\laratrust\panel\edit.save') }}</button>
+          <button class="btn btn-blue" type="submit">Save</button>
         </div>
       </form>
     </div>
@@ -102,9 +102,3 @@
     }
   </script>
 @endsection
-
-
-
-
-
-

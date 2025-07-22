@@ -29,11 +29,6 @@
     <link href="{{ asset('css/app.css') }}" rel="stylesheet">
     <script src="{{ asset('js/app.js') }}" defer></script>
 
-    <!-- SweetAlert2 for better alerts -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
-    
-    <!-- Universal AJAX Handler -->
-    <script src="{{ asset('js/ajax-handler.js') }}"></script>
 </head>
 <body style="background-color: #D6D2D3;">
     <div id="app">
@@ -43,7 +38,7 @@
                 <a class="navbar-brand" style="color: white;" href="{{ url('/') }}">
                     {{ config('app.name', 'Laravel') }}
                 </a>
-                <button class="navbar-toggler" style="color: white;" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{('Toggle navigation') }}">
+                <button class="navbar-toggler" style="color: white;" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="{{ __('Toggle navigation') }}">
                     <span class="navbar-toggler-icon"></span>
                 </button>
 
@@ -55,43 +50,40 @@
 <!-- Left Side Of Navbar -->
             <div class="mx-auto"> <!-- mx-auto centers the content -->
                 <div id="subcategory-container" class="d-flex flex-wrap mt-2" style="display: none;">
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory2">{{('layouts\app.all') }}</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory1">{{('layouts\app.jobs') }}</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory2">{{('layouts\app.devices') }}</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory3">{{('layouts\app.real_estate') }}</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory4">{{('layouts\app.cars') }}</a>
-                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory5">{{('layouts\app.service') }}</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory2">All</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory1">Jobs</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory2">Devices</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory3">Real estate</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory4">Cars</a>
+                    <a href="/" class="btn btn-md mx-3 category-link" style="color: white;" data-subcategories="subcategory5">Service</a>
                 </div>
             </div>
                     <!-- Right Side Of Navbar -->
                     <ul class="navbar-nav ms-auto">
-                        <li class="nav-item">
-                            <x-language-switcher />
-                        </li>
                         <!-- Authentication Links -->
                         @guest
                             @if (Route::has('login'))
                                 <li class="nav-item">
-                                    <a class="nav-link" style="color: white;" href="{{ route('login') }}">{{('Login') }}</a>
+                                    <a class="nav-link" style="color: white;" href="{{ route('login') }}">{{ __('Login') }}</a>
                                 </li>
                             @endif
 
                             @if (Route::has('register'))
                                 <li class="nav-item">
-                                    <a class="nav-link" style="color: white;" href="{{ route('register') }}">{{('Register') }}</a>
+                                    <a class="nav-link" style="color: white;" href="{{ route('register') }}">{{ __('Register') }}</a>
                                 </li>
                             @endif
                         @else
                             <li class="nav-item dropdown">
                                 <a id="navbarDropdown" style="color: white;" class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false" v-pre>
-                                    {{ Auth::user()->name ?? '' }}
+                                    {{ Auth::user()->name }}
                                 </a>
 
                                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault();
                                                      document.getElementById('logout-form').submit();">
-                                        {{('Logout') }}
+                                        {{ __('Logout') }}
                                     </a>
 
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
@@ -111,10 +103,3 @@
     </div>
 </body>
 </html>
-
-
-
-
-
-
-

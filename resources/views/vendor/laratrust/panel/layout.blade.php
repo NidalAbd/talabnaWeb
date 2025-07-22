@@ -6,7 +6,7 @@
   <meta name="csrf-token" content="{{ csrf_token() }}">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
   <link rel="shortcut icon" href="/vendor/laratrust/img/logo.png">
-  <title>{{('vendor\laratrust\panel\layout.laratrust_yield_title_') }}</title>
+  <title>Laratrust - @yield('title')</title>
   <link href="{{ mix('laratrust.css', 'vendor/laratrust') }}" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" defer></script>
 </head>
@@ -18,7 +18,7 @@
         <div class="flex items-center">
           <div class="hidden md:block">
             <div class="flex items-baseline">
-              <a href="{{config('laratrust.panel.go_back_route')}}" class="nav-button">{{('vendor\laratrust\panel\layout._go_back') }}</a>
+              <a href="{{config('laratrust.panel.go_back_route')}}" class="nav-button">← Go Back</a>
               <a
                 href="{{ route('laratrust.roles-assignment.index') }}"
                 class="ml-4 {{ request()->is('*roles-assigment*') ? 'nav-button-active' : 'nav-button' }}"
@@ -66,11 +66,11 @@
     -->
     <div class="hidden md:hidden">
       <div class="px-2 pt-2 pb-3 sm:px-3">
-        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-900 focus:outline-none focus:text-white focus:bg-gray-700">{{('vendor\laratrust\panel\layout.dashboard') }}</a>
-        <a href="#" class="mt-1 block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700">{{('vendor\laratrust\panel\layout.team') }}</a>
-        <a href="#" class="mt-1 block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700">{{('vendor\laratrust\panel\layout.projects') }}</a>
-        <a href="#" class="mt-1 block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700">{{('vendor\laratrust\panel\layout.calendar') }}</a>
-        <a href="#" class="mt-1 block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700">{{('vendor\laratrust\panel\layout.reports') }}</a>
+        <a href="#" class="block px-3 py-2 rounded-md text-base font-medium text-white bg-gray-900 focus:outline-none focus:text-white focus:bg-gray-700">Dashboard</a>
+        <a href="#" class="mt-1 block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700">Team</a>
+        <a href="#" class="mt-1 block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700">Projects</a>
+        <a href="#" class="mt-1 block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700">Calendar</a>
+        <a href="#" class="mt-1 block px-3 py-2 rounded-md text-base font-medium text-gray-300 hover:text-white hover:bg-gray-700 focus:outline-none focus:text-white focus:bg-gray-700">Reports</a>
       </div>
     </div>
   </nav>
@@ -99,9 +99,3 @@
 </div>
 </body>
 </html>
-
-
-
-
-
-

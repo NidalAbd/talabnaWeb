@@ -50,8 +50,8 @@ class SubcategoriesController extends Controller
         $subCategories = Sub_categories::with(['category', 'photos'])
             ->withCount('servicePosts')
             ->paginate(7);
-        $categories = Categories::where('isSuspended', false)->get();
-        return view('sub_categories.index', compact('subCategories', 'categories'));
+
+        return view('sub_categories.index', compact('subCategories'));
     }
 
     /**
@@ -133,8 +133,7 @@ class SubcategoriesController extends Controller
         $servicePosts = ServicePost::where('sub_categories_id', $id)
             ->with('photos')
             ->withCount('favorites')
-            ->orderBy('level_id', 'desc')
-            ->orderBy('id', 'desc')
+            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
             ->paginate(10);
 
         return view('sub_categories.show', compact('subcategory', 'servicePosts'));

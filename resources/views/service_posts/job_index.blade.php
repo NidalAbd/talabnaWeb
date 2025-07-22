@@ -1,68 +1,94 @@
-@extends('adminlte::page')
-@section('title', 'Job Service Posts')
+@extends('dashboard')
+@section('title', "Jobs Service Posts")
 @section('content')
-<div class="container-fluid py-4">
-    <div class="card mb-4">
-        <div class="card-header bg-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0"><i class="fas fa-briefcase text-primary mr-2"></i> Job Service Posts</h4>
-        </div>
-        <div class="card-body">
-            <!-- Filter Tabs -->
-            <ul class="nav nav-tabs mb-3" id="filterTabs" role="tablist">
-                <li class="nav-item">
-                    <a class="nav-link active" id="all-tab" data-toggle="tab" href="#all" role="tab">{{('service_posts\job_index.all') }}</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="offers-tab" data-toggle="tab" href="#offers" role="tab">{{('service_posts\job_index.offers') }}</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" id="requests-tab" data-toggle="tab" href="#requests" role="tab">{{('service_posts\job_index.requests') }}</a>
-                </li>
-            </ul>
-            <!-- Table -->
-            <div class="table-responsive">
-                <table class="table table-bordered table-hover" id="servicePostsTable">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>{{('service_posts\job_index.title') }}</th>
-                            <th>{{('service_posts\job_index.category') }}</th>
-                            <th>{{('service_posts\job_index.type') }}</th>
-                            <th>{{('service_posts\job_index.price') }}</th>
-                            <th>{{('service_posts\job_index.user') }}</th>
-                            <th>{{('service_posts\job_index.status') }}</th>
-                            <th>{{('service_posts\job_index.created') }}</th>
-                            <th>{{('service_posts\job_index.actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($servicePosts as $post)
-                        <tr>
-                            <td>{{ Str::limit($post->id) }}</td>
-                            <td>{{ $post->id }}</td>
-                            <td><span class="badge {{ $post->type == 'عرض' ? 'badge-info' : 'badge-secondary' }}">{{ $post->type == 'عرض' ? 'Offer' : 'Request' }}</span></td>
-                            <td>{{ number_format($post->price, 0) }} {{ $post->price_currency_code }}</td>
-                            <td>{{ $post->id }}</td>
-                            <td><span class="badge {{ $post->state == 'published' ? 'badge-success' : 'badge-warning' }}">{{ ucfirst($post->state) }}</span></td>
-                            <td>{{ $post->id }}</td>
-                            <td>
-                                <a href="{{ route('service_posts.show', $post->id) }}"><i class="fas fa-eye"></i></a>
-                            </td>
-                        </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-3">
-                {{ $servicePosts->links() }}
+    <div class="p-0">
+        <div class="row justify-content-center">
+            <div class="col-md-12">
+                  <div class="d-flex justify-content-end mb-3">
+                    <ul class="nav nav-pills ml-auto">
+                        <li class="nav-item">
+                            <div class="input-group mt-0 input-group-sm">
+                               <a href="{{route('service_posts.create')}}" style="float: right">
+                                            <button class="btn btn-primary" onclick="">
+                                                <i class="fa fa-user fa-1x"></i>
+                                                {{ __('+ خدمة') }}
+                                            </button>
+                                        </a>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <div class="card-header ">
+                        <h3 class="card-title">
+                            <i class="fas fa-atom mr-1"></i>
+                           Jobs Service Posts
+                        </h3>
+                      
+                    </div>
+                    <div class="card-body table-responsive p-0">
+                        <table class="table table-bordered table-striped table-dark table-sm text-center">
+                            <thead>
+                            <tr class="btn-dark">
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>User</th>
+                                <th>favorites</th>
+                                <th>reports</th>
+                                <th>views</th>
+                                <th>type</th>
+
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach($servicePosts as $post)
+                                <tr>
+                                    <td>{{ $post->title }}</td>
+                                    <td>{{ $post->category }}</td>
+                                    <td>{{ $post->user->user_name }}</td>
+                                    <td>{{ $post->favorites_count }}</td>
+                                    <td>{{ $post->report_count }}</td>
+                                    <td>{{ $post->view_count }}</td>
+                                    <td>{{ $post->have_badge }}</td>
+                                    <td>
+                                        <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-sm btn-primary">View</a>
+                                        {{--                                            @can('update_service', $post)--}}
+                                        <a href="{{ route('service_posts.edit', $post->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                        {{--                                            @endcan--}}
+                                        {{--                                            @can('destroy_service', $post)--}}
+                                        <form action="{{ route('service_posts.destroy', $post->id) }}" method="POST" style="display: inline-block;">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
+                                        </form>
+                                        {{--                                            @endcan--}}
+                                    </td>
+                                </tr>
+                            @endforeach
+                            </tbody>
+                            <thead>
+                            <tr class="btn-dark">
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>User</th>
+                                <th>favorites</th>
+                                <th>reports</th>
+                                <th>views</th>
+                                <th>type</th>
+
+                                <th>Action</th>
+                            </tr>
+                            </thead>
+                        </table>
+                    </div>
+  <div class="card-footer" style="height: 50px;"> <!-- Adjust height as needed -->
+                            <div class="m-0" style="display: flex; justify-content: center;">
+                                {{ $servicePosts->links() }}
+                            </div>
+                        </div>
+                </div>
             </div>
         </div>
     </div>
-</div>
-@stop
-
-
-
-
-
-
-
+@endsection

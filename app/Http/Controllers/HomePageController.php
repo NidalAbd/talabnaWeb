@@ -7,7 +7,6 @@ use App\Models\Sub_categories;
 use App\Models\point_purchase_requests;
 use App\Models\ServicePost;
 use App\Models\User;
-use App\Models\Level;
 use Illuminate\Contracts\View\View;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -31,15 +30,9 @@ class HomePageController extends Controller
         $allJobs = ServicePost::where('categories_id', '3')->where('state', 'published')->count();
         $allRealState = ServicePost::where('categories_id', '4')->where('state', 'published')->count();
         $allGeneral = ServicePost::where('categories_id', '5')->where('state', 'published')->count();
-        
-        // Get level IDs for badge counting
-        $goldLevel = Level::where('name->ar', 'ذهبي')->first();
-        $diamondLevel = Level::where('name->ar', 'ماسي')->first();
-        $regularLevel = Level::where('name->ar', 'عادي')->first();
-        
-        $allGolden = $goldLevel ? ServicePost::where('level_id', $goldLevel->id)->where('state', 'published')->count() : 0;
-        $allDiamond = $diamondLevel ? ServicePost::where('level_id', $diamondLevel->id)->where('state', 'published')->count() : 0;
-        $allNormal = $regularLevel ? ServicePost::where('level_id', $regularLevel->id)->where('state', 'published')->count() : 0;
+        $allGolden = ServicePost::where('have_badge', 'ذهبي')->where('state', 'published')->count();
+        $allDiamond = ServicePost::where('have_badge', 'ماسي')->where('state', 'published')->count();
+        $allNormal = ServicePost::where('have_badge', 'عادي')->where('state', 'published')->count();
         $purchaseRequests = point_purchase_requests::count();
 
         // Categories with post counts
@@ -48,20 +41,17 @@ class HomePageController extends Controller
         }])->get();
 
         // Featured premium posts (Diamond and Gold) that have photos
-        $featuredPosts = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'level'])
+        $featuredPosts = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory'])
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published')
-            ->whereHas('level', function($query) {
-                $query->whereIn('name->ar', ['ماسي', 'ذهبي']);
-            })
+            ->whereIn('have_badge', ['ماسي', 'ذهبي'])
             ->whereHas('photos')  // Only include posts with photos
-            ->orderBy('level_id', 'desc')
-            ->orderBy('view_count', 'desc')
+            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي'), view_count DESC")
             ->limit(6)
             ->get();
 
         // Latest posts across all categories that have photos
-        $latestPosts = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'level'])
+        $latestPosts = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory'])
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published')
             ->whereHas('photos')  // Only include posts with photos
@@ -72,7 +62,7 @@ class HomePageController extends Controller
         // Latest posts by category that have photos
         $latestByCategory = [];
         foreach ($categories as $category) {
-            $latestByCategory[$category->id] = ServicePost::with(['photos', 'user.photos', 'subCategory', 'level'])
+            $latestByCategory[$category->id] = ServicePost::with(['photos', 'user.photos', 'subCategory'])
                 ->withCount(['favorites', 'comments'])
                 ->where('categories_id', $category->id)
                 ->where('state', 'published')
@@ -95,7 +85,7 @@ class HomePageController extends Controller
         }
 
         // Popular posts (most viewed) that have photos
-        $popularPosts = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'level'])
+        $popularPosts = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory'])
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published')
             ->whereHas('photos')  // Only include posts with photos
@@ -104,7 +94,7 @@ class HomePageController extends Controller
             ->get();
 
         // Recent activity (recently updated or commented posts)
-        $recentlyActive = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'level'])
+        $recentlyActive = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory'])
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published')
             ->where(function($query) {

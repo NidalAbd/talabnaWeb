@@ -63,8 +63,7 @@ return [
     |
     */
 
-    // Modern, bold logo for the admin panel
-    'logo' => '<span style="font-weight:900; font-size:2rem; letter-spacing:2px; color:#007bff; text-shadow:1px 1px 4px #333;">TALABNA</span>',
+    'logo' => '<b>Talabna</b>',
     'logo_img' => 'img/logo.png',
     'logo_img_class' => 'brand-image img-circle elevation-3',
     'logo_img_xl' => null,
@@ -258,7 +257,7 @@ return [
     */
 
     'use_route_url' => false,
-    'dashboard_url' => 'dashboard',
+    'dashboard_url' => 'home',
     'logout_url' => 'logout',
     'login_url' => 'login',
     'register_url' => 'register',
@@ -300,254 +299,185 @@ return [
     */
 
     'menu' => [
-        // DASHBOARD & ANALYTICS
-        ['header' => 'DASHBOARD & ANALYTICS'],
+        // Dashboard Section
         [
             'text' => 'Dashboard',
-            'url'  => 'dashboard',
+            'url'  => 'home',
             'icon' => 'fas fa-tachometer-alt',
             'permission' => ['view_statistics']
         ],
+
+        // Administration Section
         [
-            'text' => 'User Analytics',
-            'url'  => 'user-analytics',
-            'icon' => 'fas fa-chart-line',
-            'permission' => ['user_index']
+            'text'    => 'Admin Management',
+            'icon'    => 'fas fa-cogs',
+            'permission' => ['user_index', 'user_view'],
+            'submenu' => [
+                [
+                    'text' => 'Users',
+                    'url'  => 'users',
+                    'icon' => 'fas fa-users',
+                    'permission' => ['user_index']
+                ],
+                [
+                    'text' => 'Roles',
+                    'url'  => 'roles',  // This should match your roles route
+                    'icon' => 'fas fa-user-tag',
+                    'permission' => ['view_role']
+                ],
+                [
+                    'text' => 'Permissions',
+                    'url'  => 'permissions',  // This should match your permissions route
+                    'icon' => 'fas fa-key',
+                    'permission' => ['view_permission']
+                ],
+                [
+                    'text' => 'Role Assignments',  // You might want to add this new menu item
+                    'url'  => 'role-assignments',  // This should match your role-assignments route
+                    'icon' => 'fas fa-user-cog',
+                    'permission' => ['edit_role']
+                ],
+                [
+                    'text' => 'Orders',
+                    'url'  => 'purchase_points',
+                    'icon' => 'fas fa-shopping-cart',
+                    'permission' => ['purchase_index']
+                ],
+                [
+                    'text' => 'Transactions',
+                    'url'  => 'point_transactions',
+                    'icon' => 'fas fa-exchange-alt',
+                    'permission' => ['point_transactions.index']
+                ]
+            ]
         ],
         [
-            'text' => 'Point Analytics',
-            'url'  => 'point-analytics',
-            'icon' => 'fas fa-chart-bar',
-            'permission' => ['view_statistics']
-        ],
-        [
-            'text' => 'Marketing Dashboard',
-            'url'  => 'marketing-dashboard',
+            'text' => 'Marketing',
             'icon' => 'fas fa-bullhorn',
-            'permission' => ['view_statistics']
-        ],
-
-        // USER & CONTENT MANAGEMENT
-        ['header' => 'USER & CONTENT'],
-        [
-            'text' => 'Users',
-            'url'  => 'users',
-            'icon' => 'fas fa-users',
-            'permission' => ['user_index']
-        ],
-        [
-            'text' => 'Service Posts',
-            'url'  => 'service_posts',
-            'icon' => 'fas fa-clipboard-list',
-            'permission' => ['view_service']
-        ],
-        [
-            'text' => 'Categories',
-            'url'  => 'categories',
-            'icon' => 'fas fa-folder',
-            'permission' => ['view_service']
-        ],
-        [
-            'text' => 'Sub Categories',
-            'url'  => 'indexSubCategory',
-            'icon' => 'fas fa-folder-open',
-            'permission' => ['view_service']
-        ],
-        [
-            'text' => 'Levels',
-            'url'  => 'admin/levels',
-            'icon' => 'fas fa-layer-group',
-            'permission' => ['levels_index']
-        ],
-
-        // BUSINESS & FINANCIAL
-        ['header' => 'BUSINESS & FINANCE'],
-        [
-            'text' => 'Business Management',
-            'icon' => 'fas fa-briefcase',
+            'permission' => ['view_statistics'],
             'submenu' => [
                 [
-                    'text' => 'Dashboard',
-                    'url'  => 'business-dashboard',
-                    'icon' => 'fas fa-tachometer-alt',
-                    'permission' => ['business_dashboard']
+                    'text' => 'Send Notifications',
+                    'url'  => 'admin/notifications/marketing',
+                    'icon' => 'fas fa-bell',
+                    'permission' => ['view_statistics']
                 ],
                 [
-                    'text' => 'Investor Dashboard',
-                    'url'  => 'investor-dashboard',
-                    'icon' => 'fas fa-chart-line',
-                    'permission' => ['investor_view', 'view_statistics']
-                ],
-                [
-                    'text' => 'Investor Relations',
-                    'url'  => 'investor-relations',
-                    'icon' => 'fas fa-handshake',
-                    'permission' => ['investor_profile.view', 'view_statistics']
-                ],
-                [
-                    'text' => 'Investment Tracking',
-                    'url'  => 'investment-tracking',
-                    'icon' => 'fas fa-piggy-bank',
-                    'permission' => ['investment_funding.index', 'view_statistics']
-                ],
-                [
-                    'text' => 'Strategic Planning',
-                    'url'  => 'strategic-planning',
-                    'icon' => 'fas fa-road',
-                    'permission' => ['strategic_plan.view', 'view_statistics']
-                ],
-                [
-                    'text' => 'Budget Planning',
-                    'url'  => 'monthly-budget-planning',
-                    'icon' => 'fas fa-calendar-week',
-                    'permission' => ['monthly_budget.index', 'view_statistics']
-                ],
-                [
-                    'text' => 'Expense Approvals',
-                    'url'  => 'expense-approvals',
-                    'icon' => 'fas fa-check-circle',
-                    'permission' => ['expense_approvals.index', 'view_statistics']
-                ],
-                [
-                    'text' => 'Budget Controls',
-                    'url'  => 'budget-limits',
-                    'icon' => 'fas fa-exclamation-triangle',
-                    'permission' => ['budget_limits.index', 'view_statistics']
-                ],
-            ]
-        ],
-        [
-            'text' => 'Accountant',
-            'icon' => 'fas fa-calculator',
-            'submenu' => [
-                [
-                    'text' => 'Dashboard',
-                    'url'  => 'accountant-dashboard',
-                    'icon' => 'fas fa-tachometer-alt',
-                    'permission' => ['accountant_dashboard']
-                ],
-                [
-                    'text' => 'Expenses',
-                    'url'  => 'accountant-expenses',
-                    'icon' => 'fas fa-receipt',
-                    'permission' => ['accountant_expenses']
-                ],
-                [
-                    'text' => 'Revenues',
-                    'url'  => 'accountant-revenues',
-                    'icon' => 'fas fa-dollar-sign',
-                    'permission' => ['accountant_revenues']
-                ],
-                [
-                    'text' => 'Budgets',
-                    'url'  => 'accountant-budgets',
-                    'icon' => 'fas fa-piggy-bank',
-                    'permission' => ['accountant_budgets']
-                ],
-                [
-                    'text' => 'Investments',
-                    'url'  => 'accountant-investments',
-                    'icon' => 'fas fa-chart-line',
-                    'permission' => ['accountant_investments']
-                ],
-                [
-                    'text' => 'Financial Reports',
-                    'url'  => 'accountant-financial-reports',
-                    'icon' => 'fas fa-file-alt',
-                    'permission' => ['accountant_financial_reports']
-                ],
-                [
-                    'text' => 'Tax Reports',
-                    'url'  => 'accountant-tax-reports',
-                    'icon' => 'fas fa-file-invoice-dollar',
-                    'permission' => ['accountant_tax_reports']
-                ],
-                [
-                    'text' => 'Audit Trail',
-                    'url'  => 'accountant-audit-trail',
+                    'text' => 'Notification History',
+                    'url'  => 'admin/notifications/marketing/history',
                     'icon' => 'fas fa-history',
-                    'permission' => ['accountant_audit_trail']
+                    'permission' => ['view_statistics']
                 ],
             ]
         ],
+
+        // Location Management Section
         [
-            'text' => 'Financial',
-            'url'  => 'financial/revenue',
-            'icon' => 'fas fa-chart-line',
-            'permission' => ['revenue_view', 'expense_view']
+            'text'    => 'Location Management',
+            'icon'    => 'fas fa-map-marker-alt',
+            'permission' => ['view_service'],
+            'submenu' => [
+                [
+                    'text' => 'Countries',
+                    'url'  => 'countries',
+                    'icon' => 'fas fa-globe',
+                    'permission' => ['view_service']
+                ],
+                [
+                    'text' => 'Add Country',
+                    'url'  => 'countries/create',
+                    'icon' => 'fas fa-plus-circle',
+                    'permission' => ['create_service']
+                ],
+                [
+                    'text' => 'Cities',
+                    'url'  => 'cities',
+                    'icon' => 'fas fa-city',
+                    'permission' => ['view_service']
+                ],
+                [
+                    'text' => 'Add City',
+                    'url'  => 'cities/create',
+                    'icon' => 'fas fa-plus-circle',
+                    'permission' => ['create_service']
+                ],
+            ]
         ],
 
-        // POINTS & REWARDS
-        ['header' => 'POINTS & REWARDS'],
+        // Categories Section
         [
-            'text' => 'Points',
-            'url'  => 'palservice_points',
-            'icon' => 'fas fa-coins',
-            'permission' => ['view_statistics']
-        ],
-        [
-            'text' => 'Point Packages',
-            'url'  => 'point-packages',
-            'icon' => 'fas fa-gift',
-            'permission' => ['point_packages_index']
-        ],
-
-        // SYSTEM & SETTINGS
-        ['header' => 'SYSTEM & SETTINGS'],
-        [
-            'text' => 'System Health',
-            'url'  => 'system-health',
-            'icon' => 'fas fa-cogs',
-            'permission' => ['view_statistics']
-        ],
-        [
-            'text' => 'Roles',
-            'url'  => 'roles',
-            'icon' => 'fas fa-user-shield',
-            'permission' => ['view_role']
-        ],
-        [
-            'text' => 'Role Assignments',
-            'url'  => 'role-assignments',
-            'icon' => 'fas fa-user-cog',
-            'permission' => ['edit_role']
-        ],
-        [
-            'text' => 'Permissions',
-            'url'  => 'permissions',
-            'icon' => 'fas fa-key',
-            'permission' => ['view_permission']
-        ],
-        [
-            'text' => 'Translations',
-            'url'  => 'admin/translations/view',
-            'icon' => 'fas fa-language',
-            'permission' => ['view_statistics']
+            'text'    => 'Categories',
+            'icon'    => 'fas fa-list',
+            'permission' => ['view_service'],
+            'submenu' => [
+                [
+                    'text' => 'Main Categories',
+                    'url'  => 'categories',
+                    'icon' => 'fas fa-folder',
+                    'permission' => ['view_service']
+                ],
+                [
+                    'text' => 'Add Category',
+                    'url'  => 'categories/create',
+                    'icon' => 'fas fa-plus-circle',
+                    'permission' => ['create_service']
+                ],
+                [
+                    'text' => 'Sub Categories',
+                    'url'  => 'indexSubCategory',
+                    'icon' => 'fas fa-folder-open',
+                    'permission' => ['view_service']
+                ]
+            ]
         ],
 
-        // SHORTCUTS
-        ['header' => 'SHORTCUTS'],
+        // Service Posts Section
         [
-            'text' => 'Add Service Post',
-            'url'  => 'service_posts/create',
-            'icon' => 'fas fa-plus-circle',
-            'permission' => ['create_service']
+            'text'    => 'Service Posts',
+            'icon'    => 'fas fa-clipboard-list',
+            'permission' => ['view_service'],
+            'submenu' => [
+                [
+                    'text' => 'All Services',
+                    'url'  => 'service_posts',
+                    'icon' => 'fas fa-list-alt',
+                    'permission' => ['view_all_service']
+                ],
+                [
+                    'text' => 'Add New Post',
+                    'url'  => 'service_posts/create',
+                    'icon' => 'fas fa-plus',
+                    'permission' => ['create_service']
+                ],
+                [
+                    'text' => 'User Services',
+                    'url'  => 'userAllServiceIndex',
+                    'icon' => 'fas fa-user-tag',
+                    'permission' => ['view_service']
+                ]
+            ]
         ],
+
         [
-            'text' => 'Send Notification',
-            'url'  => 'admin/notifications/marketing',
-            'icon' => 'fas fa-bell',
+            'text' => 'Statistics',
+            'url'  => 'statistics',
+            'icon' => 'fas fa-chart-pie',
             'permission' => ['view_statistics']
         ],
         [
             'text' => 'Reports',
-            'url'  => 'admin/reports',
+            'url'  => 'reports',
             'icon' => 'fas fa-file-alt',
             'permission' => ['report_index']
         ],
-    ],
+        // Pal Service Points Section
+        [
+            'text' => 'Points Overview',
+            'url'  => 'palservice_points',
+            'icon' => 'fas fa-piggy-bank'
+        ],
 
-    /*
+    ],    /*
 
         |--------------------------------------------------------------------------
     | Menu Filters
@@ -635,38 +565,8 @@ return [
             'files' => [
                 [
                     'type' => 'js',
-                    'asset' => true,
-                    'location' => 'vendor/sweetalert2/sweetalert2.all.js',
-                ],
-                [
-                    'type' => 'css',
-                    'asset' => true,
-                    'location' => 'vendor/sweetalert2/sweetalert2.min.css',
-                ],
-            ],
-        ],
-        'Moment' => [
-            'active' => true,
-            'files' => [
-                [
-                    'type' => 'js',
-                    'asset' => true,
-                    'location' => 'vendor/moment/moment.min.js',
-                ],
-            ],
-        ],
-        'DateRangePicker' => [
-            'active' => true,
-            'files' => [
-                [
-                    'type' => 'js',
-                    'asset' => true,
-                    'location' => 'vendor/daterangepicker/daterangepicker.js',
-                ],
-                [
-                    'type' => 'css',
-                    'asset' => true,
-                    'location' => 'vendor/daterangepicker/daterangepicker.css',
+                    'asset' => false,
+                    'location' => '//cdn.jsdelivr.net/npm/sweetalert2@8',
                 ],
             ],
         ],

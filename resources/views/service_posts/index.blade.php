@@ -1,1879 +1,480 @@
 @extends('adminlte::page')
-
-@section('title', 'Service Posts Management')
-
+@section('title', "Service Posts Management")
 @section('content_header')
+    @include('partials.breadcrumbs')
+    @include('partials.alert')
     <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-clipboard-list text-primary mr-2"></i> Service Posts Management</h1>
         <div>
-            <h1 class="mb-0"><i class="fas fa-briefcase text-primary mr-2"></i> Service Posts Management</h1>
-            <p class="text-muted mb-0">{{('service_posts\index.manage_and_monitor_all_service_posts_acr') }}</p>
-        </div>
-        <div class="d-flex gap-2">
             <a href="{{ route('service_posts.create') }}" class="btn btn-success">
-                <i class="fas fa-plus mr-1"></i> Create Post
+                <i class="fas fa-plus mr-1"></i> Add Service Post
             </a>
-            <button type="button" class="btn btn-outline-info" data-toggle="modal" data-target="#bulkActionsModal">
-                <i class="fas fa-tasks mr-1"></i> Bulk Actions
-            </button>
-            <button type="button" class="btn btn-outline-secondary" data-toggle="modal" data-target="#exportModal">
-                <i class="fas fa-download mr-1"></i> Export
-            </button>
         </div>
     </div>
 @stop
 
 @section('content')
-
-
-<div class="container-fluid">
-    <!-- Statistics Cards -->
-    <div class="row mb-4">
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-primary shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-briefcase"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('service_posts\index.total_posts') }}</span>
-                    <span class="info-box-number">{{ number_format($servicePosts->count()) }}</span>
-                    <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-chart-line text-light"></i> All service posts
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-success shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-check-circle"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('service_posts\index.published') }}</span>
-                    <span class="info-box-number">{{ number_format($publishedCount ?? 0) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $servicePosts->total() > 0 ? (($publishedCount ?? 0) / $servicePosts->total()) * 100 : 0 }}%"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-check text-light"></i> {{ $servicePosts->total() > 0 ? number_format((($publishedCount ?? 0) / $servicePosts->total()) * 100, 1) : 0 }}% of total
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-warning shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-clock"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('service_posts\index.pending') }}</span>
-                    <span class="info-box-number">{{ number_format($pendingCount ?? 0) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $servicePosts->total() > 0 ? (($pendingCount ?? 0) / $servicePosts->total()) * 100 : 0 }}%"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-clock text-light"></i> {{ $servicePosts->total() > 0 ? number_format((($pendingCount ?? 0) / $servicePosts->total()) * 100, 1) : 0 }}% of total
-                    </span>
-                </div>
-            </div>
-        </div>
-        <div class="col-lg-3 col-md-6">
-            <div class="info-box bg-gradient-danger shadow-sm">
-                <span class="info-box-icon"><i class="fas fa-star"></i></span>
-                <div class="info-box-content">
-                    <span class="info-box-text">{{('service_posts\index.premium') }}</span>
-                    <span class="info-box-number">{{ number_format($premiumCount ?? 0) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $servicePosts->total() > 0 ? (($premiumCount ?? 0) / $servicePosts->total()) * 100 : 0 }}%"></div></div>
-                    <span class="progress-description">
-                        <i class="fas fa-star text-light"></i> {{ $servicePosts->total() > 0 ? number_format((($premiumCount ?? 0) / $servicePosts->total()) * 100, 1) : 0 }}% of total
-                    </span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Advanced Filter Bar -->
-    <div class="card card-outline card-primary shadow-sm mb-4">
-        <div class="card-header">
-            <h5 class="card-title mb-0">
-                <i class="fas fa-filter mr-2"></i> Advanced Filters
-            </h5>
-        </div>
-        <div class="card-body">
-            <form method="GET" id="filterForm">
-                <div class="row g-3">
-                    <div class="col-md-2">
-                        <label for="category-filter" class="form-label">{{('service_posts\index.category') }}</label>
-                        <select name="category" id="category-filter" class="form-control select2">
-                            <option value="">{{('service_posts\index.all_categories') }}</option>
-                            @foreach($categories as $cat)
-                                <option value="{{ $cat->count() }}" {{ request('category') == $cat->id ? 'selected' : '' }}>
-                                    {{ $cat->name[app()->getLocale()] ?? $cat->name['en'] ?? 'Unknown' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="subcategory-filter" class="form-label">{{('service_posts\index.subcategory') }}</label>
-                        <select name="subcategory" id="subcategory-filter" class="form-control select2" {{ $subcategories->isEmpty() ? 'disabled' : '' }}>
-                            <option value="">{{('service_posts\index.all_subcategories') }}</option>
-                            @foreach($subcategories as $subcat)
-                                <option value="{{ $subcat->count() }}" {{ request('subcategory') == $subcat->id ? 'selected' : '' }}>
-                                    {{ $subcat->name[app()->getLocale()] ?? $subcat->name['en'] ?? 'Unknown' }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="status-filter" class="form-label">{{('service_posts\index.status') }}</label>
-                        <select name="status" id="status-filter" class="form-control">
-                            <option value="">{{('service_posts\index.all_statuses') }}</option>
-                            <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>{{('service_posts\index.published') }}</option>
-                            <option value="not published" {{ request('status') == 'not published' ? 'selected' : '' }}>{{('service_posts\index.pending') }}</option>
-                            <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>{{('service_posts\index.rejected') }}</option>
-                            <option value="archive" {{ request('status') == 'archive' ? 'selected' : '' }}>{{('service_posts\index.archived') }}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="type-filter" class="form-label">{{('service_posts\index.type') }}</label>
-                        <select name="type" id="type-filter" class="form-control">
-                            <option value="">{{('service_posts\index.all_types') }}</option>
-                            <option value="عرض" {{ request('type') == 'عرض' ? 'selected' : '' }}>{{('service_posts\index._offer_') }}</option>
-                            <option value="طلب" {{ request('type') == 'طلب' ? 'selected' : '' }}>{{('service_posts\index._request_') }}</option>
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="level-filter" class="form-label">{{('service_posts\index.level') }}</label>
-                        <select name="level" id="level-filter" class="form-control">
-                            <option value="">{{('service_posts\index.all_levels') }}</option>
-                            @if(isset($levels) && $levels->count() > 0)
-                                @foreach($levels as $level)
-                                    <option value="{{ $level->count() }}" {{ request('level') == $level->id ? 'selected' : '' }}>
-                                        {{ $level->localized_name ?? $level->name['ar'] ?? 'Level ' . $level->count() }}
-                                    </option>
-                                @endforeach
-                            @endif
-                        </select>
-                    </div>
-                    <div class="col-md-2">
-                        <label for="date-range" class="form-label">{{('service_posts\index.date_range') }}</label>
-                        <input type="text" name="date_range" id="date-range" class="form-control" placeholder="Select date range" value="{{ request('date_range') }}">
-                    </div>
-                    <div class="col-md-2">
-                        <label for="search-filter" class="form-label">{{('service_posts\index.search') }}</label>
-                        <input type="text" name="search" id="search-filter" class="form-control" placeholder="Search posts..." value="{{ request('search') }}">
-                    </div>
-                </div>
-                <div class="row mt-3">
-                    <div class="col-12 d-flex justify-content-between align-items-center">
-                        <div class="d-flex gap-2">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search mr-1"></i> Apply Filters
-                            </button>
-                            <a href="{{ route('service_posts.index') }}" class="btn btn-outline-secondary">
-                                <i class="fas fa-sync-alt mr-1"></i> Reset
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-clipboard-list text-primary mr-2"></i>
+                            Service Posts
+                        </h5>
+                        <div class="d-flex">
+                            <!-- Bulk Action Buttons -->
+                            <div class="btn-group mr-2">
+                                <button id="selectAllBtn" class="btn btn-sm btn-secondary">
+                                    <i class="fas fa-check-square mr-1"></i> Select All
+                                </button>
+                                <button id="deleteSelectedBtn" class="btn btn-sm btn-danger" disabled>
+                                    <i class="fas fa-trash mr-1"></i> Delete Selected
+                                </button>
+                            </div>
+                            <a href="{{ route('service_posts.create') }}" class="btn btn-sm btn-primary">
+                                <i class="fas fa-plus mr-1"></i> Add New Post
                             </a>
                         </div>
-                        <div class="d-flex gap-2">
-                            <button type="button" class="btn btn-outline-info btn-sm" data-toggle="collapse" data-target="#advancedFilters">
-                                <i class="fas fa-cog mr-1"></i> Advanced
-                            </button>
-                            <button type="button" class="btn btn-outline-success btn-sm" id="saveFilterBtn">
-                                <i class="fas fa-save mr-1"></i> Save Filter
-                            </button>
-                        </div>
                     </div>
-                </div>
 
-                <!-- Advanced Filters Collapse -->
-                <div class="collapse mt-3" id="advancedFilters">
-                    <div class="card card-body bg-light">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label for="user-filter" class="form-label">{{('service_posts\index.user') }}</label>
-                                <select name="user" id="user-filter" class="form-control select2">
-                                    <option value="">{{('service_posts\index.all_users') }}</option>
-                                    @foreach($users ?? [] as $user)
-                                        <option value="{{ $user->count() }}" {{ request('user') == $user->id ? 'selected' : '' }}>
-                                            {{ $user->name ?? $user->user_name ?? 'Unknown' }}
-                                        </option>
-                                    @endforeach
-                                </select>
+                    <div class="card-body p-0">
+                        @if(session('success'))
+                            <div class="alert alert-success alert-dismissible fade show m-3" role="alert">
+                                {{ session('success') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
                             </div>
-                            <div class="col-md-3">
-                                <label for="city-filter" class="form-label">{{('service_posts\index.city') }}</label>
-                                <select name="city" id="city-filter" class="form-control select2">
-                                    <option value="">{{('service_posts\index.all_cities') }}</option>
-                                    @foreach($cities ?? [] as $city)
-                                        <option value="{{ $city->count() }}" {{ request('city') == $city->id ? 'selected' : '' }}>
-                                            {{ $city->name[app()->getLocale()] ?? $city->name['en'] ?? 'Unknown' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="country-filter" class="form-label">{{('service_posts\index.country') }}</label>
-                                <select name="country" id="country-filter" class="form-control select2">
-                                    <option value="">{{('service_posts\index.all_countries') }}</option>
-                                    @foreach($countries ?? [] as $country)
-                                        <option value="{{ $country->count() }}" {{ request('country') == $country->id ? 'selected' : '' }}>
-                                            {{ $country->name[app()->getLocale()] ?? $country->name['en'] ?? 'Unknown' }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-md-3">
-                                <label for="views-filter" class="form-label">{{('service_posts\index.min_views') }}</label>
-                                <input type="number" name="min_views" id="views-filter" class="form-control" placeholder="0" value="{{ request('min_views') }}">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-    </div>
+                        @endif
 
-    <!-- Service Posts Table -->
-    <div class="card card-outline card-primary shadow-sm">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div class="card-title">
-                <i class="fas fa-list mr-2"></i> Service Posts List
-                <span class="badge badge-primary ml-2">{{ $servicePosts->total() }}</span>
-            </div>
-            <div class="card-tools">
-                <div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-outline-secondary" onclick="toggleViewMode()">
-                        <i class="fas fa-th-large" id="viewModeIcon"></i>
-                    </button>
-                    <button type="button" class="btn btn-outline-secondary" onclick="refreshTable()">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-            </div>
-        </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover table-striped align-middle mb-0" id="servicePostsTable">
-                    <thead class="thead-dark sticky-top" style="z-index: 10;">
-                        <tr>
-                            <th width="40">
-                                <input type="checkbox" id="selectAll" class="form-check-input">
-                            </th>
-                            <th width="60">{{('service_posts\index.id') }}</th>
-                            <th width="300">{{('service_posts\index.post_details') }}</th>
-                            <th width="150">{{('service_posts\index.user') }}</th>
-                            <th width="120">{{('service_posts\index.category') }}</th>
-                            <th width="120">{{('service_posts\index.subcategory') }}</th>
-                            <th width="100">{{('service_posts\index.status') }}</th>
-                            <th width="80">{{('service_posts\index.type') }}</th>
-                            <th width="100">{{('service_posts\index.level') }}</th>
-                            <th width="80">{{('service_posts\index.views') }}</th>
-                            <th width="250">{{('service_posts\index.actions') }}</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    @forelse($servicePosts as $post)
-                        <tr class="align-middle" id="service-post-row-{{ $post->count() }}" data-post-id="{{ $post->count() }}">
-                            <td>
-                                <input type="checkbox" class="form-check-input post-checkbox" value="{{ $post->count() }}">
-                            </td>
-                            <td>
-                                <span class="badge badge-secondary">#{{ $post->count() }}</span>
-                            </td>
-                            <td>
-                                <div class="d-flex align-items-start">
-                                    @if($post->photos && $post->photos->count() > 0)
-                                        @php
-                                            $photo = $post->photos->first();
-                                            $imgSrc = $photo->is_external ? $photo->src : asset($photo->src);
-                                        @endphp
-                                        <img src="{{ $imgSrc }}" alt="Post Image"
-                                             class="img-thumbnail mr-3" style="width: 50px; height: 50px; object-fit: cover;"
-                                             data-toggle="tooltip" title="Click to view full image">
-                                    @else
-                                        <div class="media-placeholder mr-3" style="width: 50px; height: 50px;"
-                                             data-toggle="tooltip" title="No media available">
-                                            <i class="fas fa-image"></i>
+                        @if(session('error'))
+                            <div class="alert alert-danger alert-dismissible fade show m-3" role="alert">
+                                {{ session('error') }}
+                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                        @endif
+
+                        <div class="mb-3 mx-3">
+                            <div class="row">
+                                <div class="col-md-3 mb-2">
+                                    <select id="category-filter" class="form-control form-control-sm">
+                                        <option value="">All Categories</option>
+                                        @foreach($categories as $cat)
+                                            <option value="{{ $cat->id }}"
+                                                {{ request('category') == $cat->id ? 'selected' : '' }}>
+                                                {{ $cat->name[app()->getLocale()] ?? $cat->name['en'] ?? 'Unknown' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <select id="subcategory-filter" class="form-control form-control-sm"
+                                        {{ $subcategories->isEmpty() ? 'disabled' : '' }}>
+                                        <option value="">All Subcategories</option>
+                                        @foreach($subcategories as $subcat)
+                                            <option value="{{ $subcat->id }}"
+                                                {{ request('subcategory') == $subcat->id ? 'selected' : '' }}>
+                                                {{ $subcat->name[app()->getLocale()] ?? $subcat->name['en'] ?? 'Unknown' }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <select id="status-filter" class="form-control form-control-sm">
+                                        <option value="">All Statuses</option>
+                                        <option value="published" {{ request('status') == 'published' ? 'selected' : '' }}>Published</option>
+                                        <option value="archive" {{ request('status') == 'archive' ? 'selected' : '' }}>Archived</option>
+                                        <option value="not published" {{ request('status') == 'not published' ? 'selected' : '' }}>Draft</option>
+                                        <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <select id="type-filter" class="form-control form-control-sm">
+                                        <option value="">All Types</option>
+                                        <option value="عرض" {{ request('type') == 'عرض' ? 'selected' : '' }}>Offer</option>
+                                        <option value="طلب" {{ request('type') == 'طلب' ? 'selected' : '' }}>Request</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2 mb-2">
+                                    <div class="input-group input-group-sm">
+                                        <input type="text" id="search-filter" class="form-control"
+                                               placeholder="Search..."
+                                               value="{{ request('search') }}">
+                                        <div class="input-group-append">
+                                            <button class="btn btn-outline-secondary" type="button">
+                                                <i class="fas fa-search"></i>
+                                            </button>
                                         </div>
-                                    @endif
-                                    <div class="flex-grow-1">
-                                        <h6 class="mb-1 font-weight-bold">{{ $post->id }}</h6>
-                                        <p class="mb-1 text-muted small">{{ Str::limit($post->id) }}</p>
-                                        <div class="d-flex align-items-center">
-                                            @if($post->price)
-                                                <span class="badge badge-warning mr-2">
-                                                    {{ $post->price }} {{ $post->price_currency_code ?? 'USD' }}
-                                                </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead class="thead-light">
+                                <tr>
+                                    <th style="width: 40px;">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="checkAll">
+                                            <label class="custom-control-label" for="checkAll"></label>
+                                        </div>
+                                    </th>
+                                    <th>ID</th>
+                                    <th>Image</th>
+                                    <th>Title</th>
+                                    <th>Category / Subcategory</th>
+                                    <th>User</th>
+                                    <th>Type</th>
+                                    <th>Status</th>
+                                    <th>Badge</th>
+                                    <th>Stats</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                @forelse ($servicePosts as $post)
+                                    <tr>
+                                        <td>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input post-checkbox" id="post-{{ $post->id }}" value="{{ $post->id }}">
+                                                <label class="custom-control-label" for="post-{{ $post->id }}"></label>
+                                            </div>
+                                        </td>
+                                        <td>{{ $post->id }}</td>
+                                        <td class="text-center">
+                                            @if($post->photos->count() > 0)
+                                                <img src="{{ asset($post->photos->first()->src) }}"
+                                                     class="img-thumbnail" alt="{{ $post->title }}"
+                                                     style="max-height: 50px;">
+                                            @else
+                                                <span class="badge badge-secondary">No Image</span>
                                             @endif
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                @if($post->user)
-                                    <div class="d-flex align-items-center">
-                                        <div class="avatar bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center mr-2" style="width:32px;height:32px;font-size:0.8rem;">
-                                            <i class="fas fa-user"></i>
-                                        </div>
-                                        <div>
-                                            <div class="fw-semibold small">{{ $post->id }}</div>
-                                            <div class="text-muted small">{{ $post->id }}</div>
-                                        </div>
-                                    </div>
-                                @else
-                                    <span class="text-muted small">{{('service_posts\index.n_a') }}</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge badge-primary">
-                                    {{ $post->category ? ($post->category->name[app()->getLocale()] ?? $post->category->name['en'] ?? 'Unknown') : 'Unknown' }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge badge-{{ $post->subCategory ? 'primary' : 'secondary' }}">
-                                    {{ $post->subCategory ? $post->subCategory->display_name : 'N/A' }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge badge-{{ $post->state == 'published' ? 'success' : ($post->state == 'archive' ? 'warning' : 'secondary') }}">
-                                    {{ ucfirst($post->state) }}
-                                </span>
-                            </td>
-                            <td>
-                                <span class="badge badge-{{ $post->type == 'عرض' ? 'success' : 'info' }}">
-                                    {{ $post->type }}
-                                </span>
-                            </td>
-                            <td>
-                                @if($post->level_id && $post->level_id > 0 && $post->level)
-                                    <span class="badge badge-{{ $post->level->color ?? 'primary' }}">
-                                        <i class="fas fa-{{ $post->id }}"></i>
-                                        {{ $post->level->localized_name ?? $post->level->name['ar'] ?? 'Premium' }}
-                                    </span>
-                                    @if($post->badge_expires_at)
-                                        <br><small class="text-muted">Expires: {{ \Carbon\Carbon::parse($post->badge_expires_at)->format('Y-m-d') }}</small>
-                                    @endif
-                                @else
-                                    <span class="badge badge-secondary">{{('service_posts\index.regular') }}</span>
-                                @endif
-                            </td>
-                            <td>
-                                <span class="badge badge-light text-dark">
-                                    <i class="fas fa-eye mr-1"></i>{{ $post->view_count ?? 0 }}
-                                </span>
-                            </td>
-                            <td>
-                                <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ route('service_posts.show', $post->count()) }}" class="btn btn-outline-info" data-toggle="tooltip" title="View">
-                                        <i class="fas fa-eye"></i>
-                                    </a>
-                                    <a href="{{ route('service_posts.edit', $post->count()) }}" class="btn btn-outline-primary" data-toggle="tooltip" title="Edit">
-                                        <i class="fas fa-edit"></i>
-                                    </a>
-                                    <button type="button" class="btn btn-outline-success" data-toggle="tooltip" title="Upgrade Level (Admin)" onclick="adminLevelUpgrade({{ $post->count() }})">
-                                        <i class="fas fa-level-up-alt"></i>
-                                    </button>
-                                    @if($post->level_id && $post->level_id > 0)
-                                        <button type="button" class="btn btn-outline-danger" data-toggle="tooltip" title="Remove Premium Level" onclick="adminLevelDowngrade({{ $post->count() }})">
-                                            <i class="fas fa-level-down-alt"></i>
-                                        </button>
-                                    @endif
-                                    <button type="button" class="btn btn-outline-warning" data-toggle="tooltip" title="Make Level" onclick="makePostLevel({{ $post->count() }})">
-                                        <i class="fas fa-crown"></i>
-                                    </button>
-                                    @if($post->state == 'not published')
-                                        <button type="button" class="btn btn-outline-warning" data-toggle="tooltip" title="Approve" onclick="approveServicePost({{ $post->count() }})">
-                                            <i class="fas fa-check"></i>
-                                        </button>
-                                    @endif
-                                    @if($post->state == 'published')
-                                        <button type="button" class="btn btn-outline-warning" data-toggle="tooltip" title="Reject" onclick="rejectServicePost({{ $post->count() }})">
-                                            <i class="fas fa-times"></i>
-                                        </button>
-                                    @endif
-                                    <button type="button" class="btn btn-outline-danger" data-toggle="tooltip" title="Delete" onclick="deleteServicePost({{ $post->count() }})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    @empty
-                        <tr>
-                            <td colspan="11" class="text-center py-5">
-                                <div class="alert alert-info m-0">
-                                    <i class="fas fa-info-circle mr-2"></i>
-                                    No service posts found matching your criteria.
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        <div class="card-footer bg-white border-top-0 d-flex flex-column flex-md-row justify-content-between align-items-center gap-2">
-            <div class="d-flex align-items-center gap-3">
-                <span class="text-muted">Showing <b>{{ $servicePosts->firstItem() }}</b> to <b>{{ $servicePosts->lastItem() }}</b> of <b>{{ $servicePosts->total() }}</b> results</span>
-                <div class="d-flex align-items-center gap-2">
-                    <label class="mb-0 small">{{('service_posts\index.per_page_') }}</label>
-                    <select class="form-control form-control-sm" style="width: auto;" onchange="changePerPage(this.value)">
-                        <option value="15" {{ request('per_page') == '15' ? 'selected' : '' }}>{{('service_posts\index.15') }}</option>
-                        <option value="25" {{ request('per_page') == '25' ? 'selected' : '' }}>{{('service_posts\index.25') }}</option>
-                        <option value="50" {{ request('per_page') == '50' ? 'selected' : '' }}>{{('service_posts\index.50') }}</option>
-                        <option value="100" {{ request('per_page') == '100' ? 'selected' : '' }}>{{('service_posts\index.100') }}</option>
-                    </select>
-                </div>
-            </div>
-            <div>
-                {{ $servicePosts->withQueryString()->links() }}
-            </div>
-        </div>
-    </div>
-</div>
+                                        </td>
+                                        <td>
+                                            <div class="font-weight-bold text-truncate" style="max-width: 200px;">
+                                                {{ $post->title }}
+                                            </div>
+                                            <small class="text-muted">
+                                                {{ $post->created_at->format('M d, Y') }}
+                                            </small>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <span class="badge badge-info mb-1">
+                                                    {{ $post->category->name[app()->getLocale()] ?? $post->category->name['en'] ?? 'Unknown' }}
+                                                </span>
+                                                @if($post->subCategory)
+                                                    <span class="badge badge-light">
+                                                        {{ $post->subCategory->name[app()->getLocale()] ?? $post->subCategory->name['en'] ?? 'Unknown' }}
+                                                    </span>
+                                                @endif
+                                            </div>
+                                        </td>
+                                        <td>
+                                            @if($post->user)
+                                                <a href="{{ route('users.show', $post->user_id) }}" class="text-decoration-none">
+                                                    {{ $post->user->user_name }}
+                                                </a>
+                                            @else
+                                                <span class="text-muted">Unknown</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($post->type == 'عرض')
+                                                <span class="badge badge-primary">Offer</span>
+                                            @elseif($post->type == 'طلب')
+                                                <span class="badge badge-secondary">Request</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($post->state == 'published')
+                                                <span class="badge badge-success">Published</span>
+                                            @elseif($post->state == 'archive')
+                                                <span class="badge badge-warning">Archived</span>
+                                            @elseif($post->state == 'not published')
+                                                <span class="badge badge-secondary">Draft</span>
+                                            @elseif($post->state == 'rejected')
+                                                <span class="badge badge-danger">Rejected</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            @if($post->have_badge == 'ماسي')
+                                                <span class="badge badge-primary">Diamond</span>
+                                            @elseif($post->have_badge == 'ذهبي')
+                                                <span class="badge badge-warning">Gold</span>
+                                            @else
+                                                <span class="badge badge-light">Standard</span>
+                                            @endif
+                                        </td>
+                                        <td>
+                                            <div class="d-flex flex-column">
+                                                <small class="text-muted">
+                                                    <i class="fas fa-eye mr-1"></i> {{ $post->view_count }}
+                                                </small>
+                                                <small class="text-muted">
+                                                    <i class="fas fa-heart mr-1"></i> {{ $post->favorites_count ?? 0 }}
+                                                </small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group">
+                                                @include('components.report-button', [
+                                                 'reportableType' => 'service_post',
+                                                 'reportableId' => $post->id,
+                                                 'buttonText' => 'Report Post'
+                                                   ])
+                                                <a href="{{ route('service_posts.show', $post->id) }}"
+                                                   class="btn btn-sm btn-info" title="View">
+                                                    <i class="fas fa-eye"></i>
+                                                </a>
+                                                <a href="{{ route('service_posts.edit', $post->id) }}"
+                                                   class="btn btn-sm btn-warning" title="Edit">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <form action="{{ route('service_posts.destroy', $post->id) }}"
+                                                      method="POST" class="d-inline delete-form">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                                        <i class="fas fa-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @empty
+                                    <tr>
+                                        <td colspan="11" class="text-center py-4">
+                                            <div class="d-flex flex-column align-items-center">
+                                                <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
+                                                <h5 class="font-weight-normal text-muted">No service posts found</h5>
+                                                <a href="{{ route('service_posts.create') }}" class="btn btn-primary mt-3">
+                                                    <i class="fas fa-plus mr-1"></i> Create First Service Post
+                                                </a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
 
-<!-- Bulk Actions Modal -->
-<div class="modal fade" id="bulkActionsModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{('service_posts\index.bulk_actions') }}</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>{{('service_posts\index._times_') }}</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <p>Selected <span id="selectedCount">0</span> posts</p>
-                <div class="form-group">
-                    <label>{{('service_posts\index.action_') }}</label>
-                    <select class="form-control" id="bulkAction">
-                        <option value="">{{('service_posts\index.choose_action_') }}</option>
-                        <option value="approve">{{('service_posts\index.approve_selected') }}</option>
-                        <option value="reject">{{('service_posts\index.reject_selected') }}</option>
-                        <option value="archive">{{('service_posts\index.archive_selected') }}</option>
-                        <option value="make_premium">{{('service_posts\index.make_premium') }}</option>
-                        <option value="remove_premium">{{('service_posts\index.remove_premium') }}</option>
-                        <option value="delete">{{('service_posts\index.delete_selected') }}</option>
-                    </select>
+                    <div class="card-footer bg-white">
+                        <div class="d-flex justify-content-center">
+                            {{ $servicePosts->links() }}
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('service_posts\index.cancel') }}</button>
-                <button type="button" class="btn btn-primary" onclick="executeBulkAction()">{{('service_posts\index.execute') }}</button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- Export Modal -->
-<div class="modal fade" id="exportModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{('service_posts\index.export_service_posts') }}</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>{{('service_posts\index._times_') }}</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label>{{('service_posts\index.format_') }}</label>
-                    <select class="form-control" id="exportFormat">
-                        <option value="csv">{{('service_posts\index.csv') }}</option>
-                        <option value="excel">{{('service_posts\index.excel') }}</option>
-                        <option value="pdf">{{('service_posts\index.pdf') }}</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>{{('service_posts\index.include_') }}</label>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="includePhotos" checked>
-                        <label class="form-check-label" for="includePhotos">{{('service_posts\index.photos') }}</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="includeUserInfo" checked>
-                        <label class="form-check-label" for="includeUserInfo">{{('service_posts\index.user_information') }}</label>
-                    </div>
-                    <div class="form-check">
-                        <input class="form-check-input" type="checkbox" id="includeStats" checked>
-                        <label class="form-check-label" for="includeStats">{{('service_posts\index.statistics') }}</label>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('service_posts\index.cancel') }}</button>
-                <button type="button" class="btn btn-primary" onclick="exportData()">{{('service_posts\index.export') }}</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Level Upgrade Modal -->
-<div class="modal fade" id="levelUpgradeModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{('service_posts\index.upgrade_service_post_level') }}</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>{{('service_posts\index._times_') }}</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row">
-                    <div class="col-md-8">
-                        <div class="form-group">
-                            <label>{{('service_posts\index.select_level_') }}</label>
-                            <select class="form-control" id="levelSelect">
-                                <option value="">{{('service_posts\index.choose_a_level_') }}</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>{{('service_posts\index.duration_days_') }}</label>
-                            <input type="number" class="form-control" id="levelDuration" min="1" max="365" value="30">
-                        </div>
-                        <div class="alert alert-info" id="levelInfo" style="display: none;">
-                            <div id="levelDescription"></div>
-                            <div id="levelFeatures"></div>
-                        </div>
-                    </div>
-                    <div class="col-md-4">
-                        <div class="card">
-                            <div class="card-header">
-                                <h6 class="mb-0">{{('service_posts\index.your_points') }}</h6>
-                            </div>
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between">
-                                    <span>{{('service_posts\index.available_') }}</span>
-                                    <span id="userPoints" class="font-weight-bold">0</span>
-                                </div>
-                                <div class="d-flex justify-content-between">
-                                    <span>{{('service_posts\index.required_') }}</span>
-                                    <span id="requiredPoints" class="font-weight-bold text-danger">0</span>
-                                </div>
-                                <hr>
-                                <div class="d-flex justify-content-between">
-                                    <span>{{('service_posts\index.remaining_') }}</span>
-                                    <span id="remainingPoints" class="font-weight-bold text-success">0</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="showPointPackages()">
-                                <i class="fas fa-shopping-cart mr-1"></i> Buy More Points
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('service_posts\index.cancel') }}</button>
-                <button type="button" class="btn btn-primary" id="upgradeLevelBtn" onclick="upgradeServicePostLevel()" disabled>
-                    Upgrade Level
-                </button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Point Packages Modal -->
-<div class="modal fade" id="pointPackagesModal" tabindex="-1">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">{{('service_posts\index.buy_point_packages') }}</h5>
-                <button type="button" class="close" data-dismiss="modal">
-                    <span>{{('service_posts\index._times_') }}</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <div class="row" id="packagesContainer">
-                    <!-- Packages will be loaded here -->
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('service_posts\index.close') }}</button>
-            </div>
-        </div>
-    </div>
-</div>
+    <!-- Form for bulk delete -->
+    <form id="bulkDeleteForm" action="{{ route('service_posts.bulk-destroy') }}" method="POST">
+        @csrf
+        @method('DELETE')
+        <input type="hidden" name="post_ids" id="postIdsInput">
+    </form>
 @endsection
 
-@push('js')
-<script src="{{ asset('js/sweetalert-config.js') }}"></script>
-<script>
-    $(function () {
-        // Test if libraries are loaded
-        console.log('jQuery version:', $.fn.jquery);
-        console.log('SweetAlert2 loaded:', typeof Swal !== 'undefined');
-        console.log('DateRangePicker loaded:', typeof $.fn.daterangepicker !== 'undefined');
-        console.log('Moment.js loaded:', typeof moment !== 'undefined');
-        
-        // Initialize tooltips
-        $('[data-toggle="tooltip"]').tooltip();
+@section('css')
+    <style>
+        /* Additional CSS for the service posts index */
+        .custom-control-input:checked ~ .custom-control-label::before {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
 
-        // Initialize Select2
-        $('.select2').select2({
-            theme: 'bootstrap4',
-            width: '100%'
-        });
+        .img-thumbnail {
+            object-fit: cover;
+        }
 
-        // Initialize Date Range Picker
-        $('#date-range').daterangepicker({
-            autoUpdateInput: false,
-            locale: {
-                cancelLabel: 'Clear'
-            }
-        });
+        .text-truncate {
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    </style>
+@stop
 
-        $('#date-range').on('apply.daterangepicker', function(ev, picker) {
-            $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
-        });
+@section('js')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+    <script>
+        $(document).ready(function() {
+            console.log('Service Posts Index script loaded');
 
-        $('#date-range').on('cancel.daterangepicker', function(ev, picker) {
-            $(this).val('');
-        });
+            // Select All logic
+            $('#checkAll').on('change', function() {
+                const isChecked = $(this).prop('checked');
+                $('.post-checkbox').prop('checked', isChecked);
+                updateDeleteButton();
+            });
 
-        // Dynamic subcategory loading
-        $('#category-filter').on('change', function() {
-            const categoryId = $(this).val();
-            const $subcategoryFilter = $('#subcategory-filter');
-            const $subcategoryContainer = $subcategoryFilter.closest('.col-md-2');
+            // Individual checkbox change
+            $('.post-checkbox').on('change', function() {
+                updateDeleteButton();
 
-            // Show loading state
-            $subcategoryFilter.prop('disabled', true);
-            $subcategoryFilter.html('<option value="">{{('service_posts\index.loading_') }}</option>');
+                // Update "Select All" checkbox state
+                const totalCheckboxes = $('.post-checkbox').length;
+                const checkedCheckboxes = $('.post-checkbox:checked').length;
+                $('#checkAll').prop('checked', totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0);
+            });
 
-            if (categoryId) {
-                $.ajax({
-                    url: "{{ route('fetchSubcategories') }}",
-                    method: 'GET',
-                    data: { category_id: categoryId },
-                    success: function(subcategories) {
-                        $subcategoryFilter.html('<option value="">{{('service_posts\index.all_subcategories') }}</option>');
+            // Select All button click
+            $('#selectAllBtn').on('click', function() {
+                $('#checkAll').prop('checked', true).trigger('change');
+            });
 
-                        if (subcategories.length > 0) {
-                            subcategories.forEach(function(subcat) {
-                                const name = subcat.name['{{ app()->getLocale() }}'] || subcat.name['en'] || 'Unknown';
-                                $subcategoryFilter.append(`<option value="${subcat.id}">{{('service_posts\index._name_') }}</option>{{('service_posts\index._') }}<option value="">{{('service_posts\index.no_subcategories_found') }}</option>{{('service_posts\index._subcate') }}<option value="">{{('service_posts\index.error_loading_subcategories') }}</option>{{('service_posts\index._subcategory') }}<option value="">{{('service_posts\index.all_subcategories') }}</option>');
-                $subcategoryFilter.prop('disabled', true);
-                $subcategoryFilter.select2('destroy').select2({
-                    theme: 'bootstrap4',
-                    width: '100%'
-                });
-            }
-        });
+            // Delete Selected button click
+            $('#deleteSelectedBtn').on('click', function() {
+                const selectedIds = getSelectedPostIds();
+                if (selectedIds.length === 0) return;
 
-        // Auto-submit form on filter changes
-        $('#category-filter, #subcategory-filter, #status-filter, #type-filter, #user-filter, #city-filter, #country-filter').on('change', function() {
-            setTimeout(function() {
-                $('#filterForm').submit();
-            }, 100);
-        });
-
-        // Debounced search
-        let searchTimeout;
-        $('#search-filter').on('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function() {
-                $('#filterForm').submit();
-            }, 500);
-        });
-
-        // Views filter
-        $('#views-filter').on('change', function() {
-            setTimeout(function() {
-                $('#filterForm').submit();
-            }, 100);
-        });
-
-        // Select All functionality
-        $('#selectAll').on('change', function() {
-            const isChecked = $(this).is(':checked');
-            $('.post-checkbox').prop('checked', isChecked);
-            updateSelectedCount();
-        });
-
-        // Individual checkbox change
-        $('.post-checkbox').on('change', function() {
-            updateSelectedCount();
-            updateSelectAllState();
-        });
-
-        // Save filter functionality
-        $('#saveFilterBtn').on('click', function() {
-            const filterName = prompt('Enter a name for this filter:');
-            if (filterName) {
-                const filterData = $('#filterForm').serialize();
-                localStorage.setItem('savedFilter_' + filterName, filterData);
                 Swal.fire({
-                    title: 'Success!',
-                    text: 'Filter saved successfully!',
-                    icon: 'success',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            }
-        });
-
-        // Load saved filters
-        loadSavedFilters();
-    });
-
-    // Update selected count
-    function updateSelectedCount() {
-        const selectedCount = $('.post-checkbox:checked').length;
-        $('#selectedCount').text(selectedCount);
-
-        // Enable/disable bulk action button
-        if (selectedCount > 0) {
-            $('#bulkActionsModal .btn-primary').prop('disabled', false);
-        } else {
-            $('#bulkActionsModal .btn-primary').prop('disabled', true);
-        }
-    }
-
-    // Update select all state
-    function updateSelectAllState() {
-        const totalCheckboxes = $('.post-checkbox').length;
-        const checkedCheckboxes = $('.post-checkbox:checked').length;
-
-        if (checkedCheckboxes === 0) {
-            $('#selectAll').prop('indeterminate', false).prop('checked', false);
-        } else if (checkedCheckboxes === totalCheckboxes) {
-            $('#selectAll').prop('indeterminate', false).prop('checked', true);
-        } else {
-            $('#selectAll').prop('indeterminate', true);
-        }
-    }
-
-    // Toggle view mode
-    function toggleViewMode() {
-        const table = $('#servicePostsTable');
-        const icon = $('#viewModeIcon');
-
-        if (table.hasClass('compact-view')) {
-            table.removeClass('compact-view');
-            icon.removeClass('fa-list').addClass('fa-th-large');
-        } else {
-            table.addClass('compact-view');
-            icon.removeClass('fa-th-large').addClass('fa-list');
-        }
-    }
-
-    // Refresh table
-    function refreshTable() {
-        location.reload();
-    }
-
-    // Change per page
-    function changePerPage(value) {
-        const url = new URL(window.location);
-        url.searchParams.set('per_page', value);
-        window.location = url;
-    }
-
-    // Execute bulk action
-    function executeBulkAction() {
-        const action = $('#bulkAction').val();
-        const selectedIds = $('.post-checkbox:checked').map(function() {
-            return $(this).val();
-        }).get();
-
-        if (!action) {
-            Swal.fire('Error', 'Please select an action', 'error');
-            return;
-        }
-
-        if (selectedIds.length === 0) {
-            Swal.fire('Error', 'Please select at least one post', 'error');
-            return;
-        }
-
-        const actionText = $('#bulkAction option:selected').text();
-
-        Swal.fire({
-            title: 'Confirm Action',
-            text: `Are you sure you want to ${actionText.toLowerCase()} ${selectedIds.length} selected posts?`,
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, proceed!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: "{{ route('service_posts.bulk-action') }}",
-                    method: 'POST',
-                    data: {
-                        action: action,
-                        post_ids: selectedIds,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: response.message,
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
-                        }
-                    },
-                    error: function() {
-                        Swal.fire('Error', 'An error occurred while processing the request', 'error');
-                    }
-                });
-            }
-        });
-    }
-
-    // Export data
-    function exportData() {
-        const format = $('#exportFormat').val();
-        const includePhotos = $('#includePhotos').is(':checked');
-        const includeUserInfo = $('#includeUserInfo').is(':checked');
-        const includeStats = $('#includeStats').is(':checked');
-
-        const params = new URLSearchParams(window.location.search);
-        params.append('format', format);
-        params.append('include_photos', includePhotos);
-        params.append('include_user_info', includeUserInfo);
-        params.append('include_stats', includeStats);
-
-        window.open(`{{ route('service_posts.export') }}?${params.toString()}`, '_blank');
-        $('#exportModal').modal('hide');
-    }
-
-    // Duplicate post
-    function duplicatePost(postId) {
-        Swal.fire({
-            title: 'Duplicate Post',
-            text: 'Are you sure you want to duplicate this post?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, duplicate!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/service_posts/${postId}/duplicate`,
-                    method: 'POST',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: 'Post duplicated successfully!',
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
-                        }
-                    },
-                    error: function() {
-                        Swal.fire('Error', 'An error occurred while duplicating the post', 'error');
-                    }
-                });
-            }
-        });
-    }
-
-    // Archive post
-    function archivePost(postId) {
-        Swal.fire({
-            title: 'Archive Post',
-            text: 'Are you sure you want to archive this post?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, archive!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/service_posts/${postId}/archive`,
-                    method: 'PATCH',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: 'Post archived successfully!',
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
-                        }
-                    },
-                    error: function() {
-                        Swal.fire('Error', 'An error occurred while archiving the post', 'error');
-                    }
-                });
-            }
-        });
-    }
-
-    // Feature post
-    function featurePost(postId) {
-        Swal.fire({
-            title: 'Feature Post',
-            text: 'Are you sure you want to feature this post?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, feature!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/service_posts/${postId}/feature`,
-                    method: 'PATCH',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: 'Post featured successfully!',
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
-                        }
-                    },
-                    error: function() {
-                        Swal.fire('Error', 'An error occurred while featuring the post', 'error');
-                    }
-                });
-            }
-        });
-    }
-
-    // Load saved filters
-    function loadSavedFilters() {
-        const savedFilters = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key.startsWith('savedFilter_')) {
-                const filterName = key.replace('savedFilter_', '');
-                savedFilters.push(filterName);
-            }
-        }
-
-        if (savedFilters.length > 0) {
-            const filterSelect = $('<select class="form-control form-control-sm ml-2" style="width: auto;">{{('service_posts\index._filterselect_append_') }}<option value="">{{('service_posts\index.load_saved_filter_') }}</option>{{('service_posts\index._savedfilters_foreach_fi') }}<option value="${filter}">{{('service_posts\index._filter_') }}</option>`);
-            });
-
-            filterSelect.on('change', function() {
-                const filterName = $(this).val();
-                if (filterName) {
-                    const filterData = localStorage.getItem('savedFilter_' + filterName);
-                    if (filterData) {
-                        const params = new URLSearchParams(filterData);
-                        window.location.search = params.toString();
-                    }
-                }
-            });
-
-            $('#saveFilterBtn').after(filterSelect);
-        }
-    }
-
-    // Keyboard shortcuts
-    $(document).keydown(function(e) {
-        // Ctrl/Cmd + A to select all
-        if ((e.ctrlKey || e.metaKey) && e.keyCode === 65) {
-            e.preventDefault();
-            $('#selectAll').click();
-        }
-
-        // Ctrl/Cmd + F to focus search
-        if ((e.ctrlKey || e.metaKey) && e.keyCode === 70) {
-            e.preventDefault();
-            $('#search-filter').focus();
-        }
-
-        // Escape to clear selection
-        if (e.keyCode === 27) {
-            $('.post-checkbox').prop('checked', false);
-            $('#selectAll').prop('checked', false).prop('indeterminate', false);
-            updateSelectedCount();
-        }
-    });
-
-    // Auto-refresh every 5 minutes
-    setInterval(function() {
-        // Only refresh if no modal is open and user is active
-        if (!$('.modal').hasClass('show') && !$('.dropdown-menu').is(':visible')) {
-            // Refresh statistics only
-            $.get('{{ route("service_posts.statistics") }}', function(data) {
-                // Update statistics cards
-                $('.info-box-number').each(function(index) {
-                    const values = [data.total, data.published, data.pending, data.premium];
-                    if (values[index] !== undefined) {
-                        $(this).text(values[index].toLocaleString());
+                    title: 'Delete Selected Posts?',
+                    text: `You are about to delete ${selectedIds.length} service posts. This action cannot be undone.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete them!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        $('#postIdsInput').val(JSON.stringify(selectedIds));
+                        $('#bulkDeleteForm').submit();
                     }
                 });
             });
-        }
-    }, 300000); // 5 minutes
 
-    // Level Management Variables
-    let currentServicePostId = null;
-    let availableLevels = [];
-    let userPoints = 0;
+            // Helper function to update Delete button state
+            function updateDeleteButton() {
+                const selectedCount = $('.post-checkbox:checked').length;
+                $('#deleteSelectedBtn').prop('disabled', selectedCount === 0);
 
-    // Show level upgrade modal
-    function showLevelUpgrade(postId) {
-        currentServicePostId = postId;
-        $('#levelUpgradeModal').modal('show');
-        loadAvailableLevels(postId);
-    }
-
-    // Load available levels for service post
-    function loadAvailableLevels(postId) {
-        $.ajax({
-            url: `/service_posts/${postId}/available-levels`,
-            method: 'GET',
-            success: function(response) {
-                if (response.success) {
-                    availableLevels = response.data.levels;
-                    userPoints = response.data.user_points;
-
-                    // Populate level select
-                    const $levelSelect = $('#levelSelect');
-                    $levelSelect.html('<option value="">{{('service_posts\index.choose_a_level_') }}</option>{{('service_posts\index._availablelevels') }}<option value="${level.id}" ${disabled} data-level='${JSON.stringify(level)}'>{{('service_posts\index._level_name_') }}</option>`;
-                        $levelSelect.append(option);
-                    });
-
-                    // Update user points display
-                    $('#userPoints').text(userPoints.toLocaleString());
-
-                    // Show current level info if exists
-                    if (response.data.current_level) {
-                        const current = response.data.current_level;
-                        $('#levelInfo').show().html(`
-                            <strong>{{('service_posts\index.current_level_') }}</strong> ${current.name}<br>
-                            <strong>{{('service_posts\index.expires_') }}</strong> ${current.expires_at}<br>
-                            <strong>{{('service_posts\index.remaining_days_') }}</strong> ${current.remaining_days || 0}
-                        `);
-                    }
+                // Update button text to show count
+                if (selectedCount > 0) {
+                    $('#deleteSelectedBtn').html(`<i class="fas fa-trash mr-1"></i> Delete Selected (${selectedCount})`);
+                } else {
+                    $('#deleteSelectedBtn').html(`<i class="fas fa-trash mr-1"></i> Delete Selected`);
                 }
-            },
-            error: function() {
-                Swal.fire('Error', 'Failed to load available levels', 'error');
             }
-        });
-    }
 
-    // Handle level selection change
-    $('#levelSelect').on('change', function() {
-        const selectedLevelId = $(this).val();
-        const selectedLevel = availableLevels.find(l => l.id == selectedLevelId);
+            // Helper function to get all selected post IDs
+            function getSelectedPostIds() {
+                return $('.post-checkbox:checked').map(function() {
+                    return $(this).val();
+                }).get();
+            }
 
-        if (selectedLevel) {
-            updateLevelInfo(selectedLevel);
-            updatePointsCalculation(selectedLevel);
-        } else {
-            $('#levelInfo').hide();
-            $('#upgradeLevelBtn').prop('disabled', true);
-        }
-    });
+            // Category change handler to load subcategories
+            $('#category-filter').on('change', function() {
+                const categoryId = $(this).val();
+                const $subcategoryFilter = $('#subcategory-filter');
 
-    // Handle duration change
-    $('#levelDuration').on('input', function() {
-        const selectedLevelId = $('#levelSelect').val();
-        const selectedLevel = availableLevels.find(l => l.id == selectedLevelId);
+                // Reset subcategory filter
+                $subcategoryFilter.html('<option value="">All Subcategories</option>');
 
-        if (selectedLevel) {
-            updatePointsCalculation(selectedLevel);
-        }
-    });
+                if (categoryId) {
+                    // AJAX call to fetch subcategories
+                    $.ajax({
+                        url: "{{ route('fetchSubcategories') }}",
+                        method: 'GET',
+                        data: {
+                            category_id: categoryId
+                        },
+                        success: function(subcategories) {
+                            if (subcategories.length > 0) {
+                                // Populate subcategories
+                                subcategories.forEach(function(subcategory) {
+                                    const name = subcategory.name['{{ app()->getLocale() }}'] || subcategory.name['en'] || 'Unknown';
+                                    $subcategoryFilter.append(
+                                        `<option value="${subcategory.id}">${name}</option>`
+                                    );
+                                });
 
-    // Update level information display
-    function updateLevelInfo(level) {
-        const features = level.features.map(f => `<li>{{('service_posts\index._f_') }}</li>`).join('');
-        $('#levelInfo').show().html(`
-            <div id="levelDescription">
-                <strong>{{('service_posts\index._level_name_') }}</strong><br>
-                ${level.description}
-            </div>
-            <div id="levelFeatures" class="mt-2">
-                <strong>{{('service_posts\index.features_') }}</strong>
-                <ul class="mb-0">{{('service_posts\index._features_') }}</ul>
-            </div>
-        `);
-    }
-
-    // Update points calculation - ADMIN VERSION (no restrictions)
-    function updatePointsCalculation(level) {
-        const duration = parseInt($('#levelDuration').val()) || 0;
-        const requiredPoints = level.points_per_day * duration;
-
-        // For admin users, always show as affordable
-        $('#requiredPoints').text(requiredPoints.toLocaleString() + ' (Admin)');
-        $('#remainingPoints').text('∞ (Admin)');
-
-        // Always enable upgrade button for admin
-        $('#upgradeLevelBtn').prop('disabled', false);
-
-        // Update colors for admin display
-        $('#requiredPoints').removeClass('text-danger text-success').addClass('text-info');
-        $('#remainingPoints').removeClass('text-danger text-success').addClass('text-success');
-    }
-
-    // Upgrade service post level - ADMIN VERSION
-    function upgradeServicePostLevel() {
-        const levelId = $('#levelSelect').val();
-        const duration = $('#levelDuration').val();
-
-        if (!levelId || !duration) {
-            Swal.fire('Error', 'Please select a level and duration', 'error');
-            return;
-        }
-
-        Swal.fire({
-            title: 'Confirm Admin Upgrade',
-            text: `Are you sure you want to upgrade this service post to the selected level for ${duration} days? (Admin action - no point restrictions)`,
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, upgrade!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/service_posts/${currentServicePostId}/update-level`,
-                    method: 'PATCH',
-                    data: {
-                        level_id: levelId,
-                        duration: duration,
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: response.message || 'Post has been upgraded successfully!',
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                $('#levelUpgradeModal').modal('hide');
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
+                                // Enable subcategory dropdown
+                                $subcategoryFilter.prop('disabled', false);
+                            } else {
+                                $subcategoryFilter.prop('disabled', true);
+                            }
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('AJAX error:', status, error);
+                            $subcategoryFilter.prop('disabled', true);
                         }
-                    },
-                    error: function(xhr) {
-                        const response = xhr.responseJSON;
-                        Swal.fire('Error', response?.message || 'An error occurred', 'error');
-                    }
-                });
-            }
-        });
-    }
-
-    // Show point packages modal
-    function showPointPackages() {
-        $('#levelUpgradeModal').modal('hide');
-        $('#pointPackagesModal').modal('show');
-        loadPointPackages();
-    }
-
-    // Load point packages
-    function loadPointPackages() {
-        $.ajax({
-            url: '{{ route("service_posts.point-packages") }}',
-            method: 'GET',
-            success: function(response) {
-                if (response.success) {
-                    const packages = response.data.packages;
-                    const $container = $('#packagesContainer');
-                    $container.empty();
-
-                    packages.forEach(function(package) {
-                        const features = package.features ? package.features.map(f => `<li>{{('service_posts\index._f_') }}</li>`).join('') : '';
-                        const packageHtml = `
-                            <div class="col-md-6 mb-3">
-                                <div class="card h-100">
-                                    <div class="card-header">
-                                        <h6 class="mb-0">{{('service_posts\index._package_name_') }}</h6>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="text-center mb-3">
-                                            <h4 class="text-primary">{{('service_posts\index._package_formatted_price_') }}</h4>
-                                            <p class="text-muted mb-0">{{('service_posts\index._package_formatted_points_') }}</p>
-                                        </div>
-                                        <p class="small">{{('service_posts\index._package_description_') }}</p>
-                                        ${features ? `<ul class="small mb-0">{{('service_posts\index._features_') }}</ul>` : ''}
-                                    </div>
-                                    <div class="card-footer">
-                                        <button type="button" class="btn btn-primary btn-sm w-100" onclick="purchasePackage(${package.id})">
-                                            Purchase
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        $container.append(packageHtml);
                     });
+                } else {
+                    $subcategoryFilter.prop('disabled', true);
                 }
-            },
-            error: function() {
-                Swal.fire('Error', 'Failed to load point packages', 'error');
+
+                // Trigger filtering
+                applyFilters();
+            });
+
+            // Filtering function
+            function applyFilters() {
+                const categoryFilter = $('#category-filter').val();
+                const subcategoryFilter = $('#subcategory-filter').val();
+                const statusFilter = $('#status-filter').val();
+                const typeFilter = $('#type-filter').val();
+                const searchFilter = $('#search-filter').val();
+
+                // Construct query string
+                const params = new URLSearchParams();
+
+                if (categoryFilter) params.append('category', categoryFilter);
+                if (subcategoryFilter) params.append('subcategory', subcategoryFilter);
+                if (statusFilter) params.append('status', statusFilter);
+                if (typeFilter) params.append('type', typeFilter);
+                if (searchFilter) params.append('search', searchFilter);
+
+                // Navigate to filtered URL
+                const baseUrl = "{{ route('service_posts.index') }}";
+                const fullUrl = params.toString()
+                    ? `${baseUrl}?${params.toString()}`
+                    : baseUrl;
+
+                window.location.href = fullUrl;
             }
-        });
-    }
 
-    // Purchase point package
-    function purchasePackage(packageId) {
-        Swal.fire({
-            title: 'Purchase Package',
-            text: 'This will redirect you to the payment gateway. Continue?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, continue!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Redirect to payment gateway or handle purchase
-                window.open(`/point-packages/${packageId}/purchase`, '_blank');
-            }
-        });
-    }
+            // Event listeners for filters
+            $('#category-filter, #subcategory-filter, #status-filter, #type-filter').on('change', function() {
+                applyFilters();
+            });
 
-    // Service Post Actions
-    function approveServicePost(postId) {
-        Swal.fire({
-            title: 'Approve Service Post',
-            text: 'Are you sure you want to approve this service post?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#3085d6',
-            cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, approve!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/service_posts/${postId}/approve`,
-                    method: 'PATCH',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: response.message,
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
-                        }
-                    },
-                    error: function(xhr) {
-                        const response = xhr.responseJSON;
-                        Swal.fire('Error', response?.message || 'An error occurred', 'error');
-                    }
-                });
-            }
-        });
-    }
+            // Debounced search
+            let searchTimeout;
+            $('#search-filter').on('input', function() {
+                clearTimeout(searchTimeout);
+                searchTimeout = setTimeout(applyFilters, 500);
+            });
 
-    function rejectServicePost(postId) {
-        Swal.fire({
-            title: 'Reject Service Post',
-            text: 'Are you sure you want to reject this service post?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, reject!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/service_posts/${postId}/reject`,
-                    method: 'PATCH',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: response.message,
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
-                        }
-                    },
-                    error: function(xhr) {
-                        const response = xhr.responseJSON;
-                        Swal.fire('Error', response?.message || 'An error occurred', 'error');
-                    }
-                });
-            }
-        });
-    }
+            // Delete confirmation
+            $('.delete-form').on('submit', function(e) {
+                e.preventDefault();
+                const form = this;
 
-    function deleteServicePost(postId) {
-        Swal.fire({
-            title: 'Delete Service Post',
-            text: 'Are you sure you want to delete this service post? This action cannot be undone!',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#d33',
-            cancelButtonColor: '#3085d6',
-            confirmButtonText: 'Yes, delete!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: `/service_posts/${postId}`,
-                    method: 'DELETE',
-                    data: {
-                        _token: $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        if (response.success) {
-                            Swal.fire({
-                                title: 'Success!',
-                                text: response.message,
-                                icon: 'success',
-                                timer: 2000,
-                                showConfirmButton: false
-                            }).then(() => {
-                                location.reload();
-                            });
-                        } else {
-                            Swal.fire('Error', response.message, 'error');
-                        }
-                    },
-                    error: function(xhr) {
-                        const response = xhr.responseJSON;
-                        Swal.fire('Error', response?.message || 'An error occurred', 'error');
-                    }
-                });
-            }
-        });
-    }
-
-    // Handle image clicks for full-size view
-    $(document).on('click', '.img-thumbnail', function() {
-        const imgSrc = $(this).attr('src');
-        const imgAlt = $(this).attr('alt');
-
-        // Create modal for full-size image view
-        const modal = `
-            <div class="modal fade" id="imageModal" tabindex="-1" role="dialog">
-                <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title">{{('service_posts\index.service_post_image') }}</h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">{{('service_posts\index._times_') }}</span>
-                            </button>
-                        </div>
-                        <div class="modal-body text-center">
-                            <img src="${imgSrc}" alt="${imgAlt}" class="img-fluid" style="max-height: 70vh;">
-                        </div>
-                        <div class="modal-footer">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('service_posts\index.close') }}</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        // Remove existing modal if any
-        $('#imageModal').remove();
-
-        // Add new modal to body
-        $('body').append(modal);
-
-        // Show modal
-        $('#imageModal').modal('show');
-    });
-
-    // Clean up modal on hide
-    $(document).on('hidden.bs.modal', '#imageModal', function() {
-        $(this).remove();
-    });
-
-    // Make Post Level function
-    function makePostLevel(postId) {
-        Swal.fire({
-            title: 'Make Post Level',
-            text: 'Are you sure you want to make this post a level post?',
-            icon: 'question',
-            showCancelButton: true,
-            confirmButtonColor: '#ffc107',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, make it level!',
-            cancelButtonText: 'Cancel'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Show loading state
                 Swal.fire({
-                    title: 'Processing...',
-                    text: 'Making post level...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
+                    title: 'Are you sure?',
+                    text: "This will permanently delete this service post!",
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#3085d6',
+                    confirmButtonText: 'Yes, delete it!'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
                     }
                 });
-
-                // AJAX call to make post level
-                $.ajax({
-                    url: `/service-posts/${postId}/make-level`,
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: response.message || 'Post has been made level successfully!',
-                            icon: 'success',
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            location.reload();
-                        });
-                    },
-                    error: function(xhr) {
-                        let errorMessage = 'An error occurred while making the post level.';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        }
-
-                        Swal.fire({
-                            title: 'Error!',
-                            text: errorMessage,
-                            icon: 'error'
-                        });
-                    }
-                });
-            }
+            });
         });
-    }
-
-    // Admin Level Upgrade function
-    function adminLevelUpgrade(postId) {
-        currentServicePostId = postId;
-        $('#levelUpgradeModal').modal('show');
-        loadAdminLevels(postId);
-    }
-
-    // Load available levels for admin (no point restrictions)
-    function loadAdminLevels(postId) {
-        $.ajax({
-            url: `/service_posts/${postId}/available-levels`,
-            method: 'GET',
-            success: function(response) {
-                if (response.success) {
-                    availableLevels = response.data.levels;
-                    userPoints = response.data.user_points;
-
-                    // Populate level select - ADMIN VERSION (no restrictions)
-                    const $levelSelect = $('#levelSelect');
-                    $levelSelect.html('<option value="">{{('service_posts\index.choose_a_level_') }}</option>{{('service_posts\index._availablelevels') }}<option value="${level.id}" data-level='${JSON.stringify(level)}'>{{('service_posts\index._level_name_level_points_per_day_p') }}</option>`;
-                        $levelSelect.append(option);
-                    });
-
-                    // Update user points display (show as unlimited for admin)
-                    $('#userPoints').text('∞ (Admin)');
-                    $('#requiredPoints').text('0 (Admin)');
-                    $('#remainingPoints').text('∞ (Admin)');
-
-                    // Show current level info if exists
-                    if (response.data.current_level) {
-                        const current = response.data.current_level;
-                        $('#levelInfo').show().html(`
-                            <strong>{{('service_posts\index.current_level_') }}</strong> ${current.name}<br>
-                            <strong>{{('service_posts\index.expires_') }}</strong> ${current.expires_at}<br>
-                            <strong>{{('service_posts\index.remaining_days_') }}</strong> ${current.remaining_days || 0}
-                        `);
-                    }
-
-                    // Enable upgrade button for admin
-                    $('#upgradeLevelBtn').prop('disabled', false);
-                }
-            },
-            error: function() {
-                Swal.fire('Error', 'Failed to load available levels', 'error');
-            }
-        });
-    }
-
-    // Admin Level Downgrade function
-    function adminLevelDowngrade(postId) {
-        Swal.fire({
-            title: 'Admin Level Downgrade',
-            text: 'Are you sure you want to remove the premium level from this service post?',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#dc3545',
-            cancelButtonColor: '#6c757d',
-            confirmButtonText: 'Yes, downgrade!'
-        }).then((result) => {
-            if (result.isConfirmed) {
-                // Show loading state
-                Swal.fire({
-                    title: 'Processing...',
-                    text: 'Removing premium level...',
-                    allowOutsideClick: false,
-                    didOpen: () => {
-                        Swal.showLoading();
-                    }
-                });
-
-                // AJAX call to remove premium level
-                $.ajax({
-                    url: `/service_posts/${postId}/admin-downgrade`,
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                    },
-                    success: function(response) {
-                        Swal.fire({
-                            title: 'Success!',
-                            text: response.message || 'Premium level has been removed successfully!',
-                            icon: 'success',
-                            timer: 2000,
-                            showConfirmButton: false
-                        }).then(() => {
-                            location.reload();
-                        });
-                    },
-                    error: function(xhr) {
-                        let errorMessage = 'An error occurred while downgrading the post.';
-                        if (xhr.responseJSON && xhr.responseJSON.message) {
-                            errorMessage = xhr.responseJSON.message;
-                        }
-
-                        Swal.fire({
-                            title: 'Error!',
-                            text: errorMessage,
-                            icon: 'error'
-                        });
-                    }
-                });
-            }
-        });
-    }
-</script>
-@endpush
-
-@push('css')
-<style>
-    /* Enhanced table styles */
-    .table thead th {
-        background: #f8f9fa;
-        border-bottom: 2px solid #dee2e6;
-        font-weight: 600;
-        text-transform: uppercase;
-        font-size: 0.8rem;
-        letter-spacing: 0.5px;
-    }
-
-    .table td, .table th {
-        vertical-align: middle !important;
-        padding: 0.75rem;
-    }
-
-    .table tbody tr:hover {
-        background-color: rgba(0,123,255,0.05);
-        transform: scale(1.001);
-        transition: all 0.2s ease;
-    }
-
-    /* Card enhancements */
-    .card {
-        transition: box-shadow 0.3s ease, transform 0.2s ease;
-        border: none;
-        border-radius: 0.5rem;
-    }
-
-    .card:hover {
-        box-shadow: 0 8px 32px rgba(0,0,0,0.12);
-        transform: translateY(-2px);
-    }
-
-    /* Button enhancements */
-    .btn-group-sm .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
-        border-radius: 0.2rem;
-    }
-
-    .btn-group-sm .btn:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-    }
-
-    /* Badge enhancements */
-    .badge {
-        font-size: 0.75rem;
-        padding: 0.35em 0.65em;
-        border-radius: 0.375rem;
-    }
-
-    /* Avatar styles */
-    .avatar {
-        border: 2px solid #fff;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-
-    /* Compact view */
-    .compact-view td {
-        padding: 0.5rem;
-        font-size: 0.9rem;
-    }
-
-    .compact-view .btn-group-sm .btn {
-        padding: 0.2rem 0.4rem;
-        font-size: 0.75rem;
-    }
-
-    /* Loading states */
-    .loading {
-        opacity: 0.6;
-        pointer-events: none;
-    }
-
-    /* Animation for status changes */
-    .status-badge, .premium-badge {
-        transition: all 0.3s ease;
-    }
-
-    .status-badge.updated, .premium-badge.updated {
-        animation: pulse 0.6s ease-in-out;
-    }
-
-    @keyframes pulse {
-        0% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-        100% { transform: scale(1); }
-    }
-
-    /* Responsive improvements */
-    @media (max-width: 768px) {
-        .table-responsive {
-            font-size: 0.9rem;
-        }
-
-        .btn-group-sm .btn {
-            padding: 0.2rem 0.4rem;
-            font-size: 0.75rem;
-        }
-
-        .badge {
-            font-size: 0.7rem;
-            padding: 0.25em 0.5em;
-        }
-    }
-
-    /* Custom scrollbar */
-    .table-responsive::-webkit-scrollbar {
-        height: 8px;
-    }
-
-    .table-responsive::-webkit-scrollbar-track {
-        background: #f1f1f1;
-        border-radius: 4px;
-    }
-
-    .table-responsive::-webkit-scrollbar-thumb {
-        background: #c1c1c1;
-        border-radius: 4px;
-    }
-
-    .table-responsive::-webkit-scrollbar-thumb:hover {
-        background: #a8a8a8;
-    }
-
-    /* Info box enhancements */
-    .info-box {
-        border-radius: 0.5rem;
-        overflow: hidden;
-    }
-
-    .info-box-icon {
-        border-radius: 0;
-    }
-
-    .info-box-number {
-        font-size: 1.5rem;
-        font-weight: 700;
-    }
-
-    /* Filter form enhancements */
-    .form-control:focus {
-        border-color: #80bdff;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
-
-    .select2-container--bootstrap4 .select2-selection--single {
-        border-radius: 0.375rem;
-    }
-
-    /* Modal enhancements */
-    .modal-content {
-        border-radius: 0.5rem;
-        border: none;
-        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-    }
-
-    .modal-header {
-        border-bottom: 1px solid #e9ecef;
-        background: #f8f9fa;
-        border-radius: 0.5rem 0.5rem 0 0;
-    }
-
-    /* Action button improvements - matching users index */
-    .btn-group .btn {
-        margin-right: 1px;
-        padding: 0.375rem 0.5rem;
-        font-size: 0.875rem;
-        line-height: 1.2;
-        border-radius: 0.2rem;
-    }
-
-    .btn-group .btn:last-child {
-        margin-right: 0;
-    }
-
-    /* Ensure action buttons are always visible */
-    .btn-group-sm .btn {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.8rem;
-        line-height: 1.2;
-    }
-
-    /* Responsive improvements for action buttons */
-    @media (max-width: 768px) {
-        .btn-group .btn {
-            padding: 0.25rem 0.4rem;
-            font-size: 0.75rem;
-        }
-
-        .btn-group-sm .btn {
-            padding: 0.2rem 0.4rem;
-            font-size: 0.7rem;
-        }
-    }
-
-    /* Pagination enhancements */
-    .pagination .page-link {
-        border-radius: 0.25rem;
-        margin: 0 0.125rem;
-    }
-
-    .pagination .page-item.active .page-link {
-        background-color: #007bff;
-        border-color: #007bff;
-    }
-
-    /* Media thumbnail styles */
-    .img-thumbnail {
-        border-radius: 0.375rem;
-        border: 1px solid #dee2e6;
-        transition: transform 0.2s ease, box-shadow 0.2s ease;
-    }
-
-    .img-thumbnail:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    }
-
-    /* Media placeholder styles */
-    .media-placeholder {
-        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-        border: 1px solid #dee2e6;
-        border-radius: 0.375rem;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        transition: all 0.2s ease;
-    }
-
-    .media-placeholder:hover {
-        background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
-        transform: scale(1.05);
-    }
-
-    .media-placeholder i {
-        font-size: 1.2rem;
-        color: #6c757d;
-    }
-
-    /* Crown button styling for level posts */
-    .btn-outline-warning .fa-crown {
-        color: #ffc107;
-    }
-
-    .btn-outline-warning:hover .fa-crown {
-        color: #fff;
-    }
-
-    /* Level upgrade/downgrade button styling */
-    .btn-outline-success .fa-level-up-alt {
-        color: #28a745;
-    }
-
-    .btn-outline-success:hover .fa-level-up-alt {
-        color: #fff;
-    }
-
-    .btn-outline-danger .fa-level-down-alt {
-        color: #dc3545;
-    }
-
-    .btn-outline-danger:hover .fa-level-down-alt {
-        color: #fff;
-    }
-
-    /* Admin level upgrade modal styling */
-    .modal-title:contains('Level') {
-        color: #28a745;
-    }
-
-    /* Admin points display styling */
-    .text-info {
-        color: #17a2b8 !important;
-    }
-
-    /* Action button improvements - matching users index */
-</style>
-@endpush
-
-
-
-
-
-
-
+    </script>
+@stop

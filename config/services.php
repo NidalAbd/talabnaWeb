@@ -35,11 +35,6 @@ return [
         'client_id' => env('GOOGLE_CLIENT_ID'),
         'client_secret' => env('GOOGLE_CLIENT_SECRET'),
         'redirect' => env('GOOGLE_REDIRECT_URI'),
-
-        // Maps API keys (separate for each platform)
-        'maps_api_key_web' => env('GOOGLE_MAPS_API_KEY_WEB'),
-        'maps_api_key_android' => env('GOOGLE_MAPS_API_KEY_ANDROID'),
-        'maps_api_key_ios' => env('GOOGLE_MAPS_API_KEY_IOS'), // Optional if you have iOS
     ],
     'facebook' => [
         'client_id' => env('FACEBOOK_CLIENT_ID'),

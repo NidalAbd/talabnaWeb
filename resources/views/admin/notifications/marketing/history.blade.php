@@ -21,8 +21,8 @@
                 <div class="info-box shadow">
                     <span class="info-box-icon bg-primary"><i class="fas fa-paper-plane"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">{{('admin\notifications\marketing\history.total_campaigns') }}</span>
-                        <span class="info-box-number">{{ number_format($notificationLogs->id</span> ) }}
+                        <span class="info-box-text">Total Campaigns</span>
+                        <span class="info-box-number">{{ number_format($notificationLogs->total()) }}</span>
                         <div class="progress">
                             <div class="progress-bar bg-primary" style="width: 100%"></div>
                         </div>
@@ -34,8 +34,8 @@
                 <div class="info-box shadow">
                     <span class="info-box-icon bg-info"><i class="fas fa-users"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">{{('admin\notifications\marketing\history.total_recipients') }}</span>
-                        <span class="info-box-number">{{ number_format($notificationLogs->id</span> ) }}
+                        <span class="info-box-text">Total Recipients</span>
+                        <span class="info-box-number">{{ number_format($notificationLogs->sum('total_recipients')) }}</span>
                         <div class="progress">
                             <div class="progress-bar bg-info" style="width: 100%"></div>
                         </div>
@@ -47,8 +47,8 @@
                 <div class="info-box shadow">
                     <span class="info-box-icon bg-success"><i class="fas fa-check-circle"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">{{('admin\notifications\marketing\history.successful_deliveries') }}</span>
-                        <span class="info-box-number">{{ number_format($notificationLogs->id</span> ) }}
+                        <span class="info-box-text">Successful Deliveries</span>
+                        <span class="info-box-number">{{ number_format($notificationLogs->sum('successful_count')) }}</span>
                         <div class="progress">
                             @php
                                 $totalRecipients = $notificationLogs->sum('total_recipients');
@@ -67,8 +67,8 @@
                 <div class="info-box shadow">
                     <span class="info-box-icon bg-danger"><i class="fas fa-times-circle"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">{{('admin\notifications\marketing\history.failed_deliveries') }}</span>
-                        <span class="info-box-number">{{ number_format($notificationLogs->id</span> ) }}
+                        <span class="info-box-text">Failed Deliveries</span>
+                        <span class="info-box-number">{{ number_format($notificationLogs->sum('failed_count')) }}</span>
                         <div class="progress">
                             @php
                                 $failRate = $totalRecipients > 0 ? ($notificationLogs->sum('failed_count') / $totalRecipients) * 100 : 0;
@@ -111,20 +111,20 @@
                     <table class="table table-hover table-striped">
                         <thead class="thead-light">
                         <tr>
-                            <th>{{('admin\notifications\marketing\history.id') }}</th>
-                            <th>{{('admin\notifications\marketing\history.title') }}</th>
-                            <th>{{('admin\notifications\marketing\history.sent_by') }}</th>
-                            <th>{{('admin\notifications\marketing\history.recipients') }}</th>
-                            <th>{{('admin\notifications\marketing\history.success_rate') }}</th>
-                            <th>{{('admin\notifications\marketing\history.date_sent') }}</th>
-                            <th>{{('admin\notifications\marketing\history.actions') }}</th>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Sent By</th>
+                            <th>Recipients</th>
+                            <th>Success Rate</th>
+                            <th>Date Sent</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         @if(count($notificationLogs) > 0)
                             @foreach($notificationLogs as $log)
                                 <tr>
-                                    <td>{{ $log->id</td> }}
+                                    <td>{{ $log->id }}</td>
                                     <td>
                                             <span class="d-inline-block text-truncate" style="max-width: 150px;" title="{{ $log->title }}">
                                                 {{ $log->title }}
@@ -145,10 +145,10 @@
                                             @else
                                                 <img class="img-circle img-size-32 mr-2" src="{{ asset('vendor/adminlte/dist/img/user-default.jpg') }}" alt="Admin Image">
                                             @endif
-                                            <span>{{ $admin->id</span> }}
+                                            <span>{{ $admin->user_name ?? 'Unknown' }}</span>
                                         </div>
                                     </td>
-                                    <td>{{ number_format($log->id</td> ) }}
+                                    <td>{{ number_format($log->total_recipients) }}</td>
                                     <td>
                                         @php
                                             $successRate = $log->total_recipients > 0 ? ($log->successful_count / $log->total_recipients) * 100 : 0;
@@ -162,37 +162,37 @@
                                             </div>
                                         </div>
                                     </td>
-                                    <td>{{ \Carbon\Carbon::parse($log->id</td> }}
+                                    <td>{{ \Carbon\Carbon::parse($log->created_at)->format('M d, Y h:i A') }}</td>
                                     <td>
-                                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailsModal{{ $log->count() }}">
+                                        <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#detailsModal{{ $log->id }}">
                                             <i class="fas fa-eye"></i> Details
                                         </button>
 
                                         <!-- Details Modal -->
-                                        <div class="modal fade" id="detailsModal{{ $log->count() }}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel{{ $log->count() }}" aria-hidden="true">
+                                        <div class="modal fade" id="detailsModal{{ $log->id }}" tabindex="-1" role="dialog" aria-labelledby="detailsModalLabel{{ $log->id }}" aria-hidden="true">
                                             <div class="modal-dialog" role="document">
                                                 <div class="modal-content">
                                                     <div class="modal-header bg-primary text-white">
-                                                        <h5 class="modal-title" id="detailsModalLabel{{ $log->count() }}">
+                                                        <h5 class="modal-title" id="detailsModalLabel{{ $log->id }}">
                                                             <i class="fas fa-bell mr-2"></i>Notification Details
                                                         </h5>
                                                         <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                                                            <span aria-hidden="true">{{('admin\notifications\marketing\history._times_') }}</span>
+                                                            <span aria-hidden="true">&times;</span>
                                                         </button>
                                                     </div>
                                                     <div class="modal-body">
                                                         <table class="table table-bordered">
                                                             <tr>
-                                                                <th style="width: 30%">{{('admin\notifications\marketing\history.title') }}</th>
-                                                                <td>{{ $log->id</td> }}
+                                                                <th style="width: 30%">Title</th>
+                                                                <td>{{ $log->title }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <th>{{('admin\notifications\marketing\history.message') }}</th>
-                                                                <td>{{ $log->id</td> }}
+                                                                <th>Message</th>
+                                                                <td>{{ $log->body }}</td>
                                                             </tr>
                                                             @if($log->image_url)
                                                                 <tr>
-                                                                    <th>{{('admin\notifications\marketing\history.image') }}</th>
+                                                                    <th>Image</th>
                                                                     <td>
                                                                         <img src="{{ $log->image_url }}" alt="Notification Image" class="img-fluid rounded" style="max-height: 200px">
                                                                     </td>
@@ -200,20 +200,20 @@
                                                             @endif
                                                             @if($log->deep_link)
                                                                 <tr>
-                                                                    <th>{{('admin\notifications\marketing\history.deep_link') }}</th>
-                                                                    <td><code>{{ $log->id</code></td> }}
+                                                                    <th>Deep Link</th>
+                                                                    <td><code>{{ $log->deep_link }}</code></td>
                                                                 </tr>
                                                             @endif
                                                             <tr>
-                                                                <th>{{('admin\notifications\marketing\history.sent_at') }}</th>
-                                                                <td>{{ \Carbon\Carbon::parse($log->id</td> }}
+                                                                <th>Sent At</th>
+                                                                <td>{{ \Carbon\Carbon::parse($log->created_at)->format('M d, Y h:i A') }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <th>{{('admin\notifications\marketing\history.recipients') }}</th>
-                                                                <td>{{ number_format($log->id</td> ) }}
+                                                                <th>Recipients</th>
+                                                                <td>{{ number_format($log->total_recipients) }}</td>
                                                             </tr>
                                                             <tr>
-                                                                <th>{{('admin\notifications\marketing\history.successful') }}</th>
+                                                                <th>Successful</th>
                                                                 <td>
                                                                         <span class="badge badge-success">
                                                                             {{ number_format($log->successful_count) }}
@@ -222,7 +222,7 @@
                                                                 </td>
                                                             </tr>
                                                             <tr>
-                                                                <th>{{('admin\notifications\marketing\history.failed') }}</th>
+                                                                <th>Failed</th>
                                                                 <td>
                                                                         <span class="badge badge-danger">
                                                                             {{ number_format($log->failed_count) }}
@@ -233,8 +233,8 @@
                                                         </table>
                                                     </div>
                                                     <div class="modal-footer">
-                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('admin\notifications\marketing\history.close') }}</button>
-                                                        <button type="button" class="btn btn-primary" onclick="resendNotification({{ $log->count() }})">
+                                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                                        <button type="button" class="btn btn-primary" onclick="resendNotification({{ $log->id }})">
                                                             <i class="fas fa-redo mr-1"></i> Resend This Notification
                                                         </button>
                                                     </div>
@@ -334,10 +334,3 @@
         }
     </script>
 @stop
-
-
-
-
-
-
-

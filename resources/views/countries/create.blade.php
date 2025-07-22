@@ -35,7 +35,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_en">Name (English) <span class="text-danger">{{('countries\create._') }}</span></label>
+                                        <label for="name_en">Name (English) <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('name_en') is-invalid @enderror"
                                                id="name_en" name="name_en" value="{{ old('name_en') }}" required>
                                         @error('name_en')
@@ -46,7 +46,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_ar">{{('countries\create.name_arabic_') }}</label>
+                                        <label for="name_ar">Name (Arabic)</label>
                                         <input type="text" class="form-control @error('name_ar') is-invalid @enderror"
                                                id="name_ar" name="name_ar" value="{{ old('name_ar') }}" dir="rtl">
                                         @error('name_ar')
@@ -59,10 +59,10 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="country_code">{{('countries\create.country_code') }}</label>
+                                        <label for="country_code">Country Code</label>
                                         <input type="text" class="form-control @error('country_code') is-invalid @enderror"
                                                id="country_code" name="country_code" value="{{ old('country_code') }}">
-                                        <small class="form-text text-muted">{{('countries\create.two_letter_country_code_e_g_us_gb_') }}</small>
+                                        <small class="form-text text-muted">Two letter country code (e.g. US, GB)</small>
                                         @error('country_code')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -71,10 +71,10 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="currency_code">{{('countries\create.currency_code') }}</label>
+                                        <label for="currency_code">Currency Code</label>
                                         <input type="text" class="form-control @error('currency_code') is-invalid @enderror"
                                                id="currency_code" name="currency_code" value="{{ old('currency_code') }}">
-                                        <small class="form-text text-muted">{{('countries\create.three_letter_currency_code_e_g_usd_eu') }}</small>
+                                        <small class="form-text text-muted">Three letter currency code (e.g. USD, EUR)</small>
                                         @error('currency_code')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -85,7 +85,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="currency_name_en">{{('countries\create.currency_name_english_') }}</label>
+                                        <label for="currency_name_en">Currency Name (English)</label>
                                         <input type="text" class="form-control @error('currency_name_en') is-invalid @enderror"
                                                id="currency_name_en" name="currency_name_en" value="{{ old('currency_name_en') }}">
                                         @error('currency_name_en')
@@ -96,7 +96,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="currency_name_ar">{{('countries\create.currency_name_arabic_') }}</label>
+                                        <label for="currency_name_ar">Currency Name (Arabic)</label>
                                         <input type="text" class="form-control @error('currency_name_ar') is-invalid @enderror"
                                                id="currency_name_ar" name="currency_name_ar" value="{{ old('currency_name_ar') }}" dir="rtl">
                                         @error('currency_name_ar')
@@ -107,16 +107,16 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="image">{{('countries\create.flag_image') }}</label>
+                                <label for="image">Flag Image</label>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input @error('image') is-invalid @enderror"
                                            id="image" name="image" accept="image/*">
-                                    <label class="custom-file-label" for="image">{{('countries\create.choose_file') }}</label>
+                                    <label class="custom-file-label" for="image">Choose file</label>
                                     @error('image')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <small class="form-text text-muted">{{('countries\create.recommended_size_200x120_pixels') }}</small>
+                                <small class="form-text text-muted">Recommended size: 200x120 pixels</small>
                             </div>
 
                             <div class="form-group">
@@ -162,10 +162,3 @@
         </script>
     @endpush
 @endsection
-
-
-
-
-
-
-

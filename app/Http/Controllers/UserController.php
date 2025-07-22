@@ -16,22 +16,11 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use App\Notifications\AdminCustomNotification;
 
 class UserController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('permission:user_index')->only(['index']);
-        $this->middleware('permission:user_view')->only(['show']);
-        $this->middleware('permission:user_create')->only(['create', 'store']);
-        $this->middleware('permission:user_edit')->only(['edit', 'update']);
-        $this->middleware('permission:user_destroy')->only(['destroy']);
-        $this->middleware('permission:users_export')->only(['export']);
-        $this->middleware('permission:users_import')->only(['import']);
-    }
-
     /**
      * Display a listing of the resource.
      *
@@ -76,9 +65,15 @@ class UserController extends Controller
         // Get counts for dashboard stats
         $activeUsersCount = User::where('is_active', 'active')->count();
         $bannedUsersCount = User::where('is_active', 'banned')->count();
-        $inactiveUsersCount = User::where('is_active', 'inactive')->count();
+        $totalPosts = DB::table('service_posts')->count();
 
-        return view('users.index', compact('users', 'roles', 'activeUsersCount', 'bannedUsersCount', 'inactiveUsersCount'));
+        return view('users.index', [
+            'Users' => $users,
+            'roles' => $roles,
+            'activeUsersCount' => $activeUsersCount,
+            'bannedUsersCount' => $bannedUsersCount,
+            'totalPosts' => $totalPosts,
+        ]);
     }
 
     /**
@@ -86,126 +81,162 @@ class UserController extends Controller
      *
      * @return Application|Factory|View
      */
-    public function create()
+    public function create(): View|Factory|Application
     {
         $countries = countries::all();
-        $cities = cities::all();
         $roles = Role::all();
-        return view('users.create', compact('countries', 'cities', 'roles'));
+
+        return view('users.create', compact('countries', 'roles'));
     }
 
     /**
      * Store a newly created resource in storage.
      *
      * @param Request $request
-     * @return Application|Redirector|RedirectResponse
+     * @return RedirectResponse
+     * @throws ValidationException
      */
     public function store(Request $request)
     {
         $validatedData = $request->validate([
-            'user_name' => 'required|string|max:255|unique:users',
+            'user_name' => 'required|string|max:255',
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users',
-            'password' => 'required|string|min:8|confirmed',
-            'gender' => 'required|in:ذكر,انثى',
-            'country_id' => 'required|exists:countries,id',
-            'city_id' => 'required|exists:cities,id',
-            'phones' => 'nullable|string|max:255',
-            'WatsNumber' => 'nullable|string|max:255',
+            'gender' => 'required|string|in:ذكر,انثى',
+            'country_id' => 'nullable|exists:countries,id',
+            'city_id' => 'nullable|exists:cities,id',
             'date_of_birth' => 'nullable|date',
-            'location_latitudes' => 'nullable|numeric',
-            'location_longitudes' => 'nullable|numeric',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'roles' => 'array',
+            'location_latitudes' => 'nullable|numeric|max:99999999',
+            'location_longitudes' => 'nullable|numeric|max:99999999',
+            'phones' => 'nullable|string|unique:users',
+            'WatsNumber' => 'nullable|string|unique:users',
+            'email' => 'required|email|unique:users',
+            'password' => 'required|string|min:8|confirmed',
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2500',
+            'is_active' => 'required|in:active,inactive,banned',
+            'auth_type' => 'required|string|in:email,google',
+            'data_saver_enabled' => 'nullable|boolean',
+            'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,id'
         ]);
 
-        DB::beginTransaction();
+        // Create new user with validated data
+        $user = User::create([
+            'user_name' => $validatedData['user_name'],
+            'name' => $validatedData['name'],
+            'gender' => $validatedData['gender'],
+            'country_id' => $validatedData['country_id'] ?? null,
+            'city_id' => $validatedData['city_id'] ?? null,
+            'date_of_birth' => $validatedData['date_of_birth'],
+            'location_latitudes' => $validatedData['location_latitudes'],
+            'location_longitudes' => $validatedData['location_longitudes'],
+            'phones' => $validatedData['phones'] ?? null,
+            'WatsNumber' => $validatedData['WatsNumber'] ?? null,
+            'email' => $validatedData['email'],
+            'password' => Hash::make($validatedData['password']),
+            'is_active' => $validatedData['is_active'],
+            'auth_type' => $validatedData['auth_type'],
+            'data_saver_enabled' => $request->has('data_saver_enabled'),
+        ]);
 
-        try {
-            $user = User::create([
-                'user_name' => $validatedData['user_name'],
-                'name' => $validatedData['name'],
-                'email' => $validatedData['email'],
-                'password' => Hash::make($validatedData['password']),
-                'gender' => $validatedData['gender'],
-                'country_id' => $validatedData['country_id'],
-                'city_id' => $validatedData['city_id'],
-                'phones' => $validatedData['phones'],
-                'WatsNumber' => $validatedData['WatsNumber'],
-                'date_of_birth' => $validatedData['date_of_birth'],
-                'location_latitudes' => $validatedData['location_latitudes'],
-                'location_longitudes' => $validatedData['location_longitudes'],
-                'is_active' => 'active',
+        // Attach roles if provided, otherwise attach default user role
+        if (!empty($validatedData['roles'])) {
+            $user->attachRoles($validatedData['roles']);
+        } else {
+            $user->attachRole('user');
+        }
+
+        // Handle profile image upload
+        if ($request->hasFile('profile_image')) {
+            $image = $request->file('profile_image');
+            $fileName = $image->hashName();
+            $photoPath = $image->storeAs('photos/profiles', $fileName);
+
+            $photo = new Photos([
+                'src' => 'storage/'.$photoPath,
+                'is_external' => false
             ]);
 
-            // Assign roles if provided
-            if (isset($validatedData['roles'])) {
-                $user->syncRoles($validatedData['roles']);
-            }
-
-            // Handle profile image upload
-            if ($request->hasFile('profile_image')) {
-                $image = $request->file('profile_image');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('storage/photos'), $imageName);
-                
-                $photo = new Photos([
-                    'src' => 'storage/photos/' . $imageName,
-                ]);
-                $user->photos()->save($photo);
-            } else {
-                // Create default photo
-                $photo = new Photos([
-                    'src' => 'storage/photos/avatar1.png',
-                ]);
-                $user->photos()->save($photo);
-            }
-
-            DB::commit();
-
-            return redirect()->route('users.index')
-                ->with('success', 'User created successfully');
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->withInput()->with('error', 'Failed to create user: ' . $e->getMessage());
+            $user->photos()->save($photo);
         }
+
+        return redirect()->route('users.index')->with('success', 'User has been created successfully');
     }
 
     /**
      * Display the specified resource.
      *
-     * @param User $user
-     * @return Application|Factory|View
+     * @param  int  $id
+     * @return Application|Factory|View|RedirectResponse
      */
-    public function show(User $user)
+    public function show($id)
     {
-        $user->load(['photos', 'roles', 'country', 'city']);
-        $locationDisplay = ($user->location_latitudes && $user->location_longitudes)
-            ? $user->location_latitudes . ', ' . $user->location_longitudes
-            : 'Not set';
-        
-        // Load points history
-        $pointsHistory = \App\Models\palservice_points::where('user_id', $user->id)
+        $user = User::with([
+            'servicePosts',
+            'photos',
+            'roles',
+            'followers',
+            'following',
+            'reports',
+            'city',  // Explicitly load city relationship
+            'country'  // Explicitly load country relationship
+        ])
+            ->withCount(['servicePosts', 'followers', 'following', 'reports'])
+            ->findOrFail($id);
+
+        // Safely handle location display
+        $locationDisplay = 'Not set';
+        if ($user->city && $user->country) {
+            // Check if name is a JSON string and parse it
+            $cityName = is_string($user->city->name)
+                ? (json_decode($user->city->name, true) ?? $user->city->name)
+                : $user->city->name;
+
+            $countryName = is_string($user->country->name)
+                ? (json_decode($user->country->name, true) ?? $user->country->name)
+                : $user->country->name;
+
+            // Get the appropriate language version (default to English)
+            $cityDisplayName = is_array($cityName)
+                ? ($cityName['en'] ?? $cityName['ar'] ?? 'Unknown City')
+                : $cityName;
+
+            $countryDisplayName = is_array($countryName)
+                ? ($countryName['en'] ?? $countryName['ar'] ?? 'Unknown Country')
+                : $countryName;
+
+            $locationDisplay = $cityDisplayName . ', ' . $countryDisplayName;
+        }
+
+        // Get user's points history
+        $pointsHistory = palservice_points::where('user_id', $user->id)
             ->orderBy('created_at', 'desc')
             ->get();
-        
-        return view('users.show', compact('user', 'locationDisplay', 'pointsHistory'));
-    }
 
+        return view('users.show', [
+            'user' => $user,
+            'pointsHistory' => $pointsHistory,
+            'locationDisplay' => $locationDisplay
+        ]);
+    }
     /**
      * Show the form for editing the specified resource.
      *
-     * @param User $user
-     * @return Application|Factory|View
+     * @param  int  $id
+     * @return Application|Factory|View|RedirectResponse
      */
-    public function edit(User $user)
+    public function edit($id)
     {
+        $user = User::with(['photos', 'roles'])->find($id);
+
+        if (!$user) {
+            return redirect()->route('users.index')->with('error', 'User not found');
+        }
+
         $countries = countries::all();
         $cities = cities::where('country_id', $user->country_id)->get();
         $roles = Role::all();
-        $user->load(['photos', 'roles']);
         $userRoles = $user->roles->pluck('id')->toArray();
+
         return view('users.edit', compact('user', 'countries', 'cities', 'roles', 'userRoles'));
     }
 
@@ -213,368 +244,210 @@ class UserController extends Controller
      * Update the specified resource in storage.
      *
      * @param Request $request
-     * @param User $user
-     * @return Application|Redirector|RedirectResponse
+     * @param  int  $id
+     * @return RedirectResponse
      */
-    public function update(Request $request, User $user)
+    public function update(Request $request, $id)
     {
+        $user = User::findOrFail($id);
+
+        // Determine if password is being updated
+        $passwordRules = $request->filled('password')
+            ? ['required', 'string', 'min:8', 'confirmed']
+            : ['nullable'];
+
+        // Validate the request data
         $validatedData = $request->validate([
-            'user_name' => 'required|string|max:255|unique:users,user_name,' . $user->id,
+            'user_name' => 'required|string|max:255',
             'name' => 'required|string|max:255',
-            'email' => 'required|string|email|max:255|unique:users,email,' . $user->id,
-            'password' => 'nullable|string|min:8|confirmed',
-            'gender' => 'required|in:ذكر,انثى',
-            'country_id' => 'required|exists:countries,id',
-            'city_id' => 'required|exists:cities,id',
-            'phones' => 'nullable|string|max:255',
-            'WatsNumber' => 'nullable|string|max:255',
+            'gender' => 'required|string|in:ذكر,انثى',
+            'country_id' => 'nullable|exists:countries,id',
+            'city_id' => 'nullable|exists:cities,id',
             'date_of_birth' => 'nullable|date',
-            'location_latitudes' => 'nullable|numeric',
-            'location_longitudes' => 'nullable|numeric',
+            'location_latitudes' => 'nullable|numeric|max:99999999',
+            'location_longitudes' => 'nullable|numeric|max:99999999',
+            'phones' => 'nullable|string|unique:users,phones,' . $id,
+            'WatsNumber' => 'nullable|string|unique:users,WatsNumber,' . $id,
+            'email' => 'required|email|unique:users,email,' . $id,
+            'password' => $passwordRules,
+            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg|max:2500',
             'is_active' => 'required|in:active,inactive,banned',
-            'profile_image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
-            'roles' => 'array',
+            'auth_type' => 'required|string|in:email,google',
+            'data_saver_enabled' => 'nullable|boolean',
+            'roles' => 'nullable|array',
             'roles.*' => 'exists:roles,id'
         ]);
 
-        DB::beginTransaction();
+        // Update user with validated data
+        $user->user_name = $validatedData['user_name'];
+        $user->name = $validatedData['name'];
+        $user->gender = $validatedData['gender'];
+        $user->country_id = $validatedData['country_id'] ?? null;
+        $user->city_id = $validatedData['city_id'] ?? null;
+        $user->date_of_birth = $validatedData['date_of_birth'];
+        $user->location_latitudes = $validatedData['location_latitudes'];
+        $user->location_longitudes = $validatedData['location_longitudes'];
+        $user->phones = $validatedData['phones'] ?? null;
+        $user->WatsNumber = $validatedData['WatsNumber'] ?? null;
+        $user->email = $validatedData['email'];
+        $user->is_active = $validatedData['is_active'];
+        $user->auth_type = $validatedData['auth_type'];
+        $user->data_saver_enabled = $request->has('data_saver_enabled');
 
-        try {
-            $updateData = [
-                'user_name' => $validatedData['user_name'],
-                'name' => $validatedData['name'],
-                'email' => $validatedData['email'],
-                'gender' => $validatedData['gender'],
-                'country_id' => $validatedData['country_id'],
-                'city_id' => $validatedData['city_id'],
-                'phones' => $validatedData['phones'],
-                'WatsNumber' => $validatedData['WatsNumber'],
-                'date_of_birth' => $validatedData['date_of_birth'],
-                'location_latitudes' => $validatedData['location_latitudes'],
-                'location_longitudes' => $validatedData['location_longitudes'],
-                'is_active' => $validatedData['is_active'],
-            ];
-
-            // Update password only if provided
-            if (!empty($validatedData['password'])) {
-                $updateData['password'] = Hash::make($validatedData['password']);
-            }
-
-            $user->update($updateData);
-
-            // Handle profile image upload
-            if ($request->hasFile('profile_image')) {
-                $image = $request->file('profile_image');
-                $imageName = time() . '.' . $image->getClientOriginalExtension();
-                $image->move(public_path('storage/photos'), $imageName);
-                
-                // Delete old photo if exists
-                $oldPhoto = $user->photos()->first();
-                if ($oldPhoto) {
-                    $oldPhoto->delete();
-                }
-                
-                $photo = new Photos([
-                    'src' => 'storage/photos/' . $imageName,
-                ]);
-                $user->photos()->save($photo);
-            }
-
-            // Update roles if provided
-            if (isset($validatedData['roles'])) {
-                $user->syncRoles($validatedData['roles']);
-            }
-
-            DB::commit();
-
-            return redirect()->route('users.index')
-                ->with('success', 'User updated successfully');
-        } catch (\Exception $e) {
-            DB::rollback();
-            return back()->withInput()->with('error', 'Failed to update user: ' . $e->getMessage());
+        // Update password only if provided
+        if ($request->filled('password')) {
+            $user->password = Hash::make($validatedData['password']);
         }
+
+        // Save user changes
+        $user->save();
+
+        // Update roles if provided
+        if (isset($validatedData['roles'])) {
+            $user->syncRoles($validatedData['roles']);
+        }
+
+        // Handle profile image upload
+        if ($request->hasFile('profile_image')) {
+            // Delete existing photo if exists
+            if ($user->photos && $user->photos->count() > 0) {
+                foreach ($user->photos as $existingPhoto) {
+                    // Don't delete default avatars
+                    if ($existingPhoto->src && !str_contains($existingPhoto->src, 'avatar')) {
+                        Storage::delete($existingPhoto->src);
+                    }
+                    $existingPhoto->delete();
+                }
+            }
+
+            // Upload new photo
+            $image = $request->file('profile_image');
+            $fileName = $image->hashName();
+            $photoPath = $image->storeAs('photos/profiles', $fileName);
+
+            $photo = new Photos([
+                'src' => 'storage/'.$photoPath,
+                'is_external' => false
+            ]);
+
+            $user->photos()->save($photo);
+        }
+
+        return redirect()->route('users.edit', $user->id)->with('success', 'User updated successfully');
+    }
+
+    /**
+     * Update user status
+     *
+     * @param Request $request
+     * @param int $id
+     * @return RedirectResponse
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $user = User::findOrFail($id);
+
+        $validatedData = $request->validate([
+            'is_active' => 'required|in:active,inactive,banned'
+        ]);
+
+        $user->is_active = $validatedData['is_active'];
+        $user->save();
+
+        return redirect()->route('users.show', $user->id)->with('success', 'User status updated successfully');
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param User $user
-     * @return Application|Redirector|RedirectResponse
+     * @param  int  $id
+     * @return RedirectResponse
      */
-    public function destroy(User $user)
-    {
-        try {
-            $user->delete();
-            return redirect()->route('users.index')
-                ->with('success', 'User deleted successfully');
-        } catch (\Exception $e) {
-            return back()->with('error', 'Failed to delete user: ' . $e->getMessage());
-        }
-    }
-
     /**
-     * Export users data
+     * Remove the specified resource from storage.
+     *
+     * @param  int  $id
+     * @return RedirectResponse
      */
-    public function export()
-    {
-        // Implementation for exporting users
-        return back()->with('info', 'Export functionality will be implemented');
-    }
-
-    /**
-     * Import users data
-     */
-    public function import()
-    {
-        // Implementation for importing users
-        return back()->with('info', 'Import functionality will be implemented');
-    }
-
-    /**
-     * Update user status
-     */
-    public function updateStatus(Request $request, $id)
+    public function destroy($id)
     {
         $user = User::findOrFail($id);
-        $status = $request->input('is_active');
-        
-        if (!in_array($status, ['active', 'inactive', 'banned'])) {
-            return back()->with('error', 'Invalid status');
-        }
 
-        $user->update(['is_active' => $status]);
-        
-        return back()->with('success', 'User status updated successfully');
-    }
+        // Define the list of protected default images that should not be deleted
+        $protectedImages = [
+            'storage/photos/avatar',
+            'storage/photos/servicepost1.jpg',
+            'storage/photos/servicepost2.jpg',
+            'storage/photos/servicepost3.jpg',
+            'storage/photos/servicepost4.jpg',
+            'storage/photos/servicepost5.jpg'
+        ];
 
-    /**
-     * Ban a user
-     */
-    public function ban($id)
-    {
-        try {
-            \Log::info('Ban user method called', ['user_id' => $id]);
-            $user = User::findOrFail($id);
-            $user->update(['is_active' => 'banned']);
-            
-            return back()->with('success', 'User has been banned successfully');
-        } catch (\Exception $e) {
-            \Log::error('Ban user failed', ['user_id' => $id, 'error' => $e->getMessage()]);
-            return back()->with('error', 'Failed to ban user: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Unban a user
-     */
-    public function unban($id)
-    {
-        try {
-            \Log::info('Unban user method called', ['user_id' => $id]);
-            $user = User::findOrFail($id);
-            $user->update(['is_active' => 'active']);
-            
-            return back()->with('success', 'User has been unbanned successfully');
-        } catch (\Exception $e) {
-            \Log::error('Unban user failed', ['user_id' => $id, 'error' => $e->getMessage()]);
-            return back()->with('error', 'Failed to unban user: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Reset the specified user's password and display the new password.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function resetPassword($id)
-    {
-        try {
-            \Log::info('Reset password method called', ['user_id' => $id]);
-            $user = User::findOrFail($id);
-            $newPassword = \Str::random(10);
-            $user->password = \Hash::make($newPassword);
-            $user->save();
-
-            // Optionally, you can email the new password to the user here.
-
-            return redirect()->back()->with('success', 'Password reset successfully! New password: ' . $newPassword);
-        } catch (\Exception $e) {
-            \Log::error('Reset password failed', ['user_id' => $id, 'error' => $e->getMessage()]);
-            return redirect()->back()->with('error', 'Failed to reset password: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Send a notification to the specified user.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function sendNotification(Request $request, $id)
-    {
-        try {
-            $user = User::findOrFail($id);
-            $message = $request->input('message', 'This is a notification from the admin panel.');
-            $user->notify(new AdminCustomNotification($message));
-            return redirect()->back()->with('success', 'Notification sent successfully!');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to send notification: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Get users data for AJAX requests
-     */
-    public function data(Request $request)
-    {
-        $query = User::with('roles')->withCount(['reports', 'servicePosts']);
-
-        if ($request->has('search') && $request->search) {
-            $query->where(function ($q) use ($request) {
-                $q->where('user_name', 'like', "%{$request->search}%")
-                    ->orWhere('email', 'like', "%{$request->search}%")
-                    ->orWhere('name', 'like', "%{$request->search}%");
-            });
-        }
-
-        $users = $query->paginate(10);
-
-        return response()->json($users);
-    }
-
-    /**
-     * Impersonate the specified user.
-     *
-     * @param int $id
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function impersonate($id)
-    {
-        try {
-            $user = User::findOrFail($id);
-            
-            // Store current user session
-            session(['impersonator_id' => auth()->id()]);
-            
-            // Login as the target user
-            auth()->login($user);
-            
-            return redirect()->back()->with('success', 'Now impersonating user: ' . $user->name);
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to impersonate user: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Stop impersonation and return to original user.
-     *
-     * @return \Illuminate\Http\RedirectResponse
-     */
-    public function stopImpersonation()
-    {
-        try {
-            $impersonatorId = session('impersonator_id');
-            
-            if ($impersonatorId) {
-                $impersonator = User::find($impersonatorId);
-                if ($impersonator) {
-                    auth()->login($impersonator);
-                    session()->forget('impersonator_id');
-                    return redirect()->back()->with('success', 'Stopped impersonation. Back to admin account.');
+        // Delete user's photos
+        if ($user->photos && $user->photos->count() > 0) {
+            foreach ($user->photos as $photo) {
+                // Check if it's a protected image (using str_contains to match any avatar path)
+                $isProtected = false;
+                foreach ($protectedImages as $protectedPath) {
+                    if (str_contains($photo->src, $protectedPath)) {
+                        $isProtected = true;
+                        break;
+                    }
                 }
+
+                // Only delete if it's not a protected image
+                if (!$isProtected && Storage::exists($photo->src)) {
+                    Storage::delete($photo->src);
+                }
+                $photo->delete();
             }
-            
-            return redirect()->back()->with('error', 'No impersonation session found.');
-        } catch (\Exception $e) {
-            return redirect()->back()->with('error', 'Failed to stop impersonation: ' . $e->getMessage());
         }
-    }
 
-    /**
-     * Show login history for the specified user (placeholder).
-     *
-     * @param int $id
-     * @return \Illuminate\Contracts\View\View
-     */
-    public function loginHistory($id)
-    {
-        $user = User::findOrFail($id);
-        $logins = []; // Replace with actual login history data
-        return view('users.login_history', compact('user', 'logins'));
-    }
+        // Get all service posts related to the user
+        $servicePosts = $user->servicePosts()->with('photos')->get();
 
-    /**
-     * Add points to user balance
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function addPoints(Request $request, $id)
-    {
-        try {
-            $user = User::findOrFail($id);
-            $points = $request->input('points', 0);
-            
-            if ($points <= 0) {
-                return response()->json(['success' => false, 'message' => 'Points must be greater than 0']);
+        foreach ($servicePosts as $servicePost) {
+            // Delete associated photos for each service post
+            foreach ($servicePost->photos as $photo) {
+                // Check if it's a protected image
+                $isProtected = false;
+                foreach ($protectedImages as $protectedPath) {
+                    if (str_contains($photo->src, $protectedPath)) {
+                        $isProtected = true;
+                        break;
+                    }
+                }
+
+                // Only delete if it's not a protected image
+                if (!$isProtected && Storage::disk('public')->exists(str_replace('storage/', '', $photo->src))) {
+                    Storage::delete($photo->src);
+                }
+                $photo->delete();
             }
-            
-            // Create a new points record
-            \App\Models\palservice_points::create([
-                'user_id' => $user->id,
-                'point' => $points
-            ]);
-            
-            return response()->json([
-                'success' => true, 
-                'message' => 'Points added successfully',
-                'new_balance' => $user->fresh()->pointsBalance
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error adding points: ' . $e->getMessage()]);
+
+            // Delete favorites and reports related to this service post
+            $servicePost->favorites()->delete();
+            $servicePost->reports()->delete();
+
+            // Delete the service post
+            $servicePost->delete();
         }
-    }
 
-    /**
-     * Deduct points from user balance
-     *
-     * @param Request $request
-     * @param int $id
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function deductPoints(Request $request, $id)
-    {
-        try {
-            $user = User::findOrFail($id);
-            $points = $request->input('points', 0);
-            
-            if ($points <= 0) {
-                return response()->json(['success' => false, 'message' => 'Points must be greater than 0']);
-            }
-            
-            $currentBalance = $user->pointsBalance;
-            if ($currentBalance < $points) {
-                return response()->json(['success' => false, 'message' => 'Insufficient balance']);
-            }
-            
-            // Create a negative points record
-            \App\Models\palservice_points::create([
-                'user_id' => $user->id,
-                'point' => -$points
-            ]);
-            
-            return response()->json([
-                'success' => true, 
-                'message' => 'Points deducted successfully',
-                'new_balance' => $user->fresh()->pointsBalance
-            ]);
-        } catch (\Exception $e) {
-            return response()->json(['success' => false, 'message' => 'Error deducting points: ' . $e->getMessage()]);
+        // Delete user's followers and following relationships
+        if (method_exists($user, 'followers')) {
+            $user->followers()->detach();
+            $user->following()->detach();
         }
+
+        // Delete notifications related to the user
+        if (method_exists($user, 'notifications')) {
+            $user->notifications()->delete();
+        }
+
+
+        // Delete the user
+        $user->delete();
+
+        return redirect()->route('users.index')->with('success', 'User has been deleted successfully');
     }
-
-
 }

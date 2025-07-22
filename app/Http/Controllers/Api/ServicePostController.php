@@ -42,8 +42,7 @@ class ServicePostController extends Controller
                 $servicePosts = $user->servicePosts()->with('photos')
                     ->withCount('favorites')
                     ->withCount('comments')
-                    ->orderBy('level_id', 'desc')
-                    ->orderBy('id', 'desc')
+                    ->orderByRaw("FIELD(have_badge, 'D', 'G', 'N'), id DESC")
                     ->orderBy('id', 'desc')
                     ->paginate(10);
                 return response()->json(compact('servicePosts'));
@@ -153,8 +152,7 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->orderBy('level_id', 'desc')
-            ->orderBy('id', 'desc')
+            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
             ->paginate(10);
 
         foreach ($servicePosts as $servicePost) {
@@ -269,28 +267,23 @@ class ServicePostController extends Controller
         $badgeType = $request->haveBadge ?? 'عادي';
         $badgeDuration = $request->badgeDuration ?? 0;
 
-        // Get level information from database
-        $level = null;
+        // Only perform badge check if user selected a premium badge
         if ($badgeType !== 'عادي') {
-            $level = \App\Models\Level::where('name->ar', $badgeType)
-                ->orWhere('name->en', $badgeType)
-                ->active()
-                ->first();
-            
-            if (!$level) {
+            // Badge prices per day
+            $badgePrices = ['ذهبي' => 2, 'ماسي' => 10, 'عادي' => 0];
+
+            // Validate badge type
+            if (!isset($badgePrices[$badgeType])) {
                 return response()->json(['error' => 'Invalid badge type'], 400);
             }
-        }
 
-        // Only perform badge check if user selected a premium badge
-        if ($level && $level->is_premium) {
-            // Calculate point cost using dynamic level pricing
-            $pointCost = $badgeDuration * $level->points_per_day;
+            // Calculate point cost
+            $pointCost = $badgeDuration * $badgePrices[$badgeType];
 
             // Check if user has enough points
             if ($user->pointsBalance < $pointCost) {
                 return response()->json([
-                    'error' => "Needed $pointCost points for {$level->localized_name}, but your balance is not enough."
+                    'error' => "Needed $pointCost points for $badgeType, but your balance is not enough."
                 ], 400);
             }
         }
@@ -307,12 +300,13 @@ class ServicePostController extends Controller
             ];
 
             // Handle badge logic if a premium badge is selected
-            if ($level && $level->is_premium) {
-                $pointCost = $badgeDuration * $level->points_per_day;
+            if ($badgeType !== 'عادي') {
+                $badgePrices = ['ذهبي' => 2, 'ماسي' => 10];
+                $pointCost = $badgeDuration * $badgePrices[$badgeType];
 
                 Log::info('Deducting points for badge', [
                     'userId' => $user->id,
-                    'badge' => $level->localized_name,
+                    'badge' => $badgeType,
                     'duration' => $badgeDuration,
                     'cost' => $pointCost
                 ]);
@@ -331,7 +325,7 @@ class ServicePostController extends Controller
                 Log::info('Point transaction created', ['transaction_id' => $pointTransaction->id]);
 
                 $badgeDetails = [
-                    'badge' => $level->localized_name,
+                    'badge' => $badgeType,
                     'duration' => $badgeDuration,
                     'expires_at' => Carbon::now()->addDays($badgeDuration)
                 ];
@@ -359,9 +353,9 @@ class ServicePostController extends Controller
                 'location_latitudes' => $request->locationLatitudes ?? $defaultLatitude,
                 'location_longitudes' => $request->locationLongitudes ?? $defaultLongitude,
                 'type' => $request->type,
-                'level_id' => $level ? $level->id : null,
-                'level_duration' => $badgeDetails['duration'],
-                'level_expires_at' => $badgeExpiresAt,
+                'have_badge' => $badgeDetails['badge'],
+                'badge_duration' => $badgeDetails['duration'],
+                'badge_expires_at' => $badgeExpiresAt,
                 'state' => $request->state ?? 'published',
             ]);
 
@@ -405,14 +399,19 @@ class ServicePostController extends Controller
             if ($badgeDetails['badge'] !== 'عادي') {
                 Log::info('Creating badge benefit notification');
 
-                // Get view boost from level
-                $viewBoost = $level ? $level->view_boost_percentage : 0;
+                // Define view boost estimates based on badge type
+                $viewBoosts = [
+                    'ذهبي' => 200, // Gold badge provides approximately 200% view boost
+                    'ماسي' => 500  // Diamond badge provides approximately 500% view boost
+                ];
+
+                $viewBoost = $viewBoosts[$badgeDetails['badge']] ?? 0;
                 $expiresAt = $badgeExpiresAt->format('Y-m-d H:i:s');
 
                 // Create localized message with benefits information
                 $message = json_encode([
-                    'ar' => "تم تطبيق شارة " . $badgeDetails['badge'] . " على منشورك بعنوان: {$servicePost->title}. ستحصل على زيادة تقريبية بنسبة {$viewBoost}٪ في المشاهدات وسيتم عرض منشورك في مكان مميز. ستنتهي الشارة في {$expiresAt}. [post_id:{$servicePost->id}]",
-                    'en' => "Applied " . $badgeDetails['badge'] . " badge to your post titled: {$servicePost->title}. You will get approximately {$viewBoost}% more views and your post will be displayed in premium positions. Badge will expire at {$expiresAt}. [post_id:{$servicePost->id}]"
+                    'ar' => "تم تطبيق شارة " . $this->translateBadgeType($badgeDetails['badge'], 'ar') . " على منشورك بعنوان: {$servicePost->title}. ستحصل على زيادة تقريبية بنسبة {$viewBoost}٪ في المشاهدات وسيتم عرض منشورك في مكان مميز. ستنتهي الشارة في {$expiresAt}. [post_id:{$servicePost->id}]",
+                    'en' => "Applied " . $this->translateBadgeType($badgeDetails['badge'], 'en') . " badge to your post titled: {$servicePost->title}. You will get approximately {$viewBoost}% more views and your post will be displayed in premium positions. Badge will expire at {$expiresAt}. [post_id:{$servicePost->id}]"
                 ]);
 
                 // Create new notification record directly
@@ -551,8 +550,7 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->orderBy('level_id', 'desc')
-            ->orderBy('id', 'desc');
+            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC");
 
         // Only load service post photos if data saver is disabled
         if (!$currentUser->data_saver_enabled) {
@@ -741,7 +739,19 @@ class ServicePostController extends Controller
             // First sort by badge type (Diamond → Gold → Normal)
             // Then within each badge type, sort by location relevance
             // Finally sort by creation date (newest first)
-            $servicePosts->orderBy('level_id', 'desc')
+            $servicePosts->orderByRaw("
+        CASE
+            WHEN have_badge = 'ماسي' THEN 1
+            WHEN have_badge = 'ذهبي' THEN 2
+            ELSE 3
+        END,
+        CASE
+            WHEN country_id = ? AND city_id = ? THEN 1
+            WHEN country_id = ? THEN 2
+            ELSE 3
+        END",
+                [$userCountryId, $userCityId, $userCountryId]
+            )
                 ->orderBy('created_at', 'DESC');
 
             $servicePosts->where('categories_id', $category);
@@ -837,7 +847,19 @@ class ServicePostController extends Controller
         // First sort by badge type (Diamond → Gold → Normal)
         // Then within each badge type, sort by location relevance
         // Finally sort by creation date (newest first)
-        $servicePosts->orderBy('level_id', 'desc')
+        $servicePosts->orderByRaw("
+    CASE
+        WHEN have_badge = 'ماسي' THEN 1
+        WHEN have_badge = 'ذهبي' THEN 2
+        ELSE 3
+    END,
+    CASE
+        WHEN country_id = ? AND city_id = ? THEN 1
+        WHEN country_id = ? THEN 2
+        ELSE 3
+    END",
+            [$userCountryId, $userCityId, $userCountryId]
+        )
             ->orderBy('created_at', 'DESC');
 
         // Only load service post photos if data saver is disabled
@@ -947,8 +969,7 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->orderBy('level_id', 'desc')
-            ->orderBy('id', 'desc');
+            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC");
 
         // Only load service post photos if data saver is disabled
         if (!$currentUser->data_saver_enabled) {
@@ -1037,14 +1058,9 @@ class ServicePostController extends Controller
 
             // Handle badge updates if any
             if (isset($validatedData['haveBadge']) &&
-                isset($validatedData['badgeDuration'])) {
-                
-                // Get current level name
-                $currentLevel = \App\Models\Level::find($servicePost->level_id);
-                $currentLevelName = $currentLevel ? $currentLevel->name['ar'] : 'عادي';
-                
-                if ($currentLevelName !== $validatedData['haveBadge'] ||
-                    $servicePost->level_duration !== $validatedData['badgeDuration']) {
+                isset($validatedData['badgeDuration']) &&
+                ($servicePost->have_badge !== $validatedData['haveBadge'] ||
+                    $servicePost->badge_duration !== $validatedData['badgeDuration'])) {
 
                 $badgeResult = $this->updateServicePostBadge(
                     $servicePost,
@@ -1055,7 +1071,6 @@ class ServicePostController extends Controller
 
                 if (!$badgeResult['success']) {
                     return response()->json(['error' => $badgeResult['message']], 400);
-                }
                 }
             }
 
@@ -1125,15 +1140,14 @@ class ServicePostController extends Controller
 
     private function checkAndUpdateBadgeExpiration(ServicePost $servicePost): bool
     {
-        // If level is already standard or no expiration mechanism, nothing to do
-        $standardLevel = \App\Models\Level::where('name->ar', 'عادي')->first();
-        if ($servicePost->level_id == $standardLevel->id) {
+        // If badge is already standard or no expiration mechanism, nothing to do
+        if ($servicePost->have_badge === 'عادي') {
             return false;
         }
 
-        // Method 1: Check level_expires_at if available
-        if ($servicePost->level_expires_at) {
-            if (Carbon::now()->greaterThanOrEqualTo($servicePost->level_expires_at)) {
+        // Method 1: Check badge_expires_at if available
+        if ($servicePost->badge_expires_at) {
+            if (Carbon::now()->greaterThanOrEqualTo($servicePost->badge_expires_at)) {
                 $this->expireBadge($servicePost);
                 return true;
             }
@@ -1141,16 +1155,16 @@ class ServicePostController extends Controller
         }
 
         // Method 2: Fallback - check based on duration and created_at
-        if ($servicePost->level_duration > 0) {
-            $expirationDate = Carbon::parse($servicePost->created_at)->addDays($servicePost->level_duration);
+        if ($servicePost->badge_duration > 0) {
+            $expirationDate = Carbon::parse($servicePost->created_at)->addDays($servicePost->badge_duration);
 
             if (Carbon::now()->greaterThanOrEqualTo($expirationDate)) {
                 $this->expireBadge($servicePost);
                 return true;
             }
 
-            // Update the level_expires_at field for future checks
-            $servicePost->level_expires_at = $expirationDate;
+            // Update the badge_expires_at field for future checks
+            $servicePost->badge_expires_at = $expirationDate;
             $servicePost->save();
         }
 
@@ -1159,11 +1173,10 @@ class ServicePostController extends Controller
 
     private function expireBadge(ServicePost $servicePost): void
     {
-        // Reset level to standard
-        $standardLevel = \App\Models\Level::where('name->ar', 'عادي')->first();
-        $servicePost->level_id = $standardLevel->id;
-        $servicePost->level_duration = 0;
-        $servicePost->level_expires_at = null;
+        // Reset badge to standard
+        $servicePost->have_badge = 'عادي';
+        $servicePost->badge_duration = 0;
+        $servicePost->badge_expires_at = null;
         $servicePost->save();
 
         // Create expiration notification with post ID
@@ -1188,10 +1201,9 @@ class ServicePostController extends Controller
 
         // If changing to normal badge, just update without points
         if ($badgeType === 'عادي') {
-            $standardLevel = \App\Models\Level::where('name->ar', 'عادي')->first();
-            $servicePost->level_id = $standardLevel->id;
-            $servicePost->level_duration = 0;
-            $servicePost->level_expires_at = null;
+            $servicePost->have_badge = 'عادي';
+            $servicePost->badge_duration = 0;
+            $servicePost->badge_expires_at = null;
             $servicePost->save();
 
             return ['success' => true];
@@ -1233,18 +1245,10 @@ class ServicePostController extends Controller
         // Calculate expected expiration time for notification
         $expirationTimeString = $expirationDate->format('Y-m-d H:i:s');
 
-        // Update service post level
-        $level = \App\Models\Level::where('name->ar', $badgeType)->first();
-        if (!$level) {
-            return [
-                'success' => false,
-                'message' => 'Invalid level type'
-            ];
-        }
-        
-        $servicePost->level_id = $level->id;
-        $servicePost->level_duration = $duration;
-        $servicePost->level_expires_at = $expirationDate;
+        // Update service post badge
+        $servicePost->have_badge = $badgeType;
+        $servicePost->badge_duration = $duration;
+        $servicePost->badge_expires_at = $expirationDate;
         $servicePost->save();
 
         // Create notification with post ID embedded in message
@@ -1312,15 +1316,10 @@ class ServicePostController extends Controller
 
     public function updateServicePostBadgeStatus(): JsonResponse
     {
-        // Get premium level IDs
-        $goldLevel = \App\Models\Level::where('name->ar', 'ذهبي')->first();
-        $diamondLevel = \App\Models\Level::where('name->ar', 'ماسي')->first();
-        $premiumLevelIds = [$goldLevel->id, $diamondLevel->id];
-        
-        // Find posts with level_expires_at in the past
-        $expiredByExpirationDate = ServicePost::whereIn('level_id', $premiumLevelIds)
-            ->whereNotNull('level_expires_at')
-            ->where('level_expires_at', '<', Carbon::now())
+        // Find posts with badge_expires_at in the past
+        $expiredByExpirationDate = ServicePost::whereIn('have_badge', ['ذهبي', 'ماسي'])
+            ->whereNotNull('badge_expires_at')
+            ->where('badge_expires_at', '<', Carbon::now())
             ->get();
 
         $count = $expiredByExpirationDate->count();
@@ -1329,21 +1328,21 @@ class ServicePostController extends Controller
             $this->expireBadge($post);
         }
 
-        // Fallback: check posts without level_expires_at but with duration
-        $potentiallyExpired = ServicePost::whereIn('level_id', $premiumLevelIds)
-            ->where('level_duration', '>', 0)
-            ->whereNull('level_expires_at')
+        // Fallback: check posts without badge_expires_at but with duration
+        $potentiallyExpired = ServicePost::whereIn('have_badge', ['ذهبي', 'ماسي'])
+            ->where('badge_duration', '>', 0)
+            ->whereNull('badge_expires_at')
             ->get();
 
         foreach ($potentiallyExpired as $post) {
-            $expirationDate = Carbon::parse($post->created_at)->addDays($post->level_duration);
+            $expirationDate = Carbon::parse($post->created_at)->addDays($post->badge_duration);
 
             if (Carbon::now()->greaterThanOrEqualTo($expirationDate)) {
                 $this->expireBadge($post);
                 $count++;
             } else {
-                // Update the level_expires_at field for future checks
-                $post->level_expires_at = $expirationDate;
+                // Update the badge_expires_at field for future checks
+                $post->badge_expires_at = $expirationDate;
                 $post->save();
             }
         }

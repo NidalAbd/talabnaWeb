@@ -45,9 +45,9 @@
                     <!-- Role Filter -->
                     <div class="col-md-3">
                         <select class="form-control" name="role">
-                            <option value="">{{('admin\role-assignments\index.all_roles') }}</option>
+                            <option value="">All Roles</option>
                             @foreach(App\Models\Role::orderBy('name')->get() as $role)
-                                <option value="{{ $role->count() }}" {{ request('role') == $role->id ? 'selected' : '' }}>
+                                <option value="{{ $role->id }}" {{ request('role') == $role->id ? 'selected' : '' }}>
                                     {{ $role->display_name ?? $role->name }}
                                 </option>
                             @endforeach
@@ -58,14 +58,14 @@
                     <div class="col-md-4">
                         <div class="input-group">
                             <select class="form-control" name="sort">
-                                <option value="id" {{ request('sort') == 'id' || !request('sort') ? 'selected' : '' }}>{{('admin\role-assignments\index.sort_by_id') }}</option>
-                                <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>{{('admin\role-assignments\index.sort_by_name') }}</option>
-                                <option value="email" {{ request('sort') == 'email' ? 'selected' : '' }}>{{('admin\role-assignments\index.sort_by_email') }}</option>
-                                <option value="roles_count" {{ request('sort') == 'roles_count' ? 'selected' : '' }}>{{('admin\role-assignments\index.sort_by_roles_count') }}</option>
+                                <option value="id" {{ request('sort') == 'id' || !request('sort') ? 'selected' : '' }}>Sort by ID</option>
+                                <option value="name" {{ request('sort') == 'name' ? 'selected' : '' }}>Sort by Name</option>
+                                <option value="email" {{ request('sort') == 'email' ? 'selected' : '' }}>Sort by Email</option>
+                                <option value="roles_count" {{ request('sort') == 'roles_count' ? 'selected' : '' }}>Sort by Roles Count</option>
                             </select>
                             <select class="form-control" name="direction">
-                                <option value="asc" {{ request('direction') == 'asc' ? 'selected' : '' }}>{{('admin\role-assignments\index.ascending') }}</option>
-                                <option value="desc" {{ request('direction') == 'desc' || !request('direction') ? 'selected' : '' }}>{{('admin\role-assignments\index.descending') }}</option>
+                                <option value="asc" {{ request('direction') == 'asc' ? 'selected' : '' }}>Ascending</option>
+                                <option value="desc" {{ request('direction') == 'desc' || !request('direction') ? 'selected' : '' }}>Descending</option>
                             </select>
                         </div>
                     </div>
@@ -98,19 +98,19 @@
                     <table class="table table-hover">
                         <thead>
                         <tr>
-                            <th style="width: 5%">{{('admin\role-assignments\index.id') }}</th>
-                            <th style="width: 20%">{{('admin\role-assignments\index.user') }}</th>
-                            <th style="width: 20%">{{('admin\role-assignments\index.email') }}</th>
-                            <th style="width: 20%">{{('admin\role-assignments\index.roles') }}</th>
-                            <th style="width: 15%">{{('admin\role-assignments\index.direct_permissions') }}</th>
-                            <th style="width: 20%">{{('admin\role-assignments\index.actions') }}</th>
+                            <th style="width: 5%">ID</th>
+                            <th style="width: 20%">User</th>
+                            <th style="width: 20%">Email</th>
+                            <th style="width: 20%">Roles</th>
+                            <th style="width: 15%">Direct Permissions</th>
+                            <th style="width: 20%">Actions</th>
                         </tr>
                         </thead>
                         <tbody>
                         @if(count($users) > 0)
                             @foreach($users as $user)
                                 <tr>
-                                    <td>{{ $user->id</td> }}
+                                    <td>{{ $user->id }}</td>
                                     <td>
                                         <div class="user-block">
                                             @if($user->photos && $user->photos->count() > 0)
@@ -124,11 +124,11 @@
                                             @endif
                                             <span class="username">
                                                     {{ $user->name }}
-                                                    <small>{{ $user->id</small> }}
+                                                    <small>{{ $user->user_name ?? '' }}</small>
                                                 </span>
                                         </div>
                                     </td>
-                                    <td>{{ $user->id</td> }}
+                                    <td>{{ $user->email }}</td>
                                     <td>
                                         @if($user->roles && $user->roles->count() > 0)
                                             @foreach($user->roles as $role)
@@ -137,7 +137,7 @@
                                                     </span>
                                             @endforeach
                                         @else
-                                            <span class="badge badge-secondary">{{('admin\role-assignments\index.no_roles_assigned') }}</span>
+                                            <span class="badge badge-secondary">No Roles Assigned</span>
                                         @endif
                                     </td>
                                     <td>
@@ -148,12 +148,12 @@
                                     <td>
                                         <div class="btn-group">
                                             @permission('edit_role')
-                                            <a href="{{ route('role-assignments.edit', $user->count()) }}" class="btn btn-sm btn-warning">
+                                            <a href="{{ route('role-assignments.edit', $user->id) }}" class="btn btn-sm btn-warning">
                                                 <i class="fas fa-user-tag mr-1"></i> Assign Roles
                                             </a>
                                             @endpermission
 
-                                            <a href="{{ route('users.show', $user->count()) }}" class="btn btn-sm btn-info">
+                                            <a href="{{ route('users.show', $user->id) }}" class="btn btn-sm btn-info">
                                                 <i class="fas fa-eye mr-1"></i> View User
                                             </a>
                                         </div>
@@ -191,10 +191,3 @@
         });
     </script>
 @stop
-
-
-
-
-
-
-

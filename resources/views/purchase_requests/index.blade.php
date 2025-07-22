@@ -21,10 +21,10 @@
                 <div class="info-box shadow">
                     <span class="info-box-icon bg-primary"><i class="fas fa-clock"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">{{('purchase_requests\index.pending_requests') }}</span>
-                        <span class="info-box-number">{{ number_format($pendingRequests ?? 0) }}</span>
+                        <span class="info-box-text">Pending Requests</span>
+                        <span class="info-box-number">{{ $purchaseRequests->where('status', 'pending')->count() }}</span>
                         <div class="progress">
-                            <div class="progress-bar bg-primary" style="width: {{ $purchaseRequests->count() / $totalPurchaseRequests * 100 }}%"></div>
+                            <div class="progress-bar bg-primary" style="width: {{ $purchaseRequests->count() > 0 ? ($purchaseRequests->where('status', 'pending')->count() / $purchaseRequests->count()) * 100 : 0 }}%"></div>
                         </div>
                         <a href="#" class="small-box-footer">
                             View All <i class="fas fa-arrow-circle-right"></i>
@@ -39,10 +39,10 @@
                 <div class="info-box shadow">
                     <span class="info-box-icon bg-success"><i class="fas fa-check-circle"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">{{('purchase_requests\index.approved_orders') }}</span>
-                        <span class="info-box-number">{{ number_format($approvedRequests ?? 0) }}</span>
+                        <span class="info-box-text">Approved Orders</span>
+                        <span class="info-box-number">{{ $purchaseRequests->where('status', 'approved')->count() }}</span>
                         <div class="progress">
-                            <div class="progress-bar bg-success" style="width: {{ $purchaseRequests->count() / $totalPurchaseRequests * 100 }}%"></div>
+                            <div class="progress-bar bg-success" style="width: {{ $purchaseRequests->count() > 0 ? ($purchaseRequests->where('status', 'approved')->count() / $purchaseRequests->count()) * 100 : 0 }}%"></div>
                         </div>
                         <a href="#" class="small-box-footer">
                             View All <i class="fas fa-arrow-circle-right"></i>
@@ -54,10 +54,10 @@
                 <div class="info-box shadow">
                     <span class="info-box-icon bg-danger"><i class="fas fa-ban"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">{{('purchase_requests\index.canceled_orders') }}</span>
-                        <span class="info-box-number">{{ number_format($canceledRequests ?? 0) }}</span>
+                        <span class="info-box-text">Canceled Orders</span>
+                        <span class="info-box-number">{{ $purchaseRequests->where('status', 'canceled')->count() }}</span>
                         <div class="progress">
-                            <div class="progress-bar bg-danger" style="width: {{ $purchaseRequests->count() / $totalPurchaseRequests * 100 }}%"></div>
+                            <div class="progress-bar bg-danger" style="width: {{ $purchaseRequests->count() > 0 ? ($purchaseRequests->where('status', 'canceled')->count() / $purchaseRequests->count()) * 100 : 0 }}%"></div>
                         </div>
                         <a href="#" class="small-box-footer">
                             View All <i class="fas fa-arrow-circle-right"></i>
@@ -69,8 +69,8 @@
                 <div class="info-box shadow">
                     <span class="info-box-icon bg-info"><i class="fas fa-coins"></i></span>
                     <div class="info-box-content">
-                        <span class="info-box-text">{{('purchase_requests\index.total_points_requested') }}</span>
-                        <span class="info-box-number">{{ number_format($totalPointsRequested ?? 0) }}</span>
+                        <span class="info-box-text">Total Points Requested</span>
+                        <span class="info-box-number">{{ number_format($purchaseRequests->sum('points_requested')) }}</span>
                         <div class="progress">
                             <div class="progress-bar bg-info" style="width: 100%"></div>
                         </div>
@@ -110,14 +110,14 @@
                     <table class="table table-hover table-striped">
                         <thead class="thead-light">
                         <tr>
-                            <th>{{('purchase_requests\index.id') }}</th>
-                            <th>{{('purchase_requests\index.user') }}</th>
-                            <th>{{('purchase_requests\index.role') }}</th>
-                            <th>{{('purchase_requests\index.points') }}</th>
-                            <th>{{('purchase_requests\index.price') }}</th>
-                            <th>{{('purchase_requests\index.total') }}</th>
-                            <th>{{('purchase_requests\index.status') }}</th>
-                            <th>{{('purchase_requests\index.actions') }}</th>
+                            <th>ID</th>
+                            <th>User</th>
+                            <th>Role</th>
+                            <th>Points</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -126,7 +126,7 @@
                                 <tr>
                                     @if($purchaseRequest->user)
                                         <td>
-                                            <span class="badge badge-primary">{{ $purchaseRequest->id }}</span>
+                                            <span class="badge badge-primary">{{ $purchaseRequest->user->id }}</span>
                                         </td>
                                         <td>
                                             <div class="user-info">
@@ -139,25 +139,25 @@
                                                 @else
                                                     <img class="img-circle img-size-32 mr-2" src="{{ asset('vendor/adminlte/dist/img/user-default.jpg') }}" alt="User Image">
                                                 @endif
-                                                <span>{{ $purchaseRequest->user->user_name ?? 'N/A' }}</span>
+                                                <span>{{ $purchaseRequest->user->user_name }}</span>
                                             </div>
                                         </td>
                                         <td>
                                             @if(count($purchaseRequest->user->roles) > 0)
                                                 @foreach($purchaseRequest->user->roles as $role)
-                                                    <span class="badge badge-info">{{$role->name ?? 'N/A'}}</span>
+                                                    <span class="badge badge-info">{{$role->name}}</span>
                                                 @endforeach
                                             @else
-                                                <span class="badge badge-secondary">{{('purchase_requests\index.no_role') }}</span>
+                                                <span class="badge badge-secondary">No Role</span>
                                             @endif
                                         </td>
                                     @else
                                         <td colspan="3" class="text-center">
-                                            <span class="text-danger">{{('purchase_requests\index.user_not_found') }}</span>
+                                            <span class="text-danger">User Not Found</span>
                                         </td>
                                     @endif
                                     <td>
-                                        <span class="badge badge-warning badge-pill px-3">{{ $purchaseRequest->points_requested ?? 0 }}</span>
+                                        <span class="badge badge-warning badge-pill px-3">{{ $purchaseRequest->points_requested }} pts</span>
                                     </td>
                                     <td>
                                         <span class="text-muted">${{ number_format($purchaseRequest->price_per_point, 2) }} / point</span>
@@ -180,7 +180,7 @@
                                     <td>
                                         @if ($purchaseRequest->status == 'pending')
                                             <div class="btn-group">
-                                                <form action="{{ route('purchase_points.approved', $purchaseRequest->id) }}" method="POST" class="mr-1">
+                                                <form action="{{ route('purchase_points.approved', $purchaseRequest) }}" method="POST" class="mr-1">
                                                     @csrf
                                                     @method('PUT')
                                                     <input type="hidden" name="user_id" value="{{ $purchaseRequest->user_id }}">
@@ -188,7 +188,7 @@
                                                         <i class="fas fa-check mr-1"></i> Approve
                                                     </button>
                                                 </form>
-                                                <form action="{{ route('purchase_points.cancel', $purchaseRequest->id) }}" method="POST">
+                                                <form action="{{ route('purchase_points.cancel', $purchaseRequest) }}" method="POST">
                                                     @csrf
                                                     @method('PUT')
                                                     <input type="hidden" name="user_id" value="{{ auth()->user()->id }}">
@@ -208,9 +208,9 @@
                                                 <div class="modal-dialog" role="document">
                                                     <div class="modal-content">
                                                         <div class="modal-header">
-                                                            <h5 class="modal-title" id="detailsModalLabel{{ $purchaseRequest->id }}">
+                                                            <h5 class="modal-title" id="detailsModalLabel{{ $purchaseRequest->id }}">Order Details</h5>
                                                             <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                                                                <span aria-hidden="true">{{('purchase_requests\index._times_') }}</span>
+                                                                <span aria-hidden="true">&times;</span>
                                                             </button>
                                                         </div>
                                                         <div class="modal-body">
@@ -218,49 +218,49 @@
                                                                 <div class="card-body p-0">
                                                                     <table class="table table-bordered">
                                                                         <tr>
-                                                                            <th>{{('purchase_requests\index.order_id_') }}</th>
+                                                                            <th>Order ID:</th>
                                                                             <td>{{ $purchaseRequest->id }}</td>
                                                                         </tr>
                                                                         <tr>
-                                                                            <th>{{('purchase_requests\index.user_') }}</th>
+                                                                            <th>User:</th>
                                                                             <td>
                                                                                 @if($purchaseRequest->user)
                                                                                     {{ $purchaseRequest->user->user_name }}
                                                                                 @else
-                                                                                    <span class="text-danger">{{('purchase_requests\index.user_not_found') }}</span>
+                                                                                    <span class="text-danger">User Not Found</span>
                                                                                 @endif
                                                                             </td>
                                                                         </tr>
                                                                         <tr>
-                                                                            <th>{{('purchase_requests\index.points_requested_') }}</th>
-                                                                            <td>{{ $purchaseRequest->points_requested ?? 0 }}</td>
+                                                                            <th>Points Requested:</th>
+                                                                            <td>{{ $purchaseRequest->points_requested }}</td>
                                                                         </tr>
                                                                         <tr>
-                                                                            <th>{{('purchase_requests\index.price_per_point_') }}</th>
+                                                                            <th>Price Per Point:</th>
                                                                             <td>${{ number_format($purchaseRequest->price_per_point, 2) }}</td>
                                                                         </tr>
                                                                         <tr>
-                                                                            <th>{{('purchase_requests\index.total_price_') }}</th>
+                                                                            <th>Total Price:</th>
                                                                             <td>${{ number_format($purchaseRequest->total_price, 2) }}</td>
                                                                         </tr>
                                                                         <tr>
-                                                                            <th>{{('purchase_requests\index.status_') }}</th>
+                                                                            <th>Status:</th>
                                                                             <td><span class="badge badge-{{ $statusClass }}">{{ ucfirst($purchaseRequest->status) }}</span></td>
                                                                         </tr>
                                                                         <tr>
-                                                                            <th>{{('purchase_requests\index.created_at_') }}</th>
-                                                                            <td>{{ $purchaseRequest->created_at }}</td>
+                                                                            <th>Created At:</th>
+                                                                            <td>{{ $purchaseRequest->created_at->format('M d, Y h:i A') }}</td>
                                                                         </tr>
                                                                         <tr>
-                                                                            <th>{{('purchase_requests\index.updated_at_') }}</th>
-                                                                            <td>{{ $purchaseRequest->updated_at }}</td>
+                                                                            <th>Updated At:</th>
+                                                                            <td>{{ $purchaseRequest->updated_at->format('M d, Y h:i A') }}</td>
                                                                         </tr>
                                                                     </table>
                                                                 </div>
                                                             </div>
                                                         </div>
                                                         <div class="modal-footer">
-                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('purchase_requests\index.close') }}</button>
+                                                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -272,7 +272,7 @@
                             <tr>
                                 <td colspan="8" class="text-center py-4">
                                     <div class="alert alert-info m-0">
-                                        <i class="fas fa-info-circle mr-1"></i> {{('No records found') }}
+                                        <i class="fas fa-info-circle mr-1"></i> {{ __('No records found') }}
                                     </div>
                                 </td>
                             </tr>
@@ -294,48 +294,48 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title" id="settingsModalLabel"><i class="fas fa-cog mr-2"></i>{{('purchase_requests\index.point_price_settings') }}</h5>
+                    <h5 class="modal-title" id="settingsModalLabel"><i class="fas fa-cog mr-2"></i>Point Price Settings</h5>
                     <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{('purchase_requests\index._times_') }}</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <form>
                         <div class="form-group">
-                            <label for="pointPrice"><i class="fas fa-dollar-sign mr-1"></i>{{('purchase_requests\index.price_per_point_') }}</label>
+                            <label for="pointPrice"><i class="fas fa-dollar-sign mr-1"></i>Price Per Point ($)</label>
                             <div class="input-group">
                                 <div class="input-group-prepend">
-                                    <span class="input-group-text">{{('purchase_requests\index._') }}</span>
+                                    <span class="input-group-text">$</span>
                                 </div>
                                 <input type="number" class="form-control" id="pointPrice" step="0.01" min="0.01" value="1.00">
                             </div>
                         </div>
 
                         <div class="form-group">
-                            <label for="bulkDiscount"><i class="fas fa-percentage mr-1"></i>{{('purchase_requests\index.bulk_purchase_discount_') }}</label>
+                            <label for="bulkDiscount"><i class="fas fa-percentage mr-1"></i>Bulk Purchase Discount (%)</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="bulkDiscount" min="0" max="100" value="5">
                                 <div class="input-group-append">
-                                    <span class="input-group-text">{{('purchase_requests\index._') }}</span>
+                                    <span class="input-group-text">%</span>
                                 </div>
                             </div>
-                            <small class="form-text text-muted">{{('purchase_requests\index.discount_applied_for_purchases_over_1000') }}</small>
+                            <small class="form-text text-muted">Discount applied for purchases over 1000 points</small>
                         </div>
 
                         <div class="form-group">
-                            <label for="minimumPurchase"><i class="fas fa-coins mr-1"></i>{{('purchase_requests\index.minimum_purchase_amount') }}</label>
+                            <label for="minimumPurchase"><i class="fas fa-coins mr-1"></i>Minimum Purchase Amount</label>
                             <div class="input-group">
                                 <input type="number" class="form-control" id="minimumPurchase" min="1" value="100">
                                 <div class="input-group-append">
-                                    <span class="input-group-text">{{('purchase_requests\index.points') }}</span>
+                                    <span class="input-group-text">points</span>
                                 </div>
                             </div>
                         </div>
                     </form>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>{{('purchase_requests\index.cancel') }}</button>
-                    <button type="button" class="btn btn-primary"><i class="fas fa-save mr-1"></i>{{('purchase_requests\index.save_changes') }}</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"><i class="fas fa-times mr-1"></i>Cancel</button>
+                    <button type="button" class="btn btn-primary"><i class="fas fa-save mr-1"></i>Save Changes</button>
                 </div>
             </div>
         </div>
@@ -398,10 +398,3 @@
         });
     </script>
 @stop
-
-
-
-
-
-
-

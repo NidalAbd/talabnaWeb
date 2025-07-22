@@ -12,7 +12,6 @@ class point_transactions extends Model
     protected $fillable = [
         'from_user_id',
         'to_user_id',
-        'package_id',
         'type',
         'point',
     ];
@@ -40,10 +39,5 @@ class point_transactions extends Model
     public function toUser()
     {
         return $this->belongsTo(User::class, 'to_user_id');
-    }
-
-    public function package()
-    {
-        return $this->belongsTo(PointPackage::class, 'package_id');
     }
 }

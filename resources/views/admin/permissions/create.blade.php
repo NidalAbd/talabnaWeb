@@ -17,7 +17,7 @@
             <div class="col-md-12">
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">{{('admin\permissions\create.permission_information') }}</h3>
+                        <h3 class="card-title">Permission Information</h3>
                     </div>
 
                     <form action="{{ route('permissions.store') }}" method="POST">
@@ -26,7 +26,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name">Permission Name <span class="text-danger">{{('admin\permissions\create._') }}</span></label>
+                                        <label for="name">Permission Name <span class="text-danger">*</span></label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-key"></i></span>
@@ -46,7 +46,7 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="display_name">{{('admin\permissions\create.display_name') }}</label>
+                                        <label for="display_name">Display Name</label>
                                         <div class="input-group">
                                             <div class="input-group-prepend">
                                                 <span class="input-group-text"><i class="fas fa-eye"></i></span>
@@ -66,7 +66,7 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="description">{{('admin\permissions\create.description') }}</label>
+                                <label for="description">Description</label>
                                 <textarea class="form-control @error('description') is-invalid @enderror"
                                           id="description" name="description" rows="3"
                                           placeholder="Enter a description of this permission">{{ old('description') }}</textarea>
@@ -77,16 +77,16 @@
 
                             <div class="alert alert-info">
                                 <i class="icon fas fa-info-circle"></i>
-                                <h5>{{('admin\permissions\create.permission_naming_conventions') }}</h5>
-                                <p class="mb-0">{{('admin\permissions\create.it_s_recommended_to_follow_a_consistent_') }}</p>
+                                <h5>Permission Naming Conventions</h5>
+                                <p class="mb-0">It's recommended to follow a consistent naming pattern for permissions:</p>
                                 <ul>
-                                    <li><strong>{{('admin\permissions\create.view_resource_') }}</strong> - For viewing/listing a resource</li>
-                                    <li><strong>{{('admin\permissions\create.create_resource_') }}</strong> - For creating a new resource</li>
-                                    <li><strong>{{('admin\permissions\create.edit_resource_') }}</strong> - For updating an existing resource</li>
-                                    <li><strong>{{('admin\permissions\create.delete_resource_') }}</strong> - For deleting a resource</li>
-                                    <li><strong>{{('admin\permissions\create.manage_resource_') }}</strong> - For full control over a resource</li>
+                                    <li><strong>view_[resource]</strong> - For viewing/listing a resource</li>
+                                    <li><strong>create_[resource]</strong> - For creating a new resource</li>
+                                    <li><strong>edit_[resource]</strong> - For updating an existing resource</li>
+                                    <li><strong>delete_[resource]</strong> - For deleting a resource</li>
+                                    <li><strong>manage_[resource]</strong> - For full control over a resource</li>
                                 </ul>
-                                <p class="mb-0">{{('admin\permissions\create.examples_view_users_edit_products_man') }}</p>
+                                <p class="mb-0">Examples: view_users, edit_products, manage_settings</p>
                             </div>
                         </div>
 
@@ -124,10 +124,3 @@
         });
     </script>
 @stop
-
-
-
-
-
-
-

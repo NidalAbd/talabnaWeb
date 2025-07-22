@@ -1,7 +1,1 @@
 @extends('adminlte::auth.register')
-
-
-
-
-
-

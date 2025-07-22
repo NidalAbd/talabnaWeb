@@ -167,9 +167,6 @@ class ServicePostFactory extends Factory
             'location_latitudes' => fake()->latitude(31.2, 32.5),
             'location_longitudes' => fake()->longitude(34.2, 35.5),
             'type' => $this->faker->randomElement(['عرض', 'طلب']),
-            'level_id' => $this->faker->randomElement([0, 1, 2]), // 0 = Regular, 1 = Gold, 2 = Diamond
-            'badge_duration' => $this->faker->randomElement([0, 7, 15, 30]), // Duration in days
-            'badge_expires_at' => $this->faker->optional(0.3)->dateTimeBetween('now', '+30 days'),
             'categories_id' => $jobPost['categories_id'],
             'sub_categories_id' => $jobPost['sub_categories_id'],
         ];

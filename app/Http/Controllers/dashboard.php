@@ -3,25 +3,28 @@
 namespace App\Http\Controllers;
 
 use App\Models\Categories;
-use App\Models\ServicePost;
 use App\Models\point_purchase_requests;
-use App\Models\Level;
+use App\Models\ServicePost;
+use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class dashboard extends Controller
 {
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\Http\Response
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
     public function index()
     {
-        $user = Auth::user();
+        // Count users
+        $user = User::count();
 
-        // Get categories for mapping
-        $categories = Categories::all();
+        // Get categories with more robust handling
+        $categories = Categories::get();
+
+        // Mapping of English names to category IDs
         $categoryMap = [
             'Devices' => $categories->first(fn($cat) =>
                 isset($cat->name['en']) && $cat->name['en'] === 'Devices'
@@ -48,15 +51,10 @@ class dashboard extends Controller
         $allRealState = ServicePost::where('categories_id', $categoryMap['Real Estate'])->count();
         $allGeneral = ServicePost::where('categories_id', $categoryMap['Services'])->count();
 
-        // Get level IDs for badge counting
-        $goldLevel = Level::where('name->ar', 'ذهبي')->first();
-        $diamondLevel = Level::where('name->ar', 'ماسي')->first();
-        $regularLevel = Level::where('name->ar', 'عادي')->first();
-        
         // Badge counts
-        $allGolden = $goldLevel ? ServicePost::where('level_id', $goldLevel->id)->count() : 0;
-        $allDiamond = $diamondLevel ? ServicePost::where('level_id', $diamondLevel->id)->count() : 0;
-        $allNormal = $regularLevel ? ServicePost::where('level_id', $regularLevel->id)->count() : 0;
+        $allGolden = ServicePost::where('have_badge', 'ذهبي')->count();
+        $allDiamond = ServicePost::where('have_badge', 'ماسي')->count();
+        $allNormal = ServicePost::where('have_badge', 'عادي')->count();
 
         // Count purchase requests
         $purchaseRequests = point_purchase_requests::count();
@@ -67,8 +65,7 @@ class dashboard extends Controller
             'allJobs', 'allRealState', 'allGeneral',
             'purchaseRequests'
         ));
-    }
-    /**
+    }    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response

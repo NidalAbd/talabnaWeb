@@ -11,7 +11,7 @@
                                <a href="{{route('service_posts.create')}}" style="float: right">
                                             <button class="btn btn-primary" onclick="">
                                                 <i class="fa fa-user fa-1x"></i>
-                                                {{('+ خدمة') }}
+                                                {{ __('+ خدمة') }}
                                             </button>
                                         </a>
                             </div>
@@ -30,50 +30,54 @@
                         <table class="table table-bordered table-striped table-dark table-sm text-center">
                             <thead>
                             <tr class="btn-dark">
-                                <th>{{('service_posts\general_index.title') }}</th>
-                                <th>{{('service_posts\general_index.category') }}</th>
-                                <th>{{('service_posts\general_index.user') }}</th>
-                                <th>{{('service_posts\general_index.favorites') }}</th>
-                                <th>{{('service_posts\general_index.reports') }}</th>
-                                <th>{{('service_posts\general_index.views') }}</th>
-                                <th>{{('service_posts\general_index.type') }}</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>User</th>
+                                <th>favorites</th>
+                                <th>reports</th>
+                                <th>views</th>
+                                <th>type</th>
 
-                                <th>{{('service_posts\general_index.action') }}</th>
+                                <th>Action</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($servicePosts as $post)
                                 <tr>
                                     <td>{{ $post->title }}</td>
-                                    <td>{{ $post->category->name ?? '' }}</td>
-                                    <td>{{ $post->user->user_name ?? '' }}</td>
-                                    <td>{{ $post->favorites_count ?? 0 }}</td>
-                                    <td>{{ $post->reports_count ?? 0 }}</td>
-                                    <td>{{ $post->view_count ?? 0 }}</td>
-                                    <td>{{ $post->type ?? '' }}</td>
+                                    <td>{{ $post->category }}</td>
+                                    <td>{{ $post->user->user_name }}</td>
+                                    <td>{{ $post->favorites_count }}</td>
+                                    <td>{{ $post->report_count }}</td>
+                                    <td>{{ $post->view_count }}</td>
+                                    <td>{{ $post->have_badge }}</td>
                                     <td>
-                                        <a href="{{ route('service_posts.show', $post->id) }}">Show</a>
-                                        <a href="{{ route('service_posts.edit', $post->id) }}">Edit</a>
+                                        <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-sm btn-primary">View</a>
+                                        {{--                                            @can('update_service', $post)--}}
+                                        <a href="{{ route('service_posts.edit', $post->id) }}" class="btn btn-sm btn-warning">Edit</a>
+                                        {{--                                            @endcan--}}
+                                        {{--                                            @can('destroy_service', $post)--}}
                                         <form action="{{ route('service_posts.destroy', $post->id) }}" method="POST" style="display: inline-block;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">{{ __('service_posts/general_index.delete') }}</button>
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">Delete</button>
                                         </form>
+                                        {{--                                            @endcan--}}
                                     </td>
                                 </tr>
                             @endforeach
                             </tbody>
                             <thead>
                             <tr class="btn-dark">
-                                <th>{{('service_posts\general_index.title') }}</th>
-                                <th>{{('service_posts\general_index.category') }}</th>
-                                <th>{{('service_posts\general_index.user') }}</th>
-                                <th>{{('service_posts\general_index.favorites') }}</th>
-                                <th>{{('service_posts\general_index.reports') }}</th>
-                                <th>{{('service_posts\general_index.views') }}</th>
-                                <th>{{('service_posts\general_index.type') }}</th>
+                                <th>Title</th>
+                                <th>Category</th>
+                                <th>User</th>
+                                <th>favorites</th>
+                                <th>reports</th>
+                                <th>views</th>
+                                <th>type</th>
 
-                                <th>{{('service_posts\general_index.action') }}</th>
+                                <th>Action</th>
                             </tr>
                             </thead>
                         </table>
@@ -90,10 +94,3 @@
         </div>
     </div>
 @endsection
-
-
-
-
-
-
-

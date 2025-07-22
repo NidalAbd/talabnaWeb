@@ -30,7 +30,7 @@
                                 <div class="alert alert-success alert-dismissible fade show" role="alert">
                                     {{ session('success') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">{{('categories\create._times_') }}</span>
+                                        <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                             @endif
@@ -39,7 +39,7 @@
                                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                                     {{ session('error') }}
                                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                                        <span aria-hidden="true">{{('categories\create._times_') }}</span>
+                                        <span aria-hidden="true">&times;</span>
                                     </button>
                                 </div>
                             @endif
@@ -49,7 +49,7 @@
                                     <div class="form-group">
                                         <label for="name_ar" class="font-weight-bold">
                                             <i class="fas fa-language mr-1"></i>
-                                            Arabic Name <span class="text-danger">{{('categories\create._') }}</span>
+                                            Arabic Name <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" id="name_ar" name="name[ar]"
                                                class="form-control @error('name.ar') is-invalid @enderror"
@@ -64,7 +64,7 @@
                                     <div class="form-group">
                                         <label for="name_en" class="font-weight-bold">
                                             <i class="fas fa-language mr-1"></i>
-                                            English Name <span class="text-danger">{{('categories\create._') }}</span>
+                                            English Name <span class="text-danger">*</span>
                                         </label>
                                         <input type="text" id="name_en" name="name[en]"
                                                class="form-control @error('name.en') is-invalid @enderror"
@@ -81,12 +81,12 @@
                                     <div class="form-group">
                                         <label for="photo" class="font-weight-bold">
                                             <i class="fas fa-image mr-1"></i>
-                                            Category Image <span class="text-danger">{{('categories\create._') }}</span>
+                                            Category Image <span class="text-danger">*</span>
                                         </label>
                                         <div class="custom-file">
                                             <input type="file" class="custom-file-input @error('photo') is-invalid @enderror"
                                                    id="photo" name="photo" required onchange="previewImage(this)">
-                                            <label class="custom-file-label" for="photo">{{('categories\create.choose_file_') }}</label>
+                                            <label class="custom-file-label" for="photo">Choose file...</label>
                                             @error('photo')
                                             <div class="invalid-feedback">{{ $message }}</div>
                                             @enderror
@@ -104,7 +104,7 @@
                                     <div id="image-preview-container" class="text-center d-none mt-3">
                                         <div class="card">
                                             <div class="card-header bg-light">
-                                                <h6 class="mb-0">{{('categories\create.image_preview') }}</h6>
+                                                <h6 class="mb-0">Image Preview</h6>
                                             </div>
                                             <div class="card-body">
                                                 <img id="image-preview" class="img-fluid img-thumbnail" style="max-height: 200px;">
@@ -157,10 +157,3 @@
         </script>
     @endpush
 @endsection
-
-
-
-
-
-
-

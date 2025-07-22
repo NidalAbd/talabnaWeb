@@ -33,8 +33,8 @@ class ExpireBadges extends Command
         Log::info('Badge expiration check started');
 
         try {
-            // Find posts with level_id > 0 and badge_expires_at in the past
-            $expiredByExpirationDate = ServicePost::where('level_id', '>', 0)
+            // Find posts with badge_expires_at in the past
+            $expiredByExpirationDate = ServicePost::whereIn('have_badge', ['ذهبي', 'ماسي'])
                 ->whereNotNull('badge_expires_at')
                 ->where('badge_expires_at', '<', Carbon::now())
                 ->get();
@@ -42,39 +42,32 @@ class ExpireBadges extends Command
             $count = $expiredByExpirationDate->count();
 
             foreach ($expiredByExpirationDate as $post) {
-                $oldLevel = $post->level ? $post->level->localized_name : 'Premium';
-                
-                // Reset to regular level (level_id = 0 or null)
-                $post->level_id = 0;
+                $oldBadge = $post->have_badge;
+
+                // Reset badge to standard
+                $post->have_badge = 'عادي';
                 $post->badge_duration = 0;
                 $post->badge_expires_at = null;
                 $post->save();
 
                 // Create expiration notification
-                Notification::create([
-                    'user_id' => $post->user_id,
-                    'title' => [
-                        'ar' => "انتهت صلاحية مستوى المنشور",
-                        'en' => "Service Post Level Expired"
-                    ],
-                    'body' => [
-                        'ar' => "تم تغيير مستوى المنشور من {$oldLevel} إلى عادي بسبب انتهاء الصلاحية.",
-                        'en' => "Service Post Level changed from {$oldLevel} to regular due to expiration."
-                    ],
-                    'type' => 'level_expiration',
-                    'data' => [
-                        'service_post_id' => $post->id,
-                        'old_level' => $oldLevel,
-                        'new_level' => 'Regular'
-                    ]
+                $message = json_encode([
+                    'ar' => "تم تغيير شارة منشور الخدمة من {$oldBadge} إلى عادي بسبب انتهاء المدة.",
+                    'en' => "Service Post Badge changed from {$oldBadge} to normal due to expiration."
                 ]);
 
-                $this->info("Expired level for service post #{$post->id} - Level was: {$oldLevel}");
-                Log::info("Expired level for service post #{$post->id} - Level was: {$oldLevel}");
+                Notification::create([
+                    'message' => $message,
+                    'user_id' => $post->user_id,
+                    'type' => 'badge'
+                ]);
+
+                $this->info("Expired badge for service post #{$post->id} - Badge was: {$oldBadge}");
+                Log::info("Expired badge for service post #{$post->id} - Badge was: {$oldBadge}");
             }
 
             // Fallback: check posts without badge_expires_at but with duration
-            $potentiallyExpired = ServicePost::where('level_id', '>', 0)
+            $potentiallyExpired = ServicePost::whereIn('have_badge', ['ذهبي', 'ماسي'])
                 ->where('badge_duration', '>', 0)
                 ->whereNull('badge_expires_at')
                 ->get();
@@ -83,35 +76,29 @@ class ExpireBadges extends Command
                 $expirationDate = Carbon::parse($post->created_at)->addDays($post->badge_duration);
 
                 if (Carbon::now()->greaterThanOrEqualTo($expirationDate)) {
-                    $oldLevel = $post->level ? $post->level->localized_name : 'Premium';
-                    
-                    // Reset to regular level
-                    $post->level_id = 0;
+                    $oldBadge = $post->have_badge;
+
+                    // Reset badge to standard
+                    $post->have_badge = 'عادي';
                     $post->badge_duration = 0;
                     $post->badge_expires_at = null;
                     $post->save();
 
                     // Create expiration notification
-                    Notification::create([
-                        'user_id' => $post->user_id,
-                        'title' => [
-                            'ar' => "انتهت صلاحية مستوى المنشور",
-                            'en' => "Service Post Level Expired"
-                        ],
-                        'body' => [
-                            'ar' => "تم تغيير مستوى المنشور من {$oldLevel} إلى عادي بسبب انتهاء الصلاحية.",
-                            'en' => "Service Post Level changed from {$oldLevel} to regular due to expiration."
-                        ],
-                        'type' => 'level_expiration',
-                        'data' => [
-                            'service_post_id' => $post->id,
-                            'old_level' => $oldLevel,
-                            'new_level' => 'Regular'
-                        ]
+                    $message = json_encode([
+                        'ar' => "تم تغيير شارة منشور الخدمة من {$oldBadge} إلى عادي بسبب انتهاء المدة.",
+                        'en' => "Service Post Badge changed from {$oldBadge} to normal due to expiration."
                     ]);
 
-                    $this->info("Expired level for service post #{$post->id} using fallback method - Level was: {$oldLevel}");
-                    Log::info("Expired level for service post #{$post->id} using fallback method - Level was: {$oldLevel}");
+                    Notification::create([
+                        'message' => $message,
+                        'user_id' => $post->user_id,
+                        'type' => 'badge'
+                    ]);
+
+                    $count++;
+                    $this->info("Expired badge for service post #{$post->id} using fallback method - Badge was: {$oldBadge}");
+                    Log::info("Expired badge for service post #{$post->id} using fallback method - Badge was: {$oldBadge}");
                 } else {
                     // Update the badge_expires_at field for future checks
                     $post->badge_expires_at = $expirationDate;
@@ -122,12 +109,16 @@ class ExpireBadges extends Command
                 }
             }
 
-            $this->info("Level expiration completed. Expired {$count} levels.");
-            Log::info("Level expiration completed. Expired {$count} levels.");
+            $this->info("Badge expiration completed. Expired {$count} badges.");
+            Log::info("Badge expiration completed. Expired {$count} badges.");
 
+            return 0;
         } catch (\Exception $e) {
-            $this->error("An error occurred during level expiration: " . $e->getMessage());
-            Log::error("Level expiration error: " . $e->getMessage());
+            $this->error("An error occurred during badge expiration: " . $e->getMessage());
+            Log::error("Badge expiration error: " . $e->getMessage());
+            Log::error($e->getTraceAsString());
+
+            return 1;
         }
     }
 }

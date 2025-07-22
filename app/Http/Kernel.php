@@ -37,7 +37,6 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
-            \App\Http\Middleware\SetLocale::class, // Added for language switching
         ],
 
         'api' => [
@@ -67,7 +66,6 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin' => \App\Http\Middleware\AdminAccessMiddleware::class,
         'check.user.ban' => \App\Http\Middleware\CheckUserBan::class,
-        'investor' => \App\Http\Middleware\InvestorMiddleware::class,
 
     ];
 }

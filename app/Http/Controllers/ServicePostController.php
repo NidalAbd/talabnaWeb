@@ -12,8 +12,6 @@ use App\Models\Sub_categories;
 use App\Models\User;
 use App\Models\countries;
 use App\Models\cities;
-use App\Models\Level;
-use App\Models\PointPackage;
 use App\Notifications\new_servicepost_notification;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Contracts\View\Factory;
@@ -25,215 +23,68 @@ use Illuminate\Routing\Redirector;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Support\Facades\DB;
-use Carbon\Carbon;
 
 class ServicePostController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('permission:service_posts_index')->only(['index']);
-        $this->middleware('permission:service_posts_create')->only(['create', 'store']);
-        $this->middleware('permission:service_posts_edit')->only(['edit', 'update']);
-        $this->middleware('permission:service_posts_destroy')->only(['destroy']);
-        $this->middleware('permission:service_posts_approve')->only(['approve']);
-        $this->middleware('permission:service_posts_reject')->only(['reject']);
-        $this->middleware('permission:service_posts_index')->only(['show']);
-    }
-
     public function index(Request $request)
     {
-        try {
-            $user = Auth::user();
+        $user = Auth::user();
 
-            // Check if the user has the required permissions to view all service posts
-            if ($user->hasPermission('service_posts_index')) {
-                
-                // Start with the base query
-                $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city', 'level');
+        // Check if the user has the required permissions to view all service posts
+        if ($user->hasPermission('view_service')) {
+            // Start with the base query
+            $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city');
 
-                // Apply category filter
-                if ($request->has('category') && $request->category) {
-                    $query->where('categories_id', $request->category);
-                }
-
-                // Apply subcategory filter
-                if ($request->has('subcategory') && $request->subcategory) {
-                    $query->where('sub_categories_id', $request->subcategory);
-                }
-
-                // Apply status filter
-                if ($request->has('status') && $request->status) {
-                    $query->where('state', $request->status);
-                }
-
-                // Apply type filter
-                if ($request->has('type') && $request->type) {
-                    $query->where('type', $request->type);
-                }
-
-                // Apply premium filter
-                if ($request->has('premium') && $request->premium !== '') {
-                    $query->where('is_premium', $request->premium);
-                }
-
-                // Apply level filter
-                if ($request->has('level') && $request->level) {
-                    $query->where('level_id', $request->level);
-                }
-
-                // Apply user filter
-                if ($request->has('user') && $request->user) {
-                    $query->where('user_id', $request->user);
-                }
-
-                // Apply city filter
-                if ($request->has('city') && $request->city) {
-                    $query->where('city_id', $request->city);
-                }
-
-                // Apply country filter
-                if ($request->has('country') && $request->country) {
-                    $query->where('country_id', $request->country);
-                }
-
-                // Apply minimum views filter
-                if ($request->has('min_views') && $request->min_views) {
-                    $query->where('view_count', '>=', $request->min_views);
-                }
-
-                // Apply date range filter
-                if ($request->has('date_range') && $request->date_range) {
-                    $dates = explode(' - ', $request->date_range);
-                    if (count($dates) === 2) {
-                        $startDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($dates[0]))->startOfDay();
-                        $endDate = \Carbon\Carbon::createFromFormat('m/d/Y', trim($dates[1]))->endOfDay();
-                        $query->whereBetween('created_at', [$startDate, $endDate]);
-                    }
-                }
-
-                // Apply search filter
-                if ($request->has('search') && $request->search) {
-                    $searchTerm = $request->search;
-                    $query->where(function($q) use ($searchTerm) {
-                        $q->where('title', 'like', "%{$searchTerm}%")
-                            ->orWhere('description', 'like', "%{$searchTerm}%")
-                            ->orWhere('price', 'like', "%{$searchTerm}%")
-                            ->orWhere('type', 'like', "%{$searchTerm}%")
-                            ->orWhereHas('user', function($userQuery) use ($searchTerm) {
-                                $userQuery->where('name', 'like', "%{$searchTerm}%")
-                                    ->orWhere('user_name', 'like', "%{$searchTerm}%")
-                                    ->orWhere('email', 'like', "%{$searchTerm}%");
-                            })
-                            ->orWhereHas('category', function($categoryQuery) use ($searchTerm) {
-                                $categoryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
-                                    ->orWhere('name->en', 'like', "%{$searchTerm}%")
-                                    ->orWhere('name->ar', 'like', "%{$searchTerm}%");
-                            })
-                            ->orWhereHas('subCategory', function($subCategoryQuery) use ($searchTerm) {
-                                $subCategoryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
-                                    ->orWhere('name->en', 'like', "%{$searchTerm}%")
-                                    ->orWhere('name->ar', 'like', "%{$searchTerm}%");
-                            })
-                            ->orWhereHas('city', function($cityQuery) use ($searchTerm) {
-                                $cityQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
-                                    ->orWhere('name->en', 'like', "%{$searchTerm}%")
-                                    ->orWhere('name->ar', 'like', "%{$searchTerm}%");
-                            })
-                            ->orWhereHas('country', function($countryQuery) use ($searchTerm) {
-                                $countryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
-                                    ->orWhere('name->en', 'like', "%{$searchTerm}%")
-                                    ->orWhere('name->ar', 'like', "%{$searchTerm}%");
-                            });
-                    });
-                }
-
-                // Get statistics before pagination
-                $totalCount = $query->count();
-                $publishedCount = ServicePost::where('state', 'published')->count();
-                $pendingCount = ServicePost::where('state', 'not published')->count();
-                $premiumCount = ServicePost::where('level_id', '>', 0)->count();
-
-
-
-                // Order by level_id (high to low) then by creation date
-                $perPage = $request->get('per_page', 15);
-                $servicePosts = $query->orderBy('level_id', 'desc')
-                    ->orderBy('created_at', 'desc')
-                    ->paginate($perPage)
-                    ->appends($request->query());
-
-
-
-                // Fetch categories and subcategories for dropdowns
-                $categories = Categories::all();
-                $subcategories = $request->has('category')
-                    ? Sub_categories::where('categories_id', $request->category)->get()
-                    : collect();
-
-                // Fetch additional data for advanced filters
-                $users = User::select('id', 'name', 'user_name', 'email')
-                    ->whereHas('servicePosts')
-                    ->orderBy('name')
-                    ->get();
-
-                $cities = cities::select('id', 'name')
-                    ->whereHas('servicePosts')
-                    ->orderBy('name')
-                    ->get();
-
-                $countries = countries::select('id', 'name')
-                    ->whereHas('servicePosts')
-                    ->orderBy('name')
-                    ->get();
-
-                // Fetch levels for filtering
-                try {
-                    $levels = Level::active()->ordered()->get();
-                } catch (\Exception $e) {
-                    \Log::error('Failed to load levels: ' . $e->getMessage());
-                    $levels = collect(); // Empty collection as fallback
-                }
-
-                // Check if featured functionality is available
-                $hasFeaturedColumn = Schema::hasColumn('service_posts', 'is_featured');
-
-
-
-                return view('service_posts.index', compact(
-                    'servicePosts', 
-                    'user', 
-                    'categories', 
-                    'subcategories',
-                    'users',
-                    'cities', 
-                    'countries',
-                    'levels',
-                    'totalCount',
-                    'publishedCount',
-                    'pendingCount',
-                    'premiumCount',
-                    'hasFeaturedColumn'
-                ));
-            } else {
-                return view('errors.403');
+            // Apply category filter
+            if ($request->has('category') && $request->category) {
+                $query->where('categories_id', $request->category);
             }
-        } catch (\Exception $e) {
-            \Log::error('Error in ServicePostController@index', [
-                'error' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
-                'trace' => $e->getTraceAsString()
-            ]);
-            
-            // Return a simple error response for debugging
-            return response()->json([
-                'error' => 'An error occurred while loading service posts',
-                'message' => $e->getMessage(),
-                'file' => $e->getFile(),
-                'line' => $e->getLine()
-            ], 500);
+
+            // Apply subcategory filter
+            if ($request->has('subcategory') && $request->subcategory) {
+                $query->where('sub_categories_id', $request->subcategory);
+            }
+
+            // Apply status filter
+            if ($request->has('status') && $request->status) {
+                $query->where('state', $request->status);
+            }
+
+            // Apply type filter
+            if ($request->has('type') && $request->type) {
+                $query->where('type', $request->type);
+            }
+
+            // Apply search filter
+            if ($request->has('search') && $request->search) {
+                $searchTerm = $request->search;
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('title', 'like', "%{$searchTerm}%")
+                        ->orWhereHas('user', function($userQuery) use ($searchTerm) {
+                            $userQuery->where('user_name', 'like', "%{$searchTerm}%");
+                        })
+                        ->orWhereHas('category', function($categoryQuery) use ($searchTerm) {
+                            $categoryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
+                                ->orWhere('name->en', 'like', "%{$searchTerm}%");
+                        });
+                });
+            }
+
+            // Order and paginate
+            $servicePosts = $query->orderBy('id', 'desc')
+                ->paginate(100)
+                // Preserve query parameters in pagination links
+                ->appends($request->query());
+
+            // Fetch categories and subcategories for dropdowns
+            $categories = Categories::all();
+            $subcategories = $request->has('category')
+                ? Sub_categories::where('categories_id', $request->category)->get()
+                : collect();
+
+            return view('service_posts.index', compact('servicePosts', 'user', 'categories', 'subcategories'));
+        } else {
+            return redirect()->route('errors.403');
         }
     }
 
@@ -241,7 +92,7 @@ class ServicePostController extends Controller
     {
         $user = Auth::user();
         // Check if the user has the required permissions to create a service post
-        if (!$user->hasPermission('service_posts_create')) {
+        if (!$user->hasPermission('create_service')) {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
 
@@ -253,1000 +104,188 @@ class ServicePostController extends Controller
         return view('service_posts.create', compact('categories', 'subcategories', 'countries', 'cities'));
     }
 
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $user = Auth::user();
 
-        // Check if the user has the required permissions to create a service post
-        if (!$user->hasPermission('service_posts_create')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
+        // Define default coordinates
+        $defaultLatitude = 31.9539;
+        $defaultLongitude = 35.2376;
 
         $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'price_currency_code' => 'required|string|max:3',
-            'type' => 'required|in:عرض,طلب',
+            'title' => 'required|max:255',
+            'description' => 'required',
             'categories_id' => 'required|exists:categories,id',
             'sub_categories_id' => 'required|exists:sub_categories,id',
+            'price' => 'nullable|numeric',
+            'price_currency_code' => 'nullable',
             'country_id' => 'nullable|exists:countries,id',
             'city_id' => 'nullable|exists:cities,id',
-            'location_latitudes' => 'nullable|numeric',
-            'location_longitudes' => 'nullable|numeric',
-            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
-        ]);
-
-        DB::beginTransaction();
-
-        try {
-            $servicePost = ServicePost::create([
-                'user_id' => $user->id,
-                'title' => $validatedData['title'],
-                'description' => $validatedData['description'],
-                'price' => $validatedData['price'],
-                'price_currency_code' => $validatedData['price_currency_code'],
-                'type' => $validatedData['type'],
-                'categories_id' => $validatedData['categories_id'],
-                'sub_categories_id' => $validatedData['sub_categories_id'],
-                'country_id' => $validatedData['country_id'],
-                'city_id' => $validatedData['city_id'],
-                'location_latitudes' => $validatedData['location_latitudes'],
-                'location_longitudes' => $validatedData['location_longitudes'],
-                'state' => 'published',
-            ]);
-
-            // Handle photo uploads
-            if ($request->hasFile('photos')) {
-                foreach ($request->file('photos') as $photo) {
-                    $fileName = $photo->hashName();
-                    $photoPath = $photo->storeAs('photos/serviceposts', $fileName);
-
-                    $photoModel = new Photos([
-                        'src' => 'storage/'.$photoPath,
-                        'is_external' => false
-                    ]);
-
-                    $servicePost->photos()->save($photoModel);
-                }
-            }
-
-            // Send notifications to followers
-            $this->sendNotificationsToFollowers($servicePost);
-
-            DB::commit();
-
-            return redirect()->route('service_posts.show', $servicePost)
-                ->with('success', 'Service post created successfully');
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Failed to create service post: ' . $e->getMessage());
-            return back()->withInput()->with('error', 'Failed to create service post');
-        }
-    }
-
-    public function show(Request $request, ServicePost $servicePost)
-    {
-        // Only admin and moderator can view all service posts
-        $user = Auth::user();
-
-        // Check if the user has the required permissions to view a service post
-        if ($user->hasPermission('service_posts_index')) {
-            $servicePost->load('photos', 'user', 'category', 'subCategory', 'country', 'city');
-            return view('service_posts.show', compact('servicePost'));
-        } else {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-    }
-
-    public function edit(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-
-        // Check if the user has the required permissions to edit a service post
-        if ($user->hasPermission('service_posts_edit')) {
-            $servicePost->load('photos', 'user', 'country', 'city');
-            $categories = Categories::where('isSuspended', false)->get();
-            $subcategories = Sub_categories::where('isSuspended', false)->get();
-            $countries = countries::all();
-            $cities = cities::all();
-
-            return view('service_posts.edit', compact('servicePost', 'categories', 'subcategories', 'countries', 'cities'));
-        } else {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-    }
-
-    public function update(Request $request, ServicePost $servicePost)
-    {
-        $user = Auth::user();
-
-        // Check if the user has the required permissions to update a service post
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        $validatedData = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'required|string',
-            'price' => 'required|numeric|min:0',
-            'price_currency_code' => 'required|string|max:3',
+            'location_latitudes' => 'nullable|numeric', // Changed from required to nullable
+            'location_longitudes' => 'nullable|numeric', // Changed from required to nullable
             'type' => 'required|in:عرض,طلب',
-            'categories_id' => 'required|exists:categories,id',
-            'sub_categories_id' => 'required|exists:sub_categories,id',
-            'country_id' => 'nullable|exists:countries,id',
-            'city_id' => 'nullable|exists:cities,id',
-            'location_latitudes' => 'nullable|numeric',
-            'location_longitudes' => 'nullable|numeric',
-            'photos.*' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'have_badge' => 'nullable|in:عادي,ذهبي,ماسي',
+            'badge_duration' => 'nullable|integer',
+            'state' => 'nullable|in:published,archive,not published,rejected',
+            'images.*' => 'nullable|file|mimes:jpeg,jpg,png,mp4',
         ]);
 
-        DB::beginTransaction();
+        // Get category and subcategory
+        $category = Categories::findOrFail($validatedData['categories_id']);
+        $subCategory = Sub_categories::findOrFail($validatedData['sub_categories_id']);
 
-        try {
-            $servicePost->update($validatedData);
+        // Initialize badge variables
+        $ServicePostFinalBadge = 'عادي';
+        $ServicePostFinalDuration = 0;
 
-            // Handle photo uploads
-            if ($request->hasFile('photos')) {
-                foreach ($request->file('photos') as $photo) {
-                    $fileName = $photo->hashName();
-                    $photoPath = $photo->storeAs('photos/serviceposts', $fileName);
+        // Handle badge and points if selected
+        if (isset($validatedData['have_badge']) && $validatedData['have_badge'] !== 'عادي') {
+            // Golden badge
+            if ($validatedData['have_badge'] === "ذهبي") {
+                $GoldenDurationPrice = $validatedData['badge_duration'] * 1;
+                if ($user->pointsBalance >= $GoldenDurationPrice) {
+                    $ServicePostFinalBadge = $validatedData['have_badge'];
+                    $ServicePostFinalDuration = $validatedData['badge_duration'];
 
-                    $photoModel = new Photos([
-                        'src' => 'storage/'.$photoPath,
-                        'is_external' => false
-                    ]);
+                    // Decrement user points
+                    palservice_points::where('user_id', $user->id)->decrement('point', $GoldenDurationPrice);
 
-                    $servicePost->photos()->save($photoModel);
+                    // Create a transaction record
+                    $transaction = new point_transactions();
+                    $transaction->to_user_id = $user->id;
+                    $transaction->from_user_id = $user->id;
+                    $transaction->type = 'used';
+                    $transaction->point = $GoldenDurationPrice;
+                    $transaction->save();
+                } else {
+                    return redirect()->route('service_posts.create')
+                        ->with('error', 'Needed ' . $GoldenDurationPrice . ' Point, Your Balance Point not enough.');
                 }
             }
+            // Diamond badge
+            elseif ($validatedData['have_badge'] === "ماسي") {
+                $DiamondDurationPrice = $validatedData['badge_duration'] * 3;
+                if ($user->pointsBalance >= $DiamondDurationPrice) {
+                    $ServicePostFinalBadge = $validatedData['have_badge'];
+                    $ServicePostFinalDuration = $validatedData['badge_duration'];
 
-            DB::commit();
+                    // Decrement user points
+                    palservice_points::where('user_id', $user->id)->decrement('point', $DiamondDurationPrice);
 
-            return redirect()->route('service_posts.show', $servicePost)
-                ->with('success', 'Service post updated successfully');
-        } catch (\Exception $e) {
-            DB::rollback();
-            Log::error('Failed to update service post: ' . $e->getMessage());
-            return back()->withInput()->with('error', 'Failed to update service post');
-        }
-    }
-
-    public function destroy(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-
-        if (!$user->hasPermission('service_posts_destroy')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        try {
-            $servicePost->delete();
-            return response()->json(['success' => true, 'message' => 'Service post deleted successfully']);
-        } catch (\Exception $e) {
-            Log::error('Failed to delete service post: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to delete service post'], 500);
-        }
-    }
-
-    public function approve(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-
-        if (!$user->hasPermission('service_posts_approve')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        try {
-            $servicePost->update(['state' => 'published']);
-            return response()->json(['success' => true, 'message' => 'Service post approved successfully']);
-        } catch (\Exception $e) {
-            Log::error('Failed to approve service post: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to approve service post'], 500);
-        }
-    }
-
-    public function reject(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-
-        if (!$user->hasPermission('service_posts_reject')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        try {
-            $servicePost->update(['state' => 'rejected']);
-            return response()->json(['success' => true, 'message' => 'Service post rejected successfully']);
-        } catch (\Exception $e) {
-            Log::error('Failed to reject service post: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to reject service post'], 500);
-        }
-    }
-
-    public function togglePremium(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        try {
-            $servicePost->update(['is_premium' => !$servicePost->is_premium]);
-            $status = $servicePost->is_premium ? 'premium' : 'regular';
-
-            return response()->json([
-                'success' => true,
-                'message' => "Service post status changed to {$status}",
-                'data' => [
-                    'id' => $servicePost->id,
-                    'is_premium' => $servicePost->is_premium
-                ]
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Failed to toggle premium status: ' . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to update premium status'], 500);
-        }
-    }
-
-    public function bulkDestroy(Request $request)
-    {
-        $user = Auth::user();
-
-        if (!$user->hasPermission('service_posts_destroy')) {
-            return response()->json(['error' => 'Unauthorized'], 403);
-        }
-
-        $ids = $request->input('ids', []);
-
-        if (empty($ids)) {
-            return back()->with('error', 'No posts selected');
-        }
-
-        try {
-            $servicePosts = ServicePost::whereIn('id', $ids)->get();
-
-            foreach ($servicePosts as $servicePost) {
-                // Delete associated photos
-                foreach ($servicePost->photos as $photo) {
-                    if (Storage::exists($photo->src)) {
-                        Storage::delete($photo->src);
-                    }
-                    $photo->delete();
-                }
-                $servicePost->delete();
-            }
-
-            return back()->with('success', count($servicePosts) . ' service posts deleted successfully');
-        } catch (\Exception $e) {
-            Log::error('Failed to bulk delete service posts: ' . $e->getMessage());
-            return back()->with('error', 'Failed to delete service posts');
-        }
-    }
-
-    public function inViewCount(ServicePost $servicePost)
-    {
-        $servicePost->increment('view_count');
-        return response()->json(['success' => true]);
-    }
-
-    /**
-     * Bulk action for service posts
-     */
-    public function bulkAction(Request $request)
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $action = $request->input('action');
-        $postIds = $request->input('post_ids', []);
-        
-        if (empty($postIds)) {
-            return response()->json(['success' => false, 'message' => 'No posts selected'], 400);
-        }
-
-        $posts = ServicePost::whereIn('id', $postIds)->get();
-        $updatedCount = 0;
-
-        try {
-            DB::beginTransaction();
-
-            foreach ($posts as $post) {
-                switch ($action) {
-                    case 'approve':
-                        if ($post->state !== 'published') {
-                            $post->state = 'published';
-                            $post->save();
-                            $updatedCount++;
-                        }
-                        break;
-                        
-                    case 'reject':
-                        if ($post->state !== 'rejected') {
-                            $post->state = 'rejected';
-                            $post->save();
-                            $updatedCount++;
-                        }
-                        break;
-                        
-                    case 'archive':
-                        if ($post->state !== 'archive') {
-                            $post->state = 'archive';
-                            $post->save();
-                            $updatedCount++;
-                        }
-                        break;
-                        
-                    case 'make_premium':
-                        if (!$post->is_premium) {
-                            $post->is_premium = true;
-                            $post->save();
-                            $updatedCount++;
-                        }
-                        break;
-                        
-                    case 'remove_premium':
-                        if ($post->is_premium) {
-                            $post->is_premium = false;
-                            $post->save();
-                            $updatedCount++;
-                        }
-                        break;
-                        
-                    case 'delete':
-                        $post->delete();
-                        $updatedCount++;
-                        break;
+                    // Create a transaction record
+                    $transaction = new point_transactions();
+                    $transaction->to_user_id = $user->id;
+                    $transaction->from_user_id = $user->id;
+                    $transaction->type = 'used';
+                    $transaction->point = $DiamondDurationPrice;
+                    $transaction->save();
+                } else {
+                    return redirect()->route('service_posts.create')
+                        ->with('error', 'Needed ' . $DiamondDurationPrice . ' Point, Your Balance Point not enough.');
                 }
             }
-
-            DB::commit();
-
-            $actionText = ucfirst(str_replace('_', ' ', $action));
-            return response()->json([
-                'success' => true,
-                'message' => "Successfully {$actionText} {$updatedCount} posts"
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while processing the bulk action'
-            ], 500);
-        }
-    }
-
-    /**
-     * Export service posts
-     */
-    public function export(Request $request)
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_index')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
+        } elseif (isset($validatedData['have_badge']) && $validatedData['have_badge'] === "عادي") {
+            $ServicePostFinalBadge = $validatedData['have_badge'];
+            $ServicePostFinalDuration = $validatedData['badge_duration'] ?? 0;
         }
 
-        $format = $request->get('format', 'csv');
-        $includePhotos = $request->get('include_photos', false);
-        $includeUserInfo = $request->get('include_user_info', false);
-        $includeStats = $request->get('include_stats', false);
+        // Create the service post
+        $servicePost = new ServicePost();
+        $servicePost->title = $validatedData['title'];
+        $servicePost->description = $validatedData['description'];
+        $servicePost->price = $validatedData['price'] ?? 0;
+        $servicePost->price_currency_code = $validatedData['price_currency_code'] ?? 'USD';
 
-        // Build query based on current filters
-        $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city');
-
-        // Apply the same filters as the index method
-        if ($request->has('category') && $request->category) {
-            $query->where('categories_id', $request->category);
-        }
-        if ($request->has('subcategory') && $request->subcategory) {
-            $query->where('sub_categories_id', $request->subcategory);
-        }
-        if ($request->has('status') && $request->status) {
-            $query->where('state', $request->status);
-        }
-        if ($request->has('premium') && $request->premium !== '') {
-            $query->where('is_premium', $request->premium);
-        }
-
-        $posts = $query->orderBy('id', 'desc')->get();
-
-        $filename = 'service_posts_' . date('Y-m-d_H-i-s') . '.' . $format;
-
-        if ($format === 'csv') {
-            return $this->exportToCsv($posts, $filename, $includePhotos, $includeUserInfo, $includeStats);
-        } elseif ($format === 'excel') {
-            return $this->exportToExcel($posts, $filename, $includePhotos, $includeUserInfo, $includeStats);
-        } else {
-            return $this->exportToPdf($posts, $filename, $includePhotos, $includeUserInfo, $includeStats);
-        }
-    }
-
-    /**
-     * Get statistics for service posts
-     */
-    public function statistics()
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_index')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $stats = [
-            'total' => ServicePost::count(),
-            'published' => ServicePost::where('state', 'published')->count(),
-            'pending' => ServicePost::where('state', 'not published')->count(),
-            'rejected' => ServicePost::where('state', 'rejected')->count(),
-            'archived' => ServicePost::where('state', 'archive')->count(),
-            'premium' => ServicePost::where('is_premium', true)->count(),
-            'regular' => ServicePost::where('is_premium', false)->count(),
-            'total_views' => ServicePost::sum('view_count'),
-            'avg_views' => ServicePost::avg('view_count'),
-            'recent_posts' => ServicePost::where('created_at', '>=', now()->subDays(7))->count(),
-        ];
-
-        return response()->json($stats);
-    }
-
-    /**
-     * Duplicate a service post
-     */
-    public function duplicate(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_create')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            $newPost = $servicePost->replicate();
-            $newPost->title = $servicePost->title . ' (Copy)';
-            $newPost->state = 'not published';
-            $newPost->view_count = 0;
-            $newPost->created_at = now();
-            $newPost->updated_at = now();
-            $newPost->save();
-
-            // Duplicate photos
-            foreach ($servicePost->photos as $photo) {
-                $newPhoto = $photo->replicate();
-                $newPhoto->service_post_id = $newPost->id;
-                $newPhoto->save();
+        // Set currency name based on country
+        if (isset($validatedData['country_id'])) {
+            $country = countries::find($validatedData['country_id']);
+            if ($country) {
+                $servicePost->price_currency_name = [
+                    'ar' => $country->currency_name_ar ?? 'دولار امريكي',
+                    'en' => $country->currency_name_en ?? 'US Dollar'
+                ];
             }
-
-            DB::commit();
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Post duplicated successfully',
-                'data' => ['id' => $newPost->id]
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while duplicating the post'
-            ], 500);
-        }
-    }
-
-    /**
-     * Archive a service post
-     */
-    public function archive(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        $servicePost->state = 'archive';
+        $servicePost->country_id = $validatedData['country_id'] ?? null;
+        $servicePost->city_id = $validatedData['city_id'] ?? null;
+
+        // Use default values if location coordinates are null or not provided
+        $servicePost->location_latitudes = $user->location_latitudes ?? $defaultLatitude;
+        $servicePost->location_longitudes = $user->location_longitudes ?? $defaultLongitude;
+
+
+        // If you want to try using user's stored location when coordinates aren't provided
+        if (!isset($validatedData['location_latitudes']) || $validatedData['location_latitudes'] === null) {
+            // Try to get user's saved location first, fall back to default if not available
+            $servicePost->location_latitudes = $user->location_latitudes ?? $defaultLatitude;
+        }
+
+        if (!isset($validatedData['location_longitudes']) || $validatedData['location_longitudes'] === null) {
+            // Try to get user's saved location first, fall back to default if not available
+            $servicePost->location_longitudes = $user->location_longitudes ?? $defaultLongitude;
+        }
+
+        $servicePost->type = $validatedData['type'];
+        $servicePost->have_badge = $ServicePostFinalBadge;
+        $servicePost->badge_duration = $ServicePostFinalDuration;
+        $servicePost->state = $validatedData['state'] ?? 'published';
+        $servicePost->user_id = $user->id;
+        $servicePost->categories_id = $validatedData['categories_id'];
+        $servicePost->sub_categories_id = $validatedData['sub_categories_id'];
         $servicePost->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Post archived successfully',
-            'data' => [
-                'id' => $servicePost->id,
-                'state' => $servicePost->state
-            ]
-        ]);
-    }
+        // Rest of your function for handling images and notifications remains the same
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $photo) {
+                // Generate a unique filename using hash
+                $fileName = $photo->hashName();
 
-    /**
-     * Unarchive a service post
-     */
-    public function unarchive(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
+                // Determine the storage path for the file (without 'storage/')
+                $storagePath = 'photos/posts';
 
-        $servicePost->state = 'not published';
-        $servicePost->save();
+                // Store the file in the public disk
+                $photoPath = $photo->storeAs($storagePath, $fileName, 'public');
 
-        return response()->json([
-            'success' => true,
-            'message' => 'Post unarchived successfully',
-            'data' => [
-                'id' => $servicePost->id,
-                'state' => $servicePost->state
-            ]
-        ]);
-    }
+                // Create the full path for database storage
+                $databasePath = 'storage/' . $photoPath;
 
-    /**
-     * Feature a service post
-     */
-    public function feature(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
+                // Check if the file is a video (MP4)
+                $isVideo = $photo->getClientOriginalExtension() === 'mp4';
 
-        // Check if the is_featured column exists
-        if (!Schema::hasColumn('service_posts', 'is_featured')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Featured functionality is not available. Please run database migrations.'
-            ], 400);
-        }
+                // Log the file type
+                Log::info($isVideo ? "Is Video: true" : "Is not Video: false");
 
-        $servicePost->is_featured = true;
-        $servicePost->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Post featured successfully',
-            'data' => [
-                'id' => $servicePost->id,
-                'is_featured' => $servicePost->is_featured
-            ]
-        ]);
-    }
-
-    /**
-     * Unfeature a service post
-     */
-    public function unfeature(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        // Check if the is_featured column exists
-        if (!Schema::hasColumn('service_posts', 'is_featured')) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Featured functionality is not available. Please run database migrations.'
-            ], 400);
-        }
-
-        $servicePost->is_featured = false;
-        $servicePost->save();
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Post unfeatured successfully',
-            'data' => [
-                'id' => $servicePost->id,
-                'is_featured' => $servicePost->is_featured
-            ]
-        ]);
-    }
-
-    /**
-     * Update service post level
-     */
-    public function updateLevel(Request $request, ServicePost $servicePost)
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
-
-        $request->validate([
-            'level_id' => 'required|exists:levels,id',
-            'duration' => 'required|integer|min:1'
-        ]);
-
-        $level = Level::findOrFail($request->level_id);
-        $duration = $request->duration;
-        $pointsCost = $level->calculatePointsCost($duration);
-
-        // Check if user is admin (has admin role or super admin permissions)
-        $isAdmin = $user->hasRole('admin') || $user->hasRole('super_admin') || $user->hasPermission('admin_access');
-
-        // Check if user has enough points (skip for admin users)
-        if (!$isAdmin && $user->points < $pointsCost) {
-            return response()->json([
-                'success' => false,
-                'message' => "Insufficient points. Required: {$pointsCost}, Available: {$user->points}"
-            ], 400);
-        }
-
-        try {
-            DB::beginTransaction();
-
-            // Deduct points from user (skip for admin users)
-            if (!$isAdmin) {
-                $user->points -= $pointsCost;
-                $user->save();
-            }
-
-            // Update service post level
-            $servicePost->level_id = $level->id;
-            $servicePost->badge_duration = $duration;
-            $servicePost->badge_expires_at = Carbon::now()->addDays($duration);
-            $servicePost->save();
-
-            // Create point transaction record (skip for admin users)
-            if (!$isAdmin) {
-                point_transactions::create([
-                    'user_id' => $user->id,
-                    'points' => -$pointsCost,
-                    'type' => 'level_upgrade',
-                    'description' => "Upgraded service post #{$servicePost->id} to {$level->localized_name} for {$duration} days",
-                    'service_post_id' => $servicePost->id,
-                    'level_id' => $level->id
+                // Create the photo/video entry
+                $servicePost->photos()->create([
+                    'src' => $databasePath,
+                    'isVideo' => $isVideo ? 1 : 0,
                 ]);
             }
-
-            DB::commit();
-
-            $adminMessage = $isAdmin ? ' (Admin action - no points deducted)' : '';
-            return response()->json([
-                'success' => true,
-                'message' => "Service post upgraded to {$level->localized_name} successfully{$adminMessage}",
-                'data' => [
-                    'id' => $servicePost->id,
-                    'level_id' => $servicePost->level_id,
-                    'level_name' => $level->localized_name,
-                    'duration' => $duration,
-                    'expires_at' => $servicePost->badge_expires_at->format('Y-m-d H:i:s'),
-                    'is_admin_action' => $isAdmin
-                ]
-            ]);
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return response()->json([
-                'success' => false,
-                'message' => 'An error occurred while upgrading the service post'
-            ], 500);
-        }
-    }
-
-    /**
-     * Get available levels for service post upgrade
-     */
-    public function getAvailableLevels(ServicePost $servicePost)
-    {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
         }
 
-        // Check if user is admin (has admin role or super admin permissions)
-        $isAdmin = $user->hasRole('admin') || $user->hasRole('super_admin') || $user->hasPermission('admin_access');
+        // Send notifications about the new service post
+        $this->servicePostNotification($servicePost, $user);
 
-        $levels = Level::active()->ordered()->get();
-        $availableLevels = [];
-
-        foreach ($levels as $level) {
-            // For admin users, all levels are affordable
-            $canAfford = $isAdmin ? true : ($user->points_balance >= $level->points_per_day);
-            $maxDuration = $isAdmin ? 365 : ($level->points_per_day > 0 ? floor($user->points_balance / $level->points_per_day) : 365);
-            
-            $availableLevels[] = [
-                'id' => $level->id,
-                'name' => $level->localized_name,
-                'description' => $level->localized_description,
-                'icon' => $level->icon,
-                'color' => $level->color,
-                'points_per_day' => $level->points_per_day,
-                'view_boost_percentage' => $level->view_boost_percentage,
-                'features' => $level->localized_features,
-                'can_afford' => $canAfford,
-                'max_duration' => $maxDuration
-            ];
-        }
-
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'levels' => $availableLevels,
-                'user_points' => $isAdmin ? '∞ (Admin)' : $user->points_balance,
-                'is_admin' => $isAdmin,
-                'current_level' => $servicePost->level ? [
-                    'id' => $servicePost->level->id,
-                    'name' => $servicePost->level->localized_name,
-                    'expires_at' => $servicePost->badge_expires_at ? $servicePost->badge_expires_at->format('Y-m-d H:i:s') : null,
-                    'remaining_days' => $servicePost->getLevelRemainingDays()
-                ] : null
-            ]
-        ]);
+        return redirect()->route('service_posts.create')
+            ->with('success', 'Service post created successfully.');
     }
-
-    /**
-     * Get point packages for purchase
-     */
-    public function getPointPackages()
+    public function servicePostNotification(ServicePost $servicePost, User $user): void
     {
-        $user = Auth::user();
-        
-        if (!$user->hasPermission('service_posts_edit')) {
-            return response()->json(['success' => false, 'message' => 'Unauthorized'], 403);
-        }
+        // Retrieve followers of the user who created the post
+        $followers = $user->followers()->get();
 
-        $packages = PointPackage::active()->get();
-        $availablePackages = [];
+        // Retrieve followers of the subcategory
+        $subcategory = Sub_categories::find($servicePost->sub_categories_id);
+        $subcategoryFollowers = $subcategory->users()->get();
 
-        foreach ($packages as $package) {
-            $availablePackages[] = [
-                'id' => $package->id,
-                'name' => $package->name,
-                'points' => $package->points,
-                'price' => $package->price,
-                'formatted_price' => $package->formatted_price,
-                'formatted_points' => $package->formatted_points,
-                'description' => $package->description,
-                'features' => $package->features
-            ];
-        }
+        // Merge the two follower lists
+        $allFollowers = $followers->merge($subcategoryFollowers);
 
-        return response()->json([
-            'success' => true,
-            'data' => [
-                'packages' => $availablePackages,
-                'user_points' => $user->points
-            ]
-        ]);
-    }
-
-    /**
-     * Export to CSV
-     */
-    private function exportToCsv($posts, $filename, $includePhotos, $includeUserInfo, $includeStats)
-    {
-        $headers = [
-            'Content-Type' => 'text/csv',
-            'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-        ];
-
-        $callback = function() use ($posts, $includePhotos, $includeUserInfo, $includeStats) {
-            $file = fopen('php://output', 'w');
-            
-            // Headers
-            $headers = ['ID', 'Title', 'Description', 'Price', 'Type', 'Status', 'Premium', 'Views', 'Created At'];
-            if ($includeUserInfo) {
-                $headers = array_merge($headers, ['User Name', 'User Email']);
-            }
-            fputcsv($file, $headers);
-
-            // Data
-            foreach ($posts as $post) {
-                $row = [
-                    $post->id,
-                    is_array($post->title) ? ($post->title['en'] ?? 'N/A') : $post->title,
-                    is_array($post->description) ? ($post->description['en'] ?? 'N/A') : $post->description,
-                    $post->price,
-                    $post->type,
-                    $post->state,
-                    $post->is_premium ? 'Yes' : 'No',
-                    $post->view_count ?? 0,
-                    $post->created_at->format('Y-m-d H:i:s')
-                ];
-
-                if ($includeUserInfo && $post->user) {
-                    $row[] = $post->user->name ?? $post->user->user_name ?? 'N/A';
-                    $row[] = $post->user->email ?? 'N/A';
-                }
-
-                fputcsv($file, $row);
-            }
-
-            fclose($file);
-        };
-
-        return response()->stream($callback, 200, $headers);
-    }
-
-    /**
-     * Export to Excel
-     */
-    private function exportToExcel($posts, $filename, $includePhotos, $includeUserInfo, $includeStats)
-    {
-        // This would require a package like Maatwebsite Excel
-        // For now, return CSV as Excel
-        return $this->exportToCsv($posts, str_replace('.csv', '.xlsx', $filename), $includePhotos, $includeUserInfo, $includeStats);
-    }
-
-    /**
-     * Export to PDF
-     */
-    private function exportToPdf($posts, $filename, $includePhotos, $includeUserInfo, $includeStats)
-    {
-        // This would require a package like DomPDF
-        // For now, return CSV as PDF
-        return $this->exportToCsv($posts, str_replace('.pdf', '.csv', $filename), $includePhotos, $includeUserInfo, $includeStats);
-    }
-
-    // Additional methods for different views
-    public function indexProfile(User $user)
-    {
-        $user->load(['photos', 'roles', 'country', 'city']);
-        return view('users.profile', compact('user'));
-    }
-
-    public function postProfile(User $user)
-    {
-        $servicePosts = $user->servicePosts()->with('photos')->paginate(10);
-        return view('users.posts', compact('user', 'servicePosts'));
-    }
-
-    public function userIndex()
-    {
-        $user = Auth::user();
-        $servicePosts = $user->servicePosts()->with('photos')->paginate(10);
-        return view('service_posts.user_index', compact('servicePosts'));
-    }
-
-    public function jobIndex()
-    {
-        $servicePosts = ServicePost::whereHas('category', function($q) {
-            $q->where('name->en', 'Jobs');
-        })->with('photos', 'user')->paginate(10);
-        return view('service_posts.jobs', compact('servicePosts'));
-    }
-
-    public function carIndex()
-    {
-        $servicePosts = ServicePost::whereHas('category', function($q) {
-            $q->where('name->en', 'Cars');
-        })->with('photos', 'user')->paginate(10);
-        return view('service_posts.cars', compact('servicePosts'));
-    }
-
-    public function phoneIndex()
-    {
-        $servicePosts = ServicePost::whereHas('category', function($q) {
-            $q->where('name->en', 'Devices');
-        })->with('photos', 'user')->paginate(10);
-        return view('service_posts.devices', compact('servicePosts'));
-    }
-
-    public function realStatIndex()
-    {
-        $servicePosts = ServicePost::whereHas('category', function($q) {
-            $q->where('name->en', 'Houses');
-        })->with('photos', 'user')->paginate(10);
-        return view('service_posts.realestate', compact('servicePosts'));
-    }
-
-    public function generalIndex()
-    {
-        $servicePosts = ServicePost::whereHas('category', function($q) {
-            $q->where('name->en', 'Services');
-        })->with('photos', 'user')->paginate(10);
-        return view('service_posts.services', compact('servicePosts'));
-    }
-
-    public function getServicePosts(Categories $category)
-    {
-        $servicePosts = $category->servicePosts()->with('photos', 'user')->paginate(10);
-        return view('service_posts.category', compact('servicePosts', 'category'));
-    }
-
-    public function getSubCategories(Categories $category)
-    {
-        $subcategories = $category->subCategories()->withCount('servicePosts')->get();
-        return response()->json($subcategories);
-    }
-
-    public function servicePostCategorySubCategory(Categories $categories, Sub_categories $sub_categories)
-    {
-        $servicePosts = ServicePost::where('categories_id', $categories->id)
-            ->where('sub_categories_id', $sub_categories->id)
-            ->with('photos', 'user')
-            ->paginate(10);
-        return view('service_posts.category_subcategory', compact('servicePosts', 'categories', 'sub_categories'));
-    }
-
-    public function fetchSubcategories(Request $request)
-    {
-        $categoryId = $request->input('category_id');
-        $subcategories = Sub_categories::where('categories_id', $categoryId)->get();
-        return response()->json($subcategories);
-    }
-
-    public function getCitiesForForm($countryId)
-    {
-        $cities = cities::where('country_id', $countryId)->get();
-        return response()->json($cities);
-    }
-
-    // User-specific category views
-    public function userJobIndex(Categories $category)
-    {
-        $user = Auth::user();
-        $servicePosts = $user->servicePosts()
-            ->where('categories_id', $category->id)
-            ->with('photos')
-            ->paginate(10);
-        return view('service_posts.user_jobs', compact('servicePosts', 'category'));
-    }
-
-    public function userCarIndex(Categories $category)
-    {
-        $user = Auth::user();
-        $servicePosts = $user->servicePosts()
-            ->where('categories_id', $category->id)
-            ->with('photos')
-            ->paginate(10);
-        return view('service_posts.user_cars', compact('servicePosts', 'category'));
-    }
-
-    public function userPhoneIndex(Categories $category)
-    {
-        $user = Auth::user();
-        $servicePosts = $user->servicePosts()
-            ->where('categories_id', $category->id)
-            ->with('photos')
-            ->paginate(10);
-        return view('service_posts.user_devices', compact('servicePosts', 'category'));
-    }
-
-    public function userRealStatIndex(Categories $category)
-    {
-        $user = Auth::user();
-        $servicePosts = $user->servicePosts()
-            ->where('categories_id', $category->id)
-            ->with('photos')
-            ->paginate(10);
-        return view('service_posts.user_realestate', compact('servicePosts', 'category'));
-    }
-
-    public function userGeneralIndex(Categories $category)
-    {
-        $user = Auth::user();
-        $servicePosts = $user->servicePosts()
-            ->where('categories_id', $category->id)
-            ->with('photos')
-            ->paginate(10);
-        return view('service_posts.user_services', compact('servicePosts', 'category'));
-    }
-
-    public function favoritesIndex(User $user)
-    {
-        $favorites = $user->favorites()->with('servicePost.photos')->paginate(10);
-        return view('service_posts.favorites', compact('favorites', 'user'));
-    }
-
-    private function sendNotificationsToFollowers($servicePost)
-    {
-        $followers = $servicePost->user->followers;
-
-        foreach ($followers as $follower) {
-            $message = $servicePost->user->user_name . ' has posted a new service: ' . $servicePost->title;
+        // Loop through each follower and create and send a notification
+        foreach ($allFollowers as $follower) {
+            $type = ($servicePost->type === 'عرض') ? 'offer' : 'request';
+            $message = "{$user->user_name} {$type} the following service";
 
             $notification = new Notification([
                 'message' => $message,
@@ -1259,5 +298,829 @@ class ServicePostController extends Controller
                 $follower->notify(new new_servicepost_notification($servicePost, $follower, $follower->fcm_token));
             }
         }
+    }
+
+    public function show(Request $request, ServicePost $servicePost)
+    {
+        // Only admin and moderator can view all service posts
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view a service post
+        if ($user->hasPermission('show_service')) {
+            $servicePost->load('photos', 'user', 'category', 'subCategory', 'country', 'city');
+            return view('service_posts.show', compact('servicePost'));
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+    }
+
+
+    public function edit(ServicePost $servicePost)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to edit a service post
+        if ($user->hasPermission('edit_service')) {
+            $servicePost->load('photos', 'user', 'country', 'city');
+            $categories = Categories::where('isSuspended', false)->get();
+            $subcategories = Sub_categories::where('isSuspended', false)->get();
+            $countries = countries::all();
+            $cities = cities::all();
+
+            return view('service_posts.edit', compact('servicePost', 'categories', 'subcategories', 'countries', 'cities'));
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+    }
+
+    public function update(Request $request, $id): RedirectResponse
+    {
+        $user = Auth::user();
+        $servicePost = ServicePost::findOrFail($id);
+        $defaultLatitude = 31.9539;
+        $defaultLongitude = 35.2376;
+        $validatedData = $request->validate([
+            'title' => 'required|max:255',
+            'description' => 'nullable',
+            'categories_id' => 'nullable|exists:categories,id',
+            'sub_categories_id' => 'nullable|exists:sub_categories,id',
+            'price' => 'nullable|numeric',
+            'price_currency_code' => 'nullable',
+            'country_id' => 'nullable|exists:countries,id',
+            'city_id' => 'nullable|exists:cities,id',
+            'location_latitudes' => 'nullable|numeric',
+            'location_longitudes' => 'nullable|numeric',
+            'type' => 'nullable|in:عرض,طلب',
+            'view_count' => 'nullable|integer',
+            'state' => 'nullable|in:published,archive,not published,rejected',
+            'images.*' => 'nullable|file|mimes:jpeg,jpg,png,mp4',
+            'photos.*' => 'nullable|file|mimetypes:image/jpeg,image/png,image/heic,image/heif,audio/mpeg,audio/mpeg3,audio/mp3,video/mp4,video/*',
+            'delete_photos.*' => 'nullable|integer|exists:photos,id',
+        ]);
+
+        if (isset($validatedData['categories_id'])) {
+            $servicePost->categories_id = $validatedData['categories_id'];
+            // Remove the category name assignment or add the column to your database
+        }
+
+        if (isset($validatedData['sub_categories_id'])) {
+            $servicePost->sub_categories_id = $validatedData['sub_categories_id'];
+            // Remove the sub_category name assignment or add the column to your database
+        }
+
+        $servicePost->title = $validatedData['title'] ?? $servicePost->title;
+        $servicePost->description = $validatedData['description'] ?? $servicePost->description;
+        $servicePost->price = $validatedData['price'] ?? $servicePost->price;
+
+        if (isset($validatedData['price_currency_code'])) {
+            $servicePost->price_currency_code = $validatedData['price_currency_code'];
+        }
+
+        if (isset($validatedData['country_id'])) {
+            $servicePost->country_id = $validatedData['country_id'];
+            $country = countries::find($validatedData['country_id']);
+            if ($country) {
+                $servicePost->price_currency_name = [
+                    'ar' => $country->currency_name_ar ?? 'دولار امريكي',
+                    'en' => $country->currency_name_en ?? 'US Dollar'
+                ];
+            }
+        }
+
+        $servicePost->city_id = $validatedData['city_id'] ?? $servicePost->city_id;
+        // Use values from the request if provided, otherwise keep existing values
+        $servicePost->location_latitudes = $validatedData['location_latitudes'] ?? $servicePost->location_latitudes;
+        $servicePost->location_longitudes = $validatedData['location_longitudes'] ?? $servicePost->location_longitudes;
+        $servicePost->type = $validatedData['type'] ?? $servicePost->type;
+        $servicePost->state = $validatedData['state'] ?? $servicePost->state;
+
+        if (isset($validatedData['view_count'])) {
+            $servicePost->view_count = $validatedData['view_count'];
+        }
+
+        $servicePost->save();
+
+        // Delete photos if requested
+        if ($request->has('delete_photos')) {
+            foreach ($request->delete_photos as $photoId) {
+                $photo = Photos::find($photoId);
+                if ($photo) {
+                    Storage::delete($photo->src);
+                    $photo->delete();
+                }
+            }
+        }
+
+        if ($request->hasFile('images')) {
+            foreach ($request->file('images') as $photo) {
+                // Generate a unique filename using hash
+                $fileName = $photo->hashName();
+
+                // Determine the storage path for the file (without 'storage/')
+                $storagePath = 'photos/posts';
+
+                // Store the file in the public disk
+                $photoPath = $photo->storeAs($storagePath, $fileName, 'public');
+
+                // Create the full path for database storage
+                $databasePath = 'storage/' . $photoPath;
+
+                // Check if the file is a video (MP4)
+                $isVideo = $photo->getClientOriginalExtension() === 'mp4';
+
+                // Log the file type
+                Log::info($isVideo ? "Is Video: true" : "Is not Video: false");
+
+                // Create the photo/video entry
+                $servicePost->photos()->create([
+                    'src' => $databasePath,
+                    'isVideo' => $isVideo ? 1 : 0,
+                ]);
+            }
+        }
+        return redirect()->route('service_posts.edit', $id)
+            ->with('success', 'Service Post has been updated!');
+    }
+
+    public function destroy(ServicePost $servicePost): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to delete a service post
+        if (!$user->hasPermission('destroy_service')) {
+            return redirect()->route('errors.403');
+        }
+
+        // Delete the associated photos with the post
+        foreach ($servicePost->photos as $photo) {
+            if (Storage::disk('public')->exists($photo->src) &&
+                !in_array($photo->src, [
+                    'storage/photos/servicepost1.jpg',
+                    'storage/photos/servicepost2.jpg',
+                    'storage/photos/servicepost3.jpg',
+                    'storage/photos/servicepost4.jpg',
+                    'storage/photos/servicepost5.jpg'
+                ])) {
+                Storage::delete($photo->src);
+                $photo->delete();
+            }
+        }
+
+        // Delete all favorites and reports for this service post
+        $servicePost->favorites()->delete();
+        $servicePost->reports()->delete();
+
+        // Delete the service post
+        $servicePost->delete();
+
+        return redirect()->back()->with('success', 'Selected Service Post has been deleted!');
+    }
+
+    public function bulkDestroy(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to delete service posts
+        if (!$user->hasPermission('destroy_service')) {
+            return redirect()->route('errors.403');
+        }
+
+        $postIds = json_decode($request->post_ids, true);
+
+        if (empty($postIds)) {
+            return redirect()->back()->with('error', 'No posts selected for deletion.');
+        }
+
+        // Retrieve all posts that will be deleted
+        $posts = ServicePost::whereIn('id', $postIds)->get();
+        $count = $posts->count();
+
+        foreach ($posts as $post) {
+            // Delete the associated photos with the post
+            foreach ($post->photos as $photo) {
+                if (Storage::disk('public')->exists(str_replace('storage/', '', $photo->src)) &&
+                    !in_array($photo->src, [
+                        'storage/photos/servicepost1.jpg',
+                        'storage/photos/servicepost2.jpg',
+                        'storage/photos/servicepost3.jpg',
+                        'storage/photos/servicepost4.jpg',
+                        'storage/photos/servicepost5.jpg'
+                    ])) {
+                    Storage::disk('public')->delete(str_replace('storage/', '', $photo->src));
+                }
+                $photo->delete();
+            }
+
+            // Delete all favorites and reports for this service post
+            $post->favorites()->delete();
+            $post->reports()->delete();
+
+            // Delete the service post
+            $post->delete();
+        }
+
+        return redirect()->back()->with('success', $count . ' service posts have been deleted successfully!');
+    }
+    public function inViewCount(ServicePost $servicePost): JsonResponse
+    {
+        // Increment the view count for this service post
+        $servicePost->incrementViewCount();
+        return response()->json('Post Viewed Counted');
+    }
+
+    public function jobIndex(Request $request)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $category = Categories::where(function($query) {
+                $query->where('name->ar', 'وظائف')
+                    ->orWhere('name->en', 'Jobs');
+            })->first();
+
+            if ($category) {
+                $servicePosts = ServicePost::where('categories_id', $category->id)
+                    ->with('photos', 'user', 'country', 'city')
+                    ->paginate(10);
+
+                return view('service_posts.job_index', compact('servicePosts', 'user', 'category'));
+            } else {
+                return redirect()->back()->with('error', 'Job category not found');
+            }
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function carIndex(Request $request)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $category = Categories::where(function($query) {
+                $query->where('name->ar', 'سيارات')
+                    ->orWhere('name->en', 'Cars');
+            })->first();
+
+            if ($category) {
+                $servicePosts = ServicePost::where('categories_id', $category->id)
+                    ->with('photos', 'user', 'country', 'city')
+                    ->paginate(10);
+
+                return view('service_posts.car_index', compact('servicePosts', 'user', 'category'));
+            } else {
+                return redirect()->back()->with('error', 'Car category not found');
+            }
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function phoneIndex(Request $request)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $category = Categories::where(function($query) {
+                $query->where('name->ar', 'اجهزة')
+                    ->orWhere('name->en', 'Devices');
+            })->first();
+
+            if ($category) {
+                $servicePosts = ServicePost::where('categories_id', $category->id)
+                    ->with('photos', 'user', 'country', 'city')
+                    ->paginate(10);
+
+                return view('service_posts.phone_index', compact('servicePosts', 'user', 'category'));
+            } else {
+                return redirect()->back()->with('error', 'Device category not found');
+            }
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function realStatIndex(Request $request)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $category = Categories::where(function($query) {
+                $query->where('name->ar', 'عقارات')
+                    ->orWhere('name->en', 'Houses');
+            })->first();
+
+            if ($category) {
+                $servicePosts = ServicePost::where('categories_id', $category->id)
+                    ->with('photos', 'user', 'country', 'city')
+                    ->paginate(10);
+
+                return view('service_posts.real_state_index', compact('servicePosts', 'user', 'category'));
+            } else {
+                return redirect()->back()->with('error', 'Real Estate category not found');
+            }
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function generalIndex(Request $request)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $category = Categories::where(function($query) {
+                $query->where('name->ar', 'خدمات')
+                    ->orWhere('name->en', 'Services');
+            })->first();
+
+            if ($category) {
+                $servicePosts = ServicePost::where('categories_id', $category->id)
+                    ->with('photos', 'user', 'country', 'city')
+                    ->paginate(10);
+
+                return view('service_posts.general_index', compact('servicePosts', 'user', 'category'));
+            } else {
+                return redirect()->back()->with('error', 'Services category not found');
+            }
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function userIndex(Request $request)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            // Base query
+            $query = ServicePost::with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+                ->where('state', 'published')
+                ->withCount('favorites');
+
+            // Category filter
+            if ($request->filled('category')) {
+                $categoryModel = Categories::findOrFail($request->category);
+                $query->where('categories_id', $categoryModel->id);
+            }
+
+            // Subcategory filter (only if category is selected)
+            if ($request->filled('category') && $request->filled('subcategory')) {
+                $query->where('sub_categories_id', $request->subcategory);
+            }
+
+            // Type filter
+            if ($request->filled('type')) {
+                $query->where('type', $request->type);
+            }
+
+            // Price range filter
+            if ($request->filled('min_price') || $request->filled('max_price')) {
+                if ($request->filled('min_price')) {
+                    $query->where('price', '>=', $request->min_price);
+                }
+                if ($request->filled('max_price')) {
+                    $query->where('price', '<=', $request->max_price);
+                }
+            }
+
+            // Search filter
+            if ($request->filled('search')) {
+                $searchTerm = $request->search;
+                $query->where(function($q) use ($searchTerm) {
+                    $q->where('title', 'like', "%{$searchTerm}%")
+                        ->orWhere('description', 'like', "%{$searchTerm}%")
+                        ->orWhereHas('user', function($userQuery) use ($searchTerm) {
+                            $userQuery->where('user_name', 'like', "%{$searchTerm}%");
+                        })
+                        ->orWhereHas('category', function($categoryQuery) use ($searchTerm) {
+                            $categoryQuery->where('name->'.app()->getLocale(), 'like', "%{$searchTerm}%")
+                                ->orWhere('name->en', 'like', "%{$searchTerm}%");
+                        });
+                });
+            }
+
+            // Country filter
+            if ($request->filled('country')) {
+                $query->where('country_id', $request->country);
+            }
+
+            // City filter (only if country is selected)
+            if ($request->filled('country') && $request->filled('city')) {
+                $query->where('city_id', $request->city);
+            }
+
+            // Sorting
+            switch ($request->input('sort')) {
+                case 'newest':
+                    $query->orderByDesc('created_at');
+                    break;
+                case 'oldest':
+                    $query->orderBy('created_at');
+                    break;
+                case 'price_low':
+                    $query->orderBy('price');
+                    break;
+                case 'price_high':
+                    $query->orderByDesc('price');
+                    break;
+                case 'most_viewed':
+                    $query->orderByDesc('view_count');
+                    break;
+                default:
+                    // Default sorting with badge priority
+                    $query->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC");
+            }
+
+            // Pagination
+            $servicePosts = $query->paginate(10)
+                ->appends($request->query());
+
+            // Fetch categories for dropdown
+            $categories = Categories::withCount(['sub_categories', 'servicePosts'])
+                ->where('isSuspended', false)
+                ->get();
+
+            // Fetch subcategories for dropdown
+            $subcategories = $request->filled('category')
+                ? Sub_categories::where('categories_id', $request->category)
+                    ->where('isSuspended', false)
+                    ->get()
+                : collect();
+
+            return view('service_posts.post_page', compact('servicePosts', 'user', 'categories', 'subcategories'));
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+    public function indexProfile(User $user)
+    {
+        $categories = Categories::withCount('servicePosts')
+            ->where('isSuspended', false)
+            ->orderBy('id', 'desc')
+            ->get();
+
+        $servicePosts = $user->servicePosts()
+            ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+            ->withCount('favorites')
+            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
+        return view('service_posts.post_page', compact('servicePosts', 'user', 'categories'));
+    }
+
+    public function postProfile(User $user)
+    {
+        $servicePosts = $user->servicePosts()
+            ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+            ->withCount('favorites')
+            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->orderBy('id', 'desc')
+            ->paginate(10);
+
+        return view('service_posts.index_post_profile', compact('servicePosts', 'user'));
+    }
+
+    public function favoritesIndex(User $user)
+    {
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $categories = Categories::withCount('servicePosts')
+                ->where('isSuspended', false)
+                ->orderBy('id', 'desc')
+                ->get();
+
+            $servicePosts = ServicePost::whereHas('favorites', function ($query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+                ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+                ->withCount('favorites')
+                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->paginate(10);
+
+            return view('service_posts.post_page', compact('servicePosts', 'user', 'categories'));
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function userCarIndex(Request $request, $category)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $categoryModel = Categories::where(function($query) use ($category) {
+                $query->where('name->ar', $category)
+                    ->orWhere('name->en', $category);
+            })->first();
+
+            if (!$categoryModel) {
+                return redirect()->back()->with('error', 'Category not found');
+            }
+
+            $servicePosts = ServicePost::where('categories_id', $categoryModel->id)
+                ->where('state', 'published')
+                ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+                ->withCount('favorites')
+                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->paginate(10);
+
+            $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
+                ->where('isSuspended', false)
+                ->get();
+
+            $categories = Categories::where('isSuspended', false)->get();
+
+            return view('service_posts.post_page', compact('servicePosts', 'user', 'categories', 'category', 'subcategories'));
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function userPhoneIndex(Request $request, $category)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $categoryModel = Categories::where(function($query) use ($category) {
+                $query->where('name->ar', $category)
+                    ->orWhere('name->en', $category);
+            })->first();
+
+            if (!$categoryModel) {
+                return redirect()->back()->with('error', 'Category not found');
+            }
+
+            $servicePosts = ServicePost::where('categories_id', $categoryModel->id)
+                ->where('state', 'published')
+                ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+                ->withCount('favorites')
+                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->paginate(10);
+
+            $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
+                ->where('isSuspended', false)
+                ->get();
+
+            $categories = Categories::where('isSuspended', false)->get();
+
+            return view('service_posts.post_page', compact('servicePosts', 'user', 'categories', 'category', 'subcategories'));
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function userRealStatIndex(Request $request, $category)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $categoryModel = Categories::where(function($query) use ($category) {
+                $query->where('name->ar', $category)
+                    ->orWhere('name->en', $category);
+            })->first();
+
+            if (!$categoryModel) {
+                return redirect()->back()->with('error', 'Category not found');
+            }
+
+            $servicePosts = ServicePost::where('categories_id', $categoryModel->id)
+                ->where('state', 'published')
+                ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+                ->withCount('favorites')
+                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->paginate(10);
+
+            $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
+                ->where('isSuspended', false)
+                ->get();
+
+            $categories = Categories::where('isSuspended', false)->get();
+
+            return view('service_posts.post_page', compact('servicePosts', 'user', 'categories', 'category', 'subcategories'));
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function userGeneralIndex(Request $request, $category)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $categoryModel = Categories::where(function($query) use ($category) {
+                $query->where('name->ar', $category)
+                    ->orWhere('name->en', $category);
+            })->first();
+
+            if (!$categoryModel) {
+                return redirect()->back()->with('error', 'Category not found');
+            }
+
+            $servicePosts = ServicePost::where('categories_id', $categoryModel->id)
+                ->where('state', 'published')
+                ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+                ->withCount('favorites')
+                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->paginate(10);
+
+            $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
+                ->where('isSuspended', false)
+                ->get();
+
+            $categories = Categories::where('isSuspended', false)->get();
+
+            return view('service_posts.post_page', compact('servicePosts', 'user', 'categories', 'category', 'subcategories'));
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function userJobIndex(Request $request, $category)
+    {
+        $user = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($user->hasPermission('view_service')) {
+            $categoryModel = Categories::where(function($query) use ($category) {
+                $query->where('name->ar', $category)
+                    ->orWhere('name->en', $category);
+            })->first();
+
+            if (!$categoryModel) {
+                return redirect()->back()->with('error', 'Category not found');
+            }
+
+            $servicePosts = ServicePost::where('categories_id', $categoryModel->id)
+                ->where('state', 'published')
+                ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+                ->withCount('favorites')
+                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->paginate(10);
+
+            $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
+                ->where('isSuspended', false)
+                ->get();
+
+            $categories = Categories::where('isSuspended', false)->get();
+
+            return view('service_posts.post_page', compact('servicePosts', 'user', 'categories', 'category', 'subcategories'));
+        } else {
+            return redirect()->route('errors.403');
+        }
+    }
+
+    public function servicePostCategorySubCategory(Request $request, $category, $sub_categories)
+    {
+        $categoriesInput = $request->input('categories');
+        $subCategoriesInput = $request->input('sub_categories');
+
+        $categoryModel = Categories::where(function($query) use ($categoriesInput) {
+            $query->where('name->ar', $categoriesInput)
+                ->orWhere('name->en', $categoriesInput);
+        })->first();
+
+        $subcategoryModel = Sub_categories::where(function($query) use ($subCategoriesInput) {
+            $query->where('name->ar', $subCategoriesInput)
+                ->orWhere('name->en', $subCategoriesInput);
+        })->first();
+
+        $currentUser = Auth::user();
+
+        // Check if the user has the required permissions to view service posts
+        if ($currentUser->hasPermission('view_service')) {
+            $servicePosts = ServicePost::where('categories_id', $categoryModel->id)
+                ->where('sub_categories_id', $subcategoryModel->id)
+                ->where('state', 'published')
+                ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+                ->withCount('favorites')
+                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->paginate(10);
+
+            // Fetch user photos and names for each service post
+            foreach ($servicePosts as $servicePost) {
+                $postUser = User::with('photos')->find($servicePost->user_id);
+                $servicePost->user_photo = $postUser->photos->first() ? $postUser->photos->first()->src : null;
+                $servicePost->user_name = $postUser->user_name;
+
+                $favorite = $servicePost->favorites()->where('user_id', $currentUser->id)->first();
+                $servicePost->is_favorited = (bool)$favorite;
+
+                // Get the distance between the service post location and the current user
+                $servicePost->distance = round(ServicePost::distance(
+                    $currentUser->location_latitudes,
+                    $currentUser->location_longitudes,
+                    $servicePost->location_latitudes,
+                    $servicePost->location_longitudes
+                ), 2);
+
+                // Check if the current user follows the service post user
+                $follow = $currentUser->followers()->where('follower_id', $postUser->id)->first();
+                $servicePost->is_followed = (bool)$follow;
+            }
+
+            $categories = Categories::where('isSuspended', false)->get();
+
+            return view('service_posts.post_page', compact('servicePosts', 'currentUser', 'categories'));
+        } else {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+    }
+
+    public function getSubCategories(Request $request, $category)
+    {
+        $categoryModel = Categories::where(function($query) use ($category) {
+            $query->where('name->ar', $category)
+                ->orWhere('name->en', $category);
+        })->first();
+
+        if ($categoryModel) {
+            $subCategories = Sub_categories::where('categories_id', $categoryModel->id)
+                ->where('isSuspended', false)
+                ->withCount('servicePosts')
+                ->get();
+
+            return response()->json($subCategories);
+        } else {
+            return response()->json(['error' => 'No data found in sub category']);
+        }
+    }
+    public function getServicePosts(Request $request, $subCategory)
+    {
+        $subcategoryModel = Sub_categories::where(function($query) use ($subCategory) {
+            $query->where('name->ar', $subCategory)
+                ->orWhere('name->en', $subCategory);
+        })->first();
+
+        if (!$subcategoryModel) {
+            return response()->json(['error' => 'Subcategory not found']);
+        }
+
+        $servicePosts = ServicePost::where('sub_categories_id', $subcategoryModel->id)
+            ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
+            ->withCount('favorites')
+            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->paginate(10);
+
+        return response()->json($servicePosts);
+    }
+
+    public function fetchSubcategories(Request $request)
+    {
+        $categoryId = $request->input('category_id');
+
+        if (!$categoryId) {
+            return response()->json([]);
+        }
+
+        $subcategories = Sub_categories::where('categories_id', $categoryId)
+            ->where('isSuspended', false)
+            ->get();
+
+        // Transform the data to include localized names if needed
+        $subcategories = $subcategories->map(function($subcategory) {
+            return [
+                'id' => $subcategory->id,
+                'name' => $subcategory->name,
+                // Add any other fields you need here
+            ];
+        });
+
+        return response()->json($subcategories);
+    }
+    public function CountriesSelected($countryId)
+    {
+        try {
+            $cities = cities::where('country_id', $countryId)->get();
+            return response()->json($cities);
+        } catch (\Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 500);
+        }
+    }
+    public function getCitiesForForm($countryId)
+    {
+        $cities = cities::where('country_id', $countryId)->get();
+
+        // Transform the cities data to decode JSON name strings if needed
+        $cities = $cities->map(function($city) {
+            // If name is a JSON string, decode it
+            if (is_string($city->name) && json_decode($city->name) !== null) {
+                $city->name = json_decode($city->name, true);
+            }
+            return $city;
+        });
+
+        return response()->json($cities);
     }
 }

@@ -24,8 +24,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-warning"><i class="fas fa-star"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{('palservice_points\index.total_points') }}</span>
-                                <span class="info-box-number">{{ $totalPoints ?? 0 }}</span>
+                                <span class="info-box-text">Total Points</span>
+                                <span class="info-box-number">{{ $palservicePoints->sum('point') }}</span>
                             </div>
                         </div>
                     </div>
@@ -33,8 +33,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-info"><i class="fas fa-user-tag"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{('palservice_points\index.total_users') }}</span>
-                                <span class="info-box-number">{{ $totalUsers ?? 0 }}</span>
+                                <span class="info-box-text">Total Users</span>
+                                <span class="info-box-number">{{ $palservicePoints->count() }}</span>
                             </div>
                         </div>
                     </div>
@@ -42,8 +42,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-success"><i class="fas fa-chart-line"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{('palservice_points\index.avg_points') }}</span>
-                                <span class="info-box-number">{{ $avgPoints ?? 0 }}</span>
+                                <span class="info-box-text">Avg. Points</span>
+                                <span class="info-box-number">{{ $palservicePoints->count() > 0 ? round($palservicePoints->sum('point') / $palservicePoints->count(), 2) : 0 }}</span>
                             </div>
                         </div>
                     </div>
@@ -51,8 +51,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-danger"><i class="fas fa-trophy"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{('palservice_points\index.top_score') }}</span>
-                                <span class="info-box-number">{{ $topScore ?? 0 }}</span>
+                                <span class="info-box-text">Top Score</span>
+                                <span class="info-box-number">{{ $palservicePoints->max('point') }}</span>
                             </div>
                         </div>
                     </div>
@@ -65,7 +65,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="search">{{('palservice_points\index.search_users') }}</label>
+                                        <label for="search">Search Users</label>
                                         <input type="text" class="form-control" id="search" name="search"
                                                placeholder="Search by name, username, or ID"
                                                value="{{ request('search') }}">
@@ -73,7 +73,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="min_points">{{('palservice_points\index.min_points') }}</label>
+                                        <label for="min_points">Min Points</label>
                                         <input type="number" class="form-control" id="min_points" name="min_points"
                                                placeholder="Minimum points"
                                                value="{{ request('min_points') }}">
@@ -81,7 +81,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="max_points">{{('palservice_points\index.max_points') }}</label>
+                                        <label for="max_points">Max Points</label>
                                         <input type="number" class="form-control" id="max_points" name="max_points"
                                                placeholder="Maximum points"
                                                value="{{ request('max_points') }}">
@@ -108,7 +108,7 @@
                     </div>
                 </div>
 
-                <!-- Main Cakkkkrd -->
+                <!-- Main Card -->
                 <div class="card card-outline card-warning">
                     <div class="card-header">
                         <h3 class="card-title">
@@ -126,11 +126,11 @@
                             <table class="table table-hover text-nowrap">
                                 <thead>
                                 <tr>
-                                    <th style="width: 10%">{{('palservice_points\index.id') }}</th>
-                                    <th style="width: 30%">{{('palservice_points\index.user') }}</th>
-                                    <th style="width: 20%">{{('palservice_points\index.role') }}</th>
-                                    <th style="width: 15%">{{('palservice_points\index.points') }}</th>
-                                    <th style="width: 25%">{{('palservice_points\index.action') }}</th>
+                                    <th style="width: 10%">ID</th>
+                                    <th style="width: 30%">User</th>
+                                    <th style="width: 20%">Role</th>
+                                    <th style="width: 15%">Points</th>
+                                    <th style="width: 25%">Action</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -140,40 +140,35 @@
                                             <td>{{ $palservicePoint->id }}</td>
                                             <td>
                                                 <div class="user-block">
-                                                    @if($palservicePoint->user && $palservicePoint->user->hasProfilePhoto())
-                                                        <img src="{{ $palservicePoint->user->profileImage }}"
-                                                             alt="Profile"
-                                                             class="rounded-circle me-2"
-                                                             width="40"
-                                                             height="40"
-                                                             onerror="this.src='{{ asset('vendor/adminlte/dist/img/user2-160x160.jpg') }}'">
+                                                    @if($palservicePoint->user && $palservicePoint->user->photos && $palservicePoint->user->photos->count() > 0)
+                                                        @php
+                                                            $photo = $palservicePoint->user->photos->first();
+                                                            $imgSrc = $photo->is_external ? $photo->src : asset($photo->src);
+                                                        @endphp
+                                                        <img class="img-circle" src="{{ $imgSrc }}" alt="{{ $palservicePoint->user->name }}">
                                                     @else
-                                                        <img src="{{ asset('vendor/adminlte/dist/img/user2-160x160.jpg') }}"
-                                                             alt="Default Profile"
-                                                             class="rounded-circle me-2"
-                                                             width="40"
-                                                             height="40">
+                                                        <img class="img-circle" src="{{ asset('vendor/adminlte/dist/img/user-default.jpg') }}" alt="User Image">
                                                     @endif
                                                     <span class="username">
-                        <a href="#">{{ $palservicePoint->user->name ?? 'N/A' }}</a>
-                    </span>
+                                                    <a href="#">{{ $palservicePoint->user?->name ?? 'Passed User' }}</a>
+                                                </span>
                                                     <span class="description">
-                        ID: {{ $palservicePoint->user?->id ?? 'N/A' }} |
-                        Username: {{ $palservicePoint->user?->user_name ?? 'N/A' }}
-                    </span>
+                                                        ID: {{ $palservicePoint->user?->id ?? 'N/A' }} |
+                                                        Username: {{ $palservicePoint->user?->user_name ?? 'N/A' }}
+                                                    </span>
                                                 </div>
                                             </td>
                                             <td>
                                                 @if($palservicePoint->user && count($palservicePoint->user->roles) > 0)
                                                     @foreach($palservicePoint->user->roles as $role)
-                                                        <span class="badge badge-info">{{ $role->name ?? 'FIXME' }}</span>
+                                                        <span class="badge badge-info">{{ $role->name ?? 'Passed User' }}</span>
                                                     @endforeach
                                                 @else
-                                                    <span class="badge badge-secondary">{{ $palservicePoint->user?->roles->count() == 0 ? 'No Role' : 'FIXME' }}</span>
+                                                    <span class="badge badge-secondary">Passed User</span>
                                                 @endif
                                             </td>
                                             <td>
-                                                <span class="badge badge-warning badge-pill px-3">{{ $palservicePoint->point ?? 'FIXME' }}</span>
+                                                <span class="badge badge-warning badge-pill px-3">{{ $palservicePoint->point }} pts</span>
                                             </td>
                                             <td>
                                                 <div class="btn-group">
@@ -181,15 +176,9 @@
                                                         <i class="fas fa-eye mr-1"></i> View
                                                     </a>
                                                     @if(auth()->user()->hasPermission('grant_points') || auth()->user()->hasPermission('point_transfer'))
-                                                        @if($palservicePoint->user)
-                                                            <a href="{{ url('palservice_points') }}/{{ $palservicePoint->user->id }}" class="btn btn-sm btn-primary">
-                                                                <i class="fas fa-plus-circle mr-1"></i> Add/Deduct
-                                                            </a>
-                                                        @else
-                                                            <span class="btn btn-sm btn-warning disabled" title="User has been deleted">
-                                <i class="fas fa-user-times mr-1"></i> Deleted User
-                            </span>
-                                                        @endif
+                                                        <a href="{{ url('palservice_points') }}/{{ $palservicePoint->user->id }}" class="btn btn-sm btn-primary">
+                                                            <i class="fas fa-plus-circle mr-1"></i> Add/Deduct
+                                                        </a>
                                                     @endif
                                                     <a href="{{ route('palservice_points.edit', $palservicePoint->id) }}" class="btn btn-sm btn-success">
                                                         <i class="fas fa-edit mr-1"></i> Edit
@@ -206,7 +195,7 @@
                                     <tr>
                                         <td colspan="5" class="text-center py-4">
                                             <div class="alert alert-info m-0">
-                                                <i class="fas fa-info-circle mr-1"></i> {{('No records found') }}
+                                                <i class="fas fa-info-circle mr-1"></i> {{ __('No records found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -230,20 +219,20 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">{{('palservice_points\index.confirm_delete') }}</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">Confirm Delete</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{('palservice_points\index._times_') }}</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     Are you sure you want to delete this points record?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('palservice_points\index.cancel') }}</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
                     <form id="deleteForm" method="POST" action="">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger">{{('palservice_points\index.delete') }}</button>
+                        <button type="submit" class="btn btn-danger">Delete</button>
                     </form>
                 </div>
             </div>
@@ -255,20 +244,20 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="userSelectModalLabel">{{('palservice_points\index.select_user') }}</h5>
+                    <h5 class="modal-title" id="userSelectModalLabel">Select User</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{('palservice_points\index._times_') }}</span>
+                        <span aria-hidden="true">&times;</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <form id="userSelectForm" method="GET">
                         <div class="form-group">
-                            <label for="user_id">{{('palservice_points\index.enter_user_id_') }}</label>
+                            <label for="user_id">Enter User ID:</label>
                             <input type="number" class="form-control" id="user_id" name="user_id" placeholder="Enter user ID" required>
                         </div>
                         <div class="text-right">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('palservice_points\index.cancel') }}</button>
-                            <button type="submit" class="btn btn-primary">{{('palservice_points\index.continue') }}</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Continue</button>
                         </div>
                     </form>
                 </div>
@@ -318,10 +307,3 @@
         }
     </script>
 @stop
-
-
-
-
-
-
-

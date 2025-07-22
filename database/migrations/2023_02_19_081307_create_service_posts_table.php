@@ -27,7 +27,6 @@ return new class extends Migration
             $table->decimal('location_longitudes',15,8)->nullable();
             $table->enum('type', ['عرض', 'طلب']);
             $table->enum('have_badge', ['عادي', 'ذهبي', 'ماسي'])->default('عادي');
-            $table->boolean('is_premium')->default(false); // Add this line
             $table->integer('badge_duration')->default(0);
             $table->timestamp('badge_expires_at')->nullable();
             $table->unsignedInteger('favorites_count')->default(0);

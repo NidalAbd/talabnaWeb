@@ -5,7 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 class cities extends Model
@@ -24,11 +23,6 @@ class cities extends Model
     public function country(): BelongsTo
     {
         return $this->belongsTo(countries::class, 'country_id');
-    }
-
-    public function servicePosts(): HasMany
-    {
-        return $this->hasMany(ServicePost::class, 'city_id');
     }
 
     public function getTranslatedName()
