@@ -88,10 +88,3 @@
     @stack('js')
     @yield('js')
 @stop
-
-
-
-
-
-
-

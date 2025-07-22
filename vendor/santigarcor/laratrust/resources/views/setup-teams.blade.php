@@ -75,10 +75,3 @@ class LaratrustSetupTeams extends Migration
         Schema::dropIfExists('{{ $laratrust['tables']['teams'] }}');
     }
 }
-
-
-
-
-
-
-

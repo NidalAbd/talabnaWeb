@@ -7,10 +7,3 @@
 @endisset
 
 {!! strip_tags($footer) !!}
-
-
-
-
-
-
-

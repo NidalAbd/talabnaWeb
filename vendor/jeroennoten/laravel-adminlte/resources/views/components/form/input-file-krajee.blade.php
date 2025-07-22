@@ -1,4 +1,4 @@
-{{-- }}
+{{--
 Note: we don't extends the 'input-group-component' blade layout as we have done
 with other form components. The reason is that the underlying Krajee file input
 plugin already generates an 'input-group' structure and will conflict with the
@@ -68,10 +68,3 @@ one provided by the mentioned layout. So instead, we define a new layout.
 
 </script>
 @endpush
-
-
-
-
-
-
-

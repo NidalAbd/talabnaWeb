@@ -654,8 +654,13 @@ Route::middleware(['auth', 'admin'])->group(function() {
     Route::get('income-statement', [App\Http\Controllers\FinancialController::class, 'incomeStatement'])->name('financial.income_statement');
 });
 
-Route::prefix('admin')->middleware(['auth'])->group(function () {
-    Route::resource('translations', \App\Http\Controllers\Admin\TranslationController::class);
-    Route::post('translations/{translation}/inline', [\App\Http\Controllers\Admin\TranslationController::class, 'inlineUpdate'])->name('translations.inline');
-    Route::post('translations/auto-translate', [\App\Http\Controllers\Admin\TranslationController::class, 'autoTranslate'])->name('translations.auto_translate');
+// Translation Manager Routes
+Route::group(['middleware' => ['web', 'auth'], 'prefix' => 'admin'], function () {
+    Route::get('translations/view/{groupKey?}', '\Barryvdh\TranslationManager\Controller@getView');
+    Route::post('translations/add/{groupKey}', '\Barryvdh\TranslationManager\Controller@postAdd');
+    Route::post('translations/edit/{groupKey}', '\Barryvdh\TranslationManager\Controller@postEdit');
+    Route::post('translations/delete/{groupKey}/{translationKey}', '\Barryvdh\TranslationManager\Controller@postDelete');
+    Route::post('translations/import', '\Barryvdh\TranslationManager\Controller@postImport');
+    Route::post('translations/find', '\Barryvdh\TranslationManager\Controller@postFind');
+    Route::post('translations/publish/{groupKey}', '\Barryvdh\TranslationManager\Controller@postPublish');
 });

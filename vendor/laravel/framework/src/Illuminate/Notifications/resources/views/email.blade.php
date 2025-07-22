@@ -56,10 +56,3 @@
 </x-slot:subcopy>
 @endisset
 </x-mail::message>
-
-
-
-
-
-
-

@@ -118,10 +118,3 @@ class LaratrustSetupTables extends Migration
 @endif
     }
 }
-
-
-
-
-
-
-

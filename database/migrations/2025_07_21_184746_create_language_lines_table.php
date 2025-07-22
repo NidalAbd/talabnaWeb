@@ -13,13 +13,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('language_lines', function (Blueprint $table) {
-            $table->id();
-            $table->string('group')->index();
-            $table->string('key');
-            $table->json('text');
-            $table->timestamps();
-        });
+        if (!Schema::hasTable('language_lines')) {
+            Schema::create('language_lines', function (Blueprint $table) {
+                $table->id();
+                $table->string('group')->index();
+                $table->string('key');
+                $table->json('text');
+                $table->timestamps();
+            });
+        }
     }
 
     /**

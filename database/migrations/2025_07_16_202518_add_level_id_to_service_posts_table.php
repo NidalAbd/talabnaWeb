@@ -8,22 +8,28 @@ return new class extends Migration
 {
     /**
      * Run the migrations.
+     *
+     * @return void
      */
-    public function up(): void
+    public function up()
     {
-        Schema::table('service_posts', function (Blueprint $table) {
-            $table->foreignId('level_id')->nullable()->constrained()->onDelete('set null');
-        });
+        if (!Schema::hasColumn('service_posts', 'level_id')) {
+            Schema::table('service_posts', function (Blueprint $table) {
+                $table->unsignedBigInteger('level_id')->nullable()->after('have_badge');
+                $table->foreign('level_id')->references('id')->on('levels')->onDelete('set null');
+            });
+        }
     }
 
     /**
      * Reverse the migrations.
+     *
+     * @return void
      */
-    public function down(): void
+    public function down()
     {
         Schema::table('service_posts', function (Blueprint $table) {
-            $table->dropForeign(['level_id']);
-            $table->dropColumn('level_id');
+            //
         });
     }
 };

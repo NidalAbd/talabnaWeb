@@ -24,10 +24,3 @@
     </option>
 
 @endforeach
-
-
-
-
-
-
-

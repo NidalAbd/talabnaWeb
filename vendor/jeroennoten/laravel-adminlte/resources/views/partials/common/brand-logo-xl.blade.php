@@ -26,10 +26,3 @@
          class="{{ config('adminlte.logo_img_xl_class', 'brand-image-xs') }} logo-xl">
 
 </a>
-
-
-
-
-
-
-

@@ -5,7 +5,7 @@
        {!! $item['data-compiled'] ?? '' !!}>
 
         <i class="{{ $item['icon'] ?? 'far fa-fw fa-circle' }} {{
-            isset($item['icon_color']) ? 'text-'.$item['icon_color'] : '' }}
+            isset($item['icon_color']) ? 'text-'.$item['icon_color'] : ''
         }}"></i>
 
         <p>
@@ -21,10 +21,3 @@
     </a>
 
 </li>
-
-
-
-
-
-
-

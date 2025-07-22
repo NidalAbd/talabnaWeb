@@ -14,10 +14,3 @@
         {{ $attributes->merge(['class' => $makeItemClass()]) }}>
 
 @overwrite
-
-
-
-
-
-
-

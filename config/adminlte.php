@@ -520,7 +520,7 @@ return [
         ],
         [
             'text' => 'Translations',
-            'url'  => 'admin/translations',
+            'url'  => 'admin/translations/view',
             'icon' => 'fas fa-language',
             'permission' => ['view_statistics']
         ],

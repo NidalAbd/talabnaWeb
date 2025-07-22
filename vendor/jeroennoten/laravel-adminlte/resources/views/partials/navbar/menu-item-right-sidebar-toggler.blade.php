@@ -12,9 +12,3 @@
         <i class="{{ config('adminlte.right_sidebar_icon') }}"></i>
     </a>
 </li>
-
-
-
-
-
-
