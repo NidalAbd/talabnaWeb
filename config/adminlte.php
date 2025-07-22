@@ -257,7 +257,7 @@ return [
     */
 
     'use_route_url' => false,
-    'dashboard_url' => 'home',
+    'dashboard_url' => 'dashboard',
     'logout_url' => 'logout',
     'login_url' => 'login',
     'register_url' => 'register',
@@ -302,7 +302,7 @@ return [
         // Dashboard Section
         [
             'text' => 'Dashboard',
-            'url'  => 'home',
+            'url'  => 'dashboard', // Change this from 'admin/dashboard' to 'dashboard'
             'icon' => 'fas fa-tachometer-alt',
             'permission' => ['user_index']
         ],
