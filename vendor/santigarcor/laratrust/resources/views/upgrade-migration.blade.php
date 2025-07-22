@@ -73,3 +73,10 @@ class LaratrustUpgradeTables extends Migration
     {
     }
 }
+
+
+
+
+
+
+

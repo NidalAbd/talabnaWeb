@@ -3,7 +3,7 @@
 @section('title', 'Profit & Loss Analysis')
 
 @section('content_header')
-    <h1>{{ __('admin\business\profit_loss.profit_loss_analysis') }}</h1>
+    <h1>{{('admin\business\profit_loss.profit_loss_analysis') }}</h1>
 @stop
 
 @section('content')
@@ -50,7 +50,7 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>{{ number_format($roi, 1) }}%</h3>
-                    <p>{{ __('admin\business\profit_loss.roi_vs_investments') }}</p>
+                    <p>{{('admin\business\profit_loss.roi_vs_investments') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-percentage"></i>
@@ -78,26 +78,26 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\profit_loss.monthly_p_l_breakdown') }}</h3>
+                    <h3 class="card-title">{{('admin\business\profit_loss.monthly_p_l_breakdown') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped" id="plTable">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\profit_loss.month') }}</th>
-                                    <th>{{ __('admin\business\profit_loss.revenue') }}</th>
-                                    <th>{{ __('admin\business\profit_loss.expenses') }}</th>
-                                    <th>{{ __('admin\business\profit_loss.profit_loss') }}</th>
-                                    <th>{{ __('admin\business\profit_loss.profit_margin') }}</th>
-                                    <th>{{ __('admin\business\profit_loss.trend') }}</th>
+                                    <th>{{('admin\business\profit_loss.month') }}</th>
+                                    <th>{{('admin\business\profit_loss.revenue') }}</th>
+                                    <th>{{('admin\business\profit_loss.expenses') }}</th>
+                                    <th>{{('admin\business\profit_loss.profit_loss') }}</th>
+                                    <th>{{('admin\business\profit_loss.profit_margin') }}</th>
+                                    <th>{{('admin\business\profit_loss.trend') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($monthlyPL as $pl)
                                 <tr>
                                     <td>
-                                        <strong>{{ \Carbon\Carbon::createFromFormat('Y-m', $pl->field</strong>
+                                        <strong>{{ \Carbon\Carbon::createFromFormat('Y-m', $pl->id</strong> }}
                                     </td>
                                     <td class="text-success">${{ number_format($pl->revenue, 2) }}</td>
                                     <td class="text-warning">${{ number_format($pl->expenses, 2) }}</td>
@@ -121,7 +121,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="6" class="text-center">{{ __('admin\business\profit_loss.no_p_l_data_available') }}</td>
+                                    <td colspan="6" class="text-center">{{('admin\business\profit_loss.no_p_l_data_available') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -134,13 +134,13 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\profit_loss.financial_summary') }}</h3>
+                    <h3 class="card-title">{{('admin\business\profit_loss.financial_summary') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="info-box">
                         <span class="info-box-icon bg-success"><i class="fas fa-chart-line"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\business\profit_loss.best_month') }}</span>
+                            <span class="info-box-text">{{('admin\business\profit_loss.best_month') }}</span>
                             <span class="info-box-number">
                                 @php
                                     $bestMonth = collect($monthlyPL)->sortByDesc('profit')->first();
@@ -156,7 +156,7 @@
                     <div class="info-box">
                         <span class="info-box-icon bg-danger"><i class="fas fa-chart-line"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\business\profit_loss.worst_month') }}</span>
+                            <span class="info-box-text">{{('admin\business\profit_loss.worst_month') }}</span>
                             <span class="info-box-number">
                                 @php
                                     $worstMonth = collect($monthlyPL)->sortBy('profit')->first();
@@ -172,7 +172,7 @@
                     <div class="info-box">
                         <span class="info-box-icon bg-info"><i class="fas fa-percentage"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\business\profit_loss.average_profit_margin') }}</span>
+                            <span class="info-box-text">{{('admin\business\profit_loss.average_profit_margin') }}</span>
                             <span class="info-box-number">
                                 @php
                                     $avgMargin = collect($monthlyPL)->filter(function($pl) { return $pl->revenue > 0; })->avg(function($pl) { return $pl->profit / $pl->revenue * 100; });
@@ -185,7 +185,7 @@
                     <div class="info-box">
                         <span class="info-box-icon bg-warning"><i class="fas fa-dollar-sign"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\business\profit_loss.total_investment') }}</span>
+                            <span class="info-box-text">{{('admin\business\profit_loss.total_investment') }}</span>
                             <span class="info-box-number">
                                 ${{ number_format($totalInvestments, 2) }}
                             </span>
@@ -201,7 +201,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\profit_loss.revenue_vs_investment_performance') }}</h3>
+                    <h3 class="card-title">{{('admin\business\profit_loss.revenue_vs_investment_performance') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="revenueVsInvestmentChart" style="height: 300px;"></canvas>
@@ -212,7 +212,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\profit_loss.profitability_trends') }}</h3>
+                    <h3 class="card-title">{{('admin\business\profit_loss.profitability_trends') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="profitabilityChart" style="height: 300px;"></canvas>
@@ -226,32 +226,32 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\profit_loss.key_performance_indicators') }}</h3>
+                    <h3 class="card-title">{{('admin\business\profit_loss.key_performance_indicators') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-3">
                             <div class="text-center">
                                 <h4 class="text-success">{{ number_format($yearlyRevenue > 0 ? ($yearlyProfit / $yearlyRevenue * 100) : 0, 1) }}%</h4>
-                                <p class="text-muted">{{ __('admin\business\profit_loss.profit_margin') }}</p>
+                                <p class="text-muted">{{('admin\business\profit_loss.profit_margin') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
                                 <h4 class="text-info">{{ number_format($totalInvestments > 0 ? ($yearlyProfit / $totalInvestments * 100) : 0, 1) }}%</h4>
-                                <p class="text-muted">{{ __('admin\business\profit_loss.return_on_investment') }}</p>
+                                <p class="text-muted">{{('admin\business\profit_loss.return_on_investment') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
                                 <h4 class="text-warning">${{ number_format($yearlyRevenue > 0 ? ($yearlyRevenue / 12) : 0, 2) }}</h4>
-                                <p class="text-muted">{{ __('admin\business\profit_loss.average_monthly_revenue') }}</p>
+                                <p class="text-muted">{{('admin\business\profit_loss.average_monthly_revenue') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="text-center">
                                 <h4 class="text-danger">${{ number_format($yearlyExpenses > 0 ? ($yearlyExpenses / 12) : 0, 2) }}</h4>
-                                <p class="text-muted">{{ __('admin\business\profit_loss.average_monthly_expenses') }}</p>
+                                <p class="text-muted">{{('admin\business\profit_loss.average_monthly_expenses') }}</p>
                             </div>
                         </div>
                     </div>
@@ -265,7 +265,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\profit_loss.financial_insights_recommendations') }}</h3>
+                    <h3 class="card-title">{{('admin\business\profit_loss.financial_insights_recommendations') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -274,7 +274,7 @@
                             <ul class="list-unstyled">
                                 <li><i class="fas fa-check text-success"></i> Total Revenue: ${{ number_format($yearlyRevenue, 2) }}</li>
                                 <li><i class="fas fa-check text-success"></i> Total Expenses: ${{ number_format($yearlyExpenses, 2) }}</li>
-                                <li><i class="fas fa-check {{ $yearlyProfit >{{ __('admin\business\profit_loss._0_text_success_text_danger_') }}</i> Net Profit: ${{ number_format($yearlyProfit, 2) }}</li>
+                                <li><i class="fas fa-check {{ $yearlyProfit >{{('admin\business\profit_loss._0_text_success_text_danger_') }}</i> Net Profit: ${{ number_format($yearlyProfit, 2) }}</li>
                                 <li><i class="fas fa-check text-info"></i> ROI: {{ number_format($roi, 1) }}%</li>
                             </ul>
                         </div>
@@ -439,3 +439,9 @@ $(document).ready(function() {
 });
 </script>
 @stop 
+
+
+
+
+
+

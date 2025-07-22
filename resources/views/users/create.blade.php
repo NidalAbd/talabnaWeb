@@ -19,7 +19,7 @@
             <div class="col-md-12">
                 <div class="card card-outline card-success">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('users\create.user_information') }}</h3>
+                        <h3 class="card-title">{{('users\create.user_information') }}</h3>
                     </div>
 
                     <form action="{{ route('users.store') }}" method="POST" enctype="multipart/form-data">
@@ -36,7 +36,7 @@
                                         <div class="input-group">
                                             <div class="custom-file">
                                                 <input type="file" class="custom-file-input" id="profile-image" name="profile_image">
-                                                <label class="custom-file-label" for="profile-image">{{ __('users\create.choose_profile_image') }}</label>
+                                                <label class="custom-file-label" for="profile-image">{{('users\create.choose_profile_image') }}</label>
                                             </div>
                                         </div>
                                         @error('profile_image')
@@ -45,10 +45,10 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="auth_type">{{ __('users\create.authentication_type') }}</label>
+                                        <label for="auth_type">{{('users\create.authentication_type') }}</label>
                                         <select class="form-control @error('auth_type') is-invalid @enderror" id="auth_type" name="auth_type">
-                                            <option value="email" selected>{{ __('users\create.email') }}</option>
-                                            <option value="google">{{ __('users\create.google') }}</option>
+                                            <option value="email" selected>{{('users\create.email') }}</option>
+                                            <option value="google">{{('users\create.google') }}</option>
                                         </select>
                                         @error('auth_type')
                                         <span class="invalid-feedback">{{ $message }}</span>
@@ -58,7 +58,7 @@
                                     <div class="form-group">
                                         <div class="custom-control custom-switch">
                                             <input type="checkbox" class="custom-control-input" id="data_saver_enabled" name="data_saver_enabled" value="1">
-                                            <label class="custom-control-label" for="data_saver_enabled">{{ __('users\create.data_saver_enabled') }}</label>
+                                            <label class="custom-control-label" for="data_saver_enabled">{{('users\create.data_saver_enabled') }}</label>
                                         </div>
                                     </div>
                                 </div>
@@ -67,7 +67,7 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="name">Full Name <span class="text-danger">{{ __('users\create._') }}</span></label>
+                                                <label for="name">Full Name <span class="text-danger">{{('users\create._') }}</span></label>
                                                 <input type="text" class="form-control @error('name') is-invalid @enderror" id="name" name="name" value="{{ old('name') }}" placeholder="Enter full name" required>
                                                 @error('name')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -77,7 +77,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="user_name">Username <span class="text-danger">{{ __('users\create._') }}</span></label>
+                                                <label for="user_name">Username <span class="text-danger">{{('users\create._') }}</span></label>
                                                 <input type="text" class="form-control @error('user_name') is-invalid @enderror" id="user_name" name="user_name" value="{{ old('user_name') }}" placeholder="Enter username" required>
                                                 @error('user_name')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -87,7 +87,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="email">Email Address <span class="text-danger">{{ __('users\create._') }}</span></label>
+                                                <label for="email">Email Address <span class="text-danger">{{('users\create._') }}</span></label>
                                                 <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="Enter email address" required>
                                                 @error('email')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -97,7 +97,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="password">Password <span class="text-danger">{{ __('users\create._') }}</span></label>
+                                                <label for="password">Password <span class="text-danger">{{('users\create._') }}</span></label>
                                                 <input type="password" class="form-control @error('password') is-invalid @enderror" id="password" name="password" placeholder="Enter password" required>
                                                 @error('password')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -107,17 +107,17 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="password_confirmation">Confirm Password <span class="text-danger">{{ __('users\create._') }}</span></label>
+                                                <label for="password_confirmation">Confirm Password <span class="text-danger">{{('users\create._') }}</span></label>
                                                 <input type="password" class="form-control" id="password_confirmation" name="password_confirmation" placeholder="Confirm password" required>
                                             </div>
                                         </div>
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="gender">{{ __('users\create.gender') }}</label>
+                                                <label for="gender">{{('users\create.gender') }}</label>
                                                 <select class="form-control @error('gender') is-invalid @enderror" id="gender" name="gender">
-                                                    <option value="ذكر" {{ old('gender') == 'ذكر' ? 'selected' : '' }}>{{ __('users\create._') }}</option>
-                                                    <option value="انثى" {{ old('gender') == 'انثى' ? 'selected' : '' }}>{{ __('users\create._') }}</option>
+                                                    <option value="ذكر" {{ old('gender') == 'ذكر' ? 'selected' : '' }}>{{('users\create._') }}</option>
+                                                    <option value="انثى" {{ old('gender') == 'انثى' ? 'selected' : '' }}>{{('users\create._') }}</option>
                                                 </select>
                                                 @error('gender')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -127,9 +127,9 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="country_id">{{ __('users\create.country') }}</label>
+                                                <label for="country_id">{{('users\create.country') }}</label>
                                                 <select class="form-control select2 @error('country_id') is-invalid @enderror" id="country_id" name="country_id">
-                                                    <option value="">{{ __('users\create.select_country') }}</option>
+                                                    <option value="">{{('users\create.select_country') }}</option>
                                                     @foreach ($countries as $country)
                                                         <option value="{{ $country->id }}" {{ old('country_id') == $country->id ? 'selected' : '' }}>
                                                             {{ getTranslatedName($country->name) }}
@@ -144,9 +144,9 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="city_id">{{ __('users\create.city') }}</label>
+                                                <label for="city_id">{{('users\create.city') }}</label>
                                                 <select class="form-control select2 @error('city_id') is-invalid @enderror" id="city_id" name="city_id">
-                                                    <option value="">{{ __('users\create.select_city') }}</option>
+                                                    <option value="">{{('users\create.select_city') }}</option>
                                                     <!-- Cities will be populated via AJAX based on country selection -->
                                                 </select>
                                                 @error('city_id')
@@ -157,7 +157,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="date_of_birth">{{ __('users\create.date_of_birth') }}</label>
+                                                <label for="date_of_birth">{{('users\create.date_of_birth') }}</label>
                                                 <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror" id="date_of_birth" name="date_of_birth" value="{{ old('date_of_birth') }}">
                                                 @error('date_of_birth')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -167,7 +167,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="phones">{{ __('users\create.phone_number') }}</label>
+                                                <label for="phones">{{('users\create.phone_number') }}</label>
                                                 <input type="text" class="form-control @error('phones') is-invalid @enderror" id="phones" name="phones" value="{{ old('phones') }}" placeholder="Enter phone number">
                                                 @error('phones')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -177,7 +177,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="WatsNumber">{{ __('users\create.whatsapp_number') }}</label>
+                                                <label for="WatsNumber">{{('users\create.whatsapp_number') }}</label>
                                                 <input type="text" class="form-control @error('WatsNumber') is-invalid @enderror" id="WatsNumber" name="WatsNumber" value="{{ old('WatsNumber') }}" placeholder="Enter WhatsApp number">
                                                 @error('WatsNumber')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -187,11 +187,11 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="is_active">{{ __('users\create.account_status') }}</label>
+                                                <label for="is_active">{{('users\create.account_status') }}</label>
                                                 <select class="form-control @error('is_active') is-invalid @enderror" id="is_active" name="is_active">
-                                                    <option value="active" selected>{{ __('users\create.active') }}</option>
-                                                    <option value="inactive">{{ __('users\create.inactive') }}</option>
-                                                    <option value="banned">{{ __('users\create.banned') }}</option>
+                                                    <option value="active" selected>{{('users\create.active') }}</option>
+                                                    <option value="inactive">{{('users\create.inactive') }}</option>
+                                                    <option value="banned">{{('users\create.banned') }}</option>
                                                 </select>
                                                 @error('is_active')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -203,7 +203,7 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>{{ __('users\create.user_location') }}</label>
+                                                <label>{{('users\create.user_location') }}</label>
                                                 <div id="map" style="height: 300px;"></div>
                                                 <input type="hidden" id="location_latitudes" name="location_latitudes" value="{{ old('location_latitudes') }}">
                                                 <input type="hidden" id="location_longitudes" name="location_longitudes" value="{{ old('location_longitudes') }}">
@@ -217,7 +217,7 @@
                                     <div class="row mt-3">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>{{ __('users\create.assign_roles') }}</label>
+                                                <label>{{('users\create.assign_roles') }}</label>
                                                 <div class="d-flex flex-wrap">
                                                     @foreach($roles as $role)
                                                         <div class="custom-control custom-checkbox mr-4 mb-2">
@@ -296,8 +296,89 @@
                         dataType: 'json',
                         success: function(data) {
                             // Clear the select options first
-                            $('#city_id').empty().append('<option value="">{{ __('users\create.select_city') }}</option>{{ __('users\create._if_dat') }}<option value="' + city.id + '">{{ __('users\create._cityname_') }}</option>{{ __('users\create._') }}<option value="">{{ __('users\create.error_loading_cities') }}</option>{{ __('users\create._') }}<option value="">{{ __('users\create.select_city') }}</option>{{ __('users\create._if_fn_select2') }}<div class="alert alert-warning">{{ __('users\create.unable_to_load_map_please_check_your_in') }}</div>{{ __('users\create._') }}<div class="alert alert-warning">{{ __('users\create.google_maps_could_not_be_loaded_please_') }}</div>';
+                            $('#city_id').empty().append('<option value="">{{('users\create.select_city') }}</option>');
+                            if (data.cities && data.cities.length > 0) {
+                                data.cities.forEach(function(city) {
+                                    $('#city_id').append('<option value="' + city.id + '">{{('users\create._cityname_') }}</option>');
+                                });
+                            } else {
+                                $('#city_id').append('<option value="">{{('users\create.select_city') }}</option>');
+                            }
+                            $('#city_id').select2({
+                                theme: 'bootstrap4',
+                                placeholder: '{{('users\create.select_city') }}',
+                                allowClear: true
+                            });
+                        },
+                        error: function(xhr, status, error) {
+                            console.error('Error loading cities:', error);
+                            $('#city_id').empty().append('<option value="">{{('users\create.error_loading_cities') }}</option>');
+                            $('#city_id').select2({
+                                theme: 'bootstrap4',
+                                placeholder: '{{('users\create.select_city') }}',
+                                allowClear: true
+                            });
+                        }
+                    });
+                } else {
+                    $('#city_id').empty().append('<option value="">{{('users\create.select_city') }}</option>');
+                    $('#city_id').select2({
+                        theme: 'bootstrap4',
+                        placeholder: '{{('users\create.select_city') }}',
+                        allowClear: true
+                    });
+                }
+            });
+
+            // Initialize Select2 for city dropdown
+            $('#city_id').select2({
+                theme: 'bootstrap4',
+                placeholder: '{{('users\create.select_city') }}',
+                allowClear: true
+            });
+
+            // Google Maps initialization
+            var map = new google.maps.Map(document.getElementById('map'), {
+                center: { lat: 20.5937, lng: 78.9629 }, // Default center for India
+                zoom: 6
+            });
+
+            var geocoder = new google.maps.Geocoder();
+            var marker = new google.maps.Marker({
+                map: map,
+                draggable: true,
+                position: { lat: 20.5937, lng: 78.9629 } // Default position for India
+            });
+
+            google.maps.event.addListener(marker, 'dragend', function() {
+                geocodeLatLng(marker.getPosition());
+            });
+
+            function geocodeLatLng(latLng) {
+                var lat = latLng.lat();
+                var lng = latLng.lng();
+                $('#location_latitudes').val(lat);
+                $('#location_longitudes').val(lng);
             }
+
+            // Handle form submission
+            $('form').on('submit', function(e) {
+                var lat = $('#location_latitudes').val();
+                var lng = $('#location_longitudes').val();
+
+                if (lat === '' || lng === '') {
+                    e.preventDefault();
+                    alert('{{('users\create.please_select_a_location_on_the_map') }}');
+                    return false;
+                }
+            });
         });
     </script>
 @stop
+
+
+
+
+
+
+

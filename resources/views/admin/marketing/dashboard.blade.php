@@ -9,7 +9,7 @@
                 <i class="fas fa-chart-line text-primary mr-2"></i> 
                 Marketing Dashboard
             </h1>
-            <p class="text-muted mb-0">{{ __('admin\marketing\dashboard.monitor_business_metrics_and_marketing_p') }}</p>
+            <p class="text-muted mb-0">{{('admin\marketing\dashboard.monitor_business_metrics_and_marketing_p') }}</p>
         </div>
         <div class="d-flex gap-2">
             <button type="button" class="btn btn-outline-secondary" onclick="exportReport()">
@@ -33,7 +33,7 @@
             <div class="info-box bg-gradient-info shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\marketing\dashboard.total_users') }}</span>
+                    <span class="info-box-text">{{('admin\marketing\dashboard.total_users') }}</span>
                     <span class="info-box-number">{{ number_format($metrics['total_users']) }}</span>
                     <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
                     <span class="progress-description">
@@ -46,7 +46,7 @@
             <div class="info-box bg-gradient-success shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-user-check"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\marketing\dashboard.active_users') }}</span>
+                    <span class="info-box-text">{{('admin\marketing\dashboard.active_users') }}</span>
                     <span class="info-box-number">{{ number_format($metrics['active_users']) }}</span>
                     <div class="progress"><div class="progress-bar bg-light" style="width: {{ $metrics['total_users'] > 0 ? ($metrics['active_users'] / $metrics['total_users']) * 100 : 0 }}%"></div></div>
                     <span class="progress-description">
@@ -59,7 +59,7 @@
             <div class="info-box bg-gradient-warning shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-file-alt"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\marketing\dashboard.total_posts') }}</span>
+                    <span class="info-box-text">{{('admin\marketing\dashboard.total_posts') }}</span>
                     <span class="info-box-number">{{ number_format($metrics['total_posts']) }}</span>
                     <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
                     <span class="progress-description">
@@ -72,7 +72,7 @@
             <div class="info-box bg-gradient-danger shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-star"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\marketing\dashboard.premium_posts') }}</span>
+                    <span class="info-box-text">{{('admin\marketing\dashboard.premium_posts') }}</span>
                     <span class="info-box-number">{{ number_format($metrics['premium_posts']) }}</span>
                     <div class="progress"><div class="progress-bar bg-light" style="width: {{ $metrics['total_posts'] > 0 ? ($metrics['premium_posts'] / $metrics['total_posts']) * 100 : 0 }}%"></div></div>
                     <span class="progress-description">
@@ -141,7 +141,7 @@
                             <div class="info-box bg-gradient-success">
                                 <span class="info-box-icon"><i class="fas fa-arrow-up"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">{{ __('admin\marketing\dashboard.monthly_growth') }}</span>
+                                    <span class="info-box-text">{{('admin\marketing\dashboard.monthly_growth') }}</span>
                                     <span class="info-box-number">{{ $metrics['monthly_growth'] }}%</span>
                                     <div class="progress">
                                         <div class="progress-bar" style="width: {{ min($metrics['monthly_growth'], 100) }}%"></div>
@@ -153,7 +153,7 @@
                             <div class="info-box bg-gradient-info">
                                 <span class="info-box-icon"><i class="fas fa-eye"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">{{ __('admin\marketing\dashboard.engagement_rate') }}</span>
+                                    <span class="info-box-text">{{('admin\marketing\dashboard.engagement_rate') }}</span>
                                     <span class="info-box-number">{{ $metrics['engagement_rate'] }}</span>
                                     <div class="progress">
                                         <div class="progress-bar" style="width: {{ min($metrics['engagement_rate'], 100) }}%"></div>
@@ -170,15 +170,15 @@
                                 <table class="table table-sm">
                                     <tbody>
                                         <tr>
-                                            <td><strong>{{ __('admin\marketing\dashboard.conversion_rate_') }}</strong></td>
+                                            <td><strong>{{('admin\marketing\dashboard.conversion_rate_') }}</strong></td>
                                             <td><span class="badge badge-success">{{ number_format($metrics['conversion_rate'] ?? 0, 2) }}%</span></td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\marketing\dashboard.average_session_') }}</strong></td>
+                                            <td><strong>{{('admin\marketing\dashboard.average_session_') }}</strong></td>
                                             <td><span class="badge badge-info">{{ $metrics['avg_session'] ?? '0' }} min</span></td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\marketing\dashboard.bounce_rate_') }}</strong></td>
+                                            <td><strong>{{('admin\marketing\dashboard.bounce_rate_') }}</strong></td>
                                             <td><span class="badge badge-warning">{{ number_format($metrics['bounce_rate'] ?? 0, 1) }}%</span></td>
                                         </tr>
                                     </tbody>
@@ -208,9 +208,9 @@
                         <table class="table table-bordered">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>{{ __('admin\marketing\dashboard.activity') }}</th>
-                                    <th>{{ __('admin\marketing\dashboard.count') }}</th>
-                                    <th>{{ __('admin\marketing\dashboard.trend') }}</th>
+                                    <th>{{('admin\marketing\dashboard.activity') }}</th>
+                                    <th>{{('admin\marketing\dashboard.count') }}</th>
+                                    <th>{{('admin\marketing\dashboard.trend') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -219,7 +219,7 @@
                                         <i class="fas fa-user-plus text-success mr-2"></i>
                                         New Users (Today)
                                     </td>
-                                    <td><span class="badge badge-success">{{ $recentActivities['new_users']->{{ __('admin\marketing\dashboard.where_created_at_today_coun') }}</span></td>
+                                    <td><span class="badge badge-success">{{ $recentActivities['new_users']->count() }}</span></td>
                                     <td><i class="fas fa-arrow-up text-success"></i></td>
                                 </tr>
                                 <tr>
@@ -227,7 +227,7 @@
                                         <i class="fas fa-file-alt text-info mr-2"></i>
                                         New Posts (Today)
                                     </td>
-                                    <td><span class="badge badge-info">{{ $recentActivities['new_posts']->{{ __('admin\marketing\dashboard.where_created_at_today_coun') }}</span></td>
+                                    <td><span class="badge badge-info">{{ $recentActivities['new_posts']->count() }}</span></td>
                                     <td><i class="fas fa-arrow-up text-success"></i></td>
                                 </tr>
                                 <tr>
@@ -235,7 +235,7 @@
                                         <i class="fas fa-eye text-warning mr-2"></i>
                                         Top Posts Views
                                     </td>
-                                    <td><span class="badge badge-warning">{{ $recentActivities['top_posts']->{{ __('admin\marketing\dashboard.sum_view_count_') }}</span></td>
+                                    <td><span class="badge badge-warning">{{ $recentActivities['top_posts']->sum('view_count') }}</span></td>
                                     <td><i class="fas fa-arrow-up text-success"></i></td>
                                 </tr>
                                 <tr>
@@ -265,9 +265,9 @@
                     </h3>
                     <div class="card-tools">
                         <select class="form-control form-control-sm" id="timeRange">
-                            <option value="7">{{ __('admin\marketing\dashboard.last_7_days') }}</option>
-                            <option value="30" selected>{{ __('admin\marketing\dashboard.last_30_days') }}</option>
-                            <option value="90">{{ __('admin\marketing\dashboard.last_90_days') }}</option>
+                            <option value="7">{{('admin\marketing\dashboard.last_7_days') }}</option>
+                            <option value="30" selected>{{('admin\marketing\dashboard.last_30_days') }}</option>
+                            <option value="90">{{('admin\marketing\dashboard.last_90_days') }}</option>
                         </select>
                     </div>
                 </div>
@@ -577,8 +577,8 @@ function updateActivitiesDisplay(activities) {
                         <i class="fas ${activity.icon}"></i>
                     </div>
                     <div class="activity-content">
-                        <div class="activity-title">{{ __('admin\marketing\dashboard._activity_title_') }}</div>
-                        <div class="activity-time">{{ __('admin\marketing\dashboard._activity_time_') }}</div>
+                        <div class="activity-title">{{('admin\marketing\dashboard._activity_title_') }}</div>
+                        <div class="activity-time">{{('admin\marketing\dashboard._activity_time_') }}</div>
                     </div>
                 </div>
             `);
@@ -588,3 +588,9 @@ function updateActivitiesDisplay(activities) {
 </script>
 @endpush
 @endsection 
+
+
+
+
+
+

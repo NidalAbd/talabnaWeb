@@ -49,7 +49,7 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-warning">
                 <div class="inner">
-                    <h3>{{ $budgets->field</h3>
+                    <h3>{{ $budgets->count() }}</h3>
                     <p>{{ __('admin\business\monthly_budget_planning.active_budgets') }}</p>
                 </div>
                 <div class="icon">
@@ -88,9 +88,9 @@
                                     $utilization = $budget->total_budget > 0 ? ($actualSpent / $budget->total_budget) * 100 : 0;
                                 @endphp
                                 <tr class="{{ $actualSpent > $budget->total_budget ? 'table-danger' : ($utilization >= 80 ? 'table-warning' : '') }}">
-                                    <td>{{ $budget->field</td>
+                                    <td>{{ $budget->id }}</td>
                                     <td>
-                                        <span class="badge badge-info">{{ ucfirst($budget->field</span>
+                                        <span class="badge badge-info">{{ ucfirst($budget->category) }}</span>
                                     </td>
                                     <td>${{ number_format($budget->total_budget, 2) }}</td>
                                     <td>${{ number_format($actualSpent, 2) }}</td>
@@ -172,13 +172,13 @@
                             <tbody>
                                 @foreach($monthlyExpenses->sortByDesc('amount')->take(10) as $expense)
                                 <tr>
-                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->id }}</td>
                                     <td>
-                                        <span class="badge badge-info">{{ ucfirst($expense->field</span>
+                                        <span class="badge badge-info">{{ ucfirst($expense->expense_category) }}</span>
                                     </td>
                                     <td>${{ number_format($expense->amount, 2) }}</td>
-                                    <td>{{ $expense->field</td>
-                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->vendor }}</td>
+                                    <td>{{ $expense->date }}</td>
                                     <td>
                                         <span class="badge badge-{{ $expense->status === 'approved' ? 'success' : ($expense->status === 'pending' ? 'warning' : 'danger') }}">
                                             {{ ucfirst($expense->status) }}
@@ -207,7 +207,7 @@
                             <div class="text-center">
                                 <button class="btn btn-primary btn-lg" data-toggle="modal" data-target="#createBudgetModal">
                                     <i class="fas fa-plus"></i><br>
-                                    Create New Budget
+                                    {{ __('admin\business\monthly_budget_planning.create_new_budget') }}
                                 </button>
                             </div>
                         </div>
@@ -215,7 +215,7 @@
                             <div class="text-center">
                                 <button class="btn btn-success btn-lg" data-toggle="modal" data-target="#adjustBudgetModal">
                                     <i class="fas fa-edit"></i><br>
-                                    Adjust Budget
+                                    {{ __('admin\business\monthly_budget_planning.adjust_budget') }}
                                 </button>
                             </div>
                         </div>
@@ -223,7 +223,7 @@
                             <div class="text-center">
                                 <button class="btn btn-info btn-lg" onclick="exportBudgetReport()">
                                     <i class="fas fa-download"></i><br>
-                                    Export Report
+                                    {{ __('admin\business\monthly_budget_planning.export_report') }}
                                 </button>
                             </div>
                         </div>
@@ -403,7 +403,13 @@ $(document).ready(function() {
 
 function exportBudgetReport() {
     // Implement export functionality
-    alert('Exporting budget report for {{ $currentMonth }}...');
+    alert('{{ __('admin\business\monthly_budget_planning.exporting_budget_report') }} {{ $currentMonth }}...');
 }
 </script>
 @stop 
+
+
+
+
+
+

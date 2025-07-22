@@ -21,8 +21,8 @@
             <div class="info-box bg-gradient-primary shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('users\index.total_users') }}</span>
-                    <span class="info-box-number">{{ number_format($users->field</span>
+                    <span class="info-box-text">{{ __('users.total_users') }}</span>
+                    <span class="info-box-number">{{ number_format($users->count()) }}</span>
                     <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
                     <span class="progress-description">
                         <i class="fas fa-chart-line text-light"></i> All registered users
@@ -34,11 +34,11 @@
             <div class="info-box bg-gradient-success shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-user-check"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('users\index.active_users') }}</span>
+                    <span class="info-box-text">{{ __('users.active_users') }}</span>
                     <span class="info-box-number">{{ number_format($activeUsersCount) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $users->field</div></div>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $users->count() }}"></div></div>
                     <span class="progress-description">
-                        <i class="fas fa-check-circle text-light"></i> {{ $users->total() > 0 ? number_format(($activeUsersCount / $users->total()) * 100, 1) : 0 }}% of total
+                        <i class="fas fa-check-circle text-light"></i> {{ $users->count() > 0 ? number_format(($activeUsersCount / $users->count()) * 100, 1) : 0 }}% of total
                     </span>
                 </div>
             </div>
@@ -47,11 +47,11 @@
             <div class="info-box bg-gradient-danger shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-user-slash"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('users\index.banned_users') }}</span>
+                    <span class="info-box-text">{{ __('users.banned_users') }}</span>
                     <span class="info-box-number">{{ number_format($bannedUsersCount) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $users->field</div></div>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $users->count() }}"></div></div>
                     <span class="progress-description">
-                        <i class="fas fa-exclamation-triangle text-light"></i> {{ $users->total() > 0 ? number_format(($bannedUsersCount / $users->total()) * 100, 1) : 0 }}% of total
+                        <i class="fas fa-exclamation-triangle text-light"></i> {{ $users->count() > 0 ? number_format(($bannedUsersCount / $users->count()) * 100, 1) : 0 }}% of total
                     </span>
                 </div>
             </div>
@@ -60,11 +60,11 @@
             <div class="info-box bg-gradient-warning shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-user-clock"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('users\index.inactive_users') }}</span>
+                    <span class="info-box-text">{{ __('users.inactive_users') }}</span>
                     <span class="info-box-number">{{ number_format($inactiveUsersCount) }}</span>
-                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $users->field</div></div>
+                    <div class="progress"><div class="progress-bar bg-light" style="width: {{ $users->count() }}"></div></div>
                     <span class="progress-description">
-                        <i class="fas fa-pause-circle text-light"></i> {{ $users->total() > 0 ? number_format(($inactiveUsersCount / $users->total()) * 100, 1) : 0 }}% of total
+                        <i class="fas fa-pause-circle text-light"></i> {{ $users->count() > 0 ? number_format(($inactiveUsersCount / $users->count()) * 100, 1) : 0 }}% of total
                     </span>
                 </div>
             </div>
@@ -82,21 +82,21 @@
                 <button type="button" class="btn btn-sm btn-outline-secondary mr-2 mb-2 mb-md-0" onclick="printTable(this)"><i class="fas fa-print mr-1"></i> Print</button>
                 <form method="GET" class="d-flex align-items-center mb-2 mb-md-0" style="gap: 0.5rem;">
                     <select name="status" class="form-control form-control-sm">
-                        <option value="">{{ __('users\index.all_status') }}</option>
-                        <option value="active" @if(request('status') == 'active') selected @endif>{{ __('users\index.active') }}</option>
-                        <option value="inactive" @if(request('status') == 'inactive') selected @endif>{{ __('users\index.inactive') }}</option>
-                        <option value="banned" @if(request('status') == 'banned') selected @endif>{{ __('users\index.banned') }}</option>
+                        <option value="">{{ __('users.all_status') }}</option>
+                        <option value="active" @if(request('status') == 'active') selected @endif>{{ __('users.active') }}</option>
+                        <option value="inactive" @if(request('status') == 'inactive') selected @endif>{{ __('users.inactive') }}</option>
+                        <option value="banned" @if(request('status') == 'banned') selected @endif>{{ __('users.banned') }}</option>
                     </select>
                     <select name="role" class="form-control form-control-sm">
-                        <option value="">{{ __('users\index.all_roles') }}</option>
+                        <option value="">{{ __('users.all_roles') }}</option>
                         @foreach($roles as $role)
-                            <option value="{{ $role->name }}" @if(request('role') == $role->name) selected @endif>{{ ucfirst($role->field</option>
+                            <option value="{{ $role->name }}" @if(request('role') == $role->name) selected @endif>{{ ucfirst($role->name) }}</option>
                         @endforeach
                     </select>
                     <select name="gender" class="form-control form-control-sm">
-                        <option value="">{{ __('users\index.all_genders') }}</option>
-                        <option value="ذكر" @if(request('gender') == 'ذكر') selected @endif>{{ __('users\index.male') }}</option>
-                        <option value="انثى" @if(request('gender') == 'انثى') selected @endif>{{ __('users\index.female') }}</option>
+                        <option value="">{{ __('users.all_genders') }}</option>
+                        <option value="ذكر" @if(request('gender') == 'ذكر') selected @endif>{{ __('users.male') }}</option>
+                        <option value="انثى" @if(request('gender') == 'انثى') selected @endif>{{ __('users.female') }}</option>
                     </select>
                     <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by name, email, user ID..." value="{{ request('search') }}">
                     <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
@@ -108,16 +108,16 @@
             <table class="table table-hover table-striped table-bordered align-middle">
                 <thead class="thead-light">
                     <tr>
-                        <th>{{ __('users\index.avatar') }}</th>
-                        <th>{{ __('users\index.user_id') }}</th>
-                        <th>{{ __('users\index.name') }}</th>
-                        <th>{{ __('users\index.email') }}</th>
-                        <th>{{ __('users\index.status') }}</th>
-                        <th>{{ __('users\index.roles') }}</th>
-                        <th>{{ __('users\index.posts') }}</th>
-                        <th>{{ __('users\index.reports') }}</th>
-                        <th>{{ __('users\index.registered') }}</th>
-                        <th>{{ __('users\index.actions') }}</th>
+                        <th>{{ __('users.avatar') }}</th>
+                        <th>{{ __('users.user_id') }}</th>
+                        <th>{{ __('users.name') }}</th>
+                        <th>{{ __('users.email') }}</th>
+                        <th>{{ __('users.status') }}</th>
+                        <th>{{ __('users.roles') }}</th>
+                        <th>{{ __('users.posts') }}</th>
+                        <th>{{ __('users.reports') }}</th>
+                        <th>{{ __('users.registered') }}</th>
+                        <th>{{ __('users.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -130,11 +130,8 @@
                                 @endphp
                                 <img src="{{ $src }}" alt="Avatar" class="img-circle elevation-2" width="40" height="40" style="object-fit:cover;">
                             </td>
-                            <td><span class="badge badge-secondary">{{ $user->field</span></td>
-                            <td>
-                                <strong>{{ $user->field</strong><br>
-                                <small class="text-muted">{{ $user->field</small>
-                            </td>
+                            <td><span class="badge badge-secondary">{{ $user->id }}</span></td>
+                            <td><strong>{{ $user->name }}</strong><br><small class="text-muted">{{ $user->email }}</small></td>
                             <td><a href="mailto:{{ $user->email }}" class="text-primary">{{ $user->email }}</a></td>
                             <td>
                                 @if($user->is_active == 'active')
@@ -147,19 +144,19 @@
                             </td>
                             <td>
                                 @foreach($user->roles as $role)
-                                    <span class="badge badge-primary">{{ ucfirst($role->field</span>
+                                    <span class="badge badge-primary">{{ ucfirst($role->name) }}</span>
                                 @endforeach
                                 @if($user->roles->count() == 0)
-                                    <span class="badge badge-secondary">{{ __('users\index.no_role') }}</span>
+                                    <span class="badge badge-secondary">{{ __('users.no_role') }}</span>
                                 @endif
                             </td>
-                            <td><span class="badge badge-info">{{ $user->field</span></td>
-                            <td><span class="badge badge-danger">{{ $user->field</span></td>
-                            <td><span class="text-muted">{{ $user->field</span></td>
+                            <td><span class="badge badge-info">{{ $user->pointsBalance ?? 0 }}</span></td>
+                            <td><span class="badge badge-danger">{{ $user->reports_count ?? 0 }}</span></td>
+                            <td><span class="text-muted">{{ $user->created_at ? $user->created_at->format('Y-m-d') : '-' }}</span></td>
                             <td>
                                 <div class="btn-group btn-group-sm" role="group">
-                                    <a href="{{ route('users.show', $user->field<i class="fas fa-eye"></i></a>
-                                    <a href="{{ route('users.edit', $user->field<i class="fas fa-edit"></i></a>
+                                    <a href="{{ route('users.show', $user->id) }}" class="btn btn-outline-info btn-sm" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
+                                    <a href="{{ route('users.edit', $user->id) }}" class="btn btn-outline-primary btn-sm" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
                                     
                                     <!-- Balance Button -->
                                     <button type="button" class="btn btn-outline-success" data-toggle="tooltip" title="Balance: {{ $user->pointsBalance ?? 0 }} points" onclick="showBalanceModal({{ $user->id }}, '{{ $user->name }}', {{ $user->pointsBalance ?? 0 }})">
@@ -188,11 +185,11 @@
                                     <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this user?');">
                                         @csrf
                                         @method('DELETE')
-                                        <button type="submit" class="btn btn-outline-danger" data-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
+                                        <button type="submit" class="btn btn-outline-danger btn-sm" data-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
                                     </form>
                                     
                                     <!-- History Button -->
-                                    <a href="{{ route('users.login_history', $user->field<i class="fas fa-history"></i></a>
+                                    <a href="{{ route('users.login_history', $user->id) }}"><i class="fas fa-history"></i></a>
                                 </div>
                             </td>
                         </tr>
@@ -212,7 +209,7 @@
         <div class="card-footer bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    Showing <strong>{{ $users->field</strong> to <strong>{{ $users->field</strong> of <strong>{{ $users->field</strong> users
+                    Showing <strong>{{ $users->count() }}</strong> to <strong>{{ $users->count() }}</strong> of <strong>{{ $users->count() }}</strong> users
                 </div>
                 <div>
                     {{ $users->links('pagination::bootstrap-4') }}
@@ -227,9 +224,9 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="balanceModalLabel">{{ __('users\index.user_balance') }}</h5>
+                <h5 class="modal-title" id="balanceModalLabel">{{ __('users.user_balance') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">{{ __('users\index._times_') }}</span>
+                    <span aria-hidden="true">{{ __('users._times_') }}</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -238,7 +235,7 @@
                     <div class="balance-display">
                         <i class="fas fa-coins text-warning" style="font-size: 3rem;"></i>
                         <h2 id="balanceAmount" class="text-success mt-2"></h2>
-                        <p class="text-muted">{{ __('users\index.total_points_balance') }}</p>
+                        <p class="text-muted">{{ __('users.total_points_balance') }}</p>
                     </div>
                     <div class="balance-actions mt-3">
                         <button type="button" class="btn btn-success" onclick="addPoints()">
@@ -251,7 +248,7 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('users\index.close') }}</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('users.close') }}</button>
             </div>
         </div>
     </div>
@@ -264,7 +261,7 @@
     function printTable(btn) {
         let table = btn.closest('.card').querySelector('table');
         let w = window.open();
-        w.document.write('<html><head><title>{{ __('users\index.print_table') }}</title>{{ __('users\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{ __('users\index._w_document_write_') }}</head><body>{{ __('users\index._w_document_write_table_outer') }}</body></html>');
+        w.document.write('<html><head><title>{{ __('users.print_table') }}</title>{{ __('users._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{ __('users._w_document_write_') }}</head><body>{{ __('users._w_document_write_table_outer') }}</body></html>');
         w.print();
         w.close();
     }
@@ -439,3 +436,10 @@
 </style>
 @endpush
 @stop
+
+
+
+
+
+
+

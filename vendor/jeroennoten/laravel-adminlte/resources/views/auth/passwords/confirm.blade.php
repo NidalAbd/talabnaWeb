@@ -50,7 +50,7 @@
                 <div class="input-group">
                     <input id="password" type="password" name="password"
                         class="form-control @error('password') is-invalid @enderror"
-                        placeholder="{{ __('adminlte::adminlte.password') }}" required autofocus>
+                        placeholder="{{('adminlte::adminlte.password') }}" required autofocus>
 
                     <div class="input-group-append">
                         <button type="submit" class="btn">
@@ -70,13 +70,13 @@
 
         {{-- Help block --}}
         <div class="help-block text-center">
-            {{ __('adminlte::adminlte.confirm_password_message') }}
+            {{('adminlte::adminlte.confirm_password_message') }}
         </div>
 
         {{-- Additional links --}}
         <div class="text-center">
             <a href="{{ $passResetUrl }}">
-                {{ __('adminlte::adminlte.i_forgot_my_password') }}
+                {{('adminlte::adminlte.i_forgot_my_password') }}
             </a>
         </div>
 
@@ -87,3 +87,10 @@
     @stack('js')
     @yield('js')
 @stop
+
+
+
+
+
+
+

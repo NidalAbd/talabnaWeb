@@ -3,7 +3,7 @@
 @section('title', 'Growth Metrics')
 
 @section('content_header')
-    <h1>{{ __('admin\business\growth_metrics.growth_metrics') }}</h1>
+    <h1>{{('admin\business\growth_metrics.growth_metrics') }}</h1>
 @stop
 
 @section('content')
@@ -13,8 +13,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>{{ $userGrowth->field</h3>
-                    <p>{{ __('admin\business\growth_metrics.total_new_users') }}</p>
+                    <h3>{{ $userGrowth->id</h3> }}
+                    <p>{{('admin\business\growth_metrics.total_new_users') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-users"></i>
@@ -26,7 +26,7 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>${{ number_format($revenueGrowth->sum('revenue'), 2) }}</h3>
-                    <p>{{ __('admin\business\growth_metrics.total_revenue_generated') }}</p>
+                    <p>{{('admin\business\growth_metrics.total_revenue_generated') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-dollar-sign"></i>
@@ -37,8 +37,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-warning">
                 <div class="inner">
-                    <h3>{{ $pointSalesGrowth->field</h3>
-                    <p>{{ __('admin\business\growth_metrics.total_point_sales') }}</p>
+                    <h3>{{ $pointSalesGrowth->id</h3> }}
+                    <p>{{('admin\business\growth_metrics.total_point_sales') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-coins"></i>
@@ -49,8 +49,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-primary">
                 <div class="inner">
-                    <h3>{{ number_format($pointSalesGrowth->field</h3>
-                    <p>{{ __('admin\business\growth_metrics.total_points_sold') }}</p>
+                    <h3>{{ number_format($pointSalesGrowth->id</h3> ) }}
+                    <p>{{('admin\business\growth_metrics.total_points_sold') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-chart-line"></i>
@@ -64,7 +64,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\growth_metrics.user_growth_trend') }}</h3>
+                    <h3 class="card-title">{{('admin\business\growth_metrics.user_growth_trend') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="userGrowthChart" style="height: 300px;"></canvas>
@@ -75,7 +75,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\growth_metrics.revenue_growth_trend') }}</h3>
+                    <h3 class="card-title">{{('admin\business\growth_metrics.revenue_growth_trend') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="revenueGrowthChart" style="height: 300px;"></canvas>
@@ -89,7 +89,7 @@
         <div class="col-lg-8">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\growth_metrics.point_sales_growth') }}</h3>
+                    <h3 class="card-title">{{('admin\business\growth_metrics.point_sales_growth') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="pointSalesChart" style="height: 300px;"></canvas>
@@ -100,13 +100,13 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\growth_metrics.growth_summary') }}</h3>
+                    <h3 class="card-title">{{('admin\business\growth_metrics.growth_summary') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="info-box">
                         <span class="info-box-icon bg-success"><i class="fas fa-users"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\business\growth_metrics.average_monthly_users') }}</span>
+                            <span class="info-box-text">{{('admin\business\growth_metrics.average_monthly_users') }}</span>
                             <span class="info-box-number">
                                 {{ number_format($userGrowth->avg('new_users'), 0) }}
                             </span>
@@ -116,7 +116,7 @@
                     <div class="info-box">
                         <span class="info-box-icon bg-info"><i class="fas fa-dollar-sign"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\business\growth_metrics.average_monthly_revenue') }}</span>
+                            <span class="info-box-text">{{('admin\business\growth_metrics.average_monthly_revenue') }}</span>
                             <span class="info-box-number">
                                 ${{ number_format($revenueGrowth->avg('revenue'), 2) }}
                             </span>
@@ -126,7 +126,7 @@
                     <div class="info-box">
                         <span class="info-box-icon bg-warning"><i class="fas fa-coins"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\business\growth_metrics.average_monthly_sales') }}</span>
+                            <span class="info-box-text">{{('admin\business\growth_metrics.average_monthly_sales') }}</span>
                             <span class="info-box-number">
                                 {{ number_format($pointSalesGrowth->avg('sales_count'), 0) }}
                             </span>
@@ -136,7 +136,7 @@
                     <div class="info-box">
                         <span class="info-box-icon bg-primary"><i class="fas fa-chart-line"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\business\growth_metrics.growth_rate') }}</span>
+                            <span class="info-box-text">{{('admin\business\growth_metrics.growth_rate') }}</span>
                             <span class="info-box-number">
                                 @php
                                     $firstMonth = $userGrowth->first();
@@ -158,26 +158,26 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\growth_metrics.monthly_user_growth') }}</h3>
+                    <h3 class="card-title">{{('admin\business\growth_metrics.monthly_user_growth') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\growth_metrics.month') }}</th>
-                                    <th>{{ __('admin\business\growth_metrics.new_users') }}</th>
-                                    <th>{{ __('admin\business\growth_metrics.growth') }}</th>
+                                    <th>{{('admin\business\growth_metrics.month') }}</th>
+                                    <th>{{('admin\business\growth_metrics.new_users') }}</th>
+                                    <th>{{('admin\business\growth_metrics.growth') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($userGrowth as $growth)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $growth->field</td>
-                                    <td>{{ number_format($growth->field</td>
+                                    <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $growth->id</td> }}
+                                    <td>{{ number_format($growth->id</td> ) }}
                                     <td>
                                         @php
-                                            $prevMonth = $userGrowth->field<', $growth->month)->last();
+                                            $prevMonth = $userGrowth->id<', $growth->month)->last();
                                             $growthPercent = $prevMonth && $prevMonth->new_users > 0 ? 
                                                 (($growth->new_users - $prevMonth->new_users) / $prevMonth->new_users * 100) : 0;
                                         @endphp
@@ -188,7 +188,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">{{ __('admin\business\growth_metrics.no_user_growth_data') }}</td>
+                                    <td colspan="3" class="text-center">{{('admin\business\growth_metrics.no_user_growth_data') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -201,26 +201,26 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\growth_metrics.monthly_revenue_growth') }}</h3>
+                    <h3 class="card-title">{{('admin\business\growth_metrics.monthly_revenue_growth') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\growth_metrics.month') }}</th>
-                                    <th>{{ __('admin\business\growth_metrics.revenue') }}</th>
-                                    <th>{{ __('admin\business\growth_metrics.growth') }}</th>
+                                    <th>{{('admin\business\growth_metrics.month') }}</th>
+                                    <th>{{('admin\business\growth_metrics.revenue') }}</th>
+                                    <th>{{('admin\business\growth_metrics.growth') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($revenueGrowth as $growth)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $growth->field</td>
+                                    <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $growth->id</td> }}
                                     <td>${{ number_format($growth->revenue, 2) }}</td>
                                     <td>
                                         @php
-                                            $prevMonth = $revenueGrowth->field<', $growth->month)->last();
+                                            $prevMonth = $revenueGrowth->id<', $growth->month)->last();
                                             $growthPercent = $prevMonth && $prevMonth->revenue > 0 ? 
                                                 (($growth->revenue - $prevMonth->revenue) / $prevMonth->revenue * 100) : 0;
                                         @endphp
@@ -231,7 +231,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">{{ __('admin\business\growth_metrics.no_revenue_growth_data') }}</td>
+                                    <td colspan="3" class="text-center">{{('admin\business\growth_metrics.no_revenue_growth_data') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -244,28 +244,28 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\growth_metrics.monthly_point_sales') }}</h3>
+                    <h3 class="card-title">{{('admin\business\growth_metrics.monthly_point_sales') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\growth_metrics.month') }}</th>
-                                    <th>{{ __('admin\business\growth_metrics.sales') }}</th>
-                                    <th>{{ __('admin\business\growth_metrics.points') }}</th>
+                                    <th>{{('admin\business\growth_metrics.month') }}</th>
+                                    <th>{{('admin\business\growth_metrics.sales') }}</th>
+                                    <th>{{('admin\business\growth_metrics.points') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($pointSalesGrowth as $growth)
                                 <tr>
-                                    <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $growth->field</td>
-                                    <td>{{ number_format($growth->field</td>
-                                    <td>{{ number_format($growth->field</td>
+                                    <td>{{ \Carbon\Carbon::createFromFormat('Y-m', $growth->id</td> }}
+                                    <td>{{ number_format($growth->id</td> }}
+                                    <td>{{ number_format($growth->id</td> ) }}
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">{{ __('admin\business\growth_metrics.no_point_sales_data') }}</td>
+                                    <td colspan="3" class="text-center">{{('admin\business\growth_metrics.no_point_sales_data') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -281,7 +281,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\growth_metrics.growth_insights_recommendations') }}</h3>
+                    <h3 class="card-title">{{('admin\business\growth_metrics.growth_insights_recommendations') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -329,7 +329,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\growth_metrics.growth_comparison') }}</h3>
+                    <h3 class="card-title">{{('admin\business\growth_metrics.growth_comparison') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="growthComparisonChart" style="height: 400px;"></canvas>
@@ -518,3 +518,9 @@ $(document).ready(function() {
 });
 </script>
 @stop 
+
+
+
+
+
+

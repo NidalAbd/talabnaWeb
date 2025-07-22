@@ -21,8 +21,8 @@
             <div class="info-box bg-gradient-primary shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-user-shield"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\roles\index.total_roles') }}</span>
-                    <span class="info-box-number">{{ number_format($roles->field</span>
+                    <span class="info-box-text">{{('admin\roles\index.total_roles') }}</span>
+                    <span class="info-box-number">{{ number_format($roles->count()) }}</span>
                     <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
                     <span class="progress-description">
                         <i class="fas fa-chart-line text-light"></i> All system roles
@@ -34,8 +34,8 @@
             <div class="info-box bg-gradient-success shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\roles\index.total_users') }}</span>
-                    <span class="info-box-number">{{ number_format($roles->field</span>
+                    <span class="info-box-text">{{('admin\roles\index.total_users') }}</span>
+                    <span class="info-box-number">{{ number_format($roles->count()) }}</span>
                     <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
                     <span class="progress-description">
                         <i class="fas fa-check-circle text-light"></i> Users with roles
@@ -47,8 +47,8 @@
             <div class="info-box bg-gradient-info shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-key"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\roles\index.total_permissions') }}</span>
-                    <span class="info-box-number">{{ number_format($roles->field</span>
+                    <span class="info-box-text">{{('admin\roles\index.total_permissions') }}</span>
+                    <span class="info-box-number">{{ number_format($roles->count()) }}</span>
                     <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
                     <span class="progress-description">
                         <i class="fas fa-shield-alt text-light"></i> Assigned permissions
@@ -60,8 +60,8 @@
             <div class="info-box bg-gradient-warning shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-cog"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\roles\index.system_roles') }}</span>
-                    <span class="info-box-number">{{ $roles->field</span>
+                    <span class="info-box-text">{{('admin\roles\index.system_roles') }}</span>
+                    <span class="info-box-number">{{ $roles->count() }}</span>
                     <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
                     <span class="progress-description">
                         <i class="fas fa-exclamation-triangle text-light"></i> Protected roles
@@ -99,27 +99,27 @@
             <table class="table table-hover table-striped table-bordered align-middle">
                 <thead class="thead-light">
                     <tr>
-                        <th>{{ __('admin\roles\index.id') }}</th>
-                        <th>{{ __('admin\roles\index.name') }}</th>
-                        <th>{{ __('admin\roles\index.description') }}</th>
-                        <th>{{ __('admin\roles\index.users') }}</th>
-                        <th>{{ __('admin\roles\index.permissions') }}</th>
-                        <th>{{ __('admin\roles\index.created') }}</th>
-                        <th>{{ __('admin\roles\index.actions') }}</th>
+                        <th>{{('admin\roles\index.id') }}</th>
+                        <th>{{('admin\roles\index.name') }}</th>
+                        <th>{{('admin\roles\index.description') }}</th>
+                        <th>{{('admin\roles\index.users') }}</th>
+                        <th>{{('admin\roles\index.permissions') }}</th>
+                        <th>{{('admin\roles\index.created') }}</th>
+                        <th>{{('admin\roles\index.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($roles as $role)
                         <tr>
-                            <td><span class="badge badge-secondary">{{ $role->field</span></td>
+                            <td><span class="badge badge-secondary">{{ $role->id }}</span></td>
                             <td>
-                                <strong>{{ ucfirst($role->field</strong><br>
-                                <small class="text-muted">{{ $role->field</small>
+                                <strong>{{ ucfirst($role->name) }}</strong><br>
+                                <small class="text-muted">{{ $role->id }}</small>
                             </td>
-                            <td><span class="text-muted">{{ Str::limit($role->field</span></td>
-                            <td><span class="badge badge-info">{{ $role->field</span></td>
-                            <td><span class="badge badge-warning">{{ $role->field</span></td>
-                            <td><span class="text-muted">{{ $role->field</span></td>
+                            <td><span class="text-muted">{{ Str::limit($role->description) }}</span></td>
+                            <td><span class="badge badge-info">{{ $role->users->count() }}</span></td>
+                            <td><span class="badge badge-warning">{{ $role->permissions->count() }}</span></td>
+                            <td><span class="text-muted">{{ $role->created_at->format('Y-m-d H:i') }}</span></td>
                             <td>
                                 @php
                                     $isSystemRole = in_array($role->name, ['superadmin', 'admin']);
@@ -127,7 +127,7 @@
                                     $deleteDisabled = $isSystemRole ? 'disabled' : '';
                                 @endphp
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('roles.show', $role->field<i class="fas fa-eye"></i></a>
+                                    <a href="{{ route('roles.show', $role->id) }}" class="btn btn-xs btn-outline-primary" data-toggle="tooltip" title="View Role"><i class="fas fa-eye"></i></a>
                                     <a href="{{ route('roles.edit', $role->id) }}" class="btn btn-xs btn-outline-primary {{ $editDisabled }}" data-toggle="tooltip" title="{{ $isSystemRole ? 'System roles cannot be edited' : 'Edit' }}"><i class="fas fa-edit"></i></a>
                                     <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
                                         @csrf
@@ -154,7 +154,7 @@
             <div class="card-footer bg-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        Showing <strong>{{ $roles->field</strong> to <strong>{{ $roles->field</strong> of <strong>{{ $roles->field</strong> records
+                        Showing <strong>{{ $roles->firstItem() }}</strong> to <strong>{{ $roles->lastItem() }}</strong> of <strong>{{ $roles->total() }}</strong> records
                     </div>
                     <div>
                         {{ $roles->links('pagination::bootstrap-4') }}
@@ -183,7 +183,7 @@
     function printTable(btn) {
         let table = btn.closest('.card').querySelector('table');
         let w = window.open();
-        w.document.write('<html><head><title>{{ __('admin\roles\index.print_table') }}</title>{{ __('admin\roles\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{ __('admin\roles\index._w_document_write_') }}</head><body>{{ __('admin\roles\index._w_document_write_table_outer') }}</body></html>');
+        w.document.write('<html><head><title>{{('admin\roles\index.print_table') }}</title>{{('admin\roles\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{('admin\roles\index._w_document_write_') }}</head><body>{{('admin\roles\index._w_document_write_table_outer') }}</body></html>');
         w.print();
         w.close();
     }
@@ -214,3 +214,10 @@
     });
 </script>
 @endpush
+
+
+
+
+
+
+

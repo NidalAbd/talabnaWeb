@@ -15,7 +15,7 @@
         @csrf
         @method('PUT')
         <label class="block">
-          <span class="text-gray-700">{{ __('vendor\laratrust\panel\roles-assignment\edit.name') }}</span>
+          <span class="text-gray-700">{{('vendor\laratrust\panel\roles-assignment\edit.name') }}</span>
           <input
             class="form-input mt-1 block w-full bg-gray-200 text-gray-600"
             name="name"
@@ -25,7 +25,7 @@
             autocomplete="off"
           >
         </label>
-        <span class="block text-gray-700 mt-4">{{ __('vendor\laratrust\panel\roles-assignment\edit.roles') }}</span>
+        <span class="block text-gray-700 mt-4">{{('vendor\laratrust\panel\roles-assignment\edit.roles') }}</span>
         <div class="flex flex-wrap justify-start mb-4">
           @foreach ($roles as $role)
             <label class="inline-flex items-center mr-6 my-2 text-sm" style="flex: 1 0 20%;">
@@ -48,7 +48,7 @@
           @endforeach
         </div>
         @if ($permissions)
-          <span class="block text-gray-700 mt-4">{{ __('vendor\laratrust\panel\roles-assignment\edit.permissions') }}</span>
+          <span class="block text-gray-700 mt-4">{{('vendor\laratrust\panel\roles-assignment\edit.permissions') }}</span>
           <div class="flex flex-wrap justify-start mb-4">
             @foreach ($permissions as $permission)
               <label class="inline-flex items-center mr-6 my-2 text-sm" style="flex: 1 0 20%;">
@@ -59,7 +59,7 @@
                   value="{{$permission->getKey()}}"
                   {!! $permission->assigned ? 'checked' : '' !!}
                 >
-                <span class="ml-2">{{$permission->field</span>
+                <span class="ml-2">{{$permission->id</span> }}
               </label>
             @endforeach
           </div>
@@ -71,9 +71,15 @@
           >
             Cancel
           </a>
-          <button class="btn btn-blue" type="submit">{{ __('vendor\laratrust\panel\roles-assignment\edit.save') }}</button>
+          <button class="btn btn-blue" type="submit">{{('vendor\laratrust\panel\roles-assignment\edit.save') }}</button>
         </div>
       </form>
     </div>
   </div>
 @endsection
+
+
+
+
+
+

@@ -9,10 +9,10 @@
                 <i class="fas fa-layer-group text-primary mr-2"></i>
                 Level Details
             </h1>
-            <p class="text-muted mb-0">{{ __('admin\levels\show.view_detailed_information_about_this_lev') }}</p>
+            <p class="text-muted mb-0">{{('admin\levels\show.view_detailed_information_about_this_lev') }}</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ route('levels.edit', $level->id) }}" class="btn btn-primary">
+            <a href="{{ route('levels.edit', $level->count()) }}" class="btn btn-primary">
                 <i class="fas fa-edit mr-1"></i> Edit Level
             </a>
             <a href="{{ route('levels.index') }}" class="btn btn-secondary">
@@ -27,7 +27,7 @@
     <!-- Success/Error Messages -->
     @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{ __('admin\levels\show._') }}</button>
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{('admin\levels\show._') }}</button>
             <h5><i class="icon fas fa-check"></i> Success!</h5>
             {{ session('success') }}
         </div>
@@ -35,7 +35,7 @@
 
     @if(session('error'))
         <div class="alert alert-danger alert-dismissible fade show">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{ __('admin\levels\show._') }}</button>
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{('admin\levels\show._') }}</button>
             <h5><i class="icon fas fa-ban"></i> Error!</h5>
             {{ session('error') }}
         </div>
@@ -55,7 +55,7 @@
                             {{ $level->is_active ? 'Active' : 'Inactive' }}
                         </span>
                         @if($level->is_premium)
-                            <span class="badge badge-warning ml-2">{{ __('admin\levels\show.premium') }}</span>
+                            <span class="badge badge-warning ml-2">{{('admin\levels\show.premium') }}</span>
                         @endif
                     </div>
                 </div>
@@ -64,41 +64,41 @@
                         <div class="col-md-6">
                             <table class="table table-borderless">
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.id_') }}</strong></td>
-                                    <td>{{ $level->field</td>
+                                    <td><strong>{{('admin\levels\show.id_') }}</strong></td>
+                                    <td>{{ $level->id</td> }}
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.name_arabic_') }}</strong></td>
-                                    <td>{{ $level->field</td>
+                                    <td><strong>{{('admin\levels\show.name_arabic_') }}</strong></td>
+                                    <td>{{ $level->id</td> }}
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.name_english_') }}</strong></td>
-                                    <td>{{ $level->field</td>
+                                    <td><strong>{{('admin\levels\show.name_english_') }}</strong></td>
+                                    <td>{{ $level->id</td> }}
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.description_arabic_') }}</strong></td>
-                                    <td>{{ $level->field</td>
+                                    <td><strong>{{('admin\levels\show.description_arabic_') }}</strong></td>
+                                    <td>{{ $level->id</td> }}
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.description_english_') }}</strong></td>
-                                    <td>{{ $level->field</td>
+                                    <td><strong>{{('admin\levels\show.description_english_') }}</strong></td>
+                                    <td>{{ $level->id</td> }}
                                 </tr>
                             </table>
                         </div>
                         <div class="col-md-6">
                             <table class="table table-borderless">
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.icon_') }}</strong></td>
+                                    <td><strong>{{('admin\levels\show.icon_') }}</strong></td>
                                     <td>
                                         @if($level->icon)
-                                            <i class="{{ $level->field</i> {{ $level->icon }}
+                                            <i class="{{ $level->id</i> {{ $level->icon }}
                                         @else
                                             N/A
                                         @endif
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.color_') }}</strong></td>
+                                    <td><strong>{{('admin\levels\show.color_') }}</strong></td>
                                     <td>
                                         <span class="badge" style="background-color: {{ $level->color }}; color: white;">
                                             {{ $level->color }}
@@ -106,16 +106,16 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.points_per_day_') }}</strong></td>
-                                    <td>{{ $level->field</td>
+                                    <td><strong>{{('admin\levels\show.points_per_day_') }}</strong></td>
+                                    <td>{{ $level->id</td> }}
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.view_boost_') }}</strong></td>
-                                    <td>{{ $level->field</td>
+                                    <td><strong>{{('admin\levels\show.view_boost_') }}</strong></td>
+                                    <td>{{ $level->id</td> }}
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\levels\show.display_order_') }}</strong></td>
-                                    <td>{{ $level->field</td>
+                                    <td><strong>{{('admin\levels\show.display_order_') }}</strong></td>
+                                    <td>{{ $level->id</td> }}
                                 </tr>
                             </table>
                         </div>
@@ -127,7 +127,7 @@
                             <h5><i class="fas fa-star mr-2"></i> Features</h5>
                             <div class="row">
                                 <div class="col-md-6">
-                                    <h6>{{ __('admin\levels\show.arabic_features_') }}</h6>
+                                    <h6>{{('admin\levels\show.arabic_features_') }}</h6>
                                     <ul class="list-unstyled">
                                         @foreach($level->getLocalizedFeatures('ar') as $feature)
                                             <li><i class="fas fa-check text-success mr-2"></i>{{ $feature }}</li>
@@ -135,7 +135,7 @@
                                     </ul>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6>{{ __('admin\levels\show.english_features_') }}</h6>
+                                    <h6>{{('admin\levels\show.english_features_') }}</h6>
                                     <ul class="list-unstyled">
                                         @foreach($level->getLocalizedFeatures('en') as $feature)
                                             <li><i class="fas fa-check text-success mr-2"></i>{{ $feature }}</li>
@@ -162,8 +162,8 @@
                     <div class="info-box bg-gradient-primary">
                         <span class="info-box-icon"><i class="fas fa-file-alt"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\levels\show.service_posts') }}</span>
-                            <span class="info-box-number">{{ $level->field</span>
+                            <span class="info-box-text">{{('admin\levels\show.service_posts') }}</span>
+                            <span class="info-box-number">{{ $level->id</span> }}
                             <div class="progress">
                                 <div class="progress-bar" style="width: 100%"></div>
                             </div>
@@ -176,10 +176,10 @@
                     <div class="info-box bg-gradient-success">
                         <span class="info-box-icon"><i class="fas fa-eye"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\levels\show.view_boost') }}</span>
-                            <span class="info-box-number">{{ $level->field</span>
+                            <span class="info-box-text">{{('admin\levels\show.view_boost') }}</span>
+                            <span class="info-box-number">{{ $level->id</span> }}
                             <div class="progress">
-                                <div class="progress-bar" style="width: {{ min($level->field</div>
+                                <div class="progress-bar" style="width: {{ min($level->id</div> }}
                             </div>
                             <span class="progress-description">
                                 Additional view visibility
@@ -190,8 +190,8 @@
                     <div class="info-box bg-gradient-warning">
                         <span class="info-box-icon"><i class="fas fa-coins"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\levels\show.daily_cost') }}</span>
-                            <span class="info-box-number">{{ $level->field</span>
+                            <span class="info-box-text">{{('admin\levels\show.daily_cost') }}</span>
+                            <span class="info-box-number">{{ $level->id</span> }}
                             <div class="progress">
                                 <div class="progress-bar" style="width: 100%"></div>
                             </div>
@@ -213,18 +213,18 @@
                 </div>
                 <div class="card-body">
                     <div class="btn-group-vertical w-100">
-                        <a href="{{ route('levels.edit', $level->id) }}" class="btn btn-primary mb-2">
+                        <a href="{{ route('levels.edit', $level->count()) }}" class="btn btn-primary mb-2">
                             <i class="fas fa-edit mr-2"></i> Edit Level
                         </a>
                         <button type="button" class="btn btn-{{ $level->is_active ? 'warning' : 'success' }} mb-2" 
-                                onclick="toggleStatus({{ $level->id }})">
-                            <i class="fas fa-{{ $level->field</i>
+                                onclick="toggleStatus({{ $level->count() }})">
+                            <i class="fas fa-{{ $level->id</i> }}
                             {{ $level->is_active ? 'Deactivate' : 'Activate' }}
                         </button>
-                        <button type="button" class="btn btn-info mb-2" onclick="duplicateLevel({{ $level->id }})">
+                        <button type="button" class="btn btn-info mb-2" onclick="duplicateLevel({{ $level->count() }})">
                             <i class="fas fa-copy mr-2"></i> Duplicate
                         </button>
-                        <form action="{{ route('levels.destroy', $level->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('levels.destroy', $level->count()) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger w-100" 
@@ -252,28 +252,28 @@
                     <table class="table table-hover">
                         <thead>
                             <tr>
-                                <th>{{ __('admin\levels\show.id') }}</th>
-                                <th>{{ __('admin\levels\show.title') }}</th>
-                                <th>{{ __('admin\levels\show.user') }}</th>
-                                <th>{{ __('admin\levels\show.status') }}</th>
-                                <th>{{ __('admin\levels\show.created') }}</th>
-                                <th>{{ __('admin\levels\show.actions') }}</th>
+                                <th>{{('admin\levels\show.id') }}</th>
+                                <th>{{('admin\levels\show.title') }}</th>
+                                <th>{{('admin\levels\show.user') }}</th>
+                                <th>{{('admin\levels\show.status') }}</th>
+                                <th>{{('admin\levels\show.created') }}</th>
+                                <th>{{('admin\levels\show.actions') }}</th>
                             </tr>
                         </thead>
                         <tbody>
                             @foreach($level->servicePosts()->latest()->take(10)->get() as $post)
                                 <tr>
-                                    <td>{{ $post->field</td>
-                                    <td>{{ Str::limit($post->field</td>
-                                    <td>{{ $post->field</td>
+                                    <td>{{ $post->id</td> }}
+                                    <td>{{ Str::limit($post->id</td> }}
+                                    <td>{{ $post->id</td> }}
                                     <td>
                                         <span class="badge badge-{{ $post->status === 'approved' ? 'success' : ($post->status === 'pending' ? 'warning' : 'danger') }}">
                                             {{ ucfirst($post->status) }}
                                         </span>
                                     </td>
-                                    <td>{{ $post->field</td>
+                                    <td>{{ $post->id</td> }}
                                     <td>
-                                        <a href="{{ route('service_posts.show', $post->id) }}" class="btn btn-sm btn-info">
+                                        <a href="{{ route('service_posts.show', $post->count()) }}" class="btn btn-sm btn-info">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>
@@ -404,3 +404,9 @@ function duplicateLevel(levelId) {
 }
 </script>
 @endsection 
+
+
+
+
+
+

@@ -24,7 +24,7 @@
             <div class="col-md-12">
                 <div class="card card-outline card-warning">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('users\edit.edit_user_information') }}</h3>
+                        <h3 class="card-title">{{('users\edit.edit_user_information') }}</h3>
                     </div>
 
                     <form action="{{ route('users.update', $user->id) }}" method="POST" enctype="multipart/form-data">
@@ -52,7 +52,7 @@
                                         <div class="input-group">
                                             <div class="custom-file">
                                                 <input type="file" class="custom-file-input" id="profile-image" name="profile_image">
-                                                <label class="custom-file-label" for="profile-image">{{ __('users\edit.choose_profile_image') }}</label>
+                                                <label class="custom-file-label" for="profile-image">{{('users\edit.choose_profile_image') }}</label>
                                             </div>
                                         </div>
                                         @error('profile_image')
@@ -61,10 +61,10 @@
                                     </div>
 
                                     <div class="form-group">
-                                        <label for="auth_type">{{ __('users\edit.authentication_type') }}</label>
+                                        <label for="auth_type">{{('users\edit.authentication_type') }}</label>
                                         <select class="form-control @error('auth_type') is-invalid @enderror" id="auth_type" name="auth_type">
-                                            <option value="email" {{ $user->field</option>
-                                            <option value="google" {{ $user->field</option>
+                                            <option value="email" {{ $user->id }}>
+                                            <option value="google" {{ $user->id }}>
                                         </select>
                                         @error('auth_type')
                                         <span class="invalid-feedback">{{ $message }}</span>
@@ -75,7 +75,7 @@
                                         <div class="custom-control custom-switch">
                                             <input type="checkbox" class="custom-control-input" id="data_saver_enabled"
                                                    name="data_saver_enabled" value="1" {{ $user->data_saver_enabled ? 'checked' : '' }}>
-                                            <label class="custom-control-label" for="data_saver_enabled">{{ __('users\edit.data_saver_enabled') }}</label>
+                                            <label class="custom-control-label" for="data_saver_enabled">{{('users\edit.data_saver_enabled') }}</label>
                                         </div>
                                     </div>
                                 </div>
@@ -84,7 +84,7 @@
                                     <div class="row">
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="name">Full Name <span class="text-danger">{{ __('users\edit._') }}</span></label>
+                                                <label for="name">Full Name <span class="text-danger">{{('users\edit._') }}</span></label>
                                                 <input type="text" class="form-control @error('name') is-invalid @enderror"
                                                        id="name" name="name" value="{{ old('name', $user->name) }}"
                                                        placeholder="Enter full name" required>
@@ -96,7 +96,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="user_name">Username <span class="text-danger">{{ __('users\edit._') }}</span></label>
+                                                <label for="user_name">Username <span class="text-danger">{{('users\edit._') }}</span></label>
                                                 <input type="text" class="form-control @error('user_name') is-invalid @enderror"
                                                        id="user_name" name="user_name" value="{{ old('user_name', $user->user_name) }}"
                                                        placeholder="Enter username" required>
@@ -108,7 +108,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="email">Email Address <span class="text-danger">{{ __('users\edit._') }}</span></label>
+                                                <label for="email">Email Address <span class="text-danger">{{('users\edit._') }}</span></label>
                                                 <input type="email" class="form-control @error('email') is-invalid @enderror"
                                                        id="email" name="email" value="{{ old('email', $user->email) }}"
                                                        placeholder="Enter email address" required>
@@ -120,7 +120,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="password">Password <small class="text-muted">{{ __('users\edit._leave_empty_to_keep_current_password_') }}</small></label>
+                                                <label for="password">Password <small class="text-muted">{{('users\edit._leave_empty_to_keep_current_password_') }}</small></label>
                                                 <input type="password" class="form-control @error('password') is-invalid @enderror"
                                                        id="password" name="password" placeholder="Enter new password">
                                                 @error('password')
@@ -131,7 +131,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="password_confirmation">{{ __('users\edit.confirm_password') }}</label>
+                                                <label for="password_confirmation">{{('users\edit.confirm_password') }}</label>
                                                 <input type="password" class="form-control" id="password_confirmation"
                                                        name="password_confirmation" placeholder="Confirm new password">
                                             </div>
@@ -139,10 +139,10 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="gender">{{ __('users\edit.gender') }}</label>
+                                                <label for="gender">{{('users\edit.gender') }}</label>
                                                 <select class="form-control @error('gender') is-invalid @enderror" id="gender" name="gender">
-                                                    <option value="ذكر" {{ $user->field</option>
-                                                    <option value="انثى" {{ $user->field</option>
+                                                    <option value="ذكر" {{ $user->id }}>
+                                                    <option value="انثى" {{ $user->id }}>
                                                 </select>
                                                 @error('gender')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -152,9 +152,9 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="country_id">{{ __('users\edit.country') }}</label>
+                                                <label for="country_id">{{('users\edit.country') }}</label>
                                                 <select class="form-control select2 @error('country_id') is-invalid @enderror" id="country_id" name="country_id">
-                                                    <option value="">{{ __('users\edit.select_country') }}</option>
+                                                    <option value="">{{('users\edit.select_country') }}</option>
                                                     @foreach ($countries as $country)
                                                         <option value="{{ $country->id }}"
                                                             {{ old('country_id', $user->country_id) == $country->id ? 'selected' : '' }}>
@@ -170,9 +170,9 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="city_id">{{ __('users\edit.city') }}</label>
+                                                <label for="city_id">{{('users\edit.city') }}</label>
                                                 <select class="form-control select2 @error('city_id') is-invalid @enderror" id="city_id" name="city_id">
-                                                    <option value="">{{ __('users\edit.select_city') }}</option>
+                                                    <option value="">{{('users\edit.select_city') }}</option>
                                                     @foreach ($cities as $city)
                                                         <option value="{{ $city->id }}"
                                                             {{ old('city_id', $user->city_id) == $city->id ? 'selected' : '' }}>
@@ -188,7 +188,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="date_of_birth">{{ __('users\edit.date_of_birth') }}</label>
+                                                <label for="date_of_birth">{{('users\edit.date_of_birth') }}</label>
                                                 <input type="date" class="form-control @error('date_of_birth') is-invalid @enderror"
                                                        id="date_of_birth" name="date_of_birth"
                                                        value="{{ old('date_of_birth', $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth)->format('Y-m-d') : '') }}">
@@ -200,7 +200,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="phones">{{ __('users\edit.phone_number') }}</label>
+                                                <label for="phones">{{('users\edit.phone_number') }}</label>
                                                 <input type="text" class="form-control @error('phones') is-invalid @enderror"
                                                        id="phones" name="phones" value="{{ old('phones', $user->phones) }}"
                                                        placeholder="Enter phone number">
@@ -212,7 +212,7 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="WatsNumber">{{ __('users\edit.whatsapp_number') }}</label>
+                                                <label for="WatsNumber">{{('users\edit.whatsapp_number') }}</label>
                                                 <input type="text" class="form-control @error('WatsNumber') is-invalid @enderror"
                                                        id="WatsNumber" name="WatsNumber" value="{{ old('WatsNumber', $user->WatsNumber) }}"
                                                        placeholder="Enter WhatsApp number">
@@ -224,11 +224,11 @@
 
                                         <div class="col-md-6">
                                             <div class="form-group">
-                                                <label for="is_active">{{ __('users\edit.account_status') }}</label>
+                                                <label for="is_active">{{('users\edit.account_status') }}</label>
                                                 <select class="form-control @error('is_active') is-invalid @enderror" id="is_active" name="is_active">
-                                                    <option value="active" {{ $user->field</option>
-                                                    <option value="inactive" {{ $user->field</option>
-                                                    <option value="banned" {{ $user->field</option>
+                                                    <option value="active" {{ $user->id }}>
+                                                    <option value="inactive" {{ $user->id }}>
+                                                    <option value="banned" {{ $user->id }}>
                                                 </select>
                                                 @error('is_active')
                                                 <span class="invalid-feedback">{{ $message }}</span>
@@ -240,13 +240,13 @@
                                     <div class="row">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>{{ __('users\edit.user_location') }}</label>
+                                                <label>{{('users\edit.user_location') }}</label>
                                                 <div id="map" style="height: 300px;"></div>
                                                 <input type="hidden" id="location_latitudes" name="location_latitudes"
                                                        value="{{ old('location_latitudes', $user->location_latitudes) }}">
                                                 <input type="hidden" id="location_longitudes" name="location_longitudes"
                                                        value="{{ old('location_longitudes', $user->location_longitudes) }}">
-                                                <small class="form-text text-muted">{{ __('users\edit.drag_the_marker_to_set_the_user_s_locati') }}</small>
+                                                <small class="form-text text-muted">{{('users\edit.drag_the_marker_to_set_the_user_s_locati') }}</small>
                                                 @error('location_latitudes')
                                                 <span class="text-danger">{{ $message }}</span>
                                                 @enderror
@@ -257,7 +257,7 @@
                                     <div class="row mt-3">
                                         <div class="col-md-12">
                                             <div class="form-group">
-                                                <label>{{ __('users\edit.assign_roles') }}</label>
+                                                <label>{{('users\edit.assign_roles') }}</label>
                                                 <div class="d-flex flex-wrap">
                                                     @foreach($roles as $role)
                                                         <div class="custom-control custom-checkbox mr-4 mb-2">
@@ -302,8 +302,8 @@
                                 <div class="info-box bg-gradient-success">
                                     <span class="info-box-icon"><i class="fas fa-coins"></i></span>
                                     <div class="info-box-content">
-                                        <span class="info-box-text">{{ __('users\edit.current_points_balance') }}</span>
-                                        <span class="info-box-number">{{ $user->field</span>
+                                        <span class="info-box-text">{{('users\edit.current_points_balance') }}</span>
+                                        <span class="info-box-number">{{ $user->id }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -312,7 +312,7 @@
                                     @csrf
                                     <input type="hidden" name="user_id" value="{{ $user->id }}">
                                     <div class="form-group">
-                                        <label for="point">{{ __('users\edit.add_points') }}</label>
+                                        <label for="point">{{('users\edit.add_points') }}</label>
                                         <div class="input-group">
                                             <input type="number" name="point" id="point" class="form-control" placeholder="Enter points amount">
                                             <div class="input-group-append">
@@ -386,7 +386,9 @@
                         dataType: 'json',
                         success: function(data) {
                             $('#city_id').empty();
-                            $('#city_id').append('<option value="">{{ __('users\edit.select_city') }}</option>{{ __('users\edit._each_') }}<option value="' + value.id + '">{{ __('users\edit._value_name_') }}</option>{{ __('users\edit._') }}<option value="">{{ __('users\edit.select_city') }}</option>');
+                            $('#city_id').append('<option value="">{{('users\edit.select_city') }}</option>{{('users\edit._each_') }}<option value="' + value.id + '">{{('users\edit._value_name_') }}</option>{{('users\edit._') }}<option value="">{{('users\edit.select_city') }}</option>');
+                        }
+                    });
                 }
             });
 
@@ -428,3 +430,10 @@
         });
     </script>
 @stop
+
+
+
+
+
+
+

@@ -156,6 +156,11 @@ class User extends Authenticatable implements CanResetPasswordContract
         return palservice_points::where('user_id', $this->id)->sum('point');
     }
 
+    public function palservicePoints()
+    {
+        return $this->hasMany(palservice_points::class, 'user_id');
+    }
+
     public function adminlte_profile_url()
     {
         // Using your existing user.profile route instead of a non-existent 'profile' route

@@ -32,7 +32,7 @@
                             <!-- Arabic Name -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="name_ar">Name (Arabic) <span class="text-danger">{{ __('admin\premium_features\create._') }}</span></label>
+                                    <label for="name_ar">Name (Arabic) <span class="text-danger">{{('admin\premium_features\create._') }}</span></label>
                                     <input type="text" class="form-control @error('name.ar') is-invalid @enderror" 
                                            id="name_ar" name="name[ar]" value="{{ old('name.ar') }}" required>
                                     @error('name.ar')
@@ -44,7 +44,7 @@
                             <!-- English Name -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="name_en">Name (English) <span class="text-danger">{{ __('admin\premium_features\create._') }}</span></label>
+                                    <label for="name_en">Name (English) <span class="text-danger">{{('admin\premium_features\create._') }}</span></label>
                                     <input type="text" class="form-control @error('name.en') is-invalid @enderror" 
                                            id="name_en" name="name[en]" value="{{ old('name.en') }}" required>
                                     @error('name.en')
@@ -58,7 +58,7 @@
                             <!-- Arabic Description -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="description_ar">{{ __('admin\premium_features\create.description_arabic_') }}</label>
+                                    <label for="description_ar">{{('admin\premium_features\create.description_arabic_') }}</label>
                                     <textarea class="form-control @error('description.ar') is-invalid @enderror" 
                                               id="description_ar" name="description[ar]" rows="3">{{ old('description.ar') }}</textarea>
                                     @error('description.ar')
@@ -70,7 +70,7 @@
                             <!-- English Description -->
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label for="description_en">{{ __('admin\premium_features\create.description_english_') }}</label>
+                                    <label for="description_en">{{('admin\premium_features\create.description_english_') }}</label>
                                     <textarea class="form-control @error('description.en') is-invalid @enderror" 
                                               id="description_en" name="description[en]" rows="3">{{ old('description.en') }}</textarea>
                                     @error('description.en')
@@ -84,7 +84,7 @@
                             <!-- Points Cost -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="points_cost">Points Cost <span class="text-danger">{{ __('admin\premium_features\create._') }}</span></label>
+                                    <label for="points_cost">Points Cost <span class="text-danger">{{('admin\premium_features\create._') }}</span></label>
                                     <input type="number" class="form-control @error('points_cost') is-invalid @enderror" 
                                            id="points_cost" name="points_cost" value="{{ old('points_cost') }}" min="1" required>
                                     @error('points_cost')
@@ -96,7 +96,7 @@
                             <!-- Duration Days -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="duration_days">Duration (Days) <span class="text-danger">{{ __('admin\premium_features\create._') }}</span></label>
+                                    <label for="duration_days">Duration (Days) <span class="text-danger">{{('admin\premium_features\create._') }}</span></label>
                                     <input type="number" class="form-control @error('duration_days') is-invalid @enderror" 
                                            id="duration_days" name="duration_days" value="{{ old('duration_days', 30) }}" min="1" required>
                                     @error('duration_days')
@@ -108,14 +108,14 @@
                             <!-- Category -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="category">Category <span class="text-danger">{{ __('admin\premium_features\create._') }}</span></label>
+                                    <label for="category">Category <span class="text-danger">{{('admin\premium_features\create._') }}</span></label>
                                     <select class="form-control @error('category') is-invalid @enderror" id="category" name="category" required>
-                                        <option value="">{{ __('admin\premium_features\create.select_category') }}</option>
-                                        <option value="post_enhancement" {{ old('category') == 'post_enhancement' ? 'selected' : '' }}>{{ __('admin\premium_features\create.post_enhancement') }}</option>
-                                        <option value="user_benefit" {{ old('category') == 'user_benefit' ? 'selected' : '' }}>{{ __('admin\premium_features\create.user_benefit') }}</option>
-                                        <option value="system_feature" {{ old('category') == 'system_feature' ? 'selected' : '' }}>{{ __('admin\premium_features\create.system_feature') }}</option>
-                                        <option value="premium_access" {{ old('category') == 'premium_access' ? 'selected' : '' }}>{{ __('admin\premium_features\create.premium_access') }}</option>
-                                        <option value="analytics" {{ old('category') == 'analytics' ? 'selected' : '' }}>{{ __('admin\premium_features\create.analytics') }}</option>
+                                        <option value="">{{('admin\premium_features\create.select_category') }}</option>
+                                        <option value="post_enhancement" {{ old('category') == 'post_enhancement' ? 'selected' : '' }}>{{('admin\premium_features\create.post_enhancement') }}</option>
+                                        <option value="user_benefit" {{ old('category') == 'user_benefit' ? 'selected' : '' }}>{{('admin\premium_features\create.user_benefit') }}</option>
+                                        <option value="system_feature" {{ old('category') == 'system_feature' ? 'selected' : '' }}>{{('admin\premium_features\create.system_feature') }}</option>
+                                        <option value="premium_access" {{ old('category') == 'premium_access' ? 'selected' : '' }}>{{('admin\premium_features\create.premium_access') }}</option>
+                                        <option value="analytics" {{ old('category') == 'analytics' ? 'selected' : '' }}>{{('admin\premium_features\create.analytics') }}</option>
                                     </select>
                                     @error('category')
                                         <span class="invalid-feedback">{{ $message }}</span>
@@ -128,11 +128,11 @@
                             <!-- Icon -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="icon">{{ __('admin\premium_features\create.icon_fontawesome_class_') }}</label>
+                                    <label for="icon">{{('admin\premium_features\create.icon_fontawesome_class_') }}</label>
                                     <input type="text" class="form-control @error('icon') is-invalid @enderror" 
                                            id="icon" name="icon" value="{{ old('icon', 'fas fa-crown') }}" 
                                            placeholder="fas fa-crown">
-                                    <small class="form-text text-muted">{{ __('admin\premium_features\create.enter_fontawesome_icon_class_e_g_fas_') }}</small>
+                                    <small class="form-text text-muted">{{('admin\premium_features\create.enter_fontawesome_icon_class_e_g_fas_') }}</small>
                                     @error('icon')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
@@ -142,7 +142,7 @@
                             <!-- Color -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label for="color">{{ __('admin\premium_features\create.color') }}</label>
+                                    <label for="color">{{('admin\premium_features\create.color') }}</label>
                                     <input type="color" class="form-control @error('color') is-invalid @enderror" 
                                            id="color" name="color" value="{{ old('color', '#ffc107') }}">
                                     @error('color')
@@ -154,16 +154,16 @@
                             <!-- Status -->
                             <div class="col-md-4">
                                 <div class="form-group">
-                                    <label>{{ __('admin\premium_features\create.status') }}</label>
+                                    <label>{{('admin\premium_features\create.status') }}</label>
                                     <div class="custom-control custom-switch">
                                         <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" value="1" 
                                                {{ old('is_active', true) ? 'checked' : '' }}>
-                                        <label class="custom-control-label" for="is_active">{{ __('admin\premium_features\create.active') }}</label>
+                                        <label class="custom-control-label" for="is_active">{{('admin\premium_features\create.active') }}</label>
                                     </div>
                                     <div class="custom-control custom-switch mt-2">
                                         <input type="checkbox" class="custom-control-input" id="is_popular" name="is_popular" value="1" 
                                                {{ old('is_popular') ? 'checked' : '' }}>
-                                        <label class="custom-control-label" for="is_popular">{{ __('admin\premium_features\create.popular_feature') }}</label>
+                                        <label class="custom-control-label" for="is_popular">{{('admin\premium_features\create.popular_feature') }}</label>
                                     </div>
                                 </div>
                             </div>
@@ -215,3 +215,9 @@ $(document).ready(function() {
 });
 </script>
 @stop 
+
+
+
+
+
+

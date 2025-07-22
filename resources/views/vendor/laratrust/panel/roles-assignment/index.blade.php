@@ -10,10 +10,10 @@
         x-init="$watch('model', value => value != 'initial' ? window.location = `?model=${value}` : '')"
         class="mt-4 align-middle inline-block min-w-full shadow overflow-hidden sm:rounded-lg border-b border-gray-200 p-4"
       >
-        <span class="text-gray-700">{{ __('vendor\laratrust\panel\roles-assignment\index.user_model_to_assign_roles_permissions') }}</span>
+        <span class="text-gray-700">{{('vendor\laratrust\panel\roles-assignment\index.user_model_to_assign_roles_permissions') }}</span>
         <label class="block w-3/12">
           <select class="form-select block w-full mt-1" x-model="model">
-            <option value="initial" disabled selected>{{ __('vendor\laratrust\panel\roles-assignment\index.select_a_user_model') }}</option>
+            <option value="initial" disabled selected>{{('vendor\laratrust\panel\roles-assignment\index.select_a_user_model') }}</option>
             @foreach ($models as $model)
               <option value="{{$model}}">{{ucwords($model)}}</option>
             @endforeach
@@ -23,10 +23,10 @@
           <table class="min-w-full">
             <thead>
               <tr>
-                <th class="th">{{ __('vendor\laratrust\panel\roles-assignment\index.id') }}</th>
-                <th class="th">{{ __('vendor\laratrust\panel\roles-assignment\index.name') }}</th>
-                <th class="th">{{ __('vendor\laratrust\panel\roles-assignment\index._roles') }}</th>
-                @if(config('laratrust.panel.assign_permissions_to_user'))<th class="th">{{ __('vendor\laratrust\panel\roles-assignment\index._permissions') }}</th>@endif
+                <th class="th">{{('vendor\laratrust\panel\roles-assignment\index.id') }}</th>
+                <th class="th">{{('vendor\laratrust\panel\roles-assignment\index.name') }}</th>
+                <th class="th">{{('vendor\laratrust\panel\roles-assignment\index._roles') }}</th>
+                @if(config('laratrust.panel.assign_permissions_to_user'))<th class="th">{{('vendor\laratrust\panel\roles-assignment\index._permissions') }}</th>@endif
                 <th class="th"></th>
               </tr>
             </thead>
@@ -66,3 +66,10 @@
     </div>
   </div>
 @endsection
+
+
+
+
+
+
+

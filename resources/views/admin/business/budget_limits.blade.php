@@ -3,7 +3,7 @@
 @section('title', 'Budget Limits')
 
 @section('content_header')
-    <h1>{{ __('admin\business\budget_limits.budget_limits_monitoring') }}</h1>
+    <h1>{{('admin\business\budget_limits.budget_limits_monitoring') }}</h1>
 @stop
 
 @section('content')
@@ -12,7 +12,7 @@
     @if($overBudgetBudgets->count() > 0)
     <div class="alert alert-danger">
         <h5><i class="fas fa-exclamation-triangle"></i> Over Budget Alerts</h5>
-        <p>{{ __('admin\business\budget_limits.the_following_budgets_have_exceeded_thei') }}</p>
+        <p>{{('admin\business\budget_limits.the_following_budgets_have_exceeded_thei') }}</p>
     </div>
     @endif
 
@@ -20,7 +20,7 @@
     @if($nearLimitBudgets->count() > 0)
     <div class="alert alert-warning">
         <h5><i class="fas fa-exclamation-circle"></i> Near Limit Warnings</h5>
-        <p>{{ __('admin\business\budget_limits.the_following_budgets_are_approaching_th') }}</p>
+        <p>{{('admin\business\budget_limits.the_following_budgets_are_approaching_th') }}</p>
     </div>
     @endif
 
@@ -29,29 +29,29 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\budget_limits.budget_utilization_overview') }}</h3>
+                    <h3 class="card-title">{{('admin\business\budget_limits.budget_utilization_overview') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\budget_limits.budget_title') }}</th>
-                                    <th>{{ __('admin\business\budget_limits.category') }}</th>
-                                    <th>{{ __('admin\business\budget_limits.total_budget') }}</th>
-                                    <th>{{ __('admin\business\budget_limits.spent_amount') }}</th>
-                                    <th>{{ __('admin\business\budget_limits.remaining') }}</th>
-                                    <th>{{ __('admin\business\budget_limits.utilization') }}</th>
-                                    <th>{{ __('admin\business\budget_limits.status') }}</th>
-                                    <th>{{ __('admin\business\budget_limits.actions') }}</th>
+                                    <th>{{('admin\business\budget_limits.budget_title') }}</th>
+                                    <th>{{('admin\business\budget_limits.category') }}</th>
+                                    <th>{{('admin\business\budget_limits.total_budget') }}</th>
+                                    <th>{{('admin\business\budget_limits.spent_amount') }}</th>
+                                    <th>{{('admin\business\budget_limits.remaining') }}</th>
+                                    <th>{{('admin\business\budget_limits.utilization') }}</th>
+                                    <th>{{('admin\business\budget_limits.status') }}</th>
+                                    <th>{{('admin\business\budget_limits.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($budgets as $budget)
                                 <tr class="{{ $budget->spent_amount > $budget->total_budget ? 'table-danger' : ($budget->utilization_percentage >= 80 ? 'table-warning' : '') }}">
-                                    <td>{{ $budget->field</td>
+                                    <td>{{ $budget->title }}</td>
                                     <td>
-                                        <span class="badge badge-info">{{ ucfirst($budget->field</span>
+                                        <span class="badge badge-info">{{ ucfirst($budget->category) }}</span>
                                     </td>
                                     <td>${{ number_format($budget->total_budget, 2) }}</td>
                                     <td>${{ number_format($budget->spent_amount, 2) }}</td>
@@ -66,11 +66,11 @@
                                     </td>
                                     <td>
                                         @if($budget->spent_amount > $budget->total_budget)
-                                            <span class="badge badge-danger">{{ __('admin\business\budget_limits.over_budget') }}</span>
+                                            <span class="badge badge-danger">{{('admin\business\budget_limits.over_budget') }}</span>
                                         @elseif($budget->utilization_percentage >= 80)
-                                            <span class="badge badge-warning">{{ __('admin\business\budget_limits.near_limit') }}</span>
+                                            <span class="badge badge-warning">{{('admin\business\budget_limits.near_limit') }}</span>
                                         @else
-                                            <span class="badge badge-success">{{ __('admin\business\budget_limits.healthy') }}</span>
+                                            <span class="badge badge-success">{{('admin\business\budget_limits.healthy') }}</span>
                                         @endif
                                     </td>
                                     <td>
@@ -98,15 +98,15 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\budget_limits.budget_recommendations') }}</h3>
+                    <h3 class="card-title">{{('admin\business\budget_limits.budget_recommendations') }}</h3>
                 </div>
                 <div class="card-body">
                     @if($overBudgetBudgets->count() > 0)
                         <div class="alert alert-danger">
-                            <h6>{{ __('admin\business\budget_limits.immediate_actions_required_') }}</h6>
+                            <h6>{{('admin\business\budget_limits.immediate_actions_required_') }}</h6>
                             <ul>
                                 @foreach($overBudgetBudgets as $budget)
-                                    <li><strong>{{ $budget->field</strong> is over budget by ${{ number_format($budget->spent_amount - $budget->total_budget, 2) }}</li>
+                                    <li><strong>{{ $budget->title }}</strong> is over budget by ${{ number_format($budget->spent_amount - $budget->total_budget, 2) }}</li>
                                 @endforeach
                             </ul>
                         </div>
@@ -114,10 +114,10 @@
 
                     @if($nearLimitBudgets->count() > 0)
                         <div class="alert alert-warning">
-                            <h6>{{ __('admin\business\budget_limits.monitor_closely_') }}</h6>
+                            <h6>{{('admin\business\budget_limits.monitor_closely_') }}</h6>
                             <ul>
                                 @foreach($nearLimitBudgets as $budget)
-                                    <li><strong>{{ $budget->field</strong> is at {{ number_format($budget->utilization_percentage, 1) }}% utilization</li>
+                                    <li><strong>{{ $budget->title }}</strong> is at {{ number_format($budget->utilization_percentage, 1) }}% utilization</li>
                                 @endforeach
                             </ul>
                         </div>
@@ -125,8 +125,8 @@
 
                     @if($overBudgetBudgets->count() == 0 && $nearLimitBudgets->count() == 0)
                         <div class="alert alert-success">
-                            <h6>{{ __('admin\business\budget_limits.all_budgets_are_within_healthy_limits_') }}</h6>
-                            <p>{{ __('admin\business\budget_limits.no_immediate_action_required_') }}</p>
+                            <h6>{{('admin\business\budget_limits.all_budgets_are_within_healthy_limits_') }}</h6>
+                            <p>{{('admin\business\budget_limits.no_immediate_action_required_') }}</p>
                         </div>
                     @endif
                 </div>
@@ -136,7 +136,7 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\budget_limits.budget_statistics') }}</h3>
+                    <h3 class="card-title">{{('admin\business\budget_limits.budget_statistics') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -144,8 +144,8 @@
                             <div class="info-box">
                                 <span class="info-box-icon bg-danger"><i class="fas fa-exclamation-triangle"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">{{ __('admin\business\budget_limits.over_budget') }}</span>
-                                    <span class="info-box-number">{{ $overBudgetBudgets->field</span>
+                                    <span class="info-box-text">{{('admin\business\budget_limits.over_budget') }}</span>
+                                    <span class="info-box-number">{{ $overBudgetBudgets->count() }}</span>
                                 </div>
                             </div>
                         </div>
@@ -153,8 +153,8 @@
                             <div class="info-box">
                                 <span class="info-box-icon bg-warning"><i class="fas fa-exclamation-circle"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">{{ __('admin\business\budget_limits.near_limit') }}</span>
-                                    <span class="info-box-number">{{ $nearLimitBudgets->field</span>
+                                    <span class="info-box-text">{{('admin\business\budget_limits.near_limit') }}</span>
+                                    <span class="info-box-number">{{ $nearLimitBudgets->count() }}</span>
                                 </div>
                             </div>
                         </div>
@@ -164,8 +164,8 @@
                             <div class="info-box">
                                 <span class="info-box-icon bg-success"><i class="fas fa-check-circle"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">{{ __('admin\business\budget_limits.healthy') }}</span>
-                                    <span class="info-box-number">{{ $budgets->field</span>
+                                    <span class="info-box-text">{{('admin\business\budget_limits.healthy') }}</span>
+                                    <span class="info-box-number">{{ $budgets->count() }}</span>
                                 </div>
                             </div>
                         </div>
@@ -173,8 +173,8 @@
                             <div class="info-box">
                                 <span class="info-box-icon bg-info"><i class="fas fa-chart-pie"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">{{ __('admin\business\budget_limits.total_budgets') }}</span>
-                                    <span class="info-box-number">{{ $budgets->field</span>
+                                    <span class="info-box-text">{{('admin\business\budget_limits.total_budgets') }}</span>
+                                    <span class="info-box-number">{{ $budgets->count() }}</span>
                                 </div>
                             </div>
                         </div>
@@ -223,3 +223,9 @@ $(document).ready(function() {
 });
 </script>
 @stop 
+
+
+
+
+
+

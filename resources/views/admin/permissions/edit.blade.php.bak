@@ -1,0 +1,120 @@
+@extends('adminlte::page')
+
+@section('title', 'Edit Permission')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <h1><i class="fas fa-edit text-warning mr-2"></i> Edit Permission: {{ $permission->display_name ?? $permission->name }}</h1>
+        <div>
+            <a href="{{ route('permissions.show', $permission->id) }}" class="btn btn-info">
+                <i class="fas fa-eye mr-1"></i> View Permission
+            </a>
+            <a href="{{ route('permissions.index') }}" class="btn btn-primary ml-2">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Permissions
+            </a>
+        </div>
+    </div>
+@stop
+
+@section('content')
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card card-warning card-outline">
+                    <div class="card-header">
+                        <h3 class="card-title">{{('admin\permissions\edit.permission_information') }}</h3>
+                    </div>
+
+                    <form action="{{ route('permissions.update', $permission->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+                        <div class="card-body">
+                            @if($isSystemPermission)
+                                <div class="alert alert-warning">
+                                    <i class="icon fas fa-exclamation-triangle"></i>
+                                    This is a system permission and has limited editing capabilities. You can only modify the display name and description.
+                                </div>
+                            @endif
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="name">{{('admin\permissions\edit.permission_name') }}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                            </div>
+                                            @if($isSystemPermission)
+                                                <input type="text" class="form-control"
+                                                       id="name" value="{{ $permission->name }}" readonly disabled>
+                                            @else
+                                                <input type="text" class="form-control @error('name') is-invalid @enderror"
+                                                       id="name" name="name" value="{{ old('name', $permission->name) }}"
+                                                       placeholder="Enter a unique permission name (e.g. view_users)" required>
+                                            @endif
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            @if($isSystemPermission)
+                                                System permission names cannot be changed
+                                            @else
+                                                Use lowercase letters and underscores (e.g. view_users, manage_settings)
+                                            @endif
+                                        </small>
+                                        @error('name')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label for="display_name">{{('admin\permissions\edit.display_name') }}</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text"><i class="fas fa-eye"></i></span>
+                                            </div>
+                                            <input type="text" class="form-control @error('display_name') is-invalid @enderror"
+                                                   id="display_name" name="display_name"
+                                                   value="{{ old('display_name', $permission->display_name) }}"
+                                                   placeholder="Human readable name (e.g. View Users)">
+                                        </div>
+                                        <small class="form-text text-muted">
+                                            This is the name that will be displayed in the UI
+                                        </small>
+                                        @error('display_name')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                        @enderror
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="description">{{('admin\permissions\edit.description') }}</label>
+                                <textarea class="form-control @error('description') is-invalid @enderror"
+                                          id="description" name="description" rows="3"
+                                          placeholder="Enter a description of this permission">{{ old('description', $permission->id</textarea>
+                                @error('description')
+                                <span class="invalid-feedback">{{ $message }}</span>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="card-footer">
+                            <button type="submit" class="btn btn-warning">
+                                <i class="fas fa-save mr-1"></i> Update Permission
+                            </button>
+                            <a href="{{ route('permissions.index') }}" class="btn btn-default float-right">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+@stop
+
+
+
+
+

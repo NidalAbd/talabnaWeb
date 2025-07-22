@@ -7,7 +7,7 @@
         {{-- Icon (optional) --}}
         @isset($item['icon'])
             <i class="{{ $item['icon'] }} {{
-                isset($item['icon_color']) ? 'text-' . $item['icon_color'] : ''
+                isset($item['icon_color']) ? 'text-' . $item['icon_color'] : '' }}
             }}"></i>
         @endisset
 
@@ -29,3 +29,10 @@
     </ul>
 
 </li>
+
+
+
+
+
+
+

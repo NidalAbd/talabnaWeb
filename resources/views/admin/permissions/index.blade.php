@@ -21,8 +21,8 @@
             <div class="info-box bg-gradient-primary shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-key"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\permissions\index.total_permissions') }}</span>
-                    <span class="info-box-number">{{ number_format($permissions->field</span>
+                    <span class="info-box-text">{{('admin\permissions\index.total_permissions') }}</span>
+                    <span class="info-box-number">{{ number_format($permissions->total()) }}</span>
                     <div class="progress"><div class="progress-bar" style="width: 100%"></div></div>
                     <span class="progress-description">
                         <i class="fas fa-chart-line text-light"></i> All system permissions
@@ -34,7 +34,7 @@
             <div class="info-box bg-gradient-success shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-user-shield"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\permissions\index.total_roles') }}</span>
+                    <span class="info-box-text">{{('admin\permissions\index.total_roles') }}</span>
                     <span class="info-box-number">{{ number_format($rolesCount ?? 0) }}</span>
                     <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
                     <span class="progress-description">
@@ -47,7 +47,7 @@
             <div class="info-box bg-gradient-info shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\permissions\index.total_users') }}</span>
+                    <span class="info-box-text">{{('admin\permissions\index.total_users') }}</span>
                     <span class="info-box-number">{{ number_format($usersCount ?? 0) }}</span>
                     <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
                     <span class="progress-description">
@@ -60,7 +60,7 @@
             <div class="info-box bg-gradient-warning shadow-sm">
                 <span class="info-box-icon"><i class="fas fa-cog"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\permissions\index.system_permissions') }}</span>
+                    <span class="info-box-text">{{('admin\permissions\index.system_permissions') }}</span>
                     <span class="info-box-number">{{ $systemPermissionsCount ?? 0 }}</span>
                     <div class="progress"><div class="progress-bar bg-light" style="width: 100%"></div></div>
                     <span class="progress-description">
@@ -95,31 +95,31 @@
             <table class="table table-hover table-striped table-bordered align-middle">
                 <thead class="thead-light">
                     <tr>
-                        <th>{{ __('admin\permissions\index.id') }}</th>
-                        <th>{{ __('admin\permissions\index.name') }}</th>
-                        <th>{{ __('admin\permissions\index.display_name') }}</th>
-                        <th>{{ __('admin\permissions\index.description') }}</th>
-                        <th>{{ __('admin\permissions\index.roles') }}</th>
-                        <th>{{ __('admin\permissions\index.users') }}</th>
-                        <th>{{ __('admin\permissions\index.created') }}</th>
-                        <th>{{ __('admin\permissions\index.actions') }}</th>
+                        <th>{{('admin\permissions\index.id') }}</th>
+                        <th>{{('admin\permissions\index.name') }}</th>
+                        <th>{{('admin\permissions\index.display_name') }}</th>
+                        <th>{{('admin\permissions\index.description') }}</th>
+                        <th>{{('admin\permissions\index.roles') }}</th>
+                        <th>{{('admin\permissions\index.users') }}</th>
+                        <th>{{('admin\permissions\index.created') }}</th>
+                        <th>{{('admin\permissions\index.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($permissions as $permission)
                         <tr>
-                            <td><span class="badge badge-secondary">{{ $permission->field</span></td>
-                            <td><strong>{{ $permission->field</strong></td>
-                            <td><span class="text-muted">{{ $permission->field</span></td>
-                            <td><span class="text-muted">{{ Str::limit($permission->field</span></td>
-                            <td><span class="badge badge-primary">{{ $permission->field</span></td>
-                            <td><span class="badge badge-info">{{ $permission->field</span></td>
-                            <td><span class="text-muted">{{ $permission->field</span></td>
+                            <td><span class="badge badge-secondary">{{ $permission->id }}</span></td>
+                            <td><strong>{{ $permission->id }}</strong></td>
+                            <td><span class="text-muted">{{ Str::limit($permission->id) }}</span></td>
+                            <td><span class="text-muted">{{ Str::limit($permission->id) }}</span></td>
+                            <td><span class="badge badge-primary">{{ $permission->id }}</span></td>
+                            <td><span class="badge badge-info">{{ $permission->id }}</span></td>
+                            <td><span class="text-muted">{{ $permission->id }}</span></td>
                             <td>
                                 <div class="btn-group" role="group">
-                                    <a href="{{ route('permissions.show', $permission->field<i class="fas fa-eye"></i></a>
-                                    <a href="{{ route('permissions.edit', $permission->field<i class="fas fa-edit"></i></a>
-                                    <form action="{{ route('permissions.destroy', $permission->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
+                                    <a href="{{ route('permissions.show', $permission->id) }}"><i class="fas fa-eye"></i></a>
+                                    <a href="{{ route('permissions.edit', $permission->id) }}"><i class="fas fa-edit"></i></a>
+                                    <form action="{{ route('permissions.destroy', $permission->count()) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" class="btn btn-xs btn-outline-danger" data-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
@@ -144,7 +144,7 @@
             <div class="card-footer bg-white">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        Showing <strong>{{ $permissions->field</strong> to <strong>{{ $permissions->field</strong> of <strong>{{ $permissions->field</strong> records
+                        Showing <strong>{{ $permissions->firstItem() }}</strong> to <strong>{{ $permissions->lastItem() }}</strong> of <strong>{{ $permissions->total() }}</strong> records
                     </div>
                     <div>
                         {{ $permissions->links('pagination::bootstrap-4') }}
@@ -173,7 +173,7 @@
     function printTable(btn) {
         let table = btn.closest('.card').querySelector('table');
         let w = window.open();
-        w.document.write('<html><head><title>{{ __('admin\permissions\index.print_table') }}</title>{{ __('admin\permissions\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{ __('admin\permissions\index._w_document_write_') }}</head><body>{{ __('admin\permissions\index._w_document_write_table_outer') }}</body></html>');
+        w.document.write('<html><head><title>{{('admin\permissions\index.print_table') }}</title>{{('admin\permissions\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{('admin\permissions\index._w_document_write_') }}</head><body>{{('admin\permissions\index._w_document_write_table_outer') }}</body></html>');
         w.print();
         w.close();
     }
@@ -191,3 +191,10 @@
     }
 </script>
 @endpush
+
+
+
+
+
+
+

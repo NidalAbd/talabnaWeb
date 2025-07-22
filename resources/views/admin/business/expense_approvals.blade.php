@@ -3,7 +3,7 @@
 @section('title', 'Expense Approvals')
 
 @section('content_header')
-    <h1>{{ __('admin\business\expense_approvals.expense_approval_management') }}</h1>
+    <h1>{{('admin\business\expense_approvals.expense_approval_management') }}</h1>
 @stop
 
 @section('content')
@@ -13,8 +13,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-warning">
                 <div class="inner">
-                    <h3>{{ $pendingExpenses->field</h3>
-                    <p>{{ __('admin\business\expense_approvals.pending_approvals') }}</p>
+                    <h3>{{ $pendingExpenses->count() }}</h3>
+                    <p>{{('admin\business\expense_approvals.pending_approvals') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-clock"></i>
@@ -25,8 +25,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-success">
                 <div class="inner">
-                    <h3>{{ $approvedExpenses->field</h3>
-                    <p>{{ __('admin\business\expense_approvals.approved_this_month') }}</p>
+                    <h3>{{ $approvedExpenses->count() }}</h3>
+                    <p>{{('admin\business\expense_approvals.approved_this_month') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-check-circle"></i>
@@ -37,8 +37,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-danger">
                 <div class="inner">
-                    <h3>{{ $rejectedExpenses->field</h3>
-                    <p>{{ __('admin\business\expense_approvals.rejected_this_month') }}</p>
+                    <h3>{{ $rejectedExpenses->count() }}</h3>
+                    <p>{{('admin\business\expense_approvals.rejected_this_month') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-times-circle"></i>
@@ -50,7 +50,7 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>${{ number_format($pendingExpenses->sum('amount'), 2) }}</h3>
-                    <p>{{ __('admin\business\expense_approvals.pending_amount') }}</p>
+                    <p>{{('admin\business\expense_approvals.pending_amount') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-dollar-sign"></i>
@@ -64,33 +64,33 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\expense_approvals.pending_expense_approvals') }}</h3>
+                    <h3 class="card-title">{{('admin\business\expense_approvals.pending_expense_approvals') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\expense_approvals.title') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.amount') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.category') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.vendor') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.date') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.submitted_by') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.actions') }}</th>
+                                    <th>{{('admin\business\expense_approvals.title') }}</th>
+                                    <th>{{('admin\business\expense_approvals.amount') }}</th>
+                                    <th>{{('admin\business\expense_approvals.category') }}</th>
+                                    <th>{{('admin\business\expense_approvals.vendor') }}</th>
+                                    <th>{{('admin\business\expense_approvals.date') }}</th>
+                                    <th>{{('admin\business\expense_approvals.submitted_by') }}</th>
+                                    <th>{{('admin\business\expense_approvals.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($pendingExpenses as $expense)
                                 <tr>
-                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->id }}</td>
                                     <td>${{ number_format($expense->amount, 2) }}</td>
                                     <td>
-                                        <span class="badge badge-info">{{ ucfirst($expense->field</span>
+                                        <span class="badge badge-info">{{ ucfirst($expense->category) }}</span>
                                     </td>
-                                    <td>{{ $expense->field</td>
-                                    <td>{{ $expense->field</td>
-                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->vendor }}</td>
+                                    <td>{{ $expense->date }}</td>
+                                    <td>{{ $expense->submitted_by }}</td>
                                     <td>
                                         <button class="btn btn-sm btn-success approve-expense" data-id="{{ $expense->id }}">
                                             <i class="fas fa-check"></i> Approve
@@ -117,26 +117,26 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\expense_approvals.recently_approved_expenses') }}</h3>
+                    <h3 class="card-title">{{('admin\business\expense_approvals.recently_approved_expenses') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\expense_approvals.title') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.amount') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.approved_by') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.date') }}</th>
+                                    <th>{{('admin\business\expense_approvals.title') }}</th>
+                                    <th>{{('admin\business\expense_approvals.amount') }}</th>
+                                    <th>{{('admin\business\expense_approvals.approved_by') }}</th>
+                                    <th>{{('admin\business\expense_approvals.date') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($approvedExpenses as $expense)
                                 <tr>
-                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->id }}</td>
                                     <td>${{ number_format($expense->amount, 2) }}</td>
-                                    <td>{{ $expense->field</td>
-                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->approved_by }}</td>
+                                    <td>{{ $expense->date }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -149,26 +149,26 @@
         <div class="col-md-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\expense_approvals.recently_rejected_expenses') }}</h3>
+                    <h3 class="card-title">{{('admin\business\expense_approvals.recently_rejected_expenses') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\expense_approvals.title') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.amount') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.rejected_by') }}</th>
-                                    <th>{{ __('admin\business\expense_approvals.date') }}</th>
+                                    <th>{{('admin\business\expense_approvals.title') }}</th>
+                                    <th>{{('admin\business\expense_approvals.amount') }}</th>
+                                    <th>{{('admin\business\expense_approvals.rejected_by') }}</th>
+                                    <th>{{('admin\business\expense_approvals.date') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach($rejectedExpenses as $expense)
                                 <tr>
-                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->id }}</td>
                                     <td>${{ number_format($expense->amount, 2) }}</td>
-                                    <td>{{ $expense->field</td>
-                                    <td>{{ $expense->field</td>
+                                    <td>{{ $expense->rejected_by }}</td>
+                                    <td>{{ $expense->date }}</td>
                                 </tr>
                                 @endforeach
                             </tbody>
@@ -184,7 +184,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\expense_approvals.approval_workflow') }}</h3>
+                    <h3 class="card-title">{{('admin\business\expense_approvals.approval_workflow') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -192,8 +192,8 @@
                             <div class="text-center">
                                 <div class="bg-warning p-3 rounded">
                                     <i class="fas fa-clock fa-2x text-white"></i>
-                                    <h5 class="mt-2 text-white">{{ __('admin\business\expense_approvals.pending') }}</h5>
-                                    <p class="text-white">{{ $pendingExpenses->field</p>
+                                    <h5 class="mt-2 text-white">{{('admin\business\expense_approvals.pending') }}</h5>
+                                    <p class="text-white">{{ $pendingExpenses->count() }}</p>
                                 </div>
                             </div>
                         </div>
@@ -201,8 +201,8 @@
                             <div class="text-center">
                                 <div class="bg-success p-3 rounded">
                                     <i class="fas fa-check-circle fa-2x text-white"></i>
-                                    <h5 class="mt-2 text-white">{{ __('admin\business\expense_approvals.approved') }}</h5>
-                                    <p class="text-white">{{ $approvedExpenses->field</p>
+                                    <h5 class="mt-2 text-white">{{('admin\business\expense_approvals.approved') }}</h5>
+                                    <p class="text-white">{{ $approvedExpenses->count() }}</p>
                                 </div>
                             </div>
                         </div>
@@ -210,8 +210,8 @@
                             <div class="text-center">
                                 <div class="bg-danger p-3 rounded">
                                     <i class="fas fa-times-circle fa-2x text-white"></i>
-                                    <h5 class="mt-2 text-white">{{ __('admin\business\expense_approvals.rejected') }}</h5>
-                                    <p class="text-white">{{ $rejectedExpenses->field</p>
+                                    <h5 class="mt-2 text-white">{{('admin\business\expense_approvals.rejected') }}</h5>
+                                    <p class="text-white">{{ $rejectedExpenses->count() }}</p>
                                 </div>
                             </div>
                         </div>
@@ -219,8 +219,8 @@
                             <div class="text-center">
                                 <div class="bg-info p-3 rounded">
                                     <i class="fas fa-chart-line fa-2x text-white"></i>
-                                    <h5 class="mt-2 text-white">{{ __('admin\business\expense_approvals.total') }}</h5>
-                                    <p class="text-white">{{ $pendingExpenses->field</p>
+                                    <h5 class="mt-2 text-white">{{('admin\business\expense_approvals.total') }}</h5>
+                                    <p class="text-white">{{ $pendingExpenses->count() }}</p>
                                 </div>
                             </div>
                         </div>
@@ -298,3 +298,9 @@ $(document).ready(function() {
 });
 </script>
 @stop 
+
+
+
+
+
+

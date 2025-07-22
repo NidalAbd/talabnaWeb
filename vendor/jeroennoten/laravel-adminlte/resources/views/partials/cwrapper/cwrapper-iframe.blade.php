@@ -13,22 +13,22 @@
             <div class="nav-item dropdown">
                 <a class="nav-link bg-danger dropdown-toggle" data-toggle="dropdown" href="#"
                    role="button" aria-haspopup="true" aria-expanded="false">
-                    {{ __('adminlte::iframe.btn_close') }}
+                    {{('adminlte::iframe.btn_close') }}
                 </a>
                 <div class="dropdown-menu mt-0">
                     @if(config('adminlte.iframe.buttons.close', false))
                         <a class="dropdown-item" href="#" data-widget="iframe-close">
-                            {{ __('adminlte::iframe.btn_close_active') }}
+                            {{('adminlte::iframe.btn_close_active') }}
                         </a>
                     @endif
                     @if(config('adminlte.iframe.buttons.close_all', true))
                         <a class="dropdown-item" href="#" data-widget="iframe-close" data-type="all">
-                            {{ __('adminlte::iframe.btn_close_all') }}
+                            {{('adminlte::iframe.btn_close_all') }}
                         </a>
                     @endif
                     @if(config('adminlte.iframe.buttons.close_all_other', true))
                         <a class="dropdown-item" href="#" data-widget="iframe-close" data-type="all-other">
-                            {{ __('adminlte::iframe.btn_close_all_other') }}
+                            {{('adminlte::iframe.btn_close_all_other') }}
                         </a>
                     @endif
                 </div>
@@ -37,7 +37,7 @@
         @elseif(config('adminlte.iframe.buttons.close', false))
 
             <a class="nav-link bg-danger" href="#" data-widget="iframe-close">
-                 {{ __('adminlte::iframe.btn_close') }}
+                 {{('adminlte::iframe.btn_close') }}
             </a>
 
         @endif
@@ -93,7 +93,7 @@
             <h2 class="display-4 text-center">
                 <i class="fa fa-sync fa-spin text-secondary"></i>
                 <br/>
-                {{ __('adminlte::iframe.tab_loading') }}
+                {{('adminlte::iframe.tab_loading') }}
             </h2>
         </div>
         </div>
@@ -108,10 +108,17 @@
         {{-- Empty Tab --}}
         <div class="tab-empty">
             <h2 class="display-4 text-center">
-                {{ __('adminlte::iframe.tab_empty') }}
+                {{('adminlte::iframe.tab_empty') }}
             </h2>
         </div>
 
     </div>
 
 </div>
+
+
+
+
+
+
+

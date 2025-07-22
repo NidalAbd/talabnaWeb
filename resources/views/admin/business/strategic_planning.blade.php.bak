@@ -1,0 +1,505 @@
+@extends('adminlte::page')
+
+@section('title', 'Strategic Planning')
+
+@section('content_header')
+    <h1>{{('admin\business\strategic_planning.strategic_planning') }}</h1>
+@stop
+
+@section('content')
+<div class="container-fluid">
+    <!-- Strategic Summary Cards -->
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>{{ $budgets->id</h3>
+                    <p>{{('admin\business\strategic_planning.total_budgets') }}</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-chart-pie"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>{{ $activeBudgets->id</h3>
+                    <p>{{('admin\business\strategic_planning.active_budgets') }}</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>${{ number_format($expensesByCategory->sum('total'), 2) }}</h3>
+                    <p>{{('admin\business\strategic_planning.total_expenses') }}</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-receipt"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-primary">
+                <div class="inner">
+                    <h3>${{ number_format($revenueByType->sum('total'), 2) }}</h3>
+                    <p>{{('admin\business\strategic_planning.total_revenue') }}</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategic Analysis Charts -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{('admin\business\strategic_planning.expense_distribution_by_category') }}</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="expenseDistributionChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{('admin\business\strategic_planning.revenue_distribution_by_type') }}</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="revenueDistributionChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget Planning -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{('admin\business\strategic_planning.budget_planning_management') }}</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addBudgetModal">
+                            <i class="fas fa-plus"></i> Create Budget
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="budgetsTable">
+                            <thead>
+                                <tr>
+                                    <th>{{('admin\business\strategic_planning.budget_title') }}</th>
+                                    <th>{{('admin\business\strategic_planning.category') }}</th>
+                                    <th>{{('admin\business\strategic_planning.total_budget') }}</th>
+                                    <th>{{('admin\business\strategic_planning.spent') }}</th>
+                                    <th>{{('admin\business\strategic_planning.remaining') }}</th>
+                                    <th>{{('admin\business\strategic_planning.utilization') }}</th>
+                                    <th>{{('admin\business\strategic_planning.status') }}</th>
+                                    <th>{{('admin\business\strategic_planning.actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($budgets as $budget)
+                                <tr>
+                                    <td>
+                                        <strong>{{ $budget->id</strong><br>
+                                        <small class="text-muted">{{ Str::limit($budget->id</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ $budget->category == 'overall' ? 'primary' : ($budget->category == 'marketing' ? 'info' : ($budget->category == 'development' ? 'success' : 'warning')) }}">
+                                            {{ ucfirst($budget->category) }}
+                                        </span>
+                                    </td>
+                                    <td>${{ number_format($budget->total_budget, 2) }}</td>
+                                    <td>${{ number_format($budget->spent_amount, 2) }}</td>
+                                    <td>${{ number_format($budget->remaining_amount, 2) }}</td>
+                                    <td>
+                                        <div class="progress progress-sm">
+                                            <div class="progress-bar bg-{{ $budget->utilization_percentage >= 80 ? 'danger' : ($budget->utilization_percentage >= 60 ? 'warning' : 'success') }}" 
+                                                 style="width: {{ $budget->utilization_percentage }}%"></div>
+                                        </div>
+                                        <small>{{ number_format($budget->id</small>
+                                    </td>
+                                    <td>
+                                        <span class="badge badge-{{ $budget->status == 'active' ? 'success' : ($budget->status == 'completed' ? 'info' : 'secondary') }}">
+                                            {{ ucfirst($budget->status) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#viewBudgetModal{{ $budget->id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editBudgetModal{{ $budget->id }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="8" class="text-center">{{('admin\business\strategic_planning.no_budgets_found') }}</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{('admin\business\strategic_planning.strategic_insights') }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="info-box">
+                        <span class="info-box-icon bg-info"><i class="fas fa-chart-pie"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">{{('admin\business\strategic_planning.highest_expense_category') }}</span>
+                            <span class="info-box-number">
+                                {{ $expensesByCategory->sortByDesc('total')->first()->expense_category ?? 'N/A' }}
+                            </span>
+                            <span class="info-box-text">
+                                ${{ number_format($expensesByCategory->sortByDesc('total')->first()->total ?? 0, 2) }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-box-icon bg-success"><i class="fas fa-dollar-sign"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">{{('admin\business\strategic_planning.best_revenue_source') }}</span>
+                            <span class="info-box-number">
+                                {{ $revenueByType->sortByDesc('total')->first()->revenue_type ?? 'N/A' }}
+                            </span>
+                            <span class="info-box-text">
+                                ${{ number_format($revenueByType->sortByDesc('total')->first()->total ?? 0, 2) }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="info-box">
+                        <span class="info-box-icon bg-warning"><i class="fas fa-exclamation-triangle"></i></span>
+                        <div class="info-box-content">
+                            <span class="info-box-text">{{('admin\business\strategic_planning.budget_alerts') }}</span>
+                            <span class="info-box-number">
+                                {{ $budgets->filter(function($budget) { return $budget->utilization_percentage >= 80; })->count() }}
+                            </span>
+                            <span class="info-box-text">{{('admin\business\strategic_planning.near_limit_budgets') }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Strategic Recommendations -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{('admin\business\strategic_planning.strategic_recommendations') }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-lightbulb text-warning"></i> Financial Strategy</h5>
+                            <ul class="list-unstyled">
+                                @php
+                                    $totalRevenue = $revenueByType->sum('total');
+                                    $totalExpenses = $expensesByCategory->sum('total');
+                                    $profitMargin = $totalRevenue > 0 ? ($totalRevenue - $totalExpenses) / $totalRevenue * 100 : 0;
+                                @endphp
+                                
+                                <li><i class="fas fa-check text-success"></i> Total Revenue: ${{ number_format($totalRevenue, 2) }}</li>
+                                <li><i class="fas fa-check text-success"></i> Total Expenses: ${{ number_format($totalExpenses, 2) }}</li>
+                                <li><i class="fas fa-check {{ $profitMargin >{{('admin\business\strategic_planning._0_text_success_text_danger_') }}</i> Profit Margin: {{ number_format($profitMargin, 1) }}%</li>
+                                
+                                @if($profitMargin < 0)
+                                    <li><i class="fas fa-exclamation-triangle text-warning"></i> Focus on cost reduction and revenue optimization</li>
+                                @else
+                                    <li><i class="fas fa-thumbs-up text-success"></i> Maintain current profitability levels</li>
+                                @endif
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-chart-line text-primary"></i> Growth Strategy</h5>
+                            <ul class="list-unstyled">
+                                @php
+                                    $topRevenueSource = $revenueByType->sortByDesc('total')->first();
+                                    $topExpenseCategory = $expensesByCategory->sortByDesc('total')->first();
+                                @endphp
+                                
+                                <li><i class="fas fa-arrow-up text-success"></i> Expand {{ $topRevenueSource->revenue_type ?? 'revenue' }} sources</li>
+                                <li><i class="fas fa-arrow-down text-warning"></i> Optimize {{ $topExpenseCategory->expense_category ?? 'expense' }} spending</li>
+                                <li><i class="fas fa-chart-bar text-info"></i> Monitor budget utilization closely</li>
+                                <li><i class="fas fa-users text-primary"></i> Focus on user acquisition and retention</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Budget vs Actual Analysis -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{('admin\business\strategic_planning.budget_vs_actual_analysis') }}</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="budgetVsActualChart" style="height: 400px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Budget Modal -->
+<div class="modal fade" id="addBudgetModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{('admin\business\strategic_planning.create_new_budget') }}</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>{{('admin\business\strategic_planning._times_') }}</span>
+                </button>
+            </div>
+            <form action="{{ route('business.budgets.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\strategic_planning.budget_title') }}</label>
+                                <input type="text" name="budget_title" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\strategic_planning.category') }}</label>
+                                <select name="category" class="form-control" required>
+                                    <option value="overall">{{('admin\business\strategic_planning.overall') }}</option>
+                                    <option value="marketing">{{('admin\business\strategic_planning.marketing') }}</option>
+                                    <option value="development">{{('admin\business\strategic_planning.development') }}</option>
+                                    <option value="operations">{{('admin\business\strategic_planning.operations') }}</option>
+                                    <option value="sales">{{('admin\business\strategic_planning.sales') }}</option>
+                                    <option value="research">{{('admin\business\strategic_planning.research') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\strategic_planning.total_budget') }}</label>
+                                <input type="number" name="total_budget" class="form-control" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\strategic_planning.currency') }}</label>
+                                <select name="currency" class="form-control">
+                                    <option value="USD">{{('admin\business\strategic_planning.usd') }}</option>
+                                    <option value="EUR">{{('admin\business\strategic_planning.eur') }}</option>
+                                    <option value="GBP">{{('admin\business\strategic_planning.gbp') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\strategic_planning.budget_period') }}</label>
+                                <select name="budget_period" class="form-control" required>
+                                    <option value="monthly">{{('admin\business\strategic_planning.monthly') }}</option>
+                                    <option value="quarterly">{{('admin\business\strategic_planning.quarterly') }}</option>
+                                    <option value="yearly">{{('admin\business\strategic_planning.yearly') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\strategic_planning.status') }}</label>
+                                <select name="status" class="form-control" required>
+                                    <option value="active">{{('admin\business\strategic_planning.active') }}</option>
+                                    <option value="pending">{{('admin\business\strategic_planning.pending') }}</option>
+                                    <option value="completed">{{('admin\business\strategic_planning.completed') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\strategic_planning.start_date') }}</label>
+                                <input type="date" name="start_date" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\strategic_planning.end_date') }}</label>
+                                <input type="date" name="end_date" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>{{('admin\business\strategic_planning.description') }}</label>
+                        <textarea name="budget_description" class="form-control" rows="3"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>{{('admin\business\strategic_planning.notes') }}</label>
+                        <textarea name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('admin\business\strategic_planning.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{('admin\business\strategic_planning.create_budget') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@stop
+
+@section('css')
+<style>
+    .small-box {
+        margin-bottom: 20px;
+    }
+    .card {
+        margin-bottom: 20px;
+    }
+    .info-box {
+        margin-bottom: 15px;
+    }
+</style>
+@stop
+
+@section('js')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+$(document).ready(function() {
+    // Initialize DataTable
+    $('#budgetsTable').DataTable({
+        "responsive": true,
+        "autoWidth": false,
+        "order": [[5, "desc"]]
+    });
+
+    // Expense Distribution Chart
+    const expenseCtx = document.getElementById('expenseDistributionChart').getContext('2d');
+    const expenseChart = new Chart(expenseCtx, {
+        type: 'doughnut',
+        data: {
+            labels: @json($expensesByCategory->pluck('expense_category')),
+            datasets: [{
+                data: @json($expensesByCategory->pluck('total')),
+                backgroundColor: [
+                    '#007bff', '#28a745', '#ffc107', '#dc3545', '#6c757d',
+                    '#17a2b8', '#fd7e14', '#6f42c1', '#e83e8c', '#20c997'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Revenue Distribution Chart
+    const revenueCtx = document.getElementById('revenueDistributionChart').getContext('2d');
+    const revenueChart = new Chart(revenueCtx, {
+        type: 'doughnut',
+        data: {
+            labels: @json($revenueByType->pluck('revenue_type')),
+            datasets: [{
+                data: @json($revenueByType->pluck('total')),
+                backgroundColor: [
+                    '#28a745', '#17a2b8', '#ffc107', '#dc3545', '#6c757d',
+                    '#fd7e14', '#6f42c1', '#e83e8c', '#20c997', '#6610f2'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Budget vs Actual Chart
+    const budgetVsActualCtx = document.getElementById('budgetVsActualChart').getContext('2d');
+    const budgetVsActualChart = new Chart(budgetVsActualCtx, {
+        type: 'bar',
+        data: {
+            labels: @json($budgets->pluck('budget_title')),
+            datasets: [{
+                label: 'Budgeted Amount',
+                data: @json($budgets->pluck('total_budget')),
+                backgroundColor: '#007bff',
+                borderColor: '#007bff',
+                borderWidth: 1
+            }, {
+                label: 'Actual Spent',
+                data: @json($budgets->pluck('spent_amount')),
+                backgroundColor: '#ffc107',
+                borderColor: '#ffc107',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return '$' + value.toLocaleString();
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    position: 'top'
+                }
+            }
+        }
+    });
+});
+</script>
+@stop 
+
+
+
+

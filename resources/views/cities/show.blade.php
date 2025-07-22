@@ -34,48 +34,48 @@
                             @else
                                 <div class="text-center p-4 bg-light rounded">
                                     <i class="fas fa-city fa-3x text-muted"></i>
-                                    <p class="mt-2 text-muted">{{ __('cities\show.no_city_image_available') }}</p>
+                                    <p class="mt-2 text-muted">{{('cities\show.no_city_image_available') }}</p>
                                 </div>
                             @endif
                         </div>
 
                         <table class="table table-bordered">
                             <tr>
-                                <th style="width: 40%;">{{ __('cities\show.id') }}</th>
-                                <td>{{ $city->field</td>
+                                <th style="width: 40%;">{{('cities\show.id') }}</th>
+                                <td>{{ $city->id }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('cities\show.name_english_') }}</th>
-                                <td>{{ is_array($city->field</td>
+                                <th>{{('cities\show.name_english_') }}</th>
+                                <td>{{ $city->name['en'] ?? '' }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('cities\show.name_arabic_') }}</th>
-                                <td dir="rtl">{{ is_array($city->field</td>
+                                <th>{{('cities\show.name_arabic_') }}</th>
+                                <td dir="rtl">{{ $city->name['ar'] ?? '' }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('cities\show.country') }}</th>
+                                <th>{{('cities\show.country') }}</th>
                                 <td>
                                     @if($city->country)
                                         <a href="{{ route('countries.show', $city->country->id) }}">
                                             {{ $city->country->getTranslatedName() }}
                                         </a>
                                     @else
-                                        <span class="text-muted">{{ __('cities\show.no_country_assigned') }}</span>
+                                        <span class="text-muted">{{('cities\show.no_country_assigned') }}</span>
                                     @endif
                                 </td>
                             </tr>
                             <tr>
-                                <th>{{ __('cities\show.created_at') }}</th>
-                                <td>{{ $city->field</td>
+                                <th>{{('cities\show.created_at') }}</th>
+                                <td>{{ $city->id }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('cities\show.updated_at') }}</th>
-                                <td>{{ $city->field</td>
+                                <th>{{('cities\show.updated_at') }}</th>
+                                <td>{{ $city->id }}</td>
                             </tr>
                             <tr>
-                                <th>{{ __('cities\show.status') }}</th>
+                                <th>{{('cities\show.status') }}</th>
                                 <td>
-                                    <span class="badge badge-success">{{ __('cities\show.active') }}</span>
+                                    <span class="badge badge-success">{{('cities\show.active') }}</span>
                                 </td>
                             </tr>
                         </table>
@@ -111,22 +111,22 @@
                                 @else
                                     <div class="text-center p-4 bg-light rounded">
                                         <i class="fas fa-flag fa-3x text-muted"></i>
-                                        <p class="mt-2 text-muted">{{ __('cities\show.no_country_flag_available') }}</p>
+                                        <p class="mt-2 text-muted">{{('cities\show.no_country_flag_available') }}</p>
                                     </div>
                                 @endif
                             </div>
 
                             <table class="table table-bordered">
                                 <tr>
-                                    <th style="width: 40%;">{{ __('cities\show.country_name') }}</th>
-                                    <td>{{ $city->field</td>
+                                    <th style="width: 40%;">{{('cities\show.country_name') }}</th>
+                                    <td>{{ $city->country->name['en'] ?? '' }}</td>
                                 </tr>
                                 <tr>
-                                    <th>{{ __('cities\show.country_code') }}</th>
-                                    <td>{{ $city->field</td>
+                                    <th>{{('cities\show.country_code') }}</th>
+                                    <td>{{ $city->country->country_code ?? '' }}</td>
                                 </tr>
                                 <tr>
-                                    <th>{{ __('cities\show.currency') }}</th>
+                                    <th>{{('cities\show.currency') }}</th>
                                     <td>
                                         @if($city->country->currency_code)
                                             {{ $city->country->currency_code }}
@@ -137,13 +137,13 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th>{{ __('cities\show.total_cities') }}</th>
-                                    <td>{{ $city->field</td>
+                                    <th>{{('cities\show.total_cities') }}</th>
+                                    <td>{{ $city->country->cities->count() ?? 0 }}</td>
                                 </tr>
                                 <tr>
-                                    <th>{{ __('cities\show.status') }}</th>
+                                    <th>{{('cities\show.status') }}</th>
                                     <td>
-                                        <span class="badge badge-success">{{ __('cities\show.active') }}</span>
+                                        <span class="badge badge-success">{{('cities\show.active') }}</span>
                                     </td>
                                 </tr>
                             </table>
@@ -160,9 +160,9 @@
                             </div>
                             <div class="text-center py-4">
                                 <i class="fas fa-globe fa-3x text-muted mb-3"></i>
-                                <h5 class="font-weight-normal text-muted">{{ __('cities\show.no_country_information_available') }}</h5>
-                                <p class="text-muted">{{ __('cities\show.please_edit_this_city_to_assign_it_to_a_') }}</p>
-                                <a href="{{ route('cities.edit', $city->id) }}" class="btn btn-primary mt-2">
+                                <h5 class="font-weight-normal text-muted">{{('cities\show.no_country_information_available') }}</h5>
+                                <p class="text-muted">{{('cities\show.please_edit_this_city_to_assign_it_to_a_') }}</p>
+                                <a href="{{ route('cities.edit', $city->count()) }}" class="btn btn-primary mt-2">
                                     <i class="fas fa-edit mr-1"></i> Edit City
                                 </a>
                             </div>
@@ -200,3 +200,10 @@
         </script>
     @endpush
 @endsection
+
+
+
+
+
+
+

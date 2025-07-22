@@ -93,7 +93,7 @@ class AnalyticsController extends Controller
         // Monthly point statistics
         $monthlyPointsSold = point_purchase_requests::where('status', 'approved')
             ->whereMonth('created_at', $currentMonth->month)
-            ->sum('amount');
+            ->sum('points_requested');
         $monthlyPointsUsed = point_transactions::where('type', 'used')
             ->whereMonth('created_at', $currentMonth->month)
             ->sum('point');
@@ -101,7 +101,7 @@ class AnalyticsController extends Controller
         // Previous month for comparison
         $previousMonthPointsSold = point_purchase_requests::where('status', 'approved')
             ->whereMonth('created_at', $previousMonth->month)
-            ->sum('amount');
+            ->sum('points_requested');
         $pointsGrowthRate = $previousMonthPointsSold > 0 ? 
             (($monthlyPointsSold - $previousMonthPointsSold) / $previousMonthPointsSold) * 100 : 0;
         

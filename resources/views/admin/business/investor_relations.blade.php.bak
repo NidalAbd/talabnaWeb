@@ -1,0 +1,452 @@
+@extends('adminlte::page')
+
+@section('title', 'Investor Relations')
+
+@section('content_header')
+    <h1>{{('admin\business\investor_relations.investor_relations') }}</h1>
+@stop
+
+@section('content')
+<div class="container-fluid">
+    <!-- Summary Cards -->
+    <div class="row">
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-info">
+                <div class="inner">
+                    <h3>${{ number_format($totalInvested, 2) }}</h3>
+                    <p>{{('admin\business\investor_relations.total_invested') }}</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-success">
+                <div class="inner">
+                    <h3>${{ number_format($totalPaid, 2) }}</h3>
+                    <p>{{('admin\business\investor_relations.total_paid_back') }}</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-dollar-sign"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-warning">
+                <div class="inner">
+                    <h3>${{ number_format($totalRemaining, 2) }}</h3>
+                    <p>{{('admin\business\investor_relations.remaining_to_pay') }}</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-3 col-6">
+            <div class="small-box bg-primary">
+                <div class="inner">
+                    <h3>{{ $investments->id</h3>
+                    <p>{{('admin\business\investor_relations.total_investments') }}</p>
+                </div>
+                <div class="icon">
+                    <i class="fas fa-users"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Investor Statistics -->
+    <div class="row">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{('admin\business\investor_relations.top_investors') }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>{{('admin\business\investor_relations.investor_name') }}</th>
+                                    <th>{{('admin\business\investor_relations.investments') }}</th>
+                                    <th>{{('admin\business\investor_relations.total_invested') }}</th>
+                                    <th>{{('admin\business\investor_relations.average_investment') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($investorStats as $stat)
+                                <tr>
+                                    <td>{{ $stat->id</td>
+                                    <td>{{ $stat->id</td>
+                                    <td>${{ number_format($stat->total_invested, 2) }}</td>
+                                    <td>${{ number_format($stat->avg_investment, 2) }}</td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="4" class="text-center">{{('admin\business\investor_relations.no_investor_data_available') }}</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{('admin\business\investor_relations.investment_distribution') }}</h3>
+                </div>
+                <div class="card-body">
+                    <canvas id="investmentChart" style="height: 300px;"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- All Investments Table -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">{{('admin\business\investor_relations.all_investments') }}</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addInvestmentModal">
+                            <i class="fas fa-plus"></i> Add Investment
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-striped" id="investmentsTable">
+                            <thead>
+                                <tr>
+                                    <th>{{('admin\business\investor_relations.investor') }}</th>
+                                    <th>{{('admin\business\investor_relations.amount') }}</th>
+                                    <th>{{('admin\business\investor_relations.type') }}</th>
+                                    <th>{{('admin\business\investor_relations.purpose') }}</th>
+                                    <th>{{('admin\business\investor_relations.date') }}</th>
+                                    <th>{{('admin\business\investor_relations.status') }}</th>
+                                    <th>{{('admin\business\investor_relations.progress') }}</th>
+                                    <th>{{('admin\business\investor_relations.actions') }}</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($investments as $investment)
+                                <tr>
+                                    <td>
+                                        <strong>{{ $investment->id</strong><br>
+                                        <small class="text-muted">{{ $investment->id</small>
+                                    </td>
+                                    <td>${{ number_format($investment->investment_amount, 2) }}</td>
+                                    <td>
+                                        <span class="badge badge-{{ $investment->investment_type == 'equity' ? 'primary' : ($investment->investment_type == 'loan' ? 'warning' : 'info') }}">
+                                            {{ ucfirst($investment->investment_type) }}
+                                        </span>
+                                    </td>
+                                    <td>{{ $investment->id</td>
+                                    <td>{{ $investment->id</td>
+                                    <td>
+                                        <span class="badge badge-{{ $investment->status == 'active' ? 'success' : ($investment->status == 'completed' ? 'info' : 'warning') }}">
+                                            {{ ucfirst($investment->status) }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <div class="progress progress-sm">
+                                            <div class="progress-bar bg-success" style="width: {{ $investment->id</div>
+                                        </div>
+                                        <small>{{ $investment->id</small>
+                                    </td>
+                                    <td>
+                                        <div class="btn-group">
+                                            <button type="button" class="btn btn-sm btn-info" data-toggle="modal" data-target="#viewInvestmentModal{{ $investment->id }}">
+                                                <i class="fas fa-eye"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-warning" data-toggle="modal" data-target="#editInvestmentModal{{ $investment->id }}">
+                                                <i class="fas fa-edit"></i>
+                                            </button>
+                                            <button type="button" class="btn btn-sm btn-success" data-toggle="modal" data-target="#addPaymentModal{{ $investment->id }}">
+                                                <i class="fas fa-dollar-sign"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="8" class="text-center">{{('admin\business\investor_relations.no_investments_found') }}</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Investment Modal -->
+<div class="modal fade" id="addInvestmentModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">{{('admin\business\investor_relations.add_new_investment') }}</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>{{('admin\business\investor_relations._times_') }}</span>
+                </button>
+            </div>
+            <form id="addInvestmentForm">
+                @csrf
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.investor_name_') }}</label>
+                                <input type="text" name="investor_name" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.investor_email_') }}</label>
+                                <input type="email" name="investor_email" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.investment_amount_') }}</label>
+                                <input type="number" name="investment_amount" class="form-control" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.currency') }}</label>
+                                <select name="currency" class="form-control">
+                                    <option value="USD">{{('admin\business\investor_relations.usd') }}</option>
+                                    <option value="EUR">{{('admin\business\investor_relations.eur') }}</option>
+                                    <option value="GBP">{{('admin\business\investor_relations.gbp') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.investment_type_') }}</label>
+                                <select name="investment_type" class="form-control" required>
+                                    <option value="equity">{{('admin\business\investor_relations.equity') }}</option>
+                                    <option value="loan">{{('admin\business\investor_relations.loan') }}</option>
+                                    <option value="grant">{{('admin\business\investor_relations.grant') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.investment_date_') }}</label>
+                                <input type="date" name="investment_date" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.expected_roi_') }}</label>
+                                <input type="number" name="expected_roi" class="form-control" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.investment_period_months_') }}</label>
+                                <input type="number" name="investment_period" class="form-control" min="1" max="60" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.profit_sharing_investor_') }}</label>
+                                <input type="number" name="investor_share" class="form-control" min="0" max="100" value="55" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.profit_sharing_owner_') }}</label>
+                                <input type="number" name="owner_share" class="form-control" min="0" max="100" value="45" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.purpose') }}</label>
+                                <select name="purpose" class="form-control">
+                                    <option value="license">{{('admin\business\investor_relations.license') }}</option>
+                                    <option value="advertising">{{('admin\business\investor_relations.advertising') }}</option>
+                                    <option value="salary">{{('admin\business\investor_relations.salary') }}</option>
+                                    <option value="development">{{('admin\business\investor_relations.development') }}</option>
+                                    <option value="marketing">{{('admin\business\investor_relations.marketing') }}</option>
+                                    <option value="operations">{{('admin\business\investor_relations.operations') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>{{('admin\business\investor_relations.agreement_terms') }}</label>
+                                <select name="agreement_terms" class="form-control">
+                                    <option value="standard">{{('admin\business\investor_relations.standard_55_investor_45_owner_') }}</option>
+                                    <option value="custom">{{('admin\business\investor_relations.custom_agreement') }}</option>
+                                    <option value="equity">{{('admin\business\investor_relations.equity_based') }}</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>{{('admin\business\investor_relations.notes') }}</label>
+                        <textarea name="notes" class="form-control" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('admin\business\investor_relations.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{('admin\business\investor_relations.add_investment') }}</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@stop
+
+@section('css')
+<style>
+    .small-box {
+        margin-bottom: 20px;
+    }
+    .card {
+        margin-bottom: 20px;
+    }
+    .progress-sm {
+        height: 5px;
+    }
+</style>
+@stop
+
+@section('js')
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+$(document).ready(function() {
+    // Set default date to today
+    $('input[name="investment_date"]').val(new Date().toISOString().split('T')[0]);
+
+    // Initialize DataTable
+    $('#investmentsTable').DataTable({
+        "responsive": true,
+        "autoWidth": false,
+        "order": [[4, "desc"]]
+    });
+
+    // Investment Distribution Chart
+    const investmentCtx = document.getElementById('investmentChart').getContext('2d');
+    const investmentChart = new Chart(investmentCtx, {
+        type: 'doughnut',
+        data: {
+            labels: @json($investorStats->pluck('investor_name')),
+            datasets: [{
+                data: @json($investorStats->pluck('total_invested')),
+                backgroundColor: [
+                    '#007bff', '#28a745', '#ffc107', '#dc3545', '#6c757d',
+                    '#17a2b8', '#fd7e14', '#6f42c1', '#e83e8c', '#20c997'
+                ],
+                borderWidth: 2
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Handle investment form submission
+    $('#addInvestmentForm').submit(function(e) {
+        e.preventDefault();
+        
+        const formData = new FormData(this);
+        
+        $.ajax({
+            url: '{{ route("business.investments.store") }}',
+            method: 'POST',
+            data: formData,
+            processData: false,
+            contentType: false,
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            },
+            success: function(response) {
+                if (response.success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Investment Added Successfully!',
+                        text: response.message,
+                        showConfirmButton: false,
+                        timer: 2000
+                    }).then(() => {
+                        $('#addInvestmentModal').modal('hide');
+                        location.reload();
+                    });
+                }
+            },
+            error: function(xhr) {
+                const errors = xhr.responseJSON.errors;
+                let errorMessage = 'Please fix the following errors:\n';
+                for (let field in errors) {
+                    errorMessage += errors[field][0] + '\n';
+                }
+                
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error Adding Investment',
+                    text: errorMessage
+                });
+            }
+        });
+    });
+
+    // Auto-calculate owner share when investor share changes
+    $('input[name="investor_share"]').on('input', function() {
+        const investorShare = parseInt($(this).val()) || 0;
+        const ownerShare = 100 - investorShare;
+        $('input[name="owner_share"]').val(ownerShare);
+    });
+
+    // Auto-calculate investor share when owner share changes
+    $('input[name="owner_share"]').on('input', function() {
+        const ownerShare = parseInt($(this).val()) || 0;
+        const investorShare = 100 - ownerShare;
+        $('input[name="investor_share"]').val(investorShare);
+    });
+
+    // Handle agreement terms change
+    $('select[name="agreement_terms"]').change(function() {
+        const terms = $(this).val();
+        if (terms === 'standard') {
+            $('input[name="investor_share"]').val(55);
+            $('input[name="owner_share"]').val(45);
+        }
+    });
+});
+</script>
+@stop 
+
+
+
+

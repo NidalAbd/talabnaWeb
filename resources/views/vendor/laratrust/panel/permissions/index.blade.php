@@ -17,10 +17,10 @@
         <table class="min-w-full">
           <thead>
             <tr>
-              <th class="th">{{ __('vendor\laratrust\panel\permissions\index.id') }}</th>
-              <th class="th">{{ __('vendor\laratrust\panel\permissions\index.name_code') }}</th>
-              <th class="th">{{ __('vendor\laratrust\panel\permissions\index.display_name') }}</th>
-              <th class="th">{{ __('vendor\laratrust\panel\permissions\index.description') }}</th>
+              <th class="th">{{('vendor\laratrust\panel\permissions\index.id') }}</th>
+              <th class="th">{{('vendor\laratrust\panel\permissions\index.name_code') }}</th>
+              <th class="th">{{('vendor\laratrust\panel\permissions\index.display_name') }}</th>
+              <th class="th">{{('vendor\laratrust\panel\permissions\index.description') }}</th>
               <th class="th"></th>
             </tr>
           </thead>
@@ -40,7 +40,7 @@
                 {{$permission->description}}
               </td>
               <td class="px-6 py-4 whitespace-no-wrap text-right border-b border-gray-200 text-sm leading-5 font-medium">
-                <a href="{{route('laratrust.permissions.edit', $permission->field</a>
+                <a href="{{route('laratrust.permissions.edit', $permission->id</a> }}
               </td>
             </tr>
             @endforeach
@@ -51,3 +51,9 @@
   </div>
   {{ $permissions->links('laratrust::panel.pagination') }}
 @endsection
+
+
+
+
+
+

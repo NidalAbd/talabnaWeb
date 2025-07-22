@@ -5,8 +5,8 @@
         <li class="nav-item">
             <form method="GET" action="{{ url()->current() }}" class="d-inline">
                 <select name="lang" onchange="this.form.submit()" class="form-control form-control-sm" style="width:auto;display:inline;">
-                    <option value="en" {{ app()->{{ __('partials\navbar.getlocale_en_selected_') }}</option>
-                    <option value="ar" {{ app()->{{ __('partials\navbar.getlocale_ar_selected_') }}</option>
+                    <option value="en" {{ app()->getLocale() == 'en' ? 'selected' : '' }}>{{ __('partials/navbar.english') }}</option>
+                    <option value="ar" {{ app()->getLocale() == 'ar' ? 'selected' : '' }}>{{ __('partials/navbar.arabic') }}</option>
                 </select>
                 @foreach(request()->except('lang') as $key => $value)
                     <input type="hidden" name="{{ $key }}" value="{{ $value }}">
@@ -21,3 +21,10 @@
         </li>
     </ul>
 </nav>
+
+
+
+
+
+
+

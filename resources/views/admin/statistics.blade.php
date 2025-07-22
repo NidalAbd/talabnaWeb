@@ -24,7 +24,7 @@
             <div class="info-box bg-gradient-primary">
                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\statistics.total_users') }}</span>
+                    <span class="info-box-text">{{('admin\statistics.total_users') }}</span>
                     <span class="info-box-number">{{ number_format($totalUsers ?? 0) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 100%"></div>
@@ -41,7 +41,7 @@
             <div class="info-box bg-gradient-success">
                 <span class="info-box-icon"><i class="fas fa-file-alt"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\statistics.service_posts') }}</span>
+                    <span class="info-box-text">{{('admin\statistics.service_posts') }}</span>
                     <span class="info-box-number">{{ number_format($totalPosts ?? 0) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 85%"></div>
@@ -58,7 +58,7 @@
             <div class="info-box bg-gradient-warning">
                 <span class="info-box-icon"><i class="fas fa-dollar-sign"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\statistics.revenue') }}</span>
+                    <span class="info-box-text">{{('admin\statistics.revenue') }}</span>
                     <span class="info-box-number">${{ number_format($totalRevenue ?? 0, 2) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 70%"></div>
@@ -75,7 +75,7 @@
             <div class="info-box bg-gradient-info">
                 <span class="info-box-icon"><i class="fas fa-coins"></i></span>
                 <div class="info-box-content">
-                    <span class="info-box-text">{{ __('admin\statistics.points_sold') }}</span>
+                    <span class="info-box-text">{{('admin\statistics.points_sold') }}</span>
                     <span class="info-box-number">{{ number_format($totalPoints ?? 0) }}</span>
                     <div class="progress">
                         <div class="progress-bar" style="width: 90%"></div>
@@ -146,7 +146,7 @@
                         Recent Activity
                     </h3>
                     <div class="card-tools">
-                        <a href="#" class="btn btn-sm btn-primary">{{ __('admin\statistics.view_all') }}</a>
+                        <a href="#" class="btn btn-sm btn-primary">{{('admin\statistics.view_all') }}</a>
                     </div>
                 </div>
                 <div class="card-body p-0">
@@ -154,10 +154,10 @@
                         <table class="table table-hover">
                             <thead class="thead-light">
                                 <tr>
-                                    <th>{{ __('admin\statistics.activity') }}</th>
-                                    <th>{{ __('admin\statistics.user') }}</th>
-                                    <th>{{ __('admin\statistics.time') }}</th>
-                                    <th>{{ __('admin\statistics.status') }}</th>
+                                    <th>{{('admin\statistics.activity') }}</th>
+                                    <th>{{('admin\statistics.user') }}</th>
+                                    <th>{{('admin\statistics.time') }}</th>
+                                    <th>{{('admin\statistics.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -249,20 +249,20 @@
                     
                     <div class="system-status">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>{{ __('admin\statistics.database') }}</span>
-                            <span class="badge badge-success">{{ __('admin\statistics.healthy') }}</span>
+                            <span>{{('admin\statistics.database') }}</span>
+                            <span class="badge badge-success">{{('admin\statistics.healthy') }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>{{ __('admin\statistics.storage') }}</span>
-                            <span class="badge badge-warning">{{ __('admin\statistics.75_used') }}</span>
+                            <span>{{('admin\statistics.storage') }}</span>
+                            <span class="badge badge-warning">{{('admin\statistics.75_used') }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span>{{ __('admin\statistics.cache') }}</span>
-                            <span class="badge badge-success">{{ __('admin\statistics.active') }}</span>
+                            <span>{{('admin\statistics.cache') }}</span>
+                            <span class="badge badge-success">{{('admin\statistics.active') }}</span>
                         </div>
                         <div class="d-flex justify-content-between align-items-center">
-                            <span>{{ __('admin\statistics.performance') }}</span>
-                            <span class="badge badge-info">{{ __('admin\statistics.good') }}</span>
+                            <span>{{('admin\statistics.performance') }}</span>
+                            <span class="badge badge-info">{{('admin\statistics.good') }}</span>
                         </div>
                     </div>
                 </div>
@@ -286,28 +286,28 @@
                             <div class="stat-item">
                                 <i class="fas fa-users fa-2x text-primary mb-2"></i>
                                 <h4>{{ number_format($activeUsers ?? 0) }}</h4>
-                                <p class="text-muted">{{ __('admin\statistics.active_users') }}</p>
+                                <p class="text-muted">{{('admin\statistics.active_users') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3 text-center">
                             <div class="stat-item">
                                 <i class="fas fa-star fa-2x text-warning mb-2"></i>
                                 <h4>{{ number_format($premiumUsers ?? 0) }}</h4>
-                                <p class="text-muted">{{ __('admin\statistics.premium_users') }}</p>
+                                <p class="text-muted">{{('admin\statistics.premium_users') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3 text-center">
                             <div class="stat-item">
                                 <i class="fas fa-coins fa-2x text-success mb-2"></i>
                                 <h4>{{ number_format($totalPoints ?? 0) }}</h4>
-                                <p class="text-muted">{{ __('admin\statistics.points_sold') }}</p>
+                                <p class="text-muted">{{('admin\statistics.points_sold') }}</p>
                             </div>
                         </div>
                         <div class="col-md-3 text-center">
                             <div class="stat-item">
                                 <i class="fas fa-chart-line fa-2x text-info mb-2"></i>
                                 <h4>{{ number_format($growthRate ?? 0, 1) }}%</h4>
-                                <p class="text-muted">{{ __('admin\statistics.growth_rate') }}</p>
+                                <p class="text-muted">{{('admin\statistics.growth_rate') }}</p>
                             </div>
                         </div>
                     </div>
@@ -507,3 +507,10 @@ function exportDashboard() {
 }
 </script>
 @endsection
+
+
+
+
+
+
+

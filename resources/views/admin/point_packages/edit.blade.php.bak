@@ -1,0 +1,571 @@
+@extends('adminlte::page')
+
+@section('title', 'Edit Point Package - Talabna Admin')
+
+@section('content_header')
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="m-0">
+                <i class="fas fa-edit text-primary mr-2"></i> 
+                Edit Point Package
+            </h1>
+            <p class="text-muted mb-0">{{('admin\point_packages\edit.update_point_package_information_and_set') }}</p>
+        </div>
+        <div class="d-flex gap-2">
+            <a href="{{ route('admin.point_packages.show', $pointPackage->id) }}" class="btn btn-outline-info">
+                <i class="fas fa-eye mr-1"></i> View Details
+            </a>
+            <a href="{{ route('admin.point_packages.index') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Back to List
+            </a>
+        </div>
+    </div>
+@stop
+
+@section('content')
+<div class="container-fluid">
+    <!-- Success/Error Messages -->
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{('admin\point_packages\edit._') }}</button>
+            <h5><i class="icon fas fa-check"></i> Success!</h5>
+            {{ session('success') }}
+        </div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show">
+            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">{{('admin\point_packages\edit._') }}</button>
+            <h5><i class="icon fas fa-ban"></i> Error!</h5>
+            {{ session('error') }}
+        </div>
+    @endif
+
+    <div class="row">
+        <!-- Edit Form -->
+        <div class="col-md-8">
+            <div class="card card-outline card-primary shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-edit mr-2"></i> Edit Package Information
+                    </h3>
+                    <div class="card-tools">
+                        <span class="badge badge-{{ $pointPackage->is_active ? 'success' : 'danger' }} mr-2">
+                            {{ $pointPackage->is_active ? 'Active' : 'Inactive' }}
+                        </span>
+                        @if($pointPackage->is_popular)
+                            <span class="badge badge-warning">{{('admin\point_packages\edit.popular') }}</span>
+                        @endif
+                    </div>
+                </div>
+                <form action="{{ route('admin.point_packages.update', $pointPackage->id) }}" method="POST" id="editPackageForm">
+                    @csrf
+                    @method('PUT')
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Arabic Name -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="name_ar">Name (Arabic) <span class="text-danger">{{('admin\point_packages\edit._') }}</span></label>
+                                    <input type="text" class="form-control @error('name.ar') is-invalid @enderror" 
+                                           id="name_ar" name="name[ar]" 
+                                           value="{{ old('name.ar', $pointPackage->name['ar'] ?? '') }}" 
+                                           placeholder="اسم الباقة" required>
+                                    @error('name.ar')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- English Name -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="name_en">Name (English) <span class="text-danger">{{('admin\point_packages\edit._') }}</span></label>
+                                    <input type="text" class="form-control @error('name.en') is-invalid @enderror" 
+                                           id="name_en" name="name[en]" 
+                                           value="{{ old('name.en', $pointPackage->name['en'] ?? '') }}" 
+                                           placeholder="Package Name" required>
+                                    @error('name.en')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Arabic Description -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="description_ar">{{('admin\point_packages\edit.description_arabic_') }}</label>
+                                    <textarea class="form-control @error('description.ar') is-invalid @enderror" 
+                                              id="description_ar" name="description[ar]" rows="3" 
+                                              placeholder="وصف الباقة">{{ old('description.ar', $pointPackage->id</textarea>
+                                    @error('description.ar')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- English Description -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="description_en">{{('admin\point_packages\edit.description_english_') }}</label>
+                                    <textarea class="form-control @error('description.en') is-invalid @enderror" 
+                                              id="description_en" name="description[en]" rows="3" 
+                                              placeholder="Package description">{{ old('description.en', $pointPackage->id</textarea>
+                                    @error('description.en')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Points -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="points">Points <span class="text-danger">{{('admin\point_packages\edit._') }}</span></label>
+                                    <input type="number" class="form-control @error('points') is-invalid @enderror" 
+                                           id="points" name="points" 
+                                           value="{{ old('points', $pointPackage->points_amount) }}" 
+                                           min="1" max="1000000" required>
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.number_of_points_in_this_package') }}</small>
+                                    @error('points')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Price -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="price">Price <span class="text-danger">{{('admin\point_packages\edit._') }}</span></label>
+                                    <input type="number" class="form-control @error('price') is-invalid @enderror" 
+                                           id="price" name="price" 
+                                           value="{{ old('price', $pointPackage->price) }}" 
+                                           min="0" max="10000" step="0.01" required>
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.price_in_the_selected_currency') }}</small>
+                                    @error('price')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Currency -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="currency">Currency <span class="text-danger">{{('admin\point_packages\edit._') }}</span></label>
+                                    <select class="form-control @error('currency') is-invalid @enderror" 
+                                            id="currency" name="currency" required>
+                                        <option value="SAR" {{ old('currency', $pointPackage->id</option>
+                                        <option value="USD" {{ old('currency', $pointPackage->id</option>
+                                        <option value="EUR" {{ old('currency', $pointPackage->id</option>
+                                        <option value="AED" {{ old('currency', $pointPackage->id</option>
+                                    </select>
+                                    @error('currency')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Duration Days -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="duration_days">Duration (Days) <span class="text-danger">{{('admin\point_packages\edit._') }}</span></label>
+                                    <input type="number" class="form-control @error('duration_days') is-invalid @enderror" 
+                                           id="duration_days" name="duration_days" 
+                                           value="{{ old('duration_days', $pointPackage->validity_days) }}" 
+                                           min="1" max="365" required>
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.how_long_the_points_are_valid') }}</small>
+                                    @error('duration_days')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Discount Percentage -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="discount_percentage">{{('admin\point_packages\edit.discount_') }}</label>
+                                    <input type="number" class="form-control @error('discount_percentage') is-invalid @enderror" 
+                                           id="discount_percentage" name="discount_percentage" 
+                                           value="{{ old('discount_percentage', $pointPackage->discount_percentage ?? 0) }}" 
+                                           min="0" max="100" step="0.01">
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.discount_percentage_0_100_') }}</small>
+                                    @error('discount_percentage')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Display Order -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="display_order">{{('admin\point_packages\edit.display_order') }}</label>
+                                    <input type="number" class="form-control @error('display_order') is-invalid @enderror" 
+                                           id="display_order" name="display_order" 
+                                           value="{{ old('display_order', $pointPackage->display_order ?? 0) }}" 
+                                           min="0" max="999">
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.order_in_which_package_appears') }}</small>
+                                    @error('display_order')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Icon -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="icon">{{('admin\point_packages\edit.icon') }}</label>
+                                    <input type="text" class="form-control @error('icon') is-invalid @enderror" 
+                                           id="icon" name="icon" 
+                                           value="{{ old('icon', $pointPackage->icon) }}" 
+                                           placeholder="fas fa-gift">
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.fontawesome_icon_class_e_g_fas_fa_gif') }}</small>
+                                    @error('icon')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Color -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="color">{{('admin\point_packages\edit.color') }}</label>
+                                    <input type="color" class="form-control @error('color') is-invalid @enderror" 
+                                           id="color" name="color" 
+                                           value="{{ old('color', $pointPackage->color ?? '#007bff') }}">
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.icon_color') }}</small>
+                                    @error('color')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Features -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="features_ar">{{('admin\point_packages\edit.features_arabic_') }}</label>
+                                    <textarea class="form-control @error('features.ar') is-invalid @enderror" 
+                                              id="features_ar" name="features[ar]" rows="3" 
+                                              placeholder="ميزات الباقة">{{ old('features.ar', $pointPackage->id</textarea>
+                                    @error('features.ar')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <!-- Features English -->
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="features_en">{{('admin\point_packages\edit.features_english_') }}</label>
+                                    <textarea class="form-control @error('features.en') is-invalid @enderror" 
+                                              id="features_en" name="features[en]" rows="3" 
+                                              placeholder="Package features">{{ old('features.en', $pointPackage->id</textarea>
+                                    @error('features.en')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <!-- Status -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="is_active" name="is_active" value="1" 
+                                               {{ old('is_active', $pointPackage->is_active) ? 'checked' : '' }}>
+                                        <label class="custom-control-label" for="is_active">{{('admin\point_packages\edit.active_package') }}</label>
+                                    </div>
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.enable_disable_this_package') }}</small>
+                                </div>
+                            </div>
+
+                            <!-- Popular -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <div class="custom-control custom-switch">
+                                        <input type="checkbox" class="custom-control-input" id="is_popular" name="is_popular" value="1" 
+                                               {{ old('is_popular', $pointPackage->is_popular) ? 'checked' : '' }}>
+                                        <label class="custom-control-label" for="is_popular">{{('admin\point_packages\edit.popular_package') }}</label>
+                                    </div>
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.mark_as_popular_package') }}</small>
+                                </div>
+                            </div>
+
+                            <!-- Max Purchases -->
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="max_purchases">{{('admin\point_packages\edit.max_purchases') }}</label>
+                                    <input type="number" class="form-control @error('max_purchases') is-invalid @enderror" 
+                                           id="max_purchases" name="max_purchases" 
+                                           value="{{ old('max_purchases', $pointPackage->max_purchases ?? 0) }}" 
+                                           min="0" max="999999">
+                                    <small class="form-text text-muted">{{('admin\point_packages\edit.0_unlimited') }}</small>
+                                    @error('max_purchases')
+                                        <span class="invalid-feedback">{{ $message }}</span>
+                                    @enderror
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <button type="button" class="btn btn-secondary" onclick="history.back()">
+                                <i class="fas fa-times mr-1"></i> Cancel
+                            </button>
+                            <div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-save mr-1"></i> Update Package
+                                </button>
+                                <button type="button" class="btn btn-success" onclick="saveAndContinue()">
+                                    <i class="fas fa-save mr-1"></i> Save & Continue
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <!-- Package Preview -->
+            <div class="card card-outline card-info shadow-sm">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-eye mr-2"></i> Package Preview
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div id="preview-icon" style="font-size: 48px; color: #007bff;">
+                            <i class="fas fa-gift"></i>
+                        </div>
+                    </div>
+                    <h4 id="preview-name" class="text-center text-primary">{{('admin\point_packages\edit.package_name') }}</h4>
+                    <p id="preview-description" class="text-center text-muted">{{('admin\point_packages\edit.package_description') }}</p>
+                    <div class="row text-center">
+                        <div class="col-6">
+                            <h5 class="text-success" id="preview-price">{{('admin\point_packages\edit._0_00') }}</h5>
+                            <small class="text-muted">{{('admin\point_packages\edit.price') }}</small>
+                        </div>
+                        <div class="col-6">
+                            <h5 class="text-primary" id="preview-points">{{('admin\point_packages\edit.0_points') }}</h5>
+                            <small class="text-muted">{{('admin\point_packages\edit.points') }}</small>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <span class="badge badge-info" id="preview-duration">{{('admin\point_packages\edit.0_days') }}</span>
+                        <span class="badge badge-warning" id="preview-discount" style="display: none;">{{('admin\point_packages\edit.0_off') }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card card-outline card-secondary shadow-sm mt-4">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        <i class="fas fa-bolt mr-2"></i> Quick Actions
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-{{ $pointPackage->is_active ? 'warning' : 'success' }}" 
+                                onclick="toggleStatus({{ $pointPackage->id }})">
+                            <i class="fas fa-{{ $pointPackage->id</i>
+                            {{ $pointPackage->is_active ? 'Deactivate' : 'Activate' }} Package
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-{{ $pointPackage->is_popular ? 'warning' : 'info' }}" 
+                                onclick="togglePopular({{ $pointPackage->id }})">
+                            <i class="fas fa-star mr-2"></i>
+                            {{ $pointPackage->is_popular ? 'Remove Popular' : 'Set Popular' }}
+                        </button>
+                        
+                        <button type="button" class="btn btn-outline-success" onclick="duplicatePackage({{ $pointPackage->id }})">
+                            <i class="fas fa-copy mr-2"></i> Duplicate Package
+                        </button>
+                        
+                        <a href="{{ route('admin.point_packages.show', $pointPackage->id) }}" class="btn btn-outline-info">
+                            <i class="fas fa-eye mr-2"></i> View Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    // Initialize preview
+    updatePreview();
+    
+    // Update preview on form changes
+    $('#name_ar, #name_en, #description_ar, #description_en, #price, #points, #duration_days, #discount_percentage, #icon, #color').on('input', function() {
+        updatePreview();
+    });
+    
+    $('#currency').on('change', function() {
+        updatePreview();
+    });
+});
+
+function updatePreview() {
+    // Update name
+    const nameEn = $('#name_en').val() || 'Package Name';
+    const nameAr = $('#name_ar').val() || 'اسم الباقة';
+    $('#preview-name').text(nameEn);
+    
+    // Update description
+    const descEn = $('#description_en').val() || 'Package description';
+    $('#preview-description').text(descEn);
+    
+    // Update price
+    const price = $('#price').val() || 0;
+    const currency = $('#currency').val() || 'USD';
+    $('#preview-price').text(currency + ' ' + parseFloat(price).toFixed(2));
+    
+    // Update points
+    const points = $('#points').val() || 0;
+    $('#preview-points').text(points + ' Points');
+    
+    // Update duration
+    const duration = $('#duration_days').val() || 0;
+    $('#preview-duration').text(duration + ' Days');
+    
+    // Update discount
+    const discount = $('#discount_percentage').val() || 0;
+    if (discount > 0) {
+        $('#preview-discount').text(discount + '% Off').show();
+    } else {
+        $('#preview-discount').hide();
+    }
+    
+    // Update icon
+    const icon = $('#icon').val() || 'fas fa-gift';
+    const color = $('#color').val() || '#007bff';
+    $('#preview-icon').html('<i class="' + icon + '" style="color: ' + color + ';"></i>');
+}
+
+function toggleStatus(packageId) {
+    Swal.fire({
+        title: 'Toggle Package Status',
+        text: 'Change the active status of this package?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, toggle!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.point_packages.toggle-status", "") }}/' + packageId,
+                type: 'PATCH',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to update package status.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function togglePopular(packageId) {
+    Swal.fire({
+        title: 'Toggle Popular Status',
+        text: 'Change the popular status of this package?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, toggle!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.point_packages.toggle-popular", "") }}/' + packageId,
+                type: 'PATCH',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to update package popular status.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function duplicatePackage(packageId) {
+    Swal.fire({
+        title: 'Duplicate Package',
+        text: 'Create a copy of this package?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, duplicate!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                url: '{{ route("admin.point_packages.duplicate", "") }}/' + packageId,
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}'
+                },
+                success: function(response) {
+                    if (response.success) {
+                        Swal.fire('Success!', response.message, 'success').then(() => {
+                            window.location.href = '{{ route("admin.point_packages.index") }}';
+                        });
+                    } else {
+                        Swal.fire('Error!', response.message, 'error');
+                    }
+                },
+                error: function() {
+                    Swal.fire('Error!', 'Failed to duplicate package.', 'error');
+                }
+            });
+        }
+    });
+}
+
+function saveAndContinue() {
+    // Add a hidden field to indicate save and continue
+    $('<input>{{('admin\point_packages\edit._attr_type_hidden_') }}<i class="fas fa-spinner fa-spin mr-1"></i> Saving...').prop('disabled', true);
+    
+    // Re-enable button after 5 seconds as fallback
+    setTimeout(function() {
+        submitBtn.html(originalText).prop('disabled', false);
+    }, 5000);
+});
+</script>
+@endpush
+@endsection 
+
+
+
+

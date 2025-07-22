@@ -1,0 +1,64 @@
+@extends('adminlte::page')
+@section('title', __('Edit Translation'))
+
+@section('content_header')
+    <h1><i class="fas fa-edit text-warning mr-2"></i> {{('Edit Translation') }}</h1>
+@stop
+
+@section('content')
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card card-outline card-warning shadow">
+            <div class="card-header">
+                <h3 class="card-title mb-0">
+                    <i class="fas fa-language mr-2"></i> {{ $translation->group }} <span class="mx-2">/</span> <code>{{ $translation->key }}</code>
+                </h3>
+            </div>
+            <form method="POST" action="{{ route('translations.update', $translation) }}">
+                @csrf
+                @method('PUT')
+                <div class="card-body">
+                    <ul class="nav nav-tabs mb-3" id="langTabs" role="tablist">
+                        <li class="nav-item">
+                            <a class="nav-link active" id="en-tab" data-toggle="tab" href="#en" role="tab" aria-controls="en" aria-selected="true">
+                                <i class="flag-icon flag-icon-gb mr-1"></i> English
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" id="ar-tab" data-toggle="tab" href="#ar" role="tab" aria-controls="ar" aria-selected="false">
+                                <i class="flag-icon flag-icon-sa mr-1"></i> العربية
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="langTabsContent">
+                        <div class="tab-pane fade show active" id="en" role="tabpanel" aria-labelledby="en-tab">
+                            <div class="form-group">
+                                <label for="text_en" class="font-weight-bold">English</label>
+                                <textarea class="form-control" id="text_en" name="text_en" rows="2" required>{{ old('text_en', $translation->text['en'] ?? '') }}</textarea>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="ar" role="tabpanel" aria-labelledby="ar-tab">
+                            <div class="form-group">
+                                <label for="text_ar" class="font-weight-bold">العربية</label>
+                                <textarea class="form-control" id="text_ar" name="text_ar" rows="2">{{ old('text_ar', $translation->text['ar'] ?? '') }}</textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer d-flex justify-content-between align-items-center">
+                    <a href="{{ route('translations.index') }}" class="btn btn-secondary">
+                        <i class="fas fa-arrow-left mr-1"></i> {{('Back') }}
+                    </a>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save mr-1"></i> {{('Save Changes') }}
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+@endsection 
+
+
+
+

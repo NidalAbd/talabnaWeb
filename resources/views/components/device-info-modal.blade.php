@@ -7,7 +7,7 @@
                     <i class="fas fa-mobile-alt mr-2"></i> Device Information
                 </h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">{{ __('components\device-info-modal._times_') }}</span>
+                    <span aria-hidden="true">{{('components\device-info-modal._times_') }}</span>
                 </button>
             </div>
             <div class="modal-body">
@@ -15,35 +15,35 @@
                     <div class="col-md-6">
                         <div class="card card-outline card-primary h-100">
                             <div class="card-header">
-                                <h3 class="card-title">{{ __('components\device-info-modal.device_details') }}</h3>
+                                <h3 class="card-title">{{('components\device-info-modal.device_details') }}</h3>
                             </div>
                             <div class="card-body">
                                 <table class="table table-striped">
                                     <tr>
-                                        <th style="width: 40%">{{ __('components\device-info-modal.device_id') }}</th>
-                                        <td><code>{{ $device->field</code></td>
+                                        <th style="width: 40%">{{('components\device-info-modal.device_id') }}</th>
+                                        <td><code>{{ $device->id }}</code></td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.brand') }}</th>
-                                        <td>{{ $device->field</td>
+                                        <th>{{('components\device-info-modal.brand') }}</th>
+                                        <td>{{ $device->brand }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.model') }}</th>
-                                        <td>{{ $device->field</td>
+                                        <th>{{('components\device-info-modal.model') }}</th>
+                                        <td>{{ $device->model }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.os_version') }}</th>
-                                        <td>{{ $device->field</td>
+                                        <th>{{('components\device-info-modal.os_version') }}</th>
+                                        <td>{{ $device->os_version }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.ip_address') }}</th>
-                                        <td>{{ $device->field</td>
+                                        <th>{{('components\device-info-modal.ip_address') }}</th>
+                                        <td>{{ $device->ip_address }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.fcm_token') }}</th>
+                                        <th>{{('components\device-info-modal.fcm_token') }}</th>
                                         <td>
                                             @if($device->fcm_token)
-                                                <code class="text-truncate d-block" style="max-width: 220px;">{{ $device->field</code>
+                                                <code class="text-truncate d-block" style="max-width: 220px;">{{ $device->fcm_token }}</code>
                                             @else
                                                 N/A
                                             @endif
@@ -57,34 +57,34 @@
                     <div class="col-md-6">
                         <div class="card card-outline card-danger h-100">
                             <div class="card-header">
-                                <h3 class="card-title">{{ __('components\device-info-modal.ban_information') }}</h3>
+                                <h3 class="card-title">{{('components\device-info-modal.ban_information') }}</h3>
                             </div>
                             <div class="card-body">
                                 <table class="table table-striped">
                                     <tr>
-                                        <th style="width: 40%">{{ __('components\device-info-modal.status') }}</th>
+                                        <th style="width: 40%">{{('components\device-info-modal.status') }}</th>
                                         <td>
                                             @if($device->isActive())
-                                                <span class="badge badge-danger">{{ __('components\device-info-modal.banned') }}</span>
+                                                <span class="badge badge-danger">{{('components\device-info-modal.banned') }}</span>
                                             @else
-                                                <span class="badge badge-success">{{ __('components\device-info-modal.unbanned') }}</span>
+                                                <span class="badge badge-success">{{('components\device-info-modal.unbanned') }}</span>
                                             @endif
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.banned_at') }}</th>
-                                        <td>{{ $device->field</td>
+                                        <th>{{('components\device-info-modal.banned_at') }}</th>
+                                        <td>{{ $device->banned_at }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.unbanned_at') }}</th>
-                                        <td>{{ $device->field</td>
+                                        <th>{{('components\device-info-modal.unbanned_at') }}</th>
+                                        <td>{{ $device->unbanned_at }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.reason') }}</th>
-                                        <td>{{ $device->field</td>
+                                        <th>{{('components\device-info-modal.reason') }}</th>
+                                        <td>{{ $device->reason }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.associated_user') }}</th>
+                                        <th>{{('components\device-info-modal.associated_user') }}</th>
                                         <td>
                                             @if($device->user)
                                                 <a href="{{ route('users.show', $device->user_id) }}">
@@ -96,12 +96,12 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.email') }}</th>
-                                        <td>{{ $device->field</td>
+                                        <th>{{('components\device-info-modal.email') }}</th>
+                                        <td>{{ $device->email }}</td>
                                     </tr>
                                     <tr>
-                                        <th>{{ __('components\device-info-modal.phone') }}</th>
-                                        <td>{{ $device->field</td>
+                                        <th>{{('components\device-info-modal.phone') }}</th>
+                                        <td>{{ $device->phone }}</td>
                                     </tr>
                                 </table>
                             </div>
@@ -118,8 +118,15 @@
                         </button>
                     </form>
                 @endif
-                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('components\device-info-modal.close') }}</button>
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('components\device-info-modal.close') }}</button>
             </div>
         </div>
     </div>
 </div>
+
+
+
+
+
+
+

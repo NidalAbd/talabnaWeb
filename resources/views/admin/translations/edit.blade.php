@@ -2,7 +2,7 @@
 @section('title', __('Edit Translation'))
 
 @section('content_header')
-    <h1><i class="fas fa-edit text-warning mr-2"></i> {{ __('Edit Translation') }}</h1>
+    <h1><i class="fas fa-edit text-warning mr-2"></i> {{('Edit Translation') }}</h1>
 @stop
 
 @section('content')
@@ -47,10 +47,10 @@
                 </div>
                 <div class="card-footer d-flex justify-content-between align-items-center">
                     <a href="{{ route('translations.index') }}" class="btn btn-secondary">
-                        <i class="fas fa-arrow-left mr-1"></i> {{ __('Back') }}
+                        <i class="fas fa-arrow-left mr-1"></i> {{('Back') }}
                     </a>
                     <button type="submit" class="btn btn-warning">
-                        <i class="fas fa-save mr-1"></i> {{ __('Save Changes') }}
+                        <i class="fas fa-save mr-1"></i> {{('Save Changes') }}
                     </button>
                 </div>
             </form>
@@ -58,3 +58,9 @@
     </div>
 </div>
 @endsection 
+
+
+
+
+
+

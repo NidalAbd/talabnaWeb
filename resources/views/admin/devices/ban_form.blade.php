@@ -46,18 +46,18 @@
                             @endif
 
                             <div class="form-group">
-                                <label for="device_id">Device ID <span class="text-danger">{{ __('admin\devices\ban_form._') }}</span></label>
+                                <label for="device_id">Device ID <span class="text-danger">{{('admin\devices\ban_form._') }}</span></label>
                                 <input type="text" class="form-control @error('device_id') is-invalid @enderror" id="device_id" name="device_id" value="{{ old('device_id') }}" required>
-                                <small class="form-text text-muted">{{ __('admin\devices\ban_form.the_unique_identifier_for_the_device_th') }}</small>
+                                <small class="form-text text-muted">{{('admin\devices\ban_form.the_unique_identifier_for_the_device_th') }}</small>
                                 @error('device_id')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
                             </div>
 
                             <div class="form-group">
-                                <label for="reason">Ban Reason <span class="text-danger">{{ __('admin\devices\ban_form._') }}</span></label>
+                                <label for="reason">Ban Reason <span class="text-danger">{{('admin\devices\ban_form._') }}</span></label>
                                 <textarea class="form-control @error('reason') is-invalid @enderror" id="reason" name="reason" rows="3" required>{{ old('reason') }}</textarea>
-                                <small class="form-text text-muted">{{ __('admin\devices\ban_form.the_reason_for_banning_the_device_this_') }}</small>
+                                <small class="form-text text-muted">{{('admin\devices\ban_form.the_reason_for_banning_the_device_this_') }}</small>
                                 @error('reason')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -66,7 +66,7 @@
                             <h5 class="mt-4 mb-3"><i class="fas fa-user mr-1"></i> Associated User Information</h5>
 
                             <div class="form-group">
-                                <label for="user_id">{{ __('admin\devices\ban_form.user_id') }}</label>
+                                <label for="user_id">{{('admin\devices\ban_form.user_id') }}</label>
                                 <div class="input-group">
                                     <input type="text" class="form-control @error('user_id') is-invalid @enderror" id="user_id" name="user_id" value="{{ old('user_id') }}">
                                     <div class="input-group-append">
@@ -75,7 +75,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                <small class="form-text text-muted">{{ __('admin\devices\ban_form.if_provided_this_user_will_also_be_bann') }}</small>
+                                <small class="form-text text-muted">{{('admin\devices\ban_form.if_provided_this_user_will_also_be_bann') }}</small>
                                 @error('user_id')
                                 <span class="invalid-feedback">{{ $message }}</span>
                                 @enderror
@@ -84,7 +84,7 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="email">{{ __('admin\devices\ban_form.email') }}</label>
+                                        <label for="email">{{('admin\devices\ban_form.email') }}</label>
                                         <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}">
                                         @error('email')
                                         <span class="invalid-feedback">{{ $message }}</span>
@@ -93,7 +93,7 @@
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="phone">{{ __('admin\devices\ban_form.phone') }}</label>
+                                        <label for="phone">{{('admin\devices\ban_form.phone') }}</label>
                                         <input type="text" class="form-control @error('phone') is-invalid @enderror" id="phone" name="phone" value="{{ old('phone') }}">
                                         @error('phone')
                                         <span class="invalid-feedback">{{ $message }}</span>
@@ -107,13 +107,13 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="device_brand">{{ __('admin\devices\ban_form.device_brand') }}</label>
+                                        <label for="device_brand">{{('admin\devices\ban_form.device_brand') }}</label>
                                         <input type="text" class="form-control" id="device_brand" name="device_brand" value="{{ old('device_brand') }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="device_model">{{ __('admin\devices\ban_form.device_model') }}</label>
+                                        <label for="device_model">{{('admin\devices\ban_form.device_model') }}</label>
                                         <input type="text" class="form-control" id="device_model" name="device_model" value="{{ old('device_model') }}">
                                     </div>
                                 </div>
@@ -122,13 +122,13 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="device_name">{{ __('admin\devices\ban_form.device_name') }}</label>
+                                        <label for="device_name">{{('admin\devices\ban_form.device_name') }}</label>
                                         <input type="text" class="form-control" id="device_name" name="device_name" value="{{ old('device_name') }}">
                                     </div>
                                 </div>
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="os_version">{{ __('admin\devices\ban_form.os_version') }}</label>
+                                        <label for="os_version">{{('admin\devices\ban_form.os_version') }}</label>
                                         <input type="text" class="form-control" id="os_version" name="os_version" value="{{ old('os_version') }}">
                                     </div>
                                 </div>
@@ -137,7 +137,7 @@
                             <div class="form-group mt-4">
                                 <div class="custom-control custom-checkbox">
                                     <input type="checkbox" class="custom-control-input" id="confirm_ban" name="confirm_ban" required>
-                                    <label class="custom-control-label" for="confirm_ban">{{ __('admin\devices\ban_form.i_confirm_that_i_want_to_ban_this_device') }}</label>
+                                    <label class="custom-control-label" for="confirm_ban">{{('admin\devices\ban_form.i_confirm_that_i_want_to_ban_this_device') }}</label>
                                 </div>
                             </div>
                         </div>
@@ -165,25 +165,25 @@
                     <div class="card-body">
                         <div class="alert alert-warning">
                             <i class="fas fa-exclamation-triangle mr-1"></i>
-                            <strong>{{ __('admin\devices\ban_form.warning_') }}</strong> Banning a device will prevent that device from accessing the app. If a user ID is provided, that user will also be banned.
+                            <strong>{{('admin\devices\ban_form.warning_') }}</strong> Banning a device will prevent that device from accessing the app. If a user ID is provided, that user will also be banned.
                         </div>
 
                         <h5 class="mt-3"><i class="fas fa-info-circle mr-1"></i> What is a Device ID?</h5>
-                        <p>{{ __('admin\devices\ban_form.a_device_id_is_a_unique_identifier_for_a') }}</p>
+                        <p>{{('admin\devices\ban_form.a_device_id_is_a_unique_identifier_for_a') }}</p>
 
                         <h5 class="mt-3"><i class="fas fa-mobile-alt mr-1"></i> Device Information</h5>
-                        <p>{{ __('admin\devices\ban_form.providing_additional_device_information_') }}</p>
+                        <p>{{('admin\devices\ban_form.providing_additional_device_information_') }}</p>
 
                         <h5 class="mt-3"><i class="fas fa-user-slash mr-1"></i> User Banning</h5>
-                        <p>{{ __('admin\devices\ban_form.when_a_user_is_banned_') }}</p>
+                        <p>{{('admin\devices\ban_form.when_a_user_is_banned_') }}</p>
                         <ul>
-                            <li>{{ __('admin\devices\ban_form.their_account_status_is_set_to_banned_') }}</li>
-                            <li>{{ __('admin\devices\ban_form.they_cannot_log_in_on_any_device') }}</li>
-                            <li>{{ __('admin\devices\ban_form.all_devices_they_log_in_with_will_also_b') }}</li>
+                            <li>{{('admin\devices\ban_form.their_account_status_is_set_to_banned_') }}</li>
+                            <li>{{('admin\devices\ban_form.they_cannot_log_in_on_any_device') }}</li>
+                            <li>{{('admin\devices\ban_form.all_devices_they_log_in_with_will_also_b') }}</li>
                         </ul>
 
                         <h5 class="mt-3"><i class="fas fa-undo mr-1"></i> Unbanning</h5>
-                        <p>{{ __('admin\devices\ban_form.users_and_devices_can_be_unbanned_from_t') }}</p>
+                        <p>{{('admin\devices\ban_form.users_and_devices_can_be_unbanned_from_t') }}</p>
                     </div>
                 </div>
 
@@ -241,17 +241,17 @@
                         if (response.success) {
                             if (response.users.length > 0) {
                                 // Build the results HTML
-                                let resultsHtml = '<div class="list-group">{{ __('admin\devices\ban_form._resp') }}<span class="badge badge-success">{{ __('admin\devices\ban_form.active') }}</span>{{ __('admin\devices\ban_form._') }}<span class="badge badge-danger">{{ __('admin\devices\ban_form.banned') }}</span>{{ __('admin\devices\ban_form._') }}<span class="badge badge-warning">{{ __('admin\devices\ban_form.inactive') }}</span>';
+                                let resultsHtml = '<div class="list-group">{{('admin\devices\ban_form._resp') }}<span class="badge badge-success">{{('admin\devices\ban_form.active') }}</span>{{('admin\devices\ban_form._') }}<span class="badge badge-danger">{{('admin\devices\ban_form.banned') }}</span>{{('admin\devices\ban_form._') }}<span class="badge badge-warning">{{('admin\devices\ban_form.inactive') }}</span>';
                                     }
 
                                     resultsHtml += `
                                     <div class="list-group-item">
                                         <div class="d-flex w-100 justify-content-between">
-                                            <h5 class="mb-1">{{ __('admin\devices\ban_form._user_name_') }}</h5>
+                                            <h5 class="mb-1">{{('admin\devices\ban_form._user_name_') }}</h5>
                                             ${userStatus}
                                         </div>
-                                        <p class="mb-1">{{ __('admin\devices\ban_form.id_user_id_username_user_user_n') }}</p>
-                                        <small>{{ __('admin\devices\ban_form.email_user_email_phone_user_pho') }}</small>
+                                        <p class="mb-1">{{('admin\devices\ban_form.id_user_id_username_user_user_n') }}</p>
+                                        <small>{{('admin\devices\ban_form.email_user_email_phone_user_pho') }}</small>
                                         <div class="mt-2">
                                             <button type="button" class="btn btn-sm btn-primary select-user"
                                                 data-id="${user.id}"
@@ -267,7 +267,7 @@
                                 `;
                                 });
 
-                                resultsHtml += '</div>{{ __('admin\devices\ban_form._u') }}<div class="alert alert-info m-0"><i class="fas fa-info-circle mr-1"></i> No users found matching your search criteria.</div>{{ __('admin\devices\ban_form._') }}<div class="alert alert-danger m-0"><i class="fas fa-times-circle mr-1"></i> Error: ' + response.message + '</div>{{ __('admin\devices\ban_form._') }}<div class="alert alert-danger m-0"><i class="fas fa-times-circle mr-1"></i> Error: ' + errorMessage + '</div>');
+                                resultsHtml += '</div>{{('admin\devices\ban_form._u') }}<div class="alert alert-info m-0"><i class="fas fa-info-circle mr-1"></i> No users found matching your search criteria.</div>{{('admin\devices\ban_form._') }}<div class="alert alert-danger m-0"><i class="fas fa-times-circle mr-1"></i> Error: ' + response.message + '</div>{{('admin\devices\ban_form._') }}<div class="alert alert-danger m-0"><i class="fas fa-times-circle mr-1"></i> Error: ' + errorMessage + '</div>');
                     }
                 });
             });
@@ -299,3 +299,10 @@
         });
     </script>
 @stop
+
+
+
+
+
+
+

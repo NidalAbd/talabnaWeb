@@ -3,7 +3,7 @@
 @section('title', 'Investor Relations')
 
 @section('content_header')
-    <h1>{{ __('admin\business\investor_relations.investor_relations') }}</h1>
+    <h1>{{('admin\business\investor_relations.investor_relations') }}</h1>
 @stop
 
 @section('content')
@@ -14,7 +14,7 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>${{ number_format($totalInvested, 2) }}</h3>
-                    <p>{{ __('admin\business\investor_relations.total_invested') }}</p>
+                    <p>{{('admin\business\investor_relations.total_invested') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-chart-line"></i>
@@ -26,7 +26,7 @@
             <div class="small-box bg-success">
                 <div class="inner">
                     <h3>${{ number_format($totalPaid, 2) }}</h3>
-                    <p>{{ __('admin\business\investor_relations.total_paid_back') }}</p>
+                    <p>{{('admin\business\investor_relations.total_paid_back') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-dollar-sign"></i>
@@ -38,7 +38,7 @@
             <div class="small-box bg-warning">
                 <div class="inner">
                     <h3>${{ number_format($totalRemaining, 2) }}</h3>
-                    <p>{{ __('admin\business\investor_relations.remaining_to_pay') }}</p>
+                    <p>{{('admin\business\investor_relations.remaining_to_pay') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-clock"></i>
@@ -49,8 +49,8 @@
         <div class="col-lg-3 col-6">
             <div class="small-box bg-primary">
                 <div class="inner">
-                    <h3>{{ $investments->field</h3>
-                    <p>{{ __('admin\business\investor_relations.total_investments') }}</p>
+                    <h3>{{ $investments->count() }}</h3>
+                    <p>{{ __('admin/business/investor_relations.investments_count') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-users"></i>
@@ -64,30 +64,30 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\investor_relations.top_investors') }}</h3>
+                    <h3 class="card-title">{{('admin\business\investor_relations.top_investors') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\investor_relations.investor_name') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.investments') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.total_invested') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.average_investment') }}</th>
+                                    <th>{{('admin\business\investor_relations.investor_name') }}</th>
+                                    <th>{{('admin\business\investor_relations.investments') }}</th>
+                                    <th>{{('admin\business\investor_relations.total_invested') }}</th>
+                                    <th>{{('admin\business\investor_relations.average_investment') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($investorStats as $stat)
                                 <tr>
-                                    <td>{{ $stat->field</td>
-                                    <td>{{ $stat->field</td>
+                                    <td>{{ $stat->id }}</td>
+                                    <td>{{ $stat->id }}</td>
                                     <td>${{ number_format($stat->total_invested, 2) }}</td>
                                     <td>${{ number_format($stat->avg_investment, 2) }}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="4" class="text-center">{{ __('admin\business\investor_relations.no_investor_data_available') }}</td>
+                                    <td colspan="4" class="text-center">{{('admin\business\investor_relations.no_investor_data_available') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -100,7 +100,7 @@
         <div class="col-lg-6">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\investor_relations.investment_distribution') }}</h3>
+                    <h3 class="card-title">{{('admin\business\investor_relations.investment_distribution') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="investmentChart" style="height: 300px;"></canvas>
@@ -114,7 +114,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\investor_relations.all_investments') }}</h3>
+                    <h3 class="card-title">{{('admin\business\investor_relations.all_investments') }}</h3>
                     <div class="card-tools">
                         <button type="button" class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addInvestmentModal">
                             <i class="fas fa-plus"></i> Add Investment
@@ -126,22 +126,22 @@
                         <table class="table table-striped" id="investmentsTable">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\investor_relations.investor') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.amount') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.type') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.purpose') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.date') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.status') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.progress') }}</th>
-                                    <th>{{ __('admin\business\investor_relations.actions') }}</th>
+                                    <th>{{('admin\business\investor_relations.investor') }}</th>
+                                    <th>{{('admin\business\investor_relations.amount') }}</th>
+                                    <th>{{('admin\business\investor_relations.type') }}</th>
+                                    <th>{{('admin\business\investor_relations.purpose') }}</th>
+                                    <th>{{('admin\business\investor_relations.date') }}</th>
+                                    <th>{{('admin\business\investor_relations.status') }}</th>
+                                    <th>{{('admin\business\investor_relations.progress') }}</th>
+                                    <th>{{('admin\business\investor_relations.actions') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($investments as $investment)
                                 <tr>
                                     <td>
-                                        <strong>{{ $investment->field</strong><br>
-                                        <small class="text-muted">{{ $investment->field</small>
+                                        <strong>{{ $investment->investor_name }}</strong><br>
+                                        <small class="text-muted">{{ $investment->investor_email }}</small>
                                     </td>
                                     <td>${{ number_format($investment->investment_amount, 2) }}</td>
                                     <td>
@@ -149,8 +149,8 @@
                                             {{ ucfirst($investment->investment_type) }}
                                         </span>
                                     </td>
-                                    <td>{{ $investment->field</td>
-                                    <td>{{ $investment->field</td>
+                                    <td>{{ $investment->purpose }}</td>
+                                    <td>{{ $investment->investment_date }}</td>
                                     <td>
                                         <span class="badge badge-{{ $investment->status == 'active' ? 'success' : ($investment->status == 'completed' ? 'info' : 'warning') }}">
                                             {{ ucfirst($investment->status) }}
@@ -158,9 +158,9 @@
                                     </td>
                                     <td>
                                         <div class="progress progress-sm">
-                                            <div class="progress-bar bg-success" style="width: {{ $investment->field</div>
+                                            <div class="progress-bar bg-success" style="width: {{ $investment->progress }}"></div>
                                         </div>
-                                        <small>{{ $investment->field</small>
+                                        <small>{{ $investment->progress }}</small>
                                     </td>
                                     <td>
                                         <div class="btn-group">
@@ -178,7 +178,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="8" class="text-center">{{ __('admin\business\investor_relations.no_investments_found') }}</td>
+                                    <td colspan="8" class="text-center">{{('admin\business\investor_relations.no_investments_found') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -195,9 +195,9 @@
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">{{ __('admin\business\investor_relations.add_new_investment') }}</h5>
+                <h5 class="modal-title">{{('admin\business\investor_relations.add_new_investment') }}</h5>
                 <button type="button" class="close" data-dismiss="modal">
-                    <span>{{ __('admin\business\investor_relations._times_') }}</span>
+                    <span>{{('admin\business\investor_relations._times_') }}</span>
                 </button>
             </div>
             <form id="addInvestmentForm">
@@ -206,13 +206,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.investor_name_') }}</label>
+                                <label>{{('admin\business\investor_relations.investor_name_') }}</label>
                                 <input type="text" name="investor_name" class="form-control" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.investor_email_') }}</label>
+                                <label>{{('admin\business\investor_relations.investor_email_') }}</label>
                                 <input type="email" name="investor_email" class="form-control" required>
                             </div>
                         </div>
@@ -220,17 +220,17 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.investment_amount_') }}</label>
+                                <label>{{('admin\business\investor_relations.investment_amount_') }}</label>
                                 <input type="number" name="investment_amount" class="form-control" step="0.01" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.currency') }}</label>
+                                <label>{{('admin\business\investor_relations.currency') }}</label>
                                 <select name="currency" class="form-control">
-                                    <option value="USD">{{ __('admin\business\investor_relations.usd') }}</option>
-                                    <option value="EUR">{{ __('admin\business\investor_relations.eur') }}</option>
-                                    <option value="GBP">{{ __('admin\business\investor_relations.gbp') }}</option>
+                                    <option value="USD">{{('admin\business\investor_relations.usd') }}</option>
+                                    <option value="EUR">{{('admin\business\investor_relations.eur') }}</option>
+                                    <option value="GBP">{{('admin\business\investor_relations.gbp') }}</option>
                                 </select>
                             </div>
                         </div>
@@ -238,17 +238,17 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.investment_type_') }}</label>
+                                <label>{{('admin\business\investor_relations.investment_type_') }}</label>
                                 <select name="investment_type" class="form-control" required>
-                                    <option value="equity">{{ __('admin\business\investor_relations.equity') }}</option>
-                                    <option value="loan">{{ __('admin\business\investor_relations.loan') }}</option>
-                                    <option value="grant">{{ __('admin\business\investor_relations.grant') }}</option>
+                                    <option value="equity">{{('admin\business\investor_relations.equity') }}</option>
+                                    <option value="loan">{{('admin\business\investor_relations.loan') }}</option>
+                                    <option value="grant">{{('admin\business\investor_relations.grant') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.investment_date_') }}</label>
+                                <label>{{('admin\business\investor_relations.investment_date_') }}</label>
                                 <input type="date" name="investment_date" class="form-control" required>
                             </div>
                         </div>
@@ -256,13 +256,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.expected_roi_') }}</label>
+                                <label>{{('admin\business\investor_relations.expected_roi_') }}</label>
                                 <input type="number" name="expected_roi" class="form-control" step="0.01" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.investment_period_months_') }}</label>
+                                <label>{{('admin\business\investor_relations.investment_period_months_') }}</label>
                                 <input type="number" name="investment_period" class="form-control" min="1" max="60" required>
                             </div>
                         </div>
@@ -270,13 +270,13 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.profit_sharing_investor_') }}</label>
+                                <label>{{('admin\business\investor_relations.profit_sharing_investor_') }}</label>
                                 <input type="number" name="investor_share" class="form-control" min="0" max="100" value="55" required>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.profit_sharing_owner_') }}</label>
+                                <label>{{('admin\business\investor_relations.profit_sharing_owner_') }}</label>
                                 <input type="number" name="owner_share" class="form-control" min="0" max="100" value="45" required>
                             </div>
                         </div>
@@ -284,36 +284,36 @@
                     <div class="row">
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.purpose') }}</label>
+                                <label>{{('admin\business\investor_relations.purpose') }}</label>
                                 <select name="purpose" class="form-control">
-                                    <option value="license">{{ __('admin\business\investor_relations.license') }}</option>
-                                    <option value="advertising">{{ __('admin\business\investor_relations.advertising') }}</option>
-                                    <option value="salary">{{ __('admin\business\investor_relations.salary') }}</option>
-                                    <option value="development">{{ __('admin\business\investor_relations.development') }}</option>
-                                    <option value="marketing">{{ __('admin\business\investor_relations.marketing') }}</option>
-                                    <option value="operations">{{ __('admin\business\investor_relations.operations') }}</option>
+                                    <option value="license">{{('admin\business\investor_relations.license') }}</option>
+                                    <option value="advertising">{{('admin\business\investor_relations.advertising') }}</option>
+                                    <option value="salary">{{('admin\business\investor_relations.salary') }}</option>
+                                    <option value="development">{{('admin\business\investor_relations.development') }}</option>
+                                    <option value="marketing">{{('admin\business\investor_relations.marketing') }}</option>
+                                    <option value="operations">{{('admin\business\investor_relations.operations') }}</option>
                                 </select>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="form-group">
-                                <label>{{ __('admin\business\investor_relations.agreement_terms') }}</label>
+                                <label>{{('admin\business\investor_relations.agreement_terms') }}</label>
                                 <select name="agreement_terms" class="form-control">
-                                    <option value="standard">{{ __('admin\business\investor_relations.standard_55_investor_45_owner_') }}</option>
-                                    <option value="custom">{{ __('admin\business\investor_relations.custom_agreement') }}</option>
-                                    <option value="equity">{{ __('admin\business\investor_relations.equity_based') }}</option>
+                                    <option value="standard">{{('admin\business\investor_relations.standard_55_investor_45_owner_') }}</option>
+                                    <option value="custom">{{('admin\business\investor_relations.custom_agreement') }}</option>
+                                    <option value="equity">{{('admin\business\investor_relations.equity_based') }}</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>{{ __('admin\business\investor_relations.notes') }}</label>
+                        <label>{{('admin\business\investor_relations.notes') }}</label>
                         <textarea name="notes" class="form-control" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\business\investor_relations.cancel') }}</button>
-                    <button type="submit" class="btn btn-primary">{{ __('admin\business\investor_relations.add_investment') }}</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('admin\business\investor_relations.cancel') }}</button>
+                    <button type="submit" class="btn btn-primary">{{('admin\business\investor_relations.add_investment') }}</button>
                 </div>
             </form>
         </div>
@@ -446,3 +446,9 @@ $(document).ready(function() {
 });
 </script>
 @stop 
+
+
+
+
+
+

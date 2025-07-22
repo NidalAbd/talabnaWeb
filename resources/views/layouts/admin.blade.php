@@ -22,7 +22,7 @@
                 <a class="nav-link" data-widget="pushmenu" href="#" role="button"><i class="fas fa-bars"></i></a>
             </li>
             <li class="nav-item d-none d-sm-inline-block">
-                <a href="{{ route('admin.dashboard') }}" class="nav-link">{{ __('layouts\admin.dashboard') }}</a>
+                <a href="{{ route('admin.dashboard') }}" class="nav-link">{{('layouts\admin.dashboard') }}</a>
             </li>
         </ul>
         <!-- Right navbar links -->
@@ -34,7 +34,7 @@
                 <div class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
                     <a class="dropdown-item" href="{{ route('logout') }}"
                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                        {{ __('Logout') }}
+                        {{('Logout') }}
                     </a>
                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                         @csrf
@@ -60,25 +60,25 @@
                     <li class="nav-item">
                         <a href="{{ route('users.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-users"></i>
-                            <p>{{ __('layouts\admin.users') }}</p>
+                            <p>{{('layouts\admin.users') }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('categories.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-list"></i>
-                            <p>{{ __('layouts\admin.categories') }}</p>
+                            <p>{{('layouts\admin.categories') }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('subcategories.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-sitemap"></i>
-                            <p>{{ __('layouts\admin.subcategories') }}</p>
+                            <p>{{('layouts\admin.subcategories') }}</p>
                         </a>
                     </li>
                     <li class="nav-item">
                         <a href="{{ route('service_posts.index') }}" class="nav-link">
                             <i class="nav-icon fas fa-briefcase"></i>
-                            <p>{{ __('layouts\admin.service_posts') }}</p>
+                            <p>{{('layouts\admin.service_posts') }}</p>
                         </a>
                     </li>
                     <!-- Add more menu items as needed -->
@@ -100,7 +100,7 @@
                     </div><!-- /.col -->
                     <div class="col-sm-6">
                         <ol class="breadcrumb float-sm-right">
-                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('layouts\admin.dashboard') }}</a></li>
+                            <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{('layouts\admin.dashboard') }}</a></li>
                             @yield('breadcrumb')
                         </ol>
                     </div><!-- /.col -->
@@ -133,3 +133,9 @@
 @stack('scripts')
 </body>
 </html> 
+
+
+
+
+
+

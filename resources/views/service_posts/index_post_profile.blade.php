@@ -10,7 +10,7 @@
                             <div class="input-group mt-0 input-group-md">
                                 <a href="{{ route('service_posts.create') }}" class="btn btn-success ">
                                     <i class="fa fa-plus fa-1x"></i>
-                                    {{ __(' Add') }}
+                                    {{(' Add') }}
                                 </a>
                             </div>
                         </li>
@@ -29,36 +29,36 @@
                                 <thead>
                                 <tr class="btn-dark">
                                     <th><input type="checkbox" id="select-all"></th>
-                                    <th>{{ __('service_posts\index_post_profile.id') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.title') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.category') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.user') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.favorites') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.reports') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.views') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.type') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.action') }}</th>
+                                    <th>{{('service_posts\index_post_profile.id') }}</th>
+                                    <th>{{('service_posts\index_post_profile.title') }}</th>
+                                    <th>{{('service_posts\index_post_profile.category') }}</th>
+                                    <th>{{('service_posts\index_post_profile.user') }}</th>
+                                    <th>{{('service_posts\index_post_profile.favorites') }}</th>
+                                    <th>{{('service_posts\index_post_profile.reports') }}</th>
+                                    <th>{{('service_posts\index_post_profile.views') }}</th>
+                                    <th>{{('service_posts\index_post_profile.type') }}</th>
+                                    <th>{{('service_posts\index_post_profile.action') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
                                 @foreach($servicePosts as $post)
                                     <tr>
-                                        <td><input type="checkbox" name="selected[]" value="{{ $post->field</td>
-                                        <th>{{ $post->field</th>
-                                        <td>{{ $post->field</td>
-                                        <td>{{ $post->field</td>
-                                        <td>{{ $post->field</td>
-                                        <td>{{ $post->field</td>
-                                        <td>{{ $post->field</td>
-                                        <td>{{ $post->field</td>
-                                        <td>{{ $post->field</td>
+                                        <td><input type="checkbox" name="selected[]" value="{{ $post->id }}"></td>
+                                        <th>{{ $post->id }}</th>
+                                        <td>{{ $post->title }}</td>
+                                        <td>{{ $post->category->name ?? '' }}</td>
+                                        <td>{{ $post->user->user_name ?? '' }}</td>
+                                        <td>{{ $post->favorites_count ?? 0 }}</td>
+                                        <td>{{ $post->reports_count ?? 0 }}</td>
+                                        <td>{{ $post->view_count ?? 0 }}</td>
+                                        <td>{{ $post->type ?? '' }}</td>
                                         <td>
-                                            <a href="{{ route('service_posts.show', $post->field</a>
-                                            <a href="{{ route('service_posts.edit', $post->field</a>
+                                            <a href="{{ route('service_posts.show', $post->id) }}">Show</a>
+                                            <a href="{{ route('service_posts.edit', $post->id) }}">Edit</a>
                                             <form action="{{ route('service_posts.destroy', $post->id) }}" method="POST" style="display: inline-block;">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-sm btn-danger" >{{ __('service_posts\index_post_profile.delete') }}</button>
+                                                <button type="submit" class="btn btn-sm btn-danger">{{ __('service_posts/index_post_profile.delete') }}</button>
                                             </form>
                                         </td>
                                     </tr>
@@ -67,15 +67,15 @@
                                 <thead>
                                 <tr class="btn-dark">
                                     <th><input type="checkbox" id="select-all"></th>
-                                    <th>{{ __('service_posts\index_post_profile.id') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.title') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.category') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.user') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.favorites') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.reports') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.views') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.type') }}</th>
-                                    <th>{{ __('service_posts\index_post_profile.action') }}</th>
+                                    <th>{{('service_posts\index_post_profile.id') }}</th>
+                                    <th>{{('service_posts\index_post_profile.title') }}</th>
+                                    <th>{{('service_posts\index_post_profile.category') }}</th>
+                                    <th>{{('service_posts\index_post_profile.user') }}</th>
+                                    <th>{{('service_posts\index_post_profile.favorites') }}</th>
+                                    <th>{{('service_posts\index_post_profile.reports') }}</th>
+                                    <th>{{('service_posts\index_post_profile.views') }}</th>
+                                    <th>{{('service_posts\index_post_profile.type') }}</th>
+                                    <th>{{('service_posts\index_post_profile.action') }}</th>
                                 </tr>
                                 </thead>
                             </table>
@@ -91,3 +91,10 @@
         </div>
     </div>
 @endsection
+
+
+
+
+
+
+

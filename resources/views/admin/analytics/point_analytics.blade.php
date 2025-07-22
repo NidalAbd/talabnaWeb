@@ -7,39 +7,39 @@
 <div class="container-fluid">
     @if(config('app.demo_data', true))
         <div class="alert alert-warning">
-            <strong>{{ __('admin\analytics\point_analytics.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{ __('admin\analytics\point_analytics.remove_demo_data') }}</a>
+            <strong>{{('admin\analytics\point_analytics.demo_data_') }}</strong> This page displays mock data for demonstration purposes. <a href="#" onclick="document.getElementById('demo-data').style.display='none';return false;">{{('admin\analytics\point_analytics.remove_demo_data') }}</a>
         </div>
     @endif
     <div class="row mb-4">
         <div class="col-md-3">
             <div class="card bg-warning text-white">
                 <div class="card-body">
-                    <h5>{{ __('admin\analytics\point_analytics.total_points_used') }}</h5>
-                    <h3>{{ __('admin\analytics\point_analytics.18_000') }}</h3>
+                    <h5>{{('admin\analytics\point_analytics.total_points_used') }}</h5>
+                    <h3>{{('admin\analytics\point_analytics.18_000') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-success text-white">
                 <div class="card-body">
-                    <h5>{{ __('admin\analytics\point_analytics.points_purchased') }}</h5>
-                    <h3>{{ __('admin\analytics\point_analytics.25_000') }}</h3>
+                    <h5>{{('admin\analytics\point_analytics.points_purchased') }}</h5>
+                    <h3>{{('admin\analytics\point_analytics.25_000') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-info text-white">
                 <div class="card-body">
-                    <h5>{{ __('admin\analytics\point_analytics.avg_points_user') }}</h5>
-                    <h3>{{ __('admin\analytics\point_analytics.120') }}</h3>
+                    <h5>{{('admin\analytics\point_analytics.avg_points_user') }}</h5>
+                    <h3>{{('admin\analytics\point_analytics.120') }}</h3>
                 </div>
             </div>
         </div>
         <div class="col-md-3">
             <div class="card bg-primary text-white">
                 <div class="card-body">
-                    <h5>{{ __('admin\analytics\point_analytics.transactions') }}</h5>
-                    <h3>{{ __('admin\analytics\point_analytics.320') }}</h3>
+                    <h5>{{('admin\analytics\point_analytics.transactions') }}</h5>
+                    <h3>{{('admin\analytics\point_analytics.320') }}</h3>
                 </div>
             </div>
         </div>
@@ -47,11 +47,11 @@
     <div class="card mb-4">
         <div class="card-body">
             <form class="form-inline">
-                <label class="mr-2">{{ __('admin\analytics\point_analytics.date_range_') }}</label>
+                <label class="mr-2">{{('admin\analytics\point_analytics.date_range_') }}</label>
                 <input type="date" class="form-control mr-2" name="from" value="2024-06-01">
                 <input type="date" class="form-control mr-2" name="to" value="2024-06-30">
-                <button class="btn btn-primary mr-2">{{ __('admin\analytics\point_analytics.filter') }}</button>
-                <button class="btn btn-secondary">{{ __('admin\analytics\point_analytics.export') }}</button>
+                <button class="btn btn-primary mr-2">{{('admin\analytics\point_analytics.filter') }}</button>
+                <button class="btn btn-secondary">{{('admin\analytics\point_analytics.export') }}</button>
             </form>
         </div>
     </div>
@@ -63,46 +63,46 @@
             <table class="table table-striped table-hover mb-0">
                 <thead class="thead-dark">
                     <tr>
-                        <th>{{ __('admin\analytics\point_analytics.user') }}</th>
-                        <th>{{ __('admin\analytics\point_analytics.points_used') }}</th>
-                        <th>{{ __('admin\analytics\point_analytics.points_purchased') }}</th>
-                        <th>{{ __('admin\analytics\point_analytics.last_transaction') }}</th>
-                        <th>{{ __('admin\analytics\point_analytics.balance') }}</th>
-                        <th>{{ __('admin\analytics\point_analytics.status') }}</th>
+                        <th>{{('admin\analytics\point_analytics.user') }}</th>
+                        <th>{{('admin\analytics\point_analytics.points_used') }}</th>
+                        <th>{{('admin\analytics\point_analytics.points_purchased') }}</th>
+                        <th>{{('admin\analytics\point_analytics.last_transaction') }}</th>
+                        <th>{{('admin\analytics\point_analytics.balance') }}</th>
+                        <th>{{('admin\analytics\point_analytics.status') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td>{{ __('admin\analytics\point_analytics.john_doe') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.1_200') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.2_000') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.2024_06_20') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.800') }}</td>
-                        <td><span class="badge badge-success">{{ __('admin\analytics\point_analytics.active') }}</span></td>
+                        <td>{{('admin\analytics\point_analytics.john_doe') }}</td>
+                        <td>{{('admin\analytics\point_analytics.1_200') }}</td>
+                        <td>{{('admin\analytics\point_analytics.2_000') }}</td>
+                        <td>{{('admin\analytics\point_analytics.2024_06_20') }}</td>
+                        <td>{{('admin\analytics\point_analytics.800') }}</td>
+                        <td><span class="badge badge-success">{{('admin\analytics\point_analytics.active') }}</span></td>
                     </tr>
                     <tr>
-                        <td>{{ __('admin\analytics\point_analytics.jane_smith') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.900') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.1_500') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.2024_06_18') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.600') }}</td>
-                        <td><span class="badge badge-success">{{ __('admin\analytics\point_analytics.active') }}</span></td>
+                        <td>{{('admin\analytics\point_analytics.jane_smith') }}</td>
+                        <td>{{('admin\analytics\point_analytics.900') }}</td>
+                        <td>{{('admin\analytics\point_analytics.1_500') }}</td>
+                        <td>{{('admin\analytics\point_analytics.2024_06_18') }}</td>
+                        <td>{{('admin\analytics\point_analytics.600') }}</td>
+                        <td><span class="badge badge-success">{{('admin\analytics\point_analytics.active') }}</span></td>
                     </tr>
                     <tr>
-                        <td>{{ __('admin\analytics\point_analytics.ali_hassan') }}</td>
+                        <td>{{('admin\analytics\point_analytics.ali_hassan') }}</td>
                         <td>0</td>
-                        <td>{{ __('admin\analytics\point_analytics.500') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.2024_05_01') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.500') }}</td>
-                        <td><span class="badge badge-danger">{{ __('admin\analytics\point_analytics.banned') }}</span></td>
+                        <td>{{('admin\analytics\point_analytics.500') }}</td>
+                        <td>{{('admin\analytics\point_analytics.2024_05_01') }}</td>
+                        <td>{{('admin\analytics\point_analytics.500') }}</td>
+                        <td><span class="badge badge-danger">{{('admin\analytics\point_analytics.banned') }}</span></td>
                     </tr>
                     <tr>
-                        <td>{{ __('admin\analytics\point_analytics.maria_garcia') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.800') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.1_200') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.2024_06_19') }}</td>
-                        <td>{{ __('admin\analytics\point_analytics.400') }}</td>
-                        <td><span class="badge badge-success">{{ __('admin\analytics\point_analytics.active') }}</span></td>
+                        <td>{{('admin\analytics\point_analytics.maria_garcia') }}</td>
+                        <td>{{('admin\analytics\point_analytics.800') }}</td>
+                        <td>{{('admin\analytics\point_analytics.1_200') }}</td>
+                        <td>{{('admin\analytics\point_analytics.2024_06_19') }}</td>
+                        <td>{{('admin\analytics\point_analytics.400') }}</td>
+                        <td><span class="badge badge-success">{{('admin\analytics\point_analytics.active') }}</span></td>
                     </tr>
                 </tbody>
             </table>
@@ -110,3 +110,9 @@
     </div>
 </div>
 @endsection 
+
+
+
+
+
+

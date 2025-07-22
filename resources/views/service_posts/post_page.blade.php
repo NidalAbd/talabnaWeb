@@ -16,11 +16,11 @@
                         <form id="filter-form" action="{{ route('user_all_service.index') }}" method="GET">
                             <!-- Categories -->
                             <div class="form-group">
-                                <label class="font-weight-bold">{{ __('service_posts\post_page.category') }}</label>
+                                <label class="font-weight-bold">{{('service_posts\post_page.category') }}</label>
                                 <select name="category" id="category-filter" class="form-control">
-                                    <option value="">{{ __('service_posts\post_page.all_categories') }}</option>
+                                    <option value="">{{('service_posts\post_page.all_categories') }}</option>
                                     @foreach($categories as $category)
-                                        <option value="{{ $category->id }}"
+                                        <option value="{{ $category->count() }}"
                                             {{ request('category') == $category->id ? 'selected' : '' }}>
                                             {{ $category->name[app()->getLocale()] ?? $category->name['en'] ?? 'Unknown' }}
                                             ({{ $category->service_posts_count ?? 0 }})
@@ -31,75 +31,75 @@
 
                             <!-- Subcategories -->
                             <div class="form-group">
-                                <label class="font-weight-bold">{{ __('service_posts\post_page.subcategory') }}</label>
+                                <label class="font-weight-bold">{{('service_posts\post_page.subcategory') }}</label>
                                 <select name="subcategory" id="subcategory-filter" class="form-control">
-                                    <option value="">{{ __('service_posts\post_page.all_subcategories') }}</option>
+                                    <option value="">{{('service_posts\post_page.all_subcategories') }}</option>
                                     <!-- Populated by JavaScript -->
                                 </select>
                             </div>
 
                             <!-- Type -->
                             <div class="form-group">
-                                <label class="font-weight-bold">{{ __('service_posts\post_page.type') }}</label>
+                                <label class="font-weight-bold">{{('service_posts\post_page.type') }}</label>
                                 <div class="custom-control custom-radio">
                                     <input type="radio" id="type-all" name="type" value="" class="custom-control-input"
                                         {{ !request('type') ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="type-all">{{ __('service_posts\post_page.all') }}</label>
+                                    <label class="custom-control-label" for="type-all">{{('service_posts\post_page.all') }}</label>
                                 </div>
                                 <div class="custom-control custom-radio">
                                     <input type="radio" id="type-offer" name="type" value="عرض" class="custom-control-input"
                                         {{ request('type') == 'عرض' ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="type-offer">{{ __('service_posts\post_page.offers') }}</label>
+                                    <label class="custom-control-label" for="type-offer">{{('service_posts\post_page.offers') }}</label>
                                 </div>
                                 <div class="custom-control custom-radio">
                                     <input type="radio" id="type-request" name="type" value="طلب" class="custom-control-input"
                                         {{ request('type') == 'طلب' ? 'checked' : '' }}>
-                                    <label class="custom-control-label" for="type-request">{{ __('service_posts\post_page.requests') }}</label>
+                                    <label class="custom-control-label" for="type-request">{{('service_posts\post_page.requests') }}</label>
                                 </div>
                             </div>
 
                             <!-- Price Range -->
                             <div class="form-group">
-                                <label class="font-weight-bold">{{ __('service_posts\post_page.price_range') }}</label>
+                                <label class="font-weight-bold">{{('service_posts\post_page.price_range') }}</label>
                                 <div class="d-flex align-items-center">
                                     <input type="number" name="min_price" class="form-control form-control-sm mr-2" placeholder="Min" value="{{ request('min_price') }}">
-                                    <span>{{ __('service_posts\post_page._') }}</span>
+                                    <span>{{('service_posts\post_page._') }}</span>
                                     <input type="number" name="max_price" class="form-control form-control-sm ml-2" placeholder="Max" value="{{ request('max_price') }}">
                                 </div>
                             </div>
 
                             <!-- Sort By -->
                             <div class="form-group">
-                                <label class="font-weight-bold">{{ __('service_posts\post_page.sort_by') }}</label>
+                                <label class="font-weight-bold">{{('service_posts\post_page.sort_by') }}</label>
                                 <select name="sort" class="form-control">
-                                    <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>{{ __('service_posts\post_page.newest_first') }}</option>
-                                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>{{ __('service_posts\post_page.oldest_first') }}</option>
-                                    <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>{{ __('service_posts\post_page.price_low_to_high_') }}</option>
-                                    <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>{{ __('service_posts\post_page.price_high_to_low_') }}</option>
-                                    <option value="most_viewed" {{ request('sort') == 'most_viewed' ? 'selected' : '' }}>{{ __('service_posts\post_page.most_viewed') }}</option>
+                                    <option value="newest" {{ request('sort') == 'newest' ? 'selected' : '' }}>{{('service_posts\post_page.newest_first') }}</option>
+                                    <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>{{('service_posts\post_page.oldest_first') }}</option>
+                                    <option value="price_low" {{ request('sort') == 'price_low' ? 'selected' : '' }}>{{('service_posts\post_page.price_low_to_high_') }}</option>
+                                    <option value="price_high" {{ request('sort') == 'price_high' ? 'selected' : '' }}>{{('service_posts\post_page.price_high_to_low_') }}</option>
+                                    <option value="most_viewed" {{ request('sort') == 'most_viewed' ? 'selected' : '' }}>{{('service_posts\post_page.most_viewed') }}</option>
                                 </select>
                             </div>
 
                             <!-- Location -->
                             <div class="form-group">
-                                <label class="font-weight-bold">{{ __('service_posts\post_page.location') }}</label>
+                                <label class="font-weight-bold">{{('service_posts\post_page.location') }}</label>
                                 <select name="country" id="country-filter" class="form-control mb-2">
-                                    <option value="">{{ __('service_posts\post_page.all_countries') }}</option>
+                                    <option value="">{{('service_posts\post_page.all_countries') }}</option>
                                     @foreach(\App\Models\countries::all() as $country)
-                                        <option value="{{ $country->id }}" {{ request('country') == $country->id ? 'selected' : '' }}>
+                                        <option value="{{ $country->count() }}" {{ request('country') == $country->id ? 'selected' : '' }}>
                                             {{ getTranslatedName($country->name) }}
                                         </option>
                                     @endforeach
                                 </select>
                                 <select name="city" id="city-filter" class="form-control">
-                                    <option value="">{{ __('service_posts\post_page.all_cities') }}</option>
+                                    <option value="">{{('service_posts\post_page.all_cities') }}</option>
                                     <!-- Populated by JavaScript -->
                                 </select>
                             </div>
 
                             <!-- Distance -->
                             <div class="form-group">
-                                <label class="font-weight-bold">{{ __('service_posts\post_page.distance') }}</label>
+                                <label class="font-weight-bold">{{('service_posts\post_page.distance') }}</label>
                                 <div class="input-group">
                                     <input type="number" name="distance" class="form-control" placeholder="km" value="{{ request('distance') }}">
                                     <div class="input-group-append">
@@ -146,7 +146,7 @@
                                         @endif
                                         {{ $popularCategory->name[app()->getLocale()] ?? $popularCategory->name['en'] ?? 'Unknown' }}
                                     </div>
-                                    <span class="badge badge-primary badge-pill">{{ $popularCategory->field</span>
+                                    <span class="badge badge-primary badge-pill">{{ $popularCategory->id</span> }}
                                 </a>
                             @endforeach
                         </div>
@@ -170,7 +170,7 @@
                                 Service Posts
                             @endif
                         </h4>
-                        <p class="text-muted mb-0">{{ $servicePosts->field</p>
+                        <p class="text-muted mb-0">{{ $servicePosts->id</p> }}
                     </div>
                     <div>
                         <div class="btn-group">
@@ -206,7 +206,7 @@
                         <div class="col-md-4 mb-4">
                             <div class="card h-100 shadow-sm">
                                 <div class="position-relative">
-                                    <a href="{{ route('service_posts.show', $post->id) }}">
+                                    <a href="{{ route('service_posts.show', $post->count()) }}">
                                         @if($post->photos->count() > 0)
                                             <img src="{{ asset($post->photos->first()->src) }}"
                                                  class="card-img-top" style="height: 180px; object-fit: cover;"
@@ -220,9 +220,9 @@
                                     </a>
 
                                     @if($post->level && $post->level->name['ar'] == 'ماسي')
-                                        <span class="badge badge-primary position-absolute" style="top: 10px; left: 10px;">{{ __('service_posts\post_page.diamond') }}</span>
+                                        <span class="badge badge-primary position-absolute" style="top: 10px; left: 10px;">{{('service_posts\post_page.diamond') }}</span>
                                     @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
-                                        <span class="badge badge-warning position-absolute" style="top: 10px; left: 10px;">{{ __('service_posts\post_page.gold') }}</span>
+                                        <span class="badge badge-warning position-absolute" style="top: 10px; left: 10px;">{{('service_posts\post_page.gold') }}</span>
                                     @endif
 
                                     <span class="badge {{ $post->type == 'عرض' ? 'badge-info' : 'badge-secondary' }} position-absolute"
@@ -233,7 +233,7 @@
 
                                 <div class="card-body">
                                     <h5 class="card-title mb-1">
-                                        <a href="{{ route('service_posts.show', $post->id) }}" class="text-decoration-none text-dark">
+                                        <a href="{{ route('service_posts.show', $post->count()) }}" class="text-decoration-none text-dark">
                                             {{ Str::limit($post->title, 40) }}
                                         </a>
                                     </h5>
@@ -281,8 +281,8 @@
                             <div class="alert alert-info">
                                 <div class="text-center py-5">
                                     <i class="fas fa-search fa-4x text-muted mb-4"></i>
-                                    <h4>{{ __('service_posts\post_page.no_service_posts_found') }}</h4>
-                                    <p class="mb-4">{{ __('service_posts\post_page.try_adjusting_your_search_or_filter_crit') }}</p>
+                                    <h4>{{('service_posts\post_page.no_service_posts_found') }}</h4>
+                                    <p class="mb-4">{{('service_posts\post_page.try_adjusting_your_search_or_filter_crit') }}</p>
                                     <a href="{{ route('user_all_service.index') }}" class="btn btn-primary">
                                         <i class="fas fa-undo mr-1"></i> Reset Filters
                                     </a>
@@ -298,7 +298,7 @@
                         <div class="card shadow-sm mb-3">
                             <div class="row no-gutters">
                                 <div class="col-md-3">
-                                    <a href="{{ route('service_posts.show', $post->id) }}">
+                                    <a href="{{ route('service_posts.show', $post->count()) }}">
                                         @if($post->photos->count() > 0)
                                             <img src="{{ asset($post->photos->first()->src) }}"
                                                  class="img-fluid h-100" style="object-fit: cover;"
@@ -314,15 +314,15 @@
                                     <div class="card-body">
                                         <div class="d-flex justify-content-between">
                                             <h5 class="card-title mb-1">
-                                                <a href="{{ route('service_posts.show', $post->id) }}" class="text-decoration-none text-dark">
+                                                <a href="{{ route('service_posts.show', $post->count()) }}" class="text-decoration-none text-dark">
                                                     {{ $post->title }}
                                                 </a>
                                             </h5>
                                             <div>
                                                 @if($post->level && $post->level->name['ar'] == 'ماسي')
-                                                    <span class="badge badge-primary">{{ __('service_posts\post_page.diamond') }}</span>
+                                                    <span class="badge badge-primary">{{('service_posts\post_page.diamond') }}</span>
                                                 @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
-                                                    <span class="badge badge-warning">{{ __('service_posts\post_page.gold') }}</span>
+                                                    <span class="badge badge-warning">{{('service_posts\post_page.gold') }}</span>
                                                 @endif
 
                                                 <span class="badge {{ $post->type == 'عرض' ? 'badge-info' : 'badge-secondary' }}">
@@ -361,7 +361,7 @@
                                             @endif
                                         </div>
 
-                                        <p class="card-text text-muted">{{ Str::limit($post->field</p>
+                                        <p class="card-text text-muted">{{ Str::limit($post->id</p> }}
 
                                         <div class="d-flex justify-content-between align-items-center mt-3">
                                             <div class="d-flex align-items-center">
@@ -396,8 +396,8 @@
                         <div class="alert alert-info">
                             <div class="text-center py-5">
                                 <i class="fas fa-search fa-4x text-muted mb-4"></i>
-                                <h4>{{ __('service_posts\post_page.no_service_posts_found') }}</h4>
-                                <p class="mb-4">{{ __('service_posts\post_page.try_adjusting_your_search_or_filter_crit') }}</p>
+                                <h4>{{('service_posts\post_page.no_service_posts_found') }}</h4>
+                                <p class="mb-4">{{('service_posts\post_page.try_adjusting_your_search_or_filter_crit') }}</p>
                                 <a href="{{ route('user_all_service.index') }}" class="btn btn-primary">
                                     <i class="fas fa-undo mr-1"></i> Reset Filters
                                 </a>
@@ -452,16 +452,23 @@
                             url: "{{ url('/sub-categories') }}/" + categoryId,
                             type: 'GET',
                             success: function(data) {
-                                let options = '<option value="">{{ __('service_posts\post_page.all_subcategories') }}</option>';
+                                let options = '<option value="">{{('service_posts\post_page.all_subcategories') }}</option>';
                                 data.subcategories.forEach(function(subcategory) {
                                     const name = subcategory.name['{{ app()->getLocale() }}'] || subcategory.name['en'] || 'Unknown';
-                                    options += `<option value="${subcategory.id}">{{ __('service_posts\post_page._name_subcategory_service_posts_cou') }}</option>{{ __('service_posts\post_page._') }}<option value="">{{ __('service_posts\post_page.all_subcategories') }}</option>{{ __('service_posts\post_page._') }}<option value="">{{ __('service_posts\post_page.all_cities') }}</option>';
+                                    options += `<option value="${subcategory.id}">{{('service_posts\post_page._name_subcategory_service_posts_cou') }}</option>{{('service_posts\post_page._') }}<option value="">{{('service_posts\post_page.all_subcategories') }}</option>{{('service_posts\post_page._') }}<option value="">{{('service_posts\post_page.all_cities') }}</option>';
                                 data.forEach(function(city) {
                                     const cityName = city.name['{{ app()->getLocale() }}'] || city.name['en'] || city.name;
-                                    options += `<option value="${city.id}">{{ __('service_posts\post_page._cityname_') }}</option>{{ __('service_posts\post_page._') }}<option value="">{{ __('service_posts\post_page.all_cities') }}</option>{{ __('service_posts\post_page._') }}<input type="hidden" name="lat" value="${position.coords.latitude}">{{ __('service_posts\post_page._fil') }}<input type="hidden" name="lng" value="${position.coords.longitude}">{{ __('service_posts\post_page._if') }}<div class="text-center mt-3"><div class="spinner-border text-primary" role="status"><span class="sr-only">{{ __('service_posts\post_page.loading_') }}</span></div></div>')
+                                    options += `<option value="${city.id}">{{('service_posts\post_page._cityname_') }}</option>{{('service_posts\post_page._') }}<option value="">{{('service_posts\post_page.all_cities') }}</option>{{('service_posts\post_page._') }}<input type="hidden" name="lat" value="${position.coords.latitude}">{{('service_posts\post_page._fil') }}<input type="hidden" name="lng" value="${position.coords.longitude}">{{('service_posts\post_page._if') }}<div class="text-center mt-3"><div class="spinner-border text-primary" role="status"><span class="sr-only">{{('service_posts\post_page.loading_') }}</span></div></div>')
                         .insertAfter($(this).find('button[type="submit"]'));
                 });
             });
         </script>
     @endpush
 @endsection
+
+
+
+
+
+
+

@@ -3,12 +3,12 @@
 @section('content_header')
     @include('partials.breadcrumbs')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-eye text-primary mr-2"></i> View Service Post #{{ $servicePost->id }}</h1>
+        <h1><i class="fas fa-eye text-primary mr-2"></i> View Service Post #{{ $servicePost->count() }}</h1>
         <div>
             <a href="{{ route('service_posts.index') }}" class="btn btn-secondary">
                 <i class="fas fa-arrow-left mr-1"></i> Back to List
             </a>
-            <a href="{{ route('service_posts.edit', $servicePost->id) }}" class="btn btn-warning">
+            <a href="{{ route('service_posts.edit', $servicePost->count()) }}" class="btn btn-warning">
                 <i class="fas fa-edit mr-1"></i> Edit
             </a>
         </div>
@@ -26,36 +26,36 @@
                         </h5>
                         <div>
                             @if($servicePost->level && $servicePost->level->name['ar'] == 'ماسي')
-                                <span class="badge badge-primary py-1 px-2">{{ __('service_posts\show.diamond') }}</span>
+                                <span class="badge badge-primary py-1 px-2">{{('service_posts\show.diamond') }}</span>
                             @elseif($servicePost->level && $servicePost->level->name['ar'] == 'ذهبي')
-                                <span class="badge badge-warning py-1 px-2">{{ __('service_posts\show.gold') }}</span>
+                                <span class="badge badge-warning py-1 px-2">{{('service_posts\show.gold') }}</span>
                             @endif
 
                             @if($servicePost->type == 'عرض')
-                                <span class="badge badge-info py-1 px-2">{{ __('service_posts\show.offer') }}</span>
+                                <span class="badge badge-info py-1 px-2">{{('service_posts\show.offer') }}</span>
                             @elseif($servicePost->type == 'طلب')
-                                <span class="badge badge-secondary py-1 px-2">{{ __('service_posts\show.request') }}</span>
+                                <span class="badge badge-secondary py-1 px-2">{{('service_posts\show.request') }}</span>
                             @endif
 
                             @if($servicePost->state == 'published')
-                                <span class="badge badge-success py-1 px-2">{{ __('service_posts\show.published') }}</span>
+                                <span class="badge badge-success py-1 px-2">{{('service_posts\show.published') }}</span>
                             @elseif($servicePost->state == 'archive')
-                                <span class="badge badge-warning py-1 px-2">{{ __('service_posts\show.archived') }}</span>
+                                <span class="badge badge-warning py-1 px-2">{{('service_posts\show.archived') }}</span>
                             @elseif($servicePost->state == 'not published')
-                                <span class="badge badge-secondary py-1 px-2">{{ __('service_posts\show.draft') }}</span>
+                                <span class="badge badge-secondary py-1 px-2">{{('service_posts\show.draft') }}</span>
                             @elseif($servicePost->state == 'rejected')
-                                <span class="badge badge-danger py-1 px-2">{{ __('service_posts\show.rejected') }}</span>
+                                <span class="badge badge-danger py-1 px-2">{{('service_posts\show.rejected') }}</span>
                             @endif
                         </div>
                     </div>
 
                     <div class="card-body">
-                        <h4 class="font-weight-bold mb-3">{{ $servicePost->field</h4>
+                        <h4 class="font-weight-bold mb-3">{{ $servicePost->id</h4> }}
 
                         <div class="mb-4">
                             <div class="d-flex align-items-center mb-2">
                                 <i class="fas fa-tag text-muted mr-2"></i>
-                                <strong class="mr-2">{{ __('service_posts\show.category_') }}</strong>
+                                <strong class="mr-2">{{('service_posts\show.category_') }}</strong>
                                 <span>
 
         @if($servicePost->subCategory)
@@ -69,7 +69,7 @@
 
                             <div class="d-flex align-items-center mb-2">
                                 <i class="fas fa-user text-muted mr-2"></i>
-                                <strong class="mr-2">{{ __('service_posts\show.posted_by_') }}</strong>
+                                <strong class="mr-2">{{('service_posts\show.posted_by_') }}</strong>
                                 <span>
                                 @if($servicePost->user)
                                         <a href="{{ route('users.show', $servicePost->user_id) }}" class="text-decoration-none">
@@ -83,14 +83,14 @@
 
                             <div class="d-flex align-items-center mb-2">
                                 <i class="fas fa-calendar-alt text-muted mr-2"></i>
-                                <strong class="mr-2">{{ __('service_posts\show.posted_') }}</strong>
-                                <span>{{ $servicePost->field</span>
+                                <strong class="mr-2">{{('service_posts\show.posted_') }}</strong>
+                                <span>{{ $servicePost->id</span> }}
                             </div>
 
                             @if($servicePost->price > 0)
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-money-bill-wave text-muted mr-2"></i>
-                                    <strong class="mr-2">{{ __('service_posts\show.price_') }}</strong>
+                                    <strong class="mr-2">{{('service_posts\show.price_') }}</strong>
                                     <span>{{ number_format($servicePost->price, 2) }} {{ $servicePost->price_currency_code }}</span>
                                 </div>
                             @endif
@@ -98,7 +98,7 @@
                             @if($servicePost->country || $servicePost->city)
                                 <div class="d-flex align-items-center mb-2">
                                     <i class="fas fa-map-marker-alt text-muted mr-2"></i>
-                                    <strong class="mr-2">{{ __('service_posts\show.location_') }}</strong>
+                                    <strong class="mr-2">{{('service_posts\show.location_') }}</strong>
                                     <span>
                                         @if($servicePost->city)
                                             {{ $servicePost->city->getTranslatedName() }},
@@ -113,7 +113,7 @@
 
                         <div class="card mb-4">
                             <div class="card-header bg-light">
-                                <h6 class="mb-0">{{ __('service_posts\show.description') }}</h6>
+                                <h6 class="mb-0">{{('service_posts\show.description') }}</h6>
                             </div>
                             <div class="card-body">
                                 <div class="description-content">
@@ -139,7 +139,7 @@
                                                     <div class="card bg-light">
                                                         <div class="card-body text-center py-3">
                                                             <i class="fas fa-music fa-3x text-info mb-2"></i>
-                                                            <p class="mb-2">{{ __('service_posts\show.audio_file') }}</p>
+                                                            <p class="mb-2">{{('service_posts\show.audio_file') }}</p>
                                                             <audio controls class="w-100">
                                                                 <source src="{{ asset($photo->src) }}" type="audio/mpeg">
                                                                 Your browser does not support the audio element.
@@ -159,7 +159,7 @@
                                                     <div class="card bg-light">
                                                         <div class="card-body text-center py-3">
                                                             <i class="fas fa-file fa-3x text-secondary mb-2"></i>
-                                                            <p class="mb-0">{{ __('service_posts\show.file') }}</p>
+                                                            <p class="mb-0">{{('service_posts\show.file') }}</p>
                                                             <a href="{{ asset($photo->src) }}" class="btn btn-sm btn-outline-primary mt-2" target="_blank">
                                                                 <i class="fas fa-download mr-1"></i> Download
                                                             </a>
@@ -175,7 +175,7 @@
 
                         <div class="card mb-4">
                             <div class="card-header bg-light">
-                                <h6 class="mb-0">{{ __('service_posts\show.location') }}</h6>
+                                <h6 class="mb-0">{{('service_posts\show.location') }}</h6>
                             </div>
                             <div class="card-body p-0">
                                 <div id="map" style="height: 300px;"></div>
@@ -189,10 +189,10 @@
                                 <i class="fas fa-arrow-left mr-1"></i> Back to Service Posts
                             </a>
                             <div>
-                                <a href="{{ route('service_posts.edit', $servicePost->id) }}" class="btn btn-warning">
+                                <a href="{{ route('service_posts.edit', $servicePost->count()) }}" class="btn btn-warning">
                                     <i class="fas fa-edit mr-1"></i> Edit
                                 </a>
-                                <form action="{{ route('service_posts.destroy', $servicePost->id) }}" method="POST" class="d-inline delete-form">
+                                <form action="{{ route('service_posts.destroy', $servicePost->count()) }}" method="POST" class="d-inline delete-form">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-danger">
@@ -220,19 +220,19 @@
                                 <div>
                                     <i class="fas fa-eye text-muted mr-2"></i> Views
                                 </div>
-                                <span class="badge badge-primary badge-pill">{{ $servicePost->field</span>
+                                <span class="badge badge-primary badge-pill">{{ $servicePost->id</span> }}
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
                                     <i class="fas fa-heart text-muted mr-2"></i> Favorites
                                 </div>
-                                <span class="badge badge-primary badge-pill">{{ $servicePost->field</span>
+                                <span class="badge badge-primary badge-pill">{{ $servicePost->id</span> }}
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
                                     <i class="fas fa-comments text-muted mr-2"></i> Comments
                                 </div>
-                                <span class="badge badge-primary badge-pill">{{ $servicePost->field</span>
+                                <span class="badge badge-primary badge-pill">{{ $servicePost->id</span> }}
                             </div>
                             <div class="list-group-item d-flex justify-content-between align-items-center">
                                 <div>
@@ -268,7 +268,7 @@
                                 </div>
                             @endif
 
-                            <h5 class="mb-1">{{ $servicePost->field</h5>
+                            <h5 class="mb-1">{{ $servicePost->id</h5> }}
                                 <p class="text-muted">
                                     <i class="fas fa-map-marker-alt mr-1"></i>
                                     @if($servicePost->user->city_id && $servicePost->user->city)
@@ -284,12 +284,12 @@
                             <div class="mb-3">
                                 <div class="d-flex justify-content-center">
                                     <div class="mr-3 text-center">
-                                        <h5 class="mb-0">{{ $servicePost->field</h5>
-                                        <small class="text-muted">{{ __('service_posts\show.posts') }}</small>
+                                        <h5 class="mb-0">{{ $servicePost->id</h5> }}
+                                        <small class="text-muted">{{('service_posts\show.posts') }}</small>
                                     </div>
                                     <div class="text-center">
-                                        <h5 class="mb-0">{{ $servicePost->field</h5>
-                                        <small class="text-muted">{{ __('service_posts\show.points') }}</small>
+                                        <h5 class="mb-0">{{ $servicePost->id</h5> }}
+                                        <small class="text-muted">{{('service_posts\show.points') }}</small>
                                     </div>
                                 </div>
                             </div>
@@ -318,9 +318,9 @@
                                             <h6 class="mb-0">
                                                 {{ $comment->user->user_name ?? 'Unknown User' }}
                                             </h6>
-                                            <small class="text-muted">{{ $comment->field</small>
+                                            <small class="text-muted">{{ $comment->id</small> }}
                                         </div>
-                                        <p class="mb-1">{{ Str::limit($comment->field</p>
+                                        <p class="mb-1">{{ Str::limit($comment->id</p> }}
                                     </div>
                                 @endforeach
                             </div>
@@ -335,7 +335,7 @@
                         @else
                             <div class="text-center py-4">
                                 <i class="far fa-comment-dots fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">{{ __('service_posts\show.no_comments_yet') }}</p>
+                                <p class="text-muted">{{('service_posts\show.no_comments_yet') }}</p>
                             </div>
                         @endif
                     </div>
@@ -351,7 +351,7 @@
                     </div>
                     <div class="card-body p-0">
                         @php
-                            $relatedPosts = \App\Models\ServicePost::where('id', '!=', $servicePost->id)
+                            $relatedPosts = \App\Models\ServicePost::where('id', '!=', $servicePost->count())
                                 ->where(function($query) use ($servicePost) {
                                     $query->where('categories_id', $servicePost->categories_id)
                                         ->orWhere('sub_categories_id', $servicePost->sub_categories_id);
@@ -365,7 +365,7 @@
                         @if($relatedPosts->count() > 0)
                             <div class="list-group list-group-flush">
                                 @foreach($relatedPosts as $relatedPost)
-                                    <a href="{{ route('service_posts.show', $relatedPost->id) }}" class="list-group-item list-group-item-action">
+                                    <a href="{{ route('service_posts.show', $relatedPost->count()) }}" class="list-group-item list-group-item-action">
                                         <div class="d-flex">
                                             <div class="mr-3">
                                                 @if($relatedPost->photos->count() > 0)
@@ -380,7 +380,7 @@
                                                 @endif
                                             </div>
                                             <div>
-                                                <h6 class="mb-1">{{ Str::limit($relatedPost->field</h6>
+                                                <h6 class="mb-1">{{ Str::limit($relatedPost->id</h6> }}
                                                 <div class="d-flex">
                                                     <small class="text-muted mr-2">
                                                         <i class="fas fa-calendar-alt mr-1"></i> {{ $relatedPost->created_at->format('M d, Y') }}
@@ -397,7 +397,7 @@
                         @else
                             <div class="text-center py-4">
                                 <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                                <p class="text-muted">{{ __('service_posts\show.no_similar_posts_found') }}</p>
+                                <p class="text-muted">{{('service_posts\show.no_similar_posts_found') }}</p>
                             </div>
                         @endif
                     </div>
@@ -427,7 +427,7 @@
                             title: "{{ $servicePost->title }}"
                         });
                     } else if (mapElement) {
-                        mapElement.innerHTML = '<div class="text-center py-5"><i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i><p class="text-muted">{{ __('service_posts\show.location_coordinates_not_available') }}</p></div>{{ __('service_posts\show._') }}<div class="text-center py-5"><i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i><p class="text-muted">{{ __('service_posts\show.could_not_load_map') }}</p></div>';
+                        mapElement.innerHTML = '<div class="text-center py-5"><i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i><p class="text-muted">{{('service_posts\show.location_coordinates_not_available') }}</p></div>{{('service_posts\show._') }}<div class="text-center py-5"><i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i><p class="text-muted">{{('service_posts\show.could_not_load_map') }}</p></div>';
                     }
                 }
             }
@@ -457,3 +457,10 @@
         </script>
     @endpush
 @endsection
+
+
+
+
+
+
+

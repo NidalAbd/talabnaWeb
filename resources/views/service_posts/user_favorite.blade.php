@@ -18,7 +18,7 @@
                                         <a href="{{route('service_posts.create')}}" style="float: right" >
                                             <button class="btn btn-primary" onclick="">
                                                 <i class="fa fa-user fa-1x"></i>
-                                                {{ __('+  خدمة') }}
+                                                {{('+  خدمة') }}
                                             </button>&nbsp;
                                         </a>
                                         {{--                                        @endif--}}
@@ -31,37 +31,37 @@
                         <table class="table table-bordered table-sm text-center">
                             <thead>
                             <tr class="btn-secondary">
-                                <th>{{ __('service_posts\user_favorite.title') }}</th>
-                                <th>{{ __('service_posts\user_favorite.category') }}</th>
-                                <th>{{ __('service_posts\user_favorite.user') }}</th>
-                                <th>{{ __('service_posts\user_favorite.favorites') }}</th>
-                                <th>{{ __('service_posts\user_favorite.reports') }}</th>
-                                <th>{{ __('service_posts\user_favorite.views') }}</th>
-                                <th>{{ __('service_posts\user_favorite.type') }}</th>
+                                <th>{{('service_posts\user_favorite.title') }}</th>
+                                <th>{{('service_posts\user_favorite.category') }}</th>
+                                <th>{{('service_posts\user_favorite.user') }}</th>
+                                <th>{{('service_posts\user_favorite.favorites') }}</th>
+                                <th>{{('service_posts\user_favorite.reports') }}</th>
+                                <th>{{('service_posts\user_favorite.views') }}</th>
+                                <th>{{('service_posts\user_favorite.type') }}</th>
 
-                                <th>{{ __('service_posts\user_favorite.action') }}</th>
+                                <th>{{('service_posts\user_favorite.action') }}</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($servicePosts as $post)
                                 <tr>
-                                    <td>{{ $post->field</td>
-                                    <td>{{ $post->field</td>
-                                    <td>{{ $post->field</td>
-                                    <td>{{ $post->field</td>
-                                    <td>{{ $post->field</td>
-                                    <td>{{ $post->field</td>
-                                    <td>{{ $post->field</td>
+                                    <td>{{ $post->id</td> }}
+                                    <td>{{ $post->id</td> }}
+                                    <td>{{ $post->id</td> }}
+                                    <td>{{ $post->id</td> }}
+                                    <td>{{ $post->id</td> }}
+                                    <td>{{ $post->id</td> }}
+                                    <td>{{ $post->id</td> }}
                                     <td>
-                                        <a href="{{ route('service_posts.show', $post->field</a>
+                                        <a href="{{ route('service_posts.show', $post->id</a> }}
                                         {{--                                            @can('update_service', $post)--}}
-                                        <a href="{{ route('service_posts.edit', $post->field</a>
+                                        <a href="{{ route('service_posts.edit', $post->id</a> }}
                                         {{--                                            @endcan--}}
                                         {{--                                            @can('destroy_service', $post)--}}
-                                        <form action="{{ route('service_posts.destroy', $post->id) }}" method="POST" style="display: inline-block;">
+                                        <form action="{{ route('service_posts.destroy', $post->count()) }}" method="POST" style="display: inline-block;">
                                             @csrf
                                             @method('DELETE')
-                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">{{ __('service_posts\user_favorite.delete') }}</button>
+                                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this post?')">{{('service_posts\user_favorite.delete') }}</button>
                                         </form>
                                         {{--                                            @endcan--}}
                                     </td>
@@ -70,15 +70,15 @@
                             </tbody>
                             <thead>
                             <tr class="btn-secondary">
-                                <th>{{ __('service_posts\user_favorite.title') }}</th>
-                                <th>{{ __('service_posts\user_favorite.category') }}</th>
-                                <th>{{ __('service_posts\user_favorite.user') }}</th>
-                                <th>{{ __('service_posts\user_favorite.favorites') }}</th>
-                                <th>{{ __('service_posts\user_favorite.reports') }}</th>
-                                <th>{{ __('service_posts\user_favorite.views') }}</th>
-                                <th>{{ __('service_posts\user_favorite.type') }}</th>
+                                <th>{{('service_posts\user_favorite.title') }}</th>
+                                <th>{{('service_posts\user_favorite.category') }}</th>
+                                <th>{{('service_posts\user_favorite.user') }}</th>
+                                <th>{{('service_posts\user_favorite.favorites') }}</th>
+                                <th>{{('service_posts\user_favorite.reports') }}</th>
+                                <th>{{('service_posts\user_favorite.views') }}</th>
+                                <th>{{('service_posts\user_favorite.type') }}</th>
 
-                                <th>{{ __('service_posts\user_favorite.action') }}</th>
+                                <th>{{('service_posts\user_favorite.action') }}</th>
                             </tr>
                             </thead>
                         </table>
@@ -93,3 +93,10 @@
         </div>
     </div>
 @endsection
+
+
+
+
+
+
+

@@ -3,7 +3,7 @@
 @section('title', 'Business Dashboard')
 
 @section('content_header')
-    <h1>{{ __('admin\business\dashboard.business_dashboard') }}</h1>
+    <h1>{{('admin\business\dashboard.business_dashboard') }}</h1>
 @stop
 
 @section('content')
@@ -14,7 +14,7 @@
             <div class="small-box bg-info">
                 <div class="inner">
                     <h3>${{ number_format($totalInvestments, 2) }}</h3>
-                    <p>{{ __('admin\business\dashboard.total_investments') }}</p>
+                    <p>{{('admin\business\dashboard.total_investments') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-chart-line"></i>
@@ -29,7 +29,7 @@
             <div class="small-box bg-success">
                 <div class="inner">
                     <h3>${{ number_format($totalRevenue, 2) }}</h3>
-                    <p>{{ __('admin\business\dashboard.total_revenue') }}</p>
+                    <p>{{('admin\business\dashboard.total_revenue') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-dollar-sign"></i>
@@ -44,7 +44,7 @@
             <div class="small-box bg-warning">
                 <div class="inner">
                     <h3>${{ number_format($totalExpenses, 2) }}</h3>
-                    <p>{{ __('admin\business\dashboard.total_expenses') }}</p>
+                    <p>{{('admin\business\dashboard.total_expenses') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-receipt"></i>
@@ -59,7 +59,7 @@
             <div class="small-box {{ $netProfit >= 0 ? 'bg-success' : 'bg-danger' }}">
                 <div class="inner">
                     <h3>${{ number_format($netProfit, 2) }}</h3>
-                    <p>{{ __('admin\business\dashboard.net_profit') }}</p>
+                    <p>{{('admin\business\dashboard.net_profit') }}</p>
                 </div>
                 <div class="icon">
                     <i class="fas fa-chart-pie"></i>
@@ -87,7 +87,7 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\dashboard.revenue_vs_expenses') }}</h3>
+                    <h3 class="card-title">{{('admin\business\dashboard.revenue_vs_expenses') }}</h3>
                 </div>
                 <div class="card-body">
                     <canvas id="pieChart" style="height: 300px;"></canvas>
@@ -101,28 +101,28 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\dashboard.recent_investments') }}</h3>
+                    <h3 class="card-title">{{('admin\business\dashboard.recent_investments') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\dashboard.investor') }}</th>
-                                    <th>{{ __('admin\business\dashboard.amount') }}</th>
-                                    <th>{{ __('admin\business\dashboard.date') }}</th>
+                                    <th>{{('admin\business\dashboard.investor') }}</th>
+                                    <th>{{('admin\business\dashboard.amount') }}</th>
+                                    <th>{{('admin\business\dashboard.date') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($recentInvestments as $investment)
                                 <tr>
-                                    <td>{{ $investment->field</td>
-                                    <td>${{ number_format($investment->investment_amount, 2) }}</td>
-                                    <td>{{ $investment->field</td>
+                                    <td>{{ $investment->investor_name }}</td>
+                                    <td>${{ number_format($investment->amount, 2) }}</td>
+                                    <td>{{ $investment->date ? $investment->date->format('Y-m-d') : '-' }}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">{{ __('admin\business\dashboard.no_recent_investments') }}</td>
+                                    <td colspan="3" class="text-center">{{('admin\business\dashboard.no_recent_investments') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -135,22 +135,22 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\dashboard.recent_expenses') }}</h3>
+                    <h3 class="card-title">{{('admin\business\dashboard.recent_expenses') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\dashboard.description') }}</th>
-                                    <th>{{ __('admin\business\dashboard.amount') }}</th>
-                                    <th>{{ __('admin\business\dashboard.status') }}</th>
+                                    <th>{{('admin\business\dashboard.description') }}</th>
+                                    <th>{{('admin\business\dashboard.amount') }}</th>
+                                    <th>{{('admin\business\dashboard.status') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($recentExpenses as $expense)
                                 <tr>
-                                    <td>{{ Str::limit($expense->field</td>
+                                    <td>{{ Str::limit($expense->id) }}</td>
                                     <td>${{ number_format($expense->amount, 2) }}</td>
                                     <td>
                                         <span class="badge badge-{{ $expense->status == 'approved' ? 'success' : ($expense->status == 'pending' ? 'warning' : 'danger') }}">
@@ -160,7 +160,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">{{ __('admin\business\dashboard.no_recent_expenses') }}</td>
+                                    <td colspan="3" class="text-center">{{('admin\business\dashboard.no_recent_expenses') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -173,28 +173,28 @@
         <div class="col-lg-4">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\dashboard.recent_revenue') }}</h3>
+                    <h3 class="card-title">{{('admin\business\dashboard.recent_revenue') }}</h3>
                 </div>
                 <div class="card-body p-0">
                     <div class="table-responsive">
                         <table class="table table-striped">
                             <thead>
                                 <tr>
-                                    <th>{{ __('admin\business\dashboard.source') }}</th>
-                                    <th>{{ __('admin\business\dashboard.amount') }}</th>
-                                    <th>{{ __('admin\business\dashboard.date') }}</th>
+                                    <th>{{('admin\business\dashboard.source') }}</th>
+                                    <th>{{('admin\business\dashboard.amount') }}</th>
+                                    <th>{{('admin\business\dashboard.date') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 @forelse($recentRevenue as $revenue)
                                 <tr>
-                                    <td>{{ Str::limit($revenue->field</td>
+                                    <td>{{ Str::limit($revenue->id) }}</td>
                                     <td>${{ number_format($revenue->amount, 2) }}</td>
-                                    <td>{{ $revenue->field</td>
+                                    <td>{{ $revenue->id }}</td>
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="text-center">{{ __('admin\business\dashboard.no_recent_revenue') }}</td>
+                                    <td colspan="3" class="text-center">{{('admin\business\dashboard.no_recent_revenue') }}</td>
                                 </tr>
                                 @endforelse
                             </tbody>
@@ -210,7 +210,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">{{ __('admin\business\dashboard.quick_actions') }}</h3>
+                    <h3 class="card-title">{{('admin\business\dashboard.quick_actions') }}</h3>
                 </div>
                 <div class="card-body">
                     <div class="row">
@@ -332,3 +332,9 @@ $(document).ready(function() {
 });
 </script>
 @stop 
+
+
+
+
+
+

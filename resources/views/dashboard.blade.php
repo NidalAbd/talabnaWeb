@@ -4,19 +4,6 @@
 @section('content_header')
     @include('partials.breadcrumbs')
     @include('partials.alert')
-    <!-- Welcome Card -->
-    <div class="row mb-4">
-        <div class="col-md-8 offset-md-2">
-            <div class="card shadow-sm">
-                <div class="card-body d-flex flex-column flex-md-row align-items-center justify-content-between">
-                    <div>
-                        <h4 class="mb-1">{{ __('dashboard.welcome') }}</h4>
-                        <p class="mb-0">{{ __('dashboard.change_language_prompt') }}</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
 @stop
 
 @section('content_top_nav_right')
@@ -40,7 +27,7 @@
                 <div class="small-box bg-info">
                     <div class="inner">
                         <h3>{{ $totalUsers }}</h3>
-                        <p>{{ __('dashboard.registered_users') }}</p>
+                        <p>{{('dashboard.registered_users') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-users"></i>
@@ -53,7 +40,7 @@
                 <div class="small-box bg-success">
                     <div class="inner">
                         <h3>{{ $activeUsers }}</h3>
-                        <p>{{ __('dashboard.active_users') }}</p>
+                        <p>{{('dashboard.active_users') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-check"></i>
@@ -66,7 +53,7 @@
                 <div class="small-box bg-warning">
                     <div class="inner">
                         <h3>{{ $bannedUsers }}</h3>
-                        <p>{{ __('dashboard.banned_users') }}</p>
+                        <p>{{('dashboard.banned_users') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-user-slash"></i>
@@ -79,7 +66,7 @@
                 <div class="small-box bg-danger">
                     <div class="inner">
                         <h3>{{ $totalReports }}</h3>
-                        <p>{{ __('dashboard.total_reports') }}</p>
+                        <p>{{('dashboard.total_reports') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-flag"></i>
@@ -95,7 +82,7 @@
                 <div class="small-box bg-primary">
                     <div class="inner">
                         <h3>{{ $totalPosts }}</h3>
-                        <p>{{ __('dashboard.total_service_posts') }}</p>
+                        <p>{{('dashboard.total_service_posts') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-clipboard-list"></i>
@@ -108,7 +95,7 @@
                 <div class="small-box bg-success">
                     <div class="inner">
                         <h3>{{ $publishedPosts }}</h3>
-                        <p>{{ __('dashboard.published_posts') }}</p>
+                        <p>{{('dashboard.published_posts') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-check-circle"></i>
@@ -121,7 +108,7 @@
                 <div class="small-box bg-warning">
                     <div class="inner">
                         <h3>{{ $notPublishedPosts }}</h3>
-                        <p>{{ __('dashboard.not_published_posts') }}</p>
+                        <p>{{('dashboard.not_published_posts') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-clock"></i>
@@ -134,7 +121,7 @@
                 <div class="small-box bg-danger">
                     <div class="inner">
                         <h3>{{ $rejectedPosts }}</h3>
-                        <p>{{ __('dashboard.rejected_posts') }}</p>
+                        <p>{{('dashboard.rejected_posts') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-ban"></i>
@@ -149,7 +136,7 @@
                 <div class="small-box bg-info">
                     <div class="inner">
                         <h3>{{ number_format($totalPoints) }}</h3>
-                        <p>{{ __('dashboard.total_points_in_system') }}</p>
+                        <p>{{('dashboard.total_points_in_system') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-coins"></i>
@@ -162,7 +149,7 @@
                 <div class="small-box bg-warning">
                     <div class="inner">
                         <h3>{{ number_format($pointsUsedLifetime) }}</h3>
-                        <p>{{ __('dashboard.points_used') }}</p>
+                        <p>{{('dashboard.points_used') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-hand-holding-usd"></i>
@@ -175,7 +162,7 @@
                 <div class="small-box bg-danger">
                     <div class="inner">
                         <h3>{{ $pendingPurchaseRequests }}</h3>
-                        <p>{{ __('dashboard.pending_purchase_requests') }}</p>
+                        <p>{{('dashboard.pending_purchase_requests') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-shopping-cart"></i>
@@ -198,7 +185,7 @@
                 <!-- Post Badge Stats -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('dashboard.post_badge_distribution') }}</h3>
+                        <h3 class="card-title">{{('dashboard.post_badge_distribution') }}</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="badgeChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -210,7 +197,7 @@
                 <!-- Post Type Stats -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('dashboard.post_type_distribution') }}</h3>
+                        <h3 class="card-title">{{('dashboard.post_type_distribution') }}</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="postTypeChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -225,7 +212,7 @@
                 <!-- Posts by Month Chart -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('dashboard.posts_by_month') }}</h3>
+                        <h3 class="card-title">{{('dashboard.posts_by_month') }}</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="postsChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -237,7 +224,7 @@
                 <!-- Users by Month Chart -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('dashboard.users_by_month') }}</h3>
+                        <h3 class="card-title">{{('dashboard.users_by_month') }}</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="usersChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -251,7 +238,7 @@
                 <!-- Posts by Category Chart -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('dashboard.posts_by_category') }}</h3>
+                        <h3 class="card-title">{{('dashboard.posts_by_category') }}</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="categoryChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -263,7 +250,7 @@
                 <!-- Point Transactions Chart -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('dashboard.point_transactions_by_month') }}</h3>
+                        <h3 class="card-title">{{('dashboard.point_transactions_by_month') }}</h3>
                     </div>
                     <div class="card-body">
                         <canvas id="pointsChart" style="min-height: 250px; height: 250px; max-height: 250px; max-width: 100%;"></canvas>
@@ -278,7 +265,7 @@
                 <!-- Map Card -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('dashboard.service_posts_map') }}</h3>
+                        <h3 class="card-title">{{('dashboard.service_posts_map') }}</h3>
                     </div>
                     <div class="card-body">
                         <div id="map" style="height: 400px;"></div>
@@ -293,34 +280,34 @@
                 <!-- Latest Service Posts -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('dashboard.latest_service_posts') }}</h3>
+                        <h3 class="card-title">{{('dashboard.latest_service_posts') }}</h3>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-striped">
                             <thead>
                             <tr>
-                                <th>{{ __('dashboard.id') }}</th>
-                                <th>{{ __('dashboard.title') }}</th>
-                                <th>{{ __('dashboard.user') }}</th>
-                                <th>{{ __('dashboard.status') }}</th>
-                                <th>{{ __('dashboard.date') }}</th>
+                                <th>{{('dashboard.id') }}</th>
+                                <th>{{('dashboard.title') }}</th>
+                                <th>{{('dashboard.user') }}</th>
+                                <th>{{('dashboard.status') }}</th>
+                                <th>{{('dashboard.date') }}</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($recentPosts as $post)
                                 <tr>
-                                    <td>{{ $post->id }}</td>
+                                    <td>{{ $post->count() }}</td>
                                     <td>{{ $post->title }}</td>
                                     <td>{{ $post->user->user_name ?? 'N/A' }}</td>
                                     <td>
                                         @if($post->state == 'published')
-                                            <span class="badge badge-success">{{ __('dashboard.published') }}</span>
+                                            <span class="badge badge-success">{{('dashboard.published') }}</span>
                                         @elseif($post->state == 'not published')
-                                            <span class="badge badge-warning">{{ __('dashboard.not_published') }}</span>
+                                            <span class="badge badge-warning">{{('dashboard.not_published') }}</span>
                                         @elseif($post->state == 'archive')
-                                            <span class="badge badge-secondary">{{ __('dashboard.archived') }}</span>
+                                            <span class="badge badge-secondary">{{('dashboard.archived') }}</span>
                                         @elseif($post->state == 'rejected')
-                                            <span class="badge badge-danger">{{ __('dashboard.rejected') }}</span>
+                                            <span class="badge badge-danger">{{('dashboard.rejected') }}</span>
                                         @endif
                                     </td>
                                     <td>{{ $post->created_at->format('Y-m-d') }}</td>
@@ -330,7 +317,7 @@
                         </table>
                     </div>
                     <div class="card-footer clearfix">
-                        <a href="{{ route('service_posts.index') }}" class="btn btn-sm btn-info float-right">{{ __('dashboard.view_all_service_posts') }}</a>
+                        <a href="{{ route('service_posts.index') }}" class="btn btn-sm btn-info float-right">{{('dashboard.view_all_service_posts') }}</a>
                     </div>
                 </div>
             </div>
@@ -339,32 +326,32 @@
                 <!-- Latest Users -->
                 <div class="card">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('dashboard.recent_users') }}</h3>
+                        <h3 class="card-title">{{('dashboard.recent_users') }}</h3>
                     </div>
                     <div class="card-body p-0">
                         <table class="table table-striped">
                             <thead>
                             <tr>
-                                <th>{{ __('dashboard.id') }}</th>
-                                <th>{{ __('dashboard.username') }}</th>
-                                <th>{{ __('dashboard.email') }}</th>
-                                <th>{{ __('dashboard.status') }}</th>
-                                <th>{{ __('dashboard.date') }}</th>
+                                <th>{{('dashboard.id') }}</th>
+                                <th>{{('dashboard.username') }}</th>
+                                <th>{{('dashboard.email') }}</th>
+                                <th>{{('dashboard.status') }}</th>
+                                <th>{{('dashboard.date') }}</th>
                             </tr>
                             </thead>
                             <tbody>
                             @foreach($recentUsers as $ruser)
                                 <tr>
-                                    <td>{{ $ruser->id }}</td>
+                                    <td>{{ $ruser->count() }}</td>
                                     <td>{{ $ruser->user_name }}</td>
                                     <td>{{ $ruser->email }}</td>
                                     <td>
                                         @if($ruser->is_active == 'active')
-                                            <span class="badge badge-success">{{ __('dashboard.active') }}</span>
+                                            <span class="badge badge-success">{{('dashboard.active') }}</span>
                                         @elseif($ruser->is_active == 'inactive')
-                                            <span class="badge badge-warning">{{ __('dashboard.inactive') }}</span>
+                                            <span class="badge badge-warning">{{('dashboard.inactive') }}</span>
                                         @elseif($ruser->is_active == 'banned')
-                                            <span class="badge badge-danger">{{ __('dashboard.banned') }}</span>
+                                            <span class="badge badge-danger">{{('dashboard.banned') }}</span>
                                         @endif
                                     </td>
                                     <td>{{ $ruser->created_at->format('Y-m-d') }}</td>
@@ -374,7 +361,7 @@
                         </table>
                     </div>
                     <div class="card-footer clearfix">
-                        <a href="{{ route('users.index') }}" class="btn btn-sm btn-info float-right">{{ __('dashboard.view_all_users') }}</a>
+                        <a href="{{ route('users.index') }}" class="btn btn-sm btn-info float-right">{{('dashboard.view_all_users') }}</a>
                     </div>
                 </div>
             </div>
@@ -583,7 +570,7 @@
             function initMap() {
                 // Check if Google Maps API is loaded
                 if (typeof google === 'undefined' || typeof google.maps === 'undefined') {
-                    document.getElementById('map').innerHTML = '<div class="alert alert-warning">{{ __('dashboard.google_maps_could_not_be_loaded_please_') }}</div>';
+                    document.getElementById('map').innerHTML = '<div class="alert alert-warning">{{('dashboard.google_maps_could_not_be_loaded_please_') }}</div>';
                     return;
                 }
 
@@ -611,7 +598,7 @@
                 });
 
                 // Create info window content
-                var content = '<div><strong>{{ $post->title }}</strong><br>{{ __('dashboard._') }}<br><a href="{{ route('service_posts.show', $post->id) }}">{{ __('dashboard.view_post') }}</a></div>';
+                var content = '<div><strong>{{ $post->title }}</strong><br>{{('dashboard._') }}<br><a href="{{ route('service_posts.show', $post->count()) }}">{{('dashboard.view_post') }}</a></div>';
 
                 // Add click listener to marker
                 google.maps.event.addListener(marker, 'click', (function(marker, content) {
@@ -638,3 +625,10 @@
         });
     </script>
 @stop
+
+
+
+
+
+
+

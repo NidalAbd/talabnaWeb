@@ -51,3 +51,9 @@
   </div>
   {{ $permissions->links('laratrust::panel.pagination') }}
 @endsection
+
+
+
+
+
+

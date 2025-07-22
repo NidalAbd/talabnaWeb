@@ -3,9 +3,9 @@
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center mb-3">
-        <h1><i class="fas fa-language text-primary mr-2"></i> {{ __('Translations Management') }}</h1>
+        <h1><i class="fas fa-language text-primary mr-2"></i> {{('Translations Management') }}</h1>
         <a href="{{ route('translations.create') }}" class="btn btn-success">
-            <i class="fas fa-plus mr-1"></i> {{ __('Add Translation') }}
+            <i class="fas fa-plus mr-1"></i> {{('Add Translation') }}
         </a>
     </div>
 @stop
@@ -14,22 +14,22 @@
 <div class="card card-outline card-primary">
     <div class="card-header d-flex justify-content-between align-items-center">
         <form method="GET" action="" class="form-inline d-flex flex-wrap gap-2 mb-0">
-            <input type="text" name="search" value="{{ request('search') }}" class="form-control mr-2 mb-2" placeholder="{{ __('Search group, key, or text...') }}">
+            <input type="text" name="search" value="{{ request('search') }}" class="form-control mr-2 mb-2" placeholder="{{('Search group, key, or text...') }}">
             <select name="lang" class="form-control mr-2 mb-2">
-                <option value="">{{ __('All Languages') }}</option>
+                <option value="">{{('All Languages') }}</option>
                 <option value="en" {{ request('lang') == 'en' ? 'selected' : '' }}>English</option>
                 <option value="ar" {{ request('lang') == 'ar' ? 'selected' : '' }}>Arabic</option>
             </select>
             <button type="submit" class="btn btn-primary mb-2">
-                <i class="fas fa-search"></i> {{ __('Search') }}
+                <i class="fas fa-search"></i> {{('Search') }}
             </button>
         </form>
         <div>
             <button class="btn btn-info mb-2 mr-2" data-toggle="modal" data-target="#autoTranslateModal" data-lang="ar" id="autoTranslateArBtn">
-                <i class="fas fa-globe mr-1"></i> {{ __('Auto-Translate to Arabic') }}
+                <i class="fas fa-globe mr-1"></i> {{('Auto-Translate to Arabic') }}
             </button>
             <button class="btn btn-info mb-2" data-toggle="modal" data-target="#autoTranslateModal">
-                <i class="fas fa-globe mr-1"></i> {{ __('Auto-Translate') }}
+                <i class="fas fa-globe mr-1"></i> {{('Auto-Translate') }}
             </button>
         </div>
     </div>
@@ -38,17 +38,17 @@
             <table class="table table-hover table-striped mb-0">
                 <thead class="thead-light">
                     <tr>
-                        <th>{{ __('Group') }}</th>
-                        <th>{{ __('Key') }}</th>
-                        <th>{{ __('English') }}</th>
-                        <th>{{ __('Arabic') }}</th>
-                        <th>{{ __('Other Languages') }}</th>
-                        <th class="text-center">{{ __('Actions') }}</th>
+                        <th>{{('Group') }}</th>
+                        <th>{{('Key') }}</th>
+                        <th>{{('English') }}</th>
+                        <th>{{('Arabic') }}</th>
+                        <th>{{('Other Languages') }}</th>
+                        <th class="text-center">{{('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($translations as $t)
-                        <tr data-id="{{ $t->id }}">
+                        <tr data-id="{{ $t->count() }}">
                             <td><span class="badge badge-info">{{ $t->group }}</span></td>
                             <td><code>{{ $t->key }}</code></td>
                             <td>
@@ -69,18 +69,18 @@
                                 @endforeach
                             </td>
                             <td class="text-center">
-                                <a href="{{ route('translations.edit', $t) }}" class="btn btn-sm btn-warning mr-1" title="{{ __('Edit') }}"><i class="fas fa-edit"></i></a>
+                                <a href="{{ route('translations.edit', $t) }}" class="btn btn-sm btn-warning mr-1" title="{{('Edit') }}"><i class="fas fa-edit"></i></a>
                                 <form action="{{ route('translations.destroy', $t) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure you want to delete this translation?');">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" class="btn btn-sm btn-danger" title="{{ __('Delete') }}"><i class="fas fa-trash"></i></button>
+                                    <button type="submit" class="btn btn-sm btn-danger" title="{{('Delete') }}"><i class="fas fa-trash"></i></button>
                                 </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="6" class="text-center text-muted py-4">
-                                <i class="fas fa-info-circle mr-2"></i> {{ __('No translations found.') }}
+                                <i class="fas fa-info-circle mr-2"></i> {{('No translations found.') }}
                             </td>
                         </tr>
                     @endforelse
@@ -98,7 +98,7 @@
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="autoTranslateModalLabel"><i class="fas fa-globe mr-2"></i> {{ __('Auto-Translate All') }}</h5>
+                <h5 class="modal-title" id="autoTranslateModalLabel"><i class="fas fa-globe mr-2"></i> {{('Auto-Translate All') }}</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
@@ -106,7 +106,7 @@
             <div class="modal-body">
                 <form id="autoTranslateForm">
                     <div class="form-group">
-                        <label for="autoLang">{{ __('Select Language') }}</label>
+                        <label for="autoLang">{{('Select Language') }}</label>
                         <select id="autoLang" name="lang" class="form-control">
                             <option value="ar">Arabic</option>
                             <option value="fr">French</option>
@@ -121,7 +121,7 @@
                         </select>
                     </div>
                     <button type="submit" class="btn btn-info">
-                        <i class="fas fa-magic mr-1"></i> {{ __('Auto-Translate') }}
+                        <i class="fas fa-magic mr-1"></i> {{('Auto-Translate') }}
                     </button>
                 </form>
                 <div id="autoTranslateStatus" class="mt-3"></div>
@@ -165,7 +165,7 @@ $(function() {
         e.preventDefault();
         var lang = $('#autoLang').val();
         var $status = $('#autoTranslateStatus');
-        $status.html('<div class="text-info"><i class="fas fa-spinner fa-spin"></i> {{ __('Translating...') }}</div>');
+        $status.html('<div class="text-info"><i class="fas fa-spinner fa-spin"></i> {{('Translating...') }}</div>');
         $.ajax({
             url: '/admin/translations/auto-translate',
             method: 'POST',
@@ -214,3 +214,9 @@ $(function() {
 </script>
 @endpush
 @endsection 
+
+
+
+
+
+

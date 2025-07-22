@@ -4,7 +4,7 @@
 
 @section('content_header')
     <div class="d-flex justify-content-between align-items-center">
-        <h1><i class="fas fa-user-tag text-info mr-2"></i> Role Details: {{ $role->display_name ?? $role->field</h1>
+        <h1><i class="fas fa-user-tag text-info mr-2"></i> Role Details: {{ $role->display_name ?? $role->id }}</h1>
         <div>
             @can('edit_role')
                 @if($role->name != 'superadmin' && $role->name != 'admin')
@@ -30,7 +30,7 @@
                 <!-- Role Info Card -->
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('admin\roles\show.role_information') }}</h3>
+                        <h3 class="card-title">{{ __('admin/roles/show.role_information') }}</h3>
                     </div>
                     <div class="card-body box-profile">
                         <h3 class="profile-username text-center">
@@ -38,29 +38,29 @@
                                 {{ $role->name }}
                             </span>
                         </h3>
-                        <p class="text-muted text-center">{{ $role->field</p>
+                        <p class="text-muted text-center">{{ $role->id }}</p>
 
                         <ul class="list-group list-group-unbordered mb-3">
                             <li class="list-group-item">
-                                <b>{{ __('admin\roles\show.id') }}</b> <a class="float-right">{{ $role->field</a>
+                                <b>{{ __('admin/roles/show.id') }}</b> <a class="float-right">{{ $role->id }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{ __('admin\roles\show.name') }}</b> <a class="float-right">{{ $role->field</a>
+                                <b>{{ __('admin/roles/show.name') }}</b> <a class="float-right">{{ $role->name }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{ __('admin\roles\show.display_name') }}</b> <a class="float-right">{{ $role->field</a>
+                                <b>{{ __('admin/roles/show.display_name') }}</b> <a class="float-right">{{ $role->display_name }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{ __('admin\roles\show.created') }}</b> <a class="float-right">{{ $role->field</a>
+                                <b>{{ __('admin/roles/show.created') }}</b> <a class="float-right">{{ $role->created_at ? $role->created_at->format('Y-m-d') : '-' }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{ __('admin\roles\show.last_updated') }}</b> <a class="float-right">{{ $role->field</a>
+                                <b>{{ __('admin/roles/show.last_updated') }}</b> <a class="float-right">{{ $role->updated_at ? $role->updated_at->format('Y-m-d') : '-' }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{ __('admin\roles\show.permissions') }}</b> <a class="float-right">{{ $role->field</a>
+                                <b>{{ __('admin/roles/show.permissions') }}</b> <a class="float-right">{{ $role->permissions->pluck('name')->join(', ') }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{ __('admin\roles\show.users_assigned') }}</b> <a class="float-right">{{ $usersCount }}</a>
+                                <b>{{ __('admin/roles/show.users_assigned') }}</b> <a class="float-right">{{ $usersCount }}</a>
                             </li>
                         </ul>
 
@@ -70,14 +70,14 @@
                                     <form action="{{ route('roles.destroy', $role->id) }}" method="POST" class="d-inline">
                                         @csrf
                                         @method('DELETE')
-                                        <button class="btn btn-danger btn-block" type="submit" onclick="return confirm('Are you sure you want to delete this role?')">
-                                            <i class="fas fa-trash mr-1"></i> Delete Role
+                                        <button class="btn btn-danger btn-block" type="submit" onclick="return confirm('{{ __('admin/roles/show.confirm_delete') }}')">
+                                            <i class="fas fa-trash mr-1"></i> {{ __('admin/roles/show.delete_role') }}
                                         </button>
                                     </form>
                                 @endcan
                             @else
                                 <button class="btn btn-danger btn-block" disabled>
-                                    <i class="fas fa-lock mr-1"></i> Cannot Delete
+                                    <i class="fas fa-lock mr-1"></i> {{ __('admin/roles/show.cannot_delete') }}
                                 </button>
                             @endif
                         </div>
@@ -87,16 +87,16 @@
                 <!-- Additional Options Card -->
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('admin\roles\show.options') }}</h3>
+                        <h3 class="card-title">{{ __('admin/roles/show.options') }}</h3>
                     </div>
                     <div class="card-body">
                         <a href="{{ route('role-assignments.users-with-role', $role->id) }}" class="btn btn-block btn-default">
-                            <i class="fas fa-users mr-1"></i> View Users with this Role
+                            <i class="fas fa-users mr-1"></i> {{ __('admin/roles/show.view_users_with_role') }}
                         </a>
 
                         @if($role->name != 'superadmin' && $role->name != 'admin')
                             <button type="button" class="btn btn-block btn-default" data-toggle="modal" data-target="#cloneRoleModal">
-                                <i class="fas fa-copy mr-1"></i> Clone Role
+                                <i class="fas fa-copy mr-1"></i> {{ __('admin/roles/show.clone_role') }}
                             </button>
                         @endif
                     </div>
@@ -107,13 +107,13 @@
                 <!-- Role Description Card -->
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('admin\roles\show.role_description') }}</h3>
+                        <h3 class="card-title">{{ __('admin/roles/show.role_description') }}</h3>
                     </div>
                     <div class="card-body">
                         @if($role->description)
                             {{ $role->description }}
                         @else
-                            <div class="text-muted">{{ __('admin\roles\show.no_description_available_for_this_role_') }}</div>
+                            <div class="text-muted">{{ __('admin/roles/show.no_description_available_for_this_role_') }}</div>
                         @endif
                     </div>
                 </div>
@@ -121,10 +121,10 @@
                 <!-- Permissions Card -->
                 <div class="card card-primary card-outline">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('admin\roles\show.role_permissions') }}</h3>
+                        <h3 class="card-title">{{ __('admin/roles/show.role_permissions') }}</h3>
                         <div class="card-tools">
                             <span class="badge badge-primary">
-                                {{ $role->permissions->count() }} Permissions
+                                {{ $role->permissions->count() }} {{ __('admin/roles/show.permissions') }}
                             </span>
                         </div>
                     </div>
@@ -139,7 +139,7 @@
 
                             @foreach($groupedPermissions as $group => $permissions)
                                 <div class="mb-4">
-                                    <h5 class="text-capitalize">{{ $group }} Permissions</h5>
+                                    <h5 class="text-capitalize">{{ $group }} {{ __('admin/roles/show.permissions') }}</h5>
                                     <div class="row">
                                         @foreach($permissions as $permission)
                                             <div class="col-md-4 mb-2">
@@ -148,8 +148,8 @@
                                                         <i class="fas fa-key"></i>
                                                     </span>
                                                     <div class="info-box-content">
-                                                        <span class="info-box-text">{{ $permission->field</span>
-                                                        <span class="info-box-number">{{ $permission->field</span>
+                                                        <span class="info-box-text">{{ $permission->name }}</span>
+                                                        <span class="info-box-number">{{ $permission->name }}</span>
                                                     </div>
                                                 </div>
                                             </div>
@@ -160,7 +160,7 @@
                         @else
                             <div class="alert alert-warning">
                                 <i class="icon fas fa-exclamation-triangle"></i>
-                                This role has no permissions assigned to it.
+                                {{ __('admin/roles/show.no_permissions_assigned') }}
                             </div>
                         @endif
                     </div>
@@ -176,32 +176,32 @@
                 <form action="{{ route('roles.clone', $role->id) }}" method="POST">
                     @csrf
                     <div class="modal-header">
-                        <h5 class="modal-title" id="cloneRoleModalLabel">{{ __('admin\roles\show.clone_role') }}</h5>
+                        <h5 class="modal-title" id="cloneRoleModalLabel">{{ __('admin/roles/show.clone_role') }}</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">{{ __('admin\roles\show._times_') }}</span>
+                            <span aria-hidden="true">{{ __('admin/roles/show._times_') }}</span>
                         </button>
                     </div>
                     <div class="modal-body">
-                        <p>This will create a new role with the same permissions as "{{ $role->name }}".</p>
+                        <p>{{ __('admin/roles/show.clone_role_description') }}</p>
 
                         <div class="form-group">
-                            <label for="new_name">New Role Name <span class="text-danger">{{ __('admin\roles\show._') }}</span></label>
+                            <label for="new_name">{{ __('admin/roles/show.new_role_name') }} <span class="text-danger">{{ __('admin/roles/show._') }}</span></label>
                             <input type="text" class="form-control" id="new_name" name="new_name"
-                                   placeholder="Enter a unique role name" required>
+                                   placeholder="{{ __('admin/roles/show.enter_unique_role_name') }}" required>
                             <small class="form-text text-muted">
-                                Use lowercase letters without spaces (e.g. editor, content_manager)
+                                {{ __('admin/roles/show.use_lowercase_letters_no_spaces') }}
                             </small>
                         </div>
 
                         <div class="form-group">
-                            <label for="new_display_name">{{ __('admin\roles\show.new_display_name') }}</label>
+                            <label for="new_display_name">{{ __('admin/roles/show.new_display_name') }}</label>
                             <input type="text" class="form-control" id="new_display_name" name="new_display_name"
-                                   placeholder="Human readable name">
+                                   placeholder="{{ __('admin/roles/show.human_readable_name') }}">
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin\roles\show.cancel') }}</button>
-                        <button type="submit" class="btn btn-primary">{{ __('admin\roles\show.clone_role') }}</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('admin/roles/show.cancel') }}</button>
+                        <button type="submit" class="btn btn-primary">{{ __('admin/roles/show.clone_role') }}</button>
                     </div>
                 </form>
             </div>
@@ -231,3 +231,10 @@
         }
     </style>
 @stop
+
+
+
+
+
+
+

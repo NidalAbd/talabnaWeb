@@ -21,44 +21,36 @@
                         <table class="table table-bordered table-sm text-center">
                             <thead>
                             <tr class="btn-secondary">
-                                <th>{{ __('admin\favorite.id') }}</th>
-                                <th>{{ __('admin\favorite.post') }}</th>
-                                <th>{{ __('admin\favorite.number_of_favorite') }}</th>
-                                <th>{{ __('admin\favorite.action') }}</th>
+                                <th>{{('admin\favorite.id') }}</th>
+                                <th>{{('admin\favorite.post') }}</th>
+                                <th>{{('admin\favorite.number_of_favorite') }}</th>
+                                <th>{{('admin\favorite.action') }}</th>
                             </tr>
                             </thead>
                             <tbody>
                             @if ($favorites->count() > 0)
                                 @foreach($favorites as $favorite)
                                     <tr>
-                                        <td>{{ $favorite->field</td>
-                                        <td>{{ $favorite->field</td>
-                                        <td>{{ $favorite->field</td>
+                                        <td>{{ $favorite->id }}</td>
+                                        <td>{{ $favorite->post_title ?? '' }}</td>
+                                        <td>{{ $favorite->number_of_favorite ?? '' }}</td>
                                         <td>
-                                            <a href="{{ route('admin.posts.show', $favorite->field</a>
-                                            <a href="{{ route('admin.posts.edit', $favorite->field</a>
+                                            <a href="{{ route('admin.posts.show', $favorite->id) }}" class="btn btn-info btn-sm">Show</a>
+                                            <a href="{{ route('admin.posts.edit', $favorite->id) }}" class="btn btn-primary btn-sm">Edit</a>
                                             <form action="{{ route('admin.posts.destroy', $favorite->favoritable_id) }}" method="POST" class="d-inline">
                                                 @csrf
                                                 @method('DELETE')
-                                                <button type="submit" class="btn btn-danger btn-sm">{{ __('admin\favorite.delete') }}</button>
+                                                <button type="submit" class="btn btn-danger btn-sm">{{('admin\favorite.delete') }}</button>
                                             </form>
                                         </td>
                                     </tr>
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="4">{{ __('No Record') }}</td>
+                                    <td colspan="4">{{('No Record') }}</td>
                                 </tr>
                             @endif
                             </tbody>
-                            <thead>
-                            <tr class="btn-secondary">
-                                <th>{{ __('admin\favorite.id') }}</th>
-                                <th>{{ __('admin\favorite.type') }}</th>
-                                <th>{{ __('admin\favorite.number_of_reports') }}</th>
-                                <th>{{ __('admin\favorite.action') }}</th>
-                            </tr>
-                            </thead>
                         </table>
                     </div>
                     <div class="card-footer" style="height: 50px;"> <!-- Adjust height as needed -->
@@ -71,4 +63,11 @@
         </div>
     </div>
 @endsection
+
+
+
+
+
+
+
 

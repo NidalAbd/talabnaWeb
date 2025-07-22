@@ -41,21 +41,21 @@
                             @endif
                         </div>
 
-                        <h3 class="profile-username text-center">{{ $user->field</h3>
-                        <p class="text-muted text-center">{{ '@' . $user->field</p>
+                        <h3 class="profile-username text-center">{{ $user->id }}</h3>
+                        <p class="text-muted text-center">{{ '@' . $user->id }}</p>
 
                         <ul class="list-group list-group-unbordered mb-3">
                             <li class="list-group-item">
-                                <b>{{ __('users\show.service_posts') }}</b> <a class="float-right">{{ $user->field</a>
+                                <b>{{('users\show.service_posts') }}</b> <a class="float-right">{{ $user->id }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{ __('users\show.followers') }}</b> <a class="float-right">{{ $user->field</a>
+                                <b>{{('users\show.followers') }}</b> <a class="float-right">{{ $user->id }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{ __('users\show.following') }}</b> <a class="float-right">{{ $user->field</a>
+                                <b>{{('users\show.following') }}</b> <a class="float-right">{{ $user->id }}</a>
                             </li>
                             <li class="list-group-item">
-                                <b>{{ __('users\show.points_balance') }}</b> <a class="float-right">{{ $user->field</a>
+                                <b>{{('users\show.points_balance') }}</b> <a class="float-right">{{ $user->id }}</a>
                             </li>
                         </ul>
 
@@ -86,7 +86,7 @@
                 <!-- Account Status Card -->
                 <div class="card card-outline card-{{ $user->is_active == 'active' ? 'success' : ($user->is_active == 'banned' ? 'danger' : 'warning') }}">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('users\show.account_status') }}</h3>
+                        <h3 class="card-title">{{('users\show.account_status') }}</h3>
                     </div>
                     <div class="card-body">
                         <div class="text-center">
@@ -104,12 +104,12 @@
                                 @method('PATCH')
                                 <div class="form-group">
                                     <select name="is_active" class="form-control" id="status">
-                                        <option value="active" {{ $user->field</option>
-                                        <option value="inactive" {{ $user->field</option>
-                                        <option value="banned" {{ $user->field</option>
+                                        <option value="active" {{ $user->is_active == 'active' ? 'selected' : '' }}>Active</option>
+                                        <option value="inactive" {{ $user->is_active == 'inactive' ? 'selected' : '' }}>Inactive</option>
+                                        <option value="banned" {{ $user->is_active == 'banned' ? 'selected' : '' }}>Banned</option>
                                     </select>
                                 </div>
-                                <button type="submit" class="btn btn-primary btn-block">{{ __('users\show.update_status') }}</button>
+                                <button type="submit" class="btn btn-primary btn-block">{{('users\show.update_status') }}</button>
                             </form>
                         </div>
                     </div>
@@ -118,7 +118,7 @@
                 <!-- Roles Card -->
                 <div class="card card-outline card-info">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('users\show.user_roles') }}</h3>
+                        <h3 class="card-title">{{('users\show.user_roles') }}</h3>
                     </div>
                     <div class="card-body">
                         @if(count($user->roles) > 0)
@@ -129,7 +129,7 @@
                             @endforeach
                         @else
                             <div class="text-center">
-                                <span class="text-muted">{{ __('users\show.no_roles_assigned') }}</span>
+                                <span class="text-muted">{{('users\show.no_roles_assigned') }}</span>
                             </div>
                         @endif
                         <div class="mt-3">
@@ -146,54 +146,54 @@
                 <!-- User Details Card -->
                 <div class="card card-outline card-primary">
                     <div class="card-header">
-                        <h3 class="card-title">{{ __('users\show.user_information') }}</h3>
+                        <h3 class="card-title">{{('users\show.user_information') }}</h3>
                     </div>
                     <div class="card-body">
                         <div class="row">
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.full_name') }}</span>
-                                        <span class="info-box-number">{{ $user->field</span>
+                                        <span class="info-box-text text-muted">{{('users\show.full_name') }}</span>
+                                        <span class="info-box-number">{{ $user->name }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.username') }}</span>
-                                        <span class="info-box-number">{{ $user->field</span>
+                                        <span class="info-box-text text-muted">{{('users\show.username') }}</span>
+                                        <span class="info-box-number">{{ $user->id }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.email') }}</span>
-                                        <span class="info-box-number">{{ $user->field</span>
+                                        <span class="info-box-text text-muted">{{('users\show.email') }}</span>
+                                        <span class="info-box-number">{{ $user->email }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.auth_type') }}</span>
-                                        <span class="info-box-number">{{ ucfirst($user->field</span>
+                                        <span class="info-box-text text-muted">{{('users\show.auth_type') }}</span>
+                                        <span class="info-box-number">{{ ucfirst($user->auth_type) }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.gender') }}</span>
-                                        <span class="info-box-number">{{ $user->field</span>
+                                        <span class="info-box-text text-muted">{{('users\show.gender') }}</span>
+                                        <span class="info-box-number">{{ $user->gender }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.date_of_birth') }}</span>
+                                        <span class="info-box-text text-muted">{{('users\show.date_of_birth') }}</span>
                                         <span class="info-box-number">
                                         {{ $user->date_of_birth ? \Carbon\Carbon::parse($user->date_of_birth)->format('M d, Y') : 'Not set' }}
                                     </span>
@@ -203,23 +203,23 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.phone_number') }}</span>
-                                        <span class="info-box-number">{{ $user->field</span>
+                                        <span class="info-box-text text-muted">{{('users\show.phone_number') }}</span>
+                                        <span class="info-box-number">{{ $user->phone_number }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.whatsapp_number') }}</span>
-                                        <span class="info-box-number">{{ $user->field</span>
+                                        <span class="info-box-text text-muted">{{('users\show.whatsapp_number') }}</span>
+                                        <span class="info-box-number">{{ $user->whatsapp_number }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.location') }}</span>
+                                        <span class="info-box-text text-muted">{{('users\show.location') }}</span>
                                         <span class="info-box-number">
                 {{ $locationDisplay }}
             </span>
@@ -229,12 +229,12 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.data_saver') }}</span>
+                                        <span class="info-box-text text-muted">{{('users\show.data_saver') }}</span>
                                         <span class="info-box-number">
                                         @if($user->data_saver_enabled)
-                                                <span class="badge badge-success">{{ __('users\show.enabled') }}</span>
+                                                <span class="badge badge-success">{{('users\show.enabled') }}</span>
                                             @else
-                                                <span class="badge badge-secondary">{{ __('users\show.disabled') }}</span>
+                                                <span class="badge badge-secondary">{{('users\show.disabled') }}</span>
                                             @endif
                                     </span>
                                     </div>
@@ -243,16 +243,16 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.member_since') }}</span>
-                                        <span class="info-box-number">{{ $user->field</span>
+                                        <span class="info-box-text text-muted">{{('users\show.member_since') }}</span>
+                                        <span class="info-box-number">{{ $user->created_at->format('M d, Y') }}</span>
                                     </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.last_updated') }}</span>
-                                        <span class="info-box-number">{{ $user->field</span>
+                                        <span class="info-box-text text-muted">{{('users\show.last_updated') }}</span>
+                                        <span class="info-box-number">{{ $user->updated_at->format('M d, Y H:i') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -260,11 +260,11 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.latitude') }}</span>
+                                        <span class="info-box-text text-muted">{{('users\show.latitude') }}</span>
                                         <span class="info-box-number">
                 @if($user->location_latitudes)
                                                 <div class="d-flex align-items-center">
-                        <span>{{ $user->field</span>
+                        <span>{{ $user->location_latitudes }}</span>
                         <button class="btn btn-xs btn-outline-info ml-2 copy-btn" data-coords="{{ $user->location_latitudes }}">
                             <i class="fas fa-copy"></i>
                         </button>
@@ -281,11 +281,11 @@
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
                                     <div class="info-box-content">
-                                        <span class="info-box-text text-muted">{{ __('users\show.longitude') }}</span>
+                                        <span class="info-box-text text-muted">{{('users\show.longitude') }}</span>
                                         <span class="info-box-number">
                 @if($user->location_longitudes)
                                                 <div class="d-flex align-items-center">
-                        <span>{{ $user->field</span>
+                        <span>{{ $user->location_longitudes }}</span>
                         <button class="btn btn-xs btn-outline-info ml-2 copy-btn" data-coords="{{ $user->location_longitudes }}">
                             <i class="fas fa-copy"></i>
                         </button>
@@ -302,7 +302,7 @@
                         <!-- User Location Map -->
                         @if($user->location_latitudes && $user->location_longitudes)
                             <div class="mt-4">
-                                <h5>{{ __('users\show.user_location') }}</h5>
+                                <h5>{{('users\show.user_location') }}</h5>
                                 <div id="map" style="height: 300px;"></div>
                             </div>
                         @endif
@@ -339,21 +339,21 @@
                                         <table class="table table-striped">
                                             <thead>
                                             <tr>
-                                                <th>{{ __('users\show.id') }}</th>
-                                                <th>{{ __('users\show.title') }}</th>
-                                                <th>{{ __('users\show.category') }}</th>
-                                                <th>{{ __('users\show.created') }}</th>
-                                                <th>{{ __('users\show.status') }}</th>
-                                                <th>{{ __('users\show.actions') }}</th>
+                                                <th>{{('users\show.id') }}</th>
+                                                <th>{{('users\show.title') }}</th>
+                                                <th>{{('users\show.category') }}</th>
+                                                <th>{{('users\show.created') }}</th>
+                                                <th>{{('users\show.status') }}</th>
+                                                <th>{{('users\show.actions') }}</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             @foreach($user->servicePosts as $post)
                                                 <tr>
-                                                    <td>{{ $post->field</td>
-                                                    <td>{{ $post->field</td>
-                                                    <td>{{ optional($post->field</td>
-                                                    <td>{{ $post->field</td>
+                                                    <td>{{ $post->id }}</td>
+                                                    <td>{{ $post->title }}</td>
+                                                    <td>{{ $post->category->name }}</td>
+                                                    <td>{{ $post->created_at->format('M d, Y H:i') }}</td>
                                                     <td>
                                                         <span class="badge badge-{{ $post->state ? 'success' : 'danger' }}">
                                                             {{ $post->state ? 'published' : 'Inactive' }}
@@ -371,7 +371,7 @@
                                     </div>
                                 @else
                                     <div class="text-center py-4">
-                                        <span class="text-muted">{{ __('users\show.no_service_posts_found') }}</span>
+                                        <span class="text-muted">{{('users\show.no_service_posts_found') }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -383,23 +383,23 @@
                                         <table class="table table-striped">
                                             <thead>
                                             <tr>
-                                                <th>{{ __('users\show.date') }}</th>
-                                                <th>{{ __('users\show.points') }}</th>
-                                                <th>{{ __('users\show.type') }}</th>
-                                                <th>{{ __('users\show.description') }}</th>
+                                                <th>{{('users\show.date') }}</th>
+                                                <th>{{('users\show.points') }}</th>
+                                                <th>{{('users\show.type') }}</th>
+                                                <th>{{('users\show.description') }}</th>
                                             </tr>
                                             </thead>
                                             <tbody>
                                             @foreach($pointsHistory as $point)
                                                 <tr>
-                                                    <td>{{ $point->field</td>
+                                                    <td>{{ $point->created_at->format('M d, Y H:i') }}</td>
                                                     <td>
                                                         <span class="badge badge-{{ $point->point > 0 ? 'success' : 'danger' }}">
                                                             {{ $point->point > 0 ? '+' : '' }}{{ $point->point }}
                                                         </span>
                                                     </td>
-                                                    <td>{{ $point->field</td>
-                                                    <td>{{ $point->field</td>
+                                                    <td>{{ $point->type }}</td>
+                                                    <td>{{ $point->description }}</td>
                                                 </tr>
                                             @endforeach
                                             </tbody>
@@ -407,7 +407,7 @@
                                     </div>
                                 @else
                                     <div class="text-center py-4">
-                                        <span class="text-muted">{{ __('users\show.no_points_history_found') }}</span>
+                                        <span class="text-muted">{{('users\show.no_points_history_found') }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -419,10 +419,10 @@
                                         <table class="table table-striped">
                                             <thead>
                                             <tr>
-                                                <th>{{ __('users\show.reported_by') }}</th>
-                                                <th>{{ __('users\show.reason') }}</th>
-                                                <th>{{ __('users\show.date') }}</th>
-                                                <th>{{ __('users\show.actions') }}</th>
+                                                <th>{{('users\show.reported_by') }}</th>
+                                                <th>{{('users\show.reason') }}</th>
+                                                <th>{{('users\show.date') }}</th>
+                                                <th>{{('users\show.actions') }}</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -435,8 +435,8 @@
                                                             Anonymous
                                                         @endif
                                                     </td>
-                                                    <td>{{ $report->field</td>
-                                                    <td>{{ $report->field</td>
+                                                    <td>{{ $report->reason }}</td>
+                                                    <td>{{ $report->created_at->format('M d, Y H:i') }}</td>
                                                     <td>
                                                         <button class="btn btn-sm btn-danger">
                                                             <i class="fas fa-ban"></i> Action
@@ -449,7 +449,7 @@
                                     </div>
                                 @else
                                     <div class="text-center py-4">
-                                        <span class="text-muted">{{ __('users\show.no_reports_found') }}</span>
+                                        <span class="text-muted">{{('users\show.no_reports_found') }}</span>
                                     </div>
                                 @endif
                             </div>
@@ -502,3 +502,10 @@
         });
     </script>
 @stop
+
+
+
+
+
+
+

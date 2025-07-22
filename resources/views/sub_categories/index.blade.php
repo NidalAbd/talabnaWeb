@@ -26,7 +26,7 @@
                 <button type="button" class="btn btn-sm btn-outline-secondary mr-2 mb-2 mb-md-0" onclick="printTable(this)"><i class="fas fa-print mr-1"></i> Print</button>
                 <form method="GET" class="d-flex align-items-center mb-2 mb-md-0" style="gap: 0.5rem;">
                     <select name="category" class="form-control form-control-sm">
-                        <option value="">{{ __('sub_categories\index.all_categories') }}</option>
+                        <option value="">{{('sub_categories\index.all_categories') }}</option>
                         @foreach($categories as $cat)
                             @php
                                 $catName = is_array($cat->name) ? ($cat->name['en'] ?? reset($cat->name)) : $cat->name;
@@ -35,9 +35,9 @@
                         @endforeach
                     </select>
                     <select name="status" class="form-control form-control-sm">
-                        <option value="">{{ __('sub_categories\index.all_status') }}</option>
-                        <option value="active" @if(request('status') == 'active') selected @endif>{{ __('sub_categories\index.active') }}</option>
-                        <option value="suspended" @if(request('status') == 'suspended') selected @endif>{{ __('sub_categories\index.suspended') }}</option>
+                        <option value="">{{('sub_categories\index.all_status') }}</option>
+                        <option value="active" @if(request('status') == 'active') selected @endif>{{('sub_categories\index.active') }}</option>
+                        <option value="suspended" @if(request('status') == 'suspended') selected @endif>{{('sub_categories\index.suspended') }}</option>
                     </select>
                     <input type="text" name="search" class="form-control form-control-sm" placeholder="Search by name..." value="{{ request('search') }}">
                     <button type="submit" class="btn btn-sm btn-primary"><i class="fas fa-search"></i></button>
@@ -49,13 +49,13 @@
             <table class="table table-hover table-striped table-bordered align-middle">
                 <thead class="thead-light">
                     <tr>
-                        <th>{{ __('sub_categories\index.id') }}</th>
-                        <th>{{ __('sub_categories\index.name') }}</th>
-                        <th>{{ __('sub_categories\index.category') }}</th>
-                        <th>{{ __('sub_categories\index.status') }}</th>
-                        <th>{{ __('sub_categories\index.posts') }}</th>
-                        <th>{{ __('sub_categories\index.created') }}</th>
-                        <th>{{ __('sub_categories\index.actions') }}</th>
+                        <th>{{('sub_categories\index.id') }}</th>
+                        <th>{{('sub_categories\index.name') }}</th>
+                        <th>{{('sub_categories\index.category') }}</th>
+                        <th>{{('sub_categories\index.status') }}</th>
+                        <th>{{('sub_categories\index.posts') }}</th>
+                        <th>{{('sub_categories\index.created') }}</th>
+                        <th>{{('sub_categories\index.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -81,11 +81,11 @@
                                     <span class="badge badge-success"><i class="fas fa-check-circle"></i> Active</span>
                                 @endif
                             </td>
-                            <td><span class="badge badge-primary">{{ $subCategory->field</span></td>
-                            <td><span class="text-muted">{{ $subCategory->field</span></td>
+                            <td><span class="badge badge-primary">{{ $subCategory->id }}</span></td>
+                            <td><span class="text-muted">{{ $subCategory->id }}</span></td>
                             <td>
-                                <a href="{{ route('subcategories.show', $subCategory->field<i class="fas fa-eye"></i></a>
-                                <a href="{{ route('subcategories.edit', $subCategory->field<i class="fas fa-edit"></i></a>
+                                <a href="{{ route('subcategories.show', $subCategory->id) }}"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('subcategories.edit', $subCategory->id) }}"><i class="fas fa-edit"></i></a>
                                 <form action="{{ route('subcategories.destroy', $subCategory->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
                                     @csrf
                                     @method('DELETE')
@@ -109,7 +109,7 @@
         <div class="card-footer bg-white">
             <div class="d-flex justify-content-between align-items-center">
                 <div>
-                    Showing <strong>{{ $subCategories->field</strong> to <strong>{{ $subCategories->field</strong> of <strong>{{ $subCategories->field</strong> sub categories
+                    Showing <strong>{{ $subCategories->firstItem() }}</strong> to <strong>{{ $subCategories->lastItem() }}</strong> of <strong>{{ $subCategories->total() }}</strong> sub categories
                 </div>
                 <div>
                     {{ $subCategories->links('pagination::bootstrap-4') }}
@@ -124,7 +124,7 @@
     function printTable(btn) {
         let table = btn.closest('.card').querySelector('table');
         let w = window.open();
-        w.document.write('<html><head><title>{{ __('sub_categories\index.print_table') }}</title>{{ __('sub_categories\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{ __('sub_categories\index._w_document_write_') }}</head><body>{{ __('sub_categories\index._w_document_write_table_outer') }}</body></html>');
+        w.document.write('<html><head><title>{{('sub_categories\index.print_table') }}</title>{{('sub_categories\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{('sub_categories\index._w_document_write_') }}</head><body>{{('sub_categories\index._w_document_write_table_outer') }}</body></html>');
         w.print();
         w.close();
     }
@@ -152,3 +152,10 @@
 </style>
 @endpush
 @stop
+
+
+
+
+
+
+

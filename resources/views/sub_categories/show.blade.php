@@ -5,7 +5,7 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1>
             <i class="fas fa-tag text-primary mr-2"></i>
-            Subcategory Details: <span class="text-muted">{{ $subcategory->field</span>
+            Subcategory Details: <span class="text-muted">{{ $subcategory->id }}</span>
         </h1>
         <div>
             <a href="{{ route('indexSubCategory.index') }}" class="btn btn-secondary">
@@ -31,7 +31,7 @@
                             @else
                                 <div class="bg-light p-4 rounded mb-3">
                                     <i class="fas fa-image fa-4x text-muted"></i>
-                                    <p class="mt-2 text-muted">{{ __('sub_categories\show.no_image_available') }}</p>
+                                    <p class="mt-2 text-muted">{{('sub_categories\show.no_image_available') }}</p>
                                 </div>
                             @endif
                         </div>
@@ -39,47 +39,47 @@
                         <ul class="list-group list-group-flush">
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-hashtag mr-2"></i> ID</span>
-                                <span class="badge badge-primary badge-pill">{{ $subcategory->field</span>
+                                <span class="badge badge-primary badge-pill">{{ $subcategory->id }}</span>
                             </li>
                             <li class="list-group-item">
                                 <span class="font-weight-bold mb-2 d-block"><i class="fas fa-language mr-2"></i> Name (Arabic)</span>
-                                <span class="d-block text-right">{{ $subcategory->field</span>
+                                <span class="d-block text-right">{{ $subcategory->name }}</span>
                             </li>
                             <li class="list-group-item">
                                 <span class="font-weight-bold mb-2 d-block"><i class="fas fa-language mr-2"></i> Name (English)</span>
-                                <span class="d-block text-right">{{ $subcategory->field</span>
+                                <span class="d-block text-right">{{ $subcategory->name }}</span>
                             </li>
                             <li class="list-group-item">
                                 <span class="font-weight-bold mb-2 d-block"><i class="fas fa-th-large mr-2"></i> Parent Category</span>
                                 @if($subcategory->category)
                                     <span class="d-block text-right">
-                                    <a href="{{ route('categories.show', $subcategory->categories_id) }}" class="text-decoration-none">
+                                    <a href="{{ route('categories.show', $subcategory->category->id) }}" class="text-decoration-none">
                                         {{ $subcategory->category->name[app()->getLocale()] ?? 'N/A' }}
                                     </a>
                                 </span>
                                 @else
-                                    <span class="d-block text-right text-danger">{{ __('sub_categories\show.parent_category_not_found') }}</span>
+                                    <span class="d-block text-right text-danger">{{('sub_categories\show.parent_category_not_found') }}</span>
                                 @endif
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-toggle-on mr-2"></i> Status</span>
                                 @if($subcategory->isSuspended)
-                                    <span class="badge badge-danger">{{ __('sub_categories\show.suspended') }}</span>
+                                    <span class="badge badge-danger">{{('sub_categories\show.suspended') }}</span>
                                 @else
-                                    <span class="badge badge-success">{{ __('sub_categories\show.active') }}</span>
+                                    <span class="badge badge-success">{{('sub_categories\show.active') }}</span>
                                 @endif
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-clipboard-list mr-2"></i> Service Posts</span>
-                                <span class="badge badge-primary badge-pill">{{ $subcategory->field</span>
+                                <span class="badge badge-primary badge-pill">{{ $subcategory->servicePosts->count() }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-calendar-alt mr-2"></i> Created</span>
-                                <span>{{ $subcategory->field</span>
+                                <span>{{ $subcategory->created_at->diffForHumans() }}</span>
                             </li>
                             <li class="list-group-item d-flex justify-content-between align-items-center">
                                 <span class="font-weight-bold"><i class="fas fa-edit mr-2"></i> Last Updated</span>
-                                <span>{{ $subcategory->field</span>
+                                <span>{{ $subcategory->updated_at->diffForHumans() }}</span>
                             </li>
                         </ul>
                     </div>
@@ -120,26 +120,26 @@
                                 <table class="table table-hover mb-0">
                                     <thead class="thead-light">
                                     <tr>
-                                        <th>{{ __('sub_categories\show.id') }}</th>
-                                        <th>{{ __('sub_categories\show.image') }}</th>
-                                        <th>{{ __('sub_categories\show.title') }}</th>
-                                        <th>{{ __('sub_categories\show.user') }}</th>
-                                        <th>{{ __('sub_categories\show.type') }}</th>
-                                        <th>{{ __('sub_categories\show.status') }}</th>
-                                        <th>{{ __('sub_categories\show.actions') }}</th>
+                                        <th>{{('sub_categories\show.id') }}</th>
+                                        <th>{{('sub_categories\show.image') }}</th>
+                                        <th>{{('sub_categories\show.title') }}</th>
+                                        <th>{{('sub_categories\show.user') }}</th>
+                                        <th>{{('sub_categories\show.type') }}</th>
+                                        <th>{{('sub_categories\show.status') }}</th>
+                                        <th>{{('sub_categories\show.actions') }}</th>
                                     </tr>
                                     </thead>
                                     <tbody>
                                     @foreach($subcategory->servicePosts->take(10) as $post)
                                         <tr>
-                                            <td>{{ $post->field</td>
+                                            <td>{{ $post->id }}</td>
                                             <td class="text-center">
                                                 @if($post->photos->count() > 0)
                                                     <img src="{{ asset($post->photos->first()->src) }}"
                                                          alt="{{ $post->title }}" class="img-thumbnail"
                                                          style="max-height: 40px;">
                                                 @else
-                                                    <span class="badge badge-secondary">{{ __('sub_categories\show.no_image') }}</span>
+                                                    <span class="badge badge-secondary">{{('sub_categories\show.no_image') }}</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -154,29 +154,29 @@
                                             </td>
                                             <td>
                                                 @if($post->user)
-                                                    <a href="{{ route('users.show', $post->user_id) }}" class="text-decoration-none">
+                                                    <a href="{{ route('users.show', $post->user->id) }}" class="text-decoration-none">
                                                         {{ $post->user->user_name }}
                                                     </a>
                                                 @else
-                                                    <span class="text-muted">{{ __('sub_categories\show.unknown') }}</span>
+                                                    <span class="text-muted">{{('sub_categories\show.unknown') }}</span>
                                                 @endif
                                             </td>
                                             <td>
                                                 @if($post->type == 'عرض')
-                                                    <span class="badge badge-info">{{ __('sub_categories\show.offer') }}</span>
+                                                    <span class="badge badge-info">{{('sub_categories\show.offer') }}</span>
                                                 @elseif($post->type == 'طلب')
-                                                    <span class="badge badge-secondary">{{ __('sub_categories\show.request') }}</span>
+                                                    <span class="badge badge-secondary">{{('sub_categories\show.request') }}</span>
                                                 @endif
                                             </td>
                                             <td>
                                                 @if($post->state == 'published')
-                                                    <span class="badge badge-success">{{ __('sub_categories\show.published') }}</span>
+                                                    <span class="badge badge-success">{{('sub_categories\show.published') }}</span>
                                                 @elseif($post->state == 'archive')
-                                                    <span class="badge badge-warning">{{ __('sub_categories\show.archived') }}</span>
+                                                    <span class="badge badge-warning">{{('sub_categories\show.archived') }}</span>
                                                 @elseif($post->state == 'not published')
-                                                    <span class="badge badge-secondary">{{ __('sub_categories\show.draft') }}</span>
+                                                    <span class="badge badge-secondary">{{('sub_categories\show.draft') }}</span>
                                                 @elseif($post->state == 'rejected')
-                                                    <span class="badge badge-danger">{{ __('sub_categories\show.rejected') }}</span>
+                                                    <span class="badge badge-danger">{{('sub_categories\show.rejected') }}</span>
                                                 @endif
                                             </td>
                                             <td>
@@ -198,7 +198,7 @@
                             </div>
                             @if($subcategory->servicePosts->count() > 10)
                                 <div class="card-footer bg-white text-center">
-                                    <a href="{{ route('servicePostCategorySubCategory', [$subcategory->categories_id, $subcategory->id]) }}"
+                                    <a href="{{ route('servicePostCategorySubCategory', [$subcategory->category->id, $subcategory->id]) }}"
                                        class="btn btn-sm btn-outline-primary">
                                         View All {{ $subcategory->servicePosts->count() }} Posts
                                     </a>
@@ -208,7 +208,7 @@
                             <div class="text-center py-4">
                                 <div class="d-flex flex-column align-items-center">
                                     <i class="fas fa-clipboard fa-3x text-muted mb-3"></i>
-                                    <h5 class="font-weight-normal text-muted">{{ __('sub_categories\show.no_service_posts_found_in_this_subcatego') }}</h5>
+                                    <h5 class="font-weight-normal text-muted">{{('sub_categories\show.no_service_posts_found_in_this_subcatego') }}</h5>
                                     <a href="{{ route('service_posts.create') }}" class="btn btn-primary mt-3">
                                         <i class="fas fa-plus mr-1"></i> Create New Service Post
                                     </a>
@@ -248,3 +248,10 @@
         </script>
     @endpush
 @endsection
+
+
+
+
+
+
+

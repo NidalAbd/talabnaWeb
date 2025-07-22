@@ -16,14 +16,14 @@
                     <li class="nav-item has-treeview">
                         <a href="#" class="nav-link">
                             <i class="nav-icon fas fa-users teal"></i>
-                            <p>{{ __('partials\sidebar.admin') }}<i class="right fas fa-angle-left"></i></p>
+                            <p>{{('partials\sidebar.admin') }}<i class="right fas fa-angle-left"></i></p>
                         </a>
                         <ul class="nav nav-treeview">
                             @can('view_any_user')
                                 <li class="nav-item">
                                     <a href="{{ route('users.index') }}" class="nav-link">
                                         <i class="fas fa-users nav-icon"></i>
-                                        <p>{{ __('partials\sidebar.users') }}</p>
+                                        <p>{{('partials\sidebar.users') }}</p>
                                     </a>
                                 </li>
                             @endcan
@@ -31,7 +31,7 @@
                                 <li class="nav-item">
                                     <a href="{{ route('roles.index') }}" class="nav-link">
                                         <i class="fas fa-user-tag nav-icon"></i>
-                                        <p>{{ __('partials\sidebar.roles') }}</p>
+                                        <p>{{('partials\sidebar.roles') }}</p>
                                     </a>
                                 </li>
                             @endcan
@@ -39,7 +39,7 @@
                                 <li class="nav-item">
                                     <a href="{{ route('permissions.index') }}" class="nav-link">
                                         <i class="fas fa-user-shield nav-icon"></i>
-                                        <p>{{ __('partials\sidebar.permissions') }}</p>
+                                        <p>{{('partials\sidebar.permissions') }}</p>
                                     </a>
                                 </li>
                             @endcan
@@ -51,7 +51,7 @@
                     <li class="nav-item">
                         <a class="nav-link" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <i class="nav-icon fas fa-power-off red"></i>
-                            <p>{{ __('partials\sidebar.logout') }}</p>
+                            <p>{{ __('partials/sidebar.logout') }}</p>
                             <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: none;">
                                 @csrf
                             </form>
@@ -62,3 +62,10 @@
         </div>
     </aside>
 @endauth
+
+
+
+
+
+
+

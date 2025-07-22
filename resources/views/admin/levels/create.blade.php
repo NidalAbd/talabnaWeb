@@ -10,13 +10,13 @@
                 <i class="fas fa-layer-group mr-2"></i>
                 Create New Level
             </h1>
-            <p class="text-muted mt-1">{{ __('admin\levels\create.add_a_new_user_level_with_custom_feature') }}</p>
+            <p class="text-muted mt-1">{{('admin\levels\create.add_a_new_user_level_with_custom_feature') }}</p>
         </div>
         <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
-                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{ __('admin\levels\create.dashboard') }}</a></li>
-                <li class="breadcrumb-item"><a href="{{ route('levels.index') }}">{{ __('admin\levels\create.levels') }}</a></li>
-                <li class="breadcrumb-item active">{{ __('admin\levels\create.create') }}</li>
+                <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">{{('admin\levels\create.dashboard') }}</a></li>
+                <li class="breadcrumb-item"><a href="{{ route('levels.index') }}">{{('admin\levels\create.levels') }}</a></li>
+                <li class="breadcrumb-item active">{{('admin\levels\create.create') }}</li>
             </ol>
         </div>
     </div>
@@ -29,7 +29,7 @@
                     <div class="small-box bg-info">
                         <div class="inner">
                             <h3>{{ \App\Models\Level::count() }}</h3>
-                            <p>{{ __('admin\levels\create.total_levels') }}</p>
+                            <p>{{('admin\levels\create.total_levels') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-layer-group"></i>
@@ -39,8 +39,8 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-success">
                         <div class="inner">
-                            <h3>{{ \App\Models\Level::where('is_active', true)->{{ __('admin\levels\create.count_') }}</h3>
-                            <p>{{ __('admin\levels\create.active_levels') }}</p>
+                            <h3>{{ \App\Models\Level::where('is_active', true)-> __('admin\levels\create.count_') }}</h3>
+                            <p>{{('admin\levels\create.active_levels') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-check-circle"></i>
@@ -50,8 +50,8 @@
                 <div class="col-lg-3 col-6">
                     <div class="small-box bg-warning">
                         <div class="inner">
-                            <h3>{{ \App\Models\Level::where('is_premium', true)->{{ __('admin\levels\create.count_') }}</h3>
-                            <p>{{ __('admin\levels\create.premium_levels') }}</p>
+                            <h3>{{ \App\Models\Level::where('is_premium', true)-> __('admin\levels\create.count_') }}</h3>
+                            <p>{{('admin\levels\create.premium_levels') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-crown"></i>
@@ -62,7 +62,7 @@
                     <div class="small-box bg-danger">
                         <div class="inner">
                             <h3>{{ \App\Models\ServicePost::count() }}</h3>
-                            <p>{{ __('admin\levels\create.service_posts') }}</p>
+                            <p>{{('admin\levels\create.service_posts') }}</p>
                         </div>
                         <div class="icon">
                             <i class="fas fa-file-alt"></i>
@@ -92,7 +92,7 @@
                                     <!-- Arabic Name -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name_ar">Name (Arabic) <span class="text-danger">{{ __('admin\levels\create._') }}</span></label>
+                                            <label for="name_ar">Name (Arabic) <span class="text-danger">{{('admin\levels\create._') }}</span></label>
                                             <input type="text" class="form-control @error('name.ar') is-invalid @enderror" 
                                                    id="name_ar" name="name[ar]" value="{{ old('name.ar') }}" 
                                                    placeholder="اسم المستوى" required>
@@ -105,7 +105,7 @@
                                     <!-- English Name -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="name_en">Name (English) <span class="text-danger">{{ __('admin\levels\create._') }}</span></label>
+                                            <label for="name_en">Name (English) <span class="text-danger">{{('admin\levels\create._') }}</span></label>
                                             <input type="text" class="form-control @error('name.en') is-invalid @enderror" 
                                                    id="name_en" name="name[en]" value="{{ old('name.en') }}" 
                                                    placeholder="Level Name" required>
@@ -120,7 +120,7 @@
                                     <!-- Arabic Description -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="description_ar">{{ __('admin\levels\create.description_arabic_') }}</label>
+                                            <label for="description_ar">{{('admin\levels\create.description_arabic_') }}</label>
                                             <textarea class="form-control @error('description.ar') is-invalid @enderror" 
                                                       id="description_ar" name="description[ar]" rows="3" 
                                                       placeholder="وصف المستوى">{{ old('description.ar') }}</textarea>
@@ -133,7 +133,7 @@
                                     <!-- English Description -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="description_en">{{ __('admin\levels\create.description_english_') }}</label>
+                                            <label for="description_en">{{('admin\levels\create.description_english_') }}</label>
                                             <textarea class="form-control @error('description.en') is-invalid @enderror" 
                                                       id="description_en" name="description[en]" rows="3" 
                                                       placeholder="Level description">{{ old('description.en') }}</textarea>
@@ -148,11 +148,11 @@
                                     <!-- Icon -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="icon">{{ __('admin\levels\create.icon') }}</label>
+                                            <label for="icon">{{('admin\levels\create.icon') }}</label>
                                             <input type="text" class="form-control @error('icon') is-invalid @enderror" 
                                                    id="icon" name="icon" value="{{ old('icon') }}" 
                                                    placeholder="fas fa-star">
-                                            <small class="form-text text-muted">{{ __('admin\levels\create.fontawesome_icon_class_e_g_fas_fa_sta') }}</small>
+                                            <small class="form-text text-muted">{{('admin\levels\create.fontawesome_icon_class_e_g_fas_fa_sta') }}</small>
                                             @error('icon')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -162,7 +162,7 @@
                                     <!-- Color -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="color">Color <span class="text-danger">{{ __('admin\levels\create._') }}</span></label>
+                                            <label for="color">Color <span class="text-danger">{{('admin\levels\create._') }}</span></label>
                                             <input type="color" class="form-control @error('color') is-invalid @enderror" 
                                                    id="color" name="color" value="{{ old('color', '#6c757d') }}" required>
                                             @error('color')
@@ -174,7 +174,7 @@
                                     <!-- Display Order -->
                                     <div class="col-md-4">
                                         <div class="form-group">
-                                            <label for="display_order">{{ __('admin\levels\create.display_order') }}</label>
+                                            <label for="display_order">{{('admin\levels\create.display_order') }}</label>
                                             <input type="number" class="form-control @error('display_order') is-invalid @enderror" 
                                                    id="display_order" name="display_order" value="{{ old('display_order', 1) }}" 
                                                    min="1" max="100">
@@ -189,11 +189,11 @@
                                     <!-- Points Per Day -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="points_per_day">{{ __('admin\levels\create.points_per_day') }}</label>
+                                            <label for="points_per_day">{{('admin\levels\create.points_per_day') }}</label>
                                             <input type="number" class="form-control @error('points_per_day') is-invalid @enderror" 
                                                    id="points_per_day" name="points_per_day" value="{{ old('points_per_day', 0) }}" 
                                                    min="0" max="1000">
-                                            <small class="form-text text-muted">{{ __('admin\levels\create.cost_in_points_per_day_for_this_level') }}</small>
+                                            <small class="form-text text-muted">{{('admin\levels\create.cost_in_points_per_day_for_this_level') }}</small>
                                             @error('points_per_day')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -203,11 +203,11 @@
                                     <!-- View Boost Percentage -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="view_boost_percentage">{{ __('admin\levels\create.view_boost_') }}</label>
+                                            <label for="view_boost_percentage">{{('admin\levels\create.view_boost_') }}</label>
                                             <input type="number" class="form-control @error('view_boost_percentage') is-invalid @enderror" 
                                                    id="view_boost_percentage" name="view_boost_percentage" 
                                                    value="{{ old('view_boost_percentage', 0) }}" min="0" max="1000">
-                                            <small class="form-text text-muted">{{ __('admin\levels\create.percentage_increase_in_views_for_posts_w') }}</small>
+                                            <small class="form-text text-muted">{{('admin\levels\create.percentage_increase_in_views_for_posts_w') }}</small>
                                             @error('view_boost_percentage')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -219,11 +219,11 @@
                                     <!-- Features -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="features_ar">{{ __('admin\levels\create.features_arabic_') }}</label>
+                                            <label for="features_ar">{{('admin\levels\create.features_arabic_') }}</label>
                                             <textarea class="form-control @error('features.ar') is-invalid @enderror" 
                                                       id="features_ar" name="features[ar]" rows="3" 
                                                       placeholder="مميزات المستوى (سطر واحد لكل مميزة)">{{ old('features.ar') }}</textarea>
-                                            <small class="form-text text-muted">{{ __('admin\levels\create.one_feature_per_line') }}</small>
+                                            <small class="form-text text-muted">{{('admin\levels\create.one_feature_per_line') }}</small>
                                             @error('features.ar')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -233,11 +233,11 @@
                                     <!-- Features English -->
                                     <div class="col-md-6">
                                         <div class="form-group">
-                                            <label for="features_en">{{ __('admin\levels\create.features_english_') }}</label>
+                                            <label for="features_en">{{('admin\levels\create.features_english_') }}</label>
                                             <textarea class="form-control @error('features.en') is-invalid @enderror" 
                                                       id="features_en" name="features[en]" rows="3" 
                                                       placeholder="Level features (one per line)">{{ old('features.en') }}</textarea>
-                                            <small class="form-text text-muted">{{ __('admin\levels\create.one_feature_per_line') }}</small>
+                                            <small class="form-text text-muted">{{('admin\levels\create.one_feature_per_line') }}</small>
                                             @error('features.en')
                                                 <span class="invalid-feedback">{{ $message }}</span>
                                             @enderror
@@ -252,7 +252,7 @@
                                             <div class="custom-control custom-switch">
                                                 <input type="checkbox" class="custom-control-input" id="is_active" 
                                                        name="is_active" value="1" {{ old('is_active', true) ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="is_active">{{ __('admin\levels\create.active') }}</label>
+                                                <label class="custom-control-label" for="is_active">{{('admin\levels\create.active') }}</label>
                                             </div>
                                         </div>
                                     </div>
@@ -263,7 +263,7 @@
                                             <div class="custom-control custom-switch">
                                                 <input type="checkbox" class="custom-control-input" id="is_premium" 
                                                        name="is_premium" value="1" {{ old('is_premium') ? 'checked' : '' }}>
-                                                <label class="custom-control-label" for="is_premium">{{ __('admin\levels\create.premium_level') }}</label>
+                                                <label class="custom-control-label" for="is_premium">{{('admin\levels\create.premium_level') }}</label>
                                             </div>
                                         </div>
                                     </div>
@@ -305,10 +305,10 @@
                                     </div>
                                 </div>
                                 <div class="text-center">
-                                    <h5 id="preview-name">{{ __('admin\levels\create.level_name') }}</h5>
-                                    <p class="text-muted" id="preview-description">{{ __('admin\levels\create.level_description') }}</p>
-                                    <div class="badge badge-info" id="preview-points">{{ __('admin\levels\create.0_pts_day') }}</div>
-                                    <div class="badge badge-success" id="preview-boost">{{ __('admin\levels\create._0_') }}</div>
+                                    <h5 id="preview-name">{{('admin\levels\create.level_name') }}</h5>
+                                    <p class="text-muted" id="preview-description">{{('admin\levels\create.level_description') }}</p>
+                                    <div class="badge badge-info" id="preview-points">{{('admin\levels\create.0_pts_day') }}</div>
+                                    <div class="badge badge-success" id="preview-boost">{{('admin\levels\create._0_') }}</div>
                                 </div>
                             </div>
                         </div>
@@ -470,10 +470,10 @@ $(document).ready(function() {
                     <div class="level-badge mx-auto mb-3" style="background-color: ${$('#color').val() || '#6c757d'};">
                         <i class="${$('#icon').val() || 'fas fa-star'}" style="color: white; font-size: 24px;"></i>
                     </div>
-                    <h5>{{ __('admin\levels\create._name_ar_val_') }}</h5>
-                    <p class="text-muted">{{ __('admin\levels\create._description_ar_val_') }}</p>
-                    <div class="badge badge-info mr-2">{{ __('admin\levels\create._points_per_day_val_0_pts_d') }}</div>
-                    <div class="badge badge-success">{{ __('admin\levels\create._view_boost_percentage_val_') }}</div>
+                    <h5>{{('admin\levels\create._name_ar_val_') }}</h5>
+                    <p class="text-muted">{{('admin\levels\create._description_ar_val_') }}</p>
+                    <div class="badge badge-info mr-2">{{('admin\levels\create._points_per_day_val_0_pts_d') }}</div>
+                    <div class="badge badge-success">{{('admin\levels\create._view_boost_percentage_val_') }}</div>
                 </div>
             `,
             confirmButtonText: 'OK'
@@ -547,3 +547,9 @@ function clearForm() {
 </script>
 @endpush
 @endsection 
+
+
+
+
+
+

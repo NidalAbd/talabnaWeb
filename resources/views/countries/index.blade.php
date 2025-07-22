@@ -35,21 +35,21 @@
             <table class="table table-hover table-striped table-bordered align-middle">
                 <thead class="thead-light">
                     <tr>
-                        <th>{{ __('countries\index.id') }}</th>
-                        <th>{{ __('countries\index.flag') }}</th>
-                        <th>{{ __('countries\index.name') }}</th>
-                        <th>{{ __('countries\index.code') }}</th>
-                        <th>{{ __('countries\index.currency') }}</th>
-                        <th>{{ __('countries\index.cities') }}</th>
-                        <th>{{ __('countries\index.users') }}</th>
-                        <th>{{ __('countries\index.created') }}</th>
-                        <th>{{ __('countries\index.actions') }}</th>
+                        <th>{{('countries\index.id') }}</th>
+                        <th>{{('countries\index.flag') }}</th>
+                        <th>{{('countries\index.name') }}</th>
+                        <th>{{('countries\index.code') }}</th>
+                        <th>{{('countries\index.currency') }}</th>
+                        <th>{{('countries\index.cities') }}</th>
+                        <th>{{('countries\index.users') }}</th>
+                        <th>{{('countries\index.created') }}</th>
+                        <th>{{('countries\index.actions') }}</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($countries as $country)
                         <tr>
-                            <td><span class="badge badge-secondary">{{ $country->id }}</span></td>
+                            <td><span class="badge badge-secondary">{{ $country->count() }}</span></td>
                             <td>
                                 @php
                                     $photo = $country->photos->first();
@@ -57,7 +57,7 @@
                                 @if($photo)
                                     <img src="{{ asset($photo->src) }}" alt="Flag" class="img-thumbnail" style="max-height: 30px;">
                                 @else
-                                    <span class="badge badge-secondary">{{ __('countries\index.no_flag') }}</span>
+                                    <span class="badge badge-secondary">{{('countries\index.no_flag') }}</span>
                                 @endif
                             </td>
                             <td>
@@ -72,9 +72,9 @@
                             <td><span class="badge badge-success">{{ $country->users->count() ?? 'FIXME' }}</span></td>
                             <td><span class="text-muted">{{ $country->created_at ? $country->created_at->format('Y-m-d') : '-' }}</span></td>
                             <td>
-                                <a href="{{ route('countries.show', $country->id) }}" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
-                                <a href="{{ route('countries.edit', $country->id) }}" class="btn btn-xs btn-outline-primary" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
-                                <form action="{{ route('countries.destroy', $country->id) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
+                                <a href="{{ route('countries.show', $country->count()) }}" class="btn btn-xs btn-outline-info" data-toggle="tooltip" title="View"><i class="fas fa-eye"></i></a>
+                                <a href="{{ route('countries.edit', $country->count()) }}" class="btn btn-xs btn-outline-primary" data-toggle="tooltip" title="Edit"><i class="fas fa-edit"></i></a>
+                                <form action="{{ route('countries.destroy', $country->count()) }}" method="POST" class="d-inline-block" onsubmit="return confirm('Are you sure?');">
                                     @csrf
                                     @method('DELETE')
                                     <button type="submit" class="btn btn-xs btn-outline-danger" data-toggle="tooltip" title="Delete"><i class="fas fa-trash"></i></button>
@@ -112,7 +112,7 @@
     function printTable(btn) {
         let table = btn.closest('.card').querySelector('table');
         let w = window.open();
-        w.document.write('<html><head><title>{{ __('countries\index.print_table') }}</title>{{ __('countries\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{ __('countries\index._w_document_write_') }}</head><body>{{ __('countries\index._w_document_write_table_outer') }}</body></html>');
+        w.document.write('<html><head><title>{{('countries\index.print_table') }}</title>{{('countries\index._w_document_write_') }}<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">{{('countries\index._w_document_write_') }}</head><body>{{('countries\index._w_document_write_table_outer') }}</body></html>');
         w.print();
         w.close();
     }
@@ -140,3 +140,10 @@
 </style>
 @endpush
 @stop
+
+
+
+
+
+
+

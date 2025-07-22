@@ -9,7 +9,7 @@
             Premium Feature Details
         </h1>
         <div>
-            <a href="{{ route('admin.premium-features.edit', $feature->id) }}" class="btn btn-primary">
+            <a href="{{ route('admin.premium-features.edit', $feature->count()) }}" class="btn btn-primary">
                 <i class="fas fa-edit mr-1"></i> Edit
             </a>
             <a href="{{ route('admin.premium-features.index') }}" class="btn btn-secondary">
@@ -36,27 +36,27 @@
                         <div class="col-md-6">
                             <table class="table table-borderless">
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.id_') }}</strong></td>
-                                    <td>{{ $feature->field</td>
+                                    <td><strong>{{('admin\premium_features\show.id_') }}</strong></td>
+                                    <td>{{ $feature->id</td> }}
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.name_arabic_') }}</strong></td>
-                                    <td>{{ $feature->field</td>
+                                    <td><strong>{{('admin\premium_features\show.name_arabic_') }}</strong></td>
+                                    <td>{{ $feature->id</td> }}
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.name_english_') }}</strong></td>
-                                    <td>{{ $feature->field</td>
+                                    <td><strong>{{('admin\premium_features\show.name_english_') }}</strong></td>
+                                    <td>{{ $feature->id</td> }}
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.category_') }}</strong></td>
+                                    <td><strong>{{('admin\premium_features\show.category_') }}</strong></td>
                                     <td>
-                                        <span class="badge badge-info">{{ ucfirst(str_replace('_', ' ', $feature->field</span>
+                                        <span class="badge badge-info">{{ ucfirst(str_replace('_', ' ', $feature->id</span> }}
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.points_cost_') }}</strong></td>
+                                    <td><strong>{{('admin\premium_features\show.points_cost_') }}</strong></td>
                                     <td>
-                                        <span class="badge badge-primary">{{ number_format($feature->field</span>
+                                        <span class="badge badge-primary">{{ number_format($feature->id</span> ) }}
                                     </td>
                                 </tr>
                             </table>
@@ -64,52 +64,52 @@
                         <div class="col-md-6">
                             <table class="table table-borderless">
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.duration_') }}</strong></td>
+                                    <td><strong>{{('admin\premium_features\show.duration_') }}</strong></td>
                                     <td>
-                                        <span class="badge badge-success">{{ $feature->field</span>
+                                        <span class="badge badge-success">{{ $feature->id</span> }}
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.status_') }}</strong></td>
+                                    <td><strong>{{('admin\premium_features\show.status_') }}</strong></td>
                                     <td>
                                         @if($feature->is_active)
-                                            <span class="badge badge-success">{{ __('admin\premium_features\show.active') }}</span>
+                                            <span class="badge badge-success">{{('admin\premium_features\show.active') }}</span>
                                         @else
-                                            <span class="badge badge-danger">{{ __('admin\premium_features\show.inactive') }}</span>
+                                            <span class="badge badge-danger">{{('admin\premium_features\show.inactive') }}</span>
                                         @endif
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.popular_') }}</strong></td>
+                                    <td><strong>{{('admin\premium_features\show.popular_') }}</strong></td>
                                     <td>
                                         @if($feature->is_popular)
-                                            <span class="badge badge-warning">{{ __('admin\premium_features\show.yes') }}</span>
+                                            <span class="badge badge-warning">{{('admin\premium_features\show.yes') }}</span>
                                         @else
-                                            <span class="badge badge-secondary">{{ __('admin\premium_features\show.no') }}</span>
+                                            <span class="badge badge-secondary">{{('admin\premium_features\show.no') }}</span>
                                         @endif
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.icon_') }}</strong></td>
+                                    <td><strong>{{('admin\premium_features\show.icon_') }}</strong></td>
                                     <td>
                                         @if($feature->icon)
                                             <i class="{{ $feature->icon }}" style="font-size: 18px; color: {{ $feature->color ?? '#ffc107' }};"></i>
-                                            <span class="ml-2">{{ $feature->field</span>
+                                            <span class="ml-2">{{ $feature->id</span> }}
                                         @else
-                                            <span class="text-muted">{{ __('admin\premium_features\show.none') }}</span>
+                                            <span class="text-muted">{{('admin\premium_features\show.none') }}</span>
                                         @endif
                                     </td>
                                 </tr>
                                 <tr>
-                                    <td><strong>{{ __('admin\premium_features\show.color_') }}</strong></td>
+                                    <td><strong>{{('admin\premium_features\show.color_') }}</strong></td>
                                     <td>
                                         @if($feature->color)
                                             <div class="d-flex align-items-center">
-                                                <div class="color-preview mr-2" style="width: 20px; height: 20px; background-color: {{ $feature->field</div>
-                                                <span>{{ $feature->field</span>
+                                                <div class="color-preview mr-2" style="width: 20px; height: 20px; background-color: {{ $feature->id</div> }}
+                                                <span>{{ $feature->id</span> }}
                                             </div>
                                         @else
-                                            <span class="text-muted">{{ __('admin\premium_features\show.default') }}</span>
+                                            <span class="text-muted">{{('admin\premium_features\show.default') }}</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -120,7 +120,7 @@
                     <!-- Descriptions -->
                     <div class="row mt-4">
                         <div class="col-md-6">
-                            <h5><i class="fas fa-language mr-2"></i>{{ __('admin\premium_features\show.description_arabic_') }}</h5>
+                            <h5><i class="fas fa-language mr-2"></i>{{('admin\premium_features\show.description_arabic_') }}</h5>
                             <div class="card bg-light">
                                 <div class="card-body">
                                     {{ $feature->description['ar'] ?? 'No description available' }}
@@ -128,7 +128,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <h5><i class="fas fa-language mr-2"></i>{{ __('admin\premium_features\show.description_english_') }}</h5>
+                            <h5><i class="fas fa-language mr-2"></i>{{('admin\premium_features\show.description_english_') }}</h5>
                             <div class="card bg-light">
                                 <div class="card-body">
                                     {{ $feature->description['en'] ?? 'No description available' }}
@@ -140,15 +140,15 @@
                     <!-- Timestamps -->
                     <div class="row mt-4">
                         <div class="col-12">
-                            <h5><i class="fas fa-clock mr-2"></i>{{ __('admin\premium_features\show.timestamps') }}</h5>
+                            <h5><i class="fas fa-clock mr-2"></i>{{('admin\premium_features\show.timestamps') }}</h5>
                             <div class="card bg-light">
                                 <div class="card-body">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <strong>{{ __('admin\premium_features\show.created_') }}</strong> {{ $feature->created_at->format('M d, Y H:i:s') }}
+                                            <strong>{{('admin\premium_features\show.created_') }}</strong> {{ $feature->created_at->format('M d, Y H:i:s') }}
                                         </div>
                                         <div class="col-md-6">
-                                            <strong>{{ __('admin\premium_features\show.updated_') }}</strong> {{ $feature->updated_at->format('M d, Y H:i:s') }}
+                                            <strong>{{('admin\premium_features\show.updated_') }}</strong> {{ $feature->updated_at->format('M d, Y H:i:s') }}
                                         </div>
                                     </div>
                                 </div>
@@ -174,12 +174,12 @@
                             <i class="{{ $feature->icon ?? 'fas fa-crown' }}" 
                                style="font-size: 64px; color: {{ $feature->color ?? '#ffc107' }};"></i>
                         </div>
-                        <h4>{{ $feature->field</h4>
-                        <p class="text-muted">{{ $feature->field</p>
-                        <div class="badge badge-primary mr-2 mb-2">{{ number_format($feature->field</div>
-                        <div class="badge badge-info mb-2">{{ $feature->field</div>
+                        <h4>{{ $feature->id</h4> }}
+                        <p class="text-muted">{{ $feature->id</p> }}
+                        <div class="badge badge-primary mr-2 mb-2">{{ number_format($feature->id</div> }}
+                        <div class="badge badge-info mb-2">{{ $feature->id</div> ) }}
                         @if($feature->is_popular)
-                            <div class="badge badge-warning">{{ __('admin\premium_features\show.popular') }}</div>
+                            <div class="badge badge-warning">{{('admin\premium_features\show.popular') }}</div>
                         @endif
                     </div>
                 </div>
@@ -195,10 +195,10 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-2">
-                        <a href="{{ route('admin.premium-features.edit', $feature->id) }}" class="btn btn-primary">
+                        <a href="{{ route('admin.premium-features.edit', $feature->count()) }}" class="btn btn-primary">
                             <i class="fas fa-edit mr-1"></i> Edit Feature
                         </a>
-                        <form action="{{ route('admin.premium-features.destroy', $feature->id) }}" method="POST" class="d-inline">
+                        <form action="{{ route('admin.premium-features.destroy', $feature->count()) }}" method="POST" class="d-inline">
                             @csrf
                             @method('DELETE')
                             <button type="submit" class="btn btn-danger w-100" 
@@ -227,7 +227,7 @@
                             <div class="info-box bg-info">
                                 <span class="info-box-icon"><i class="fas fa-users"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">{{ __('admin\premium_features\show.users') }}</span>
+                                    <span class="info-box-text">{{('admin\premium_features\show.users') }}</span>
                                     <span class="info-box-number">0</span>
                                 </div>
                             </div>
@@ -236,7 +236,7 @@
                             <div class="info-box bg-success">
                                 <span class="info-box-icon"><i class="fas fa-shopping-cart"></i></span>
                                 <div class="info-box-content">
-                                    <span class="info-box-text">{{ __('admin\premium_features\show.purchases') }}</span>
+                                    <span class="info-box-text">{{('admin\premium_features\show.purchases') }}</span>
                                     <span class="info-box-number">0</span>
                                 </div>
                             </div>
@@ -271,3 +271,9 @@ $(document).ready(function() {
 });
 </script>
 @stop 
+
+
+
+
+
+

@@ -27,11 +27,11 @@
                             <table class="table table-striped">
                                 <thead>
                                     <tr>
-                                        <th>{{ __('admin\point_packages\analytics.package_name') }}</th>
-                                        <th>{{ __('admin\point_packages\analytics.points') }}</th>
-                                        <th>{{ __('admin\point_packages\analytics.price') }}</th>
-                                        <th>{{ __('admin\point_packages\analytics.sales_count') }}</th>
-                                        <th>{{ __('admin\point_packages\analytics.status') }}</th>
+                                        <th>{{('admin\point_packages\analytics.package_name') }}</th>
+                                        <th>{{('admin\point_packages\analytics.points') }}</th>
+                                        <th>{{('admin\point_packages\analytics.price') }}</th>
+                                        <th>{{('admin\point_packages\analytics.sales_count') }}</th>
+                                        <th>{{('admin\point_packages\analytics.status') }}</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -61,9 +61,9 @@
                                             </td>
                                             <td>
                                                 @if($package->is_active)
-                                                    <span class="badge badge-success">{{ __('admin\point_packages\analytics.active') }}</span>
+                                                    <span class="badge badge-success">{{('admin\point_packages\analytics.active') }}</span>
                                                 @else
-                                                    <span class="badge badge-secondary">{{ __('admin\point_packages\analytics.inactive') }}</span>
+                                                    <span class="badge badge-secondary">{{('admin\point_packages\analytics.inactive') }}</span>
                                                 @endif
                                             </td>
                                         </tr>
@@ -91,7 +91,7 @@
                         @else
                             <div class="text-center text-muted">
                                 <i class="fas fa-chart-line fa-3x mb-3"></i>
-                                <p>{{ __('admin\point_packages\analytics.no_sales_data_available') }}</p>
+                                <p>{{('admin\point_packages\analytics.no_sales_data_available') }}</p>
                             </div>
                         @endif
                     </div>
@@ -104,8 +104,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-info">
                     <div class="inner">
-                        <h3>{{ $packageSales->field</h3>
-                        <p>{{ __('admin\point_packages\analytics.total_packages') }}</p>
+                        <h3>{{ $packageSales->id</h3> }}
+                        <p>{{('admin\point_packages\analytics.total_packages') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-box"></i>
@@ -116,8 +116,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-success">
                     <div class="inner">
-                        <h3>{{ $packageSales->field</h3>
-                        <p>{{ __('admin\point_packages\analytics.active_packages') }}</p>
+                        <h3>{{ $packageSales->id</h3> }}
+                        <p>{{('admin\point_packages\analytics.active_packages') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-check-circle"></i>
@@ -128,8 +128,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-warning">
                     <div class="inner">
-                        <h3>{{ $packageSales->field</h3>
-                        <p>{{ __('admin\point_packages\analytics.total_sales') }}</p>
+                        <h3>{{ $packageSales->id</h3> }}
+                        <p>{{('admin\point_packages\analytics.total_sales') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-shopping-cart"></i>
@@ -140,8 +140,8 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-danger">
                     <div class="inner">
-                        <h3>{{ number_format($monthlySales->field</h3>
-                        <p>{{ __('admin\point_packages\analytics.total_points_sold') }}</p>
+                        <h3>{{ number_format($monthlySales->id</h3> ) }}
+                        <p>{{('admin\point_packages\analytics.total_points_sold') }}</p>
                     </div>
                     <div class="icon">
                         <i class="fas fa-coins"></i>
@@ -203,3 +203,9 @@
         @endif
     </script>
 @stop 
+
+
+
+
+
+

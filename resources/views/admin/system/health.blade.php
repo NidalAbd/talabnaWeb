@@ -24,7 +24,7 @@
                     <div class="info-box bg-gradient-{{ $systemHealth['database']['status'] == 'healthy' ? 'success' : 'danger' }}">
                         <span class="info-box-icon"><i class="fas fa-database"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\system\health.database') }}</span>
+                            <span class="info-box-text">{{('admin\system\health.database') }}</span>
                             <span class="info-box-number">{{ ucfirst($systemHealth['database']['status']) }}</span>
                             <div class="progress">
                                 <div class="progress-bar" style="width: {{ $systemHealth['database']['status'] == 'healthy' ? 100 : 50 }}%"></div>
@@ -41,7 +41,7 @@
                     <div class="info-box bg-gradient-{{ $systemHealth['storage']['status'] == 'healthy' ? 'success' : ($systemHealth['storage']['status'] == 'warning' ? 'warning' : 'danger') }}">
                         <span class="info-box-icon"><i class="fas fa-hdd"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\system\health.storage') }}</span>
+                            <span class="info-box-text">{{('admin\system\health.storage') }}</span>
                             <span class="info-box-number">{{ ucfirst($systemHealth['storage']['status']) }}</span>
                             <div class="progress">
                                 <div class="progress-bar" style="width: {{ $systemHealth['storage']['usage_percentage'] }}%"></div>
@@ -58,7 +58,7 @@
                     <div class="info-box bg-gradient-{{ $systemHealth['cache']['status'] == 'healthy' ? 'success' : 'danger' }}">
                         <span class="info-box-icon"><i class="fas fa-memory"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\system\health.cache') }}</span>
+                            <span class="info-box-text">{{('admin\system\health.cache') }}</span>
                             <span class="info-box-number">{{ ucfirst($systemHealth['cache']['status']) }}</span>
                             <div class="progress">
                                 <div class="progress-bar" style="width: {{ $systemHealth['cache']['status'] == 'healthy' ? 100 : 50 }}%"></div>
@@ -75,7 +75,7 @@
                     <div class="info-box bg-gradient-info">
                         <span class="info-box-icon"><i class="fab fa-php"></i></span>
                         <div class="info-box-content">
-                            <span class="info-box-text">{{ __('admin\system\health.php_version') }}</span>
+                            <span class="info-box-text">{{('admin\system\health.php_version') }}</span>
                             <span class="info-box-number">{{ $systemHealth['performance']['php_version'] }}</span>
                             <div class="progress">
                                 <div class="progress-bar" style="width: 100%"></div>
@@ -110,7 +110,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.status') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.status') }}</strong></td>
                                             <td>
                                                 <span class="badge badge-{{ $systemHealth['database']['status'] == 'healthy' ? 'success' : 'danger' }}">
                                                     <i class="fas fa-{{ $systemHealth['database']['status'] == 'healthy' ? 'check' : 'times' }} mr-1"></i>
@@ -119,21 +119,21 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.connection') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.connection') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-plug text-success mr-1"></i>
                                                 {{ $systemHealth['database']['connection'] }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.tables_count') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.tables_count') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-table text-info mr-1"></i>
                                                 {{ $systemHealth['database']['tables_count'] }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.last_check') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.last_check') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-clock text-muted mr-1"></i>
                                                 {{ $systemHealth['database']['last_check']->format('Y-m-d H:i:s') }}
@@ -165,7 +165,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.status') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.status') }}</strong></td>
                                             <td>
                                                 <span class="badge badge-{{ $systemHealth['storage']['status'] == 'healthy' ? 'success' : ($systemHealth['storage']['status'] == 'warning' ? 'warning' : 'danger') }}">
                                                     <i class="fas fa-{{ $systemHealth['storage']['status'] == 'healthy' ? 'check' : 'exclamation-triangle' }} mr-1"></i>
@@ -174,28 +174,28 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.total_space') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.total_space') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-hdd text-primary mr-1"></i>
                                                 {{ $systemHealth['storage']['total_space'] }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.used_space') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.used_space') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-chart-pie text-warning mr-1"></i>
                                                 {{ $systemHealth['storage']['used_space'] }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.free_space') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.free_space') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-chart-pie text-success mr-1"></i>
                                                 {{ $systemHealth['storage']['free_space'] }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.usage') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.usage') }}</strong></td>
                                             <td>
                                                 <div class="progress">
                                                     <div class="progress-bar bg-{{ $systemHealth['storage']['usage_percentage'] < 70 ? 'success' : ($systemHealth['storage']['usage_percentage'] < 90 ? 'warning' : 'danger') }}" 
@@ -233,28 +233,28 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.memory_usage') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.memory_usage') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-memory text-info mr-1"></i>
                                                 {{ $systemHealth['performance']['memory_usage'] }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.peak_memory') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.peak_memory') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-chart-line text-warning mr-1"></i>
                                                 {{ $systemHealth['performance']['peak_memory'] }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.execution_time') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.execution_time') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-stopwatch text-primary mr-1"></i>
                                                 {{ $systemHealth['performance']['execution_time'] }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.laravel_version') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.laravel_version') }}</strong></td>
                                             <td>
                                                 <i class="fab fa-laravel text-danger mr-1"></i>
                                                 {{ $systemHealth['performance']['laravel_version'] }}
@@ -286,7 +286,7 @@
                                 <table class="table table-bordered">
                                     <tbody>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.status') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.status') }}</strong></td>
                                             <td>
                                                 <span class="badge badge-{{ $systemHealth['cache']['status'] == 'healthy' ? 'success' : 'danger' }}">
                                                     <i class="fas fa-{{ $systemHealth['cache']['status'] == 'healthy' ? 'check' : 'times' }} mr-1"></i>
@@ -295,21 +295,21 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.hit_rate') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.hit_rate') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-bullseye text-success mr-1"></i>
                                                 {{ $systemHealth['cache']['hit_rate'] ?? '85%' }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.cache_size') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.cache_size') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-database text-info mr-1"></i>
                                                 {{ $systemHealth['cache']['size'] ?? '2.5 MB' }}
                                             </td>
                                         </tr>
                                         <tr>
-                                            <td><strong>{{ __('admin\system\health.last_cleanup') }}</strong></td>
+                                            <td><strong>{{('admin\system\health.last_cleanup') }}</strong></td>
                                             <td>
                                                 <i class="fas fa-broom text-muted mr-1"></i>
                                                 {{ $systemHealth['cache']['last_cleanup'] ?? '2 hours ago' }}
@@ -518,3 +518,9 @@ function backupSystem() {
 }
 </script>
 @endsection 
+
+
+
+
+
+

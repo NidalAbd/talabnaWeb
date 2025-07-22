@@ -782,13 +782,13 @@
                     @guest
                         @if (Route::has('login'))
                             <li class="nav-item">
-                                <a class="btn btn-outline-primary me-2" href="{{ route('login') }}">{{ __('Login') }}</a>
+                                <a class="btn btn-outline-primary me-2" href="{{ route('login') }}">{{__('Login') }}</a>
                             </li>
                         @endif
                     @else
                         @if(Auth::user()->hasRole(['admin']))
                             <li class="nav-item">
-                                <a class="nav-link" href="{{ route('admin.dashboard') }}">{{ __('Dashboard') }}</a>
+                                <a class="nav-link" href="{{ route('admin.dashboard') }}">{{__('Dashboard') }}</a>
                             </li>
                         @endif
                         <li class="nav-item dropdown">
@@ -799,7 +799,7 @@
                                 <li>
                                     <a class="dropdown-item" href="{{ route('logout') }}"
                                        onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
-                                        <i class="fas fa-sign-out-alt me-2"></i> {{ __('Logout') }}
+                                        <i class="fas fa-sign-out-alt me-2"></i> {{__('Logout') }}
                                     </a>
                                     <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
                                         @csrf
@@ -820,11 +820,11 @@
             <div class="container">
                 <div class="d-flex flex-column flex-md-row align-items-center justify-content-between">
                     <div class="mb-3 mb-md-0">
-                        <h5 class="mb-1">{{ __('welcome.use_the_talabna_app_for_full_features_') }}</h5>
-                        <p class="mb-0">{{ __('welcome.post_services_manage_your_listings_and') }}</p>
+                        <h5 class="mb-1">{{__('welcome.use_the_talabna_app_for_full_features_') }}</h5>
+                        <p class="mb-0">{{__('welcome.post_services_manage_your_listings_and') }}</p>
                     </div>
                     <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" class="btn btn-light" style="color: var(--primary);" target="_blank">
-                        <i class="fab fa-google-play me-2"></i> Download Now
+                        <i class="fab fa-google-play me-2"></i> {{__('Download Now') }}
                     </a>
                 </div>
             </div>
@@ -838,11 +838,11 @@
         <div class="row align-items-center">
             <div class="col-lg-6">
                 <div class="hero-content">
-                    <h1 class="hero-title">{{ __('welcome.find_offer_services_with_talabna') }}</h1>
-                    <p class="hero-subtitle">{{ __('welcome.connect_with_local_service_providers_or_') }}</p>
+                    <h1 class="hero-title">{{__('welcome.find_offer_services_with_talabna') }}</h1>
+                    <p class="hero-subtitle">{{__('welcome.connect_with_local_service_providers_or_') }}</p>
                     <div class="hero-buttons">
-                        <a href="#categories" class="btn btn-light">{{ __('welcome.explore_services') }}</a>
-                        <a href="{{ route('register') }}" class="btn btn-outline-light">{{ __('welcome.join_now') }}</a>
+                        <a href="#categories" class="btn btn-light">{{__('welcome.explore_services') }}</a>
+                        <a href="{{ route('register') }}" class="btn btn-outline-light">{{__('welcome.join_now') }}</a>
                     </div>
                 </div>
             </div>
@@ -884,8 +884,8 @@
                             <rect width="180" height="220" rx="15" fill="url(#cardGradient)" />
                             <circle cx="90" cy="70" r="40" fill="#f0edff" />
                             <path d="M78 50 L78 90 L102 90 L102 50 L78 50 Z M90 82 C88.3 82 87 83.3 87 85 C87 86.7 88.3 88 90 88 C91.7 88 93 86.7 93 85 C93 83.3 91.7 82 90 82 Z" fill="#5035FF" />
-                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">{{ __('welcome.mobile') }}</text>
-                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">{{ __('welcome.350_services') }}</text>
+                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">{{__('welcome.mobile') }}</text>
+                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">{{__('welcome.350_services') }}</text>
                         </g>
 
                         <!-- Card 2: Real Estate -->
@@ -893,8 +893,8 @@
                             <rect width="180" height="220" rx="15" fill="url(#cardGradient)" />
                             <circle cx="90" cy="70" r="40" fill="#f0edff" />
                             <path d="M65 90 L90 55 L115 90 L65 90 Z M75 90 L75 105 L105 105 L105 90 L75 90 Z" fill="#5035FF" />
-                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">{{ __('welcome.real_estate') }}</text>
-                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">{{ __('welcome.420_listings') }}</text>
+                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">{{__('welcome.real_estate') }}</text>
+                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">{{__('welcome.420_listings') }}</text>
                         </g>
 
                         <!-- Card 3: Jobs -->
@@ -902,8 +902,8 @@
                             <rect width="180" height="220" rx="15" fill="url(#cardGradient)" />
                             <circle cx="90" cy="70" r="40" fill="#f0edff" />
                             <path d="M75 50 L105 50 L105 60 L115 60 L115 100 L65 100 L65 60 L75 60 L75 50 Z M90 60 L90.001 60 Z" fill="#5035FF" />
-                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">{{ __('welcome.jobs') }}</text>
-                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">{{ __('welcome.280_positions') }}</text>
+                            <text x="90" y="130" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#192A3E" text-anchor="middle">{{__('welcome.jobs') }}</text>
+                            <text x="90" y="155" font-family="Arial, sans-serif" font-size="14" fill="#6C757D" text-anchor="middle">{{__('welcome.280_positions') }}</text>
                         </g>
 
                         <!-- Search bar -->
@@ -911,16 +911,16 @@
                             <rect width="300" height="60" rx="30" fill="white" />
                             <circle cx="40" cy="30" r="15" fill="none" stroke="#5035FF" stroke-width="3" />
                             <line x1="50" y1="40" x2="60" y2="50" stroke="#5035FF" stroke-width="3" stroke-linecap="round" />
-                            <text x="115" y="35" font-family="Arial, sans-serif" font-size="16" fill="#6C757D" text-anchor="middle">{{ __('welcome.find_services_') }}</text>
+                            <text x="115" y="35" font-family="Arial, sans-serif" font-size="16" fill="#6C757D" text-anchor="middle">{{__('welcome.find_services_') }}</text>
                             <rect x="200" y="10" width="80" height="40" rx="20" fill="#5035FF" />
-                            <text x="240" y="35" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">{{ __('welcome.search') }}</text>
+                            <text x="240" y="35" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white" text-anchor="middle">{{__('welcome.search') }}</text>
                         </g>
 
                         <!-- Logo text -->
-                        <text x="120" y="80" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white">{{ __('welcome.talabna') }}</text>
-                        <text x="120" y="110" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.8)">{{ __('welcome.find_offer_services') }}</text>
+                        <text x="120" y="80" font-family="Arial, sans-serif" font-size="36" font-weight="bold" fill="white">{{__('welcome.talabna') }}</text>
+                        <text x="120" y="110" font-family="Arial, sans-serif" font-size="18" fill="rgba(255,255,255,0.8)">{{__('welcome.find_offer_services') }}</text>
                     </svg>
-                </div>.
+                </div>
         </div>
     </div>
 </section>
@@ -931,19 +931,19 @@
         <div class="stats-container">
             <div class="stat-item">
                 <div class="stat-number">{{ number_format($allService) }}</div>
-                <div class="stat-label">{{ __('welcome.active_services') }}</div>
+                <div class="stat-label">{{__('welcome.active_services') }}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">{{ number_format($users) }}</div>
-                <div class="stat-label">{{ __('welcome.registered_users') }}</div>
+                <div class="stat-label">{{__('welcome.registered_users') }}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">{{ number_format($allDiamond + $allGolden) }}</div>
-                <div class="stat-label">{{ __('welcome.premium_services') }}</div>
+                <div class="stat-label">{{__('welcome.premium_services') }}</div>
             </div>
             <div class="stat-item">
                 <div class="stat-number">{{ number_format($purchaseRequests) }}</div>
-                <div class="stat-label">{{ __('welcome.transactions') }}</div>
+                <div class="stat-label">{{__('welcome.transactions') }}</div>
             </div>
         </div>
     </div>
@@ -952,8 +952,8 @@
 <!-- Categories Section -->
 <section class="section" id="categories">
     <div class="container">
-        <h2 class="section-title">{{ __('welcome.browse_service_categories') }}</h2>
-        <p class="section-description">{{ __('welcome.explore_our_wide_range_of_service_catego') }}</p>
+        <h2 class="section-title">{{__('welcome.browse_service_categories') }}</h2>
+        <p class="section-description">{{__('welcome.explore_our_wide_range_of_service_catego') }}</p>
 
         <div class="row">
             @php
@@ -985,8 +985,8 @@
 <!-- Featured Posts -->
 <section class="featured-posts section-light">
     <div class="container">
-        <h2 class="section-title">{{ __('welcome.featured_services') }}</h2>
-        <p class="section-description">{{ __('welcome.discover_our_top_rated_premium_services_') }}</p>
+        <h2 class="section-title">{{__('welcome.featured_services') }}</h2>
+        <p class="section-description">{{__('welcome.discover_our_top_rated_premium_services_') }}</p>
 
         <div class="row">
             @forelse($featuredPosts as $post)
@@ -1013,11 +1013,11 @@
                             @endif
                             <div class="post-badge {{ $post->level ? $post->level->name['ar'] : 'عادي' }}">
                                 @if($post->level && $post->level->name['ar'] == 'ماسي')
-                                    <i class="fas fa-gem"></i> Diamond
+                                    <i class="fas fa-gem"></i> {{__('Diamond') }}
                                 @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
-                                    <i class="fas fa-medal"></i> Gold
+                                    <i class="fas fa-medal"></i> {{__('Gold') }}
                                 @else
-                                    <i class="fas fa-check"></i> Standard
+                                    <i class="fas fa-check"></i> {{__('Standard') }}
                                 @endif
                             </div>
                         </div>
@@ -1040,7 +1040,7 @@
                 </div>
             @empty
                 <div class="col-12 text-center">
-                    <p>{{ __('welcome.no_featured_posts_available_at_the_momen') }}</p>
+                    <p>{{__('welcome.no_featured_posts_available_at_the_momen') }}</p>
                 </div>
             @endforelse
         </div>
@@ -1050,13 +1050,13 @@
 <!-- Subcategory Section -->
 <section class="subcategory-section">
     <div class="container">
-        <h2 class="section-title">{{ __('welcome.explore_subcategories') }}</h2>
-        <p class="section-description">{{ __('welcome.find_specific_services_by_browsing_throu') }}</p>
+        <h2 class="section-title">{{__('welcome.explore_subcategories') }}</h2>
+        <p class="section-description">{{__('welcome.find_specific_services_by_browsing_throu') }}</p>
 
         <!-- Tabs for different main categories -->
         <div class="subcategory-tabs">
             @foreach($categories as $index => $category)
-                <div class="subcategory-tab {{ $index === 0 ? 'active' : '' }}" data-category="{{ $category->id }}">
+                <div class="subcategory-tab {{ $index === 0 ? 'active' : '' }}" data-category="{{ $category->count() }}">
                     {{ is_array($category->name) ? ($category->name[app()->getLocale()] ?? reset($category->name)) : $category->name }}
                 </div>
             @endforeach
@@ -1064,13 +1064,13 @@
 
         <!-- Subcategory content -->
         @foreach($categories as $index => $category)
-            <div class="subcategory-content {{ $index === 0 ? 'active' : '' }}" id="subcategory-{{ $category->id }}">
+            <div class="subcategory-content {{ $index === 0 ? 'active' : '' }}" id="subcategory-{{ $category->count() }}">
                 <div class="row">
                     @forelse($subcategories[$category->id] as $subcategory)
                         <div class="col-lg-3 col-md-4 col-6">
                             <a href="#" class="category-card">
                                 <div class="category-icon">
-                                    <i class="{{ $categoryIcons[$category->field] ?? 'FIXME' }}"></i>
+                                    <i class="{{ $categoryIcons[$category->id] ?? 'FIXME' }}"></i>
                                 </div>
                                 <h3 class="category-name">{{ is_array($subcategory->name) ? ($subcategory->name[app()->getLocale()] ?? reset($subcategory->name)) : $subcategory->name }}</h3>
                                 <div class="category-count">{{ number_format($subcategory->service_posts_count ?? 0) }}</div>
@@ -1078,14 +1078,14 @@
                         </div>
                     @empty
                         <div class="col-12 text-center">
-                            <p>{{ __('welcome.no_subcategories_available_for_this_cate') }}</p>
+                            <p>{{__('welcome.no_subcategories_available_for_this_cate') }}</p>
                         </div>
                     @endforelse
                 </div>
 
                 <!-- Latest posts for this category -->
                 <div class="mt-5">
-                    <h3 class="mb-4">Latest in {{ is_array($category->name) ? ($category->name[app()->getLocale()] ?? reset($category->name)) : $category->name }}</h3>
+                    <h3 class="mb-4">{{__('welcome.latest_in') }} {{ is_array($category->name) ? ($category->name[app()->getLocale()] ?? reset($category->name)) : $category->name }}</h3>
                     <div class="row">
                         @forelse($latestByCategory[$category->id] as $post)
                             <div class="col-lg-4 col-md-6 mb-4">
@@ -1111,11 +1111,11 @@
                                         @endif
                                         <div class="post-badge {{ $post->level ? $post->level->name['ar'] : 'عادي' }}">
                                             @if($post->level && $post->level->name['ar'] == 'ماسي')
-                                                <i class="fas fa-gem"></i> Diamond
+                                                <i class="fas fa-gem"></i> {{__('Diamond') }}
                                             @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
-                                                <i class="fas fa-medal"></i> Gold
+                                                <i class="fas fa-medal"></i> {{__('Gold') }}
                                             @else
-                                                <i class="fas fa-check"></i> Standard
+                                                <i class="fas fa-check"></i> {{__('Standard') }}
                                             @endif
                                         </div>
                                     </div>
@@ -1135,7 +1135,7 @@
                             </div>
                         @empty
                             <div class="col-12 text-center">
-                                <p>{{ __('welcome.no_posts_available_in_this_category_yet_') }}</p>
+                                <p>{{__('welcome.no_posts_available_in_this_category_yet_') }}</p>
                             </div>
                         @endforelse
                     </div>
@@ -1148,8 +1148,8 @@
 <!-- Latest Posts Section -->
 <section class="latest-posts">
     <div class="container">
-        <h2 class="section-title">{{ __('welcome.latest_services') }}</h2>
-        <p class="section-description">{{ __('welcome.check_out_the_newest_services_added_to_o') }}</p>
+        <h2 class="section-title">{{__('welcome.latest_services') }}</h2>
+        <p class="section-description">{{__('welcome.check_out_the_newest_services_added_to_o') }}</p>
 
         <!-- Swiper slider for latest posts -->
         <div class="swiper">
@@ -1178,11 +1178,11 @@
                                 @endif
                                 <div class="post-badge {{ $post->level ? $post->level->name['ar'] : 'عادي' }}">
                                     @if($post->level && $post->level->name['ar'] == 'ماسي')
-                                        <i class="fas fa-gem"></i> Diamond
+                                        <i class="fas fa-gem"></i> {{__('Diamond') }}
                                     @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
-                                        <i class="fas fa-medal"></i> Gold
+                                        <i class="fas fa-medal"></i> {{__('Gold') }}
                                     @else
-                                        <i class="fas fa-check"></i> Standard
+                                        <i class="fas fa-check"></i> {{__('Standard') }}
                                     @endif
                                 </div>
                             </div>
@@ -1204,7 +1204,7 @@
                 @empty
                     <div class="swiper-slide">
                         <div class="text-center">
-                            <p>{{ __('welcome.no_posts_available_yet_') }}</p>
+                            <p>{{__('welcome.no_posts_available_yet_') }}</p>
                         </div>
                     </div>
                 @endforelse
@@ -1221,8 +1221,8 @@
 <!-- Popular Posts Section (Most Viewed) -->
 <section class="section">
     <div class="container">
-        <h2 class="section-title">{{ __('welcome.popular_services') }}</h2>
-        <p class="section-description">{{ __('welcome.discover_the_most_viewed_services_on_our') }}</p>
+        <h2 class="section-title">{{__('welcome.popular_services') }}</h2>
+        <p class="section-description">{{__('welcome.discover_the_most_viewed_services_on_our') }}</p>
 
         <div class="row">
             @forelse($popularPosts as $post)
@@ -1249,11 +1249,11 @@
                             @endif
                             <div class="post-badge {{ $post->level ? $post->level->name['ar'] : 'عادي' }}">
                                 @if($post->level && $post->level->name['ar'] == 'ماسي')
-                                    <i class="fas fa-gem"></i> Diamond
+                                    <i class="fas fa-gem"></i> {{__('Diamond') }}
                                 @elseif($post->level && $post->level->name['ar'] == 'ذهبي')
-                                    <i class="fas fa-medal"></i> Gold
+                                    <i class="fas fa-medal"></i> {{__('Gold') }}
                                 @else
-                                    <i class="fas fa-check"></i> Standard
+                                    <i class="fas fa-check"></i> {{__('Standard') }}
                                 @endif
                             </div>
                         </div>
@@ -1274,7 +1274,7 @@
                 </div>
             @empty
                 <div class="col-12 text-center">
-                    <p>{{ __('welcome.no_popular_posts_available_yet_') }}</p>
+                    <p>{{__('welcome.no_popular_posts_available_yet_') }}</p>
                 </div>
             @endforelse
         </div>
@@ -1287,11 +1287,11 @@
             <div class="container">
                 <div class="row align-items-center">
                     <div class="col-lg-8">
-                        <h2>{{ __('welcome.experience_talabna_on_your_mobile') }}</h2>
-                        <p class="lead">{{ __('welcome.get_the_full_experience_with_our_mobile_') }}</p>
+                        <h2>{{__('welcome.experience_talabna_on_your_mobile') }}</h2>
+                        <p class="lead">{{__('welcome.get_the_full_experience_with_our_mobile_') }}</p>
                         <div class="mt-4">
                             <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" class="btn btn-primary btn-lg" target="_blank">
-                                <i class="fab fa-google-play me-2"></i> Download on Google Play
+                                <i class="fab fa-google-play me-2"></i> {{__('Download on Google Play') }}
                             </a>
                         </div>
                     </div>
@@ -1310,7 +1310,7 @@
         <div class="row">
             <div class="col-lg-3 mb-5 mb-lg-0">
                 <a href="{{ url('/') }}" class="footer-logo">{{ config('app.name', 'Talabna') }}</a>
-                <p class="footer-description">{{ __('welcome.talabna_is_your_one_stop_platform_for_fi') }}</p>
+                <p class="footer-description">{{__('welcome.talabna_is_your_one_stop_platform_for_fi') }}</p>
                 <ul class="footer-social">
                     <li><a href="#"><i class="fab fa-facebook-f"></i></a></li>
                     <li><a href="#"><i class="fab fa-twitter"></i></a></li>
@@ -1319,17 +1319,17 @@
                 </ul>
             </div>
             <div class="col-lg-2 col-md-2 mb-5 mb-md-0">
-                <h4 class="footer-heading">{{ __('welcome.quick_links') }}</h4>
+                <h4 class="footer-heading">{{__('welcome.quick_links') }}</h4>
                 <ul class="footer-links">
-                    <li><a href="{{ url('/') }}">{{ __('welcome.home') }}</a></li>
-                    <li><a href="#">{{ __('welcome.about_us') }}</a></li>
-                    <li><a href="#">{{ __('welcome.services') }}</a></li>
-                    <li><a href="#">{{ __('welcome.contact') }}</a></li>
-                    <li><a href="{{ route('login') }}">{{ __('welcome.login') }}</a></li>
+                    <li><a href="{{ url('/') }}">{{__('welcome.home') }}</a></li>
+                    <li><a href="#">{{__('welcome.about_us') }}</a></li>
+                    <li><a href="#">{{__('welcome.services') }}</a></li>
+                    <li><a href="#">{{__('welcome.contact') }}</a></li>
+                    <li><a href="{{ route('login') }}">{{__('welcome.login') }}</a></li>
                 </ul>
             </div>
             <div class="col-lg-2 col-md-2 mb-5 mb-md-0">
-                <h4 class="footer-heading">{{ __('welcome.categories') }}</h4>
+                <h4 class="footer-heading">{{__('welcome.categories') }}</h4>
                 <ul class="footer-links">
                     @foreach($categories as $category)
                         <li>
@@ -1339,7 +1339,7 @@
                 </ul>
             </div>
             <div class="col-lg-3 col-md-2">
-                <h4 class="footer-heading">{{ __('welcome.contact_info') }}</h4>
+                <h4 class="footer-heading">{{__('welcome.contact_info') }}</h4>
                 <ul class="footer-links">
                     <li><i class="fas fa-map-marker-alt me-2"></i> 123 Business Street, City, Country</li>
                     <li><i class="fas fa-phone-alt me-2"></i> +123 456 7890</li>
@@ -1347,17 +1347,17 @@
                 </ul>
             </div>
             <div class="col-lg-2 col-md-2">
-                <h4 class="footer-heading">{{ __('welcome.policy_and_privacy') }}</h4>
+                <h4 class="footer-heading">{{__('welcome.policy_and_privacy') }}</h4>
 
                 <ul class="footer-links">
-                    <li><a href="{{ route('policy.index') }}"><i class="fas fa-shield-alt me-2"></i> Privacy Policy</a></li>
-                    <li><a href="{{ route('policy.index') }}?terms=1"><i class="fas fa-gavel me-2"></i> Terms of Service</a></li>
-                    <li><a href="{{ route('policy.index') }}?child_safety=1"><i class="fas fa-child me-2"></i> Child Safety Policy</a></li>
+                    <li><a href="{{ route('policy.index') }}"><i class="fas fa-shield-alt me-2"></i> {{__('Privacy Policy') }}</a></li>
+                    <li><a href="{{ route('policy.index') }}?terms=1"><i class="fas fa-gavel me-2"></i> {{__('Terms of Service') }}</a></li>
+                    <li><a href="{{ route('policy.index') }}?child_safety=1"><i class="fas fa-child me-2"></i> {{__('Child Safety Policy') }}</a></li>
                 </ul>
             </div>
         </div>
         <div class="footer-bottom">
-            <p>&copy; {{ date('Y') }} {{ config('app.name') }}. All rights reserved.</p>
+            <p>&copy; {{ date('Y') }} {{ config('app.name') }}. {{__('All rights reserved.') }}</p>
         </div>
     </div>
 </footer>
@@ -1445,3 +1445,10 @@
 </script>
 </body>
 </html>
+
+
+
+
+
+
+

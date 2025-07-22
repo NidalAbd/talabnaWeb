@@ -34,9 +34,9 @@
                             <div class="row">
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_en">City Name (English) <span class="text-danger">{{ __('cities\edit._') }}</span></label>
+                                        <label for="name_en">City Name (English) <span class="text-danger">{{('cities\edit._') }}</span></label>
                                         <input type="text" class="form-control @error('name_en') is-invalid @enderror"
-                                               id="name_en" name="name_en" value="{{ old('name_en', $nameArray['en'] ?? '') }}" required>
+                                               id="name_en" name="name_en" value="{{ old('name_en', $city->name['en'] ?? '') }}" required>
                                         @error('name_en')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -45,9 +45,9 @@
 
                                 <div class="col-md-6">
                                     <div class="form-group">
-                                        <label for="name_ar">{{ __('cities\edit.city_name_arabic_') }}</label>
+                                        <label for="name_ar">{{('cities\edit.city_name_arabic_') }}</label>
                                         <input type="text" class="form-control @error('name_ar') is-invalid @enderror"
-                                               id="name_ar" name="name_ar" value="{{ old('name_ar', $nameArray['ar'] ?? '') }}" dir="rtl">
+                                               id="name_ar" name="name_ar" value="{{ old('name_ar', $city->name['ar'] ?? '') }}" dir="rtl">
                                         @error('name_ar')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -56,10 +56,10 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="country_id">Country <span class="text-danger">{{ __('cities\edit._') }}</span></label>
+                                <label for="country_id">Country <span class="text-danger">{{('cities\edit._') }}</span></label>
                                 <select class="form-control @error('country_id') is-invalid @enderror"
                                         id="country_id" name="country_id" required>
-                                    <option value="">{{ __('cities\edit._select_country_') }}</option>
+                                    <option value="">{{('cities\edit._select_country_') }}</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country->id }}"
                                             {{ (old('country_id', $city->country_id) == $country->id) ? 'selected' : '' }}>
@@ -73,30 +73,30 @@
                             </div>
 
                             <div class="form-group">
-                                <label for="image">{{ __('cities\edit.city_image') }}</label>
+                                <label for="image">{{('cities\edit.city_image') }}</label>
                                 <div class="custom-file">
                                     <input type="file" class="custom-file-input @error('image') is-invalid @enderror"
                                            id="image" name="image" accept="image/*">
-                                    <label class="custom-file-label" for="image">{{ __('cities\edit.choose_file') }}</label>
+                                    <label class="custom-file-label" for="image">{{('cities\edit.choose_file') }}</label>
                                     @error('image')
                                     <span class="invalid-feedback">{{ $message }}</span>
                                     @enderror
                                 </div>
-                                <small class="form-text text-muted">{{ __('cities\edit.recommended_size_200x120_pixels') }}</small>
+                                <small class="form-text text-muted">{{('cities\edit.recommended_size_200x120_pixels') }}</small>
                             </div>
 
                             <div class="form-group">
                                 <div class="img-preview mt-3">
                                     @if($city->photos && $city->photos->count() > 0)
-                                        <p>{{ __('cities\edit.current_image_') }}</p>
+                                        <p>{{('cities\edit.current_image_') }}</p>
                                         <img src="{{ asset($city->photos->first()->src) }}" alt="{{ $city->getTranslatedName() }}"
                                              class="img-thumbnail" style="max-height: 200px;">
                                     @else
-                                        <p>{{ __('cities\edit.no_image_currently_uploaded_') }}</p>
+                                        <p>{{('cities\edit.no_image_currently_uploaded_') }}</p>
                                     @endif
                                 </div>
                                 <div class="new-img-preview mt-3" style="display: none;">
-                                    <p>{{ __('cities\edit.new_image_') }}</p>
+                                    <p>{{('cities\edit.new_image_') }}</p>
                                     <img id="preview-image" src="#" alt="Preview" class="img-thumbnail" style="max-height: 200px;">
                                 </div>
                             </div>
@@ -138,3 +138,10 @@
         </script>
     @endpush
 @endsection
+
+
+
+
+
+
+

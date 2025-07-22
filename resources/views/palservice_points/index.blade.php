@@ -24,8 +24,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-warning"><i class="fas fa-star"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{ __('palservice_points\index.total_points') }}</span>
-                                <span class="info-box-number">{{ $palservicePoints->field</span>
+                                <span class="info-box-text">{{('palservice_points\index.total_points') }}</span>
+                                <span class="info-box-number">{{ $totalPoints ?? 0 }}</span>
                             </div>
                         </div>
                     </div>
@@ -33,8 +33,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-info"><i class="fas fa-user-tag"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{ __('palservice_points\index.total_users') }}</span>
-                                <span class="info-box-number">{{ $palservicePoints->field</span>
+                                <span class="info-box-text">{{('palservice_points\index.total_users') }}</span>
+                                <span class="info-box-number">{{ $totalUsers ?? 0 }}</span>
                             </div>
                         </div>
                     </div>
@@ -42,8 +42,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-success"><i class="fas fa-chart-line"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{ __('palservice_points\index.avg_points') }}</span>
-                                <span class="info-box-number">{{ $palservicePoints->field</span>
+                                <span class="info-box-text">{{('palservice_points\index.avg_points') }}</span>
+                                <span class="info-box-number">{{ $avgPoints ?? 0 }}</span>
                             </div>
                         </div>
                     </div>
@@ -51,8 +51,8 @@
                         <div class="info-box">
                             <span class="info-box-icon bg-danger"><i class="fas fa-trophy"></i></span>
                             <div class="info-box-content">
-                                <span class="info-box-text">{{ __('palservice_points\index.top_score') }}</span>
-                                <span class="info-box-number">{{ $palservicePoints->field</span>
+                                <span class="info-box-text">{{('palservice_points\index.top_score') }}</span>
+                                <span class="info-box-number">{{ $topScore ?? 0 }}</span>
                             </div>
                         </div>
                     </div>
@@ -65,7 +65,7 @@
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group">
-                                        <label for="search">{{ __('palservice_points\index.search_users') }}</label>
+                                        <label for="search">{{('palservice_points\index.search_users') }}</label>
                                         <input type="text" class="form-control" id="search" name="search"
                                                placeholder="Search by name, username, or ID"
                                                value="{{ request('search') }}">
@@ -73,7 +73,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="min_points">{{ __('palservice_points\index.min_points') }}</label>
+                                        <label for="min_points">{{('palservice_points\index.min_points') }}</label>
                                         <input type="number" class="form-control" id="min_points" name="min_points"
                                                placeholder="Minimum points"
                                                value="{{ request('min_points') }}">
@@ -81,7 +81,7 @@
                                 </div>
                                 <div class="col-md-3">
                                     <div class="form-group">
-                                        <label for="max_points">{{ __('palservice_points\index.max_points') }}</label>
+                                        <label for="max_points">{{('palservice_points\index.max_points') }}</label>
                                         <input type="number" class="form-control" id="max_points" name="max_points"
                                                placeholder="Maximum points"
                                                value="{{ request('max_points') }}">
@@ -126,11 +126,11 @@
                             <table class="table table-hover text-nowrap">
                                 <thead>
                                 <tr>
-                                    <th style="width: 10%">{{ __('palservice_points\index.id') }}</th>
-                                    <th style="width: 30%">{{ __('palservice_points\index.user') }}</th>
-                                    <th style="width: 20%">{{ __('palservice_points\index.role') }}</th>
-                                    <th style="width: 15%">{{ __('palservice_points\index.points') }}</th>
-                                    <th style="width: 25%">{{ __('palservice_points\index.action') }}</th>
+                                    <th style="width: 10%">{{('palservice_points\index.id') }}</th>
+                                    <th style="width: 30%">{{('palservice_points\index.user') }}</th>
+                                    <th style="width: 20%">{{('palservice_points\index.role') }}</th>
+                                    <th style="width: 15%">{{('palservice_points\index.points') }}</th>
+                                    <th style="width: 25%">{{('palservice_points\index.action') }}</th>
                                 </tr>
                                 </thead>
                                 <tbody>
@@ -206,7 +206,7 @@
                                     <tr>
                                         <td colspan="5" class="text-center py-4">
                                             <div class="alert alert-info m-0">
-                                                <i class="fas fa-info-circle mr-1"></i> {{ __('No records found') }}
+                                                <i class="fas fa-info-circle mr-1"></i> {{('No records found') }}
                                             </div>
                                         </td>
                                     </tr>
@@ -230,20 +230,20 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="deleteModalLabel">{{ __('palservice_points\index.confirm_delete') }}</h5>
+                    <h5 class="modal-title" id="deleteModalLabel">{{('palservice_points\index.confirm_delete') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ __('palservice_points\index._times_') }}</span>
+                        <span aria-hidden="true">{{('palservice_points\index._times_') }}</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     Are you sure you want to delete this points record?
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('palservice_points\index.cancel') }}</button>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('palservice_points\index.cancel') }}</button>
                     <form id="deleteForm" method="POST" action="">
                         @csrf
                         @method('DELETE')
-                        <button type="submit" class="btn btn-danger">{{ __('palservice_points\index.delete') }}</button>
+                        <button type="submit" class="btn btn-danger">{{('palservice_points\index.delete') }}</button>
                     </form>
                 </div>
             </div>
@@ -255,20 +255,20 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="userSelectModalLabel">{{ __('palservice_points\index.select_user') }}</h5>
+                    <h5 class="modal-title" id="userSelectModalLabel">{{('palservice_points\index.select_user') }}</h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">{{ __('palservice_points\index._times_') }}</span>
+                        <span aria-hidden="true">{{('palservice_points\index._times_') }}</span>
                     </button>
                 </div>
                 <div class="modal-body">
                     <form id="userSelectForm" method="GET">
                         <div class="form-group">
-                            <label for="user_id">{{ __('palservice_points\index.enter_user_id_') }}</label>
+                            <label for="user_id">{{('palservice_points\index.enter_user_id_') }}</label>
                             <input type="number" class="form-control" id="user_id" name="user_id" placeholder="Enter user ID" required>
                         </div>
                         <div class="text-right">
-                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{ __('palservice_points\index.cancel') }}</button>
-                            <button type="submit" class="btn btn-primary">{{ __('palservice_points\index.continue') }}</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">{{('palservice_points\index.cancel') }}</button>
+                            <button type="submit" class="btn btn-primary">{{('palservice_points\index.continue') }}</button>
                         </div>
                     </form>
                 </div>
@@ -318,3 +318,10 @@
         }
     </script>
 @stop
+
+
+
+
+
+
+
