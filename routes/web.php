@@ -60,7 +60,7 @@ Auth::routes();
 */
 Route::group(['middleware' => ['auth', 'admin']], function() {
     // Dashboard
-    Route::get('/home', [HomeController::class, 'index'])->name('/home');
+    Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::get('statistics', [App\Http\Controllers\dashboard::class, 'index'])->name('statistics.index');
 
     /*

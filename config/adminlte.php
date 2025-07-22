@@ -304,6 +304,7 @@ return [
             'text' => 'Dashboard',
             'url'  => 'home',
             'icon' => 'fas fa-tachometer-alt',
+            'permission' => ['user_index']
         ],
 
         // Administration Section
