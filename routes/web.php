@@ -60,7 +60,7 @@ Auth::routes();
 */
 Route::group(['middleware' => ['auth', 'admin']], function() {
     // Dashboard
-    Route::get('/dashboard', [HomeController::class, 'index'])->name('admin.dashboard');
+    Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
     Route::get('statistics', [App\Http\Controllers\dashboard::class, 'index'])->name('statistics.index');
 
     /*
