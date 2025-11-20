@@ -1,5 +1,16 @@
 name: Deploy Laravel to Hostinger (Talbna)
 
+# DEPLOYMENT OPTIMIZATIONS:
+# - vendor directory is uploaded manually via SSH (not included in FTP deployment)
+# - This significantly reduces deployment time and avoids timeout issues
+# - composer.lock should be committed to ensure consistent dependencies
+#
+# MANUAL STEPS REQUIRED:
+# 1. Upload vendor directory via SSH after first deployment or when dependencies change:
+#    scp -r ./vendor u252000670.talbna.cloud@82.198.227.208:/domains/talbna.cloud/
+#    OR use rsync for faster incremental uploads:
+#    rsync -avz --progress ./vendor/ u252000670.talbna.cloud@82.198.227.208:/domains/talbna.cloud/vendor/
+
 on:
   push:
     branches: [ master ]
@@ -16,23 +27,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup PHP 8.2
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.2'
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_sqlite, dom, filter, gd, json, pdo, pdo_mysql, curl, zip, bcmath
-          tools: composer:v2
-          coverage: none
-
-      - name: Remove old lock file and install dependencies
-        run: |
-          echo "🔧 Removing old lock file to ensure PHP 8.2 compatibility..."
-          rm -f composer.lock
-
-          echo "📦 Installing fresh dependencies with PHP 8.2..."
-          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
-
-          echo "✅ Dependencies installed successfully"
+      # PHP setup removed - vendor will be uploaded manually via SSH
+      # This significantly speeds up deployment and avoids timeout issues
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -66,9 +62,10 @@ jobs:
 
       - name: Prepare Laravel files (outside public_html)
         run: |
-          # Copy all Laravel files EXCEPT public folder
+          # Copy all Laravel files EXCEPT public folder and vendor (uploaded manually via SSH)
           rsync -av \
             --exclude='public' \
+            --exclude='vendor' \
             --exclude='node_modules' \
             --exclude='.git' \
             --exclude='deploy_laravel' \
@@ -305,7 +302,7 @@ jobs:
           echo "Critical files check:"
           [ -f "deploy_laravel/.env" ] && echo "✅ .env exists" || echo "⚠️ .env missing (will use existing)"
           [ -f "deploy_laravel/artisan" ] && echo "✅ artisan exists" || echo "❌ artisan missing"
-          [ -d "deploy_laravel/vendor" ] && echo "✅ vendor directory exists" || echo "❌ vendor missing"
+          echo "ℹ️ vendor directory uploaded separately via SSH (not in this deployment)"
           [ -f "deploy_public/index.php" ] && echo "✅ index.php exists" || echo "❌ index.php missing"
 
       - name: Deploy Laravel files to domain root
@@ -319,6 +316,7 @@ jobs:
           local-dir: ./deploy_laravel/
           server-dir: ./domains/talbna.cloud/
           exclude: |
+            vendor/**
             public/**
             public_html/**
             .git*
