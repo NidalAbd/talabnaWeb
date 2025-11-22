@@ -31,25 +31,20 @@ jobs:
 
       - name: Prepare deploy_laravel (exclude public & vendor)
         run: |
-           rsync -av --delete \
-             --exclude='public' \
-             --exclude='vendor' \
-             --exclude='node_modules' \
-             --exclude='.git' \
-             --exclude='.github' \
-             --exclude='README.md' \
-             --exclude='.env*' \
-             --exclude='deploy_laravel' \
-             --exclude='deploy_public' \
-             ./ deploy_laravel/
-           # Ensure composer.json and composer.lock are included (needed for composer install on server)
-           cp composer.json deploy_laravel/ 2>/dev/null || true
-           cp composer.lock deploy_laravel/ 2>/dev/null || true
-           # Ensure storage directory structure exists
-           mkdir -p deploy_laravel/storage/app/public
-           mkdir -p deploy_laravel/storage/framework/{cache,sessions,testing,views}
-           mkdir -p deploy_laravel/storage/logs
-           mkdir -p deploy_laravel/bootstrap/cache
+          rsync -av --delete \
+            --exclude='public' \
+            --exclude='vendor' \
+            --exclude='node_modules' \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='README.md' \
+            --exclude='.env*' \
+            --exclude='deploy_laravel' \
+            --exclude='deploy_public' \
+            ./ deploy_laravel/
+          # Ensure composer.json and composer.lock are included (needed for composer install on server)
+          cp composer.json deploy_laravel/ 2>/dev/null || true
+          cp composer.lock deploy_laravel/ 2>/dev/null || true
 
       - name: Prepare deploy_public
         run: |
@@ -163,29 +158,15 @@ jobs:
               }
           }
 
-          // Create the symlink using relative path (better for portability)
-          // From public_html/storage, we need to go up one level (..) then into storage/app/public
-          chdir($publicPath); // Change to public_html directory
-          $relativeStoragePath = '../storage/app/public';
-
-          if (symlink($relativeStoragePath, 'storage')) {
+          // Create the symlink
+          if (symlink($storagePath, $storageLink)) {
               echo "✅ Storage symlink created successfully!\n";
-              echo "   Link: $storageLink -> $relativeStoragePath\n";
-              echo "   (Absolute: $storageLink -> $storagePath)\n";
+              echo "   Link: $storageLink -> $storagePath\n";
           } else {
-              // Fallback to absolute path if relative fails
-              if (symlink($storagePath, $storageLink)) {
-                  echo "✅ Storage symlink created successfully (using absolute path)!\n";
-                  echo "   Link: $storageLink -> $storagePath\n";
-              } else {
-                  echo "❌ Failed to create storage symlink\n";
-                  echo "   Error: " . error_get_last()['message'] . "\n";
-                  echo "   You may need to create it manually via SSH:\n";
-                  echo "   cd $publicPath\n";
-                  echo "   ln -s ../storage/app/public storage\n";
-              }
+              echo "❌ Failed to create storage symlink\n";
+              echo "   You may need to create it manually via SSH:\n";
+              echo "   ln -s $storagePath $storageLink\n";
           }
-          chdir($laravelPath); // Change back to Laravel directory
           echo "\n";
 
           // Step 3: Clear Laravel caches
@@ -248,7 +229,7 @@ jobs:
           } else {
               echo "⚠️ Some issues detected. Please review the output above.\n";
               echo "⚠️ This script will remain available for troubleshooting.\n";
-              echo "⚠️ Deledte it manually after fixing issues: " . basename(__FILE__) . "\n";
+              echo "⚠️ Delete it manually after fixing issues: " . basename(__FILE__) . "\n";
               echo "</pre></body></html>";
           }
           EOF
@@ -338,4 +319,3 @@ jobs:
       - name: Cleanup
         run: |
           rm -rf deploy_laravel deploy_public
-
