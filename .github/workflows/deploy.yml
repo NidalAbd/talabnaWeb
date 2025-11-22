@@ -266,7 +266,7 @@ jobs:
           security: loose
           port: 21
           local-dir: ./deploy_public/
-          # Deploy public files inside the domain folder: domains/talbna.cloud/public_html/
+          # Deplosy public files inside the domain folder: domains/talbna.cloud/public_html/
           server-dir: domains/talbna.cloud/public_html/
           log-level: verbose
           dangerous-clean-slate: false
