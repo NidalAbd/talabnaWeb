@@ -248,7 +248,7 @@ jobs:
           } else {
               echo "⚠️ Some issues detected. Please review the output above.\n";
               echo "⚠️ This script will remain available for troubleshooting.\n";
-              echo "⚠️ Delete it manually after fixing issues: " . basename(__FILE__) . "\n";
+              echo "⚠️ Deledte it manually after fixing issues: " . basename(__FILE__) . "\n";
               echo "</pre></body></html>";
           }
           EOF
