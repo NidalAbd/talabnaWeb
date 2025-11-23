@@ -51,6 +51,7 @@ jobs:
           rm -rf deploy_public/*
           cp -a public/. deploy_public/
           rm -f deploy_public/storage || true
+          rm -f deploy_public/hot || true
           # Verify files are copied
           echo "Files in deploy_public:"
           ls -la deploy_public/ | head -20
