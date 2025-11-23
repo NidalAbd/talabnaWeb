@@ -193,14 +193,16 @@
           <v-col cols="6" md="2">
             <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'حمل التطبيق' : 'Download App' }}</h4>
             <div class="d-flex flex-column gap-2">
-              <v-btn variant="outlined" size="small" href="#" class="justify-start">
+              <v-btn variant="outlined" size="small" href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="justify-start">
                 <v-icon start>mdi-google-play</v-icon>
                 Google Play
               </v-btn>
-              <v-btn variant="outlined" size="small" href="#" class="justify-start">
-                <v-icon start>mdi-apple</v-icon>
-                App Store
-              </v-btn>
+            </div>
+            <div class="mt-4">
+              <h4 class="text-subtitle-2 font-weight-bold mb-2">{{ appStore.locale === 'ar' ? 'تواصل معنا' : 'Contact Us' }}</h4>
+              <p class="text-caption text-medium-emphasis mb-1">
+                <v-icon size="small" class="mr-1">mdi-email</v-icon> info@talabna.com
+              </p>
             </div>
           </v-col>
         </v-row>

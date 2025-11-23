@@ -4,62 +4,77 @@
     <section class="hero-section">
       <v-container>
         <v-row align="center" justify="center">
-          <v-col cols="12" md="8" class="text-center">
-            <h1 class="text-h2 text-md-h1 font-weight-bold text-white mb-4">
-              {{ locale === 'ar' ? 'أكبر سوق للإعلانات المبوبة' : 'The Largest Classified Marketplace' }}
-            </h1>
-            <p class="text-h6 text-white-darken-1 mb-8">
-              {{ locale === 'ar'
-                ? 'بيع واشتري السيارات، العقارات، الهواتف، والمزيد بسهولة وأمان'
-                : 'Buy and sell cars, real estate, phones, and more easily and safely'
-              }}
-            </p>
+          <v-col cols="12" md="6">
+            <div class="hero-content">
+              <h1 class="text-h3 text-md-h2 font-weight-bold text-white mb-4">
+                {{ locale === 'ar' ? 'اعثر على الخدمات وقدمها مع طلبنا' : 'Find & Offer Services with Talabna' }}
+              </h1>
+              <p class="text-h6 text-white-darken-1 mb-8">
+                {{ locale === 'ar'
+                  ? 'تواصل مع مزودي الخدمات المحليين أو قدم خدماتك لآلاف المستخدمين. منصتك الشاملة لجميع احتياجات الخدمات.'
+                  : 'Connect with local service providers or offer your services to thousands of users. Your one-stop platform for all service needs.'
+                }}
+              </p>
 
-            <!-- Search Box -->
-            <v-card class="search-card mx-auto" max-width="700" elevation="8">
-              <v-card-text class="pa-4">
-                <v-row dense>
-                  <v-col cols="12" sm="8">
-                    <v-text-field
-                      v-model="searchQuery"
-                      :placeholder="locale === 'ar' ? 'ابحث عن سيارات، هواتف، وظائف...' : 'Search for cars, phones, jobs...'"
-                      prepend-inner-icon="mdi-magnify"
-                      variant="solo-filled"
-                      density="comfortable"
-                      hide-details
-                      single-line
-                      @keyup.enter="doSearch"
-                    />
-                  </v-col>
-                  <v-col cols="12" sm="4">
-                    <v-btn
-                      color="primary"
-                      size="large"
-                      block
-                      @click="doSearch"
-                      class="h-100"
-                    >
-                      <v-icon start>mdi-magnify</v-icon>
-                      {{ locale === 'ar' ? 'بحث' : 'Search' }}
-                    </v-btn>
-                  </v-col>
-                </v-row>
-              </v-card-text>
-            </v-card>
+              <!-- Search Box -->
+              <v-card class="search-card" elevation="8">
+                <v-card-text class="pa-4">
+                  <v-row dense>
+                    <v-col cols="12" sm="8">
+                      <v-text-field
+                        v-model="searchQuery"
+                        :placeholder="locale === 'ar' ? 'ابحث عن الخدمات...' : 'Find services...'"
+                        prepend-inner-icon="mdi-magnify"
+                        variant="solo-filled"
+                        density="comfortable"
+                        hide-details
+                        single-line
+                        @keyup.enter="doSearch"
+                      />
+                    </v-col>
+                    <v-col cols="12" sm="4">
+                      <v-btn
+                        color="primary"
+                        size="large"
+                        block
+                        @click="doSearch"
+                        class="h-100"
+                      >
+                        {{ locale === 'ar' ? 'بحث' : 'Search' }}
+                      </v-btn>
+                    </v-col>
+                  </v-row>
+                </v-card-text>
+              </v-card>
+
+              <div class="hero-buttons mt-6">
+                <v-btn color="white" size="large" variant="flat" class="text-primary me-3" href="#categories">
+                  {{ locale === 'ar' ? 'استكشف الخدمات' : 'Explore Services' }}
+                </v-btn>
+                <v-btn color="white" size="large" variant="outlined" href="/register">
+                  {{ locale === 'ar' ? 'انضم الآن' : 'Join Now' }}
+                </v-btn>
+              </div>
+            </div>
+          </v-col>
+          <v-col cols="12" md="6" class="text-center d-none d-md-block">
+            <!-- Hero SVG Illustration -->
+            <div class="hero-illustration">
+              <v-icon size="200" color="white" class="opacity-20">mdi-handshake</v-icon>
+            </div>
           </v-col>
         </v-row>
       </v-container>
     </section>
 
     <!-- Stats Section -->
-    <section class="stats-section py-8">
+    <section class="stats-section py-10">
       <v-container>
         <v-row>
           <v-col v-for="stat in statsItems" :key="stat.key" cols="6" md="3">
             <v-card class="stat-card text-center pa-6" variant="flat">
-              <v-icon :color="stat.color" size="48" class="mb-3">{{ stat.icon }}</v-icon>
-              <div class="text-h4 font-weight-bold mb-1">{{ formatNumber(stats[stat.key] || 0) }}</div>
-              <div class="text-body-2 text-medium-emphasis">{{ stat.label }}</div>
+              <div class="text-h3 font-weight-bold text-primary mb-2">{{ formatNumber(stats[stat.key] || 0) }}</div>
+              <div class="text-body-1 text-medium-emphasis">{{ stat.label }}</div>
             </v-card>
           </v-col>
         </v-row>
@@ -67,14 +82,14 @@
     </section>
 
     <!-- Categories Section -->
-    <section class="categories-section py-12">
+    <section class="categories-section py-12" id="categories">
       <v-container>
-        <div class="section-header text-center mb-8">
+        <div class="section-header mb-8">
           <h2 class="text-h4 font-weight-bold mb-2">
-            {{ locale === 'ar' ? 'تصفح حسب التصنيف' : 'Browse by Category' }}
+            {{ locale === 'ar' ? 'تصفح تصنيفات الخدمات' : 'Browse Service Categories' }}
           </h2>
           <p class="text-body-1 text-medium-emphasis">
-            {{ locale === 'ar' ? 'اختر التصنيف الذي يناسبك' : 'Choose the category that suits you' }}
+            {{ locale === 'ar' ? 'استكشف مجموعتنا الواسعة من تصنيفات الخدمات واعثر على ما تبحث عنه بالضبط.' : 'Explore our wide range of service categories and find exactly what you\'re looking for.' }}
           </p>
         </div>
 
@@ -85,14 +100,14 @@
               variant="outlined"
               :to="`/category/${cat.id}/${cat.slug}`"
             >
-              <v-avatar :color="getCategoryColor(cat.id)" size="64" class="mb-3">
-                <v-icon size="32" color="white">{{ getCategoryIcon(cat.id) }}</v-icon>
+              <v-avatar :color="getCategoryColor(cat.id)" size="70" class="mb-3">
+                <v-icon size="35" color="white">{{ getCategoryIcon(cat.id) }}</v-icon>
               </v-avatar>
               <h3 class="text-subtitle-1 font-weight-bold mb-1">
                 {{ locale === 'ar' ? cat.name : cat.name_en }}
               </h3>
               <p class="text-caption text-medium-emphasis">
-                {{ formatNumber(cat.posts_count) }} {{ locale === 'ar' ? 'إعلان' : 'ads' }}
+                {{ formatNumber(cat.posts_count) }} {{ locale === 'ar' ? 'خدمة' : 'Services' }}
               </p>
             </v-card>
           </v-col>
@@ -100,15 +115,18 @@
       </v-container>
     </section>
 
-    <!-- Featured Listings -->
-    <section class="featured-section py-12 bg-surface-variant">
+    <!-- Featured Services -->
+    <section class="featured-section py-12 bg-surface-light">
       <v-container>
         <div class="section-header d-flex justify-space-between align-center mb-6">
           <div>
             <h2 class="text-h5 font-weight-bold">
-              <v-icon color="amber" class="mr-2">mdi-star</v-icon>
-              {{ locale === 'ar' ? 'الإعلانات المميزة' : 'Featured Listings' }}
+              <v-icon color="purple" class="mr-2">mdi-diamond-stone</v-icon>
+              {{ locale === 'ar' ? 'الخدمات المميزة' : 'Featured Services' }}
             </h2>
+            <p class="text-body-2 text-medium-emphasis mt-1">
+              {{ locale === 'ar' ? 'اكتشف أفضل الخدمات المميزة من مستخدمينا' : 'Discover our top-rated premium services with excellent reviews' }}
+            </p>
           </div>
           <v-btn variant="text" color="primary" to="/browse?badge=premium">
             {{ locale === 'ar' ? 'عرض الكل' : 'View All' }}
@@ -129,14 +147,19 @@
       </v-container>
     </section>
 
-    <!-- Latest Listings by Category -->
+    <!-- Latest Services by Category -->
     <section class="latest-section py-12">
       <v-container>
         <div class="section-header d-flex justify-space-between align-center mb-6">
-          <h2 class="text-h5 font-weight-bold">
-            <v-icon color="primary" class="mr-2">mdi-clock-outline</v-icon>
-            {{ locale === 'ar' ? 'أحدث الإعلانات' : 'Latest Listings' }}
-          </h2>
+          <div>
+            <h2 class="text-h5 font-weight-bold">
+              <v-icon color="primary" class="mr-2">mdi-clock-outline</v-icon>
+              {{ locale === 'ar' ? 'أحدث الخدمات' : 'Latest Services' }}
+            </h2>
+            <p class="text-body-2 text-medium-emphasis mt-1">
+              {{ locale === 'ar' ? 'تحقق من أحدث الخدمات المضافة إلى منصتنا' : 'Check out the newest services added to our platform' }}
+            </p>
+          </div>
           <v-btn variant="text" color="primary" to="/browse">
             {{ locale === 'ar' ? 'عرض الكل' : 'View All' }}
             <v-icon end>mdi-arrow-left</v-icon>
@@ -164,14 +187,19 @@
       </v-container>
     </section>
 
-    <!-- Popular Listings -->
-    <section class="popular-section py-12 bg-surface-variant">
+    <!-- Popular Services -->
+    <section class="popular-section py-12 bg-surface-light">
       <v-container>
         <div class="section-header d-flex justify-space-between align-center mb-6">
-          <h2 class="text-h5 font-weight-bold">
-            <v-icon color="error" class="mr-2">mdi-fire</v-icon>
-            {{ locale === 'ar' ? 'الأكثر مشاهدة' : 'Most Viewed' }}
-          </h2>
+          <div>
+            <h2 class="text-h5 font-weight-bold">
+              <v-icon color="error" class="mr-2">mdi-fire</v-icon>
+              {{ locale === 'ar' ? 'الخدمات الأكثر مشاهدة' : 'Popular Services' }}
+            </h2>
+            <p class="text-body-2 text-medium-emphasis mt-1">
+              {{ locale === 'ar' ? 'اكتشف الخدمات الأكثر مشاهدة على منصتنا' : 'Discover the most viewed services on our platform' }}
+            </p>
+          </div>
           <v-btn variant="text" color="primary" to="/browse?sort_by=view_count">
             {{ locale === 'ar' ? 'عرض الكل' : 'View All' }}
             <v-icon end>mdi-arrow-left</v-icon>
@@ -191,62 +219,24 @@
       </v-container>
     </section>
 
-    <!-- CTA Section -->
-    <section class="cta-section py-16">
+    <!-- App Download Banner -->
+    <section class="app-banner py-16">
       <v-container>
-        <v-row justify="center">
+        <v-row align="center" justify="center">
           <v-col cols="12" md="8" class="text-center">
             <h2 class="text-h4 font-weight-bold text-white mb-4">
-              {{ locale === 'ar' ? 'هل لديك شيء للبيع؟' : 'Have something to sell?' }}
+              {{ locale === 'ar' ? 'حمل تطبيق طلبنا' : 'Download Talabna App' }}
             </h2>
             <p class="text-h6 text-white-darken-1 mb-8">
               {{ locale === 'ar'
-                ? 'أضف إعلانك الآن ووصل لآلاف المشترين'
-                : 'Post your ad now and reach thousands of buyers'
+                ? 'احصل على التجربة الكاملة مع تطبيقنا. انشر الخدمات، أدر إعلاناتك، استقبل الإشعارات، وتواصل مع مزودي الخدمات أينما كنت.'
+                : 'Get the full experience with our mobile app. Post services, manage your listings, receive notifications, and connect with service providers on the go.'
               }}
             </p>
-            <v-btn color="white" size="x-large" href="/login" class="text-primary">
-              <v-icon start>mdi-plus</v-icon>
-              {{ locale === 'ar' ? 'أضف إعلان مجاني' : 'Post Free Ad' }}
+            <v-btn color="white" size="x-large" href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="text-primary">
+              <v-icon start size="28">mdi-google-play</v-icon>
+              {{ locale === 'ar' ? 'حمل من Google Play' : 'Download on Google Play' }}
             </v-btn>
-          </v-col>
-        </v-row>
-      </v-container>
-    </section>
-
-    <!-- Download App Section -->
-    <section class="app-section py-12">
-      <v-container>
-        <v-row align="center">
-          <v-col cols="12" md="6">
-            <h2 class="text-h4 font-weight-bold mb-4">
-              {{ locale === 'ar' ? 'حمل تطبيق طلبنا' : 'Download Talabna App' }}
-            </h2>
-            <p class="text-body-1 text-medium-emphasis mb-6">
-              {{ locale === 'ar'
-                ? 'تصفح الإعلانات وتواصل مع البائعين من هاتفك في أي وقت'
-                : 'Browse ads and connect with sellers from your phone anytime'
-              }}
-            </p>
-            <div class="d-flex gap-4 flex-wrap">
-              <v-btn variant="outlined" size="large" href="#">
-                <v-icon start size="28">mdi-google-play</v-icon>
-                <div class="text-left">
-                  <div class="text-caption">{{ locale === 'ar' ? 'متوفر على' : 'Get it on' }}</div>
-                  <div class="font-weight-bold">Google Play</div>
-                </div>
-              </v-btn>
-              <v-btn variant="outlined" size="large" href="#">
-                <v-icon start size="28">mdi-apple</v-icon>
-                <div class="text-left">
-                  <div class="text-caption">{{ locale === 'ar' ? 'حمل من' : 'Download on' }}</div>
-                  <div class="font-weight-bold">App Store</div>
-                </div>
-              </v-btn>
-            </div>
-          </v-col>
-          <v-col cols="12" md="6" class="text-center">
-            <v-img src="/storage/photos/app-mockup.png" max-height="400" contain />
           </v-col>
         </v-row>
       </v-container>
@@ -280,18 +270,18 @@ const loadingPopular = ref(true)
 const locale = computed(() => appStore.locale)
 
 const statsItems = computed(() => [
-  { key: 'total_listings', icon: 'mdi-bullhorn', color: 'primary', label: locale.value === 'ar' ? 'إعلان' : 'Listings' },
-  { key: 'total_users', icon: 'mdi-account-group', color: 'success', label: locale.value === 'ar' ? 'مستخدم' : 'Users' },
-  { key: 'total_categories', icon: 'mdi-shape', color: 'warning', label: locale.value === 'ar' ? 'تصنيف' : 'Categories' },
-  { key: 'listings_today', icon: 'mdi-clock-outline', color: 'info', label: locale.value === 'ar' ? 'إعلان اليوم' : 'Today' },
+  { key: 'total_listings', label: locale.value === 'ar' ? 'خدمات نشطة' : 'Active Services' },
+  { key: 'total_users', label: locale.value === 'ar' ? 'مستخدمين مسجلين' : 'Registered Users' },
+  { key: 'total_categories', label: locale.value === 'ar' ? 'خدمات مميزة' : 'Premium Services' },
+  { key: 'listings_today', label: locale.value === 'ar' ? 'معاملات' : 'Transactions' },
 ])
 
 const categoryIcons = {
-  1: 'mdi-cellphone',
-  2: 'mdi-car',
-  3: 'mdi-briefcase',
-  4: 'mdi-home-city',
-  5: 'mdi-shape',
+  1: 'mdi-cellphone',      // Mobile & Devices
+  2: 'mdi-car',            // Vehicles
+  3: 'mdi-briefcase',      // Jobs
+  4: 'mdi-home-city',      // Real Estate
+  5: 'mdi-tools',          // General Services
 }
 
 const categoryColors = {
@@ -397,9 +387,9 @@ watch(activeTab, (newTab) => {
 onMounted(() => {
   // Set SEO
   updateMeta({
-    title: 'طلبنا - Talabna | أكبر سوق للإعلانات المبوبة',
-    description: 'أكبر منصة للإعلانات المبوبة في الوطن العربي. بيع واشتري السيارات، العقارات، الهواتف، الوظائف والمزيد بسهولة وأمان.',
-    keywords: 'إعلانات مبوبة, سيارات للبيع, عقارات, وظائف, هواتف, بيع وشراء, classified ads, cars for sale',
+    title: 'طلبنا - Talabna | منصة الخدمات الشاملة',
+    description: 'طلبنا - منصتك الشاملة للعثور على الخدمات وتقديمها. تواصل مع مزودي الخدمات أو قدم خدماتك لآلاف المستخدمين.',
+    keywords: 'خدمات, إعلانات مبوبة, هواتف, سيارات, عقارات, وظائف, طلبنا, talabna, services',
   })
   setOrganizationSchema()
 
@@ -414,48 +404,96 @@ onMounted(() => {
 
 <style scoped>
 .hero-section {
-  background: linear-gradient(135deg, #5035FF 0%, #7C6AFF 100%);
+  background: linear-gradient(135deg, #6e5aff 0%, #5035FF 100%);
   padding: 80px 0;
   min-height: 500px;
   display: flex;
   align-items: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.hero-section::before {
+  content: '';
+  position: absolute;
+  top: -100px;
+  right: -80px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.hero-section::after {
+  content: '';
+  position: absolute;
+  bottom: -150px;
+  left: -80px;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
 }
 
 .search-card {
-  border-radius: 16px !important;
+  border-radius: 12px !important;
+}
+
+.stats-section {
+  background-color: #f0edff;
 }
 
 .stat-card {
-  border-radius: 16px !important;
+  border-radius: 12px !important;
   background: rgb(var(--v-theme-surface));
-  transition: transform 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
 }
 
 .category-card {
   cursor: pointer;
   transition: all 0.3s ease;
-  border-radius: 16px !important;
+  border-radius: 12px !important;
 }
 
 .category-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-10px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
   border-color: rgb(var(--v-theme-primary)) !important;
 }
 
-.bg-surface-variant {
+.bg-surface-light {
   background: rgba(var(--v-theme-on-surface), 0.03);
 }
 
-.cta-section {
-  background: linear-gradient(135deg, #5035FF 0%, #7C6AFF 100%);
+.app-banner {
+  background: linear-gradient(135deg, #6e5aff 0%, #5035FF 100%);
+  position: relative;
+  overflow: hidden;
 }
 
-.app-section {
-  background: rgb(var(--v-theme-surface));
+.app-banner::before {
+  content: '';
+  position: absolute;
+  top: -200px;
+  right: -200px;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.app-banner::after {
+  content: '';
+  position: absolute;
+  bottom: -200px;
+  left: -200px;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
 }
 </style>
