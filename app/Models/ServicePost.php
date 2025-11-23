@@ -25,6 +25,7 @@ class ServicePost extends Model
         'location_longitudes',
         'type',
         'have_badge',
+        'badge_type_id',
         'badge_duration',
         'badge_expires_at',
         'view_count',
@@ -288,5 +289,41 @@ class ServicePost extends Model
     public function city(): BelongsTo
     {
         return $this->belongsTo(cities::class);
+    }
+
+    public function badgeType(): BelongsTo
+    {
+        return $this->belongsTo(BadgeType::class, 'badge_type_id');
+    }
+
+    /**
+     * Get badge info (from relationship or fallback to have_badge)
+     */
+    public function getBadgeInfo(): array
+    {
+        if ($this->badgeType) {
+            return [
+                'id' => $this->badgeType->id,
+                'name' => $this->badgeType->name,
+                'name_ar' => $this->badgeType->name_ar,
+                'name_en' => $this->badgeType->name_en,
+                'slug' => $this->badgeType->slug,
+                'color' => $this->badgeType->color,
+                'icon' => $this->badgeType->icon,
+                'is_default' => $this->badgeType->is_default,
+            ];
+        }
+
+        // Fallback for old data
+        return [
+            'id' => null,
+            'name' => ['ar' => $this->have_badge, 'en' => $this->have_badge],
+            'name_ar' => $this->have_badge,
+            'name_en' => $this->have_badge,
+            'slug' => null,
+            'color' => $this->have_badge === 'ماسي' ? '#9C27B0' : ($this->have_badge === 'ذهبي' ? '#FFD700' : '#808080'),
+            'icon' => $this->have_badge === 'ماسي' ? 'mdi-diamond-stone' : ($this->have_badge === 'ذهبي' ? 'mdi-star' : 'mdi-tag'),
+            'is_default' => $this->have_badge === 'عادي',
+        ];
     }
 }

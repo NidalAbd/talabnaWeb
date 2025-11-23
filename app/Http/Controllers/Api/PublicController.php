@@ -18,6 +18,86 @@ use Carbon\Carbon;
 class PublicController extends Controller
 {
     /**
+     * Helper to decode JSON name field
+     */
+    private function decodeName($name)
+    {
+        if (is_array($name)) {
+            return $name;
+        }
+        if (is_string($name)) {
+            $decoded = json_decode($name, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                return $decoded;
+            }
+        }
+        return ['ar' => $name, 'en' => $name];
+    }
+
+    /**
+     * Transform listing data to fix JSON name fields
+     */
+    private function transformListing($listing)
+    {
+        if (!$listing) return null;
+
+        $data = $listing->toArray();
+
+        // Fix category name
+        if (isset($data['category']['name'])) {
+            $name = $this->decodeName($data['category']['name']);
+            $data['category']['name'] = $name;
+        }
+
+        // Fix sub_category name
+        if (isset($data['sub_category']['name'])) {
+            $name = $this->decodeName($data['sub_category']['name']);
+            $data['sub_category']['name'] = $name;
+        }
+
+        // Fix city name
+        if (isset($data['city']['name'])) {
+            $name = $this->decodeName($data['city']['name']);
+            $data['city']['name'] = $name;
+        }
+
+        // Fix country name
+        if (isset($data['country']['name'])) {
+            $name = $this->decodeName($data['country']['name']);
+            $data['country']['name'] = $name;
+        }
+
+        // Add badge info from badgeType relationship or fallback
+        if ($listing->badgeType) {
+            $data['badge'] = [
+                'id' => $listing->badgeType->id,
+                'name' => $listing->badgeType->name,
+                'name_ar' => $listing->badgeType->name_ar,
+                'name_en' => $listing->badgeType->name_en,
+                'slug' => $listing->badgeType->slug,
+                'color' => $listing->badgeType->color,
+                'icon' => $listing->badgeType->icon,
+                'is_default' => $listing->badgeType->is_default,
+            ];
+        } else {
+            // Fallback for old data using have_badge
+            $haveBadge = $data['have_badge'] ?? 'عادي';
+            $data['badge'] = [
+                'id' => null,
+                'name' => ['ar' => $haveBadge, 'en' => $haveBadge],
+                'name_ar' => $haveBadge,
+                'name_en' => $haveBadge,
+                'slug' => null,
+                'color' => $haveBadge === 'ماسي' ? '#9C27B0' : ($haveBadge === 'ذهبي' ? '#FFD700' : '#808080'),
+                'icon' => $haveBadge === 'ماسي' ? 'mdi-diamond-stone' : ($haveBadge === 'ذهبي' ? 'mdi-star' : 'mdi-tag'),
+                'is_default' => $haveBadge === 'عادي',
+            ];
+        }
+
+        return $data;
+    }
+
+    /**
      * Get all categories with counts
      */
     public function categories(Request $request): JsonResponse
@@ -89,7 +169,7 @@ class PublicController extends Controller
      */
     public function listings(Request $request): JsonResponse
     {
-        $query = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country'])
+        $query = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published');
 
@@ -153,8 +233,13 @@ class PublicController extends Controller
         $perPage = min($request->get('per_page', 20), 50);
         $listings = $query->paginate($perPage);
 
+        // Transform listings to fix JSON name fields
+        $transformedListings = collect($listings->items())->map(function ($listing) {
+            return $this->transformListing($listing);
+        });
+
         return response()->json([
-            'listings' => $listings->items(),
+            'listings' => $transformedListings,
             'pagination' => [
                 'total' => $listings->total(),
                 'per_page' => $listings->perPage(),
@@ -171,7 +256,7 @@ class PublicController extends Controller
      */
     public function listing(Request $request, $id): JsonResponse
     {
-        $listing = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country'])
+        $listing = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published')
             ->find($id);
@@ -181,7 +266,7 @@ class PublicController extends Controller
         }
 
         // Get related listings
-        $related = ServicePost::with(['photos', 'user.photos'])
+        $related = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published')
             ->where('id', '!=', $listing->id)
@@ -196,9 +281,14 @@ class PublicController extends Controller
         // Increment view count
         $listing->increment('view_count');
 
+        // Transform listings to fix JSON name fields
+        $transformedRelated = $related->map(function ($item) {
+            return $this->transformListing($item);
+        });
+
         return response()->json([
-            'listing' => $listing,
-            'related' => $related,
+            'listing' => $this->transformListing($listing),
+            'related' => $transformedRelated,
         ]);
     }
 
@@ -207,8 +297,8 @@ class PublicController extends Controller
      */
     public function featured(Request $request): JsonResponse
     {
-        $featured = Cache::remember('featured_listings', 900, function () {
-            return ServicePost::with(['photos', 'user.photos', 'category', 'subCategory'])
+        $featured = Cache::remember('featured_listings_v2', 900, function () {
+            $listings = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
                 ->withCount(['favorites', 'comments'])
                 ->where('state', 'published')
                 ->whereIn('have_badge', ['ماسي', 'ذهبي'])
@@ -217,6 +307,10 @@ class PublicController extends Controller
                 ->orderBy('view_count', 'desc')
                 ->limit(8)
                 ->get();
+
+            return $listings->map(function ($listing) {
+                return $this->transformListing($listing);
+            });
         });
 
         return response()->json([
@@ -231,10 +325,10 @@ class PublicController extends Controller
     {
         $categoryId = $request->get('category_id');
 
-        $cacheKey = $categoryId ? "latest_listings_{$categoryId}" : 'latest_listings';
+        $cacheKey = $categoryId ? "latest_listings_v2_{$categoryId}" : 'latest_listings_v2';
 
         $latest = Cache::remember($cacheKey, 600, function () use ($categoryId) {
-            $query = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory'])
+            $query = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
                 ->withCount(['favorites', 'comments'])
                 ->where('state', 'published')
                 ->whereHas('photos');
@@ -243,9 +337,13 @@ class PublicController extends Controller
                 $query->where('categories_id', $categoryId);
             }
 
-            return $query->orderBy('created_at', 'desc')
+            $listings = $query->orderBy('created_at', 'desc')
                 ->limit(12)
                 ->get();
+
+            return $listings->map(function ($listing) {
+                return $this->transformListing($listing);
+            });
         });
 
         return response()->json([
@@ -258,14 +356,18 @@ class PublicController extends Controller
      */
     public function popular(Request $request): JsonResponse
     {
-        $popular = Cache::remember('popular_listings', 1800, function () {
-            return ServicePost::with(['photos', 'user.photos', 'category', 'subCategory'])
+        $popular = Cache::remember('popular_listings_v2', 1800, function () {
+            $listings = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
                 ->withCount(['favorites', 'comments'])
                 ->where('state', 'published')
                 ->whereHas('photos')
                 ->orderBy('view_count', 'desc')
                 ->limit(8)
                 ->get();
+
+            return $listings->map(function ($listing) {
+                return $this->transformListing($listing);
+            });
         });
 
         return response()->json([
@@ -299,14 +401,26 @@ class PublicController extends Controller
     {
         $countries = Cache::remember('countries_list', 86400, function () {
             return countries::withCount(['cities'])
-                ->orderBy('name')
+                ->orderBy('id')
                 ->get()
                 ->map(function ($country) {
+                    // Handle name - could be array, JSON string, or plain string
+                    $name = $country->name;
+                    if (is_string($name)) {
+                        $decoded = json_decode($name, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            $name = $decoded;
+                        }
+                    }
+
+                    $nameAr = is_array($name) ? ($name['ar'] ?? '') : $name;
+                    $nameEn = is_array($name) ? ($name['en'] ?? $nameAr) : $name;
+
                     return [
                         'id' => $country->id,
-                        'name' => $country->name,
-                        'name_en' => $country->name_en ?? $country->name,
-                        'code' => $country->code,
+                        'name' => $nameAr,
+                        'name_en' => $nameEn,
+                        'code' => $country->code ?? $country->country_code,
                         'cities_count' => $country->cities_count,
                     ];
                 });
@@ -324,13 +438,25 @@ class PublicController extends Controller
     {
         $cities = Cache::remember("cities_{$countryId}", 86400, function () use ($countryId) {
             return cities::where('country_id', $countryId)
-                ->orderBy('name')
+                ->orderBy('id')
                 ->get()
                 ->map(function ($city) {
+                    // Handle name - could be array, JSON string, or plain string
+                    $name = $city->name;
+                    if (is_string($name)) {
+                        $decoded = json_decode($name, true);
+                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                            $name = $decoded;
+                        }
+                    }
+
+                    $nameAr = is_array($name) ? ($name['ar'] ?? '') : $name;
+                    $nameEn = is_array($name) ? ($name['en'] ?? $nameAr) : $name;
+
                     return [
                         'id' => $city->id,
-                        'name' => $city->name,
-                        'name_en' => $city->name_en ?? $city->name,
+                        'name' => $nameAr,
+                        'name_en' => $nameEn,
                         'country_id' => $city->country_id,
                     ];
                 });
@@ -355,7 +481,7 @@ class PublicController extends Controller
             ]);
         }
 
-        $listings = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory'])
+        $listings = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published')
             ->where(function ($q) use ($query) {
@@ -366,8 +492,13 @@ class PublicController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
+        // Transform listings to fix JSON name fields
+        $transformedListings = collect($listings->items())->map(function ($listing) {
+            return $this->transformListing($listing);
+        });
+
         return response()->json([
-            'listings' => $listings->items(),
+            'listings' => $transformedListings,
             'pagination' => [
                 'total' => $listings->total(),
                 'per_page' => $listings->perPage(),
@@ -394,12 +525,17 @@ class PublicController extends Controller
         }
 
         // Get user's listings
-        $listings = ServicePost::with(['photos', 'category', 'subCategory'])
+        $listings = ServicePost::with(['photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
             ->withCount(['favorites', 'comments'])
             ->where('user_id', $id)
             ->where('state', 'published')
             ->orderBy('created_at', 'desc')
             ->paginate(12);
+
+        // Transform listings to fix JSON name fields
+        $transformedListings = collect($listings->items())->map(function ($listing) {
+            return $this->transformListing($listing);
+        });
 
         return response()->json([
             'user' => [
@@ -409,12 +545,42 @@ class PublicController extends Controller
                 'listings_count' => $user->service_posts_count,
                 'created_at' => $user->created_at,
             ],
-            'listings' => $listings->items(),
+            'listings' => $transformedListings,
             'pagination' => [
                 'total' => $listings->total(),
                 'current_page' => $listings->currentPage(),
                 'last_page' => $listings->lastPage(),
             ],
+        ]);
+    }
+
+    /**
+     * Get available badge types for public display
+     */
+    public function badgeTypes(): JsonResponse
+    {
+        $badges = Cache::remember('public_badge_types', 3600, function () {
+            return \App\Models\BadgeType::active()
+                ->ordered()
+                ->get()
+                ->map(function ($badge) {
+                    return [
+                        'id' => $badge->id,
+                        'name' => $badge->name,
+                        'name_ar' => $badge->name_ar,
+                        'name_en' => $badge->name_en,
+                        'slug' => $badge->slug,
+                        'color' => $badge->color,
+                        'icon' => $badge->icon,
+                        'points_per_day' => $badge->points_per_day,
+                        'view_boost_percent' => $badge->view_boost_percent,
+                        'is_default' => $badge->is_default,
+                    ];
+                });
+        });
+
+        return response()->json([
+            'badges' => $badges,
         ]);
     }
 }

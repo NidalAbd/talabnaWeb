@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\PalservicePointsController;
 use App\Http\Controllers\Api\PublicController;
+use App\Http\Controllers\Api\BadgeTypeController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServicePostController;
 use Illuminate\Http\Request;
@@ -50,6 +51,11 @@ Route::prefix('public')->group(function () {
 
     // User Profile
     Route::get('/users/{id}', [PublicController::class, 'userProfile']);
+
+    // Badge Types (public - for displaying available badges)
+    Route::get('/badge-types', [BadgeTypeController::class, 'index']);
+    Route::get('/badge-types/{badgeType}', [BadgeTypeController::class, 'show']);
+    Route::get('/badge-types/calculate-cost', [BadgeTypeController::class, 'calculateCost']);
 });
 
 /*
@@ -187,4 +193,22 @@ Route::middleware(['auth:api'])->group(function () {
     // These routes will be used by the Flutter app for country/city filtering
     Route::get('countries', [ServicePostController::class, 'getCountries']);
     Route::get('cities', [ServicePostController::class, 'getCities']);
+
+    // Badge Type Management Routes (Admin)
+    Route::prefix('admin/badge-types')->group(function () {
+        Route::get('/', [BadgeTypeController::class, 'index']);
+        Route::post('/', [BadgeTypeController::class, 'store']);
+        Route::get('/statistics', [BadgeTypeController::class, 'statistics']);
+        Route::get('/{badgeType}', [BadgeTypeController::class, 'show']);
+        Route::put('/{badgeType}', [BadgeTypeController::class, 'update']);
+        Route::delete('/{badgeType}', [BadgeTypeController::class, 'destroy']);
+        Route::post('/reorder', [BadgeTypeController::class, 'reorder']);
+        Route::post('/{badgeType}/set-default', [BadgeTypeController::class, 'setDefault']);
+        Route::post('/{badgeType}/toggle-active', [BadgeTypeController::class, 'toggleActive']);
+        Route::post('/migrate-old-badges', [BadgeTypeController::class, 'migrateOldBadges']);
+    });
+
+    // Badge application routes for service posts
+    Route::post('service_posts/{servicePost}/apply-badge', [BadgeTypeController::class, 'applyBadgeToPost']);
+    Route::post('service_posts/{servicePost}/remove-badge', [BadgeTypeController::class, 'removeBadgeFromPost']);
 });

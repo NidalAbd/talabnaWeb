@@ -44,10 +44,16 @@ export function useSeo() {
     setMeta('author', 'Talabna')
     setMeta('robots', 'index, follow')
 
+    // Helper to get full image URL
+    const getImageUrl = (img) => {
+      if (!img) return siteUrl + defaultImage
+      return img.startsWith('http') ? img : siteUrl + img
+    }
+
     // OpenGraph tags
     setMeta('og:title', title, true)
     setMeta('og:description', description, true)
-    setMeta('og:image', image.startsWith('http') ? image : siteUrl + image, true)
+    setMeta('og:image', getImageUrl(image), true)
     setMeta('og:url', url, true)
     setMeta('og:type', type, true)
     setMeta('og:locale', locale, true)
@@ -57,7 +63,7 @@ export function useSeo() {
     setMeta('twitter:card', 'summary_large_image')
     setMeta('twitter:title', title)
     setMeta('twitter:description', description)
-    setMeta('twitter:image', image.startsWith('http') ? image : siteUrl + image)
+    setMeta('twitter:image', getImageUrl(image))
 
     // Canonical URL
     let canonical = document.querySelector('link[rel="canonical"]')

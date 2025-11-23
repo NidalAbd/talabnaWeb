@@ -15,6 +15,15 @@
         preload="metadata"
         muted
       />
+      <!-- No Image Placeholder -->
+      <div
+        v-else-if="!mainPhoto"
+        class="no-media-placeholder d-flex flex-column align-center justify-center"
+        style="height: 200px;"
+      >
+        <v-icon size="56" color="grey-lighten-1">mdi-image-multiple-outline</v-icon>
+        <span class="text-caption text-grey mt-2">{{ locale === 'ar' ? 'لا توجد صور' : 'No media' }}</span>
+      </div>
       <!-- Image -->
       <v-img
         v-else
@@ -339,5 +348,10 @@ const toggleFavorite = () => {
   -webkit-box-orient: vertical;
   overflow: hidden;
   line-height: 1.4;
+}
+
+.no-media-placeholder {
+  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
 }
 </style>

@@ -199,7 +199,13 @@
             <v-card v-for="listing in listings" :key="listing.id" class="mb-4 listing-list-card" variant="outlined" :to="`/listing/${listing.id}`">
               <v-row no-gutters>
                 <v-col cols="4" md="3">
-                  <v-img :src="listing.photos?.[0]?.src || '/storage/photos/placeholder.jpg'" height="180" cover />
+                  <v-img :src="getPhotoUrl(listing)" height="180" cover>
+                    <template v-slot:error>
+                      <v-row class="fill-height ma-0 bg-grey-lighten-3" align="center" justify="center">
+                        <v-icon size="48" color="grey">mdi-image-off</v-icon>
+                      </v-row>
+                    </template>
+                  </v-img>
                 </v-col>
                 <v-col cols="8" md="9">
                   <v-card-text>
@@ -207,13 +213,14 @@
                       <v-chip v-if="listing.have_badge !== 'عادي'" :color="listing.have_badge === 'ماسي' ? 'purple' : 'amber'" size="x-small">
                         {{ listing.have_badge }}
                       </v-chip>
-                      <v-chip size="x-small" variant="tonal">{{ listing.category?.name }}</v-chip>
+                      <v-chip size="x-small" variant="tonal">{{ getLocalizedName(listing.category) }}</v-chip>
                     </div>
                     <h3 class="text-h6 font-weight-bold mb-2">{{ listing.title }}</h3>
                     <p class="text-body-2 text-medium-emphasis mb-2 listing-description">{{ listing.description }}</p>
                     <div class="d-flex justify-space-between align-center">
-                      <span class="text-h6 font-weight-bold text-primary">${{ listing.price }}</span>
-                      <span class="text-caption text-medium-emphasis">{{ listing.city?.name }}</span>
+                      <span v-if="listing.price" class="text-h6 font-weight-bold text-primary">${{ listing.price }}</span>
+                      <span v-else class="text-body-2 text-medium-emphasis">{{ locale === 'ar' ? 'السعر عند الاتصال' : 'Contact for price' }}</span>
+                      <span class="text-caption text-medium-emphasis">{{ getLocalizedName(listing.city) }}</span>
                     </div>
                   </v-card-text>
                 </v-col>
@@ -299,6 +306,42 @@ const filters = ref({
 
 const locale = computed(() => appStore.locale)
 
+// Get localized name from category/subcategory/city/country object
+const getLocalizedName = (item) => {
+  if (!item) return ''
+  // If name is an object with ar/en keys
+  if (item.name && typeof item.name === 'object') {
+    return locale.value === 'ar' ? (item.name.ar || item.name.en || '') : (item.name.en || item.name.ar || '')
+  }
+  // If name is a string directly
+  if (typeof item.name === 'string') {
+    return locale.value === 'ar' ? item.name : (item.name_en || item.name)
+  }
+  return ''
+}
+
+// Ensure URL starts with / for absolute path
+const ensureAbsoluteUrl = (url) => {
+  if (!url) return null
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+    return url
+  }
+  // Handle paths stored as 'photos/posts/...' (from public disk) - need /storage prefix
+  if (url.startsWith('photos/')) {
+    return '/storage/' + url
+  }
+  // Handle paths stored as 'storage/photos/...' - just add leading slash
+  return '/' + url
+}
+
+const getPhotoUrl = (listing) => {
+  if (listing.photos && listing.photos.length > 0) {
+    const src = listing.photos[0].src || listing.photos[0].url
+    return ensureAbsoluteUrl(src)
+  }
+  return null
+}
+
 const hasMore = computed(() => {
   return pagination.value.current_page < pagination.value.last_page
 })
@@ -321,18 +364,36 @@ const subcategoryOptions = computed(() => {
 
 const countryOptions = computed(() => {
   if (!Array.isArray(countries.value)) return []
-  return countries.value.map(c => ({
-    title: locale.value === 'ar' ? c.name : c.name_en,
-    value: c.id,
-  }))
+  return countries.value.map(c => {
+    // Handle both string and object name formats
+    let nameAr = c.name
+    let nameEn = c.name_en || c.name
+    if (c.name && typeof c.name === 'object') {
+      nameAr = c.name.ar || c.name.en || ''
+      nameEn = c.name.en || c.name.ar || ''
+    }
+    return {
+      title: locale.value === 'ar' ? nameAr : nameEn,
+      value: c.id,
+    }
+  })
 })
 
 const cityOptions = computed(() => {
   if (!Array.isArray(cities.value)) return []
-  return cities.value.map(c => ({
-    title: locale.value === 'ar' ? c.name : c.name_en,
-    value: c.id,
-  }))
+  return cities.value.map(c => {
+    // Handle both string and object name formats
+    let nameAr = c.name
+    let nameEn = c.name_en || c.name
+    if (c.name && typeof c.name === 'object') {
+      nameAr = c.name.ar || c.name.en || ''
+      nameEn = c.name.en || c.name.ar || ''
+    }
+    return {
+      title: locale.value === 'ar' ? nameAr : nameEn,
+      value: c.id,
+    }
+  })
 })
 
 const sortOptions = computed(() => [

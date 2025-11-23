@@ -8,7 +8,7 @@
           <v-avatar size="40" class="mr-2">
             <v-img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" />
           </v-avatar>
-          <span class="text-h5 font-weight-bold text-primary">طلبنا</span>
+          <span class="text-h5 font-weight-bold text-primary">{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</span>
         </router-link>
 
         <v-spacer />
@@ -142,7 +142,7 @@
                 <v-img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" />
               </v-avatar>
               <div>
-                <h3 class="text-h6 font-weight-bold">طلبنا - Talabna</h3>
+                <h3 class="text-h6 font-weight-bold">{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</h3>
                 <p class="text-caption text-medium-emphasis">{{ appStore.locale === 'ar' ? 'منصة الإعلانات المبوبة' : 'Classified Ads Platform' }}</p>
               </div>
             </div>
