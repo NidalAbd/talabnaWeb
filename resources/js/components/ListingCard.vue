@@ -72,10 +72,10 @@
       <!-- Category -->
       <div class="d-flex align-center gap-2 mb-2">
         <v-chip size="x-small" variant="tonal" color="primary">
-          {{ locale === 'ar' ? listing.category?.name : listing.category?.name_en }}
+          {{ getCategoryName(listing.category) }}
         </v-chip>
         <v-chip v-if="listing.sub_category" size="x-small" variant="tonal">
-          {{ locale === 'ar' ? listing.sub_category?.name : listing.sub_category?.name_en }}
+          {{ getCategoryName(listing.sub_category) }}
         </v-chip>
       </div>
 
@@ -143,6 +143,32 @@ const props = defineProps({
 
 const isFavorite = ref(false)
 
+// Get localized name from category/subcategory object
+const getCategoryName = (item) => {
+  if (!item) return ''
+  // If name is an object with ar/en keys
+  if (item.name && typeof item.name === 'object') {
+    return props.locale === 'ar' ? (item.name.ar || item.name.en || '') : (item.name.en || item.name.ar || '')
+  }
+  // If name is a string directly
+  if (typeof item.name === 'string') {
+    return props.locale === 'ar' ? item.name : (item.name_en || item.name)
+  }
+  return ''
+}
+
+// Get localized location name
+const getLocationName = (item) => {
+  if (!item) return ''
+  if (item.name && typeof item.name === 'object') {
+    return props.locale === 'ar' ? (item.name.ar || item.name.en || '') : (item.name.en || item.name.ar || '')
+  }
+  if (typeof item.name === 'string') {
+    return props.locale === 'ar' ? item.name : (item.name_en || item.name)
+  }
+  return ''
+}
+
 // Ensure URL starts with / for absolute path
 const ensureAbsoluteUrl = (url) => {
   if (!url) return null
@@ -207,9 +233,9 @@ const badgeIcon = computed(() => {
 
 const locationText = computed(() => {
   const parts = []
-  if (props.listing.city?.name) parts.push(props.listing.city.name)
-  if (props.listing.country?.name) parts.push(props.listing.country.name)
-  return parts.join(', ')
+  if (props.listing.city) parts.push(getLocationName(props.listing.city))
+  if (props.listing.country) parts.push(getLocationName(props.listing.country))
+  return parts.filter(p => p).join(', ')
 })
 
 const timeAgo = computed(() => {

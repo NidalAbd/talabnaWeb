@@ -57,10 +57,10 @@
                   {{ listing.have_badge }}
                 </v-chip>
                 <v-chip color="primary" variant="tonal">
-                  {{ locale === 'ar' ? listing.category?.name : listing.category?.name_en }}
+                  {{ getLocalizedName(listing.category) }}
                 </v-chip>
                 <v-chip v-if="listing.sub_category" variant="tonal">
-                  {{ locale === 'ar' ? listing.sub_category?.name : listing.sub_category?.name_en }}
+                  {{ getLocalizedName(listing.sub_category) }}
                 </v-chip>
               </div>
 
@@ -265,6 +265,20 @@ const userPhotoUrl = computed(() => {
   return null
 })
 
+// Get localized name from category/subcategory/city/country object
+const getLocalizedName = (item) => {
+  if (!item) return ''
+  // If name is an object with ar/en keys
+  if (item.name && typeof item.name === 'object') {
+    return locale.value === 'ar' ? (item.name.ar || item.name.en || '') : (item.name.en || item.name.ar || '')
+  }
+  // If name is a string directly
+  if (typeof item.name === 'string') {
+    return locale.value === 'ar' ? item.name : (item.name_en || item.name)
+  }
+  return ''
+}
+
 const shareUrl = computed(() => window.location.href)
 
 const badgeColor = computed(() => {
@@ -280,8 +294,8 @@ const badgeIcon = computed(() => {
 const locationText = computed(() => {
   if (!listing.value) return ''
   const parts = []
-  if (listing.value.city?.name) parts.push(listing.value.city.name)
-  if (listing.value.country?.name) parts.push(listing.value.country.name)
+  if (listing.value.city) parts.push(getLocalizedName(listing.value.city))
+  if (listing.value.country) parts.push(getLocalizedName(listing.value.country))
   return parts.join(', ')
 })
 
@@ -289,7 +303,7 @@ const breadcrumbs = computed(() => {
   if (!listing.value) return []
   return [
     { title: locale.value === 'ar' ? 'الرئيسية' : 'Home', to: '/' },
-    { title: locale.value === 'ar' ? listing.value.category?.name : listing.value.category?.name_en, to: `/category/${listing.value.category?.id}` },
+    { title: getLocalizedName(listing.value.category), to: `/category/${listing.value.category?.id}` },
     { title: listing.value.title, disabled: true },
   ]
 })
