@@ -222,6 +222,11 @@ const ensureAbsoluteUrl = (url) => {
   if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
     return url
   }
+  // Handle paths stored as 'photos/posts/...' (from public disk) - need /storage prefix
+  if (url.startsWith('photos/')) {
+    return '/storage/' + url
+  }
+  // Handle paths stored as 'storage/photos/...' - just add leading slash
   return '/' + url
 }
 
