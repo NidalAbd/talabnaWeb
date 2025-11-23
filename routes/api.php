@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\GoogleAuthController;
 use App\Http\Controllers\Api\PalservicePointsController;
+use App\Http\Controllers\Api\PublicController;
 use App\Http\Controllers\Api\SearchController;
 use App\Http\Controllers\Api\ServicePostController;
 use Illuminate\Http\Request;
@@ -19,6 +20,37 @@ use App\Http\Controllers\UserController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Public API Routes (No Authentication Required)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('public')->group(function () {
+    // Categories & Subcategories
+    Route::get('/categories', [PublicController::class, 'categories']);
+    Route::get('/categories/{categoryId}/subcategories', [PublicController::class, 'subcategories']);
+
+    // Listings
+    Route::get('/listings', [PublicController::class, 'listings']);
+    Route::get('/listings/{id}', [PublicController::class, 'listing']);
+    Route::get('/featured', [PublicController::class, 'featured']);
+    Route::get('/latest', [PublicController::class, 'latest']);
+    Route::get('/popular', [PublicController::class, 'popular']);
+
+    // Stats
+    Route::get('/stats', [PublicController::class, 'stats']);
+
+    // Location
+    Route::get('/countries', [PublicController::class, 'countries']);
+    Route::get('/countries/{countryId}/cities', [PublicController::class, 'cities']);
+
+    // Search
+    Route::get('/search', [PublicController::class, 'search']);
+
+    // User Profile
+    Route::get('/users/{id}', [PublicController::class, 'userProfile']);
+});
 
 /*
 |--------------------------------------------------------------------------

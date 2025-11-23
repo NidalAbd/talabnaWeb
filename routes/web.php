@@ -3,6 +3,7 @@
 use App\Http\Controllers\Admin\BanController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\CategoriesController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\CitiesController;
 use App\Http\Controllers\CommentController;
 use App\Http\Controllers\CountriesController;
@@ -38,11 +39,70 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Public Routes
-Route::get('/', [HomePageController::class, 'index'])->name('landing');
-Route::get('/policy', [PolicyController::class, 'index'])->name('policy.index');
+// Facebook Data Deletion (keep these before SPA routes)
 Route::post('/facebook/data-deletion', [App\Http\Controllers\FacebookController::class, 'handleDataDeletion']);
 Route::get('/facebook/deletion-status', [App\Http\Controllers\FacebookController::class, 'getDeletionStatus']);
+
+/*
+|--------------------------------------------------------------------------
+| SEO Routes - Sitemap & Robots
+|--------------------------------------------------------------------------
+*/
+Route::get('/sitemap.xml', [SitemapController::class, 'index']);
+Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages']);
+Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories']);
+Route::get('/sitemap-listings-{page}.xml', [SitemapController::class, 'listings'])->where('page', '[0-9]+');
+Route::get('/robots.txt', [SitemapController::class, 'robots']);
+
+// Legacy Policy Route (redirect to SPA)
+Route::get('/policy', function() {
+    return view('spa');
+})->name('policy.index');
+
+/*
+|--------------------------------------------------------------------------
+| Vue SPA Routes (Public)
+|--------------------------------------------------------------------------
+*/
+Route::get('/', function() {
+    return view('spa');
+})->name('landing');
+
+Route::get('/browse', function() {
+    return view('spa');
+})->name('browse');
+
+Route::get('/category/{id}/{slug?}', function() {
+    return view('spa');
+})->name('category.show');
+
+Route::get('/listing/{id}/{slug?}', function() {
+    return view('spa');
+})->name('listing.show');
+
+Route::get('/search', function() {
+    return view('spa');
+})->name('search');
+
+Route::get('/user/{id}', function() {
+    return view('spa');
+})->where('id', '[0-9]+')->name('user.public.profile');
+
+Route::get('/about', function() {
+    return view('spa');
+})->name('about');
+
+Route::get('/contact', function() {
+    return view('spa');
+})->name('contact');
+
+Route::get('/privacy', function() {
+    return view('spa');
+})->name('privacy');
+
+Route::get('/terms', function() {
+    return view('spa');
+})->name('terms');
 
 
 // Deep Link Routes
