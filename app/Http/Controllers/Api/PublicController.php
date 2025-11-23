@@ -30,13 +30,17 @@ class PublicController extends Controller
                 ->orderBy('id')
                 ->get()
                 ->map(function ($cat) {
+                    // Handle name as JSON object with ar/en keys
+                    $nameAr = is_array($cat->name) ? ($cat->name['ar'] ?? '') : $cat->name;
+                    $nameEn = is_array($cat->name) ? ($cat->name['en'] ?? $nameAr) : $cat->name;
+
                     return [
                         'id' => $cat->id,
-                        'name' => $cat->name,
-                        'name_en' => $cat->name_en ?? $cat->name,
-                        'icon' => $cat->icon,
-                        'color' => $cat->color,
-                        'slug' => \Str::slug($cat->name_en ?? $cat->name),
+                        'name' => $nameAr,
+                        'name_en' => $nameEn,
+                        'icon' => $cat->icon ?? null,
+                        'color' => $cat->color ?? null,
+                        'slug' => \Str::slug($nameEn),
                         'posts_count' => $cat->service_posts_count,
                     ];
                 });
@@ -58,13 +62,17 @@ class PublicController extends Controller
             }])
                 ->where('categories_id', $categoryId)
                 ->where('isSuspended', false)
-                ->orderBy('name')
+                ->orderBy('id')
                 ->get()
                 ->map(function ($sub) {
+                    // Handle name as JSON object with ar/en keys
+                    $nameAr = is_array($sub->name) ? ($sub->name['ar'] ?? '') : $sub->name;
+                    $nameEn = is_array($sub->name) ? ($sub->name['en'] ?? $nameAr) : $sub->name;
+
                     return [
                         'id' => $sub->id,
-                        'name' => $sub->name,
-                        'name_en' => $sub->name_en ?? $sub->name,
+                        'name' => $nameAr,
+                        'name_en' => $nameEn,
                         'category_id' => $sub->categories_id,
                         'posts_count' => $sub->service_posts_count,
                     ];
