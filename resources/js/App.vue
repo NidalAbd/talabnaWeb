@@ -5,8 +5,8 @@
       <v-container class="d-flex align-center py-0">
         <!-- Logo -->
         <router-link to="/" class="d-flex align-center text-decoration-none">
-          <v-avatar size="40" class="mr-2">
-            <v-img src="/storage/photos/logo.png" alt="Talabna" />
+          <v-avatar size="40" class="mr-2" color="primary">
+            <v-icon color="white">mdi-store</v-icon>
           </v-avatar>
           <span class="text-h5 font-weight-bold text-primary">طلبنا</span>
         </router-link>
@@ -138,8 +138,8 @@
           <!-- About -->
           <v-col cols="12" md="4">
             <div class="d-flex align-center mb-4">
-              <v-avatar size="48" class="mr-3">
-                <v-img src="/storage/photos/logo.png" alt="Talabna" />
+              <v-avatar size="48" class="mr-3" color="primary">
+                <v-icon color="white" size="28">mdi-store</v-icon>
               </v-avatar>
               <div>
                 <h3 class="text-h6 font-weight-bold">طلبنا - Talabna</h3>

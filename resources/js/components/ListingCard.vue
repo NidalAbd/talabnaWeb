@@ -159,7 +159,8 @@ const mainPhoto = computed(() => {
     const src = props.listing.photos[0].src || props.listing.photos[0].url
     return ensureAbsoluteUrl(src)
   }
-  return '/storage/photos/placeholder.jpg'
+  // Return empty - v-img will show error slot
+  return ''
 })
 
 const isFirstMediaVideo = computed(() => {

@@ -42,7 +42,9 @@
                 />
               </v-carousel-item>
             </v-carousel>
-            <v-img v-else src="/storage/photos/placeholder.jpg" height="450" cover />
+            <div v-else class="d-flex align-center justify-center bg-grey-lighten-3" style="height: 450px;">
+              <v-icon size="100" color="grey">mdi-image-off</v-icon>
+            </div>
           </v-card>
 
           <!-- Listing Info -->
