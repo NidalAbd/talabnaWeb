@@ -4,9 +4,20 @@
     variant="outlined"
     :to="`/listing/${listing.id}/${slugify(listing.title)}`"
   >
-    <!-- Image -->
+    <!-- Image/Video Thumbnail -->
     <div class="listing-image-container">
+      <!-- Video thumbnail -->
+      <video
+        v-if="isFirstMediaVideo"
+        :src="mainPhoto"
+        class="listing-image"
+        style="width: 100%; height: 200px; object-fit: cover;"
+        preload="metadata"
+        muted
+      />
+      <!-- Image -->
       <v-img
+        v-else
         :src="mainPhoto"
         :alt="listing.title"
         height="200"
