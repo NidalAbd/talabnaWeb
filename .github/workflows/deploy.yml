@@ -253,8 +253,10 @@ jobs:
             .github/**
             deploy_laravel/**
             deploy_public/**
+            .env
+            storage/**
           log-level: minimal
-          dangerous-clean-slate: false
+          dangerous-clean-slate: true
 
       - name: Deploy public files to domains/talbna.cloud/public_html/
         uses: SamKirkland/FTP-Deploy-Action@v4.3.4
@@ -266,10 +268,11 @@ jobs:
           security: loose
           port: 21
           local-dir: ./deploy_public/
-          # Deplosy public files inside the domain folder: domains/talbna.cloud/public_html/
           server-dir: domains/talbna.cloud/public_html/
+          exclude: |
+            storage/**
           log-level: verbose
-          dangerous-clean-slate: false
+          dangerous-clean-slate: true
 
       - name: Run post-deployment setup (composer install, storage symlink, clear cache)
         run: |
