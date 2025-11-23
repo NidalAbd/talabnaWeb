@@ -229,15 +229,20 @@
             <v-btn color="primary" class="mt-4" @click="clearFilters">{{ locale === 'ar' ? 'مسح الفلاتر' : 'Clear Filters' }}</v-btn>
           </v-card>
 
-          <!-- Pagination -->
-          <div v-if="listings.length > 0 && pagination.last_page > 1" class="d-flex justify-center mt-8">
-            <v-pagination
-              v-model="currentPage"
-              :length="pagination.last_page"
-              :total-visible="7"
-              rounded="circle"
-              @update:model-value="changePage"
-            />
+          <!-- Infinite Scroll Trigger -->
+          <div v-if="listings.length > 0" ref="scrollTrigger" class="scroll-trigger">
+            <div v-if="loadingMore" class="text-center py-8">
+              <v-progress-circular indeterminate color="primary" size="32" />
+              <p class="mt-2 text-caption text-medium-emphasis">{{ locale === 'ar' ? 'جاري تحميل المزيد...' : 'Loading more...' }}</p>
+            </div>
+            <div v-else-if="hasMore" class="text-center py-4">
+              <v-btn variant="text" color="primary" @click="loadMore">
+                {{ locale === 'ar' ? 'تحميل المزيد' : 'Load More' }}
+              </v-btn>
+            </div>
+            <div v-else class="text-center py-4 text-caption text-medium-emphasis">
+              {{ locale === 'ar' ? 'تم عرض جميع النتائج' : 'All results loaded' }}
+            </div>
           </div>
         </v-col>
       </v-row>
@@ -246,7 +251,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
@@ -264,12 +269,15 @@ const subcategories = ref([])
 const countries = ref([])
 const cities = ref([])
 const loading = ref(false)
+const loadingMore = ref(false)
 const loadingCategories = ref(false)
 const loadingSubcategories = ref(false)
 const loadingCountries = ref(false)
 const loadingCities = ref(false)
 const viewMode = ref('grid')
 const currentPage = ref(1)
+const scrollTrigger = ref(null)
+let observer = null
 
 const pagination = ref({
   total: 0,
@@ -290,6 +298,10 @@ const filters = ref({
 })
 
 const locale = computed(() => appStore.locale)
+
+const hasMore = computed(() => {
+  return pagination.value.current_page < pagination.value.last_page
+})
 
 const categoryOptions = computed(() => {
   if (!Array.isArray(categories.value)) return []
@@ -331,8 +343,14 @@ const sortOptions = computed(() => [
 ])
 
 // Fetch functions
-const fetchListings = async () => {
-  loading.value = true
+const fetchListings = async (append = false) => {
+  if (append) {
+    loadingMore.value = true
+  } else {
+    loading.value = true
+    currentPage.value = 1
+  }
+
   try {
     const params = new URLSearchParams({
       page: currentPage.value,
@@ -361,15 +379,51 @@ const fetchListings = async () => {
     if (!response.ok) throw new Error('Failed to fetch')
     const data = await response.json()
 
-    listings.value = Array.isArray(data.listings) ? data.listings : []
+    const newListings = Array.isArray(data.listings) ? data.listings : []
+
+    if (append) {
+      listings.value = [...listings.value, ...newListings]
+    } else {
+      listings.value = newListings
+    }
+
     pagination.value = data.pagination || pagination.value
   } catch (error) {
     console.error('Error:', error)
-    listings.value = []
+    if (!append) listings.value = []
   } finally {
     loading.value = false
+    loadingMore.value = false
   }
 }
+
+const loadMore = async () => {
+  if (loadingMore.value || !hasMore.value) return
+  currentPage.value++
+  await fetchListings(true)
+}
+
+// Intersection Observer for infinite scroll
+const setupIntersectionObserver = () => {
+  if (observer) observer.disconnect()
+
+  observer = new IntersectionObserver(
+    (entries) => {
+      if (entries[0].isIntersecting && hasMore.value && !loadingMore.value && !loading.value) {
+        loadMore()
+      }
+    },
+    { rootMargin: '100px' }
+  )
+
+  if (scrollTrigger.value) {
+    observer.observe(scrollTrigger.value)
+  }
+}
+
+watch(scrollTrigger, (newVal) => {
+  if (newVal) setupIntersectionObserver()
+})
 
 const fetchCategories = async () => {
   loadingCategories.value = true
@@ -464,12 +518,6 @@ const clearFilters = () => {
   fetchListings()
 }
 
-const changePage = (page) => {
-  currentPage.value = page
-  fetchListings()
-  window.scrollTo({ top: 0, behavior: 'smooth' })
-}
-
 onMounted(() => {
   updateMeta({
     title: 'تصفح الإعلانات - طلبنا | Browse Listings',
@@ -483,6 +531,10 @@ onMounted(() => {
   fetchCategories()
   fetchCountries()
   fetchListings()
+})
+
+onUnmounted(() => {
+  if (observer) observer.disconnect()
 })
 </script>
 
