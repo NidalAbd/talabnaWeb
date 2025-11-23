@@ -24,9 +24,23 @@
               <v-carousel-item
                 v-for="(photo, i) in listing.photos"
                 :key="i"
-                :src="getPhotoUrl(photo)"
-                cover
-              />
+              >
+                <!-- Video -->
+                <video
+                  v-if="photo.isVideo || isVideoFile(photo.src)"
+                  :src="getPhotoUrl(photo)"
+                  controls
+                  class="w-100 h-100"
+                  style="object-fit: cover;"
+                />
+                <!-- Image -->
+                <v-img
+                  v-else
+                  :src="getPhotoUrl(photo)"
+                  height="450"
+                  cover
+                />
+              </v-carousel-item>
             </v-carousel>
             <v-img v-else src="/storage/photos/placeholder.jpg" height="450" cover />
           </v-card>
@@ -232,6 +246,14 @@ const ensureAbsoluteUrl = (url) => {
 
 const getPhotoUrl = (photo) => {
   return ensureAbsoluteUrl(photo?.src || photo?.url)
+}
+
+// Check if file is a video by extension
+const isVideoFile = (src) => {
+  if (!src) return false
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']
+  const lowerSrc = src.toLowerCase()
+  return videoExtensions.some(ext => lowerSrc.endsWith(ext))
 }
 
 const userPhotoUrl = computed(() => {

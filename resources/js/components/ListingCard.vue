@@ -36,6 +36,11 @@
         {{ listing.have_badge }}
       </v-chip>
 
+      <!-- Video Play Icon -->
+      <div v-if="isFirstMediaVideo" class="video-indicator">
+        <v-icon size="48" color="white">mdi-play-circle</v-icon>
+      </div>
+
       <!-- Favorite Button -->
       <v-btn
         icon
@@ -141,12 +146,28 @@ const ensureAbsoluteUrl = (url) => {
   return '/' + url
 }
 
+// Check if file is a video by extension
+const isVideoFile = (src) => {
+  if (!src) return false
+  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']
+  const lowerSrc = src.toLowerCase()
+  return videoExtensions.some(ext => lowerSrc.endsWith(ext))
+}
+
 const mainPhoto = computed(() => {
   if (props.listing.photos && props.listing.photos.length > 0) {
     const src = props.listing.photos[0].src || props.listing.photos[0].url
     return ensureAbsoluteUrl(src)
   }
   return '/storage/photos/placeholder.jpg'
+})
+
+const isFirstMediaVideo = computed(() => {
+  if (props.listing.photos && props.listing.photos.length > 0) {
+    const photo = props.listing.photos[0]
+    return photo.isVideo || isVideoFile(photo.src)
+  }
+  return false
 })
 
 const userPhoto = computed(() => {
@@ -262,6 +283,16 @@ const toggleFavorite = () => {
   position: absolute;
   top: 12px;
   right: 12px;
+}
+
+.video-indicator {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(0, 0, 0, 0.5);
+  border-radius: 50%;
+  padding: 8px;
 }
 
 .listing-title {
