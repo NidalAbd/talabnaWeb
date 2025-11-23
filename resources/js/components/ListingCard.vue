@@ -101,7 +101,7 @@
     <v-divider />
     <v-card-actions class="pa-4 pt-3 pb-3">
       <v-avatar size="28" class="mr-2">
-        <v-img v-if="listing.user?.photos?.[0]" :src="listing.user.photos[0].src" />
+        <v-img v-if="userPhoto" :src="userPhoto" />
         <v-icon v-else>mdi-account</v-icon>
       </v-avatar>
       <span class="text-caption text-medium-emphasis">{{ listing.user?.name || 'User' }}</span>
@@ -127,11 +127,28 @@ const props = defineProps({
 
 const isFavorite = ref(false)
 
+// Ensure URL starts with / for absolute path
+const ensureAbsoluteUrl = (url) => {
+  if (!url) return null
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+    return url
+  }
+  return '/' + url
+}
+
 const mainPhoto = computed(() => {
   if (props.listing.photos && props.listing.photos.length > 0) {
-    return props.listing.photos[0].src || props.listing.photos[0].url
+    const src = props.listing.photos[0].src || props.listing.photos[0].url
+    return ensureAbsoluteUrl(src)
   }
   return '/storage/photos/placeholder.jpg'
+})
+
+const userPhoto = computed(() => {
+  if (props.listing.user?.photos?.[0]?.src) {
+    return ensureAbsoluteUrl(props.listing.user.photos[0].src)
+  }
+  return null
 })
 
 const badgeColor = computed(() => {

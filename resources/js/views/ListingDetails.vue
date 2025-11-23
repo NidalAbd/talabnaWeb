@@ -24,7 +24,7 @@
               <v-carousel-item
                 v-for="(photo, i) in listing.photos"
                 :key="i"
-                :src="photo.src || photo.url"
+                :src="getPhotoUrl(photo)"
                 cover
               />
             </v-carousel>
@@ -111,7 +111,7 @@
               <!-- Seller Info -->
               <div class="d-flex align-center mb-6">
                 <v-avatar size="56" class="mr-4">
-                  <v-img v-if="listing.user?.photos?.[0]" :src="listing.user.photos[0].src" />
+                  <v-img v-if="userPhotoUrl" :src="userPhotoUrl" />
                   <v-icon v-else size="32">mdi-account</v-icon>
                 </v-avatar>
                 <div>
@@ -216,6 +216,26 @@ const snackbarText = ref('')
 
 const locale = computed(() => appStore.locale)
 
+// Ensure URL starts with / for absolute path
+const ensureAbsoluteUrl = (url) => {
+  if (!url) return null
+  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
+    return url
+  }
+  return '/' + url
+}
+
+const getPhotoUrl = (photo) => {
+  return ensureAbsoluteUrl(photo?.src || photo?.url)
+}
+
+const userPhotoUrl = computed(() => {
+  if (listing.value?.user?.photos?.[0]) {
+    return ensureAbsoluteUrl(listing.value.user.photos[0].src)
+  }
+  return null
+})
+
 const shareUrl = computed(() => window.location.href)
 
 const badgeColor = computed(() => {
@@ -289,7 +309,7 @@ const fetchListing = async () => {
       updateMeta({
         title: `${listing.value.title} - طلبنا`,
         description: listing.value.description?.substring(0, 160) || '',
-        image: listing.value.photos?.[0]?.src,
+        image: getPhotoUrl(listing.value.photos?.[0]),
         type: 'product',
       })
       setListingSchema(listing.value)
