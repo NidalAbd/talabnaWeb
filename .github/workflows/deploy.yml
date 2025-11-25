@@ -320,6 +320,25 @@ jobs:
             echo "   php artisan optimize:clear"
           fi
 
+      - name: Fix storage symlink via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          port: 65002
+          script: |
+            cd /home/u252000670/domains/talbna.cloud
+            # Remove existing storage link if it exists
+            if [ -e public_html/storage ]; then
+                rm -f public_html/storage
+                echo "Removed old storage link"
+            fi
+            # Create fresh symlink
+            ln -s /home/u252000670/domains/talbna.cloud/storage/app/public public_html/storage
+            echo "✅ Storage symlink created successfully"
+            ls -la public_html/storage
+
       - name: Cleanup
         run: |
           rm -rf deploy_laravel deploy_public

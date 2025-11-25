@@ -116,22 +116,15 @@
     </section>
 
     <!-- Featured Services -->
-    <section class="featured-section py-12 bg-surface-light">
+    <section class="featured-section py-12">
       <v-container>
-        <div class="section-header d-flex justify-space-between align-center mb-6">
-          <div>
-            <h2 class="text-h5 font-weight-bold">
-              <v-icon color="purple" class="mr-2">mdi-diamond-stone</v-icon>
-              {{ locale === 'ar' ? 'الخدمات المميزة' : 'Featured Services' }}
-            </h2>
-            <p class="text-body-2 text-medium-emphasis mt-1">
-              {{ locale === 'ar' ? 'اكتشف أفضل الخدمات المميزة من مستخدمينا' : 'Discover our top-rated premium services with excellent reviews' }}
-            </p>
-          </div>
-          <v-btn variant="text" color="primary" to="/browse?badge=premium">
-            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }}
-            <v-icon end>mdi-arrow-left</v-icon>
-          </v-btn>
+        <div class="section-header mb-8">
+          <h2 class="text-h4 font-weight-bold text-center mb-2">
+            {{ locale === 'ar' ? 'الخدمات المميزة' : 'Featured Services' }}
+          </h2>
+          <p class="text-body-1 text-medium-emphasis text-center">
+            {{ locale === 'ar' ? 'اكتشف أفضل الخدمات المميزة من مستخدمينا' : 'Discover our top-rated premium services with excellent reviews' }}
+          </p>
         </div>
 
         <v-row v-if="!loadingFeatured">
@@ -150,20 +143,13 @@
     <!-- Latest Services by Category -->
     <section class="latest-section py-12">
       <v-container>
-        <div class="section-header d-flex justify-space-between align-center mb-6">
-          <div>
-            <h2 class="text-h5 font-weight-bold">
-              <v-icon color="primary" class="mr-2">mdi-clock-outline</v-icon>
-              {{ locale === 'ar' ? 'أحدث الخدمات' : 'Latest Services' }}
-            </h2>
-            <p class="text-body-2 text-medium-emphasis mt-1">
-              {{ locale === 'ar' ? 'تحقق من أحدث الخدمات المضافة إلى منصتنا' : 'Check out the newest services added to our platform' }}
-            </p>
-          </div>
-          <v-btn variant="text" color="primary" to="/browse">
-            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }}
-            <v-icon end>mdi-arrow-left</v-icon>
-          </v-btn>
+        <div class="section-header mb-8">
+          <h2 class="text-h4 font-weight-bold text-center mb-2">
+            {{ locale === 'ar' ? 'أحدث الخدمات' : 'Latest Services' }}
+          </h2>
+          <p class="text-body-1 text-medium-emphasis text-center">
+            {{ locale === 'ar' ? 'تحقق من أحدث الخدمات المضافة إلى منصتنا' : 'Check out the newest services added to our platform' }}
+          </p>
         </div>
 
         <!-- Category Tabs -->
@@ -188,22 +174,15 @@
     </section>
 
     <!-- Popular Services -->
-    <section class="popular-section py-12 bg-surface-light">
+    <section class="popular-section py-12">
       <v-container>
-        <div class="section-header d-flex justify-space-between align-center mb-6">
-          <div>
-            <h2 class="text-h5 font-weight-bold">
-              <v-icon color="error" class="mr-2">mdi-fire</v-icon>
-              {{ locale === 'ar' ? 'الخدمات الأكثر مشاهدة' : 'Popular Services' }}
-            </h2>
-            <p class="text-body-2 text-medium-emphasis mt-1">
-              {{ locale === 'ar' ? 'اكتشف الخدمات الأكثر مشاهدة على منصتنا' : 'Discover the most viewed services on our platform' }}
-            </p>
-          </div>
-          <v-btn variant="text" color="primary" to="/browse?sort_by=view_count">
-            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }}
-            <v-icon end>mdi-arrow-left</v-icon>
-          </v-btn>
+        <div class="section-header mb-8">
+          <h2 class="text-h4 font-weight-bold text-center mb-2">
+            {{ locale === 'ar' ? 'الخدمات الأكثر مشاهدة' : 'Popular Services' }}
+          </h2>
+          <p class="text-body-1 text-medium-emphasis text-center">
+            {{ locale === 'ar' ? 'اكتشف الخدمات الأكثر مشاهدة على منصتنا' : 'Discover the most viewed services on our platform' }}
+          </p>
         </div>
 
         <v-row v-if="!loadingPopular">
@@ -222,23 +201,26 @@
     <!-- App Download Banner -->
     <section class="app-banner py-16">
       <v-container>
-        <v-row align="center" justify="center">
-          <v-col cols="12" md="8" class="text-center">
-            <h2 class="text-h4 font-weight-bold text-white mb-4">
-              {{ locale === 'ar' ? 'حمل تطبيق طلبنا' : 'Download Talabna App' }}
-            </h2>
-            <p class="text-h6 text-white-darken-1 mb-8">
-              {{ locale === 'ar'
-                ? 'احصل على التجربة الكاملة مع تطبيقنا. انشر الخدمات، أدر إعلاناتك، استقبل الإشعارات، وتواصل مع مزودي الخدمات أينما كنت.'
-                : 'Get the full experience with our mobile app. Post services, manage your listings, receive notifications, and connect with service providers on the go.'
-              }}
-            </p>
-            <v-btn color="white" size="x-large" href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="text-primary">
-              <v-icon start size="28">mdi-google-play</v-icon>
-              {{ locale === 'ar' ? 'حمل من Google Play' : 'Download on Google Play' }}
-            </v-btn>
-          </v-col>
-        </v-row>
+        <v-card class="app-download-card pa-12 text-center" elevation="0">
+          <v-row align="center" justify="center">
+            <v-col cols="12" md="10" lg="8">
+              <v-icon size="80" color="primary" class="mb-6">mdi-cellphone-download</v-icon>
+              <h2 class="text-h3 font-weight-bold mb-4">
+                {{ locale === 'ar' ? 'حمل تطبيق طلبنا' : 'Download Talabna App' }}
+              </h2>
+              <p class="text-h6 text-medium-emphasis mb-8">
+                {{ locale === 'ar'
+                  ? 'احصل على التجربة الكاملة مع تطبيقنا. انشر الخدمات، أدر إعلاناتك، استقبل الإشعارات، وتواصل مع مزودي الخدمات أينما كنت.'
+                  : 'Get the full experience with our mobile app. Post services, manage your listings, receive notifications, and connect with service providers on the go.'
+                }}
+              </p>
+              <v-btn color="primary" size="x-large" href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank">
+                <v-icon start size="28">mdi-google-play</v-icon>
+                {{ locale === 'ar' ? 'حمل من Google Play' : 'Download on Google Play' }}
+              </v-btn>
+            </v-col>
+          </v-row>
+        </v-card>
       </v-container>
     </section>
   </div>
@@ -460,7 +442,7 @@ onMounted(() => {
 .stat-card {
   border-radius: 16px !important;
   background: rgb(var(--v-theme-surface));
-  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
   transition: all 0.3s ease;
 }
 
@@ -474,7 +456,7 @@ onMounted(() => {
   cursor: pointer;
   transition: all 0.3s ease;
   border-radius: 16px !important;
-  border: 2px solid transparent;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
   background: rgb(var(--v-theme-surface));
 }
 
@@ -484,36 +466,20 @@ onMounted(() => {
   border-color: rgb(var(--v-theme-primary)) !important;
 }
 
-.bg-surface-light {
+.app-banner {
   background: transparent;
 }
 
-.app-banner {
-  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-primary-darken-1)) 100%);
-  position: relative;
-  overflow: hidden;
+.app-download-card {
+  background: rgb(var(--v-theme-surface)) !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  border-radius: 24px !important;
+  transition: all 0.3s ease;
 }
 
-.app-banner::before {
-  content: '';
-  position: absolute;
-  top: -200px;
-  right: -200px;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-}
-
-.app-banner::after {
-  content: '';
-  position: absolute;
-  bottom: -200px;
-  left: -200px;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
+.app-download-card:hover {
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1) !important;
+  border-color: rgb(var(--v-theme-primary));
 }
 
 .section-header {
