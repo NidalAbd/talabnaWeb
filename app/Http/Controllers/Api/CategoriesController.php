@@ -106,6 +106,50 @@ class CategoriesController extends Controller
     }
 
     /**
+     * Get featured categories
+     *
+     * @return JsonResponse
+     */
+    public function featured(): JsonResponse
+    {
+        $user = Auth::user();
+
+        $baseQuery = Categories::with(['sub_categories' => function($query) {
+            $query->withCount(['servicePosts'])->with('photos');
+        }, 'photos'])
+            ->featured()
+            ->where('isSuspended', false)
+            ->withCount(['servicePosts']);
+
+        $query = $this->directCategoryFilter($baseQuery, $user);
+        $categories = $query->get();
+
+        return response()->json(compact('categories'));
+    }
+
+    /**
+     * Get popular categories
+     *
+     * @return JsonResponse
+     */
+    public function popular(): JsonResponse
+    {
+        $user = Auth::user();
+
+        $baseQuery = Categories::with(['sub_categories' => function($query) {
+            $query->withCount(['servicePosts'])->with('photos');
+        }, 'photos'])
+            ->popular()
+            ->where('isSuspended', false)
+            ->withCount(['servicePosts']);
+
+        $query = $this->directCategoryFilter($baseQuery, $user);
+        $categories = $query->get();
+
+        return response()->json(compact('categories'));
+    }
+
+    /**
      * Display the specified resource.
      *
      * @param int $id

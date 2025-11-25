@@ -12,6 +12,8 @@ class Categories extends Model
     protected $table = 'categories'; // تأكد من أن الاسم مطابق لقاعدة البيانات
     protected $fillable = [
         'name',
+        'is_featured',
+        'is_popular',
     ];
     protected $casts = [
         'name' => 'array', // Automatically decode JSON to an array
@@ -35,5 +37,15 @@ class Categories extends Model
     public function subCategory()
     {
         return $this->hasMany(sub_categories::class,'sub_category_id');
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
+    }
+
+    public function scopePopular($query)
+    {
+        return $query->where('is_popular', true);
     }
 }

@@ -320,7 +320,7 @@
                                 </small>
                             </div>
 
-                            <button type="button" class="btn btn-warning btn-block" id="apply-badge-btn">
+                            <button type="submit" class="btn btn-warning btn-block" onclick="return confirmBadgeApplication()">
                                 <i class="fas fa-award mr-1"></i> <span id="badge-btn-text">Apply Badge</span>
                             </button>
                         </form>
@@ -690,52 +690,38 @@
                 console.log('Running initial calculation');
                 updateBadgeCost();
 
-                // Form submission with confirmation
-                const badgeForm = document.getElementById('badge-form');
-                const applyBadgeBtn = document.getElementById('apply-badge-btn');
+                // Simple confirmation function for badge application
+                window.confirmBadgeApplication = function() {
+                    const badgeSelect = document.getElementById('badge_type_id');
+                    const daysInput = document.getElementById('days');
+                    const refundInfo = document.getElementById('refund-info');
 
-                if (applyBadgeBtn) {
-                    applyBadgeBtn.addEventListener('click', function(e) {
-                        e.preventDefault();
+                    if (!badgeSelect || !badgeSelect.value) {
+                        alert('Please select a badge type');
+                        return false;
+                    }
 
-                        const badgeSelect = document.getElementById('badge_type_id');
-                        const daysInput = document.getElementById('days');
-                        const refundInfo = document.getElementById('refund-info');
+                    const selectedBadge = badgeSelect.options[badgeSelect.selectedIndex].text;
+                    const days = daysInput.value;
+                    const isSwitch = refundInfo && refundInfo.style.display !== 'none';
 
-                        if (!badgeSelect.value) {
-                            alert('Please select a badge type');
-                            return;
-                        }
+                    let confirmMessage = `Are you sure you want to apply ${selectedBadge} for ${days} days?`;
 
-                        const selectedBadge = badgeSelect.options[badgeSelect.selectedIndex].text;
-                        const days = daysInput.value;
-                        const isSwitch = refundInfo && refundInfo.style.display !== 'none';
+                    if (isSwitch) {
+                        const refundAmount = document.getElementById('refund-amount').textContent;
+                        const refundDays = document.getElementById('refund-days').textContent;
+                        const netAmount = document.getElementById('net-amount').textContent;
 
-                        let confirmMessage = `Are you sure you want to apply ${selectedBadge} for ${days} days?`;
+                        confirmMessage = `Badge Switch Confirmation\n\n`;
+                        confirmMessage += `New Badge: ${selectedBadge}\n`;
+                        confirmMessage += `Duration: ${days} days\n\n`;
+                        confirmMessage += `Refund: ${refundAmount} points (${refundDays} unused days)\n`;
+                        confirmMessage += `Net Charge: ${netAmount} points\n\n`;
+                        confirmMessage += `Do you want to proceed?`;
+                    }
 
-                        if (isSwitch) {
-                            const refundAmount = document.getElementById('refund-amount').textContent;
-                            const refundDays = document.getElementById('refund-days').textContent;
-                            const netAmount = document.getElementById('net-amount').textContent;
-
-                            confirmMessage = `⚠️ Badge Switch Confirmation\n\n`;
-                            confirmMessage += `New Badge: ${selectedBadge}\n`;
-                            confirmMessage += `Duration: ${days} days\n\n`;
-                            confirmMessage += `💰 Refund: ${refundAmount} points (${refundDays} unused days)\n`;
-                            confirmMessage += `💳 Net Charge: ${netAmount} points\n\n`;
-                            confirmMessage += `Do you want to proceed?`;
-                        }
-
-                        if (confirm(confirmMessage)) {
-                            console.log('Form confirmed, submitting...');
-                            badgeForm.submit();
-                        } else {
-                            console.log('Form submission cancelled by user');
-                        }
-                    });
-                } else {
-                    console.error('Apply badge button not found!');
-                }
+                    return confirm(confirmMessage);
+                };
             });
         </script>
     @endpush

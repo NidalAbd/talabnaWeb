@@ -14,7 +14,7 @@ class Sub_categories extends Model
     use HasFactory;
     protected $table = 'sub_categories';
     protected $fillable = [
-        'categories_id','name',
+        'categories_id','name','is_featured','is_popular',
     ];
     protected $casts = [
         'name' => 'array', // Converts JSON to PHP array automatically
@@ -63,6 +63,16 @@ class Sub_categories extends Model
     public function photos(): MorphMany
     {
         return $this->morphMany(Photos::class, 'photoable');
+    }
+
+    public function scopeFeatured($query)
+    {
+        return $query->where('is_featured', true);
+    }
+
+    public function scopePopular($query)
+    {
+        return $query->where('is_popular', true);
     }
 
 }

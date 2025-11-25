@@ -76,6 +76,44 @@ class SubcategoriesController extends Controller
         ]);
     }
 
+    /**
+     * Get featured subcategories
+     *
+     * @return JsonResponse
+     */
+    public function featured(): JsonResponse
+    {
+        $subcategories = Sub_categories::featured()
+            ->where('isSuspended', false)
+            ->withCount(['servicePosts' => function ($query) {
+                $query->where('state', 'published');
+            }])
+            ->with('photos')
+            ->orderByDesc('service_posts_count')
+            ->get();
+
+        return response()->json(compact('subcategories'));
+    }
+
+    /**
+     * Get popular subcategories
+     *
+     * @return JsonResponse
+     */
+    public function popular(): JsonResponse
+    {
+        $subcategories = Sub_categories::popular()
+            ->where('isSuspended', false)
+            ->withCount(['servicePosts' => function ($query) {
+                $query->where('state', 'published');
+            }])
+            ->with('photos')
+            ->orderByDesc('service_posts_count')
+            ->get();
+
+        return response()->json(compact('subcategories'));
+    }
+
     public function create(): Response
     {
         //

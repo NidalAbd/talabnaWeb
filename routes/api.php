@@ -182,8 +182,12 @@ Route::middleware(['auth:api'])->group(function () {
     Route::apiResource('categories', CategoriesController::class);
     Route::get('categories_list',[CategoriesController::class, 'categoryList']);
     Route::get('categories_menu',[CategoriesController::class, 'categoryMenu']);
+    Route::get('categories_featured',[CategoriesController::class, 'featured']);
+    Route::get('categories_popular',[CategoriesController::class, 'popular']);
 
     Route::get('categories_list/{categories}/sub_categories/',[SubcategoriesController::class, 'CategoriesSelected']);
+    Route::get('subcategories_featured',[SubcategoriesController::class, 'featured']);
+    Route::get('subcategories_popular',[SubcategoriesController::class, 'popular']);
 
     // EXISTING COUNTRY AND CITY ROUTES
     Route::get('countries_list',[CountriesController::class, 'countryList']);
