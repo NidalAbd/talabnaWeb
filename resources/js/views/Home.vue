@@ -404,9 +404,9 @@ onMounted(() => {
 
 <style scoped>
 .hero-section {
-  background: linear-gradient(135deg, #6e5aff 0%, #5035FF 100%);
-  padding: 80px 0;
-  min-height: 500px;
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-primary-darken-1)) 100%);
+  padding: 100px 0;
+  min-height: 600px;
   display: flex;
   align-items: center;
   position: relative;
@@ -416,23 +416,30 @@ onMounted(() => {
 .hero-section::before {
   content: '';
   position: absolute;
-  top: -100px;
-  right: -80px;
-  width: 300px;
-  height: 300px;
+  top: -150px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
+  animation: float 6s ease-in-out infinite;
 }
 
 .hero-section::after {
   content: '';
   position: absolute;
   bottom: -150px;
-  left: -80px;
-  width: 400px;
-  height: 400px;
+  left: -100px;
+  width: 500px;
+  height: 500px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
+  animation: float 8s ease-in-out infinite reverse;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-20px); }
 }
 
 .hero-content {
@@ -441,36 +448,48 @@ onMounted(() => {
 }
 
 .search-card {
-  border-radius: 12px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
+  backdrop-filter: blur(10px);
 }
 
 .stats-section {
-  background-color: #f0edff;
+  background: transparent;
 }
 
 .stat-card {
-  border-radius: 12px !important;
+  border-radius: 16px !important;
   background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-primary), 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
+  border-color: rgb(var(--v-theme-primary));
 }
 
 .category-card {
   cursor: pointer;
   transition: all 0.3s ease;
-  border-radius: 12px !important;
+  border-radius: 16px !important;
+  border: 2px solid transparent;
+  background: rgb(var(--v-theme-surface));
 }
 
 .category-card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1) !important;
   border-color: rgb(var(--v-theme-primary)) !important;
 }
 
 .bg-surface-light {
-  background: rgba(var(--v-theme-on-surface), 0.03);
+  background: transparent;
 }
 
 .app-banner {
-  background: linear-gradient(135deg, #6e5aff 0%, #5035FF 100%);
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-primary-darken-1)) 100%);
   position: relative;
   overflow: hidden;
 }
@@ -480,10 +499,10 @@ onMounted(() => {
   position: absolute;
   top: -200px;
   right: -200px;
-  width: 400px;
-  height: 400px;
+  width: 500px;
+  height: 500px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 .app-banner::after {
@@ -491,9 +510,19 @@ onMounted(() => {
   position: absolute;
   bottom: -200px;
   left: -200px;
-  width: 400px;
-  height: 400px;
+  width: 500px;
+  height: 500px;
   border-radius: 50%;
   background: rgba(255, 255, 255, 0.05);
+}
+
+.section-header {
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.home-page {
+  background: rgb(var(--v-theme-background));
 }
 </style>

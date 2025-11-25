@@ -1,13 +1,13 @@
 {
   "ListingCard.css": {
-    "file": "assets/ListingCard-7dd169df.css",
+    "file": "assets/ListingCard-cc72c4c0.css",
     "src": "ListingCard.css"
   },
-  "_ListingCard-d151943d.js": {
+  "_ListingCard-38a9e3c8.js": {
     "css": [
-      "assets/ListingCard-7dd169df.css"
+      "assets/ListingCard-cc72c4c0.css"
     ],
-    "file": "assets/ListingCard-d151943d.js",
+    "file": "assets/ListingCard-38a9e3c8.js",
     "imports": [
       "resources/js/app.js",
       "__plugin-vue_export-helper-c27b6911.js"
@@ -16,8 +16,8 @@
   "__plugin-vue_export-helper-c27b6911.js": {
     "file": "assets/_plugin-vue_export-helper-c27b6911.js"
   },
-  "_useSeo-fdd56011.js": {
-    "file": "assets/useSeo-fdd56011.js",
+  "_useSeo-d6e36092.js": {
+    "file": "assets/useSeo-d6e36092.js",
     "imports": [
       "resources/js/app.js"
     ]
@@ -52,7 +52,7 @@
     "src": "resources/css/app.css"
   },
   "resources/js/app.css": {
-    "file": "assets/app-ad7793de.css",
+    "file": "assets/app-e5d2dd61.css",
     "src": "resources/js/app.css"
   },
   "resources/js/app.js": {
@@ -63,7 +63,7 @@
       "assets/materialdesignicons-webfont-61e8aba5.ttf"
     ],
     "css": [
-      "assets/app-ad7793de.css"
+      "assets/app-e5d2dd61.css"
     ],
     "dynamicImports": [
       "resources/js/views/Home.vue",
@@ -78,7 +78,7 @@
       "resources/js/views/Terms.vue",
       "resources/js/views/NotFound.vue"
     ],
-    "file": "assets/app-537f2d87.js",
+    "file": "assets/app-d6a317b7.js",
     "isEntry": true,
     "src": "resources/js/app.js"
   },
@@ -90,28 +90,28 @@
     "css": [
       "assets/About-0ee1938d.css"
     ],
-    "file": "assets/About-7475e3ad.js",
+    "file": "assets/About-bbc31cb5.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
+      "_useSeo-d6e36092.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/views/About.vue"
   },
   "resources/js/views/Browse.css": {
-    "file": "assets/Browse-c2ebc0e3.css",
+    "file": "assets/Browse-27f0afdd.css",
     "src": "resources/js/views/Browse.css"
   },
   "resources/js/views/Browse.vue": {
     "css": [
-      "assets/Browse-c2ebc0e3.css"
+      "assets/Browse-27f0afdd.css"
     ],
-    "file": "assets/Browse-31eb2f55.js",
+    "file": "assets/Browse-193b868a.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
-      "_ListingCard-d151943d.js",
+      "_useSeo-d6e36092.js",
+      "_ListingCard-38a9e3c8.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
@@ -125,11 +125,11 @@
     "css": [
       "assets/Category-83ef8977.css"
     ],
-    "file": "assets/Category-50ee0f9d.js",
+    "file": "assets/Category-61589165.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
-      "_ListingCard-d151943d.js",
+      "_useSeo-d6e36092.js",
+      "_ListingCard-38a9e3c8.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
@@ -143,28 +143,28 @@
     "css": [
       "assets/Contact-30dd5ae0.css"
     ],
-    "file": "assets/Contact-c0e38abd.js",
+    "file": "assets/Contact-5f043dfa.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
+      "_useSeo-d6e36092.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/views/Contact.vue"
   },
   "resources/js/views/Home.css": {
-    "file": "assets/Home-c7051217.css",
+    "file": "assets/Home-cffed01f.css",
     "src": "resources/js/views/Home.css"
   },
   "resources/js/views/Home.vue": {
     "css": [
-      "assets/Home-c7051217.css"
+      "assets/Home-cffed01f.css"
     ],
-    "file": "assets/Home-b8849d65.js",
+    "file": "assets/Home-537adac1.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
-      "_ListingCard-d151943d.js",
+      "_useSeo-d6e36092.js",
+      "_ListingCard-38a9e3c8.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
@@ -178,21 +178,21 @@
     "css": [
       "assets/ListingDetails-5286a745.css"
     ],
-    "file": "assets/ListingDetails-fbbaaf34.js",
+    "file": "assets/ListingDetails-e59c8a07.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
-      "_ListingCard-d151943d.js",
+      "_useSeo-d6e36092.js",
+      "_ListingCard-38a9e3c8.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/views/ListingDetails.vue"
   },
   "resources/js/views/NotFound.vue": {
-    "file": "assets/NotFound-ef7898c9.js",
+    "file": "assets/NotFound-fa6dc529.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js"
+      "_useSeo-d6e36092.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/views/NotFound.vue"
@@ -205,21 +205,21 @@
     "css": [
       "assets/Privacy-5cba7e3c.css"
     ],
-    "file": "assets/Privacy-7f7c0f98.js",
+    "file": "assets/Privacy-b8c02acd.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
+      "_useSeo-d6e36092.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/views/Privacy.vue"
   },
   "resources/js/views/Search.vue": {
-    "file": "assets/Search-0569a1f5.js",
+    "file": "assets/Search-ef72dcf4.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
-      "_ListingCard-d151943d.js",
+      "_useSeo-d6e36092.js",
+      "_ListingCard-38a9e3c8.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
@@ -233,21 +233,21 @@
     "css": [
       "assets/Terms-c49f3fd4.css"
     ],
-    "file": "assets/Terms-bd2b64f5.js",
+    "file": "assets/Terms-529358d0.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
+      "_useSeo-d6e36092.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
     "src": "resources/js/views/Terms.vue"
   },
   "resources/js/views/UserProfile.vue": {
-    "file": "assets/UserProfile-1e5e57d8.js",
+    "file": "assets/UserProfile-076bad2e.js",
     "imports": [
       "resources/js/app.js",
-      "_useSeo-fdd56011.js",
-      "_ListingCard-d151943d.js",
+      "_useSeo-d6e36092.js",
+      "_ListingCard-38a9e3c8.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,

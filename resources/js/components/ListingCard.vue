@@ -340,31 +340,48 @@ const toggleFavorite = () => {
 <style scoped>
 .listing-card {
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 16px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px !important;
   overflow: hidden;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 
 .listing-card:hover {
   transform: translateY(-8px);
-  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1) !important;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
   border-color: rgb(var(--v-theme-primary)) !important;
 }
 
 .listing-image-container {
   position: relative;
+  overflow: hidden;
+}
+
+.listing-image {
+  transition: transform 0.3s ease;
+}
+
+.listing-card:hover .listing-image {
+  transform: scale(1.05);
 }
 
 .listing-badge {
   position: absolute;
   top: 12px;
   left: 12px;
+  z-index: 2;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .favorite-btn {
   position: absolute;
   top: 12px;
   right: 12px;
+  z-index: 2;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.9) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .video-indicator {
@@ -372,9 +389,10 @@ const toggleFavorite = () => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   border-radius: 50%;
-  padding: 8px;
+  padding: 12px;
+  backdrop-filter: blur(5px);
 }
 
 .listing-title {
@@ -382,11 +400,12 @@ const toggleFavorite = () => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  line-height: 1.4;
+  line-height: 1.5;
+  min-height: 3em;
 }
 
 .no-media-placeholder {
-  background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background: linear-gradient(135deg, rgb(var(--v-theme-surface-variant)) 0%, rgb(var(--v-theme-surface-bright)) 100%);
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 </style>

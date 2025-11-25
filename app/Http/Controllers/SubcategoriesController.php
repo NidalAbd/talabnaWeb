@@ -157,6 +157,8 @@ class SubcategoriesController extends Controller
             'name.en' => 'required|string|max:255',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'isSuspended' => 'nullable|boolean',
+            'is_featured' => 'nullable|boolean',
+            'is_popular' => 'nullable|boolean',
         ]);
 
         $subcategory = Sub_categories::findOrFail($id);
@@ -171,6 +173,9 @@ class SubcategoriesController extends Controller
         if (isset($validatedData['isSuspended'])) {
             $subcategory->isSuspended = $validatedData['isSuspended'];
         }
+
+        $subcategory->is_featured = $request->has('is_featured');
+        $subcategory->is_popular = $request->has('is_popular');
 
         $subcategory->save();
 

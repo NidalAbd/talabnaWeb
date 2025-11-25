@@ -302,7 +302,7 @@ onMounted(() => {
 /* Page transitions */
 .fade-enter-active,
 .fade-leave-active {
-  transition: opacity 0.2s ease;
+  transition: opacity 0.3s ease;
 }
 
 .fade-enter-from,
@@ -313,23 +313,53 @@ onMounted(() => {
 /* Search field */
 .search-field .v-field {
   border-radius: 24px !important;
+  background: rgba(var(--v-theme-surface), 0.9) !important;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.05);
+  background: rgb(var(--v-theme-surface-variant));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.2);
-  border-radius: 4px;
+  background: rgb(var(--v-theme-secondary));
+  border-radius: 5px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: rgb(var(--v-theme-primary));
+}
+
+/* Global smooth transitions */
+* {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+/* App bar styling */
+.v-app-bar {
+  backdrop-filter: blur(10px);
+  background: rgba(var(--v-theme-surface), 0.95) !important;
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+}
+
+/* Footer styling */
+.v-footer {
+  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+}
+
+/* Card improvements */
+.v-card {
+  transition: all 0.3s ease !important;
+}
+
+/* Button improvements */
+.v-btn {
+  text-transform: none;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 </style>

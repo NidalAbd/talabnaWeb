@@ -620,28 +620,41 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
+.browse-page {
+  background: rgb(var(--v-theme-background));
+  min-height: 100vh;
+}
+
 .hero-gradient {
-  background: linear-gradient(135deg, #5035FF 0%, #7C6AFF 100%);
+  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-primary-darken-1)) 100%);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
 .filters-card {
-  border-radius: 16px !important;
+  border-radius: 20px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  background: rgb(var(--v-theme-surface));
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04) !important;
 }
 
 .sticky-filters {
   position: sticky;
-  top: 80px;
+  top: 90px;
 }
 
 .listing-list-card {
   cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 16px !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 20px !important;
   overflow: hidden;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
 }
 
 .listing-list-card:hover {
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1) !important;
+  transform: translateY(-4px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.12) !important;
+  border-color: rgb(var(--v-theme-primary)) !important;
 }
 
 .listing-description {
@@ -649,5 +662,10 @@ onUnmounted(() => {
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  line-height: 1.5;
+}
+
+.scroll-trigger {
+  margin-top: 40px;
 }
 </style>

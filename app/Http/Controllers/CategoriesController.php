@@ -120,6 +120,8 @@ class CategoriesController extends Controller
             'name.en' => 'required|string|max:255',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'isSuspended' => 'nullable|boolean',
+            'is_featured' => 'nullable|boolean',
+            'is_popular' => 'nullable|boolean',
         ]);
 
         $category = Categories::findOrFail($id);
@@ -133,6 +135,9 @@ class CategoriesController extends Controller
         if (isset($validatedData['isSuspended'])) {
             $category->isSuspended = $validatedData['isSuspended'];
         }
+
+        $category->is_featured = $request->has('is_featured');
+        $category->is_popular = $request->has('is_popular');
 
         $category->save();
 

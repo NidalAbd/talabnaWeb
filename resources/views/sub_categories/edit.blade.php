@@ -101,7 +101,7 @@
                             </div>
 
                             <div class="row mt-3">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="status" class="font-weight-bold">
                                             <i class="fas fa-toggle-on mr-1"></i>
@@ -117,7 +117,28 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold d-block">
+                                            <i class="fas fa-star mr-1"></i>
+                                            Display Options
+                                        </label>
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="is_featured"
+                                                   name="is_featured" value="1"
+                                                   {{ old('is_featured', $subcategory->is_featured ?? false) ? 'checked' : '' }}>
+                                            <label class="custom-control-label" for="is_featured">Featured</label>
+                                        </div>
+                                        <div class="custom-control custom-checkbox mt-2">
+                                            <input type="checkbox" class="custom-control-input" id="is_popular"
+                                                   name="is_popular" value="1"
+                                                   {{ old('is_popular', $subcategory->is_popular ?? false) ? 'checked' : '' }}>
+                                            <label class="custom-control-label" for="is_popular">Popular</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="photo" class="font-weight-bold">
                                             <i class="fas fa-image mr-1"></i>
@@ -132,8 +153,7 @@
                                             @enderror
                                         </div>
                                         <small class="form-text text-muted">
-                                            Recommended size: 256x256 pixels. Max file size: 2MB.
-                                            Allowed formats: JPG, PNG, GIF
+                                            Max: 2MB. JPG, PNG, GIF
                                         </small>
                                     </div>
                                 </div>
