@@ -53,7 +53,7 @@ Route::prefix('public')->group(function () {
     Route::get('/users/{id}', [PublicController::class, 'userProfile']);
 
     // Badge Types (public - for displaying available badges)
-    Route::get('/badge-types', [BadgeTypeController::class, 'index']);
+    Route::get('/badge-types', [PublicController::class, 'badgeTypes']);
     Route::get('/badge-types/{badgeType}', [BadgeTypeController::class, 'show']);
     Route::get('/badge-types/calculate-cost', [BadgeTypeController::class, 'calculateCost']);
 });

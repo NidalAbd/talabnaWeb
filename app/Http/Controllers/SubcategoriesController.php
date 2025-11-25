@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BadgeType;
 use App\Models\Categories;
 use App\Models\Photos;
 use App\Models\ServicePost;
@@ -133,7 +134,7 @@ class SubcategoriesController extends Controller
         $servicePosts = ServicePost::where('sub_categories_id', $id)
             ->with('photos')
             ->withCount('favorites')
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
             ->paginate(10);
 
         return view('sub_categories.show', compact('subcategory', 'servicePosts'));

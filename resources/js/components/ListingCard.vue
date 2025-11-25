@@ -47,13 +47,13 @@
 
       <!-- Badge -->
       <v-chip
-        v-if="listing.have_badge && listing.have_badge !== 'عادي'"
+        v-if="showBadge"
         :color="badgeColor"
         size="small"
         class="listing-badge"
       >
         <v-icon start size="14">{{ badgeIcon }}</v-icon>
-        {{ listing.have_badge }}
+        {{ badgeName }}
       </v-chip>
 
       <!-- Video Play Icon -->
@@ -224,18 +224,53 @@ const userPhoto = computed(() => {
   return null
 })
 
+// Badge computed properties - supports both new badge object and legacy have_badge
+const hasBadgeData = computed(() => {
+  return props.listing.badge && !props.listing.badge.is_default
+})
+
+const showBadge = computed(() => {
+  // Check new badge object first
+  if (props.listing.badge) {
+    return !props.listing.badge.is_default
+  }
+  // Fallback to legacy have_badge
+  return props.listing.have_badge && props.listing.have_badge !== 'عادي'
+})
+
+const badgeName = computed(() => {
+  // Use new badge object if available
+  if (props.listing.badge) {
+    return props.locale === 'ar' ? props.listing.badge.name_ar : props.listing.badge.name_en
+  }
+  // Fallback to legacy
+  return props.listing.have_badge
+})
+
 const badgeColor = computed(() => {
+  // Use new badge object color if available
+  if (props.listing.badge && props.listing.badge.color) {
+    return props.listing.badge.color
+  }
+  // Fallback to legacy color mapping
   switch (props.listing.have_badge) {
     case 'ماسي': return 'purple'
     case 'ذهبي': return 'amber'
+    case 'فضي': return 'grey-lighten-1'
     default: return 'grey'
   }
 })
 
 const badgeIcon = computed(() => {
+  // Use new badge object icon if available
+  if (props.listing.badge && props.listing.badge.icon) {
+    return props.listing.badge.icon
+  }
+  // Fallback to legacy icon mapping
   switch (props.listing.have_badge) {
     case 'ماسي': return 'mdi-diamond-stone'
     case 'ذهبي': return 'mdi-star'
+    case 'فضي': return 'mdi-medal'
     default: return 'mdi-tag'
   }
 })

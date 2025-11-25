@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\BadgeType;
 use App\Models\Categories;
 use App\Models\cities;
 use App\Models\countries;
@@ -42,7 +43,7 @@ class ServicePostController extends Controller
                 $servicePosts = $user->servicePosts()->with('photos')
                     ->withCount('favorites')
                     ->withCount('comments')
-                    ->orderByRaw("FIELD(have_badge, 'D', 'G', 'N'), id DESC")
+                    ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
                     ->orderBy('id', 'desc')
                     ->paginate(10);
                 return response()->json(compact('servicePosts'));
@@ -152,7 +153,7 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
             ->paginate(10);
 
         foreach ($servicePosts as $servicePost) {
@@ -550,7 +551,7 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC");
+            ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC");
 
         // Only load service post photos if data saver is disabled
         if (!$currentUser->data_saver_enabled) {
@@ -969,7 +970,7 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC");
+            ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC");
 
         // Only load service post photos if data saver is disabled
         if (!$currentUser->data_saver_enabled) {

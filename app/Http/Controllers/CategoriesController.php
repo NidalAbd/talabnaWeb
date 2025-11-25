@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BadgeType;
 use App\Models\Categories;
 use App\Models\Photos;
 use App\Models\ServicePost;
@@ -100,7 +101,7 @@ class CategoriesController extends Controller
             'servicePosts' => function($query) {
                 $query->with('photos')
                     ->withCount('favorites')
-                    ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC");
+                    ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC");
             }
         ])->findOrFail($id);
 

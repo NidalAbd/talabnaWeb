@@ -16,6 +16,42 @@
 @stop
 @section('content')
     <div class="container-fluid p-0">
+        <!-- Success/Error Messages -->
+        @if(session('success'))
+            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle mr-2"></i>
+                <strong>Success!</strong> {{ session('success') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        @if(session('error'))
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle mr-2"></i>
+                <strong>Error!</strong> {{ session('error') }}
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
+        @if($errors->any())
+            <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle mr-2"></i>
+                <strong>Validation Error!</strong>
+                <ul class="mb-0 mt-2">
+                    @foreach($errors->all() as $error)
+                        <li>{{ $error }}</li>
+                    @endforeach
+                </ul>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+        @endif
+
         <div class="row">
             <div class="col-md-8">
                 <div class="card shadow-sm mb-4">
@@ -206,6 +242,92 @@
             </div>
 
             <div class="col-md-4">
+                <!-- Badge Management Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-white">
+                        <h5 class="mb-0">
+                            <i class="fas fa-award text-warning mr-2"></i>
+                            Badge Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        @php
+                            $currentBadge = $servicePost->badgeType;
+                            $badgeTypes = \App\Models\BadgeType::active()->ordered()->get();
+                        @endphp
+
+                        <!-- Current Badge -->
+                        <div class="text-center mb-3">
+                            @if($currentBadge)
+                                <i class="{{ $currentBadge->icon }}" style="font-size: 48px; color: {{ $currentBadge->color }};"></i>
+                                <h5 class="mt-2">{{ $currentBadge->name_en }}</h5>
+                                <p class="text-muted mb-0">{{ $currentBadge->name_ar }}</p>
+                                @if($servicePost->badge_expires_at)
+                                    <small class="text-{{ $servicePost->badge_expires_at > now() ? 'success' : 'danger' }}">
+                                        @if($servicePost->badge_expires_at > now())
+                                            Expires: {{ $servicePost->badge_expires_at->format('M d, Y') }}
+                                            ({{ $servicePost->badge_expires_at->diffInDays(now()) }} days left)
+                                        @else
+                                            Expired
+                                        @endif
+                                    </small>
+                                @endif
+                            @else
+                                <i class="fas fa-tag" style="font-size: 48px; color: #ccc;"></i>
+                                <h5 class="mt-2 text-muted">No Badge</h5>
+                            @endif
+                        </div>
+
+                        <hr>
+
+                        <!-- Apply/Change Badge Form -->
+                        <form action="{{ route('service_posts.apply_badge', $servicePost->id) }}" method="POST" id="badge-form">
+                            @csrf
+                            <div class="form-group">
+                                <label for="badge_type_id">Select Badge</label>
+                                <select class="form-control" id="badge_type_id" name="badge_type_id" required>
+                                    <option value="">-- Select Badge --</option>
+                                    @foreach($badgeTypes as $badge)
+                                        <option value="{{ $badge->id }}"
+                                                data-points="{{ $badge->points_per_day }}"
+                                                data-color="{{ $badge->color }}"
+                                                {{ $currentBadge && $currentBadge->id == $badge->id ? 'selected' : '' }}>
+                                            {{ $badge->name_en }} ({{ $badge->name_ar }}) - {{ $badge->points_per_day }} pts/day
+                                        </option>
+                                    @endforeach
+                                </select>
+                                <small class="text-muted">Total badge types: {{ count($badgeTypes) }}</small>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="days">Duration (Days)</label>
+                                <input type="number" class="form-control" id="days" name="days" value="7" min="1" max="365" required>
+                            </div>
+
+                            <div class="alert alert-info py-2" id="cost-preview">
+                                <small>
+                                    <strong>Total Cost:</strong> <span id="total-cost">0</span> points
+                                    <br>
+                                    <strong>User Balance:</strong> {{ $servicePost->user->pointsBalance ?? 0 }} points
+                                </small>
+                            </div>
+
+                            <button type="submit" class="btn btn-warning btn-block">
+                                <i class="fas fa-award mr-1"></i> Apply Badge
+                            </button>
+                        </form>
+
+                        @if($currentBadge && !$currentBadge->is_default)
+                            <form action="{{ route('service_posts.remove_badge', $servicePost->id) }}" method="POST" class="mt-2">
+                                @csrf
+                                <button type="submit" class="btn btn-outline-danger btn-block" onclick="return confirm('Are you sure you want to remove the badge?')">
+                                    <i class="fas fa-times mr-1"></i> Remove Badge
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+
                 <!-- Stats Card -->
                 <div class="card shadow-sm mb-4">
                     <div class="card-header bg-white">
@@ -459,6 +581,84 @@
                         }
                     });
                 });
+
+                // Badge cost calculator
+                function updateBadgeCost() {
+                    console.log('updateBadgeCost called');
+                    const select = document.getElementById('badge_type_id');
+                    const days = document.getElementById('days');
+                    const totalCost = document.getElementById('total-cost');
+
+                    console.log('Elements found:', {
+                        select: select ? 'yes' : 'no',
+                        days: days ? 'yes' : 'no',
+                        totalCost: totalCost ? 'yes' : 'no'
+                    });
+
+                    if (select && days && totalCost) {
+                        const selectedOption = select.options[select.selectedIndex];
+                        console.log('Selected option:', selectedOption);
+                        console.log('Selected option data-points:', selectedOption ? selectedOption.dataset.points : 'none');
+
+                        const pointsPerDay = selectedOption ? parseInt(selectedOption.dataset.points) || 0 : 0;
+                        const daysValue = parseInt(days.value) || 0;
+                        const total = pointsPerDay * daysValue;
+
+                        console.log('Calculation:', {
+                            pointsPerDay: pointsPerDay,
+                            days: daysValue,
+                            total: total
+                        });
+
+                        totalCost.textContent = total.toLocaleString();
+                    }
+                }
+
+                const badgeSelect = document.getElementById('badge_type_id');
+                const daysInput = document.getElementById('days');
+
+                console.log('Badge elements:', {
+                    badgeSelect: badgeSelect ? 'found' : 'not found',
+                    daysInput: daysInput ? 'found' : 'not found'
+                });
+
+                if (badgeSelect) {
+                    console.log('Badge select options count:', badgeSelect.options.length);
+                    badgeSelect.addEventListener('change', function() {
+                        console.log('Badge select changed');
+                        updateBadgeCost();
+                    });
+                }
+
+                if (daysInput) {
+                    daysInput.addEventListener('input', function() {
+                        console.log('Days input changed');
+                        updateBadgeCost();
+                    });
+                }
+
+                // Initial calculation
+                console.log('Running initial calculation');
+                updateBadgeCost();
+
+                // Form submission logging
+                const badgeForm = document.getElementById('badge-form');
+                if (badgeForm) {
+                    console.log('Badge form found');
+                    badgeForm.addEventListener('submit', function(e) {
+                        const badgeId = document.getElementById('badge_type_id').value;
+                        const days = document.getElementById('days').value;
+                        console.log('Form submitting with:', {
+                            badgeId: badgeId,
+                            days: days,
+                            action: this.action,
+                            method: this.method
+                        });
+                        // Don't prevent default - let form submit normally
+                    });
+                } else {
+                    console.error('Badge form not found!');
+                }
             });
         </script>
     @endpush

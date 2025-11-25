@@ -477,6 +477,24 @@ return [
             'icon' => 'fas fa-piggy-bank'
         ],
 
+        // Badge Types Section
+        [
+            'text'    => 'Badge System',
+            'icon'    => 'fas fa-award',
+            'submenu' => [
+                [
+                    'text' => 'Badge Types',
+                    'url'  => 'badge_types',
+                    'icon' => 'fas fa-gem',
+                ],
+                [
+                    'text' => 'Add Badge Type',
+                    'url'  => 'badge_types/create',
+                    'icon' => 'fas fa-plus-circle',
+                ],
+            ]
+        ],
+
     ],    /*
 
         |--------------------------------------------------------------------------

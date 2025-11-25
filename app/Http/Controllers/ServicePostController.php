@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BadgeType;
 use App\Models\Categories;
 use App\Models\Notification;
 use App\Models\palservice_points;
@@ -305,10 +306,31 @@ class ServicePostController extends Controller
         // Only admin and moderator can view all service posts
         $user = Auth::user();
 
+        \Log::info('=== SERVICE POST SHOW ===');
+        \Log::info('Service Post ID:', ['id' => $servicePost->id]);
+        \Log::info('User:', ['id' => $user->id, 'name' => $user->name]);
+
         // Check if the user has the required permissions to view a service post
         if ($user->hasPermission('show_service')) {
-            $servicePost->load('photos', 'user', 'category', 'subCategory', 'country', 'city');
-            return view('service_posts.show', compact('servicePost'));
+            $servicePost->load('photos', 'user', 'category', 'subCategory', 'country', 'city', 'badgeType');
+
+            // Get all active badge types for the dropdown
+            $badgeTypes = \App\Models\BadgeType::active()->ordered()->get();
+
+            \Log::info('Badge Types loaded:', [
+                'count' => $badgeTypes->count(),
+                'badges' => $badgeTypes->map(function($b) {
+                    return ['id' => $b->id, 'name' => $b->name_en, 'active' => $b->is_active];
+                })->toArray()
+            ]);
+
+            \Log::info('Current Badge:', [
+                'has_badge' => $servicePost->badgeType ? 'yes' : 'no',
+                'badge_id' => $servicePost->badge_type_id,
+                'badge_name' => $servicePost->badgeType?->name_en ?? 'none'
+            ]);
+
+            return view('service_posts.show', compact('servicePost', 'badgeTypes'));
         } else {
             return response()->json(['error' => 'Unauthorized'], 403);
         }
@@ -735,7 +757,7 @@ class ServicePostController extends Controller
                     break;
                 default:
                     // Default sorting with badge priority
-                    $query->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC");
+                    $query->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC");
             }
 
             // Pagination
@@ -769,7 +791,7 @@ class ServicePostController extends Controller
         $servicePosts = $user->servicePosts()
             ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
             ->withCount('favorites')
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
             ->orderBy('id', 'desc')
             ->paginate(10);
 
@@ -781,7 +803,7 @@ class ServicePostController extends Controller
         $servicePosts = $user->servicePosts()
             ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
             ->withCount('favorites')
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
             ->orderBy('id', 'desc')
             ->paginate(10);
 
@@ -802,7 +824,7 @@ class ServicePostController extends Controller
             })
                 ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
                 ->withCount('favorites')
-                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
                 ->paginate(10);
 
             return view('service_posts.post_page', compact('servicePosts', 'user', 'categories'));
@@ -830,7 +852,7 @@ class ServicePostController extends Controller
                 ->where('state', 'published')
                 ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
                 ->withCount('favorites')
-                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
                 ->paginate(10);
 
             $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
@@ -864,7 +886,7 @@ class ServicePostController extends Controller
                 ->where('state', 'published')
                 ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
                 ->withCount('favorites')
-                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
                 ->paginate(10);
 
             $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
@@ -898,7 +920,7 @@ class ServicePostController extends Controller
                 ->where('state', 'published')
                 ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
                 ->withCount('favorites')
-                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
                 ->paginate(10);
 
             $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
@@ -932,7 +954,7 @@ class ServicePostController extends Controller
                 ->where('state', 'published')
                 ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
                 ->withCount('favorites')
-                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
                 ->paginate(10);
 
             $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
@@ -966,7 +988,7 @@ class ServicePostController extends Controller
                 ->where('state', 'published')
                 ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
                 ->withCount('favorites')
-                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
                 ->paginate(10);
 
             $subcategories = Sub_categories::where('categories_id', $categoryModel->id)
@@ -1005,7 +1027,7 @@ class ServicePostController extends Controller
                 ->where('state', 'published')
                 ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
                 ->withCount('favorites')
-                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+                ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
                 ->paginate(10);
 
             // Fetch user photos and names for each service post
@@ -1070,7 +1092,7 @@ class ServicePostController extends Controller
         $servicePosts = ServicePost::where('sub_categories_id', $subcategoryModel->id)
             ->with('photos', 'user', 'category', 'subCategory', 'country', 'city')
             ->withCount('favorites')
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي'), id DESC")
+            ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
             ->paginate(10);
 
         return response()->json($servicePosts);
@@ -1122,5 +1144,76 @@ class ServicePostController extends Controller
         });
 
         return response()->json($cities);
+    }
+
+    /**
+     * Apply badge to a service post (Admin)
+     */
+    public function applyBadge(Request $request, ServicePost $servicePost)
+    {
+        \Log::info('=== APPLY BADGE REQUEST START ===');
+        \Log::info('Request data:', $request->all());
+        \Log::info('Service Post ID:', ['id' => $servicePost->id]);
+        \Log::info('Service Post User:', ['user_id' => $servicePost->user_id, 'user_name' => $servicePost->user->name ?? 'N/A']);
+
+        $request->validate([
+            'badge_type_id' => 'required|exists:badge_types,id',
+            'days' => 'required|integer|min:1|max:365',
+        ]);
+
+        \Log::info('Validation passed');
+
+        $badgeService = app(\App\Services\BadgeService::class);
+
+        $badge = \App\Models\BadgeType::find($request->badge_type_id);
+        \Log::info('Badge Type:', [
+            'id' => $badge->id,
+            'name' => $badge->name_en,
+            'points_per_day' => $badge->points_per_day
+        ]);
+
+        $totalCost = $badge->points_per_day * $request->days;
+        $userBalance = $servicePost->user->pointsBalance ?? 0;
+
+        \Log::info('Cost calculation:', [
+            'points_per_day' => $badge->points_per_day,
+            'days' => $request->days,
+            'total_cost' => $totalCost,
+            'user_balance' => $userBalance,
+            'sufficient' => $userBalance >= $totalCost
+        ]);
+
+        try {
+            // Apply badge and deduct points from user
+            \Log::info('Calling badgeService->applyBadge()');
+            $result = $badgeService->applyBadge($servicePost, $request->badge_type_id, $request->days, true);
+            \Log::info('Badge applied successfully', ['post_id' => $result->id]);
+
+            return redirect()->back()->with('success', 'Badge applied successfully! Points deducted from user balance.');
+        } catch (\Exception $e) {
+            \Log::error('Failed to apply badge:', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return redirect()->back()->with('error', 'Failed to apply badge: ' . $e->getMessage());
+        } finally {
+            \Log::info('=== APPLY BADGE REQUEST END ===');
+        }
+    }
+
+    /**
+     * Remove badge from a service post (Admin)
+     */
+    public function removeBadge(ServicePost $servicePost)
+    {
+        $badgeService = app(\App\Services\BadgeService::class);
+
+        try {
+            $badgeService->removeBadge($servicePost);
+
+            return redirect()->back()->with('success', 'Badge removed successfully!');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Failed to remove badge: ' . $e->getMessage());
+        }
     }
 }

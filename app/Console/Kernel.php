@@ -15,8 +15,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        // Add this line to run the badge expiration command daily
-        $schedule->command('badges:expire')->everyMinute();
+        // Run badge expiration check every 15 minutes
+        // This ensures badges expire at approximately the same time they were created
+        $schedule->command('badges:expire')->everyFifteenMinutes();
     }
 
     /**

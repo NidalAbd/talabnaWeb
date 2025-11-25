@@ -142,13 +142,15 @@
                   {{ locale === 'ar' ? 'نوع الإعلان' : 'Listing Type' }}
                 </label>
                 <v-chip-group v-model="filters.badge" column @update:model-value="fetchListings">
-                  <v-chip filter value="ماسي" color="purple">
-                    <v-icon start size="16">mdi-diamond-stone</v-icon>
-                    {{ locale === 'ar' ? 'ماسي' : 'Diamond' }}
-                  </v-chip>
-                  <v-chip filter value="ذهبي" color="amber">
-                    <v-icon start size="16">mdi-star</v-icon>
-                    {{ locale === 'ar' ? 'ذهبي' : 'Gold' }}
+                  <v-chip
+                    v-for="badge in badgeTypes.filter(b => !b.is_default)"
+                    :key="badge.id"
+                    filter
+                    :value="badge.name_ar"
+                    :color="badge.color"
+                  >
+                    <v-icon start size="16">{{ badge.icon }}</v-icon>
+                    {{ locale === 'ar' ? badge.name_ar : badge.name_en }}
                   </v-chip>
                 </v-chip-group>
               </div>
@@ -210,8 +212,13 @@
                 <v-col cols="8" md="9">
                   <v-card-text>
                     <div class="d-flex align-center gap-2 mb-2">
-                      <v-chip v-if="listing.have_badge !== 'عادي'" :color="listing.have_badge === 'ماسي' ? 'purple' : 'amber'" size="x-small">
-                        {{ listing.have_badge }}
+                      <v-chip
+                        v-if="listing.badge && !listing.badge.is_default"
+                        :color="listing.badge.color"
+                        size="x-small"
+                      >
+                        <v-icon start size="12">{{ listing.badge.icon }}</v-icon>
+                        {{ locale === 'ar' ? listing.badge.name_ar : listing.badge.name_en }}
                       </v-chip>
                       <v-chip size="x-small" variant="tonal">{{ getLocalizedName(listing.category) }}</v-chip>
                     </div>
@@ -275,6 +282,7 @@ const categories = ref([])
 const subcategories = ref([])
 const countries = ref([])
 const cities = ref([])
+const badgeTypes = ref([])
 const loading = ref(false)
 const loadingMore = ref(false)
 const loadingCategories = ref(false)
@@ -532,6 +540,17 @@ const fetchCountries = async () => {
   }
 }
 
+const fetchBadgeTypes = async () => {
+  try {
+    const response = await fetch('/api/public/badge-types')
+    if (!response.ok) return
+    const data = await response.json()
+    badgeTypes.value = Array.isArray(data.badges) ? data.badges : []
+  } catch (error) {
+    console.error('Error fetching badge types:', error)
+  }
+}
+
 const fetchCities = async (countryId) => {
   if (!countryId) {
     cities.value = []
@@ -591,6 +610,7 @@ onMounted(() => {
 
   fetchCategories()
   fetchCountries()
+  fetchBadgeTypes()
   fetchListings()
 })
 

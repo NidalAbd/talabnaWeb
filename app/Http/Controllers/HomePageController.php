@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\BadgeType;
 use App\Models\Categories;
 use App\Models\Sub_categories;
 use App\Models\point_purchase_requests;
@@ -44,9 +45,9 @@ class HomePageController extends Controller
         $featuredPosts = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory'])
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published')
-            ->whereIn('have_badge', ['ماسي', 'ذهبي'])
+            ->where('have_badge', '!=', 'عادي')  // Get all premium badges
             ->whereHas('photos')  // Only include posts with photos
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي'), view_count DESC")
+            ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", view_count DESC")
             ->limit(6)
             ->get();
 

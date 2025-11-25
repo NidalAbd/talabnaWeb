@@ -27,6 +27,7 @@ use App\Http\Controllers\ServicePostController;
 use App\Http\Controllers\SubcategoriesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserRoleAssignmentController;
+use App\Http\Controllers\BadgeTypeController;
 use App\Models\ServicePost;
 use App\Models\Sub_categories;
 use App\Models\User;
@@ -130,6 +131,10 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     */
     // Service Posts Resources and Actions
     Route::resource('service_posts', ServicePostController::class);
+    Route::post('service_posts/{servicePost}/apply-badge', [ServicePostController::class, 'applyBadge'])
+        ->name('service_posts.apply_badge');
+    Route::post('service_posts/{servicePost}/remove-badge', [ServicePostController::class, 'removeBadge'])
+        ->name('service_posts.remove_badge');
     Route::delete('service-posts/bulk-destroy', [ServicePostController::class, 'bulkDestroy'])
         ->name('service_posts.bulk-destroy');
     Route::post('inViewCount/{servicePost}', [ServicePostController::class, 'inViewCount'])
@@ -301,6 +306,19 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
         Route::delete('/{palservice_point}', [PalservicePointsController::class, 'destroy'])
             ->name('palservice_points.destroy');
     });
+
+    /*
+    |--------------------------------------------------------------------------
+    | Badge Types Management Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::resource('badge_types', BadgeTypeController::class);
+    Route::post('/badge_types/{badgeType}/toggle-active', [BadgeTypeController::class, 'toggleActive'])
+        ->name('badge_types.toggle_active');
+    Route::post('/badge_types/{badgeType}/set-default', [BadgeTypeController::class, 'setDefault'])
+        ->name('badge_types.set_default');
+    Route::post('/badge_types/migrate-old-badges', [BadgeTypeController::class, 'migrateOldBadges'])
+        ->name('badge_types.migrate');
 
     /*
     |--------------------------------------------------------------------------

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\BadgeType;
 use App\Models\Categories;
 use App\Models\Sub_categories;
 use App\Models\ServicePost;
@@ -222,10 +223,10 @@ class PublicController extends Controller
 
         if (in_array($sortBy, $allowedSortFields)) {
             // Premium listings first
-            $query->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي')");
+            $query->orderByRaw(BadgeType::getLegacyOrderByClause());
             $query->orderBy($sortBy, $sortOrder);
         } else {
-            $query->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي')");
+            $query->orderByRaw(BadgeType::getLegacyOrderByClause());
             $query->orderBy('created_at', 'desc');
         }
 
@@ -303,7 +304,7 @@ class PublicController extends Controller
                 ->where('state', 'published')
                 ->whereIn('have_badge', ['ماسي', 'ذهبي'])
                 ->whereHas('photos')
-                ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي')")
+                ->orderByRaw(BadgeType::getLegacyOrderByClause())
                 ->orderBy('view_count', 'desc')
                 ->limit(8)
                 ->get();
@@ -488,7 +489,7 @@ class PublicController extends Controller
                 $q->where('title', 'like', "%{$query}%")
                     ->orWhere('description', 'like', "%{$query}%");
             })
-            ->orderByRaw("FIELD(have_badge, 'ماسي', 'ذهبي', 'عادي')")
+            ->orderByRaw(BadgeType::getLegacyOrderByClause())
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 

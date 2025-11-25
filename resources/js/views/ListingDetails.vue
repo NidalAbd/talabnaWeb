@@ -52,9 +52,9 @@
             <v-card-text class="pa-6">
               <!-- Badges -->
               <div class="d-flex flex-wrap gap-2 mb-4">
-                <v-chip v-if="listing.have_badge !== 'عادي'" :color="badgeColor" variant="flat">
+                <v-chip v-if="showBadge" :color="badgeColor" variant="flat">
                   <v-icon start>{{ badgeIcon }}</v-icon>
-                  {{ listing.have_badge }}
+                  {{ badgeName }}
                 </v-chip>
                 <v-chip color="primary" variant="tonal">
                   {{ getLocalizedName(listing.category) }}
@@ -281,13 +281,44 @@ const getLocalizedName = (item) => {
 
 const shareUrl = computed(() => window.location.href)
 
+// Badge computed properties - supports both new badge object and legacy have_badge
+const showBadge = computed(() => {
+  if (!listing.value) return false
+  // Check new badge object first
+  if (listing.value.badge) {
+    return !listing.value.badge.is_default
+  }
+  // Fallback to legacy have_badge
+  return listing.value.have_badge && listing.value.have_badge !== 'عادي'
+})
+
+const badgeName = computed(() => {
+  if (!listing.value) return ''
+  // Use new badge object if available
+  if (listing.value.badge) {
+    return locale.value === 'ar' ? listing.value.badge.name_ar : listing.value.badge.name_en
+  }
+  // Fallback to legacy
+  return listing.value.have_badge
+})
+
 const badgeColor = computed(() => {
   if (!listing.value) return 'grey'
+  // Use new badge object color if available
+  if (listing.value.badge && listing.value.badge.color) {
+    return listing.value.badge.color
+  }
+  // Fallback to legacy color mapping
   return listing.value.have_badge === 'ماسي' ? 'purple' : 'amber'
 })
 
 const badgeIcon = computed(() => {
   if (!listing.value) return 'mdi-tag'
+  // Use new badge object icon if available
+  if (listing.value.badge && listing.value.badge.icon) {
+    return listing.value.badge.icon
+  }
+  // Fallback to legacy icon mapping
   return listing.value.have_badge === 'ماسي' ? 'mdi-diamond-stone' : 'mdi-star'
 })
 
