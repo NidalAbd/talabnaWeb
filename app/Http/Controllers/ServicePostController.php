@@ -1164,32 +1164,44 @@ class ServicePostController extends Controller
         \Log::info('Validation passed');
 
         $badgeService = app(\App\Services\BadgeService::class);
-
         $badge = \App\Models\BadgeType::find($request->badge_type_id);
+
+        // Check if post already has a non-default badge
+        $currentBadge = $servicePost->badgeType;
+        $isSwitch = $currentBadge && !$currentBadge->is_default && $servicePost->badge_expires_at;
+
         \Log::info('Badge Type:', [
             'id' => $badge->id,
             'name' => $badge->name_en,
-            'points_per_day' => $badge->points_per_day
-        ]);
-
-        $totalCost = $badge->points_per_day * $request->days;
-        $userBalance = $servicePost->user->pointsBalance ?? 0;
-
-        \Log::info('Cost calculation:', [
             'points_per_day' => $badge->points_per_day,
-            'days' => $request->days,
-            'total_cost' => $totalCost,
-            'user_balance' => $userBalance,
-            'sufficient' => $userBalance >= $totalCost
+            'is_switch' => $isSwitch,
+            'current_badge' => $currentBadge ? $currentBadge->name_en : 'none'
         ]);
 
         try {
-            // Apply badge and deduct points from user
-            \Log::info('Calling badgeService->applyBadge()');
-            $result = $badgeService->applyBadge($servicePost, $request->badge_type_id, $request->days, true);
-            \Log::info('Badge applied successfully', ['post_id' => $result->id]);
+            if ($isSwitch) {
+                // Switching badges - use changeBadge which handles refunds
+                \Log::info('Switching from existing badge');
+                $refundInfo = $badgeService->calculateRefund($servicePost, $currentBadge);
+                \Log::info('Refund calculation:', $refundInfo);
 
-            return redirect()->back()->with('success', 'Badge applied successfully! Points deducted from user balance.');
+                $result = $badgeService->changeBadge($servicePost, $request->badge_type_id, $request->days);
+
+                $message = 'Badge switched successfully!';
+                if ($refundInfo['refund_amount'] > 0) {
+                    $message .= " Refunded {$refundInfo['refund_amount']} points for {$refundInfo['remaining_days']} unused days.";
+                }
+
+                \Log::info('Badge switched successfully', ['post_id' => $result->id]);
+                return redirect()->back()->with('success', $message);
+            } else {
+                // First time badge or replacing expired/default badge
+                \Log::info('Applying new badge');
+                $result = $badgeService->applyBadge($servicePost, $request->badge_type_id, $request->days, true);
+                \Log::info('Badge applied successfully', ['post_id' => $result->id]);
+
+                return redirect()->back()->with('success', 'Badge applied successfully! Points deducted from user balance.');
+            }
         } catch (\Exception $e) {
             \Log::error('Failed to apply badge:', [
                 'error' => $e->getMessage(),
@@ -1199,6 +1211,48 @@ class ServicePostController extends Controller
         } finally {
             \Log::info('=== APPLY BADGE REQUEST END ===');
         }
+    }
+
+    /**
+     * Calculate refund preview for badge switching
+     */
+    public function calculateRefundPreview(Request $request, ServicePost $servicePost)
+    {
+        $request->validate([
+            'badge_type_id' => 'required|exists:badge_types,id',
+            'days' => 'required|integer|min:1|max:365',
+        ]);
+
+        $badgeService = app(\App\Services\BadgeService::class);
+        $currentBadge = $servicePost->badgeType;
+        $newBadge = BadgeType::find($request->badge_type_id);
+
+        $result = [
+            'has_current_badge' => false,
+            'refund_amount' => 0,
+            'new_cost' => $newBadge->calculateCost($request->days),
+            'net_amount' => $newBadge->calculateCost($request->days),
+            'current_balance' => $servicePost->user->pointsBalance ?? 0,
+        ];
+
+        // Check if there's an active badge to refund
+        if ($currentBadge && !$currentBadge->is_default && $servicePost->badge_expires_at) {
+            $refundInfo = $badgeService->calculateRefund($servicePost, $currentBadge);
+
+            $result['has_current_badge'] = true;
+            $result['current_badge'] = [
+                'name_ar' => $currentBadge->name_ar,
+                'name_en' => $currentBadge->name_en,
+            ];
+            $result['refund_info'] = $refundInfo;
+            $result['refund_amount'] = $refundInfo['refund_amount'];
+            $result['net_amount'] = $result['new_cost'] - $refundInfo['refund_amount'];
+        }
+
+        $result['can_afford'] = $servicePost->user->pointsBalance >= $result['net_amount'];
+        $result['new_balance'] = $result['current_balance'] - $result['net_amount'];
+
+        return response()->json($result);
     }
 
     /**

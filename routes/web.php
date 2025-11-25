@@ -135,6 +135,8 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
         ->name('service_posts.apply_badge');
     Route::post('service_posts/{servicePost}/remove-badge', [ServicePostController::class, 'removeBadge'])
         ->name('service_posts.remove_badge');
+    Route::post('service_posts/{servicePost}/calculate-refund-preview', [ServicePostController::class, 'calculateRefundPreview'])
+        ->name('service_posts.calculate_refund_preview');
     Route::delete('service-posts/bulk-destroy', [ServicePostController::class, 'bulkDestroy'])
         ->name('service_posts.bulk-destroy');
     Route::post('inViewCount/{servicePost}', [ServicePostController::class, 'inViewCount'])

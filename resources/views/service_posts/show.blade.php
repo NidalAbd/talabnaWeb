@@ -308,12 +308,20 @@
                                 <small>
                                     <strong>Total Cost:</strong> <span id="total-cost">0</span> points
                                     <br>
-                                    <strong>User Balance:</strong> {{ $servicePost->user->pointsBalance ?? 0 }} points
+                                    <strong>User Balance:</strong> <span id="user-balance">{{ $servicePost->user->pointsBalance ?? 0 }}</span> points
+                                    <div id="refund-info" style="display:none;" class="mt-2 pt-2 border-top">
+                                        <span class="text-success">
+                                            <i class="fas fa-undo"></i> Refund: <span id="refund-amount">0</span> points
+                                            (<span id="refund-days">0</span> unused days)
+                                        </span>
+                                        <br>
+                                        <strong class="text-primary">Net Charge: <span id="net-amount">0</span> points</strong>
+                                    </div>
                                 </small>
                             </div>
 
-                            <button type="submit" class="btn btn-warning btn-block">
-                                <i class="fas fa-award mr-1"></i> Apply Badge
+                            <button type="button" class="btn btn-warning btn-block" id="apply-badge-btn">
+                                <i class="fas fa-award mr-1"></i> <span id="badge-btn-text">Apply Badge</span>
                             </button>
                         </form>
 
@@ -582,35 +590,76 @@
                     });
                 });
 
-                // Badge cost calculator
-                function updateBadgeCost() {
+                // Badge cost calculator with refund preview
+                async function updateBadgeCost() {
                     console.log('updateBadgeCost called');
                     const select = document.getElementById('badge_type_id');
                     const days = document.getElementById('days');
                     const totalCost = document.getElementById('total-cost');
-
-                    console.log('Elements found:', {
-                        select: select ? 'yes' : 'no',
-                        days: days ? 'yes' : 'no',
-                        totalCost: totalCost ? 'yes' : 'no'
-                    });
+                    const refundInfo = document.getElementById('refund-info');
+                    const refundAmount = document.getElementById('refund-amount');
+                    const refundDays = document.getElementById('refund-days');
+                    const netAmount = document.getElementById('net-amount');
+                    const badgeBtnText = document.getElementById('badge-btn-text');
 
                     if (select && days && totalCost) {
                         const selectedOption = select.options[select.selectedIndex];
-                        console.log('Selected option:', selectedOption);
-                        console.log('Selected option data-points:', selectedOption ? selectedOption.dataset.points : 'none');
+                        const badgeId = select.value;
+                        const daysValue = parseInt(days.value) || 0;
+
+                        if (!badgeId) {
+                            totalCost.textContent = '0';
+                            refundInfo.style.display = 'none';
+                            badgeBtnText.textContent = 'Apply Badge';
+                            return;
+                        }
 
                         const pointsPerDay = selectedOption ? parseInt(selectedOption.dataset.points) || 0 : 0;
-                        const daysValue = parseInt(days.value) || 0;
                         const total = pointsPerDay * daysValue;
-
-                        console.log('Calculation:', {
-                            pointsPerDay: pointsPerDay,
-                            days: daysValue,
-                            total: total
-                        });
-
                         totalCost.textContent = total.toLocaleString();
+
+                        // Fetch refund preview from server
+                        try {
+                            const response = await fetch('{{ route("service_posts.calculate_refund_preview", $servicePost->id) }}', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                                },
+                                body: JSON.stringify({
+                                    badge_type_id: badgeId,
+                                    days: daysValue
+                                })
+                            });
+
+                            if (response.ok) {
+                                const data = await response.json();
+                                console.log('Refund preview:', data);
+
+                                if (data.has_current_badge && data.refund_amount > 0) {
+                                    refundAmount.textContent = data.refund_amount.toLocaleString();
+                                    refundDays.textContent = data.refund_info.remaining_days;
+                                    netAmount.textContent = data.net_amount.toLocaleString();
+                                    refundInfo.style.display = 'block';
+                                    badgeBtnText.textContent = 'Switch Badge';
+                                } else {
+                                    refundInfo.style.display = 'none';
+                                    badgeBtnText.textContent = 'Apply Badge';
+                                }
+
+                                // Update balance warning if insufficient
+                                if (!data.can_afford) {
+                                    totalCost.parentElement.classList.remove('alert-info');
+                                    totalCost.parentElement.classList.add('alert-danger');
+                                } else {
+                                    totalCost.parentElement.classList.remove('alert-danger');
+                                    totalCost.parentElement.classList.add('alert-info');
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error fetching refund preview:', error);
+                            refundInfo.style.display = 'none';
+                        }
                     }
                 }
 
@@ -641,23 +690,51 @@
                 console.log('Running initial calculation');
                 updateBadgeCost();
 
-                // Form submission logging
+                // Form submission with confirmation
                 const badgeForm = document.getElementById('badge-form');
-                if (badgeForm) {
-                    console.log('Badge form found');
-                    badgeForm.addEventListener('submit', function(e) {
-                        const badgeId = document.getElementById('badge_type_id').value;
-                        const days = document.getElementById('days').value;
-                        console.log('Form submitting with:', {
-                            badgeId: badgeId,
-                            days: days,
-                            action: this.action,
-                            method: this.method
-                        });
-                        // Don't prevent default - let form submit normally
+                const applyBadgeBtn = document.getElementById('apply-badge-btn');
+
+                if (applyBadgeBtn) {
+                    applyBadgeBtn.addEventListener('click', function(e) {
+                        e.preventDefault();
+
+                        const badgeSelect = document.getElementById('badge_type_id');
+                        const daysInput = document.getElementById('days');
+                        const refundInfo = document.getElementById('refund-info');
+
+                        if (!badgeSelect.value) {
+                            alert('Please select a badge type');
+                            return;
+                        }
+
+                        const selectedBadge = badgeSelect.options[badgeSelect.selectedIndex].text;
+                        const days = daysInput.value;
+                        const isSwitch = refundInfo && refundInfo.style.display !== 'none';
+
+                        let confirmMessage = `Are you sure you want to apply ${selectedBadge} for ${days} days?`;
+
+                        if (isSwitch) {
+                            const refundAmount = document.getElementById('refund-amount').textContent;
+                            const refundDays = document.getElementById('refund-days').textContent;
+                            const netAmount = document.getElementById('net-amount').textContent;
+
+                            confirmMessage = `⚠️ Badge Switch Confirmation\n\n`;
+                            confirmMessage += `New Badge: ${selectedBadge}\n`;
+                            confirmMessage += `Duration: ${days} days\n\n`;
+                            confirmMessage += `💰 Refund: ${refundAmount} points (${refundDays} unused days)\n`;
+                            confirmMessage += `💳 Net Charge: ${netAmount} points\n\n`;
+                            confirmMessage += `Do you want to proceed?`;
+                        }
+
+                        if (confirm(confirmMessage)) {
+                            console.log('Form confirmed, submitting...');
+                            badgeForm.submit();
+                        } else {
+                            console.log('Form submission cancelled by user');
+                        }
                     });
                 } else {
-                    console.error('Badge form not found!');
+                    console.error('Apply badge button not found!');
                 }
             });
         </script>
