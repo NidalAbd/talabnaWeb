@@ -1,66 +1,108 @@
 <template>
   <div class="home-page">
-    <!-- Hero Section -->
+    <!-- Hero Section - Modern Minimal Design -->
     <section class="hero-section">
       <v-container>
-        <v-row align="center" justify="center">
-          <v-col cols="12" md="6">
+        <v-row align="center" class="hero-row">
+          <v-col cols="12" md="7" lg="6" class="hero-content-col">
             <div class="hero-content">
-              <h1 class="text-h3 text-md-h2 font-weight-bold text-white mb-4">
-                {{ locale === 'ar' ? 'اعثر على الخدمات وقدمها مع طلبنا' : 'Find & Offer Services with Talabna' }}
+              <!-- Main Heading - SEO Optimized -->
+              <h1 class="hero-title">
+                {{ locale === 'ar' ? 'اعثر على أفضل الخدمات' : 'Find the Best Services' }}
+                <span class="hero-highlight">{{ locale === 'ar' ? 'بسهولة وأمان' : 'Easily & Safely' }}</span>
               </h1>
-              <p class="text-h6 text-white-darken-1 mb-8">
+
+              <!-- Subtitle with semantic markup -->
+              <p class="hero-subtitle">
                 {{ locale === 'ar'
-                  ? 'تواصل مع مزودي الخدمات المحليين أو قدم خدماتك لآلاف المستخدمين. منصتك الشاملة لجميع احتياجات الخدمات.'
-                  : 'Connect with local service providers or offer your services to thousands of users. Your one-stop platform for all service needs.'
+                  ? 'منصة طلبنا الشاملة تربطك بآلاف مزودي الخدمات المحليين. ابحث، تواصل، واحصل على ما تحتاجه في دقائق.'
+                  : 'Talabna platform connects you with thousands of local service providers. Search, connect, and get what you need in minutes.'
                 }}
               </p>
 
-              <!-- Search Box -->
-              <v-card class="search-card" elevation="8">
-                <v-card-text class="pa-4">
-                  <v-row dense>
-                    <v-col cols="12" sm="8">
-                      <v-text-field
-                        v-model="searchQuery"
-                        :placeholder="locale === 'ar' ? 'ابحث عن الخدمات...' : 'Find services...'"
-                        prepend-inner-icon="mdi-magnify"
-                        variant="solo-filled"
-                        density="comfortable"
-                        hide-details
-                        single-line
-                        @keyup.enter="doSearch"
-                      />
-                    </v-col>
-                    <v-col cols="12" sm="4">
-                      <v-btn
-                        color="primary"
-                        size="large"
-                        block
-                        @click="doSearch"
-                        class="h-100"
-                      >
-                        {{ locale === 'ar' ? 'بحث' : 'Search' }}
-                      </v-btn>
-                    </v-col>
-                  </v-row>
-                </v-card-text>
-              </v-card>
+              <!-- Search Box with Schema Markup -->
+              <div class="hero-search-wrapper">
+                <v-card class="search-card" elevation="4" rounded="xl">
+                  <v-card-text class="pa-2">
+                    <v-row dense align="center">
+                      <v-col cols="12" sm="8">
+                        <v-text-field
+                          v-model="searchQuery"
+                          :placeholder="locale === 'ar' ? 'ابحث عن خدمة...' : 'Search for services...'"
+                          prepend-inner-icon="mdi-magnify"
+                          variant="solo-filled"
+                          flat
+                          density="comfortable"
+                          hide-details
+                          single-line
+                          class="search-input"
+                          @keyup.enter="doSearch"
+                        />
+                      </v-col>
+                      <v-col cols="12" sm="4">
+                        <v-btn
+                          color="primary"
+                          size="large"
+                          block
+                          elevation="0"
+                          rounded="xl"
+                          class="search-btn"
+                          @click="doSearch"
+                        >
+                          <v-icon start>mdi-magnify</v-icon>
+                          {{ locale === 'ar' ? 'بحث' : 'Search' }}
+                        </v-btn>
+                      </v-col>
+                    </v-row>
+                  </v-card-text>
+                </v-card>
+              </div>
 
-              <div class="hero-buttons mt-6">
-                <v-btn color="white" size="large" variant="flat" class="text-primary me-3" href="#categories">
-                  {{ locale === 'ar' ? 'استكشف الخدمات' : 'Explore Services' }}
-                </v-btn>
-                <v-btn color="white" size="large" variant="outlined" href="/register">
-                  {{ locale === 'ar' ? 'انضم الآن' : 'Join Now' }}
-                </v-btn>
+              <!-- Trust Indicators -->
+              <div class="hero-trust-indicators">
+                <div class="trust-item">
+                  <v-icon size="20" color="success">mdi-shield-check</v-icon>
+                  <span>{{ locale === 'ar' ? 'آمن وموثوق' : 'Safe & Secure' }}</span>
+                </div>
+                <div class="trust-item">
+                  <v-icon size="20" color="success">mdi-check-circle</v-icon>
+                  <span>{{ locale === 'ar' ? 'مستخدمين مُوثّقين' : 'Verified Users' }}</span>
+                </div>
+                <div class="trust-item">
+                  <v-icon size="20" color="success">mdi-lightning-bolt</v-icon>
+                  <span>{{ locale === 'ar' ? 'استجابة سريعة' : 'Fast Response' }}</span>
+                </div>
               </div>
             </div>
           </v-col>
-          <v-col cols="12" md="6" class="text-center d-none d-md-block">
-            <!-- Hero SVG Illustration -->
-            <div class="hero-illustration">
-              <v-icon size="200" color="white" class="opacity-20">mdi-handshake</v-icon>
+
+          <!-- Hero Visual - Modern Illustration -->
+          <v-col cols="12" md="5" lg="6" class="d-none d-md-flex hero-visual-col">
+            <div class="hero-visual">
+              <div class="visual-card visual-card-1">
+                <v-icon size="40" color="primary">mdi-account-group</v-icon>
+                <div class="visual-text">
+                  <div class="visual-number">{{ formatNumber(stats.total_users || 15000) }}+</div>
+                  <div class="visual-label">{{ locale === 'ar' ? 'مستخدم نشط' : 'Active Users' }}</div>
+                </div>
+              </div>
+              <div class="visual-card visual-card-2">
+                <v-icon size="40" color="success">mdi-clipboard-check</v-icon>
+                <div class="visual-text">
+                  <div class="visual-number">{{ formatNumber(stats.total_listings || 8500) }}+</div>
+                  <div class="visual-label">{{ locale === 'ar' ? 'خدمة متاحة' : 'Services' }}</div>
+                </div>
+              </div>
+              <div class="visual-card visual-card-3">
+                <v-icon size="40" color="warning">mdi-star</v-icon>
+                <div class="visual-text">
+                  <div class="visual-number">4.8</div>
+                  <div class="visual-label">{{ locale === 'ar' ? 'تقييم المستخدمين' : 'User Rating' }}</div>
+                </div>
+              </div>
+              <div class="hero-graphic">
+                <v-icon size="200" color="primary" class="graphic-icon">mdi-handshake-outline</v-icon>
+              </div>
             </div>
           </v-col>
         </v-row>
@@ -385,54 +427,210 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Modern Hero Section - No Gradient, Clean Design */
 .hero-section {
-  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-primary-darken-1)) 100%);
-  padding: 100px 0;
-  min-height: 600px;
-  display: flex;
-  align-items: center;
+  background: rgb(var(--v-theme-background));
+  padding: 80px 0 60px;
+  min-height: 500px;
   position: relative;
   overflow: hidden;
 }
 
-.hero-section::before {
-  content: '';
-  position: absolute;
-  top: -150px;
-  right: -100px;
-  width: 400px;
-  height: 400px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.08);
-  animation: float 6s ease-in-out infinite;
+.hero-row {
+  min-height: 500px;
 }
 
-.hero-section::after {
-  content: '';
-  position: absolute;
-  bottom: -150px;
-  left: -100px;
-  width: 500px;
-  height: 500px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.05);
-  animation: float 8s ease-in-out infinite reverse;
-}
-
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-20px); }
+.hero-content-col {
+  display: flex;
+  align-items: center;
 }
 
 .hero-content {
-  position: relative;
-  z-index: 2;
+  width: 100%;
+  padding: 20px 0;
+}
+
+/* Typography - SEO Optimized */
+.hero-title {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight: 800;
+  line-height: 1.2;
+  margin-bottom: 1.5rem;
+  color: rgb(var(--v-theme-on-background));
+  letter-spacing: -0.02em;
+}
+
+.hero-highlight {
+  display: block;
+  color: rgb(var(--v-theme-primary));
+  margin-top: 0.25rem;
+}
+
+.hero-subtitle {
+  font-size: 1.125rem;
+  line-height: 1.7;
+  color: rgba(var(--v-theme-on-background), 0.7);
+  margin-bottom: 2.5rem;
+  max-width: 560px;
+}
+
+/* Search Card - Modern Clean Style */
+.hero-search-wrapper {
+  margin-bottom: 2rem;
 }
 
 .search-card {
-  border-radius: 16px !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15) !important;
-  backdrop-filter: blur(10px);
+  background: rgb(var(--v-theme-surface)) !important;
+  border: 2px solid rgba(var(--v-theme-primary), 0.1);
+  box-shadow: 0 8px 32px rgba(var(--v-theme-primary), 0.08) !important;
+  transition: all 0.3s ease;
+}
+
+.search-card:hover {
+  border-color: rgba(var(--v-theme-primary), 0.3);
+  box-shadow: 0 12px 48px rgba(var(--v-theme-primary), 0.12) !important;
+}
+
+.search-input :deep(.v-field) {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.search-btn {
+  height: 48px !important;
+  font-weight: 600;
+}
+
+/* Trust Indicators */
+.hero-trust-indicators {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.trust-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: rgba(var(--v-theme-on-background), 0.7);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+/* Hero Visual Cards - Floating Stats */
+.hero-visual-col {
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-visual {
+  position: relative;
+  width: 100%;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.visual-card {
+  position: absolute;
+  background: rgb(var(--v-theme-surface));
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  border-radius: 20px;
+  padding: 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+  animation: float-card 6s ease-in-out infinite;
+}
+
+.visual-card:hover {
+  transform: translateY(-8px) !important;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
+}
+
+.visual-card-1 {
+  top: 10%;
+  left: 10%;
+  z-index: 3;
+  animation-delay: 0s;
+}
+
+.visual-card-2 {
+  top: 45%;
+  right: 5%;
+  z-index: 2;
+  animation-delay: 1s;
+}
+
+.visual-card-3 {
+  bottom: 15%;
+  left: 15%;
+  z-index: 3;
+  animation-delay: 2s;
+}
+
+@keyframes float-card {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-15px); }
+}
+
+.visual-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.visual-number {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: rgb(var(--v-theme-on-background));
+  line-height: 1;
+}
+
+.visual-label {
+  font-size: 0.75rem;
+  color: rgba(var(--v-theme-on-background), 0.6);
+  margin-top: 0.25rem;
+  font-weight: 500;
+}
+
+.hero-graphic {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  opacity: 0.06;
+}
+
+.graphic-icon {
+  filter: blur(2px);
+}
+
+/* Responsive Design */
+@media (max-width: 960px) {
+  .hero-section {
+    padding: 60px 0 40px;
+  }
+
+  .hero-row {
+    min-height: auto;
+  }
+
+  .hero-title {
+    font-size: 2rem;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .trust-item {
+    font-size: 0.8rem;
+  }
 }
 
 .stats-section {
