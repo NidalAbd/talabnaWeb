@@ -703,8 +703,7 @@ class ServicePostController extends Controller
             ->with('subCategory')
             ->with('category')
             ->whereHas('user', function($query) {
-                $query->where('is_active', 'active')
-                      ->where('is_banned', false);
+                $query->where('is_active', 'active');
             });
 
         // Only load service post photos if data saver is disabled
@@ -827,8 +826,7 @@ class ServicePostController extends Controller
             ->with('category')
             ->withCount('favorites')
             ->whereHas('user', function($query) {
-                $query->where('is_active', 'active')
-                      ->where('is_banned', false);
+                $query->where('is_active', 'active');
             });
 
         // Apply type filter if provided (عرض or طلب)
