@@ -1,0 +1,207 @@
+<template>
+  <v-app>
+    <!-- App Bar -->
+    <v-app-bar
+      app
+      :elevation="1"
+      color="surface"
+    >
+      <v-app-bar-nav-icon @click="drawer = !drawer" />
+
+      <v-toolbar-title class="text-h6">
+        <v-icon class="mr-2" size="small">mdi-view-dashboard</v-icon>
+        Admin Dashboard
+      </v-toolbar-title>
+
+      <v-spacer />
+
+      <!-- Search -->
+      <v-text-field
+        v-model="search"
+        density="compact"
+        variant="solo"
+        label="Search..."
+        prepend-inner-icon="mdi-magnify"
+        single-line
+        hide-details
+        class="mr-4 d-none d-md-flex"
+        style="max-width: 300px;"
+      />
+
+      <!-- Notifications -->
+      <v-btn icon>
+        <v-badge
+          color="error"
+          content="3"
+          overlap
+        >
+          <v-icon>mdi-bell-outline</v-icon>
+        </v-badge>
+      </v-btn>
+
+      <!-- User Menu -->
+      <v-menu>
+        <template #activator="{ props }">
+          <v-btn
+            v-bind="props"
+            class="ml-2"
+          >
+            <v-icon class="mr-2">mdi-account-circle</v-icon>
+            <span class="d-none d-sm-inline">{{ userName }}</span>
+            <v-icon class="ml-1">mdi-chevron-down</v-icon>
+          </v-btn>
+        </template>
+        <v-list>
+          <v-list-item @click="logout">
+            <template #prepend>
+              <v-icon>mdi-logout</v-icon>
+            </template>
+            <v-list-item-title>Logout</v-list-item-title>
+          </v-list-item>
+        </v-list>
+      </v-menu>
+    </v-app-bar>
+
+    <!-- Navigation Drawer -->
+    <v-navigation-drawer
+      v-model="drawer"
+      app
+      :width="260"
+    >
+      <!-- Logo -->
+      <v-list-item
+        :to="{ name: 'admin-dashboard' }"
+        class="py-4"
+      >
+        <template #prepend>
+          <v-avatar size="40">
+            <v-img src="/img/logo.ico" alt="Logo" />
+          </v-avatar>
+        </template>
+        <v-list-item-title class="text-h6 font-weight-bold">
+          Talabna Admin
+        </v-list-item-title>
+      </v-list-item>
+
+      <v-divider />
+
+      <!-- Navigation Menu -->
+      <v-list
+        nav
+        density="compact"
+      >
+        <v-list-item
+          v-for="item in menuItems"
+          :key="item.title"
+          :to="item.to"
+          :prepend-icon="item.icon"
+          :title="item.title"
+          :value="item.value"
+          color="primary"
+        />
+      </v-list>
+    </v-navigation-drawer>
+
+    <!-- Main Content -->
+    <v-main>
+      <v-container fluid>
+        <router-view />
+      </v-container>
+    </v-main>
+
+    <!-- Footer -->
+    <v-footer app class="bg-surface">
+      <v-row justify="center" no-gutters>
+        <v-col class="text-center py-2" cols="12">
+          <strong>&copy; {{ currentYear }} Talabna.</strong> All rights reserved.
+        </v-col>
+      </v-row>
+    </v-footer>
+  </v-app>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
+const drawer = ref(true)
+const search = ref('')
+
+const userName = computed(() => {
+  // Get from auth store or props
+  return 'Admin User'
+})
+
+const currentYear = computed(() => new Date().getFullYear())
+
+const menuItems = [
+  {
+    title: 'Dashboard',
+    icon: 'mdi-view-dashboard',
+    to: { name: 'admin-dashboard' },
+    value: 'dashboard'
+  },
+  {
+    title: 'Users',
+    icon: 'mdi-account-group',
+    to: { name: 'admin-users' },
+    value: 'users'
+  },
+  {
+    title: 'Categories',
+    icon: 'mdi-shape',
+    to: { name: 'admin-categories' },
+    value: 'categories'
+  },
+  {
+    title: 'Subcategories',
+    icon: 'mdi-sitemap',
+    to: { name: 'admin-subcategories' },
+    value: 'subcategories'
+  },
+  {
+    title: 'Service Posts',
+    icon: 'mdi-briefcase',
+    to: { name: 'admin-service-posts' },
+    value: 'service-posts'
+  },
+  {
+    title: 'Reports',
+    icon: 'mdi-flag',
+    to: { name: 'admin-reports' },
+    value: 'reports'
+  },
+  {
+    title: 'Points System',
+    icon: 'mdi-diamond-stone',
+    to: { name: 'admin-points' },
+    value: 'points'
+  }
+]
+
+const logout = async () => {
+  try {
+    await fetch('/logout', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.content || ''
+      }
+    })
+    window.location.href = '/login'
+  } catch (error) {
+    console.error('Logout error:', error)
+  }
+}
+</script>
+
+<style scoped>
+.v-app-bar {
+  backdrop-filter: blur(10px);
+}
+
+.v-navigation-drawer {
+  border-right: thin solid rgba(var(--v-border-color), var(--v-border-opacity));
+}
+</style>

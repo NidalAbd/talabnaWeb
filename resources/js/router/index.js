@@ -13,6 +13,10 @@ const Privacy = () => import('@/views/Privacy.vue')
 const Terms = () => import('@/views/Terms.vue')
 const NotFound = () => import('@/views/NotFound.vue')
 
+// Admin views
+const AdminLayout = () => import('@/layouts/AdminLayout.vue')
+const AdminDashboard = () => import('@/views/admin/Dashboard.vue')
+
 const routes = [
   {
     path: '/',
@@ -98,6 +102,34 @@ const routes = [
     meta: {
       title: 'شروط الاستخدام - طلبنا',
     },
+  },
+  // Redirect /dashboard to /admin/dashboard (for AdminLTE sidebar)
+  {
+    path: '/dashboard',
+    redirect: '/admin/dashboard',
+  },
+  // Admin routes
+  {
+    path: '/admin',
+    component: AdminLayout,
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: true,
+    },
+    children: [
+      {
+        path: '',
+        redirect: '/admin/dashboard',
+      },
+      {
+        path: 'dashboard',
+        name: 'admin-dashboard',
+        component: AdminDashboard,
+        meta: {
+          title: 'لوحة التحكم - طلبنا',
+        },
+      },
+    ],
   },
   {
     path: '/:pathMatch(.*)*',

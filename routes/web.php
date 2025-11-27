@@ -28,6 +28,7 @@ use App\Http\Controllers\SubcategoriesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserRoleAssignmentController;
 use App\Http\Controllers\BadgeTypeController;
+use App\Http\Controllers\Admin\DashboardApiController;
 use App\Models\ServicePost;
 use App\Models\Sub_categories;
 use App\Models\User;
@@ -430,18 +431,21 @@ Route::middleware(['auth'])->group(function () {
         ->defaults('reported', 'service_post');
 });
 
-Route::middleware(['auth', 'admin'])->prefix('admin')->name('admin.')->group(function () {
+Route::middleware(['auth', 'admin'])->group(function () {
     // Marketing Notification routes
     Route::get('/notifications/marketing', [NotificationMarketingController::class, 'index'])->name('notifications.marketing.index');
     Route::post('/notifications/marketing/send-all', [NotificationMarketingController::class, 'sendToAll'])->name('notifications.marketing.send-all');
     Route::post('/notifications/marketing/send-specific', [NotificationMarketingController::class, 'sendToSpecific'])->name('notifications.marketing.send-specific');
     Route::get('/notifications/marketing/history', [NotificationMarketingController::class, 'history'])->name('notifications.marketing.history');
 
-    // API routes for the notification system
-    Route::prefix('api')->name('api.')->group(function () {
+    // API routes for the notification system and admin dashboard
+    Route::prefix('api')->group(function () {
         Route::get('/users/search', [ApiController::class, 'searchUsers'])->name('users.search');
         Route::get('/users/filter', [ApiController::class, 'filterUsers'])->name('users.filter');
         Route::get('/roles/list', [ApiController::class, 'getRoles'])->name('roles.list');
         Route::get('/countries/list', [ApiController::class, 'getCountries'])->name('countries.list');
+
+        // Dashboard API (separate from mobile API)
+        Route::get('/dashboard', [DashboardApiController::class, 'index'])->name('dashboard');
     });
 });

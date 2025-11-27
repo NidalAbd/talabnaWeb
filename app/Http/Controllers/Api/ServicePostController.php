@@ -701,7 +701,11 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->withCount('favorites')
             ->with('subCategory')
-            ->with('category');
+            ->with('category')
+            ->whereHas('user', function($query) {
+                $query->where('is_active', 'active')
+                      ->where('is_banned', false);
+            });
 
         // Only load service post photos if data saver is disabled
         if (!$currentUser->data_saver_enabled) {
@@ -774,8 +778,9 @@ class ServicePostController extends Controller
 
         // Loop through each service post to enrich with extra data
         foreach ($servicePosts as $servicePost) {
-            // Always load user photos regardless of data saver setting
+            // Load user (guaranteed to exist due to whereHas filter above)
             $postUser = User::with('photos')->find($servicePost->user_id);
+
             $servicePost->user_photo = $postUser->photos->first();
             $servicePost->user_name = $postUser->user_name;
 
@@ -820,7 +825,11 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
-            ->withCount('favorites');
+            ->withCount('favorites')
+            ->whereHas('user', function($query) {
+                $query->where('is_active', 'active')
+                      ->where('is_banned', false);
+            });
 
         // Apply type filter if provided (عرض or طلب)
         if ($request->has('type') && in_array($request->type, ['عرض', 'طلب'])) {
@@ -885,8 +894,9 @@ class ServicePostController extends Controller
 
         // Fetch user photos and names for each service post
         foreach ($servicePosts as $servicePost) {
-            // Always load user photos regardless of data saver setting
+            // Load user (guaranteed to exist due to whereHas filter above)
             $postUser = User::with('photos')->find($servicePost->user_id);
+
             $servicePost->user_photo = $postUser->photos->first();
             $servicePost->user_name = $postUser->user_name;
 
@@ -981,8 +991,9 @@ class ServicePostController extends Controller
 
         // Fetch user photos and names for each service post
         foreach ($servicePosts as $servicePost) {
-            // Always load user photos regardless of data saver setting
+            // Load user (guaranteed to exist due to whereHas filter above)
             $postUser = User::with('photos')->find($servicePost->user_id);
+
             $servicePost->user_photo = $postUser->photos->first();
             $servicePost->user_name = $postUser->user_name;
 

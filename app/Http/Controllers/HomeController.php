@@ -35,81 +35,9 @@ class HomeController extends Controller
      */
     public function index()
     {
-        $user = Auth::user();
-
-        // User stats
-        $totalUsers = User::count();
-        $activeUsers = User::where('is_active', 'active')->count();
-        $bannedUsers = User::where('is_active', 'banned')->count();
-        $recentUsers = User::latest()->take(5)->get();
-
-        // Service posts stats
-        $totalPosts = ServicePost::count();
-        $publishedPosts = ServicePost::where('state', 'published')->count();
-        $notPublishedPosts = ServicePost::where('state', 'not published')->count();
-        $archivedPosts = ServicePost::where('state', 'archive')->count();
-        $rejectedPosts = ServicePost::where('state', 'rejected')->count();
-        $recentPosts = ServicePost::with('user')->latest()->take(5)->get();
-
-        // Point stats
-        $totalPoints = palservice_points::sum('point');
-        $totalTransactions = point_transactions::count();
-        $pendingPurchaseRequests = point_purchase_requests::where('status', 'pending')->count();
-        $recentTransactions = point_transactions::with(['fromUser', 'toUser'])->latest()->take(5)->get();
-
-        // Points used statistics for different time periods
-        $pointsUsedStats = $this->getPointsUsedStatistics();
-
-        // Pass individual stats for easy access in the view
-        $pointsUsedToday = $pointsUsedStats['today'];
-        $pointsUsedWeek = $pointsUsedStats['week'];
-        $pointsUsedMonth = $pointsUsedStats['month'];
-        $pointsUsedYear = $pointsUsedStats['year'];
-        $pointsUsedLifetime = $pointsUsedStats['lifetime'];
-
-        // Category stats
-        $totalCategories = Categories::count();
-        $totalSubCategories = Sub_categories::count();
-        $categoriesWithCounts = Categories::withCount('servicePosts')->orderBy('service_posts_count', 'desc')->take(5)->get();
-
-        // Report stats
-        $totalReports = Report::count();
-
-        // Post types
-        $offerPosts = ServicePost::where('type', 'عرض')->count();
-        $requestPosts = ServicePost::where('type', 'طلب')->count();
-
-        // Badge stats
-        $normalPosts = ServicePost::where('have_badge', 'عادي')->count();
-        $goldenPosts = ServicePost::where('have_badge', 'ذهبي')->count();
-        $diamondPosts = ServicePost::where('have_badge', 'ماسي')->count();
-
-        // Data for charts
-        $postsByMonth = $this->getPostsByMonth();
-        $usersByMonth = $this->getUsersByMonth();
-        $postsByCategory = $this->getPostsByCategory();
-        $pointTransactionsByMonth = $this->getPointTransactionsByMonth();
-
-        // Map data
-        $mapData = ServicePost::select('id', 'title', 'location_latitudes', 'location_longitudes')
-            ->where('state', 'published')
-            ->whereNotNull('location_latitudes')
-            ->whereNotNull('location_longitudes')
-            ->latest()
-            ->take(100)
-            ->get();
-
-        return view('dashboard', compact(
-            'totalUsers', 'activeUsers', 'bannedUsers', 'recentUsers',
-            'totalPosts', 'publishedPosts', 'notPublishedPosts', 'archivedPosts', 'rejectedPosts', 'recentPosts',
-            'totalPoints', 'totalTransactions', 'pendingPurchaseRequests', 'recentTransactions',
-            'pointsUsedStats', 'pointsUsedToday', 'pointsUsedWeek', 'pointsUsedMonth', 'pointsUsedYear', 'pointsUsedLifetime',
-            'totalCategories', 'totalSubCategories', 'categoriesWithCounts',
-            'totalReports', 'offerPosts', 'requestPosts',
-            'normalPosts', 'goldenPosts', 'diamondPosts',
-            'postsByMonth', 'usersByMonth', 'postsByCategory', 'pointTransactionsByMonth',
-            'mapData', 'user'
-        ));
+        // Return Vue dashboard view
+        // All data will be loaded via API endpoint: /admin/api/dashboard
+        return view('admin.dashboard');
     }
 
     /**

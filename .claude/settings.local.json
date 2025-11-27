@@ -8,7 +8,13 @@
       "Bash(ssh:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(timeout /t 15 /nobreak)",
+      "Bash(exit 0)",
+      "Bash(if exist \"lib\\DEEPLINK_INTEGRATION_EXAMPLE.dart\" ren \"lib\\DEEPLINK_INTEGRATION_EXAMPLE.dart\" \"DEEPLINK_INTEGRATION_EXAMPLE.dart.bak\")",
+      "Bash(npm install:*)",
+      "Bash(curl:*)"
     ],
     "deny": [],
     "ask": []
