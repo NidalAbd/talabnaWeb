@@ -37,6 +37,7 @@ class BadgeTypeController extends Controller
                     'name_en' => $badge->name_en,
                     'slug' => $badge->slug,
                     'color' => $badge->color,
+                    'secondary_color' => $badge->secondary_color,
                     'icon' => $badge->icon,
                     'points_per_day' => $badge->points_per_day,
                     'priority' => $badge->priority,
@@ -97,6 +98,7 @@ class BadgeTypeController extends Controller
                 'name_en' => $badge->name_en,
                 'slug' => $badge->slug,
                 'color' => $badge->color,
+                'secondary_color' => $badge->secondary_color,
                 'icon' => $badge->icon,
                 'points_per_day' => $badge->points_per_day,
                 'priority' => $badge->priority,
@@ -439,6 +441,47 @@ class BadgeTypeController extends Controller
             return response()->json([
                 'message' => 'Badge removed successfully',
                 'post' => $post,
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['error' => $e->getMessage()], 400);
+        }
+    }
+
+    /**
+     * Upgrade badge for a service post
+     * User can only upgrade (higher priority), not downgrade
+     * Calculates remaining time value from current badge and applies to new badge
+     */
+    public function upgradeBadge(Request $request, int $servicePostId): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'new_badge_type_id' => 'required|integer|exists:badge_types,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 422);
+        }
+
+        $servicePost = ServicePost::find($servicePostId);
+
+        if (!$servicePost) {
+            return response()->json(['error' => 'Service post not found'], 404);
+        }
+
+        try {
+            $result = $this->badgeService->upgradeBadge(
+                $servicePost,
+                $request->new_badge_type_id
+            );
+
+            return response()->json([
+                'message' => 'Badge upgraded successfully',
+                'post' => $result['post'],
+                'old_badge' => $result['old_badge'],
+                'new_badge' => $result['new_badge'],
+                'refund' => $result['refund'],
+                'additional_cost' => $result['additional_cost'],
+                'net_cost' => $result['net_cost'],
             ]);
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);

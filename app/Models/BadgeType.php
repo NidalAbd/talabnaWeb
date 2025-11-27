@@ -15,6 +15,7 @@ class BadgeType extends Model
         'name',
         'slug',
         'color',
+        'secondary_color',
         'icon',
         'points_per_day',
         'priority',

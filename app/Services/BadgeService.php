@@ -41,8 +41,10 @@ class BadgeService
                 'name_ar' => $badge->name_ar,
                 'name_en' => $badge->name_en,
                 'color' => $badge->color,
+                'secondary_color' => $badge->secondary_color,
                 'icon' => $badge->icon,
                 'points_per_day' => $badge->points_per_day,
+                'priority' => $badge->priority,
                 'view_boost_percent' => $badge->view_boost_percent,
             ];
         })->toArray();
@@ -123,6 +125,113 @@ class BadgeService
             DB::commit();
 
             return $servicePost->fresh();
+        } catch (Exception $e) {
+            DB::rollBack();
+            throw $e;
+        }
+    }
+
+    /**
+     * Upgrade badge ONLY (no downgrade allowed)
+     * Calculates refund based on remaining time and applies to new badge
+     *
+     * @throws Exception
+     */
+    public function upgradeBadge(
+        ServicePost $servicePost,
+        int $newBadgeTypeId
+    ): array {
+        $currentBadge = $servicePost->badgeType;
+        $newBadge = BadgeType::find($newBadgeTypeId);
+        $user = $servicePost->user;
+
+        if (!$newBadge) {
+            throw new Exception('New badge type not found');
+        }
+
+        if (!$newBadge->is_active) {
+            throw new Exception('New badge type is not active');
+        }
+
+        // Check if post has current badge
+        if (!$currentBadge || $currentBadge->is_default) {
+            throw new Exception('Post does not have an active premium badge to upgrade from');
+        }
+
+        // PREVENT DOWNGRADE: Check if new badge has higher priority (lower number = higher priority)
+        if ($newBadge->priority >= $currentBadge->priority) {
+            throw new Exception('You can only upgrade to a higher tier badge. Downgrade is not allowed.');
+        }
+
+        // Calculate refund for remaining time on current badge
+        $refundInfo = $this->calculateRefund($servicePost, $currentBadge);
+        $refundAmount = $refundInfo['refund_amount'];
+        $remainingDays = $refundInfo['remaining_days'];
+
+        if ($remainingDays <= 0) {
+            throw new Exception('Current badge has expired. Cannot upgrade.');
+        }
+
+        // Calculate new badge cost for the SAME remaining time
+        $newCost = $newBadge->calculateCost($remainingDays);
+
+        // Calculate net amount to charge
+        $netAmount = $newCost - $refundAmount;
+
+        // Check if user has enough points for the additional cost
+        if ($netAmount > 0 && $user->pointsBalance < $netAmount) {
+            throw new Exception("Insufficient points. You need {$netAmount} additional points but you have {$user->pointsBalance}");
+        }
+
+        DB::beginTransaction();
+
+        try {
+            // Refund remaining value from old badge
+            if ($refundAmount > 0) {
+                $this->refundPoints($user, $refundAmount, $servicePost, $currentBadge, $refundInfo);
+            }
+
+            // Charge for new badge (only the difference)
+            if ($netAmount > 0) {
+                $this->deductPoints($user, $netAmount, $servicePost, $newBadge);
+            }
+
+            // Update service post with new badge keeping same expiry time
+            $servicePost->badge_type_id = $newBadge->id;
+            $servicePost->have_badge = $newBadge->name_ar;
+            $servicePost->badge_duration = $remainingDays;
+            // Keep the same expiry time
+            $servicePost->save();
+
+            // Create notification
+            $this->createBadgeUpgradeNotification(
+                $servicePost,
+                $currentBadge,
+                $newBadge,
+                $remainingDays,
+                $refundAmount,
+                $netAmount
+            );
+
+            DB::commit();
+
+            return [
+                'post' => $servicePost->fresh(),
+                'old_badge' => [
+                    'id' => $currentBadge->id,
+                    'name' => $currentBadge->name,
+                    'points_per_day' => $currentBadge->points_per_day,
+                ],
+                'new_badge' => [
+                    'id' => $newBadge->id,
+                    'name' => $newBadge->name,
+                    'points_per_day' => $newBadge->points_per_day,
+                ],
+                'refund' => $refundAmount,
+                'additional_cost' => max(0, $netAmount),
+                'net_cost' => $netAmount,
+                'remaining_days' => $remainingDays,
+            ];
         } catch (Exception $e) {
             DB::rollBack();
             throw $e;
@@ -373,6 +482,48 @@ class BadgeService
                 'badge_type_id' => $badge->id,
                 'badge_name' => $badge->name,
                 'days' => $days,
+            ]),
+        ]);
+    }
+
+    /**
+     * Create badge upgrade notification
+     */
+    protected function createBadgeUpgradeNotification(
+        ServicePost $post,
+        BadgeType $oldBadge,
+        BadgeType $newBadge,
+        int $remainingDays,
+        int $refundAmount,
+        int $netAmount
+    ): void {
+        $message = "تم ترقية الشارة من {$oldBadge->name_ar} إلى {$newBadge->name_ar}";
+        $message .= "\nالمدة المتبقية: {$remainingDays} يوم";
+
+        if ($refundAmount > 0) {
+            $message .= "\nتم استرجاع {$refundAmount} نقطة من الشارة السابقة";
+        }
+
+        if ($netAmount > 0) {
+            $message .= "\nتم خصم {$netAmount} نقطة إضافية";
+        } elseif ($netAmount < 0) {
+            $message .= "\nتم استرجاع " . abs($netAmount) . " نقطة إضافية";
+        }
+
+        Notification::create([
+            'user_id' => $post->user_id,
+            'type' => 'badge_upgraded',
+            'title' => "تمت ترقية شارة الإعلان",
+            'message' => $message,
+            'data' => json_encode([
+                'service_post_id' => $post->id,
+                'old_badge_id' => $oldBadge->id,
+                'old_badge_name' => $oldBadge->name,
+                'new_badge_id' => $newBadge->id,
+                'new_badge_name' => $newBadge->name,
+                'remaining_days' => $remainingDays,
+                'refund_amount' => $refundAmount,
+                'net_amount' => $netAmount,
             ]),
         ]);
     }

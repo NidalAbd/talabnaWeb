@@ -317,7 +317,7 @@ onMounted(async () => {
 const loadDashboardData = async () => {
   try {
     loading.value = true
-    const response = await fetch('/admin/api/dashboard')
+    const response = await fetch('/api/dashboard')
     const data = await response.json()
 
     stats.value = data.stats

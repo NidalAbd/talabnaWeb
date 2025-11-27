@@ -61,14 +61,14 @@
     "src": "resources/css/app.css"
   },
   "resources/js/admin.css": {
-    "file": "assets/admin-d6939c5b.css",
+    "file": "assets/admin-008d1d62.css",
     "src": "resources/js/admin.css"
   },
   "resources/js/admin.js": {
     "css": [
-      "assets/admin-d6939c5b.css"
+      "assets/admin-008d1d62.css"
     ],
-    "file": "assets/admin-2736af33.js",
+    "file": "assets/admin-96ce5070.js",
     "imports": [
       "_vue.esm-bundler-4b9dc335.js",
       "_MixedChart-36f40069.js",

@@ -215,4 +215,5 @@ Route::middleware(['auth:api'])->group(function () {
     // Badge application routes for service posts
     Route::post('service_posts/{servicePost}/apply-badge', [BadgeTypeController::class, 'applyBadgeToPost']);
     Route::post('service_posts/{servicePost}/remove-badge', [BadgeTypeController::class, 'removeBadgeFromPost']);
+    Route::post('service_posts/{servicePost}/upgrade-badge', [BadgeTypeController::class, 'upgradeBadge']);
 });
