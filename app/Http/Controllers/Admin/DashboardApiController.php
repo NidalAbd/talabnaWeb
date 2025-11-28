@@ -43,9 +43,17 @@ class DashboardApiController extends Controller
 
             return response()->json($data);
         } catch (\Exception $e) {
+            \Log::error('Dashboard API Error: ' . $e->getMessage(), [
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
             return response()->json([
                 'error' => 'Failed to load dashboard data',
-                'message' => $e->getMessage()
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine()
             ], 500);
         }
     }
@@ -303,15 +311,26 @@ class DashboardApiController extends Controller
      */
     private function getRecentReports(): array
     {
-        return Report::with(['reporter', 'servicePost'])
+        return Report::with(['reporter', 'reportable'])
             ->latest()
             ->take(5)
             ->get()
             ->map(function ($report) {
+                $reportedItem = 'N/A';
+                if ($report->reportable) {
+                    if ($report->reportable instanceof ServicePost) {
+                        $reportedItem = $report->reportable->title ?? 'Service Post';
+                    } elseif ($report->reportable instanceof User) {
+                        $reportedItem = $report->reportable->user_name ?? 'User';
+                    } else {
+                        $reportedItem = class_basename($report->reportable_type);
+                    }
+                }
+
                 return [
                     'id' => $report->id,
                     'reporter_name' => $report->reporter->user_name ?? 'N/A',
-                    'post_title' => $report->servicePost->title ?? 'N/A',
+                    'reported_item' => $reportedItem,
                     'reason' => $report->reason,
                     'created_at' => $report->created_at->toISOString(),
                 ];
