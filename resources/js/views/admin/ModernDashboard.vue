@@ -134,8 +134,8 @@
             <div class="card-header bg-white border-0 py-3">
               <h5 class="mb-0"><i class="fas fa-chart-pie text-primary me-2"></i>Posts by State</h5>
             </div>
-            <div class="card-body">
-              <pie-chart :data="postsByStateData" :height="250" />
+            <div class="card-body" style="height: 300px; max-height: 300px; overflow: hidden;">
+              <pie-chart :data="postsByStateData" :height="250" :key="'posts-by-state'" />
             </div>
           </div>
         </div>
@@ -146,8 +146,8 @@
             <div class="card-header bg-white border-0 py-3">
               <h5 class="mb-0"><i class="fas fa-award text-warning me-2"></i>Badge Distribution</h5>
             </div>
-            <div class="card-body">
-              <pie-chart :data="badgeChartData" :height="250" />
+            <div class="card-body" style="height: 300px; max-height: 300px; overflow: hidden;">
+              <pie-chart :data="badgeChartData" :height="250" :key="'badge-distribution'" />
             </div>
           </div>
         </div>
@@ -158,8 +158,8 @@
             <div class="card-header bg-white border-0 py-3">
               <h5 class="mb-0"><i class="fas fa-tags text-success me-2"></i>Post Types</h5>
             </div>
-            <div class="card-body">
-              <pie-chart :data="postTypeChartData" :height="250" />
+            <div class="card-body" style="height: 300px; max-height: 300px; overflow: hidden;">
+              <pie-chart :data="postTypeChartData" :height="250" :key="'post-types'" />
             </div>
           </div>
         </div>
@@ -172,8 +172,8 @@
             <div class="card-header bg-white border-0 py-3">
               <h5 class="mb-0"><i class="fas fa-chart-line text-primary me-2"></i>Posts Trend</h5>
             </div>
-            <div class="card-body">
-              <line-chart :data="postsByMonthData" :height="250" />
+            <div class="card-body" style="height: 350px; max-height: 350px; overflow: hidden;">
+              <line-chart :data="postsByMonthData" :height="300" />
             </div>
           </div>
         </div>
@@ -183,8 +183,8 @@
             <div class="card-header bg-white border-0 py-3">
               <h5 class="mb-0"><i class="fas fa-user-plus text-success me-2"></i>User Growth</h5>
             </div>
-            <div class="card-body">
-              <line-chart :data="usersByMonthData" :height="250" />
+            <div class="card-body" style="height: 350px; max-height: 350px; overflow: hidden;">
+              <line-chart :data="usersByMonthData" :height="300" />
             </div>
           </div>
         </div>
@@ -197,8 +197,8 @@
             <div class="card-header bg-white border-0 py-3">
               <h5 class="mb-0"><i class="fas fa-chart-bar text-info me-2"></i>Top Categories</h5>
             </div>
-            <div class="card-body">
-              <bar-chart :data="postsByCategoryData" :height="300" />
+            <div class="card-body" style="height: 400px; max-height: 400px; overflow: hidden;">
+              <bar-chart :data="postsByCategoryData" :height="350" />
             </div>
           </div>
         </div>
@@ -270,7 +270,7 @@
                     <tr v-for="report in recentReports" :key="report.id">
                       <td>
                         <div>
-                          <strong class="d-block">{{ report.post_title }}</strong>
+                          <strong class="d-block">{{ report.reported_item }}</strong>
                           <small class="text-muted">reported by {{ report.reporter_name }}</small>
                         </div>
                       </td>
@@ -290,10 +290,12 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import PieChart from '@/components/admin/charts/PieChart.vue'
 import LineChart from '@/components/admin/charts/LineChart.vue'
 import BarChart from '@/components/admin/charts/BarChart.vue'
+
+console.log('ModernDashboard: Script setup running')
 
 const loading = ref(true)
 const stats = ref({})
@@ -309,12 +311,31 @@ const postsByStateData = ref({})
 const postsByMonthData = ref({})
 const usersByMonthData = ref({})
 const postsByCategoryData = ref({})
+const renderCount = ref(0)
+
+let loadCount = 0
 
 onMounted(async () => {
+  console.log('ModernDashboard: onMounted')
+  renderCount.value++
+  console.log('ModernDashboard: renderCount =', renderCount.value)
   await loadDashboardData()
 })
 
+onBeforeUnmount(() => {
+  console.log('ModernDashboard: onBeforeUnmount')
+})
+
 const loadDashboardData = async () => {
+  loadCount++
+  console.log('ModernDashboard: loadDashboardData called (count:', loadCount, ')')
+
+  if (loadCount > 5) {
+    console.error('ModernDashboard: Too many load attempts! Stopping to prevent infinite loop.')
+    loading.value = false
+    return
+  }
+
   try {
     loading.value = true
     const response = await fetch('/api/dashboard')
