@@ -313,5 +313,3 @@ const handleImageError = (event) => {
 }
 </script>
 
-<style src="../../../css/admin-compact.css" scoped></style>
-<style src="../../../css/admin-table.css" scoped></style>

@@ -87,6 +87,18 @@
             </div>
           </div>
 
+          <div class="stat-card-advanced stat-secondary">
+            <div class="stat-icon-wrapper">
+              <div class="stat-icon">
+                <i class="fas fa-folder-tree"></i>
+              </div>
+            </div>
+            <div class="stat-details">
+              <h2 class="stat-number">{{ overviewStats.total_subcategories || 0 }}</h2>
+              <p class="stat-label">Total Sub-Categories</p>
+            </div>
+          </div>
+
           <div class="stat-card-advanced stat-primary">
             <div class="stat-icon-wrapper">
               <div class="stat-icon">
@@ -188,6 +200,28 @@
           </div>
         </div>
       </div>
+
+      <!-- Sub-Categories Tab -->
+      <div v-if="activeTab === 'subcategories'" class="tab-content-panel">
+        <div class="stats-grid">
+          <div
+            v-for="stat in subcategoriesStats"
+            :key="stat.label"
+            class="stat-card-advanced"
+            :class="`stat-${stat.color}`"
+          >
+            <div class="stat-icon-wrapper">
+              <div class="stat-icon">
+                <i :class="stat.icon"></i>
+              </div>
+            </div>
+            <div class="stat-details">
+              <h2 class="stat-number">{{ stat.value }}</h2>
+              <p class="stat-label">{{ stat.label }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Quick Actions -->
@@ -240,6 +274,17 @@
           </div>
           <i class="fas fa-arrow-right action-arrow"></i>
         </router-link>
+
+        <router-link to="/subcategories" class="action-card">
+          <div class="action-icon bg-secondary">
+            <i class="fas fa-folder-tree"></i>
+          </div>
+          <div class="action-content">
+            <h4>Manage Sub-Categories</h4>
+            <p>Organize sub-categories</p>
+          </div>
+          <i class="fas fa-arrow-right action-arrow"></i>
+        </router-link>
       </div>
     </div>
   </div>
@@ -256,7 +301,8 @@ const tabs = [
   { id: 'users', label: 'Users', icon: 'fas fa-users' },
   { id: 'roles', label: 'Roles', icon: 'fas fa-user-shield' },
   { id: 'permissions', label: 'Permissions', icon: 'fas fa-key' },
-  { id: 'categories', label: 'Categories', icon: 'fas fa-folder' }
+  { id: 'categories', label: 'Categories', icon: 'fas fa-folder' },
+  { id: 'subcategories', label: 'Sub-Categories', icon: 'fas fa-folder-tree' }
 ]
 
 const overviewStats = ref({
@@ -264,6 +310,7 @@ const overviewStats = ref({
   total_roles: 0,
   total_permissions: 0,
   total_categories: 0,
+  total_subcategories: 0,
   system_health: '100%'
 })
 
@@ -271,6 +318,7 @@ const usersStats = ref([])
 const rolesStats = ref([])
 const permissionsStats = ref([])
 const categoriesStats = ref([])
+const subcategoriesStats = ref([])
 
 onMounted(async () => {
   await loadAllStats()
@@ -284,7 +332,8 @@ const loadAllStats = async () => {
       loadUsersStats(),
       loadRolesStats(),
       loadPermissionsStats(),
-      loadCategoriesStats()
+      loadCategoriesStats(),
+      loadSubCategoriesStats()
     ])
   } catch (error) {
     console.error('Error loading dashboard stats:', error)
@@ -311,17 +360,23 @@ const loadOverviewStats = async () => {
     const categoriesResponse = await fetch('/api/admin/categories/stats')
     const categoriesData = await categoriesResponse.json()
 
+    // Load subcategories count
+    const subcategoriesResponse = await fetch('/api/admin/subcategories/stats')
+    const subcategoriesData = await subcategoriesResponse.json()
+
     // Find total stats
     const totalUsers = usersData.stats?.find(s => s.label === 'Total Users')?.value || 0
     const totalRoles = rolesData.stats?.find(s => s.label === 'Total Roles')?.value || 0
     const totalPermissions = permissionsData.stats?.find(s => s.label === 'Total Permissions')?.value || 0
     const totalCategories = categoriesData.stats?.find(s => s.label === 'Total Categories')?.value || 0
+    const totalSubCategories = subcategoriesData.stats?.find(s => s.label === 'Total Sub-Categories')?.value || 0
 
     overviewStats.value = {
       total_users: totalUsers,
       total_roles: totalRoles,
       total_permissions: totalPermissions,
       total_categories: totalCategories,
+      total_subcategories: totalSubCategories,
       system_health: '100%'
     }
   } catch (error) {
@@ -366,6 +421,16 @@ const loadCategoriesStats = async () => {
     categoriesStats.value = data.stats || []
   } catch (error) {
     console.error('Error loading categories stats:', error)
+  }
+}
+
+const loadSubCategoriesStats = async () => {
+  try {
+    const response = await fetch('/api/admin/subcategories/stats')
+    const data = await response.json()
+    subcategoriesStats.value = data.stats || []
+  } catch (error) {
+    console.error('Error loading subcategories stats:', error)
   }
 }
 
