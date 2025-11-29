@@ -31,16 +31,8 @@ class CustomPermissionsController extends Controller
      */
     public function index()
     {
-        $permissions = $this->permissionModel::orderBy('name')->paginate(15);
-
-        // Group all permissions for display purposes
-        $allPermissions = $this->permissionModel::orderBy('name')->get();
-        $groupedPermissions = $allPermissions->groupBy(function($permission) {
-            $parts = explode('_', $permission->name);
-            return $parts[0] ?? 'general';
-        });
-
-        return view('admin.permissions.index', compact('permissions', 'groupedPermissions'));
+        // Return SPA shell - Vue Router will handle the component
+        return view('admin.spa');
     }
 
     /**

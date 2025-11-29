@@ -1,0 +1,23 @@
+{
+  "applinks": {
+    "apps": [],
+    "details": [
+      {
+        "appID": "TEAM_ID.com.talabna.talabna",
+        "paths": [
+          "/api/deep-link/*",
+          "/service-post/*",
+          "/reels/*",
+          "/user/*",
+          "/profile/*",
+          "/category/*"
+        ]
+      }
+    ]
+  },
+  "webcredentials": {
+    "apps": [
+      "TEAM_ID.com.talabna.talabna"
+    ]
+  }
+}

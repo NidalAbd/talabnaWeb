@@ -1,0 +1,361 @@
+/**
+ * Modern Professional Table Design - Applied to all admin sections
+ * Clean, uniform table layout with actions
+ */
+
+/* Hide card grids, show only list/table view */
+.users-grid,
+.roles-grid,
+.permissions-grid {
+  display: none !important;
+}
+
+.users-list-view,
+.roles-list-view,
+.permissions-list-view {
+  display: block !important;
+}
+
+/* Hide view toggle - force table view */
+.view-toggle {
+  display: none !important;
+}
+
+/* Modern Table Container */
+.modern-table-container {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  overflow: hidden;
+}
+
+.modern-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+/* Table Header */
+.modern-table thead {
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-bottom: 2px solid #dee2e6;
+}
+
+.modern-table thead th {
+  padding: 1rem;
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #495057;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+/* Table Body */
+.modern-table tbody tr {
+  border-bottom: 1px solid #f1f3f5;
+  transition: all 0.2s ease;
+}
+
+.modern-table tbody tr:hover {
+  background: #f8f9fa;
+  transform: scale(1.001);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.modern-table tbody td {
+  padding: 0.875rem 1rem;
+  font-size: 0.875rem;
+  color: #495057;
+  vertical-align: middle;
+}
+
+/* Avatar/Icon Column */
+.table-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #e9ecef;
+}
+
+.table-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.table-icon.icon-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+}
+
+.table-icon.icon-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  color: #212529;
+}
+
+.table-icon.icon-primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.table-icon.icon-info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.table-icon.icon-success {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+}
+
+/* Name/Title Column */
+.table-name {
+  font-weight: 600;
+  color: #2c3e50;
+  margin: 0;
+  font-size: 0.9rem;
+}
+
+.table-subtitle {
+  color: #6c757d;
+  font-size: 0.75rem;
+  margin: 0.125rem 0 0 0;
+}
+
+/* Badge Styles */
+.table-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.625rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-right: 0.375rem;
+  margin-bottom: 0.25rem;
+}
+
+.table-badge.badge-success {
+  background: #d4edda;
+  color: #155724;
+}
+
+.table-badge.badge-danger {
+  background: #f8d7da;
+  color: #721c24;
+}
+
+.table-badge.badge-warning {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.table-badge.badge-info {
+  background: #d1ecf1;
+  color: #0c5460;
+}
+
+.table-badge.badge-primary {
+  background: #e7e9fc;
+  color: #4c51bf;
+}
+
+.table-badge.badge-secondary {
+  background: #e9ecef;
+  color: #495057;
+}
+
+/* Status Indicator */
+.status-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 0.5rem;
+}
+
+.status-dot.active {
+  background: #28a745;
+  animation: pulse 2s infinite;
+}
+
+.status-dot.banned,
+.status-dot.inactive {
+  background: #dc3545;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Actions Column */
+.table-actions {
+  display: flex;
+  gap: 0.375rem;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.table-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: 1px solid #dee2e6;
+  background: white;
+  color: #6c757d;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.table-action-btn:hover {
+  background: #f8f9fa;
+  border-color: #667eea;
+  color: #667eea;
+  transform: translateY(-1px);
+}
+
+.table-action-btn.btn-view:hover {
+  border-color: #17a2b8;
+  color: #17a2b8;
+}
+
+.table-action-btn.btn-edit:hover {
+  border-color: #ffc107;
+  color: #ffc107;
+}
+
+.table-action-btn.btn-delete:hover {
+  border-color: #dc3545;
+  color: #dc3545;
+  background: #fff5f5;
+}
+
+.table-action-btn.btn-ban:hover {
+  border-color: #dc3545;
+  color: #dc3545;
+}
+
+/* Dropdown Menu for Actions */
+.table-dropdown {
+  position: relative;
+}
+
+.table-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 0.25rem;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 180px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.table-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.625rem 1rem;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #495057;
+  text-decoration: none;
+  font-size: 0.85rem;
+}
+
+.table-dropdown-item:hover {
+  background: #f8f9fa;
+}
+
+.table-dropdown-item.danger {
+  color: #dc3545;
+}
+
+.table-dropdown-item.danger:hover {
+  background: #fff5f5;
+}
+
+/* Responsive Table */
+@media (max-width: 1200px) {
+  .modern-table {
+    font-size: 0.8rem;
+  }
+
+  .modern-table thead th,
+  .modern-table tbody td {
+    padding: 0.75rem 0.625rem;
+  }
+}
+
+/* Empty State */
+.table-empty-state {
+  text-align: center;
+  padding: 3rem 2rem;
+  color: #6c757d;
+}
+
+.table-empty-state i {
+  font-size: 3rem;
+  color: #dee2e6;
+  margin-bottom: 1rem;
+}
+
+/* System/Protected Indicator */
+.system-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: #ffc107;
+  font-size: 0.75rem;
+}
+
+/* Role Count / Meta Info */
+.table-meta {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+}
+
+.table-meta i {
+  color: #667eea;
+}
+
+/* Truncate long text */
+.table-truncate {
+  max-width: 250px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Fix list view items to look like table rows */
+.user-list-item,
+.role-list-item,
+.permission-list-item {
+  display: none !important;
+}
+
+/* Override the component styles to force table display */
+.users-list-view,
+.roles-list-view,
+.permissions-list-view {
+  background: transparent !important;
+  padding: 0 !important;
+}

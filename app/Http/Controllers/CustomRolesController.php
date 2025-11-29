@@ -33,11 +33,8 @@ class CustomRolesController extends Controller
      */
     public function index()
     {
-        $roles = $this->rolesModel::withCount('permissions')
-            ->orderBy('name')
-            ->paginate(10);
-
-        return view('admin.roles.index', compact('roles'));
+        // Return SPA shell - Vue Router will handle the component
+        return view('admin.spa');
     }
 
     /**

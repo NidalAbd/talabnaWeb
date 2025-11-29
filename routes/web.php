@@ -256,6 +256,11 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::post('users/{id}/update-status', [UserController::class, 'updateStatus'])
         ->name('users.update.status');
 
+    // Vue.js Users Management (Test Route)
+    Route::get('users-vue', function () {
+        return view('users.users-vue');
+    })->name('users.vue');
+
     // AJAX Ban/Unban action for users
     Route::post('/users/{user}/toggle-ban', [BanController::class, 'toggleBan'])
         ->name('users.toggle-ban');
@@ -333,6 +338,11 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::resource('permissions', CustomPermissionsController::class);
     Route::post('roles/{role}/clone', [CustomRolesController::class, 'clone'])
         ->name('roles.clone');
+
+    // Vue.js Roles Management (Test Route)
+    Route::get('roles-vue', function () {
+        return view('admin.roles.roles-vue');
+    })->name('roles.vue');
     Route::post('permissions/generate', [CustomPermissionsController::class, 'generateForModule'])
         ->name('permissions.generate');
     Route::post('/role-assignments/default-permissions',
@@ -447,5 +457,51 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
         // Dashboard API (separate from mobile API)
         Route::get('/dashboard', [DashboardApiController::class, 'index'])->name('dashboard');
+
+        // Users API (for Vue.js admin dashboard)
+        Route::prefix('admin')->group(function () {
+            // Users
+            Route::get('/users/stats', [\App\Http\Controllers\Admin\UsersApiController::class, 'getStats'])->name('api.admin.users.stats');
+            Route::get('/users/roles', [\App\Http\Controllers\Admin\UsersApiController::class, 'getRoles'])->name('api.admin.users.roles');
+            Route::get('/users', [\App\Http\Controllers\Admin\UsersApiController::class, 'index'])->name('api.admin.users.index');
+            Route::get('/users/{id}', [\App\Http\Controllers\Admin\UsersApiController::class, 'show'])->name('api.admin.users.show');
+            Route::post('/users/{id}/toggle-ban', [\App\Http\Controllers\Admin\UsersApiController::class, 'toggleBan'])->name('api.admin.users.toggle-ban');
+            Route::delete('/users/{id}', [\App\Http\Controllers\Admin\UsersApiController::class, 'destroy'])->name('api.admin.users.destroy');
+
+            // Roles
+            Route::get('/roles/stats', [\App\Http\Controllers\Admin\RolesApiController::class, 'getStats'])->name('api.admin.roles.stats');
+            Route::get('/roles', [\App\Http\Controllers\Admin\RolesApiController::class, 'index'])->name('api.admin.roles.index');
+            Route::get('/roles/{id}', [\App\Http\Controllers\Admin\RolesApiController::class, 'show'])->name('api.admin.roles.show');
+            Route::get('/roles/{id}/users', [\App\Http\Controllers\Admin\RolesApiController::class, 'getUsersWithRole'])->name('api.admin.roles.users');
+            Route::delete('/roles/{id}', [\App\Http\Controllers\Admin\RolesApiController::class, 'destroy'])->name('api.admin.roles.destroy');
+
+            // Permissions
+            Route::get('/permissions/stats', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'getStats'])->name('api.admin.permissions.stats');
+            Route::get('/permissions/categories', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'getCategories'])->name('api.admin.permissions.categories');
+            Route::get('/permissions', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'index'])->name('api.admin.permissions.index');
+            Route::post('/permissions/generate', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'generate'])->name('api.admin.permissions.generate');
+            Route::delete('/permissions/{id}', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'destroy'])->name('api.admin.permissions.destroy');
+
+            // Categories
+            Route::get('/categories/stats', [\App\Http\Controllers\Admin\CategoriesApiController::class, 'getStats'])->name('api.admin.categories.stats');
+            Route::get('/categories', [\App\Http\Controllers\Admin\CategoriesApiController::class, 'index'])->name('api.admin.categories.index');
+            Route::get('/categories/{id}', [\App\Http\Controllers\Admin\CategoriesApiController::class, 'show'])->name('api.admin.categories.show');
+            Route::post('/categories', [\App\Http\Controllers\Admin\CategoriesApiController::class, 'store'])->name('api.admin.categories.store');
+            Route::post('/categories/{id}', [\App\Http\Controllers\Admin\CategoriesApiController::class, 'update'])->name('api.admin.categories.update');
+            Route::delete('/categories/{id}', [\App\Http\Controllers\Admin\CategoriesApiController::class, 'destroy'])->name('api.admin.categories.destroy');
+            Route::post('/categories/{id}/toggle-status', [\App\Http\Controllers\Admin\CategoriesApiController::class, 'toggleStatus'])->name('api.admin.categories.toggle-status');
+            Route::post('/categories/{id}/toggle-featured', [\App\Http\Controllers\Admin\CategoriesApiController::class, 'toggleFeatured'])->name('api.admin.categories.toggle-featured');
+            Route::post('/categories/{id}/toggle-popular', [\App\Http\Controllers\Admin\CategoriesApiController::class, 'togglePopular'])->name('api.admin.categories.toggle-popular');
+
+            // Sub-Categories
+            Route::get('/subcategories/stats', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'getStats'])->name('api.admin.subcategories.stats');
+            Route::get('/subcategories', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'index'])->name('api.admin.subcategories.index');
+            Route::get('/subcategories/{id}', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'show'])->name('api.admin.subcategories.show');
+            Route::post('/subcategories', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'store'])->name('api.admin.subcategories.store');
+            Route::post('/subcategories/{id}', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'update'])->name('api.admin.subcategories.update');
+            Route::delete('/subcategories/{id}', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'destroy'])->name('api.admin.subcategories.destroy');
+            Route::post('/subcategories/{id}/toggle-featured', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'toggleFeatured'])->name('api.admin.subcategories.toggle-featured');
+            Route::post('/subcategories/{id}/toggle-popular', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'togglePopular'])->name('api.admin.subcategories.toggle-popular');
+        });
     });
 });

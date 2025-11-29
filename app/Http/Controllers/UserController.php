@@ -28,52 +28,8 @@ class UserController extends Controller
      */
     public function index(Request $request)
     {
-        // Get filter parameters
-        $status = $request->input('status');
-        $role = $request->input('role');
-        $search = $request->input('search');
-
-        // Base query
-        $query = User::with('photos', 'roles')
-            ->withCount(['reports', 'servicePosts']);
-
-        // Apply filters
-        if ($status) {
-            $query->where('is_active', $status);
-        }
-
-        if ($role) {
-            $query->whereHas('roles', function ($q) use ($role) {
-                $q->where('name', $role);
-            });
-        }
-
-        if ($search) {
-            $query->where(function ($q) use ($search) {
-                $q->where('id', 'like', $search)
-                    ->orWhere('user_name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phones', 'like', "%{$search}%");
-            });
-        }
-
-        // Get paginated users
-        $users = $query->orderBy('id', 'desc')->paginate(10);
-        // Get all roles for the dropdown
-        $roles = Role::all();
-
-        // Get counts for dashboard stats
-        $activeUsersCount = User::where('is_active', 'active')->count();
-        $bannedUsersCount = User::where('is_active', 'banned')->count();
-        $totalPosts = DB::table('service_posts')->count();
-
-        return view('users.index', [
-            'Users' => $users,
-            'roles' => $roles,
-            'activeUsersCount' => $activeUsersCount,
-            'bannedUsersCount' => $bannedUsersCount,
-            'totalPosts' => $totalPosts,
-        ]);
+        // Return SPA shell - Vue Router will handle the component
+        return view('admin.spa');
     }
 
     /**
