@@ -7,6 +7,9 @@ import RolesList from '../views/admin/RolesList.vue'
 import PermissionsList from '../views/admin/PermissionsList.vue'
 import CategoriesList from '../views/admin/categories/CategoriesList.vue'
 import SubCategoriesList from '../views/admin/subcategories/SubCategoriesList.vue'
+import CountriesList from '../views/admin/countries/CountriesList.vue'
+import CitiesList from '../views/admin/cities/CitiesList.vue'
+import BadgeTypesList from '../views/admin/badge-types/BadgeTypesList.vue'
 
 const routes = [
   {
@@ -44,6 +47,24 @@ const routes = [
     name: 'subcategories.index',
     component: SubCategoriesList,
     meta: { title: 'Sub-Categories Management' }
+  },
+  {
+    path: '/countries',
+    name: 'countries.index',
+    component: CountriesList,
+    meta: { title: 'Countries Management' }
+  },
+  {
+    path: '/cities',
+    name: 'cities.index',
+    component: CitiesList,
+    meta: { title: 'Cities Management' }
+  },
+  {
+    path: '/badge-types',
+    name: 'badge-types.index',
+    component: BadgeTypesList,
+    meta: { title: 'Badge Types Management' }
   }
 ]
 

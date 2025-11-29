@@ -502,6 +502,32 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::delete('/subcategories/{id}', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'destroy'])->name('api.admin.subcategories.destroy');
             Route::post('/subcategories/{id}/toggle-featured', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'toggleFeatured'])->name('api.admin.subcategories.toggle-featured');
             Route::post('/subcategories/{id}/toggle-popular', [\App\Http\Controllers\Admin\SubCategoriesApiController::class, 'togglePopular'])->name('api.admin.subcategories.toggle-popular');
+
+            // Countries
+            Route::get('/countries/stats', [\App\Http\Controllers\Admin\CountriesApiController::class, 'getStats'])->name('api.admin.countries.stats');
+            Route::get('/countries', [\App\Http\Controllers\Admin\CountriesApiController::class, 'index'])->name('api.admin.countries.index');
+            Route::get('/countries/{id}', [\App\Http\Controllers\Admin\CountriesApiController::class, 'show'])->name('api.admin.countries.show');
+            Route::post('/countries', [\App\Http\Controllers\Admin\CountriesApiController::class, 'store'])->name('api.admin.countries.store');
+            Route::post('/countries/{id}', [\App\Http\Controllers\Admin\CountriesApiController::class, 'update'])->name('api.admin.countries.update');
+            Route::delete('/countries/{id}', [\App\Http\Controllers\Admin\CountriesApiController::class, 'destroy'])->name('api.admin.countries.destroy');
+
+            // Cities
+            Route::get('/cities/stats', [\App\Http\Controllers\Admin\CitiesApiController::class, 'getStats'])->name('api.admin.cities.stats');
+            Route::get('/cities', [\App\Http\Controllers\Admin\CitiesApiController::class, 'index'])->name('api.admin.cities.index');
+            Route::get('/cities/{id}', [\App\Http\Controllers\Admin\CitiesApiController::class, 'show'])->name('api.admin.cities.show');
+            Route::post('/cities', [\App\Http\Controllers\Admin\CitiesApiController::class, 'store'])->name('api.admin.cities.store');
+            Route::post('/cities/{id}', [\App\Http\Controllers\Admin\CitiesApiController::class, 'update'])->name('api.admin.cities.update');
+            Route::delete('/cities/{id}', [\App\Http\Controllers\Admin\CitiesApiController::class, 'destroy'])->name('api.admin.cities.destroy');
+
+            // Badge Types
+            Route::get('/badge-types/stats', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'getStats'])->name('api.admin.badge-types.stats');
+            Route::get('/badge-types', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'index'])->name('api.admin.badge-types.index');
+            Route::get('/badge-types/{id}', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'show'])->name('api.admin.badge-types.show');
+            Route::post('/badge-types', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'store'])->name('api.admin.badge-types.store');
+            Route::post('/badge-types/{id}', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'update'])->name('api.admin.badge-types.update');
+            Route::delete('/badge-types/{id}', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'destroy'])->name('api.admin.badge-types.destroy');
+            Route::post('/badge-types/{id}/toggle-status', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'toggleStatus'])->name('api.admin.badge-types.toggle-status');
+            Route::post('/badge-types/{id}/set-default', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'setDefault'])->name('api.admin.badge-types.set-default');
         });
     });
 });

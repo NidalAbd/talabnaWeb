@@ -99,6 +99,30 @@
             </div>
           </div>
 
+          <div class="stat-card-advanced stat-info">
+            <div class="stat-icon-wrapper">
+              <div class="stat-icon">
+                <i class="fas fa-globe"></i>
+              </div>
+            </div>
+            <div class="stat-details">
+              <h2 class="stat-number">{{ overviewStats.total_countries || 0 }}</h2>
+              <p class="stat-label">Total Countries</p>
+            </div>
+          </div>
+
+          <div class="stat-card-advanced stat-success">
+            <div class="stat-icon-wrapper">
+              <div class="stat-icon">
+                <i class="fas fa-city"></i>
+              </div>
+            </div>
+            <div class="stat-details">
+              <h2 class="stat-number">{{ overviewStats.total_cities || 0 }}</h2>
+              <p class="stat-label">Total Cities</p>
+            </div>
+          </div>
+
           <div class="stat-card-advanced stat-primary">
             <div class="stat-icon-wrapper">
               <div class="stat-icon">
@@ -222,6 +246,72 @@
           </div>
         </div>
       </div>
+
+      <!-- Countries Tab -->
+      <div v-if="activeTab === 'countries'" class="tab-content-panel">
+        <div class="stats-grid">
+          <div
+            v-for="stat in countriesStats"
+            :key="stat.label"
+            class="stat-card-advanced"
+            :class="`stat-${stat.color}`"
+          >
+            <div class="stat-icon-wrapper">
+              <div class="stat-icon">
+                <i :class="stat.icon"></i>
+              </div>
+            </div>
+            <div class="stat-details">
+              <h2 class="stat-number">{{ stat.value }}</h2>
+              <p class="stat-label">{{ stat.label }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Cities Tab -->
+      <div v-if="activeTab === 'cities'" class="tab-content-panel">
+        <div class="stats-grid">
+          <div
+            v-for="stat in citiesStats"
+            :key="stat.label"
+            class="stat-card-advanced"
+            :class="`stat-${stat.color}`"
+          >
+            <div class="stat-icon-wrapper">
+              <div class="stat-icon">
+                <i :class="stat.icon"></i>
+              </div>
+            </div>
+            <div class="stat-details">
+              <h2 class="stat-number">{{ stat.value }}</h2>
+              <p class="stat-label">{{ stat.label }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Badge Types Tab -->
+      <div v-if="activeTab === 'badges'" class="tab-content-panel">
+        <div class="stats-grid">
+          <div
+            v-for="stat in badgesStats"
+            :key="stat.label"
+            class="stat-card-advanced"
+            :class="`stat-${stat.color}`"
+          >
+            <div class="stat-icon-wrapper">
+              <div class="stat-icon">
+                <i :class="stat.icon"></i>
+              </div>
+            </div>
+            <div class="stat-details">
+              <h2 class="stat-number">{{ stat.value }}</h2>
+              <p class="stat-label">{{ stat.label }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Quick Actions -->
@@ -285,6 +375,39 @@
           </div>
           <i class="fas fa-arrow-right action-arrow"></i>
         </router-link>
+
+        <router-link to="/countries" class="action-card">
+          <div class="action-icon bg-info">
+            <i class="fas fa-globe"></i>
+          </div>
+          <div class="action-content">
+            <h4>Manage Countries</h4>
+            <p>Manage countries and locations</p>
+          </div>
+          <i class="fas fa-arrow-right action-arrow"></i>
+        </router-link>
+
+        <router-link to="/cities" class="action-card">
+          <div class="action-icon bg-success">
+            <i class="fas fa-city"></i>
+          </div>
+          <div class="action-content">
+            <h4>Manage Cities</h4>
+            <p>Organize cities by country</p>
+          </div>
+          <i class="fas fa-arrow-right action-arrow"></i>
+        </router-link>
+
+        <router-link to="/badge-types" class="action-card">
+          <div class="action-icon bg-warning">
+            <i class="fas fa-certificate"></i>
+          </div>
+          <div class="action-content">
+            <h4>Manage Badge Types</h4>
+            <p>Configure service post badges</p>
+          </div>
+          <i class="fas fa-arrow-right action-arrow"></i>
+        </router-link>
       </div>
     </div>
   </div>
@@ -302,7 +425,10 @@ const tabs = [
   { id: 'roles', label: 'Roles', icon: 'fas fa-user-shield' },
   { id: 'permissions', label: 'Permissions', icon: 'fas fa-key' },
   { id: 'categories', label: 'Categories', icon: 'fas fa-folder' },
-  { id: 'subcategories', label: 'Sub-Categories', icon: 'fas fa-folder-tree' }
+  { id: 'subcategories', label: 'Sub-Categories', icon: 'fas fa-folder-tree' },
+  { id: 'countries', label: 'Countries', icon: 'fas fa-globe' },
+  { id: 'cities', label: 'Cities', icon: 'fas fa-city' },
+  { id: 'badges', label: 'Badge Types', icon: 'fas fa-certificate' }
 ]
 
 const overviewStats = ref({
@@ -311,6 +437,8 @@ const overviewStats = ref({
   total_permissions: 0,
   total_categories: 0,
   total_subcategories: 0,
+  total_countries: 0,
+  total_cities: 0,
   system_health: '100%'
 })
 
@@ -319,6 +447,9 @@ const rolesStats = ref([])
 const permissionsStats = ref([])
 const categoriesStats = ref([])
 const subcategoriesStats = ref([])
+const countriesStats = ref([])
+const citiesStats = ref([])
+const badgesStats = ref([])
 
 onMounted(async () => {
   await loadAllStats()
@@ -333,7 +464,10 @@ const loadAllStats = async () => {
       loadRolesStats(),
       loadPermissionsStats(),
       loadCategoriesStats(),
-      loadSubCategoriesStats()
+      loadSubCategoriesStats(),
+      loadCountriesStats(),
+      loadCitiesStats(),
+      loadBadgesStats()
     ])
   } catch (error) {
     console.error('Error loading dashboard stats:', error)
@@ -364,12 +498,22 @@ const loadOverviewStats = async () => {
     const subcategoriesResponse = await fetch('/api/admin/subcategories/stats')
     const subcategoriesData = await subcategoriesResponse.json()
 
+    // Load countries count
+    const countriesResponse = await fetch('/api/admin/countries/stats')
+    const countriesData = await countriesResponse.json()
+
+    // Load cities count
+    const citiesResponse = await fetch('/api/admin/cities/stats')
+    const citiesData = await citiesResponse.json()
+
     // Find total stats
     const totalUsers = usersData.stats?.find(s => s.label === 'Total Users')?.value || 0
     const totalRoles = rolesData.stats?.find(s => s.label === 'Total Roles')?.value || 0
     const totalPermissions = permissionsData.stats?.find(s => s.label === 'Total Permissions')?.value || 0
     const totalCategories = categoriesData.stats?.find(s => s.label === 'Total Categories')?.value || 0
     const totalSubCategories = subcategoriesData.stats?.find(s => s.label === 'Total Sub-Categories')?.value || 0
+    const totalCountries = countriesData.stats?.find(s => s.label === 'Total Countries')?.value || 0
+    const totalCities = citiesData.stats?.find(s => s.label === 'Total Cities')?.value || 0
 
     overviewStats.value = {
       total_users: totalUsers,
@@ -377,6 +521,8 @@ const loadOverviewStats = async () => {
       total_permissions: totalPermissions,
       total_categories: totalCategories,
       total_subcategories: totalSubCategories,
+      total_countries: totalCountries,
+      total_cities: totalCities,
       system_health: '100%'
     }
   } catch (error) {
@@ -431,6 +577,36 @@ const loadSubCategoriesStats = async () => {
     subcategoriesStats.value = data.stats || []
   } catch (error) {
     console.error('Error loading subcategories stats:', error)
+  }
+}
+
+const loadCountriesStats = async () => {
+  try {
+    const response = await fetch('/api/admin/countries/stats')
+    const data = await response.json()
+    countriesStats.value = data.stats || []
+  } catch (error) {
+    console.error('Error loading countries stats:', error)
+  }
+}
+
+const loadCitiesStats = async () => {
+  try {
+    const response = await fetch('/api/admin/cities/stats')
+    const data = await response.json()
+    citiesStats.value = data.stats || []
+  } catch (error) {
+    console.error('Error loading cities stats:', error)
+  }
+}
+
+const loadBadgesStats = async () => {
+  try {
+    const response = await fetch('/api/admin/badge-types/stats')
+    const data = await response.json()
+    badgesStats.value = data.stats || []
+  } catch (error) {
+    console.error('Error loading badges stats:', error)
   }
 }
 

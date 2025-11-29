@@ -16,6 +16,9 @@ import RolesList from './views/admin/RolesList.vue'
 import PermissionsList from './views/admin/PermissionsList.vue'
 import CategoriesList from './views/admin/categories/CategoriesList.vue'
 import SubCategoriesList from './views/admin/subcategories/SubCategoriesList.vue'
+import CountriesList from './views/admin/countries/CountriesList.vue'
+import CitiesList from './views/admin/cities/CitiesList.vue'
+import BadgeTypesList from './views/admin/badge-types/BadgeTypesList.vue'
 import PieChart from './components/admin/charts/PieChart.vue'
 import LineChart from './components/admin/charts/LineChart.vue'
 import BarChart from './components/admin/charts/BarChart.vue'
@@ -34,6 +37,9 @@ app.component('RolesList', RolesList)
 app.component('PermissionsList', PermissionsList)
 app.component('CategoriesList', CategoriesList)
 app.component('SubCategoriesList', SubCategoriesList)
+app.component('CountriesList', CountriesList)
+app.component('CitiesList', CitiesList)
+app.component('BadgeTypesList', BadgeTypesList)
 app.component('PieChart', PieChart)
 app.component('LineChart', LineChart)
 app.component('BarChart', BarChart)
@@ -69,6 +75,9 @@ document.addEventListener('DOMContentLoaded', () => {
         href.includes('/permissions') ||
         href.includes('/categories') ||
         href.includes('/subcategories') ||
+        href.includes('/countries') ||
+        href.includes('/cities') ||
+        href.includes('/badge-types') ||
         href.includes('/dashboard')
       )) {
         e.preventDefault()
