@@ -78,6 +78,20 @@ document.addEventListener('DOMContentLoaded', () => {
         href.includes('/countries') ||
         href.includes('/cities') ||
         href.includes('/badge-types') ||
+        href.includes('/service_posts') ||
+        href.includes('/reports') ||
+        href.includes('/admin/users/banned') ||
+        href.includes('/admin/devices/banned') ||
+        href.includes('/admin/point-packages') ||
+        href.includes('/admin/premium-features') ||
+        href.includes('/admin/levels') ||
+        href.includes('/admin/point-purchase-requests') ||
+        href.includes('/admin/point-transactions') ||
+        href.includes('/admin/marketing-notifications') ||
+        href.includes('/admin/analytics') ||
+        href.includes('/admin/statistics') ||
+        href.includes('/admin/role-assignments') ||
+        href.includes('/admin/palservice-points') ||
         href.includes('/dashboard')
       )) {
         e.preventDefault()

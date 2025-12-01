@@ -70,7 +70,7 @@
     >
       <!-- Logo -->
       <v-list-item
-        :to="{ name: 'admin-dashboard' }"
+        :to="{ name: 'admin.dashboard' }"
         class="py-4"
       >
         <template #prepend>
@@ -139,43 +139,49 @@ const menuItems = [
   {
     title: 'Dashboard',
     icon: 'mdi-view-dashboard',
-    to: { name: 'admin-dashboard' },
+    to: { name: 'admin.dashboard' },
     value: 'dashboard'
   },
   {
     title: 'Users',
     icon: 'mdi-account-group',
-    to: { name: 'admin-users' },
+    to: { name: 'users.index' },
     value: 'users'
   },
   {
     title: 'Categories',
     icon: 'mdi-shape',
-    to: { name: 'admin-categories' },
+    to: { name: 'categories.index' },
     value: 'categories'
   },
   {
     title: 'Subcategories',
     icon: 'mdi-sitemap',
-    to: { name: 'admin-subcategories' },
+    to: { name: 'subcategories.index' },
     value: 'subcategories'
+  },
+  {
+    title: 'Badge Types',
+    icon: 'mdi-certificate',
+    to: { name: 'badge-types.index' },
+    value: 'badge-types'
   },
   {
     title: 'Service Posts',
     icon: 'mdi-briefcase',
-    to: { name: 'admin-service-posts' },
+    to: { name: 'service_posts.index' },
     value: 'service-posts'
   },
   {
     title: 'Reports',
     icon: 'mdi-flag',
-    to: { name: 'admin-reports' },
+    to: { name: 'reports.index' },
     value: 'reports'
   },
   {
     title: 'Points System',
     icon: 'mdi-diamond-stone',
-    to: { name: 'admin-points' },
+    to: { name: 'point_packages.index' },
     value: 'points'
   }
 ]

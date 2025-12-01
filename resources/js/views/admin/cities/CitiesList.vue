@@ -1,142 +1,254 @@
 <template>
-  <div class="subcategories-management-advanced">
-    <!-- Section Header -->
-    <div class="section-header-advanced">
-      <div class="header-left">
-        <h1 class="section-title-advanced">
-          <i class="fas fa-city"></i>
-          Cities Management
-        </h1>
-        <p class="section-subtitle">Manage cities across all countries</p>
+  <div class="cities-management-advanced">
+    <!-- Advanced Search & Filters -->
+    <div class="search-filter-bar">
+      <div class="search-box">
+        <i class="fas fa-search search-icon"></i>
+        <input
+          type="text"
+          v-model="filters.search"
+          class="search-input"
+          placeholder="Search cities by name..."
+        >
+        <span v-if="filters.search" class="clear-search" @click="filters.search = ''">
+          <i class="fas fa-times"></i>
+        </span>
       </div>
-      <button class="btn-create-advanced" @click="openCreateModal">
+
+      <div class="filter-controls">
+        <select v-model="filters.country_id" class="role-select">
+          <option value="">All Countries</option>
+          <option v-for="country in countries" :key="country.id" :value="country.id">
+            {{ country.name.en }}
+          </option>
+        </select>
+
+        <select v-model="filters.sort_by" class="role-select">
+          <option value="created_at">Sort by: Created Date</option>
+          <option value="name">Sort by: Name</option>
+          <option value="country">Sort by: Country</option>
+        </select>
+
+        <select v-model="filters.sort_order" class="role-select">
+          <option value="desc">Descending</option>
+          <option value="asc">Ascending</option>
+        </select>
+
+        <button class="action-btn primary" @click="resetFilters">
+          <i class="fas fa-redo"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- View Controls -->
+    <div class="view-controls mb-4">
+      <div class="view-toggle">
+        <button
+          class="toggle-btn"
+          :class="{ active: viewMode === 'grid' }"
+          @click="viewMode = 'grid'"
+        >
+          <i class="fas fa-th"></i>
+          Grid
+        </button>
+        <button
+          class="toggle-btn"
+          :class="{ active: viewMode === 'list' }"
+          @click="viewMode = 'list'"
+        >
+          <i class="fas fa-list"></i>
+          List
+        </button>
+      </div>
+
+      <div class="results-info">
+        Showing {{ cities.data.length }} of {{ cities.total }} cities
+      </div>
+
+      <button class="action-btn success" @click="openCreateModal">
         <i class="fas fa-plus-circle"></i>
-        Create City
+        Add City
       </button>
     </div>
 
-    <!-- Filters & Search Bar -->
-    <div class="filters-bar-advanced">
-      <div class="search-box-advanced">
-        <i class="fas fa-search"></i>
-        <input
-          v-model="filters.search"
-          type="text"
-          placeholder="Search cities..."
-          @input="debounceSearch"
-        >
-      </div>
-
-      <select v-model="filters.country_id" class="filter-select-advanced" @change="applyFilters">
-        <option value="">All Countries</option>
-        <option v-for="country in countries" :key="country.id" :value="country.id">
-          {{ country.name.en }}
-        </option>
-      </select>
-
-      <select v-model="filters.sort_by" class="filter-select-advanced" @change="applyFilters">
-        <option value="created_at">Sort by: Created Date</option>
-        <option value="name">Sort by: Name</option>
-        <option value="country">Sort by: Country</option>
-      </select>
-
-      <select v-model="filters.sort_order" class="filter-select-advanced" @change="applyFilters">
-        <option value="desc">Descending</option>
-        <option value="asc">Ascending</option>
-      </select>
-    </div>
-
     <!-- Loading State -->
-    <div v-if="loading" class="loading-state-advanced">
+    <div v-if="loading" class="loading-state">
       <div class="loader-advanced"></div>
       <p>Loading cities...</p>
     </div>
 
-    <!-- Cities Grid -->
-    <div v-else-if="cities.data.length > 0" class="categories-grid-advanced">
+    <!-- Cities Grid View -->
+    <div v-else-if="viewMode === 'grid'" class="users-grid">
       <div
         v-for="city in cities.data"
         :key="city.id"
-        class="category-card-advanced"
+        class="user-card"
       >
-        <!-- City Image -->
-        <div class="category-image-wrapper">
-          <img
-            :src="city.image_url ? `/storage/${city.image_url}` : '/images/placeholder-city.png'"
-            :alt="city.name.en"
-            class="category-image"
-            @error="handleImageError"
-          >
-        </div>
-
-        <!-- City Info -->
-        <div class="category-info">
-          <h3 class="category-name">{{ city.name.en }}</h3>
-          <p class="category-name-ar">{{ city.name.ar }}</p>
-
-          <div class="category-meta">
-            <span class="meta-item">
-              <i class="fas fa-globe"></i>
-              {{ city.country?.name?.en || 'No Country' }}
-            </span>
+        <div class="card-header-custom">
+          <div class="user-avatar-wrapper">
+            <img
+              :src="city.image_url ? `/storage/${city.image_url}` : '/images/placeholder-city.png'"
+              :alt="city.name.en"
+              class="user-avatar"
+              @error="handleImageError"
+            >
           </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="category-actions">
-          <div class="dropdown-modern">
-            <button class="action-btn-modern more">
+          <div class="card-menu">
+            <button class="menu-btn" @click="toggleMenu(city.id)">
               <i class="fas fa-ellipsis-v"></i>
             </button>
-            <div class="dropdown-menu-modern">
-              <button @click="openEditModal(city)">
-                <i class="fas fa-edit"></i> Edit
+            <div v-if="activeMenu === city.id" class="dropdown-menu">
+              <button @click="openEditModal(city)" class="menu-item">
+                <i class="fas fa-edit"></i>
+                Edit City
               </button>
-              <button @click="handleDelete(city)" class="delete-btn">
-                <i class="fas fa-trash"></i> Delete
+              <button @click="handleDelete(city)" class="menu-item danger">
+                <i class="fas fa-trash"></i>
+                Delete
               </button>
             </div>
           </div>
         </div>
+
+        <div class="card-body-custom">
+          <h3 class="user-name">{{ city.name.en }}</h3>
+          <p class="user-id">{{ city.name.ar }}</p>
+
+          <div class="user-contact">
+            <div class="contact-item">
+              <i class="fas fa-globe"></i>
+              <span>{{ city.country?.name?.en || 'No Country' }}</span>
+            </div>
+          </div>
+
+          <div class="spacer"></div>
+        </div>
+
+        <div class="card-footer-custom">
+          <button @click="openEditModal(city)" class="action-btn primary">
+            <i class="fas fa-edit"></i>
+            Edit
+          </button>
+        </div>
+      </div>
+
+      <!-- Empty State -->
+      <div v-if="cities.data.length === 0" class="empty-state-advanced">
+        <div class="empty-icon">
+          <i class="fas fa-city"></i>
+        </div>
+        <h3>No Cities Found</h3>
+        <p>Try adjusting your filters or search criteria</p>
+        <button @click="resetFilters" class="action-btn primary">
+          <i class="fas fa-redo"></i>
+          Reset Filters
+        </button>
       </div>
     </div>
 
-    <!-- Empty State -->
-    <div v-else class="empty-state-advanced">
-      <i class="fas fa-city"></i>
-      <h3>No Cities Found</h3>
-      <p>Create your first city to get started</p>
-      <button class="btn-create-advanced" @click="openCreateModal">
-        <i class="fas fa-plus-circle"></i>
-        Create City
-      </button>
+    <!-- Modern Table View -->
+    <div v-else class="modern-table-container">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">Image</th>
+            <th>City Name</th>
+            <th>Country</th>
+            <th style="width: 120px; text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="city in cities.data" :key="city.id">
+            <!-- Image -->
+            <td>
+              <img
+                :src="city.image_url ? `/storage/${city.image_url}` : '/images/placeholder-city.png'"
+                :alt="city.name.en"
+                class="table-avatar"
+                @error="handleImageError"
+              >
+            </td>
+
+            <!-- City Name -->
+            <td>
+              <div class="table-name">{{ city.name.en }}</div>
+              <div class="table-subtitle">{{ city.name.ar }}</div>
+            </td>
+
+            <!-- Country -->
+            <td>
+              <span class="table-badge badge-info">
+                <i class="fas fa-globe"></i>
+                {{ city.country?.name?.en || 'No Country' }}
+              </span>
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="table-actions">
+                <button
+                  @click="openEditModal(city)"
+                  class="table-action-btn btn-edit"
+                  title="Edit"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  @click="handleDelete(city)"
+                  class="table-action-btn btn-delete"
+                  title="Delete"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Empty State Row -->
+          <tr v-if="cities.data.length === 0">
+            <td colspan="4" class="table-empty-state">
+              <i class="fas fa-city"></i>
+              <h3>No Cities Found</h3>
+              <p>Try adjusting your filters or search criteria</p>
+              <button @click="resetFilters" class="action-btn primary">
+                <i class="fas fa-redo"></i>
+                Reset Filters
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Pagination -->
-    <div v-if="cities.last_page > 1" class="pagination-advanced">
+    <!-- Advanced Pagination -->
+    <div v-if="cities.data.length > 0" class="pagination-advanced">
       <button
-        class="pagination-btn"
+        class="page-btn"
         :disabled="cities.current_page === 1"
-        @click="changePage(cities.current_page - 1)"
+        @click="loadCities(cities.current_page - 1)"
       >
         <i class="fas fa-chevron-left"></i>
+        Previous
       </button>
 
-      <button
-        v-for="page in paginationPages"
-        :key="page"
-        class="pagination-btn"
-        :class="{ active: page === cities.current_page }"
-        @click="changePage(page)"
-      >
-        {{ page }}
-      </button>
+      <div class="page-numbers">
+        <button
+          v-for="page in visiblePages"
+          :key="page"
+          class="page-number"
+          :class="{ active: page === cities.current_page }"
+          @click="loadCities(page)"
+        >
+          {{ page }}
+        </button>
+      </div>
 
       <button
-        class="pagination-btn"
+        class="page-btn"
         :disabled="cities.current_page === cities.last_page"
-        @click="changePage(cities.current_page + 1)"
+        @click="loadCities(cities.current_page + 1)"
       >
+        Next
         <i class="fas fa-chevron-right"></i>
       </button>
     </div>
@@ -153,33 +265,71 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useCities } from '../../../composables/useCities'
 import CityFormModal from '../../../components/admin/cities/CityFormModal.vue'
 
 const { cities, loading, fetchCities, deleteCity } = useCities()
 
+const viewMode = ref('list')
+const activeMenu = ref(null)
+
 const filters = ref({
   search: '',
   country_id: '',
   sort_by: 'created_at',
-  sort_order: 'desc',
-  page: 1
+  sort_order: 'desc'
 })
 
 const countries = ref([])
 const showModal = ref(false)
 const modalMode = ref('create')
 const selectedCity = ref(null)
-let searchTimeout = null
 
-onMounted(async () => {
-  await loadCities()
-  await loadCountries()
+const visiblePages = computed(() => {
+  const pages = []
+  const current = cities.value.current_page
+  const last = cities.value.last_page
+
+  let start = Math.max(1, current - 2)
+  let end = Math.min(last, current + 2)
+
+  for (let i = start; i <= end; i++) {
+    pages.push(i)
+  }
+
+  return pages
 })
 
-const loadCities = async () => {
-  await fetchCities(filters.value)
+onMounted(async () => {
+  await loadData()
+  document.addEventListener('click', closeMenus)
+})
+
+onBeforeUnmount(() => {
+  document.removeEventListener('click', closeMenus)
+})
+
+// Watch filters with debounce for search
+let searchTimeout = null
+watch(() => filters.value.search, () => {
+  clearTimeout(searchTimeout)
+  searchTimeout = setTimeout(() => loadCities(1), 300)
+})
+
+watch(() => [filters.value.country_id, filters.value.sort_by, filters.value.sort_order], () => {
+  loadCities(1)
+})
+
+const loadData = async () => {
+  await Promise.all([
+    loadCities(),
+    loadCountries()
+  ])
+}
+
+const loadCities = async (page = 1) => {
+  await fetchCities({ ...filters.value, page })
 }
 
 const loadCountries = async () => {
@@ -192,37 +342,21 @@ const loadCountries = async () => {
   }
 }
 
-const debounceSearch = () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => {
-    applyFilters()
-  }, 500)
+const resetFilters = () => {
+  filters.value.search = ''
+  filters.value.country_id = ''
+  filters.value.sort_by = 'created_at'
+  filters.value.sort_order = 'desc'
+  loadCities(1)
 }
 
-const applyFilters = () => {
-  filters.value.page = 1
-  loadCities()
+const toggleMenu = (cityId) => {
+  activeMenu.value = activeMenu.value === cityId ? null : cityId
 }
 
-const changePage = (page) => {
-  filters.value.page = page
-  loadCities()
+const closeMenus = () => {
+  activeMenu.value = null
 }
-
-const paginationPages = computed(() => {
-  const pages = []
-  const currentPage = cities.value.current_page
-  const lastPage = cities.value.last_page
-
-  let startPage = Math.max(1, currentPage - 2)
-  let endPage = Math.min(lastPage, currentPage + 2)
-
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(i)
-  }
-
-  return pages
-})
 
 const openCreateModal = () => {
   selectedCity.value = null
@@ -231,6 +365,7 @@ const openCreateModal = () => {
 }
 
 const openEditModal = (city) => {
+  closeMenus()
   selectedCity.value = city
   modalMode.value = 'edit'
   showModal.value = true
@@ -243,19 +378,21 @@ const closeModal = () => {
 
 const handleSaved = () => {
   closeModal()
-  loadCities()
+  loadCities(cities.value.current_page)
 }
 
 const handleDelete = async (city) => {
-  if (!confirm(`Are you sure you want to delete "${city.name.en}"?`)) {
+  closeMenus()
+
+  if (!confirm(`Are you sure you want to delete "${city.name.en}"? This action cannot be undone.`)) {
     return
   }
 
   try {
     await deleteCity(city.id)
-    await loadCities()
+    await loadCities(cities.value.current_page)
   } catch (error) {
-    alert(error.message || 'Failed to delete city')
+    alert('Error deleting city: ' + (error.message || 'Unknown error'))
   }
 }
 
@@ -263,3 +400,458 @@ const handleImageError = (event) => {
   event.target.src = '/images/placeholder-city.png'
 }
 </script>
+
+<style scoped>
+.cities-management-advanced {
+  padding: 0;
+  background: #f5f7fa;
+  min-height: 100vh;
+}
+
+/* Search & Filter Bar */
+.search-filter-bar {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.875rem 3rem 0.875rem 3.5rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.clear-search {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.role-select {
+  padding: 0.625rem 1.25rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.role-select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.action-btn {
+  padding: 0.625rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-btn.success {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* View Controls */
+.view-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
+  background: white;
+  padding: 0.375rem;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.07);
+}
+
+.toggle-btn {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.results-info {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+/* Loading State */
+.loading-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 16px;
+}
+
+.loader-advanced {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Grid View */
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.user-card {
+  background: white;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 320px;
+}
+
+.user-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+}
+
+.card-header-custom {
+  padding: 1.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+}
+
+.user-avatar-wrapper {
+  position: relative;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  border: 4px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  object-fit: cover;
+}
+
+.card-menu {
+  position: relative;
+}
+
+.menu-btn {
+  background: white;
+  border: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease;
+}
+
+.menu-btn:hover {
+  background: #f8f9fa;
+  transform: scale(1.1);
+}
+
+.dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 45px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  min-width: 200px;
+  z-index: 100;
+  overflow: hidden;
+}
+
+.menu-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.875rem 1.25rem;
+  border: none;
+  background: transparent;
+  width: 100%;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #495057;
+  font-weight: 500;
+}
+
+.menu-item:hover {
+  background: #f8f9fa;
+}
+
+.menu-item.danger {
+  color: #dc3545;
+}
+
+.menu-item.danger:hover {
+  background: #fee;
+}
+
+.card-body-custom {
+  padding: 1.5rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.user-name {
+  font-size: 1.25rem;
+  font-weight: 700;
+  margin: 0 0 0.25rem 0;
+  color: #2c3e50;
+}
+
+.user-id {
+  color: #6c757d;
+  font-size: 0.875rem;
+  margin: 0 0 1rem 0;
+}
+
+.user-contact {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.contact-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6c757d;
+  font-size: 0.875rem;
+}
+
+.contact-item i {
+  width: 16px;
+  color: #adb5bd;
+}
+
+.spacer {
+  flex: 1;
+}
+
+.card-footer-custom {
+  padding: 1rem 1.5rem;
+  background: #f8f9fa;
+  display: flex;
+  gap: 0.75rem;
+  border-top: 1px solid #e9ecef;
+}
+
+.card-footer-custom .action-btn {
+  flex: 1;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
+
+/* Empty State */
+.empty-state-advanced {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 16px;
+  grid-column: 1 / -1;
+}
+
+.empty-icon {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #adb5bd;
+}
+
+.empty-state-advanced h3 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.empty-state-advanced p {
+  color: #6c757d;
+  margin: 0 0 2rem 0;
+}
+
+/* Pagination */
+.pagination-advanced {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+.page-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e9ecef;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #495057;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.page-number {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #e9ecef;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  color: #495057;
+}
+
+.page-number.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+.page-number:hover:not(.active) {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .search-filter-bar {
+    flex-direction: column;
+  }
+
+  .search-box {
+    min-width: 100%;
+  }
+
+  .filter-controls {
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .users-grid {
+    grid-template-columns: 1fr;
+  }
+}
+</style>

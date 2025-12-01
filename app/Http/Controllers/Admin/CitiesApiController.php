@@ -56,7 +56,7 @@ class CitiesApiController extends Controller
 
         // Transform data to include image URL
         $cities->getCollection()->transform(function ($city) {
-            $city->image_url = $city->photos->first()?->url ?? null;
+            $city->image_url = $city->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
             unset($city->photos);
             return $city;
         });
@@ -112,7 +112,7 @@ class CitiesApiController extends Controller
         $city = cities::with(['photos', 'country'])
             ->findOrFail($id);
 
-        $city->image_url = $city->photos->first()?->url ?? null;
+        $city->image_url = $city->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
 
         return response()->json($city);
     }
@@ -156,7 +156,7 @@ class CitiesApiController extends Controller
         }
 
         $city->load(['photos', 'country']);
-        $city->image_url = $city->photos->first()?->url ?? null;
+        $city->image_url = $city->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
 
         return response()->json([
             'message' => 'City created successfully',
@@ -222,7 +222,7 @@ class CitiesApiController extends Controller
         }
 
         $city->load(['photos', 'country']);
-        $city->image_url = $city->photos->first()?->url ?? null;
+        $city->image_url = $city->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
 
         return response()->json([
             'message' => 'City updated successfully',

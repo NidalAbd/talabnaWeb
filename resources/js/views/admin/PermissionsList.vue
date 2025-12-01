@@ -1,24 +1,15 @@
 <template>
   <div class="permissions-management-advanced">
-    <!-- Section Header -->
-    <div class="section-header mb-4">
-      <div class="header-content">
-        <h1 class="section-title">
-          <i class="fas fa-key"></i>
-          Permissions Management
-        </h1>
-        <p class="section-subtitle">Manage system permissions and generate CRUD permissions for modules</p>
-      </div>
-      <div class="header-actions">
-        <button @click="showGenerateModal = true" class="action-btn success">
-          <i class="fas fa-magic"></i>
-          Generate CRUD
-        </button>
-        <a href="/permissions/create" class="action-btn primary">
-          <i class="fas fa-plus-circle"></i>
-          Create Permission
-        </a>
-      </div>
+    <!-- Action Bar -->
+    <div class="action-bar mb-4">
+      <button @click="showGenerateModal = true" class="action-btn success">
+        <i class="fas fa-magic"></i>
+        Generate CRUD
+      </button>
+      <a href="/permissions/create" class="action-btn primary">
+        <i class="fas fa-plus-circle"></i>
+        Create Permission
+      </a>
     </div>
 
     <!-- Advanced Search & Filters -->

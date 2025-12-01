@@ -1,22 +1,5 @@
 <template>
   <div class="categories-management-advanced">
-    <!-- Section Header -->
-    <div class="section-header mb-4">
-      <div class="header-content">
-        <h1 class="section-title">
-          <i class="fas fa-folder"></i>
-          Categories Management
-        </h1>
-        <p class="section-subtitle">Manage main categories and their properties</p>
-      </div>
-      <div class="header-actions">
-        <button @click="showCreateModal = true" class="action-btn success">
-          <i class="fas fa-plus-circle"></i>
-          Create Category
-        </button>
-      </div>
-    </div>
-
     <!-- Advanced Search & Filters -->
     <div class="search-filter-bar">
       <div class="search-box">
@@ -33,42 +16,25 @@
       </div>
 
       <div class="filter-controls">
-        <select v-model="filters.status" class="filter-select">
+        <select v-model="filters.status" class="role-select">
           <option value="">All Status</option>
           <option value="active">Active</option>
           <option value="suspended">Suspended</option>
         </select>
 
-        <select v-model="filters.featured" class="filter-select">
+        <select v-model="filters.featured" class="role-select">
           <option value="all">All Categories</option>
           <option value="true">Featured Only</option>
           <option value="false">Not Featured</option>
         </select>
 
-        <select v-model="filters.popular" class="filter-select">
+        <select v-model="filters.popular" class="role-select">
           <option value="all">All Categories</option>
           <option value="true">Popular Only</option>
           <option value="false">Not Popular</option>
         </select>
 
-        <div class="sort-group">
-          <select v-model="filters.sort_by" class="sort-select">
-            <option value="id">Sort by ID</option>
-            <option value="name">Sort by Name</option>
-            <option value="created_at">Sort by Date</option>
-            <option value="posts_count">Sort by Posts</option>
-            <option value="subcategories_count">Sort by Subcategories</option>
-          </select>
-          <button
-            class="sort-direction-btn"
-            @click="toggleSortDirection"
-            :title="filters.sort_direction === 'asc' ? 'Ascending' : 'Descending'"
-          >
-            <i :class="filters.sort_direction === 'asc' ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
-          </button>
-        </div>
-
-        <button class="action-btn secondary" @click="resetFilters">
+        <button class="action-btn primary" @click="resetFilters">
           <i class="fas fa-redo"></i>
         </button>
       </div>
@@ -76,11 +42,33 @@
 
     <!-- View Controls -->
     <div class="view-controls mb-4">
-      <div class="view-info">
-        <span class="results-count">
-          Showing {{ categories.data.length }} of {{ categories.total }} categories
-        </span>
+      <div class="view-toggle">
+        <button
+          class="toggle-btn"
+          :class="{ active: viewMode === 'grid' }"
+          @click="viewMode = 'grid'"
+        >
+          <i class="fas fa-th"></i>
+          Grid
+        </button>
+        <button
+          class="toggle-btn"
+          :class="{ active: viewMode === 'list' }"
+          @click="viewMode = 'list'"
+        >
+          <i class="fas fa-list"></i>
+          List
+        </button>
       </div>
+
+      <div class="results-info">
+        Showing {{ categories.data.length }} of {{ categories.total }} categories
+      </div>
+
+      <button class="action-btn success" @click="showCreateModal = true">
+        <i class="fas fa-plus-circle"></i>
+        Add Category
+      </button>
     </div>
 
     <!-- Loading State -->
@@ -89,50 +77,44 @@
       <p>Loading categories...</p>
     </div>
 
-    <!-- Categories Grid -->
-    <div v-else class="categories-grid">
+    <!-- Categories Grid View -->
+    <div v-else-if="viewMode === 'grid'" class="users-grid">
       <div
         v-for="category in categories.data"
         :key="category.id"
-        class="category-card"
-        :class="getCategoryCardClass(category)"
+        class="user-card"
+        :class="{ 'card-suspended': category.is_suspended, 'card-featured': category.is_featured }"
       >
         <div class="card-header-custom">
-          <div class="category-image">
+          <div class="user-avatar-wrapper">
             <img
-              v-if="category.image_url"
-              :src="category.image_url"
+              :src="category.image_url || '/images/placeholder.png'"
               :alt="category.name.en"
+              class="user-avatar"
+              style="border-radius: 8px;"
               @error="handleImageError"
             >
-            <div v-else class="image-placeholder">
-              <i class="fas fa-image"></i>
-            </div>
           </div>
-          <div class="category-menu">
+          <div class="card-menu">
             <button class="menu-btn" @click="toggleMenu(category.id)">
               <i class="fas fa-ellipsis-v"></i>
             </button>
             <div v-if="activeMenu === category.id" class="dropdown-menu">
-              <button @click="viewCategory(category)" class="menu-item">
-                <i class="fas fa-eye"></i>
-                View Details
-              </button>
               <button @click="editCategory(category)" class="menu-item">
                 <i class="fas fa-edit"></i>
                 Edit Category
               </button>
               <button @click="handleToggleStatus(category)" class="menu-item">
-                <i :class="category.is_suspended ? 'fas fa-check-circle' : 'fas fa-ban'"></i>
+                <i :class="category.is_suspended ? 'fas fa-check' : 'fas fa-ban'"></i>
                 {{ category.is_suspended ? 'Activate' : 'Suspend' }}
               </button>
               <button @click="handleToggleFeatured(category)" class="menu-item">
-                <i :class="category.is_featured ? 'far fa-star' : 'fas fa-star'"></i>
-                {{ category.is_featured ? 'Unmark Featured' : 'Mark Featured' }}
+                <i class="fas fa-star"></i>
+                {{ category.is_featured ? 'Unfeature' : 'Feature' }}
               </button>
               <button @click="handleTogglePopular(category)" class="menu-item">
-                <i :class="category.is_popular ? 'fas fa-fire-alt' : 'far fa-fire-alt'"></i>
-                {{ category.is_popular ? 'Unmark Popular' : 'Mark Popular' }}
+                <i class="fas fa-fire"></i>
+                {{ category.is_popular ? 'Unpopular' : 'Popular' }}
               </button>
               <button @click="handleDelete(category)" class="menu-item danger">
                 <i class="fas fa-trash"></i>
@@ -143,50 +125,37 @@
         </div>
 
         <div class="card-body-custom">
-          <div class="category-header-info">
-            <h3 class="category-name">{{ category.name.en }}</h3>
-            <span class="category-name-ar">{{ category.name.ar }}</span>
-            <span class="category-id">#{{ category.id }}</span>
-          </div>
+          <h3 class="user-name">{{ category.name.en }}</h3>
+          <p class="user-id">{{ category.name.ar }}</p>
 
-          <div class="category-badges">
-            <span
-              class="status-badge"
-              :class="category.is_suspended ? 'badge-danger' : 'badge-success'"
-            >
-              <i :class="category.is_suspended ? 'fas fa-ban' : 'fas fa-check-circle'"></i>
+          <div class="user-roles">
+            <span v-if="category.is_featured" class="role-badge badge-warning">
+              <i class="fas fa-star"></i> Featured
+            </span>
+            <span v-if="category.is_popular" class="role-badge badge-danger">
+              <i class="fas fa-fire"></i> Popular
+            </span>
+            <span class="role-badge" :class="category.is_suspended ? 'badge-danger' : 'badge-success'">
               {{ category.is_suspended ? 'Suspended' : 'Active' }}
-            </span>
-            <span v-if="category.is_featured" class="badge badge-warning">
-              <i class="fas fa-star"></i>
-              Featured
-            </span>
-            <span v-if="category.is_popular" class="badge badge-danger">
-              <i class="fas fa-fire"></i>
-              Popular
             </span>
           </div>
 
           <div class="spacer"></div>
 
-          <div class="category-stats">
+          <div class="user-stats">
             <div class="stat-item">
-              <i class="fas fa-folder-open text-info"></i>
-              <span>{{ category.sub_categories_count }} Subcategories</span>
+              <i class="fas fa-layer-group"></i>
+              <span>{{ category.subcategories_count || 0 }} Subcategories</span>
             </div>
             <div class="stat-item">
-              <i class="fas fa-clipboard-list text-primary"></i>
-              <span>{{ category.service_posts_count }} Posts</span>
+              <i class="fas fa-file-alt"></i>
+              <span>{{ category.posts_count || 0 }} Posts</span>
             </div>
           </div>
         </div>
 
         <div class="card-footer-custom">
-          <button @click="viewCategory(category)" class="action-btn outline-primary flex-1">
-            <i class="fas fa-eye"></i>
-            View
-          </button>
-          <button @click="editCategory(category)" class="action-btn outline-warning flex-1">
+          <button @click="editCategory(category)" class="action-btn primary">
             <i class="fas fa-edit"></i>
             Edit
           </button>
@@ -199,12 +168,121 @@
           <i class="fas fa-folder"></i>
         </div>
         <h3>No Categories Found</h3>
-        <p>Try adjusting your search criteria or create a new category</p>
-        <button @click="showCreateModal = true" class="action-btn primary">
-          <i class="fas fa-plus-circle"></i>
-          Create First Category
+        <p>Try adjusting your filters or search criteria</p>
+        <button @click="resetFilters" class="action-btn primary">
+          <i class="fas fa-redo"></i>
+          Reset Filters
         </button>
       </div>
+    </div>
+
+    <!-- Modern Table View -->
+    <div v-else class="modern-table-container">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th style="width: 80px;">Image</th>
+            <th>Category Name</th>
+            <th style="width: 180px;">Status</th>
+            <th style="width: 150px;">Stats</th>
+            <th style="width: 180px; text-align: right;">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-for="category in categories.data" :key="category.id">
+            <!-- Image -->
+            <td>
+              <img
+                :src="category.image_url || '/images/placeholder.png'"
+                :alt="category.name.en"
+                class="table-avatar"
+                @error="handleImageError"
+              >
+            </td>
+
+            <!-- Category Name -->
+            <td>
+              <div class="table-name">{{ category.name.en }}</div>
+              <div class="table-subtitle">{{ category.name.ar }}</div>
+            </td>
+
+            <!-- Status -->
+            <td>
+              <div style="display: flex; gap: 0.25rem; flex-wrap: wrap;">
+                <span class="table-badge" :class="category.is_suspended ? 'badge-danger' : 'badge-success'">
+                  {{ category.is_suspended ? 'Suspended' : 'Active' }}
+                </span>
+                <span v-if="category.is_featured" class="table-badge badge-warning">
+                  <i class="fas fa-star"></i>
+                </span>
+                <span v-if="category.is_popular" class="table-badge badge-danger">
+                  <i class="fas fa-fire"></i>
+                </span>
+              </div>
+            </td>
+
+            <!-- Stats -->
+            <td>
+              <div class="table-meta">
+                <span title="Subcategories">
+                  <i class="fas fa-layer-group"></i> {{ category.subcategories_count || 0 }}
+                </span>
+                <span title="Posts">
+                  <i class="fas fa-file-alt"></i> {{ category.posts_count || 0 }}
+                </span>
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td>
+              <div class="table-actions">
+                <button
+                  @click="editCategory(category)"
+                  class="table-action-btn btn-edit"
+                  title="Edit"
+                >
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button
+                  @click="handleToggleStatus(category)"
+                  class="table-action-btn btn-ban"
+                  :title="category.is_suspended ? 'Activate' : 'Suspend'"
+                >
+                  <i :class="category.is_suspended ? 'fas fa-check' : 'fas fa-ban'"></i>
+                </button>
+                <button
+                  @click="handleToggleFeatured(category)"
+                  class="table-action-btn"
+                  :class="category.is_featured ? 'btn-featured' : 'btn-edit'"
+                  title="Toggle Featured"
+                >
+                  <i class="fas fa-star"></i>
+                </button>
+                <button
+                  @click="handleDelete(category)"
+                  class="table-action-btn btn-delete"
+                  title="Delete"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+
+          <!-- Empty State Row -->
+          <tr v-if="categories.data.length === 0">
+            <td colspan="5" class="table-empty-state">
+              <i class="fas fa-folder"></i>
+              <h3>No Categories Found</h3>
+              <p>Try adjusting your filters or search criteria</p>
+              <button @click="resetFilters" class="action-btn primary">
+                <i class="fas fa-redo"></i>
+                Reset Filters
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
     <!-- Advanced Pagination -->
@@ -252,12 +330,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, reactive, computed, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, watch, reactive, onBeforeUnmount } from 'vue'
 import { useCategories } from '../../../composables/useCategories'
 import CategoryFormModal from '../../../components/admin/categories/CategoryFormModal.vue'
 
 const { categories, loading, fetchCategories, deleteCategory, toggleStatus, toggleFeatured, togglePopular } = useCategories()
 
+const viewMode = ref('list')
 const activeMenu = ref(null)
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
@@ -322,16 +401,6 @@ const resetFilters = () => {
   loadCategories(1)
 }
 
-const toggleSortDirection = () => {
-  filters.sort_direction = filters.sort_direction === 'asc' ? 'desc' : 'asc'
-}
-
-const getCategoryCardClass = (category) => {
-  if (category.is_suspended) return 'card-suspended'
-  if (category.is_featured) return 'card-featured'
-  return ''
-}
-
 const toggleMenu = (categoryId) => {
   activeMenu.value = activeMenu.value === categoryId ? null : categoryId
 }
@@ -340,14 +409,10 @@ const closeMenus = () => {
   activeMenu.value = null
 }
 
-const viewCategory = (category) => {
-  window.location.href = `/categories/${category.id}`
-}
-
 const editCategory = (category) => {
+  closeMenus()
   selectedCategory.value = category
   showEditModal.value = true
-  closeMenus()
 }
 
 const handleToggleStatus = async (category) => {
@@ -398,7 +463,7 @@ const handleDelete = async (category) => {
     await deleteCategory(category.id)
     await loadCategories(categories.value.current_page)
   } catch (error) {
-    alert(error.message || 'Failed to delete category')
+    alert('Error deleting category: ' + (error.message || 'Unknown error'))
   }
 }
 
@@ -414,8 +479,7 @@ const handleCategorySaved = () => {
 }
 
 const handleImageError = (event) => {
-  event.target.style.display = 'none'
-  event.target.parentElement.innerHTML = '<div class="image-placeholder"><i class="fas fa-image"></i></div>'
+  event.target.src = '/images/placeholder.png'
 }
 </script>
 
@@ -426,18 +490,222 @@ const handleImageError = (event) => {
   min-height: 100vh;
 }
 
-/* Categories Grid */
-.categories-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+.card-featured {
+  border-top: 4px solid #ffc107;
+}
+
+.card-suspended {
+  opacity: 0.7;
+  border-top: 4px solid #dc3545;
+}
+
+.role-badge {
+  padding: 0.375rem 0.875rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.badge-success {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+}
+
+.badge-danger {
+  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+  color: white;
+}
+
+.badge-warning {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  color: #212529;
+}
+
+.btn-featured {
+  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  color: #212529;
+}
+
+.btn-featured:hover {
+  background: linear-gradient(135deg, #e0a800 0%, #c79100 100%);
+}
+
+/* Reuse styles from other components */
+.search-filter-bar {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.search-box {
+  flex: 1;
+  min-width: 300px;
+  position: relative;
+}
+
+.search-icon {
+  position: absolute;
+  left: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  font-size: 1.1rem;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.875rem 3rem 0.875rem 3.5rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-size: 0.95rem;
+  transition: all 0.3s ease;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #667eea;
+  box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+}
+
+.clear-search {
+  position: absolute;
+  right: 1.25rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #6c757d;
+  cursor: pointer;
+  padding: 0.25rem;
+}
+
+.filter-controls {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.role-select {
+  padding: 0.625rem 1.25rem;
+  border: 2px solid #e9ecef;
+  border-radius: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.role-select:focus {
+  outline: none;
+  border-color: #667eea;
+}
+
+.action-btn {
+  padding: 0.625rem 1.5rem;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+}
+
+.action-btn.primary {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-btn.success {
+  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.view-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
   gap: 1rem;
 }
 
-.category-card {
+.view-toggle {
+  display: flex;
+  gap: 0.5rem;
   background: white;
+  padding: 0.375rem;
   border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.07);
+}
+
+.toggle-btn {
+  padding: 0.625rem 1.25rem;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 500;
+  color: #6c757d;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.toggle-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.results-info {
+  color: #6c757d;
+  font-weight: 500;
+}
+
+.loading-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 16px;
+}
+
+.loader-advanced {
+  width: 60px;
+  height: 60px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.users-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.user-card {
+  background: white;
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
   display: flex;
@@ -445,57 +713,41 @@ const handleImageError = (event) => {
   min-height: 380px;
 }
 
-.category-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.category-card.card-featured {
-  border-top: 4px solid #ffc107;
-}
-
-.category-card.card-suspended {
-  opacity: 0.7;
-  border-top: 4px solid #dc3545;
+.user-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
 .card-header-custom {
-  position: relative;
-  padding: 0;
-}
-
-.category-image {
-  width: 100%;
-  height: 160px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 1.5rem;
   display: flex;
-  align-items: center;
-  justify-content: center;
+  justify-content: space-between;
+  align-items: flex-start;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
 }
 
-.category-image img {
-  width: 100%;
-  height: 100%;
+.user-avatar-wrapper {
+  position: relative;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 8px;
+  border: 4px solid white;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   object-fit: cover;
 }
 
-.image-placeholder {
-  font-size: 3rem;
-  color: #adb5bd;
-}
-
-.category-menu {
-  position: absolute;
-  top: 0.75rem;
-  right: 0.75rem;
+.card-menu {
+  position: relative;
 }
 
 .menu-btn {
   background: white;
   border: none;
-  width: 32px;
-  height: 32px;
+  width: 36px;
+  height: 36px;
   border-radius: 50%;
   cursor: pointer;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -510,10 +762,10 @@ const handleImageError = (event) => {
 .dropdown-menu {
   position: absolute;
   right: 0;
-  top: 40px;
+  top: 45px;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
   min-width: 200px;
   z-index: 100;
   overflow: hidden;
@@ -523,7 +775,7 @@ const handleImageError = (event) => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.75rem 1rem;
+  padding: 0.875rem 1.25rem;
   border: none;
   background: transparent;
   width: 100%;
@@ -531,7 +783,7 @@ const handleImageError = (event) => {
   cursor: pointer;
   transition: all 0.2s ease;
   color: #495057;
-  font-size: 0.875rem;
+  font-weight: 500;
 }
 
 .menu-item:hover {
@@ -547,115 +799,170 @@ const handleImageError = (event) => {
 }
 
 .card-body-custom {
-  padding: 1rem;
+  padding: 1.5rem;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.category-header-info {
-  margin-bottom: 0.75rem;
-}
-
-.category-name {
-  font-size: 1.1rem;
+.user-name {
+  font-size: 1.25rem;
   font-weight: 700;
   margin: 0 0 0.25rem 0;
   color: #2c3e50;
 }
 
-.category-name-ar {
-  display: block;
-  font-size: 0.9rem;
+.user-id {
   color: #6c757d;
-  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  margin: 0 0 1rem 0;
 }
 
-.category-id {
-  color: #adb5bd;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.category-badges {
+.user-roles {
   display: flex;
   gap: 0.5rem;
   flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-}
-
-.status-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.badge-success {
-  background: #d4edda;
-  color: #155724;
-}
-
-.badge-danger {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-}
-
-.badge-warning {
-  background: #fff3cd;
-  color: #856404;
+  margin-bottom: 1rem;
 }
 
 .spacer {
   flex: 1;
 }
 
-.category-stats {
-  padding-top: 0.75rem;
-  margin-top: 0.75rem;
-  border-top: 1px solid #e9ecef;
+.user-stats {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
+  gap: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e9ecef;
+  flex-wrap: wrap;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
   color: #6c757d;
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.stat-item i {
+  color: #667eea;
 }
 
 .card-footer-custom {
-  padding: 0.75rem;
+  padding: 1rem 1.5rem;
   background: #f8f9fa;
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
   border-top: 1px solid #e9ecef;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
-  }
+.card-footer-custom .action-btn {
+  flex: 1;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  font-size: 0.875rem;
+}
 
+.empty-state-advanced {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: white;
+  border-radius: 16px;
+  grid-column: 1 / -1;
+}
+
+.empty-icon {
+  width: 120px;
+  height: 120px;
+  margin: 0 auto 2rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 3rem;
+  color: #adb5bd;
+}
+
+.empty-state-advanced h3 {
+  font-size: 1.5rem;
+  margin: 0 0 0.5rem 0;
+  color: #2c3e50;
+}
+
+.empty-state-advanced p {
+  color: #6c757d;
+  margin: 0 0 2rem 0;
+}
+
+.pagination-advanced {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-top: 2rem;
+  padding: 1.5rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+.page-btn {
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e9ecef;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #495057;
+}
+
+.page-btn:hover:not(:disabled) {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.page-numbers {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.page-number {
+  width: 44px;
+  height: 44px;
+  border: 2px solid #e9ecef;
+  background: white;
+  border-radius: 12px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  color: #495057;
+}
+
+.page-number.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  border-color: #667eea;
+}
+
+.page-number:hover:not(.active) {
+  border-color: #667eea;
+  color: #667eea;
+}
+
+@media (max-width: 768px) {
   .search-filter-bar {
     flex-direction: column;
   }
@@ -669,7 +976,7 @@ const handleImageError = (event) => {
     width: 100%;
   }
 
-  .categories-grid {
+  .users-grid {
     grid-template-columns: 1fr;
   }
 }

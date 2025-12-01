@@ -8,7 +8,7 @@
 
 @section('content')
     <div id="admin-app">
-        <admin-dashboard></admin-dashboard>
+        <router-view></router-view>
     </div>
 @stop
 

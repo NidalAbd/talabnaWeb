@@ -22,19 +22,37 @@ export function usePermissions() {
             if (filters.sort_direction) params.append('sort_direction', filters.sort_direction)
             if (filters.page) params.append('page', filters.page)
 
-            const response = await fetch(`/api/admin/permissions?${params.toString()}`)
+            const url = `/api/admin/permissions?${params.toString()}`
+            console.log('🔍 Fetching permissions from:', url)
+
+            const response = await fetch(url)
+            console.log('📡 Response status:', response.status, response.statusText)
 
             if (!response.ok) {
+                const errorText = await response.text()
+                console.error('❌ Response error:', errorText)
                 throw new Error('Failed to fetch permissions')
             }
 
             const data = await response.json()
-            permissions.value = data.permissions
+            console.log('✅ Permissions data received:', data)
+            console.log('📊 Permissions nested object:', data.permissions)
+            console.log('📊 Actual permissions array:', data.permissions?.data)
+
+            // Check if data is wrapped in 'permissions' key or is direct pagination
+            if (data.permissions) {
+                permissions.value = data.permissions
+            } else {
+                permissions.value = data
+            }
         } catch (error) {
-            console.error('Error fetching permissions:', error)
+            console.error('❌ Error fetching permissions:', error)
             throw error
         } finally {
             loading.value = false
+            console.log('⏱️ Loading complete. Permissions count:', permissions.value.data?.length || 0)
+            console.log('🔍 Loading state:', loading.value)
+            console.log('🔍 Final permissions.value:', permissions.value)
         }
     }
 

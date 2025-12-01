@@ -89,7 +89,7 @@ class RolesApiController extends Controller
             $roles = $query->paginate($perPage);
 
             // Transform data for Vue
-            $transformedRoles = $roles->map(function ($role) {
+            $transformedRoles = $roles->getCollection()->map(function ($role) {
                 return [
                     'id' => $role->id,
                     'name' => $role->name,
@@ -102,9 +102,12 @@ class RolesApiController extends Controller
                 ];
             });
 
+            // Set the transformed collection back
+            $roles->setCollection($transformedRoles);
+
             return response()->json([
                 'roles' => [
-                    'data' => $transformedRoles,
+                    'data' => $roles->items(),
                     'current_page' => $roles->currentPage(),
                     'last_page' => $roles->lastPage(),
                     'per_page' => $roles->perPage(),

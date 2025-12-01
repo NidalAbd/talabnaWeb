@@ -51,7 +51,7 @@ class CountriesApiController extends Controller
 
         // Transform data to include flag URL
         $countries->getCollection()->transform(function ($country) {
-            $country->flag_url = $country->photos->first()?->url ?? null;
+            $country->flag_url = $country->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
             unset($country->photos);
             return $country;
         });
@@ -107,7 +107,7 @@ class CountriesApiController extends Controller
             ->withCount('cities')
             ->findOrFail($id);
 
-        $country->flag_url = $country->photos->first()?->url ?? null;
+        $country->flag_url = $country->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
 
         return response()->json($country);
     }
@@ -159,7 +159,7 @@ class CountriesApiController extends Controller
         }
 
         $country->load('photos');
-        $country->flag_url = $country->photos->first()?->url ?? null;
+        $country->flag_url = $country->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
 
         return response()->json([
             'message' => 'Country created successfully',
@@ -239,7 +239,7 @@ class CountriesApiController extends Controller
         }
 
         $country->load('photos');
-        $country->flag_url = $country->photos->first()?->url ?? null;
+        $country->flag_url = $country->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
 
         return response()->json([
             'message' => 'Country updated successfully',

@@ -2,10 +2,6 @@
   <div class="dashboard-container">
     <!-- Dashboard Header -->
     <div class="dashboard-header mb-4">
-      <div>
-        <h1 class="dashboard-title">Dashboard Overview</h1>
-        <p class="dashboard-subtitle">Comprehensive statistics and analytics for all platform sections</p>
-      </div>
       <div class="header-meta">
         <small class="text-muted">Last updated</small>
         <strong>{{ formatDate(new Date()) }}</strong>

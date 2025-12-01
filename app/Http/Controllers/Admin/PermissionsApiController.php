@@ -118,9 +118,12 @@ class PermissionsApiController extends Controller
             ];
         });
 
+        // Set the transformed collection back
+        $permissions->setCollection($transformedPermissions);
+
         return response()->json([
             'permissions' => [
-                'data' => $transformedPermissions,
+                'data' => $permissions->items(),
                 'current_page' => $permissions->currentPage(),
                 'last_page' => $permissions->lastPage(),
                 'per_page' => $permissions->perPage(),

@@ -44,15 +44,41 @@ class SubcategoriesController extends Controller
     /**
      * Display a listing of all subcategories with related information.
      *
+     * @param Request $request
      * @return Application|Factory|View
      */
-    public function indexSubCategory(): Application|Factory|View
+    public function indexSubCategory(Request $request): Application|Factory|View
     {
-        $subCategories = Sub_categories::with(['category', 'photos'])
-            ->withCount('servicePosts')
-            ->paginate(7);
+        $query = Sub_categories::with(['category', 'photos'])
+            ->withCount('servicePosts');
 
-        return view('sub_categories.index', compact('subCategories'));
+        // Filter by status
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('isSuspended', false);
+            } elseif ($request->status === 'suspended') {
+                $query->where('isSuspended', true);
+            }
+        }
+
+        // Filter by category
+        if ($request->filled('category_id')) {
+            $query->where('categories_id', $request->category_id);
+        }
+
+        // Search by name
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('name->en', 'like', "%{$search}%")
+                  ->orWhere('name->ar', 'like', "%{$search}%");
+            });
+        }
+
+        $subCategories = $query->paginate(15);
+        $categories = Categories::where('isSuspended', false)->get();
+
+        return view('sub_categories.index', compact('subCategories', 'categories'));
     }
 
     /**

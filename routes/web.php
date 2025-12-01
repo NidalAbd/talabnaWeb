@@ -29,6 +29,10 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserRoleAssignmentController;
 use App\Http\Controllers\BadgeTypeController;
 use App\Http\Controllers\Admin\DashboardApiController;
+use App\Http\Controllers\Admin\AnalyticsApiController;
+use App\Http\Controllers\Admin\StatisticsApiController;
+use App\Http\Controllers\Admin\RoleAssignmentsApiController;
+use App\Http\Controllers\Admin\PalServicePointsApiController;
 use App\Models\ServicePost;
 use App\Models\Sub_categories;
 use App\Models\User;
@@ -127,11 +131,26 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
 
     /*
     |--------------------------------------------------------------------------
+    | Vue SPA Routes (List Pages)
+    |--------------------------------------------------------------------------
+    */
+    // Users - Vue SPA
+    Route::get('users', [HomeController::class, 'index'])->name('users.index');
+
+    // Categories & Subcategories - Vue SPA
+    Route::get('categories', [HomeController::class, 'index'])->name('categories.index');
+    Route::get('subcategories', [HomeController::class, 'index'])->name('subcategories.index');
+
+    /*
+    |--------------------------------------------------------------------------
     | Service Posts Routes
     |--------------------------------------------------------------------------
     */
-    // Service Posts Resources and Actions
-    Route::resource('service_posts', ServicePostController::class);
+    // Service Posts Index - Vue SPA
+    Route::get('service_posts', [HomeController::class, 'index'])->name('service_posts.index');
+
+    // Service Posts Resources and Actions (except index)
+    Route::resource('service_posts', ServicePostController::class)->except(['index']);
     Route::post('service_posts/{servicePost}/apply-badge', [ServicePostController::class, 'applyBadge'])
         ->name('service_posts.apply_badge');
     Route::post('service_posts/{servicePost}/remove-badge', [ServicePostController::class, 'removeBadge'])
@@ -199,15 +218,15 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     | Categories & Subcategories Routes
     |--------------------------------------------------------------------------
     */
-    // Categories Resource
-    Route::resource('categories', CategoriesController::class);
+    // Categories Resource (index moved to Vue SPA)
+    Route::resource('categories', CategoriesController::class)->except(['index']);
     Route::put('categories/{category}/toggle-suspend', [CategoriesController::class, 'toggleSuspend'])
         ->name('categories.toggle-suspend');
     Route::get('MainComponent', [CategoriesController::class, 'UserFrontIndex'])
         ->name('UserFrontIndex');
 
-    // Subcategories Resource
-    Route::resource('subcategories', SubcategoriesController::class);
+    // Subcategories Resource (index moved to Vue SPA)
+    Route::resource('subcategories', SubcategoriesController::class)->except(['index']);
     Route::put('subcategories/{subcategory}/toggle-suspend', [SubcategoriesController::class, 'toggleSuspend'])
         ->name('subcategories.toggle-suspend');
     Route::get('indexSubCategory', [SubcategoriesController::class, 'indexSubCategory'])
@@ -230,15 +249,15 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     | Location & Geography Routes
     |--------------------------------------------------------------------------
     */
-    // Countries
-    Route::resource('countries', CountriesController::class);
+    // Countries - Vue SPA
+    Route::get('countries', [HomeController::class, 'index'])->name('countries.index');
     Route::get('countries-selected/{country}', [CountriesController::class, 'CountriesSelected'])
         ->name('countries.selected');
     Route::get('country-list', [CountriesController::class, 'countryList'])
         ->name('countries.list');
 
-    // Cities
-    Route::resource('cities', CitiesController::class);
+    // Cities - Vue SPA
+    Route::get('cities', [HomeController::class, 'index'])->name('cities.index');
     Route::get('/form-cities/{countryId}', function($countryId) {
         $cities = App\Models\cities::where('country_id', $countryId)->get();
         return response()->json($cities);
@@ -250,8 +269,8 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     | User Management Routes
     |--------------------------------------------------------------------------
     */
-    // Users Resource
-    Route::resource('users', UserController::class);
+    // Users Resource (index moved to Vue SPA)
+    Route::resource('users', UserController::class)->except(['index']);
     Route::get('users/data', [UserController::class, 'data'])->name('users.data');
     Route::post('users/{id}/update-status', [UserController::class, 'updateStatus'])
         ->name('users.update.status');
@@ -297,10 +316,11 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     // Point Transactions
     Route::resource('point_transactions', PointTransactionsController::class);
 
-    // Pal Service Points
+    // Pal Service Points - Old Blade routes (deprecated - use Vue at /admin/palservice-points)
+    // Keeping these for backward compatibility with existing forms/links
     Route::prefix('palservice_points')->group(function() {
         Route::get('/', [PalservicePointsController::class, 'index'])
-            ->name('palservice_points.index');
+            ->name('palservice_points.blade.index');  // Renamed to avoid conflict
         Route::get('/{user_id}', [PalservicePointsController::class, 'create'])
             ->name('palservice_points.create');
         Route::post('/', [PalservicePointsController::class, 'store'])
@@ -320,7 +340,8 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     | Badge Types Management Routes
     |--------------------------------------------------------------------------
     */
-    Route::resource('badge_types', BadgeTypeController::class);
+    // Badge Types - Vue SPA
+    Route::get('badge-types', [HomeController::class, 'index'])->name('badge_types.index');
     Route::post('/badge_types/{badgeType}/toggle-active', [BadgeTypeController::class, 'toggleActive'])
         ->name('badge_types.toggle_active');
     Route::post('/badge_types/{badgeType}/set-default', [BadgeTypeController::class, 'setDefault'])
@@ -333,9 +354,11 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     | Roles & Permissions Routes
     |--------------------------------------------------------------------------
     */
-    // Roles & Permissions
-    Route::resource('roles', CustomRolesController::class);
-    Route::resource('permissions', CustomPermissionsController::class);
+    // Roles & Permissions - Vue SPA Routes
+    Route::get('roles', [HomeController::class, 'index'])->name('roles.index');
+    Route::get('permissions', [HomeController::class, 'index'])->name('permissions.index');
+
+    // Keep clone route for API functionality
     Route::post('roles/{role}/clone', [CustomRolesController::class, 'clone'])
         ->name('roles.clone');
 
@@ -372,37 +395,57 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->prefix('admin')->group(function () {
-    // Ban Management
-    Route::get('users/banned', [BanController::class, 'index'])
+    // Ban Management - Vue SPA
+    Route::get('users/banned', [HomeController::class, 'index'])
         ->name('users.banned');
-    Route::get('users/{userId}/ban', [BanController::class, 'banForm'])
-        ->name('users.ban.form');
-    Route::post('users/{userId}/ban', [BanController::class, 'banUser'])
-        ->name('users.ban');
-    Route::post('users/{userId}/unban', [BanController::class, 'unbanUser'])
-        ->name('users.unban');
-
-    // Banned Devices
-    Route::get('devices/banned', [BanController::class, 'devices'])
+    Route::get('devices/banned', [HomeController::class, 'index'])
         ->name('devices.banned');
-    Route::get('devices/ban', [BanController::class, 'banDeviceForm'])
-        ->name('devices.ban.form');
-
-    // Ban History
-    Route::get('bans/history', [BanController::class, 'history'])
+    Route::get('bans/history', [HomeController::class, 'index'])
         ->name('bans.history');
 
-    // Reports Management
-    Route::get('/reports', [ReportController::class, 'index'])
+    // Reports Management - Vue SPA
+    Route::get('/reports', [HomeController::class, 'index'])
         ->name('reports.index');
-    Route::get('/reports/{type}/{id}', [ReportController::class, 'showDetails'])
-        ->name('reports.details');
-    Route::get('/reports-statistics', [ReportController::class, 'statistics'])
-        ->name('reports.statistics');
-    Route::post('/reports/handle/{type}/{id}', [ReportController::class, 'handleReported'])
-        ->name('reports.handle-reported');
-    Route::delete('/reports/{id}', [ReportController::class, 'destroy'])
-        ->name('reports.destroy');
+
+    // Point Packages - Vue SPA
+    Route::get('/point-packages', [HomeController::class, 'index'])
+        ->name('point_packages.index');
+
+    // Premium Features - Vue SPA
+    Route::get('/premium-features', [HomeController::class, 'index'])
+        ->name('premium_features.index');
+
+    // User Levels - Vue SPA
+    Route::get('/levels', [HomeController::class, 'index'])
+        ->name('levels.index');
+
+    // Point Purchase Requests - Vue SPA
+    Route::get('/point-purchase-requests', [HomeController::class, 'index'])
+        ->name('point_purchase_requests.index');
+
+    // Point Transactions - Vue SPA
+    Route::get('/point-transactions', [HomeController::class, 'index'])
+        ->name('point_transactions.index');
+
+    // Marketing Notifications - Vue SPA
+    Route::get('/marketing-notifications', [HomeController::class, 'index'])
+        ->name('marketing_notifications.index');
+
+    // Analytics - Vue SPA
+    Route::get('/analytics', [HomeController::class, 'index'])
+        ->name('analytics.index');
+
+    // Statistics - Vue SPA
+    Route::get('/statistics', [HomeController::class, 'index'])
+        ->name('statistics.index');
+
+    // Role Assignments - Vue SPA
+    Route::get('/role-assignments', [HomeController::class, 'index'])
+        ->name('role_assignments.index');
+
+    // Pal Service Points Overview - Vue SPA
+    Route::get('/palservice-points', [HomeController::class, 'index'])
+        ->name('palservice_points.index');
 
     // Point Transactions Fix
     Route::get('/point-transactions/fix', [PointTransactionsController::class, 'fixTransactionRecords'])
@@ -528,6 +571,106 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::delete('/badge-types/{id}', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'destroy'])->name('api.admin.badge-types.destroy');
             Route::post('/badge-types/{id}/toggle-status', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'toggleStatus'])->name('api.admin.badge-types.toggle-status');
             Route::post('/badge-types/{id}/set-default', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'setDefault'])->name('api.admin.badge-types.set-default');
+
+            // Service Posts
+            Route::get('/service-posts/stats', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'getStats'])->name('api.admin.service-posts.stats');
+            Route::get('/service-posts/categories', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'getCategories'])->name('api.admin.service-posts.categories');
+            Route::get('/service-posts/subcategories', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'getSubcategories'])->name('api.admin.service-posts.subcategories');
+            Route::get('/service-posts', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'index'])->name('api.admin.service-posts.index');
+            Route::delete('/service-posts/bulk-destroy', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'bulkDestroy'])->name('api.admin.service-posts.bulk-destroy');
+            Route::delete('/service-posts/{id}', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'destroy'])->name('api.admin.service-posts.destroy');
+
+            // Reports
+            Route::get('/reports/stats', [\App\Http\Controllers\Admin\ReportsApiController::class, 'getStats'])->name('api.admin.reports.stats');
+            Route::get('/reports', [\App\Http\Controllers\Admin\ReportsApiController::class, 'index'])->name('api.admin.reports.index');
+            Route::get('/reports/{type}/{id}', [\App\Http\Controllers\Admin\ReportsApiController::class, 'show'])->name('api.admin.reports.show');
+            Route::post('/reports/handle/{type}/{id}', [\App\Http\Controllers\Admin\ReportsApiController::class, 'handleReported'])->name('api.admin.reports.handle');
+            Route::delete('/reports/{id}', [\App\Http\Controllers\Admin\ReportsApiController::class, 'destroy'])->name('api.admin.reports.destroy');
+
+            // Bans
+            Route::get('/bans/stats', [\App\Http\Controllers\Admin\BansApiController::class, 'getStats'])->name('api.admin.bans.stats');
+            Route::get('/bans/users', [\App\Http\Controllers\Admin\BansApiController::class, 'getBannedUsers'])->name('api.admin.bans.users');
+            Route::get('/bans/devices', [\App\Http\Controllers\Admin\BansApiController::class, 'getBannedDevices'])->name('api.admin.bans.devices');
+            Route::post('/bans/users/{userId}/toggle', [\App\Http\Controllers\Admin\BansApiController::class, 'toggleUserBan'])->name('api.admin.bans.users.toggle');
+            Route::post('/bans/devices/{deviceId}/unban', [\App\Http\Controllers\Admin\BansApiController::class, 'unbanDevice'])->name('api.admin.bans.devices.unban');
+
+            // Point Packages
+            Route::get('/point-packages/stats', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'getStats'])->name('api.admin.point-packages.stats');
+            Route::get('/point-packages', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'index'])->name('api.admin.point-packages.index');
+            Route::post('/point-packages', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'store'])->name('api.admin.point-packages.store');
+            Route::put('/point-packages/{id}', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'update'])->name('api.admin.point-packages.update');
+            Route::delete('/point-packages/{id}', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'destroy'])->name('api.admin.point-packages.destroy');
+            Route::post('/point-packages/{id}/toggle-status', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'toggleStatus'])->name('api.admin.point-packages.toggle-status');
+            Route::post('/point-packages/{id}/toggle-popular', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'togglePopular'])->name('api.admin.point-packages.toggle-popular');
+            Route::post('/point-packages/{id}/duplicate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'duplicate'])->name('api.admin.point-packages.duplicate');
+            Route::post('/point-packages/bulk-activate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'bulkActivate'])->name('api.admin.point-packages.bulk-activate');
+            Route::post('/point-packages/bulk-deactivate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'bulkDeactivate'])->name('api.admin.point-packages.bulk-deactivate');
+
+            // Premium Features
+            Route::get('/premium-features/stats', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'getStats'])->name('api.admin.premium-features.stats');
+            Route::get('/premium-features/types', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'getTypes'])->name('api.admin.premium-features.types');
+            Route::get('/premium-features', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'index'])->name('api.admin.premium-features.index');
+            Route::post('/premium-features', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'store'])->name('api.admin.premium-features.store');
+            Route::put('/premium-features/{id}', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'update'])->name('api.admin.premium-features.update');
+            Route::delete('/premium-features/{id}', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'destroy'])->name('api.admin.premium-features.destroy');
+            Route::post('/premium-features/{id}/toggle-status', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'toggleStatus'])->name('api.admin.premium-features.toggle-status');
+
+            // User Levels
+            Route::get('/levels/stats', [\App\Http\Controllers\Admin\LevelsApiController::class, 'getStats'])->name('api.admin.levels.stats');
+            Route::get('/levels', [\App\Http\Controllers\Admin\LevelsApiController::class, 'index'])->name('api.admin.levels.index');
+            Route::post('/levels', [\App\Http\Controllers\Admin\LevelsApiController::class, 'store'])->name('api.admin.levels.store');
+            Route::put('/levels/{id}', [\App\Http\Controllers\Admin\LevelsApiController::class, 'update'])->name('api.admin.levels.update');
+            Route::delete('/levels/{id}', [\App\Http\Controllers\Admin\LevelsApiController::class, 'destroy'])->name('api.admin.levels.destroy');
+            Route::post('/levels/{id}/toggle-status', [\App\Http\Controllers\Admin\LevelsApiController::class, 'toggleStatus'])->name('api.admin.levels.toggle-status');
+            Route::post('/levels/{id}/duplicate', [\App\Http\Controllers\Admin\LevelsApiController::class, 'duplicate'])->name('api.admin.levels.duplicate');
+            Route::post('/levels/update-order', [\App\Http\Controllers\Admin\LevelsApiController::class, 'updateOrder'])->name('api.admin.levels.update-order');
+            Route::post('/levels/bulk-activate', [\App\Http\Controllers\Admin\LevelsApiController::class, 'bulkActivate'])->name('api.admin.levels.bulk-activate');
+            Route::post('/levels/bulk-deactivate', [\App\Http\Controllers\Admin\LevelsApiController::class, 'bulkDeactivate'])->name('api.admin.levels.bulk-deactivate');
+
+            // Point Purchase Requests
+            Route::get('/point-purchase-requests/stats', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'getStats'])->name('api.admin.point-purchase-requests.stats');
+            Route::get('/point-purchase-requests', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'index'])->name('api.admin.point-purchase-requests.index');
+            Route::post('/point-purchase-requests/{id}/approve', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'approve'])->name('api.admin.point-purchase-requests.approve');
+            Route::post('/point-purchase-requests/{id}/cancel', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'cancel'])->name('api.admin.point-purchase-requests.cancel');
+            Route::delete('/point-purchase-requests/{id}', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'destroy'])->name('api.admin.point-purchase-requests.destroy');
+            Route::post('/point-purchase-requests/bulk-approve', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'bulkApprove'])->name('api.admin.point-purchase-requests.bulk-approve');
+
+            // Point Transactions
+            Route::get('/point-transactions/stats', [\App\Http\Controllers\Admin\PointTransactionsApiController::class, 'getStats'])->name('api.admin.point-transactions.stats');
+            Route::get('/point-transactions/types', [\App\Http\Controllers\Admin\PointTransactionsApiController::class, 'getTypes'])->name('api.admin.point-transactions.types');
+            Route::get('/point-transactions', [\App\Http\Controllers\Admin\PointTransactionsApiController::class, 'index'])->name('api.admin.point-transactions.index');
+            Route::get('/point-transactions/{id}', [\App\Http\Controllers\Admin\PointTransactionsApiController::class, 'show'])->name('api.admin.point-transactions.show');
+            Route::delete('/point-transactions/{id}', [\App\Http\Controllers\Admin\PointTransactionsApiController::class, 'destroy'])->name('api.admin.point-transactions.destroy');
+
+            // Marketing Notifications
+            Route::get('/marketing-notifications/stats', [\App\Http\Controllers\Admin\MarketingNotificationsApiController::class, 'getStats'])->name('api.admin.marketing-notifications.stats');
+            Route::get('/marketing-notifications/active-users', [\App\Http\Controllers\Admin\MarketingNotificationsApiController::class, 'getActiveUsers'])->name('api.admin.marketing-notifications.active-users');
+            Route::get('/marketing-notifications', [\App\Http\Controllers\Admin\MarketingNotificationsApiController::class, 'index'])->name('api.admin.marketing-notifications.index');
+            Route::post('/marketing-notifications/send-all', [\App\Http\Controllers\Admin\MarketingNotificationsApiController::class, 'sendToAll'])->name('api.admin.marketing-notifications.send-all');
+            Route::post('/marketing-notifications/send-test', [\App\Http\Controllers\Admin\MarketingNotificationsApiController::class, 'sendTest'])->name('api.admin.marketing-notifications.send-test');
+            Route::delete('/marketing-notifications/{id}', [\App\Http\Controllers\Admin\MarketingNotificationsApiController::class, 'destroy'])->name('api.admin.marketing-notifications.destroy');
+
+            // Analytics
+            Route::get('/analytics/overview', [AnalyticsApiController::class, 'getOverview'])->name('api.admin.analytics.overview');
+            Route::get('/analytics/users', [AnalyticsApiController::class, 'getUserAnalytics'])->name('api.admin.analytics.users');
+            Route::get('/analytics/points', [AnalyticsApiController::class, 'getPointAnalytics'])->name('api.admin.analytics.points');
+            Route::get('/analytics/posts', [AnalyticsApiController::class, 'getPostAnalytics'])->name('api.admin.analytics.posts');
+
+            // Statistics
+            Route::get('/statistics', [StatisticsApiController::class, 'index'])->name('api.admin.statistics.index');
+
+            // Role Assignments
+            Route::get('/role-assignments/stats', [RoleAssignmentsApiController::class, 'getStats'])->name('api.admin.role-assignments.stats');
+            Route::get('/role-assignments/roles', [RoleAssignmentsApiController::class, 'getRoles'])->name('api.admin.role-assignments.roles');
+            Route::get('/role-assignments/permissions', [RoleAssignmentsApiController::class, 'getPermissions'])->name('api.admin.role-assignments.permissions');
+            Route::get('/role-assignments', [RoleAssignmentsApiController::class, 'index'])->name('api.admin.role-assignments.index');
+            Route::get('/role-assignments/{id}', [RoleAssignmentsApiController::class, 'show'])->name('api.admin.role-assignments.show');
+            Route::put('/role-assignments/{id}', [RoleAssignmentsApiController::class, 'update'])->name('api.admin.role-assignments.update');
+
+            // Pal Service Points Overview
+            Route::get('/palservice-points/stats', [PalServicePointsApiController::class, 'getStats'])->name('api.admin.palservice-points.stats');
+            Route::get('/palservice-points/top-users', [PalServicePointsApiController::class, 'getTopUsers'])->name('api.admin.palservice-points.top-users');
+            Route::get('/palservice-points', [PalServicePointsApiController::class, 'index'])->name('api.admin.palservice-points.index');
         });
     });
 });

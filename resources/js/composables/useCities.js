@@ -25,19 +25,29 @@ export function useCities() {
       if (filters.per_page) queryParams.append('per_page', filters.per_page)
       if (filters.page) queryParams.append('page', filters.page)
 
-      const response = await fetch(`/api/admin/cities?${queryParams}`)
+      const url = `/api/admin/cities?${queryParams}`
+      console.log('🔍 Fetching cities from:', url)
+
+      const response = await fetch(url)
+      console.log('📡 Response status:', response.status, response.statusText)
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Response error:', errorText)
         throw new Error('Failed to fetch cities')
       }
 
       const data = await response.json()
+      console.log('✅ Cities data received:', data)
+      console.log('📊 Cities array:', data.data)
+      console.log('🏙️ First city sample:', data.data?.[0])
       cities.value = data
     } catch (err) {
       error.value = err.message
-      console.error('Error fetching cities:', err)
+      console.error('❌ Error fetching cities:', err)
     } finally {
       loading.value = false
+      console.log('⏱️ Loading complete. Cities count:', cities.value.data?.length || 0)
     }
   }
 

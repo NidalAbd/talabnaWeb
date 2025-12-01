@@ -24,19 +24,37 @@ export function useRoles() {
             if (filters.page) params.append('page', filters.page)
             if (filters.per_page) params.append('per_page', filters.per_page)
 
-            const response = await fetch(`/api/admin/roles?${params.toString()}`)
+            const url = `/api/admin/roles?${params.toString()}`
+            console.log('🔍 Fetching roles from:', url)
+
+            const response = await fetch(url)
+            console.log('📡 Response status:', response.status, response.statusText)
 
             if (!response.ok) {
+                const errorText = await response.text()
+                console.error('❌ Response error:', errorText)
                 throw new Error('Failed to fetch roles')
             }
 
             const data = await response.json()
-            roles.value = data.roles
+            console.log('✅ Roles data received:', data)
+            console.log('📊 Roles nested object:', data.roles)
+            console.log('📊 Actual roles array:', data.roles?.data)
+
+            // Check if data is wrapped in 'roles' key or is direct pagination
+            if (data.roles) {
+                roles.value = data.roles
+            } else {
+                roles.value = data
+            }
         } catch (err) {
             error.value = err.message
-            console.error('Error fetching roles:', err)
+            console.error('❌ Error fetching roles:', err)
         } finally {
             loading.value = false
+            console.log('⏱️ Loading complete. Roles count:', roles.value.data?.length || 0)
+            console.log('🔍 Loading state:', loading.value)
+            console.log('🔍 Final roles.value:', roles.value)
         }
     }
 

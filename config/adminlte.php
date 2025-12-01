@@ -321,33 +321,33 @@ return [
                 ],
                 [
                     'text' => 'Roles',
-                    'url'  => 'roles',  // This should match your roles route
+                    'url'  => 'roles',
                     'icon' => 'fas fa-user-tag',
                     'permission' => ['view_role']
                 ],
                 [
                     'text' => 'Permissions',
-                    'url'  => 'permissions',  // This should match your permissions route
+                    'url'  => 'permissions',
                     'icon' => 'fas fa-key',
                     'permission' => ['view_permission']
                 ],
                 [
-                    'text' => 'Role Assignments',  // You might want to add this new menu item
-                    'url'  => 'role-assignments',  // This should match your role-assignments route
+                    'text' => 'Role Assignments',
+                    'url'  => 'admin/role-assignments',
                     'icon' => 'fas fa-user-cog',
                     'permission' => ['edit_role']
                 ],
                 [
-                    'text' => 'Orders',
-                    'url'  => 'purchase_points',
-                    'icon' => 'fas fa-shopping-cart',
-                    'permission' => ['purchase_index']
+                    'text' => 'Banned Users',
+                    'url'  => 'admin/users/banned',
+                    'icon' => 'fas fa-user-slash',
+                    'permission' => ['user_index']
                 ],
                 [
-                    'text' => 'Transactions',
-                    'url'  => 'point_transactions',
-                    'icon' => 'fas fa-exchange-alt',
-                    'permission' => ['point_transactions.index']
+                    'text' => 'Banned Devices',
+                    'url'  => 'admin/devices/banned',
+                    'icon' => 'fas fa-mobile-alt',
+                    'permission' => ['user_index']
                 ]
             ]
         ],
@@ -357,17 +357,11 @@ return [
             'permission' => ['view_statistics'],
             'submenu' => [
                 [
-                    'text' => 'Send Notifications',
-                    'url'  => 'admin/notifications/marketing',
+                    'text' => 'Marketing Notifications',
+                    'url'  => 'admin/marketing-notifications',
                     'icon' => 'fas fa-bell',
                     'permission' => ['view_statistics']
-                ],
-                [
-                    'text' => 'Notification History',
-                    'url'  => 'admin/notifications/marketing/history',
-                    'icon' => 'fas fa-history',
-                    'permission' => ['view_statistics']
-                ],
+                ]
             ]
         ],
 
@@ -384,22 +378,10 @@ return [
                     'permission' => ['view_service']
                 ],
                 [
-                    'text' => 'Add Country',
-                    'url'  => 'countries/create',
-                    'icon' => 'fas fa-plus-circle',
-                    'permission' => ['create_service']
-                ],
-                [
                     'text' => 'Cities',
                     'url'  => 'cities',
                     'icon' => 'fas fa-city',
                     'permission' => ['view_service']
-                ],
-                [
-                    'text' => 'Add City',
-                    'url'  => 'cities/create',
-                    'icon' => 'fas fa-plus-circle',
-                    'permission' => ['create_service']
                 ],
             ]
         ],
@@ -417,14 +399,8 @@ return [
                     'permission' => ['view_service']
                 ],
                 [
-                    'text' => 'Add Category',
-                    'url'  => 'categories/create',
-                    'icon' => 'fas fa-plus-circle',
-                    'permission' => ['create_service']
-                ],
-                [
                     'text' => 'Sub Categories',
-                    'url'  => 'indexSubCategory',
+                    'url'  => 'subcategories',
                     'icon' => 'fas fa-folder-open',
                     'permission' => ['view_service']
                 ]
@@ -444,12 +420,6 @@ return [
                     'permission' => ['view_all_service']
                 ],
                 [
-                    'text' => 'Add New Post',
-                    'url'  => 'service_posts/create',
-                    'icon' => 'fas fa-plus',
-                    'permission' => ['create_service']
-                ],
-                [
                     'text' => 'User Services',
                     'url'  => 'userAllServiceIndex',
                     'icon' => 'fas fa-user-tag',
@@ -459,8 +429,14 @@ return [
         ],
 
         [
+            'text' => 'Analytics',
+            'url'  => 'admin/analytics',
+            'icon' => 'fas fa-chart-line',
+            'permission' => ['view_statistics']
+        ],
+        [
             'text' => 'Statistics',
-            'url'  => 'statistics',
+            'url'  => 'admin/statistics',
             'icon' => 'fas fa-chart-pie',
             'permission' => ['view_statistics']
         ],
@@ -470,29 +446,51 @@ return [
             'icon' => 'fas fa-file-alt',
             'permission' => ['report_index']
         ],
-        // Pal Service Points Section
+
+        // Points System Section
         [
-            'text' => 'Points Overview',
-            'url'  => 'palservice_points',
-            'icon' => 'fas fa-piggy-bank'
+            'text'    => 'Points System',
+            'icon'    => 'fas fa-coins',
+            'permission' => ['view_statistics'],
+            'submenu' => [
+                [
+                    'text' => 'Points Overview',
+                    'url'  => 'admin/palservice-points',
+                    'icon' => 'fas fa-piggy-bank',
+                ],
+                [
+                    'text' => 'Point Packages',
+                    'url'  => 'admin/point-packages',
+                    'icon' => 'fas fa-box-open',
+                ],
+                [
+                    'text' => 'Purchase Requests',
+                    'url'  => 'admin/point-purchase-requests',
+                    'icon' => 'fas fa-shopping-cart',
+                ],
+                [
+                    'text' => 'Point Transactions',
+                    'url'  => 'admin/point-transactions',
+                    'icon' => 'fas fa-exchange-alt',
+                ],
+                [
+                    'text' => 'Premium Features',
+                    'url'  => 'admin/premium-features',
+                    'icon' => 'fas fa-star',
+                ],
+                [
+                    'text' => 'User Levels',
+                    'url'  => 'admin/levels',
+                    'icon' => 'fas fa-layer-group',
+                ]
+            ]
         ],
 
         // Badge Types Section
         [
-            'text'    => 'Badge System',
-            'icon'    => 'fas fa-award',
-            'submenu' => [
-                [
-                    'text' => 'Badge Types',
-                    'url'  => 'badge_types',
-                    'icon' => 'fas fa-gem',
-                ],
-                [
-                    'text' => 'Add Badge Type',
-                    'url'  => 'badge_types/create',
-                    'icon' => 'fas fa-plus-circle',
-                ],
-            ]
+            'text' => 'Badge Types',
+            'url'  => 'badge-types',
+            'icon' => 'fas fa-award',
         ],
 
     ],    /*

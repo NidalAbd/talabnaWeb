@@ -245,8 +245,15 @@ const visiblePages = computed(() => {
 })
 
 onMounted(async () => {
+  console.log('🎬 RolesList component mounted')
+  console.log('🎬 Initial roles.value:', roles.value)
+  console.log('🎬 Initial roles.value.data:', roles.value.data)
+  console.log('🎬 Initial loading:', loading.value)
   await loadData()
   document.addEventListener('click', closeMenus)
+  console.log('🎬 After loadData - roles.value:', roles.value)
+  console.log('🎬 After loadData - roles.value.data:', roles.value.data)
+  console.log('🎬 After loadData - loading:', loading.value)
 })
 
 onBeforeUnmount(() => {
