@@ -61,14 +61,14 @@
     "src": "resources/css/app.css"
   },
   "resources/js/admin.css": {
-    "file": "assets/admin-0c85ad8b.css",
+    "file": "assets/admin-687d6660.css",
     "src": "resources/js/admin.css"
   },
   "resources/js/admin.js": {
     "css": [
-      "assets/admin-0c85ad8b.css"
+      "assets/admin-687d6660.css"
     ],
-    "file": "assets/admin-d5259d55.js",
+    "file": "assets/admin-6c9846e7.js",
     "imports": [
       "_vue-router-b7ce5ba7.js",
       "__plugin-vue_export-helper-c27b6911.js",
