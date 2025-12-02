@@ -56,7 +56,7 @@ class CitiesApiController extends Controller
 
         // Transform data to include image URL and ensure name is properly formatted
         $cities->getCollection()->transform(function ($city) {
-            $city->image_url = $city->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
+            $city->image_url = $city->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
 
             // Ensure name is properly decoded as array/object
             if (is_string($city->name)) {
@@ -161,8 +161,7 @@ class CitiesApiController extends Controller
             $path = $image->store('cities/images', 'public');
 
             $city->photos()->create([
-                'url' => $path,
-                'is_default' => true
+                'src' => $path
             ]);
         }
 
@@ -216,8 +215,8 @@ class CitiesApiController extends Controller
             // Delete old image if exists
             if ($city->photos()->exists()) {
                 $oldImage = $city->photos()->first();
-                if ($oldImage && \Storage::disk('public')->exists($oldImage->url)) {
-                    \Storage::disk('public')->delete($oldImage->url);
+                if ($oldImage && \Storage::disk('public')->exists($oldImage->src)) {
+                    \Storage::disk('public')->delete($oldImage->src);
                 }
                 $oldImage->delete();
             }
@@ -227,8 +226,7 @@ class CitiesApiController extends Controller
             $path = $image->store('cities/images', 'public');
 
             $city->photos()->create([
-                'url' => $path,
-                'is_default' => true
+                'src' => $path
             ]);
         }
 
@@ -251,8 +249,8 @@ class CitiesApiController extends Controller
         // Delete associated image
         if ($city->photos()->exists()) {
             $image = $city->photos()->first();
-            if ($image && \Storage::disk('public')->exists($image->url)) {
-                \Storage::disk('public')->delete($image->url);
+            if ($image && \Storage::disk('public')->exists($image->src)) {
+                \Storage::disk('public')->delete($image->src);
             }
             $image->delete();
         }

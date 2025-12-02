@@ -20,10 +20,7 @@ class countries extends Model
         'flag'
     ];
 
-    protected $casts = [
-        'name' => 'array',
-        'currency_name' => 'array'
-    ];
+    // Note: Do NOT add 'name' or 'currency_name' casts here as they conflict with the Attribute accessors below
 
     /**
      * Ensure name is always returned as an array

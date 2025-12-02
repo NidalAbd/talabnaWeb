@@ -17,9 +17,7 @@ class cities extends Model
         'country_id'
     ];
 
-    protected $casts = [
-        'name' => 'array'
-    ];
+    // Note: Do NOT add 'name' => 'array' cast here as it conflicts with the Attribute accessor below
 
     /**
      * Ensure name is always returned as an array
