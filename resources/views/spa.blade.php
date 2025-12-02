@@ -5,6 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="BSAla0i5_oynIREw-fChMYZ9zCMyA95qqYxILO8xBpE" />
+
+    <!-- Google Analytics (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E68NQJJES2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-E68NQJJES2');
+    </script>
+
     <!-- SEO Meta Tags -->
     <title>طلبنا - Talabna | أكبر سوق للإعلانات المبوبة</title>
     <meta name="description" content="طلبنا - أكبر منصة للإعلانات المبوبة في الوطن العربي. بيع واشتري السيارات، العقارات، الهواتف، الوظائف والمزيد بسهولة وأمان.">
