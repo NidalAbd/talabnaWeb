@@ -396,12 +396,20 @@ class PublicController extends Controller
     }
 
     /**
-     * Get countries list
+     * Get countries list with listings count and top cities
      */
     public function countries(): JsonResponse
     {
-        $countries = Cache::remember('countries_list', 86400, function () {
+        $countries = Cache::remember('countries_list_v2', 3600, function () {
             return countries::withCount(['cities'])
+                ->with(['cities' => function ($query) {
+                    $query->withCount(['servicePosts' => function ($q) {
+                        $q->where('state', 'published');
+                    }])
+                    ->having('service_posts_count', '>', 0)
+                    ->orderByDesc('service_posts_count')
+                    ->limit(5);
+                }])
                 ->orderBy('id')
                 ->get()
                 ->map(function ($country) {
@@ -417,14 +425,48 @@ class PublicController extends Controller
                     $nameAr = is_array($name) ? ($name['ar'] ?? '') : $name;
                     $nameEn = is_array($name) ? ($name['en'] ?? $nameAr) : $name;
 
+                    // Count total listings in this country
+                    $listingsCount = ServicePost::where('state', 'published')
+                        ->where('country_id', $country->id)
+                        ->count();
+
+                    // Get top cities with their names decoded
+                    $topCities = $country->cities->map(function ($city) use ($nameAr) {
+                        $cityName = $city->name;
+                        if (is_string($cityName)) {
+                            $decoded = json_decode($cityName, true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                                $cityName = $decoded;
+                            }
+                        }
+                        $cityNameAr = is_array($cityName) ? ($cityName['ar'] ?? '') : $cityName;
+                        $cityNameEn = is_array($cityName) ? ($cityName['en'] ?? $cityNameAr) : $cityName;
+
+                        return [
+                            'id' => $city->id,
+                            'name' => $cityNameAr,
+                            'name_en' => $cityNameEn,
+                            'slug' => \Str::slug($cityNameEn ?: $cityNameAr) ?: rawurlencode($cityNameAr),
+                            'listings_count' => $city->service_posts_count,
+                        ];
+                    });
+
                     return [
                         'id' => $country->id,
                         'name' => $nameAr,
                         'name_en' => $nameEn,
+                        'slug' => \Str::slug($nameEn ?: $nameAr) ?: rawurlencode($nameAr),
                         'code' => $country->code ?? $country->country_code,
+                        'flag' => $country->flag ? '/storage/' . $country->flag : null,
                         'cities_count' => $country->cities_count,
+                        'listings_count' => $listingsCount,
+                        'top_cities' => $topCities,
                     ];
-                });
+                })
+                ->filter(function ($country) {
+                    return $country['listings_count'] > 0;
+                })
+                ->values();
         });
 
         return response()->json([

@@ -157,6 +157,75 @@
       </v-container>
     </section>
 
+    <!-- Browse by Location Section -->
+    <section class="locations-section py-12" id="locations">
+      <v-container>
+        <div class="section-header mb-8">
+          <h2 class="text-h4 font-weight-bold mb-2">
+            {{ locale === 'ar' ? 'تصفح حسب الموقع' : 'Browse by Location' }}
+          </h2>
+          <p class="text-body-1 text-medium-emphasis">
+            {{ locale === 'ar' ? 'اعثر على الخدمات المتاحة في منطقتك' : 'Find services available in your area' }}
+          </p>
+        </div>
+
+        <v-row v-if="!loadingLocations">
+          <v-col v-for="country in countries" :key="country.id" cols="12" sm="6" md="4" lg="3">
+            <v-card
+              class="location-card h-100"
+              variant="outlined"
+              :to="`/services/${country.id}/${country.slug}`"
+            >
+              <v-img
+                :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'"
+                height="120"
+                cover
+                class="location-flag"
+              >
+                <template v-slot:error>
+                  <div class="d-flex align-center justify-center h-100 bg-grey-lighten-3">
+                    <v-icon size="48" color="grey">mdi-earth</v-icon>
+                  </div>
+                </template>
+              </v-img>
+              <v-card-text class="text-center">
+                <h3 class="text-subtitle-1 font-weight-bold mb-1">
+                  {{ locale === 'ar' ? country.name : country.name_en }}
+                </h3>
+                <p class="text-caption text-medium-emphasis mb-2">
+                  {{ formatNumber(country.listings_count) }} {{ locale === 'ar' ? 'إعلان' : 'Listings' }}
+                </p>
+                <div class="d-flex flex-wrap justify-center gap-1">
+                  <v-chip
+                    v-for="city in (country.top_cities || []).slice(0, 3)"
+                    :key="city.id"
+                    size="x-small"
+                    :to="`/services/${country.id}/${country.slug}/${city.id}/${city.slug}`"
+                    class="city-chip"
+                  >
+                    {{ locale === 'ar' ? city.name : city.name_en }}
+                  </v-chip>
+                </div>
+              </v-card-text>
+            </v-card>
+          </v-col>
+        </v-row>
+        <v-row v-else>
+          <v-col v-for="n in 4" :key="n" cols="12" sm="6" md="4" lg="3">
+            <v-skeleton-loader type="card" />
+          </v-col>
+        </v-row>
+
+        <!-- View All Locations Button -->
+        <div class="text-center mt-6">
+          <v-btn color="primary" variant="outlined" size="large" to="/browse">
+            {{ locale === 'ar' ? 'عرض جميع المواقع' : 'View All Locations' }}
+            <v-icon end>mdi-arrow-left</v-icon>
+          </v-btn>
+        </div>
+      </v-container>
+    </section>
+
     <!-- Featured Services -->
     <section class="featured-section py-12">
       <v-container>
@@ -282,6 +351,7 @@ const { updateMeta, setOrganizationSchema } = useSeo()
 // State
 const searchQuery = ref('')
 const categories = ref([])
+const countries = ref([])
 const featured = ref([])
 const latest = ref([])
 const popular = ref([])
@@ -290,6 +360,7 @@ const activeTab = ref('all')
 const loadingFeatured = ref(true)
 const loadingLatest = ref(true)
 const loadingPopular = ref(true)
+const loadingLocations = ref(true)
 
 const locale = computed(() => appStore.locale)
 
@@ -402,6 +473,21 @@ const fetchStats = async () => {
   }
 }
 
+const fetchCountries = async () => {
+  loadingLocations.value = true
+  try {
+    const response = await fetch('/api/public/countries')
+    if (!response.ok) return
+    const data = await response.json()
+    countries.value = Array.isArray(data.countries) ? data.countries : []
+  } catch (error) {
+    console.error('Error fetching countries:', error)
+    countries.value = []
+  } finally {
+    loadingLocations.value = false
+  }
+}
+
 // Watch tab changes
 watch(activeTab, (newTab) => {
   fetchLatest(newTab)
@@ -419,6 +505,7 @@ onMounted(() => {
 
   // Fetch data
   fetchCategories()
+  fetchCountries()
   fetchFeatured()
   fetchLatest()
   fetchPopular()
@@ -688,5 +775,39 @@ onMounted(() => {
 
 .home-page {
   background: rgb(var(--v-theme-background));
+}
+
+/* Location Cards */
+.locations-section {
+  background: rgba(var(--v-theme-primary), 0.02);
+}
+
+.location-card {
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-radius: 16px !important;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  background: rgb(var(--v-theme-surface));
+  overflow: hidden;
+}
+
+.location-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1) !important;
+  border-color: rgb(var(--v-theme-primary)) !important;
+}
+
+.location-flag {
+  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+}
+
+.city-chip {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.city-chip:hover {
+  background: rgb(var(--v-theme-primary)) !important;
+  color: white !important;
 }
 </style>

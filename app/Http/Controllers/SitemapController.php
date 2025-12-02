@@ -441,6 +441,14 @@ class SitemapController extends Controller
      */
     private function slugify($text, $preferredLocale = 'ar')
     {
+        // Handle JSON string (e.g., '{"ar":"فلسطين","en":"Palestine"}')
+        if (is_string($text) && (str_starts_with($text, '{') || str_starts_with($text, '['))) {
+            $decoded = json_decode($text, true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $text = $decoded;
+            }
+        }
+
         // Handle array/JSON names (multilingual)
         if (is_array($text)) {
             // Get preferred locale, fallback to other locale, then first available
@@ -456,10 +464,18 @@ class SitemapController extends Controller
             $text = 'item';
         }
 
-        // Convert Arabic text to a safe format
+        // Trim and handle empty
+        $text = trim($text);
+        if (empty($text)) {
+            return 'item';
+        }
+
+        // Convert text to a safe format - keep only letters, numbers, spaces and hyphens
         $text = preg_replace('/[^\p{L}\p{N}\s-]/u', '', $text);
         $text = preg_replace('/[\s-]+/', '-', $text);
         $text = trim($text, '-');
-        return urlencode($text) ?: 'item';
+
+        // URL encode for safe transport
+        return rawurlencode($text) ?: 'item';
     }
 }

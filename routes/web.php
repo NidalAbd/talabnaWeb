@@ -113,6 +113,25 @@ Route::get('/terms', function() {
     return view('spa');
 })->name('terms');
 
+/*
+|--------------------------------------------------------------------------
+| Services/Location Routes (SEO Pages)
+|--------------------------------------------------------------------------
+*/
+// Services by country
+Route::get('/services/{countryId}/{countrySlug?}', function() {
+    return view('spa');
+})->where('countryId', '[0-9]+')->name('services.country');
+
+// Services by country and city
+Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug?}', function() {
+    return view('spa');
+})->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+'])->name('services.city');
+
+// Services by country, city, and category
+Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug}/{categoryId}/{categorySlug?}', function() {
+    return view('spa');
+})->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+', 'categoryId' => '[0-9]+'])->name('services.category');
 
 // Deep Link Routes
 Route::get('api/deep-link/{route}/{id?}', [DeepLinkController::class, 'redirect'])->name('deep.link');
