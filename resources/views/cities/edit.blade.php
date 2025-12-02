@@ -36,7 +36,7 @@
                                     <div class="form-group">
                                         <label for="name_en">City Name (English) <span class="text-danger">*</span></label>
                                         <input type="text" class="form-control @error('name_en') is-invalid @enderror"
-                                               id="name_en" name="name_en" value="{{ old('name_en', $nameArray['en'] ?? '') }}" required>
+                                               id="name_en" name="name_en" value="{{ old('name_en', $city->name['en'] ?? '') }}" required>
                                         @error('name_en')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror
@@ -47,7 +47,7 @@
                                     <div class="form-group">
                                         <label for="name_ar">City Name (Arabic)</label>
                                         <input type="text" class="form-control @error('name_ar') is-invalid @enderror"
-                                               id="name_ar" name="name_ar" value="{{ old('name_ar', $nameArray['ar'] ?? '') }}" dir="rtl">
+                                               id="name_ar" name="name_ar" value="{{ old('name_ar', $city->name['ar'] ?? '') }}" dir="rtl">
                                         @error('name_ar')
                                         <span class="invalid-feedback">{{ $message }}</span>
                                         @enderror

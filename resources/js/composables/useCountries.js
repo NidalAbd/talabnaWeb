@@ -102,7 +102,8 @@ export function useCountries() {
       const response = await fetch(`/api/admin/countries/${id}`, {
         method: 'POST',
         headers: {
-          'X-CSRF-TOKEN': csrfToken
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json'
         },
         body: formData
       })
@@ -110,7 +111,12 @@ export function useCountries() {
       const data = await response.json()
 
       if (!response.ok) {
-        throw new Error(data.message || 'Failed to update country')
+        // Log detailed validation errors
+        console.error('Validation errors:', data.errors)
+        const errorMessages = data.errors
+          ? Object.values(data.errors).flat().join(', ')
+          : data.message
+        throw new Error(errorMessages || 'Failed to update country')
       }
 
       return data

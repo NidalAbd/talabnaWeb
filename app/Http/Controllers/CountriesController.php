@@ -22,7 +22,8 @@ class CountriesController extends Controller
      */
     public function index()
     {
-        $countries = countries::withCount('cities')
+        $countries = countries::with('photos')
+            ->withCount('cities')
             ->paginate(10);
 
         return view('countries.index', compact('countries'));
@@ -115,7 +116,7 @@ class CountriesController extends Controller
      */
     public function edit($id)
     {
-        $country = countries::findOrFail($id);
+        $country = countries::with('photos')->findOrFail($id);
         return view('countries.edit', compact('country'));
     }
 

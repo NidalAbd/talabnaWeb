@@ -51,7 +51,7 @@ class CountriesApiController extends Controller
 
         // Transform data to include flag URL
         $countries->getCollection()->transform(function ($country) {
-            $country->flag_url = $country->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
+            $country->flag_url = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
             unset($country->photos);
             return $country;
         });
@@ -107,7 +107,7 @@ class CountriesApiController extends Controller
             ->withCount('cities')
             ->findOrFail($id);
 
-        $country->flag_url = $country->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
+        $country->flag_url = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
 
         return response()->json($country);
     }
@@ -120,11 +120,11 @@ class CountriesApiController extends Controller
         $validator = Validator::make($request->all(), [
             'name.ar' => 'required|string|max:255',
             'name.en' => 'required|string|max:255',
-            'country_code' => 'required|string|max:3|unique:countries,country_code',
-            'currency_code' => 'nullable|string|max:3',
+            'country_code' => 'required|string|max:10|unique:countries,country_code',
+            'currency_code' => 'nullable|string|max:10',
             'currency_name.ar' => 'nullable|string|max:255',
             'currency_name.en' => 'nullable|string|max:255',
-            'flag' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            'flag' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120'
         ]);
 
         if ($validator->fails()) {
@@ -150,16 +150,15 @@ class CountriesApiController extends Controller
         // Handle flag upload
         if ($request->hasFile('flag')) {
             $flag = $request->file('flag');
-            $path = $flag->store('countries/flags', 'public');
+            $path = $flag->store('countryFlag', 'public');
 
             $country->photos()->create([
-                'url' => $path,
-                'is_default' => true
+                'src' => $path
             ]);
         }
 
         $country->load('photos');
-        $country->flag_url = $country->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
+        $country->flag_url = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
 
         return response()->json([
             'message' => 'Country created successfully',
@@ -174,17 +173,29 @@ class CountriesApiController extends Controller
     {
         $country = countries::findOrFail($id);
 
-        $validator = Validator::make($request->all(), [
-            'name.ar' => 'sometimes|required|string|max:255',
-            'name.en' => 'sometimes|required|string|max:255',
-            'country_code' => 'sometimes|required|string|max:3|unique:countries,country_code,' . $id,
-            'currency_code' => 'nullable|string|max:3',
+        // Build validation rules
+        $rules = [
+            'name.ar' => 'nullable|string|max:255',
+            'name.en' => 'nullable|string|max:255',
+            'country_code' => 'nullable|string|max:10|unique:countries,country_code,' . $id,
+            'currency_code' => 'nullable|string|max:10',
             'currency_name.ar' => 'nullable|string|max:255',
             'currency_name.en' => 'nullable|string|max:255',
-            'flag' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
-        ]);
+        ];
+
+        // Only validate flag if file is present
+        if ($request->hasFile('flag')) {
+            $rules['flag'] = 'image|mimes:jpeg,png,jpg,gif,svg,webp|max:5120';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
+            \Log::error('Country update validation failed', [
+                'errors' => $validator->errors()->toArray(),
+                'request_data' => $request->except('flag'),
+                'has_flag' => $request->hasFile('flag')
+            ]);
             return response()->json([
                 'message' => 'Validation failed',
                 'errors' => $validator->errors()
@@ -222,24 +233,23 @@ class CountriesApiController extends Controller
             // Delete old flag if exists
             if ($country->photos()->exists()) {
                 $oldFlag = $country->photos()->first();
-                if ($oldFlag && \Storage::disk('public')->exists($oldFlag->url)) {
-                    \Storage::disk('public')->delete($oldFlag->url);
+                if ($oldFlag && \Storage::disk('public')->exists($oldFlag->src)) {
+                    \Storage::disk('public')->delete($oldFlag->src);
                 }
                 $oldFlag->delete();
             }
 
             // Upload new flag
             $flag = $request->file('flag');
-            $path = $flag->store('countries/flags', 'public');
+            $path = $flag->store('countryFlag', 'public');
 
             $country->photos()->create([
-                'url' => $path,
-                'is_default' => true
+                'src' => $path
             ]);
         }
 
         $country->load('photos');
-        $country->flag_url = $country->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
+        $country->flag_url = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
 
         return response()->json([
             'message' => 'Country updated successfully',
@@ -264,8 +274,8 @@ class CountriesApiController extends Controller
         // Delete associated flag
         if ($country->photos()->exists()) {
             $flag = $country->photos()->first();
-            if ($flag && \Storage::disk('public')->exists($flag->url)) {
-                \Storage::disk('public')->delete($flag->url);
+            if ($flag && \Storage::disk('public')->exists($flag->src)) {
+                \Storage::disk('public')->delete($flag->src);
             }
             $flag->delete();
         }

@@ -93,21 +93,14 @@ class CitiesController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param  int  $id
-     * @return array
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\View\Factory|\Illuminate\Contracts\View\View
      */
-    private function getNameArray($city) {
-        if (is_string($city->name)) {
-            return json_decode($city->name, true) ?: ['en' => '', 'ar' => ''];
-        }
-        return is_array($city->name) ? $city->name : ['en' => '', 'ar' => ''];
-    }
-
-    public function edit($id) {
-        $city = cities::findOrFail($id);
+    public function edit($id)
+    {
+        $city = cities::with('photos')->findOrFail($id);
         $countries = countries::all();
-        $nameArray = $this->getNameArray($city);
 
-        return view('cities.edit', compact('city', 'countries', 'nameArray'));
+        return view('cities.edit', compact('city', 'countries'));
     }
 
     /**

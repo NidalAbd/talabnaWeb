@@ -80,8 +80,8 @@
         <div class="card-header-custom">
           <div class="user-avatar-wrapper">
             <img
-              :src="country.flag_url ? `/storage/${country.flag_url}` : '/images/placeholder-flag.png'"
-              :alt="country.name.en"
+              :src="country.flag_url ? `/storage/${country.flag_url}` : '/storage/countryFlag/placeholder-flag.jpg'"
+              :alt="country.name?.en || 'Country'"
               class="user-avatar"
               @error="handleImageError"
             >
@@ -168,8 +168,8 @@
             <!-- Flag -->
             <td>
               <img
-                :src="country.flag_url ? `/storage/${country.flag_url}` : '/images/placeholder-flag.png'"
-                :alt="country.name.en"
+                :src="country.flag_url ? `/storage/${country.flag_url}` : '/storage/countryFlag/placeholder-flag.jpg'"
+                :alt="country.name?.en || 'Country'"
                 class="table-avatar"
                 style="border-radius: 4px;"
                 @error="handleImageError"
@@ -406,7 +406,7 @@ const handleDelete = async (country) => {
 }
 
 const handleImageError = (event) => {
-  event.target.src = '/images/placeholder-flag.png'
+  event.target.src = '/storage/countryFlag/placeholder-flag.jpg'
 }
 </script>
 

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 
 class cities extends Model
 {
@@ -19,6 +20,34 @@ class cities extends Model
     protected $casts = [
         'name' => 'array'
     ];
+
+    /**
+     * Ensure name is always returned as an array
+     */
+    protected function name(): Attribute
+    {
+        return Attribute::make(
+            get: function ($value) {
+                if (is_array($value)) {
+                    return $value;
+                }
+                if (is_string($value)) {
+                    $decoded = json_decode($value, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                        return $decoded;
+                    }
+                    return ['ar' => $value, 'en' => $value];
+                }
+                return ['ar' => '', 'en' => ''];
+            },
+            set: function ($value) {
+                if (is_array($value)) {
+                    return json_encode($value, JSON_UNESCAPED_UNICODE);
+                }
+                return $value;
+            }
+        );
+    }
 
     public function country(): BelongsTo
     {
