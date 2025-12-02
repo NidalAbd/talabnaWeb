@@ -6,8 +6,11 @@ use App\Models\Categories;
 use App\Models\ServicePost;
 use App\Models\Sub_categories;
 use App\Models\User;
+use App\Models\countries;
+use App\Models\cities;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 
 class SitemapController extends Controller
 {
@@ -29,6 +32,18 @@ class SitemapController extends Controller
             // Categories sitemap
             $xml .= '<sitemap>';
             $xml .= '<loc>' . url('/sitemap-categories.xml') . '</loc>';
+            $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
+            $xml .= '</sitemap>';
+
+            // Locations sitemap (countries, cities, services by location)
+            $xml .= '<sitemap>';
+            $xml .= '<loc>' . url('/sitemap-locations.xml') . '</loc>';
+            $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
+            $xml .= '</sitemap>';
+
+            // Location + Category combinations sitemap
+            $xml .= '<sitemap>';
+            $xml .= '<loc>' . url('/sitemap-location-categories.xml') . '</loc>';
             $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
             $xml .= '</sitemap>';
 
@@ -70,7 +85,7 @@ class SitemapController extends Controller
     {
         $content = Cache::remember('sitemap-pages', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
             $pages = [
                 ['url' => '/', 'priority' => '1.0', 'changefreq' => 'daily'],
@@ -113,9 +128,12 @@ class SitemapController extends Controller
             $categories = Categories::where('isSuspended', false)->get();
 
             foreach ($categories as $category) {
-                $slug = $this->slugify($category->name);
+                $slugAr = $this->slugify($category->name, 'ar');
+                $slugEn = $this->slugify($category->name, 'en');
+
+                // Arabic URL
                 $xml .= '<url>';
-                $xml .= '<loc>' . url("/category/{$category->id}/{$slug}") . '</loc>';
+                $xml .= '<loc>' . url("/category/{$category->id}/{$slugAr}") . '</loc>';
                 $xml .= '<lastmod>' . ($category->updated_at ?? now())->toIso8601String() . '</lastmod>';
                 $xml .= '<changefreq>daily</changefreq>';
                 $xml .= '<priority>0.8</priority>';
@@ -129,14 +147,156 @@ class SitemapController extends Controller
 
             foreach ($subcategories as $sub) {
                 if ($sub->category && !$sub->category->isSuspended) {
-                    $categorySlug = $this->slugify($sub->category->name);
-                    $subSlug = $this->slugify($sub->name);
+                    $categorySlug = $this->slugify($sub->category->name, 'ar');
+
                     $xml .= '<url>';
                     $xml .= '<loc>' . url("/category/{$sub->categories_id}/{$categorySlug}?subcategory={$sub->id}") . '</loc>';
                     $xml .= '<lastmod>' . ($sub->updated_at ?? now())->toIso8601String() . '</lastmod>';
                     $xml .= '<changefreq>daily</changefreq>';
                     $xml .= '<priority>0.7</priority>';
                     $xml .= '</url>';
+                }
+            }
+
+            $xml .= '</urlset>';
+
+            return $xml;
+        });
+
+        return response($content, 200)
+            ->header('Content-Type', 'application/xml');
+    }
+
+    /**
+     * Generate sitemap for locations (countries and cities)
+     * URLs like: /services/palestine/gaza - خدمات في غزة، فلسطين
+     */
+    public function locations()
+    {
+        $content = Cache::remember('sitemap-locations', 3600, function () {
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+            // Get countries that have services
+            $countriesWithServices = countries::whereHas('cities', function($q) {
+                $q->whereHas('servicePosts', function($sq) {
+                    $sq->where('state', 'published');
+                });
+            })->orWhereIn('id', function($query) {
+                $query->select('country_id')
+                    ->from('service_posts')
+                    ->where('state', 'published')
+                    ->distinct();
+            })->get();
+
+            foreach ($countriesWithServices as $country) {
+                $countrySlugAr = $this->slugify($country->name, 'ar');
+                $countrySlugEn = $this->slugify($country->name, 'en');
+
+                // Country page - Arabic
+                $xml .= '<url>';
+                $xml .= '<loc>' . url("/services/{$country->id}/{$countrySlugAr}") . '</loc>';
+                $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
+                $xml .= '<changefreq>daily</changefreq>';
+                $xml .= '<priority>0.8</priority>';
+                $xml .= '</url>';
+
+                // Country page - English
+                $xml .= '<url>';
+                $xml .= '<loc>' . url("/services/{$country->id}/{$countrySlugEn}") . '</loc>';
+                $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
+                $xml .= '<changefreq>daily</changefreq>';
+                $xml .= '<priority>0.8</priority>';
+                $xml .= '</url>';
+
+                // Cities in this country
+                $citiesWithServices = cities::where('country_id', $country->id)
+                    ->whereIn('id', function($query) {
+                        $query->select('city_id')
+                            ->from('service_posts')
+                            ->where('state', 'published')
+                            ->whereNotNull('city_id')
+                            ->distinct();
+                    })->get();
+
+                foreach ($citiesWithServices as $city) {
+                    $citySlugAr = $this->slugify($city->name, 'ar');
+                    $citySlugEn = $this->slugify($city->name, 'en');
+
+                    // City page - Arabic
+                    // URL: /services/country-id/country-slug/city-id/city-slug
+                    $xml .= '<url>';
+                    $xml .= '<loc>' . url("/services/{$country->id}/{$countrySlugAr}/{$city->id}/{$citySlugAr}") . '</loc>';
+                    $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
+                    $xml .= '<changefreq>daily</changefreq>';
+                    $xml .= '<priority>0.7</priority>';
+                    $xml .= '</url>';
+
+                    // City page - English
+                    $xml .= '<url>';
+                    $xml .= '<loc>' . url("/services/{$country->id}/{$countrySlugEn}/{$city->id}/{$citySlugEn}") . '</loc>';
+                    $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
+                    $xml .= '<changefreq>daily</changefreq>';
+                    $xml .= '<priority>0.7</priority>';
+                    $xml .= '</url>';
+                }
+            }
+
+            $xml .= '</urlset>';
+
+            return $xml;
+        });
+
+        return response($content, 200)
+            ->header('Content-Type', 'application/xml');
+    }
+
+    /**
+     * Generate sitemap for location + category combinations
+     * URLs like: /services/palestine/gaza/cars - سيارات للبيع في غزة
+     */
+    public function locationCategories()
+    {
+        $content = Cache::remember('sitemap-location-categories', 3600, function () {
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+            $categories = Categories::where('isSuspended', false)->get();
+
+            // Get cities that have services
+            $citiesWithServices = cities::whereIn('id', function($query) {
+                $query->select('city_id')
+                    ->from('service_posts')
+                    ->where('state', 'published')
+                    ->whereNotNull('city_id')
+                    ->distinct();
+            })->with('country')->get();
+
+            foreach ($citiesWithServices as $city) {
+                if (!$city->country) continue;
+
+                $countrySlugAr = $this->slugify($city->country->name, 'ar');
+                $citySlugAr = $this->slugify($city->name, 'ar');
+
+                foreach ($categories as $category) {
+                    // Check if this city has services in this category
+                    $hasServices = ServicePost::where('state', 'published')
+                        ->where('city_id', $city->id)
+                        ->where('categories_id', $category->id)
+                        ->exists();
+
+                    if ($hasServices) {
+                        $categorySlugAr = $this->slugify($category->name, 'ar');
+                        $categorySlugEn = $this->slugify($category->name, 'en');
+
+                        // Arabic: /services/country/city/category
+                        $xml .= '<url>';
+                        $xml .= '<loc>' . url("/services/{$city->country->id}/{$countrySlugAr}/{$city->id}/{$citySlugAr}/{$category->id}/{$categorySlugAr}") . '</loc>';
+                        $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
+                        $xml .= '<changefreq>daily</changefreq>';
+                        $xml .= '<priority>0.6</priority>';
+                        $xml .= '</url>';
+                    }
                 }
             }
 
@@ -237,6 +397,7 @@ class SitemapController extends Controller
         $content .= "Allow: /category/\n";
         $content .= "Allow: /listing/\n";
         $content .= "Allow: /user/\n";
+        $content .= "Allow: /services/\n";
         $content .= "Allow: /search\n";
         $content .= "Allow: /about\n";
         $content .= "Allow: /contact\n";
@@ -276,14 +437,23 @@ class SitemapController extends Controller
     }
 
     /**
-     * Generate URL-friendly slug
+     * Generate URL-friendly slug from multilingual text
      */
-    private function slugify($text)
+    private function slugify($text, $preferredLocale = 'ar')
     {
         // Handle array/JSON names (multilingual)
         if (is_array($text)) {
-            // Prefer Arabic, then English, then first available
-            $text = $text['ar'] ?? $text['en'] ?? (count($text) > 0 ? array_values($text)[0] : 'item');
+            // Get preferred locale, fallback to other locale, then first available
+            if ($preferredLocale === 'ar') {
+                $text = $text['ar'] ?? $text['en'] ?? (count($text) > 0 ? array_values($text)[0] : 'item');
+            } else {
+                $text = $text['en'] ?? $text['ar'] ?? (count($text) > 0 ? array_values($text)[0] : 'item');
+            }
+        }
+
+        // Ensure we have a string
+        if (!is_string($text)) {
+            $text = 'item';
         }
 
         // Convert Arabic text to a safe format

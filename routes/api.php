@@ -49,6 +49,9 @@ Route::prefix('public')->group(function () {
     // Search
     Route::get('/search', [PublicController::class, 'search']);
 
+    // Services by Location (SEO pages)
+    Route::get('/services', [PublicController::class, 'services']);
+
     // User Profile
     Route::get('/users/{id}', [PublicController::class, 'userProfile']);
 

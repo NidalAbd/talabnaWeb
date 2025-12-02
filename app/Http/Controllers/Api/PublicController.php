@@ -556,6 +556,174 @@ class PublicController extends Controller
     }
 
     /**
+     * Get services by location (country/city/category) for SEO pages
+     */
+    public function services(Request $request): JsonResponse
+    {
+        $countryId = $request->input('country_id');
+        $cityId = $request->input('city_id');
+        $categoryId = $request->input('category_id');
+        $page = $request->input('page', 1);
+        $perPage = 12;
+        $locale = app()->getLocale();
+
+        // Build location info
+        $location = [];
+
+        if ($countryId) {
+            $country = countries::find($countryId);
+            if ($country) {
+                $countryName = $this->decodeName($country->name);
+                $location['country'] = [
+                    'id' => $country->id,
+                    'name' => $countryName[$locale] ?? $countryName['ar'] ?? $countryName['en'] ?? '',
+                    'name_ar' => $countryName['ar'] ?? '',
+                    'name_en' => $countryName['en'] ?? '',
+                ];
+            }
+        }
+
+        if ($cityId) {
+            $city = cities::with('country')->find($cityId);
+            if ($city) {
+                $cityName = $this->decodeName($city->name);
+                $location['city'] = [
+                    'id' => $city->id,
+                    'name' => $cityName[$locale] ?? $cityName['ar'] ?? $cityName['en'] ?? '',
+                    'name_ar' => $cityName['ar'] ?? '',
+                    'name_en' => $cityName['en'] ?? '',
+                ];
+            }
+        }
+
+        if ($categoryId) {
+            $category = Categories::find($categoryId);
+            if ($category) {
+                $categoryName = $this->decodeName($category->name);
+                $location['category'] = [
+                    'id' => $category->id,
+                    'name' => $categoryName[$locale] ?? $categoryName['ar'] ?? $categoryName['en'] ?? '',
+                    'name_ar' => $categoryName['ar'] ?? '',
+                    'name_en' => $categoryName['en'] ?? '',
+                ];
+            }
+        }
+
+        // Build listings query
+        $query = ServicePost::where('state', 'published')
+            ->with(['photos', 'city', 'country', 'category']);
+
+        if ($countryId) {
+            $query->where('country_id', $countryId);
+        }
+        if ($cityId) {
+            $query->where('city_id', $cityId);
+        }
+        if ($categoryId) {
+            $query->where('categories_id', $categoryId);
+        }
+
+        $query->orderByDesc('created_at');
+        $listings = $query->paginate($perPage, ['*'], 'page', $page);
+
+        // Transform listings
+        $transformedListings = $listings->getCollection()->map(function ($listing) use ($locale) {
+            $cityName = $listing->city ? $this->decodeName($listing->city->name) : null;
+
+            return [
+                'id' => $listing->id,
+                'title' => $listing->title,
+                'description' => \Str::limit($listing->description, 100),
+                'price' => $listing->price,
+                'currency' => $listing->price_currency_code,
+                'image' => $listing->photos->first()
+                    ? ($listing->photos->first()->is_external
+                        ? $listing->photos->first()->src
+                        : '/storage/' . $listing->photos->first()->src)
+                    : null,
+                'city_name' => $cityName ? ($cityName[$locale] ?? $cityName['ar'] ?? '') : '',
+                'badge' => $listing->have_badge !== 'عادي' ? $listing->have_badge : null,
+                'created_at' => $listing->created_at->toIso8601String(),
+            ];
+        });
+
+        $listings->setCollection($transformedListings);
+
+        // Get sub-locations (cities if viewing country, categories if viewing city)
+        $subLocations = [];
+
+        if ($countryId && !$cityId) {
+            // Show cities in this country with service count
+            $citiesData = cities::where('country_id', $countryId)
+                ->withCount(['servicePosts' => function($q) {
+                    $q->where('state', 'published');
+                }])
+                ->having('service_posts_count', '>', 0)
+                ->orderByDesc('service_posts_count')
+                ->limit(20)
+                ->get();
+
+            foreach ($citiesData as $city) {
+                $cityName = $this->decodeName($city->name);
+                $subLocations[] = [
+                    'id' => $city->id,
+                    'name' => $cityName[$locale] ?? $cityName['ar'] ?? '',
+                    'count' => $city->service_posts_count,
+                    'icon' => 'mdi-city',
+                    'color' => 'success',
+                    'route' => "/services/{$countryId}/" . urlencode($location['country']['name_ar'] ?? '') . "/{$city->id}/" . urlencode($cityName['ar'] ?? ''),
+                ];
+            }
+        } elseif ($cityId && !$categoryId) {
+            // Show categories available in this city
+            $categoriesData = Categories::where('isSuspended', false)
+                ->withCount(['servicePosts' => function($q) use ($cityId) {
+                    $q->where('state', 'published')->where('city_id', $cityId);
+                }])
+                ->having('service_posts_count', '>', 0)
+                ->orderByDesc('service_posts_count')
+                ->get();
+
+            $colors = ['primary', 'success', 'warning', 'info', 'error'];
+            $icons = ['mdi-car', 'mdi-home', 'mdi-briefcase', 'mdi-cellphone', 'mdi-shape'];
+
+            foreach ($categoriesData as $index => $cat) {
+                $catName = $this->decodeName($cat->name);
+                $subLocations[] = [
+                    'id' => $cat->id,
+                    'name' => $catName[$locale] ?? $catName['ar'] ?? '',
+                    'count' => $cat->service_posts_count,
+                    'icon' => $icons[$index % count($icons)],
+                    'color' => $colors[$index % count($colors)],
+                    'route' => "/services/{$countryId}/" . urlencode($location['country']['name_ar'] ?? '') . "/{$cityId}/" . urlencode($location['city']['name_ar'] ?? '') . "/{$cat->id}/" . urlencode($catName['ar'] ?? ''),
+                ];
+            }
+        }
+
+        // Get stats
+        $statsQuery = ServicePost::where('state', 'published');
+        if ($countryId) $statsQuery->where('country_id', $countryId);
+        if ($cityId) $statsQuery->where('city_id', $cityId);
+        if ($categoryId) $statsQuery->where('categories_id', $categoryId);
+
+        $stats = [
+            'totalListings' => $statsQuery->count(),
+            'totalCategories' => $categoryId ? 1 : Categories::where('isSuspended', false)->count(),
+            'totalCities' => $cityId ? 1 : ($countryId
+                ? cities::where('country_id', $countryId)->count()
+                : cities::count()),
+            'totalUsers' => (clone $statsQuery)->distinct('user_id')->count('user_id'),
+        ];
+
+        return response()->json([
+            'location' => $location,
+            'listings' => $listings,
+            'subLocations' => $subLocations,
+            'stats' => $stats,
+        ]);
+    }
+
+    /**
      * Get available badge types for public display
      */
     public function badgeTypes(): JsonResponse

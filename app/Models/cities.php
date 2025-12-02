@@ -47,4 +47,9 @@ class cities extends Model
     {
         return $this->morphMany(Photos::class, 'photoable');
     }
+
+    public function servicePosts()
+    {
+        return $this->hasMany(ServicePost::class, 'city_id');
+    }
 }

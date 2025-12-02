@@ -57,6 +57,8 @@ Route::get('/facebook/deletion-status', [App\Http\Controllers\FacebookController
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages']);
 Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories']);
+Route::get('/sitemap-locations.xml', [SitemapController::class, 'locations']);
+Route::get('/sitemap-location-categories.xml', [SitemapController::class, 'locationCategories']);
 Route::get('/sitemap-listings-{page}.xml', [SitemapController::class, 'listings'])->where('page', '[0-9]+');
 Route::get('/sitemap-users-{page}.xml', [SitemapController::class, 'users'])->where('page', '[0-9]+');
 Route::get('/robots.txt', [SitemapController::class, 'robots']);

@@ -7,6 +7,7 @@ const ListingDetails = () => import('@/views/ListingDetails.vue')
 const Category = () => import('@/views/Category.vue')
 const Search = () => import('@/views/Search.vue')
 const UserProfile = () => import('@/views/UserProfile.vue')
+const Services = () => import('@/views/Services.vue')
 const About = () => import('@/views/About.vue')
 const Contact = () => import('@/views/Contact.vue')
 const Privacy = () => import('@/views/Privacy.vue')
@@ -101,6 +102,37 @@ const routes = [
     component: Terms,
     meta: {
       title: 'شروط الاستخدام - طلبنا',
+    },
+  },
+  // Location-based services pages (SEO friendly)
+  // /services/:countryId/:countrySlug - Services in country
+  // /services/:countryId/:countrySlug/:cityId/:citySlug - Services in city
+  // /services/:countryId/:countrySlug/:cityId/:citySlug/:categoryId/:categorySlug - Category services in city
+  {
+    path: '/services/:countryId/:countrySlug?',
+    name: 'services-country',
+    component: Services,
+    meta: {
+      title: 'خدمات - طلبنا',
+      description: 'تصفح الخدمات والإعلانات حسب الموقع',
+    },
+  },
+  {
+    path: '/services/:countryId/:countrySlug/:cityId/:citySlug?',
+    name: 'services-city',
+    component: Services,
+    meta: {
+      title: 'خدمات - طلبنا',
+      description: 'تصفح الخدمات والإعلانات في مدينتك',
+    },
+  },
+  {
+    path: '/services/:countryId/:countrySlug/:cityId/:citySlug/:categoryId/:categorySlug?',
+    name: 'services-category',
+    component: Services,
+    meta: {
+      title: 'خدمات - طلبنا',
+      description: 'تصفح الخدمات والإعلانات حسب التصنيف والموقع',
     },
   },
   // Redirect /dashboard to /admin/dashboard (for AdminLTE sidebar)

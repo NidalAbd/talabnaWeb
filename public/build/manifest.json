@@ -98,6 +98,7 @@
       "resources/js/views/Category.vue",
       "resources/js/views/Search.vue",
       "resources/js/views/UserProfile.vue",
+      "resources/js/views/Services.vue",
       "resources/js/views/About.vue",
       "resources/js/views/Contact.vue",
       "resources/js/views/Privacy.vue",
@@ -106,7 +107,7 @@
       "resources/js/layouts/AdminLayout.vue",
       "resources/js/views/admin/Dashboard.vue"
     ],
-    "file": "assets/app-5d0430bf.js",
+    "file": "assets/app-d136d7ab.js",
     "imports": [
       "_vue-router-f2d300c7.js"
     ],
@@ -137,7 +138,7 @@
     "css": [
       "assets/About-0ee1938d.css"
     ],
-    "file": "assets/About-fa07535e.js",
+    "file": "assets/About-3c2cfc71.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -155,7 +156,7 @@
     "css": [
       "assets/Browse-27f0afdd.css"
     ],
-    "file": "assets/Browse-5c412598.js",
+    "file": "assets/Browse-c9bcd0b3.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -174,7 +175,7 @@
     "css": [
       "assets/Category-83ef8977.css"
     ],
-    "file": "assets/Category-76a3f11f.js",
+    "file": "assets/Category-ffd65a5f.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -193,7 +194,7 @@
     "css": [
       "assets/Contact-30dd5ae0.css"
     ],
-    "file": "assets/Contact-bb21ffef.js",
+    "file": "assets/Contact-1114981d.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -211,7 +212,7 @@
     "css": [
       "assets/Home-347a6f58.css"
     ],
-    "file": "assets/Home-91b002d6.js",
+    "file": "assets/Home-6973a4da.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -230,7 +231,7 @@
     "css": [
       "assets/ListingDetails-5286a745.css"
     ],
-    "file": "assets/ListingDetails-474f29a3.js",
+    "file": "assets/ListingDetails-4f1d96de.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -242,7 +243,7 @@
     "src": "resources/js/views/ListingDetails.vue"
   },
   "resources/js/views/NotFound.vue": {
-    "file": "assets/NotFound-f222951f.js",
+    "file": "assets/NotFound-50c5cd20.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -259,7 +260,7 @@
     "css": [
       "assets/Privacy-5cba7e3c.css"
     ],
-    "file": "assets/Privacy-4bff478f.js",
+    "file": "assets/Privacy-2e469bf2.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -270,7 +271,7 @@
     "src": "resources/js/views/Privacy.vue"
   },
   "resources/js/views/Search.vue": {
-    "file": "assets/Search-6a2796f2.js",
+    "file": "assets/Search-f3e14fac.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -281,6 +282,23 @@
     "isDynamicEntry": true,
     "src": "resources/js/views/Search.vue"
   },
+  "resources/js/views/Services.css": {
+    "file": "assets/Services-1ed6c884.css",
+    "src": "resources/js/views/Services.css"
+  },
+  "resources/js/views/Services.vue": {
+    "css": [
+      "assets/Services-1ed6c884.css"
+    ],
+    "file": "assets/Services-8986a762.js",
+    "imports": [
+      "_vue-router-f2d300c7.js",
+      "resources/js/app.js",
+      "__plugin-vue_export-helper-c27b6911.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/views/Services.vue"
+  },
   "resources/js/views/Terms.css": {
     "file": "assets/Terms-c49f3fd4.css",
     "src": "resources/js/views/Terms.css"
@@ -289,7 +307,7 @@
     "css": [
       "assets/Terms-c49f3fd4.css"
     ],
-    "file": "assets/Terms-9b8f67d5.js",
+    "file": "assets/Terms-fd43f2b6.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
@@ -300,7 +318,7 @@
     "src": "resources/js/views/Terms.vue"
   },
   "resources/js/views/UserProfile.vue": {
-    "file": "assets/UserProfile-4c658a21.js",
+    "file": "assets/UserProfile-8cccd13e.js",
     "imports": [
       "_vue-router-f2d300c7.js",
       "resources/js/app.js",
