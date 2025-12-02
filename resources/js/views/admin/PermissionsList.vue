@@ -1,378 +1,253 @@
 <template>
-  <div class="permissions-management-advanced">
-    <!-- Action Bar -->
-    <div class="action-bar mb-4">
-      <button @click="showGenerateModal = true" class="action-btn success">
-        <i class="fas fa-magic"></i>
-        Generate CRUD
-      </button>
-      <a href="/permissions/create" class="action-btn primary">
-        <i class="fas fa-plus-circle"></i>
-        Create Permission
-      </a>
+  <div class="permissions-modern">
+    <!-- Stats Cards -->
+    <div class="stats-grid mb-4">
+      <div class="stat-card blue">
+        <div class="stat-icon">
+          <i class="fas fa-key"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ permissionsTotal }}</h3>
+          <p class="stat-label">Total Permissions</p>
+        </div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">
+          <i class="fas fa-lock"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ systemPermissionsCount }}</h3>
+          <p class="stat-label">System Permissions</p>
+        </div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon">
+          <i class="fas fa-user-edit"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ customPermissionsCount }}</h3>
+          <p class="stat-label">Custom Permissions</p>
+        </div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon">
+          <i class="fas fa-folder"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ categories.length }}</h3>
+          <p class="stat-label">Categories</p>
+        </div>
+      </div>
     </div>
 
-    <!-- Advanced Search & Filters -->
+    <!-- Filters -->
     <div class="search-filter-bar">
       <div class="search-box">
         <i class="fas fa-search search-icon"></i>
         <input
           type="text"
-          v-model="filters.search"
           class="search-input"
-          placeholder="Search permissions by name or description..."
+          placeholder="Search permissions by name..."
+          v-model="filters.search"
         >
         <span v-if="filters.search" class="clear-search" @click="filters.search = ''">
           <i class="fas fa-times"></i>
         </span>
       </div>
-
-      <div class="filter-controls">
-        <select v-model="filters.category" class="category-select">
+      <div class="filter-group">
+        <select class="filter-select" v-model="filters.category">
           <option value="">All Categories</option>
-          <option v-for="category in categories" :key="category.value" :value="category.value">
-            {{ category.label }}
+          <option v-for="cat in categories" :key="cat" :value="cat">
+            {{ cat }}
           </option>
         </select>
-
-        <div class="sort-group">
-          <select v-model="filters.sort_by" class="sort-select">
-            <option value="id">Sort by ID</option>
-            <option value="name">Sort by Name</option>
-            <option value="created_at">Sort by Date</option>
-          </select>
-          <button
-            class="sort-direction-btn"
-            @click="filters.sort_direction = filters.sort_direction === 'asc' ? 'desc' : 'asc'"
-            :title="filters.sort_direction === 'asc' ? 'Ascending' : 'Descending'"
-          >
-            <i :class="filters.sort_direction === 'asc' ? 'fas fa-sort-amount-up' : 'fas fa-sort-amount-down'"></i>
-          </button>
-        </div>
-
-        <button class="action-btn secondary" @click="resetFilters">
-          <i class="fas fa-redo"></i>
+        <select class="filter-select" v-model="filters.per_page">
+          <option :value="15">15 per page</option>
+          <option :value="30">30 per page</option>
+          <option :value="50">50 per page</option>
+          <option :value="100">100 per page</option>
+        </select>
+      </div>
+      <div class="action-buttons">
+        <a href="/roles" class="action-btn info">
+          <i class="fas fa-user-tag"></i> Roles
+        </a>
+        <button class="action-btn primary" @click="showGenerateModal = true">
+          <i class="fas fa-plus"></i> Generate
         </button>
       </div>
-    </div>
-
-    <!-- View Controls -->
-    <div class="view-controls mb-4">
-      <div class="view-toggle">
-        <button
-          class="toggle-btn"
-          :class="{ active: viewMode === 'grid' }"
-          @click="viewMode = 'grid'"
-        >
-          <i class="fas fa-th"></i>
-          Grid
-        </button>
-        <button
-          class="toggle-btn"
-          :class="{ active: viewMode === 'list' }"
-          @click="viewMode = 'list'"
-        >
-          <i class="fas fa-list"></i>
-          List
-        </button>
-      </div>
-
-      <div class="results-info">
-        Showing {{ permissions.data.length }} of {{ permissions.total }} permissions
-      </div>
-
-      <select v-model="filters.per_page" class="per-page-select">
-        <option :value="15">15 per page</option>
-        <option :value="25">25 per page</option>
-        <option :value="50">50 per page</option>
-        <option :value="100">100 per page</option>
-      </select>
-    </div>
-
-    <!-- Debug Info -->
-    <div class="debug-info" style="background: #fff3cd; padding: 1rem; margin-bottom: 1rem; border-radius: 8px;">
-      <strong>Debug:</strong>
-      Loading: {{ loading }} |
-      Data Length: {{ permissions.data?.length || 0 }} |
-      Total: {{ permissions.total }} |
-      Current Page: {{ permissions.current_page }} |
-      View Mode: {{ viewMode }}
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      <div class="loader-advanced"></div>
+    <div v-if="isLoading" class="loading-state">
+      <div class="spinner"></div>
       <p>Loading permissions...</p>
     </div>
 
-    <!-- Permissions Grid View -->
-    <div v-else-if="viewMode === 'grid'" class="permissions-grid">
-      <div
-        v-for="permission in permissions.data"
-        :key="permission.id"
-        class="permission-card"
-        :class="{ system: permission.is_system }"
-      >
-        <div class="card-header-custom">
-          <div class="permission-icon-wrapper">
-            <div class="permission-icon" :class="getCategoryIconClass(permission.category)">
-              <i :class="getCategoryIcon(permission.category)"></i>
-            </div>
-            <span v-if="permission.is_system" class="system-badge">
-              <i class="fas fa-shield-alt"></i>
-              System
-            </span>
-          </div>
-          <div class="card-menu">
-            <button class="menu-btn" @click="toggleMenu(permission.id)">
-              <i class="fas fa-ellipsis-v"></i>
-            </button>
-            <div v-if="activeMenu === permission.id" class="dropdown-menu">
-              <a :href="`/permissions/${permission.id}`" class="menu-item">
-                <i class="fas fa-eye"></i>
-                View Details
-              </a>
-              <a :href="`/permissions/${permission.id}/edit`" class="menu-item">
-                <i class="fas fa-edit"></i>
-                Edit Permission
-              </a>
-              <button
-                v-if="permission.is_deletable"
-                @click="handleDelete(permission)"
-                class="menu-item danger"
-              >
-                <i class="fas fa-trash"></i>
-                Delete
+    <!-- Table -->
+    <div v-else class="data-table-container">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Permission</th>
+            <th>Category</th>
+            <th>Roles</th>
+            <th>Type</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody v-if="permissionsData.length > 0">
+          <tr v-for="permission in permissionsData" :key="permission.id">
+            <td><span class="id-badge">#{{ permission.id }}</span></td>
+            <td>
+              <div class="permission-cell">
+                <div class="permission-icon-box" :class="getCategoryColorClass(permission.category)">
+                  <i :class="getCategoryIcon(permission.category)"></i>
+                </div>
+                <div class="permission-info">
+                  <strong>{{ permission.display_name }}</strong>
+                  <span class="permission-slug">{{ permission.name }}</span>
+                </div>
+              </div>
+            </td>
+            <td>
+              <span class="badge" :class="getCategoryBadgeClass(permission.category)">
+                {{ permission.category }}
+              </span>
+            </td>
+            <td>
+              <span class="badge info">
+                <i class="fas fa-user-tag"></i> {{ permission.role_count }} roles
+              </span>
+            </td>
+            <td>
+              <span v-if="permission.is_system" class="badge warning">
+                <i class="fas fa-lock"></i> System
+              </span>
+              <span v-else class="badge success">
+                <i class="fas fa-user"></i> Custom
+              </span>
+            </td>
+            <td>
+              <div class="table-actions">
+                <button
+                  v-if="permission.is_deletable"
+                  @click="handleDelete(permission)"
+                  class="action-btn-small delete"
+                  title="Delete"
+                >
+                  <i class="fas fa-trash"></i>
+                </button>
+                <span v-else class="lock-indicator" title="Cannot delete - assigned to roles or system permission">
+                  <i class="fas fa-lock"></i>
+                </span>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else>
+          <tr>
+            <td colspan="6" class="empty-state">
+              <i class="fas fa-key"></i>
+              <p>No permissions found</p>
+              <button @click="resetFilters" class="action-btn primary">
+                <i class="fas fa-redo"></i> Reset Filters
               </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-body-custom">
-          <h3 class="permission-name">{{ permission.name }}</h3>
-          <p class="permission-id">#{{ permission.id }}</p>
-
-          <div class="permission-display">
-            <label>Display Name</label>
-            <p>{{ permission.display_name || 'N/A' }}</p>
-          </div>
-
-          <div class="permission-description">
-            <label>Description</label>
-            <p>{{ truncate(permission.description, 80) || 'No description' }}</p>
-          </div>
-
-          <div class="spacer"></div>
-
-          <div class="permission-meta">
-            <div class="meta-item">
-              <i class="fas fa-user-tag"></i>
-              <span>{{ permission.role_count }} Roles</span>
-            </div>
-            <div class="meta-item" v-if="permission.category">
-              <i class="fas fa-tag"></i>
-              <span>{{ formatCategory(permission.category) }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="card-footer-custom">
-          <a :href="`/permissions/${permission.id}`" class="action-btn primary">
-            <i class="fas fa-eye"></i>
-            View
-          </a>
-          <a :href="`/permissions/${permission.id}/edit`" class="action-btn secondary">
-            <i class="fas fa-edit"></i>
-            Edit
-          </a>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-if="permissions.data.length === 0" class="empty-state-advanced">
-        <div class="empty-icon">
-          <i class="fas fa-key"></i>
-        </div>
-        <h3>No Permissions Found</h3>
-        <p>Try adjusting your filters or search criteria</p>
-        <button @click="resetFilters" class="action-btn primary">
-          <i class="fas fa-redo"></i>
-          Reset Filters
-        </button>
-      </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Permissions List View -->
-    <div v-else class="permissions-list-view">
-      <div
-        v-for="permission in permissions.data"
-        :key="permission.id"
-        class="permission-list-item"
-        :class="{ system: permission.is_system }"
-      >
-        <div class="list-item-icon">
-          <div class="permission-icon" :class="getCategoryIconClass(permission.category)">
-            <i :class="getCategoryIcon(permission.category)"></i>
-          </div>
-        </div>
-
-        <div class="list-item-info">
-          <h4>{{ permission.name }}</h4>
-          <p class="permission-id">#{{ permission.id }}</p>
-        </div>
-
-        <div class="list-item-display">
-          <label>Display Name</label>
-          <p>{{ permission.display_name || 'N/A' }}</p>
-        </div>
-
-        <div class="list-item-description">
-          <label>Description</label>
-          <p>{{ truncate(permission.description, 60) || 'No description' }}</p>
-        </div>
-
-        <div class="list-item-meta">
-          <div class="meta-pill">
-            <i class="fas fa-user-tag"></i>
-            {{ permission.role_count }}
-          </div>
-          <span v-if="permission.is_system" class="system-badge small">
-            <i class="fas fa-shield-alt"></i>
-          </span>
-        </div>
-
-        <div class="list-item-actions">
-          <a :href="`/permissions/${permission.id}`" class="icon-btn" title="View">
-            <i class="fas fa-eye"></i>
-          </a>
-          <a :href="`/permissions/${permission.id}/edit`" class="icon-btn" title="Edit">
-            <i class="fas fa-edit"></i>
-          </a>
-          <button
-            v-if="permission.is_deletable"
-            @click="handleDelete(permission)"
-            class="icon-btn danger"
-            title="Delete"
-          >
-            <i class="fas fa-trash"></i>
-          </button>
-        </div>
+    <!-- Pagination -->
+    <div class="pagination-container" v-if="lastPage > 1">
+      <div class="pagination-info">
+        Showing {{ permissionsData.length }} of {{ permissionsTotal }} permissions
       </div>
-
-      <!-- Empty State for List View -->
-      <div v-if="permissions.data.length === 0" class="empty-state-advanced">
-        <div class="empty-icon">
-          <i class="fas fa-key"></i>
-        </div>
-        <h3>No Permissions Found</h3>
-        <p>Try adjusting your filters or search criteria</p>
-        <button @click="resetFilters" class="action-btn primary">
-          <i class="fas fa-redo"></i>
-          Reset Filters
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          :disabled="currentPage === 1"
+          @click="loadPermissions(currentPage - 1)"
+        >
+          <i class="fas fa-chevron-left"></i> Previous
         </button>
-      </div>
-    </div>
-
-    <!-- Advanced Pagination -->
-    <div v-if="permissions.data.length > 0" class="pagination-advanced">
-      <button
-        class="page-btn"
-        :disabled="permissions.current_page === 1"
-        @click="loadPermissions(permissions.current_page - 1)"
-      >
-        <i class="fas fa-chevron-left"></i>
-        Previous
-      </button>
-
-      <div class="page-numbers">
         <button
           v-for="page in visiblePages"
           :key="page"
-          class="page-number"
-          :class="{ active: page === permissions.current_page }"
+          class="pagination-btn"
+          :class="{ active: page === currentPage }"
           @click="loadPermissions(page)"
         >
           {{ page }}
         </button>
+        <button
+          class="pagination-btn"
+          :disabled="currentPage === lastPage"
+          @click="loadPermissions(currentPage + 1)"
+        >
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
-
-      <button
-        class="page-btn"
-        :disabled="permissions.current_page === permissions.last_page"
-        @click="loadPermissions(permissions.current_page + 1)"
-      >
-        Next
-        <i class="fas fa-chevron-right"></i>
-      </button>
     </div>
 
     <!-- Generate Permissions Modal -->
-    <div v-if="showGenerateModal" class="modal-overlay" @click="closeGenerateModal">
-      <div class="modal-dialog-advanced" @click.stop>
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">
-              <i class="fas fa-magic text-success"></i>
-              Generate CRUD Permissions
-            </h5>
-            <button type="button" class="btn-close" @click="closeGenerateModal">
-              <i class="fas fa-times"></i>
-            </button>
-          </div>
-          <div class="modal-body">
-            <p class="text-muted mb-3">
-              This will generate standard CRUD permissions for a module (view, create, edit, delete).
-            </p>
-
-            <div class="form-group mb-3">
-              <label class="form-label">
-                Module Name <span class="text-danger">*</span>
-              </label>
-              <input
-                type="text"
-                v-model="moduleName"
-                class="form-control-modern"
-                placeholder="Enter module name (e.g. product, blog_post)"
-                @input="updatePreview"
-              >
-              <small class="form-text">
-                Use lowercase letters, underscores instead of spaces
-              </small>
-            </div>
-
-            <div class="alert-info">
-              <i class="fas fa-info-circle"></i>
-              <strong>The following permissions will be generated:</strong>
-              <ul class="mb-0 mt-2">
-                <li v-for="perm in previewPermissions" :key="perm">{{ perm }}</li>
-              </ul>
-            </div>
-
-            <div v-if="generateError" class="alert-danger mt-3">
-              <i class="fas fa-exclamation-triangle"></i>
-              {{ generateError }}
-            </div>
-
-            <div v-if="generateSuccess" class="alert-success mt-3">
-              <i class="fas fa-check-circle"></i>
-              {{ generateSuccess }}
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="action-btn secondary" @click="closeGenerateModal">
-              Cancel
-            </button>
-            <button
-              type="button"
-              class="action-btn success"
-              @click="handleGenerate"
-              :disabled="!moduleName || generating"
+    <div class="modal-overlay" v-if="showGenerateModal" @click="showGenerateModal = false">
+      <div class="modern-modal" @click.stop>
+        <div class="modal-header">
+          <h3><i class="fas fa-plus-circle text-success"></i> Generate Permissions</h3>
+          <button class="close-btn" @click="showGenerateModal = false">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label class="form-label">Module Name</label>
+            <input
+              type="text"
+              v-model="moduleName"
+              class="form-input"
+              placeholder="e.g., posts, comments, orders"
             >
-              <i v-if="generating" class="fas fa-spinner fa-spin"></i>
-              <i v-else class="fas fa-magic"></i>
-              {{ generating ? 'Generating...' : 'Generate Permissions' }}
-            </button>
+            <p class="form-help">
+              This will create: create_[module], view_[module], edit_[module], update_[module], destroy_[module]
+            </p>
           </div>
+        </div>
+        <div class="modal-footer">
+          <button class="action-btn secondary" @click="showGenerateModal = false">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button class="action-btn success" @click="generatePermissions" :disabled="isGenerating || !moduleName">
+            <i v-if="isGenerating" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-plus-circle"></i> Generate
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div class="modal-overlay" v-if="showDeleteModal" @click="showDeleteModal = false">
+      <div class="modern-modal" @click.stop>
+        <div class="modal-header">
+          <h3><i class="fas fa-exclamation-triangle text-danger"></i> Delete Permission</h3>
+          <button class="close-btn" @click="showDeleteModal = false">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete the permission <strong>{{ permissionToDelete?.display_name }}</strong>?</p>
+          <p class="text-muted">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="action-btn secondary" @click="showDeleteModal = false">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button class="action-btn danger" @click="confirmDelete" :disabled="isDeleting">
+            <i v-if="isDeleting" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-trash"></i> Delete
+          </button>
         </div>
       </div>
     </div>
@@ -380,42 +255,40 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch, reactive, computed, onBeforeUnmount } from 'vue'
-import { usePermissions } from '../../composables/usePermissions'
+import { ref, onMounted, watch, reactive, computed } from 'vue'
 
-const { permissions, loading, fetchPermissions, generatePermissions, deletePermission } = usePermissions()
-
+// Local state
+const permissionsData = ref([])
+const permissionsTotal = ref(0)
+const currentPage = ref(1)
+const lastPage = ref(1)
+const isLoading = ref(true)
 const categories = ref([])
 const showGenerateModal = ref(false)
+const showDeleteModal = ref(false)
+const permissionToDelete = ref(null)
+const isDeleting = ref(false)
+const isGenerating = ref(false)
 const moduleName = ref('')
-const generating = ref(false)
-const generateError = ref('')
-const generateSuccess = ref('')
-const viewMode = ref('grid')
-const activeMenu = ref(null)
 
 const filters = reactive({
   search: '',
   category: '',
-  per_page: 15,
-  sort_by: 'id',
-  sort_direction: 'desc'
+  per_page: 15
 })
 
-const previewPermissions = computed(() => {
-  const module = moduleName.value || '[module]'
-  return [
-    `view_${module}`,
-    `create_${module}`,
-    `edit_${module}`,
-    `delete_${module}`
-  ]
+const systemPermissionsCount = computed(() => {
+  return permissionsData.value.filter(p => p.is_system).length
+})
+
+const customPermissionsCount = computed(() => {
+  return permissionsData.value.filter(p => !p.is_system).length
 })
 
 const visiblePages = computed(() => {
   const pages = []
-  const current = permissions.value.current_page
-  const last = permissions.value.last_page
+  const current = currentPage.value
+  const last = lastPage.value
 
   let start = Math.max(1, current - 2)
   let end = Math.min(last, current + 2)
@@ -427,13 +300,9 @@ const visiblePages = computed(() => {
   return pages
 })
 
-onMounted(async () => {
-  await loadData()
-  document.addEventListener('click', closeMenus)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', closeMenus)
+onMounted(() => {
+  loadPermissions(1)
+  loadCategories()
 })
 
 // Watch filters with debounce for search
@@ -443,26 +312,48 @@ watch(() => filters.search, () => {
   searchTimeout = setTimeout(() => loadPermissions(1), 300)
 })
 
-watch(() => [filters.category, filters.per_page, filters.sort_by, filters.sort_direction], () => {
+watch(() => [filters.category, filters.per_page], () => {
   loadPermissions(1)
 })
 
-const loadData = async () => {
-  await Promise.all([
-    loadPermissions(),
-    loadCategories()
-  ])
-}
-
 const loadPermissions = async (page = 1) => {
-  await fetchPermissions({ ...filters, page })
+  isLoading.value = true
+
+  try {
+    const params = new URLSearchParams()
+    if (filters.search) params.append('search', filters.search)
+    if (filters.category) params.append('category', filters.category)
+    if (filters.per_page) params.append('per_page', filters.per_page)
+    params.append('page', page)
+
+    const response = await fetch(`/api/admin/permissions?${params.toString()}`)
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch permissions')
+    }
+
+    const data = await response.json()
+
+    if (data.permissions) {
+      permissionsData.value = data.permissions.data || []
+      permissionsTotal.value = data.permissions.total || 0
+      currentPage.value = data.permissions.current_page || 1
+      lastPage.value = data.permissions.last_page || 1
+    }
+  } catch (error) {
+    console.error('Error loading permissions:', error)
+  } finally {
+    isLoading.value = false
+  }
 }
 
 const loadCategories = async () => {
   try {
     const response = await fetch('/api/admin/permissions/categories')
-    const data = await response.json()
-    categories.value = data.categories
+    if (response.ok) {
+      const data = await response.json()
+      categories.value = data.categories || []
+    }
   } catch (error) {
     console.error('Error loading categories:', error)
   }
@@ -472,276 +363,195 @@ const resetFilters = () => {
   filters.search = ''
   filters.category = ''
   filters.per_page = 15
-  filters.sort_by = 'id'
-  filters.sort_direction = 'desc'
   loadPermissions(1)
 }
 
 const getCategoryIcon = (category) => {
   const icons = {
-    'view': 'fas fa-eye',
-    'create': 'fas fa-plus-circle',
-    'edit': 'fas fa-edit',
-    'delete': 'fas fa-trash'
+    users: 'fas fa-users',
+    roles: 'fas fa-user-tag',
+    permissions: 'fas fa-key',
+    posts: 'fas fa-file-alt',
+    categories: 'fas fa-folder',
+    settings: 'fas fa-cog',
+    reports: 'fas fa-flag'
   }
-  return icons[category] || 'fas fa-key'
+  return icons[category] || 'fas fa-shield-alt'
 }
 
-const getCategoryIconClass = (category) => {
+const getCategoryColorClass = (category) => {
   const classes = {
-    'view': 'icon-info',
-    'create': 'icon-success',
-    'edit': 'icon-warning',
-    'delete': 'icon-danger'
+    users: 'blue',
+    roles: 'gold',
+    permissions: 'purple',
+    posts: 'green',
+    categories: 'orange',
+    settings: 'teal',
+    reports: 'red'
   }
-  return classes[category] || 'icon-primary'
+  return classes[category] || 'blue'
 }
 
-const formatCategory = (category) => {
-  return category ? category.charAt(0).toUpperCase() + category.slice(1) : 'General'
+const getCategoryBadgeClass = (category) => {
+  const classes = {
+    users: 'primary',
+    roles: 'warning',
+    permissions: 'info',
+    posts: 'success',
+    categories: 'purple',
+    settings: 'secondary',
+    reports: 'danger'
+  }
+  return classes[category] || 'secondary'
 }
 
-const truncate = (text, length) => {
-  if (!text) return ''
-  return text.length > length ? text.substring(0, length) + '...' : text
+const handleDelete = (permission) => {
+  permissionToDelete.value = permission
+  showDeleteModal.value = true
 }
 
-const toggleMenu = (permissionId) => {
-  activeMenu.value = activeMenu.value === permissionId ? null : permissionId
+const confirmDelete = async () => {
+  if (!permissionToDelete.value) return
+
+  isDeleting.value = true
+
+  try {
+    const response = await fetch(`/api/admin/permissions/${permissionToDelete.value.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      }
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to delete permission')
+    }
+
+    showDeleteModal.value = false
+    permissionToDelete.value = null
+    loadPermissions(currentPage.value)
+  } catch (error) {
+    console.error('Error deleting permission:', error)
+    alert(error.message)
+  } finally {
+    isDeleting.value = false
+  }
 }
 
-const closeMenus = () => {
-  activeMenu.value = null
-}
-
-const closeGenerateModal = () => {
-  showGenerateModal.value = false
-  moduleName.value = ''
-  generateError.value = ''
-  generateSuccess.value = ''
-}
-
-const updatePreview = () => {
-  generateError.value = ''
-  generateSuccess.value = ''
-}
-
-const handleGenerate = async () => {
+const generatePermissions = async () => {
   if (!moduleName.value) return
 
-  generating.value = true
-  generateError.value = ''
-  generateSuccess.value = ''
+  isGenerating.value = true
 
   try {
-    const result = await generatePermissions(moduleName.value)
+    const response = await fetch('/api/admin/permissions/generate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      },
+      body: JSON.stringify({ module_name: moduleName.value })
+    })
 
-    if (result.success) {
-      generateSuccess.value = result.message
-      if (result.existing && result.existing.length > 0) {
-        generateSuccess.value += ` (${result.existing.length} already existed)`
-      }
-
-      // Reload permissions after 1.5 seconds
-      setTimeout(async () => {
-        await loadPermissions(1)
-        await loadCategories()
-        closeGenerateModal()
-      }, 1500)
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.message || 'Failed to generate permissions')
     }
+
+    showGenerateModal.value = false
+    moduleName.value = ''
+    loadPermissions(1)
+    loadCategories()
   } catch (error) {
-    generateError.value = error.message || 'Failed to generate permissions'
+    console.error('Error generating permissions:', error)
+    alert(error.message)
   } finally {
-    generating.value = false
-  }
-}
-
-const handleDelete = async (permission) => {
-  closeMenus()
-
-  if (!confirm(`Are you sure you want to delete the permission "${permission.display_name}"? This action cannot be undone.`)) {
-    return
-  }
-
-  try {
-    await deletePermission(permission.id)
-    alert('Permission deleted successfully')
-    await loadPermissions(permissions.value.current_page)
-  } catch (error) {
-    alert(error.message || 'Failed to delete permission')
+    isGenerating.value = false
   }
 }
 </script>
 
 <style scoped>
-.permissions-management-advanced {
+.permissions-modern {
   padding: 0;
-  background: #f5f7fa;
 }
 
-/* Section Header */
-.section-header {
-  background: white;
-  border-radius: 16px;
-  padding: 2rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-
-.header-content {
-  flex: 1;
-}
-
-.section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 0.5rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.section-title i {
-  color: #667eea;
-}
-
-.section-subtitle {
-  color: #6c757d;
-  margin: 0;
-  font-size: 0.95rem;
-}
-
-.header-actions {
-  display: flex;
-  gap: 1rem;
-}
-
-/* Modern Stats Cards */
+/* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
-.stat-card-advanced {
-  background: white;
+.stat-card {
   border-radius: 16px;
   padding: 1.5rem;
+  color: white;
   display: flex;
   align-items: center;
   gap: 1.25rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.stat-card-advanced::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 4px;
-  background: var(--stat-color-start, #667eea);
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
 }
 
-.stat-card-advanced.stat-info {
-  --stat-color-start: #17a2b8;
-  --stat-color-end: #138496;
-}
-
-.stat-card-advanced.stat-success {
-  --stat-color-start: #28a745;
-  --stat-color-end: #1e7e34;
-}
-
-.stat-card-advanced.stat-danger {
-  --stat-color-start: #dc3545;
-  --stat-color-end: #bd2130;
-}
-
-.stat-card-advanced.stat-warning {
-  --stat-color-start: #ffc107;
-  --stat-color-end: #e0a800;
-}
-
-.stat-card-advanced:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
-}
-
-.stat-icon-wrapper {
-  position: relative;
-}
+.stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.stat-card.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.stat-card.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 
 .stat-icon {
-  width: 64px;
-  height: 64px;
-  border-radius: 14px;
+  width: 65px;
+  height: 65px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.5rem;
-  background: linear-gradient(135deg, var(--stat-color-start, #667eea) 0%, var(--stat-color-end, #764ba2) 100%);
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  font-size: 1.75rem;
 }
 
-.stat-details {
-  flex: 1;
-}
+.stat-content { flex: 1; }
+.stat-value { font-size: 2rem; font-weight: 700; margin: 0; }
+.stat-label { font-size: 0.9rem; opacity: 0.9; margin: 0.25rem 0 0 0; }
 
-.stat-number {
-  font-size: 2rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 0.25rem 0;
-}
-
-.stat-label {
-  color: #6c757d;
-  font-size: 0.9rem;
-  margin: 0;
-  font-weight: 500;
-}
-
-/* Search & Filter Bar */
+/* Search & Filters */
 .search-filter-bar {
   background: white;
+  padding: 1.25rem;
   border-radius: 16px;
-  padding: 1.5rem;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .search-box {
-  flex: 1;
-  min-width: 300px;
   position: relative;
+  flex: 1;
+  min-width: 280px;
 }
 
 .search-icon {
   position: absolute;
-  left: 1.25rem;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #6c757d;
-  font-size: 1.1rem;
+  color: #999;
 }
 
 .search-input {
   width: 100%;
-  padding: 0.875rem 3rem 0.875rem 3.5rem;
-  border: 2px solid #e9ecef;
+  padding: 0.875rem 2.5rem 0.875rem 2.75rem;
+  border: 2px solid #eef2f7;
   border-radius: 12px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -755,80 +565,64 @@ const handleDelete = async (permission) => {
 
 .clear-search {
   position: absolute;
-  right: 1.25rem;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #6c757d;
+  color: #999;
   cursor: pointer;
-  padding: 0.25rem;
-  transition: color 0.2s ease;
+  transition: color 0.2s;
 }
 
 .clear-search:hover {
-  color: #dc3545;
+  color: #333;
 }
 
-.filter-controls {
+.filter-group {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  gap: 0.5rem;
 }
 
-.category-select,
-.sort-select,
-.per-page-select {
-  padding: 0.625rem 1.25rem;
-  border: 2px solid #e9ecef;
+.filter-select {
+  padding: 0.875rem 1rem;
+  border: 2px solid #eef2f7;
   border-radius: 12px;
-  font-weight: 500;
-  cursor: pointer;
-  transition: all 0.2s ease;
+  font-size: 0.9rem;
   background: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
 }
 
-.category-select:focus,
-.sort-select:focus,
-.per-page-select:focus {
+.filter-select:focus {
   outline: none;
   border-color: #667eea;
 }
 
-.sort-group {
+.action-buttons {
   display: flex;
-  gap: 0.5rem;
-}
-
-.sort-direction-btn {
-  padding: 0.625rem 0.875rem;
-  border: 2px solid #e9ecef;
-  border-radius: 12px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #6c757d;
-}
-
-.sort-direction-btn:hover {
-  border-color: #667eea;
-  color: #667eea;
+  gap: 0.75rem;
 }
 
 .action-btn {
-  padding: 0.625rem 1.5rem;
+  padding: 0.75rem 1.25rem;
   border: none;
   border-radius: 12px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
   text-decoration: none;
-  white-space: nowrap;
 }
 
 .action-btn.primary {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+}
+
+.action-btn.info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
   color: white;
 }
 
@@ -838,18 +632,18 @@ const handleDelete = async (permission) => {
 }
 
 .action-btn.success {
-  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
   color: white;
 }
 
 .action-btn.danger {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
   color: white;
 }
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 .action-btn:disabled {
@@ -858,66 +652,22 @@ const handleDelete = async (permission) => {
   transform: none;
 }
 
-/* View Controls */
-.view-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-  background: white;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.07);
-}
-
-.view-toggle {
-  display: flex;
-  gap: 0.5rem;
-  background: #f8f9fa;
-  padding: 0.375rem;
-  border-radius: 12px;
-}
-
-.toggle-btn {
-  padding: 0.625rem 1.25rem;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
-  cursor: pointer;
-  font-weight: 500;
-  color: #6c757d;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.toggle-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.results-info {
-  color: #6c757d;
-  font-weight: 500;
-}
-
 /* Loading State */
 .loading-state {
   text-align: center;
   padding: 4rem 2rem;
   background: white;
   border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
 }
 
-.loader-advanced {
-  width: 60px;
-  height: 60px;
-  border: 4px solid #f3f3f3;
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  border: 4px solid #f3f4f6;
   border-top: 4px solid #667eea;
   border-radius: 50%;
-  margin: 0 auto 1rem;
   animation: spin 1s linear infinite;
 }
 
@@ -926,680 +676,355 @@ const handleDelete = async (permission) => {
   100% { transform: rotate(360deg); }
 }
 
-/* Permissions Grid */
-.permissions-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 1.5rem;
-}
-
-.permission-card {
+/* Data Table */
+.data-table-container {
   background: white;
   border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  min-height: 400px;
-}
-
-.permission-card.system {
-  border: 2px solid #ffc107;
-}
-
-.permission-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-.card-header-custom {
-  padding: 1.5rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-}
-
-.permission-icon-wrapper {
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
-}
-
-.permission-icon {
-  width: 70px;
-  height: 70px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.icon-danger {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
-}
-
-.icon-warning {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  color: #212529;
-}
-
-.icon-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.icon-info {
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-}
-
-.icon-success {
-  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-}
-
-.system-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  color: #212529;
-  border-radius: 20px;
-  font-size: 0.7rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.system-badge.small {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.65rem;
-}
-
-.card-menu {
-  position: relative;
-}
-
-.menu-btn {
-  background: white;
-  border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.menu-btn:hover {
-  background: #f8f9fa;
-  transform: scale(1.1);
-}
-
-.dropdown-menu {
-  position: absolute;
-  right: 0;
-  top: 45px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  min-width: 200px;
-  z-index: 100;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1.25rem;
-  border: none;
-  background: transparent;
+.modern-table {
   width: 100%;
+  border-collapse: collapse;
+}
+
+.modern-table thead {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
+.modern-table th {
+  padding: 1.125rem 1rem;
   text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #495057;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.menu-item:hover {
-  background: #f8f9fa;
-}
-
-.menu-item.danger {
-  color: #dc3545;
-}
-
-.menu-item.danger:hover {
-  background: #fee;
-}
-
-.card-body-custom {
-  padding: 1.5rem;
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.permission-name {
-  font-size: 1.1rem;
-  font-weight: 700;
-  margin: 0 0 0.25rem 0;
-  color: #2c3e50;
-  word-break: break-word;
-}
-
-.permission-id {
-  color: #6c757d;
-  font-size: 0.875rem;
-  margin: 0 0 1rem 0;
-}
-
-.permission-display,
-.permission-description {
-  margin-bottom: 1rem;
-}
-
-.permission-display label,
-.permission-description label {
-  font-size: 0.75rem;
   font-weight: 600;
-  color: #6c757d;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 0.25rem 0;
-  display: block;
-}
-
-.permission-display p,
-.permission-description p {
-  margin: 0;
-  color: #495057;
-  font-size: 0.9rem;
-}
-
-.spacer {
-  flex: 1;
-}
-
-.permission-meta {
-  display: flex;
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.meta-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: #6c757d;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.meta-item i {
-  color: #667eea;
-}
-
-.card-footer-custom {
-  padding: 1rem 1.5rem;
-  background: #f8f9fa;
-  display: flex;
-  gap: 0.75rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.card-footer-custom .action-btn {
-  flex: 1;
-  justify-content: center;
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-}
-
-/* List View */
-.permissions-list-view {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.permission-list-item {
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  transition: all 0.3s ease;
-}
-
-.permission-list-item:hover {
-  transform: translateX(8px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
-}
-
-.permission-list-item.system {
-  border-left: 4px solid #ffc107;
-}
-
-.list-item-icon .permission-icon {
-  width: 56px;
-  height: 56px;
-  font-size: 1.25rem;
-}
-
-.list-item-info {
-  flex: 0 0 220px;
-}
-
-.list-item-info h4 {
-  margin: 0 0 0.25rem 0;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #2c3e50;
-}
-
-.list-item-display {
-  flex: 0 0 180px;
-}
-
-.list-item-description {
-  flex: 1;
-  min-width: 200px;
-}
-
-.list-item-display label,
-.list-item-description label {
-  font-size: 0.7rem;
-  font-weight: 600;
-  color: #6c757d;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  margin: 0 0 0.25rem 0;
-  display: block;
-}
-
-.list-item-display p,
-.list-item-description p {
-  margin: 0;
-  color: #495057;
-  font-size: 0.875rem;
-}
-
-.list-item-meta {
-  flex: 0 0 120px;
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-.meta-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.375rem;
-  padding: 0.375rem 0.75rem;
-  background: #e9ecef;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #495057;
-}
-
-.meta-pill i {
-  color: #667eea;
-}
-
-.list-item-actions {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.icon-btn {
-  width: 38px;
-  height: 38px;
-  border-radius: 10px;
-  border: 2px solid #e9ecef;
-  background: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #6c757d;
-  text-decoration: none;
-}
-
-.icon-btn:hover {
-  background: #f8f9fa;
-  border-color: #667eea;
-  color: #667eea;
-  transform: translateY(-2px);
-}
-
-.icon-btn.danger:hover {
-  border-color: #dc3545;
-  color: #dc3545;
-  background: #fee;
-}
-
-/* Empty State */
-.empty-state-advanced {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 4rem 2rem;
-  background: white;
-  border-radius: 16px;
-}
-
-.empty-icon {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-}
-
-.empty-icon i {
-  font-size: 3rem;
   color: white;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-.empty-state-advanced h3 {
-  color: #2c3e50;
-  margin-bottom: 0.5rem;
+.modern-table tbody tr {
+  border-bottom: 1px solid #f0f4f8;
+  transition: all 0.2s ease;
 }
 
-.empty-state-advanced p {
-  color: #6c757d;
+.modern-table tbody tr:hover {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
+}
+
+.modern-table td {
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #333;
+  vertical-align: middle;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem !important;
+  color: #999;
+}
+
+.empty-state i {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  opacity: 0.3;
+}
+
+.empty-state p {
   margin-bottom: 1.5rem;
 }
 
-/* Advanced Pagination */
-.pagination-advanced {
+/* Permission Cell */
+.permission-cell {
   display: flex;
-  justify-content: center;
   align-items: center;
-  gap: 0.75rem;
-  margin-top: 2rem;
-  background: white;
-  padding: 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.07);
+  gap: 1rem;
 }
 
-.page-btn {
-  padding: 0.75rem 1.25rem;
-  border: 2px solid #e9ecef;
+.permission-icon-box {
+  width: 45px;
+  height: 45px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  color: white;
+}
+
+.permission-icon-box.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.permission-icon-box.gold { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); }
+.permission-icon-box.purple { background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); }
+.permission-icon-box.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.permission-icon-box.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.permission-icon-box.teal { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+.permission-icon-box.red { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); }
+
+.permission-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.permission-slug {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+/* Badges */
+.id-badge {
+  background: linear-gradient(135deg, #e8ecef 0%, #d1d8e0 100%);
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge.primary { background: #e3f2fd; color: #1976d2; }
+.badge.info { background: #e0f7fa; color: #00838f; }
+.badge.success { background: #e8f5e9; color: #2e7d32; }
+.badge.warning { background: #fff3e0; color: #ef6c00; }
+.badge.danger { background: #ffebee; color: #c62828; }
+.badge.secondary { background: #f5f5f5; color: #616161; }
+.badge.purple { background: #f3e5f5; color: #7b1fa2; }
+
+/* Lock Indicator */
+.lock-indicator {
+  color: #999;
+  font-size: 0.9rem;
+}
+
+/* Table Actions */
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn-small {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.action-btn-small.delete {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.action-btn-small:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Pagination */
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.pagination-info {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.pagination-controls {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-btn {
+  padding: 0.6rem 1rem;
+  border: 2px solid #eef2f7;
   background: white;
   border-radius: 10px;
   cursor: pointer;
-  font-weight: 600;
-  color: #495057;
+  font-size: 0.9rem;
   transition: all 0.2s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
 }
 
-.page-btn:hover:not(:disabled) {
+.pagination-btn:hover:not(:disabled) {
   border-color: #667eea;
   color: #667eea;
-  transform: translateY(-2px);
 }
 
-.page-btn:disabled {
+.pagination-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.pagination-btn:disabled {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-.page-numbers {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.page-number {
-  width: 42px;
-  height: 42px;
-  border: 2px solid #e9ecef;
-  background: white;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 600;
-  color: #495057;
-  transition: all 0.2s ease;
-}
-
-.page-number:hover {
-  border-color: #667eea;
-  color: #667eea;
-}
-
-.page-number.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: #667eea;
-  color: white;
-}
-
-/* Modal Styles */
+/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.6);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1050;
   padding: 1rem;
+  backdrop-filter: blur(4px);
 }
 
-.modal-dialog-advanced {
+.modern-modal {
   background: white;
-  border-radius: 16px;
-  max-width: 600px;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  max-width: 500px;
   width: 100%;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
-  animation: modalFadeIn 0.3s ease;
-}
-
-@keyframes modalFadeIn {
-  from {
-    opacity: 0;
-    transform: scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-.modal-content {
-  border: none;
-  border-radius: 16px;
 }
 
 .modal-header {
-  border-bottom: 1px solid #e9ecef;
-  padding: 1.5rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eef2f7;
 }
 
-.modal-title {
-  font-weight: 600;
-  font-size: 1.25rem;
+.modal-header h3 {
   margin: 0;
+  font-size: 1.25rem;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
 }
 
-.btn-close {
-  background: transparent;
+.close-btn {
+  background: none;
   border: none;
   font-size: 1.25rem;
+  color: #999;
   cursor: pointer;
-  color: #6c757d;
-  padding: 0;
-  transition: color 0.2s ease;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
 }
 
-.btn-close:hover {
-  color: #dc3545;
+.close-btn:hover {
+  background: #f8f9fa;
+  color: #333;
 }
 
 .modal-body {
   padding: 1.5rem;
 }
 
-.text-muted {
-  color: #6c757d;
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-top: 1px solid #eef2f7;
 }
 
+/* Form Elements */
 .form-group {
   margin-bottom: 1rem;
 }
 
 .form-label {
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 0.5rem;
   display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
 }
 
-.text-danger {
-  color: #dc3545;
-}
-
-.form-control-modern {
+.form-input {
   width: 100%;
-  padding: 0.75rem 1rem;
-  border: 2px solid #e9ecef;
-  border-radius: 10px;
+  padding: 0.875rem 1rem;
+  border: 2px solid #eef2f7;
+  border-radius: 12px;
   font-size: 0.95rem;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
-.form-control-modern:focus {
+.form-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 }
 
-.form-text {
+.form-help {
+  margin-top: 0.5rem;
   font-size: 0.85rem;
-  color: #6c757d;
-  margin-top: 0.25rem;
-  display: block;
+  color: #888;
 }
 
-.alert-info {
-  background: #d1ecf1;
-  border: 1px solid #bee5eb;
-  border-radius: 10px;
-  padding: 1rem;
-  color: #0c5460;
-}
-
-.alert-danger {
-  background: #f8d7da;
-  border: 1px solid #f5c6cb;
-  border-radius: 10px;
-  padding: 1rem;
-  color: #721c24;
-}
-
-.alert-success {
-  background: #d4edda;
-  border: 1px solid #c3e6cb;
-  border-radius: 10px;
-  padding: 1rem;
-  color: #155724;
-}
-
-.alert-info ul,
-.alert-danger ul,
-.alert-success ul {
-  margin: 0.5rem 0 0 1.5rem;
-  padding: 0;
-}
-
-.modal-footer {
-  border-top: 1px solid #e9ecef;
-  padding: 1.5rem;
-  display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-}
+.text-danger { color: #dc3545; }
+.text-success { color: #28a745; }
+.text-muted { color: #888; font-size: 0.9rem; }
 
 /* Responsive */
 @media (max-width: 768px) {
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .header-actions {
-    width: 100%;
-    flex-direction: column;
-  }
-
-  .header-actions .action-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
   .search-filter-bar {
     flex-direction: column;
   }
 
-  .search-box {
-    min-width: 100%;
-  }
-
-  .filter-controls {
-    flex-wrap: wrap;
+  .search-box, .filter-group, .action-buttons {
     width: 100%;
   }
 
-  .category-select,
-  .sort-select {
+  .action-buttons {
+    justify-content: stretch;
+  }
+
+  .action-btn {
     flex: 1;
+    justify-content: center;
   }
 
-  .permissions-grid {
-    grid-template-columns: 1fr;
+  .data-table-container {
+    overflow-x: auto;
   }
 
-  .permission-list-item {
-    flex-wrap: wrap;
+  .modern-table {
+    min-width: 800px;
   }
 
-  .list-item-info,
-  .list-item-display,
-  .list-item-description {
-    flex: 1 1 100%;
-  }
-
-  .permission-icon {
-    width: 50px;
-    height: 50px;
-    font-size: 1.25rem;
+  .pagination-container {
+    flex-direction: column;
   }
 }
 </style>

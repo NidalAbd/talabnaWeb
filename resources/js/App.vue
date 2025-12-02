@@ -76,8 +76,39 @@
             <span class="text-body-2 font-weight-bold">{{ appStore.locale === 'ar' ? 'EN' : 'ع' }}</span>
           </v-btn>
 
-          <!-- Login/Register -->
-          <v-btn color="primary" variant="flat" href="/login" class="d-none d-sm-flex">
+          <!-- User Menu (when logged in) -->
+          <v-menu v-if="isLoggedIn" v-model="userMenuOpen" :close-on-content-click="true" location="bottom end">
+            <template v-slot:activator="{ props }">
+              <v-btn variant="text" v-bind="props" class="d-none d-sm-flex user-menu-btn">
+                <v-avatar size="32" class="mr-2" :color="userAvatar ? undefined : 'primary'">
+                  <v-img v-if="userAvatar" :src="userAvatar" :alt="userName" />
+                  <v-icon v-else size="20" color="white">mdi-account</v-icon>
+                </v-avatar>
+                <span class="text-body-2 font-weight-medium">{{ userName }}</span>
+                <v-icon end size="small">mdi-chevron-down</v-icon>
+              </v-btn>
+            </template>
+            <v-list density="compact" min-width="200">
+              <!-- Dashboard (Admin Only) -->
+              <v-list-item v-if="isAdmin" href="/dashboard" color="primary">
+                <template v-slot:prepend>
+                  <v-icon color="primary">mdi-view-dashboard</v-icon>
+                </template>
+                <v-list-item-title>{{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}</v-list-item-title>
+              </v-list-item>
+              <v-divider v-if="isAdmin" class="my-1" />
+              <!-- Logout -->
+              <v-list-item @click="logout" color="error">
+                <template v-slot:prepend>
+                  <v-icon color="error">mdi-logout</v-icon>
+                </template>
+                <v-list-item-title>{{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}</v-list-item-title>
+              </v-list-item>
+            </v-list>
+          </v-menu>
+
+          <!-- Login/Register (when not logged in) -->
+          <v-btn v-else color="primary" variant="flat" href="/login" class="d-none d-sm-flex">
             <v-icon start>mdi-login</v-icon>
             {{ appStore.locale === 'ar' ? 'تسجيل الدخول' : 'Login' }}
           </v-btn>
@@ -93,6 +124,26 @@
     <!-- Mobile Navigation Drawer -->
     <v-navigation-drawer v-model="mobileDrawer" temporary location="right">
       <v-list>
+        <!-- User Info (when logged in) -->
+        <template v-if="isLoggedIn">
+          <v-list-item class="py-3">
+            <template v-slot:prepend>
+              <v-avatar size="40" :color="userAvatar ? undefined : 'primary'">
+                <v-img v-if="userAvatar" :src="userAvatar" :alt="userName" />
+                <v-icon v-else color="white">mdi-account</v-icon>
+              </v-avatar>
+            </template>
+            <v-list-item-title class="font-weight-bold">{{ userName }}</v-list-item-title>
+            <v-list-item-subtitle>{{ appStore.user?.email }}</v-list-item-subtitle>
+          </v-list-item>
+          <v-divider class="my-2" />
+          <!-- Dashboard (Admin Only) -->
+          <v-list-item v-if="isAdmin" href="/dashboard" @click="mobileDrawer = false">
+            <template v-slot:prepend><v-icon color="primary">mdi-view-dashboard</v-icon></template>
+            <v-list-item-title>{{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}</v-list-item-title>
+          </v-list-item>
+        </template>
+
         <v-list-item to="/" @click="mobileDrawer = false">
           <template v-slot:prepend><v-icon>mdi-home</v-icon></template>
           <v-list-item-title>{{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}</v-list-item-title>
@@ -115,9 +166,15 @@
           <v-list-item-title>{{ appStore.locale === 'ar' ? cat.name : cat.name_en }}</v-list-item-title>
         </v-list-item>
         <v-divider class="my-2" />
-        <v-list-item href="/login">
+        <!-- Login (when not logged in) -->
+        <v-list-item v-if="!isLoggedIn" href="/login">
           <template v-slot:prepend><v-icon>mdi-login</v-icon></template>
           <v-list-item-title>{{ appStore.locale === 'ar' ? 'تسجيل الدخول' : 'Login' }}</v-list-item-title>
+        </v-list-item>
+        <!-- Logout (when logged in) -->
+        <v-list-item v-else @click="logout">
+          <template v-slot:prepend><v-icon color="error">mdi-logout</v-icon></template>
+          <v-list-item-title class="text-error">{{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}</v-list-item-title>
         </v-list-item>
       </v-list>
     </v-navigation-drawer>
@@ -180,12 +237,13 @@
             </div>
           </v-col>
 
-          <!-- Legal -->
+          <!-- Legal & SEO -->
           <v-col cols="6" md="2">
             <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'قانوني' : 'Legal' }}</h4>
             <div class="d-flex flex-column gap-2">
               <router-link to="/privacy" class="text-decoration-none text-medium-emphasis">{{ appStore.locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' }}</router-link>
               <router-link to="/terms" class="text-decoration-none text-medium-emphasis">{{ appStore.locale === 'ar' ? 'شروط الاستخدام' : 'Terms of Service' }}</router-link>
+              <a href="/sitemap.xml" class="text-decoration-none text-medium-emphasis" target="_blank">{{ appStore.locale === 'ar' ? 'خريطة الموقع' : 'Sitemap' }}</a>
             </div>
           </v-col>
 
@@ -225,7 +283,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 
@@ -234,6 +292,25 @@ const appStore = useAppStore()
 
 const mobileDrawer = ref(false)
 const searchQuery = ref('')
+const userMenuOpen = ref(false)
+
+// Computed properties for user
+const isLoggedIn = computed(() => !!appStore.user)
+const isAdmin = computed(() => {
+  if (!appStore.user) return false
+  const roles = appStore.user.roles || []
+  return roles.some(role => ['admin', 'superadmin'].includes(role.name || role))
+})
+const userName = computed(() => appStore.user?.name || appStore.user?.user_name || '')
+const userAvatar = computed(() => {
+  if (!appStore.user) return null
+  if (appStore.user.avatar) return appStore.user.avatar
+  if (appStore.user.photos && appStore.user.photos.length > 0) {
+    const photo = appStore.user.photos[0]
+    return photo.is_external ? photo.src : `/storage/${photo.src}`
+  }
+  return null
+})
 
 const categoryIcons = {
   1: 'mdi-cellphone',      // Phones
@@ -276,9 +353,50 @@ const fetchCategories = async () => {
   }
 }
 
+const fetchCurrentUser = async () => {
+  try {
+    const response = await fetch('/api/user', {
+      headers: {
+        'Accept': 'application/json',
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      credentials: 'same-origin',
+    })
+    if (response.ok) {
+      const data = await response.json()
+      appStore.setUser(data.user || data)
+    }
+  } catch (error) {
+    // User not logged in or error - that's okay
+    console.log('User not authenticated')
+  }
+}
+
+const logout = async () => {
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+    await fetch('/logout', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      credentials: 'same-origin',
+    })
+    appStore.setUser(null)
+    window.location.href = '/'
+  } catch (error) {
+    console.error('Error logging out:', error)
+    window.location.href = '/logout'
+  }
+}
+
 onMounted(() => {
   appStore.init()
   fetchCategories()
+  fetchCurrentUser()
 })
 </script>
 

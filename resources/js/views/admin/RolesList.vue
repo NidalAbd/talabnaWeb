@@ -1,237 +1,228 @@
 <template>
-  <div class="roles-management-advanced">
-    <!-- Advanced Search & Filters -->
+  <div class="roles-modern">
+    <!-- Stats Cards -->
+    <div class="stats-grid mb-4">
+      <div class="stat-card blue">
+        <div class="stat-icon">
+          <i class="fas fa-user-tag"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ rolesTotal }}</h3>
+          <p class="stat-label">Total Roles</p>
+        </div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">
+          <i class="fas fa-shield-alt"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ systemRolesCount }}</h3>
+          <p class="stat-label">System Roles</p>
+        </div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon">
+          <i class="fas fa-user-cog"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ customRolesCount }}</h3>
+          <p class="stat-label">Custom Roles</p>
+        </div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon">
+          <i class="fas fa-key"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ totalPermissions }}</h3>
+          <p class="stat-label">Total Permissions</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
     <div class="search-filter-bar">
       <div class="search-box">
         <i class="fas fa-search search-icon"></i>
         <input
           type="text"
-          v-model="filters.search"
           class="search-input"
           placeholder="Search roles by name or description..."
+          v-model="filters.search"
         >
-        <span v-if="filters.search" class="clear-search" @click="filters.search = ''">
-          <i class="fas fa-times"></i>
-        </span>
       </div>
-
-      <div class="filter-controls">
-        <select v-model="filters.sort_by" class="sort-select">
+      <div class="filter-group">
+        <select class="filter-select" v-model="filters.sort_by" @change="loadRoles(1)">
           <option value="id">Sort by ID</option>
           <option value="name">Sort by Name</option>
           <option value="created_at">Sort by Date</option>
           <option value="permissions_count">Sort by Permissions</option>
         </select>
-
-        <div class="sort-direction-toggle">
-          <button
-            class="direction-btn"
-            :class="{ active: filters.sort_direction === 'asc' }"
-            @click="filters.sort_direction = 'asc'"
-            title="Ascending"
-          >
-            <i class="fas fa-arrow-up"></i>
-          </button>
-          <button
-            class="direction-btn"
-            :class="{ active: filters.sort_direction === 'desc' }"
-            @click="filters.sort_direction = 'desc'"
-            title="Descending"
-          >
-            <i class="fas fa-arrow-down"></i>
-          </button>
-        </div>
-
-        <button class="action-btn primary" @click="resetFilters">
-          <i class="fas fa-redo"></i>
+        <button
+          class="sort-btn"
+          @click="toggleSortDirection"
+          :title="filters.sort_direction === 'asc' ? 'Ascending' : 'Descending'"
+        >
+          <i :class="filters.sort_direction === 'asc' ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
         </button>
       </div>
-    </div>
-
-    <!-- View Controls -->
-    <div class="view-controls mb-4">
-      <div class="view-info">
-        <h3 class="section-title">
-          <i class="fas fa-user-tag me-2"></i>
-          Roles Management
-        </h3>
-        <p class="section-subtitle">Manage user roles and permissions</p>
-      </div>
-
       <div class="action-buttons">
-        <a href="/permissions" class="action-btn success">
-          <i class="fas fa-key"></i>
-          Manage Permissions
+        <a href="/permissions" class="action-btn info">
+          <i class="fas fa-key"></i> Permissions
         </a>
         <a href="/roles/create" class="action-btn primary">
-          <i class="fas fa-plus-circle"></i>
-          Create Role
+          <i class="fas fa-plus"></i> Create Role
         </a>
       </div>
-    </div>
-
-    <!-- Debug Info - set to true to enable -->
-    <div class="debug-info" style="background: #fff3cd; padding: 1rem; margin-bottom: 1rem; border-radius: 8px;">
-      <strong>Debug:</strong>
-      Loading: {{ loading }} |
-      Data Length: {{ roles.data?.length || 0 }} |
-      Total: {{ roles.total }} |
-      Current Page: {{ roles.current_page }} |
-      Last Page: {{ roles.last_page }}
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      <div class="loader-advanced"></div>
+    <div v-if="isLoading" class="loading-state">
+      <div class="spinner"></div>
       <p>Loading roles...</p>
     </div>
 
-    <!-- Roles Grid -->
-    <div v-else class="roles-grid">
-      <div
-        v-for="role in roles.data"
-        :key="role.id"
-        class="role-card"
-        :class="getRoleCardClass(role.name)"
-      >
-        <div class="role-card-header">
-          <div class="role-icon-large" :class="getRoleIconClass(role.name)">
-            <i :class="getRoleIcon(role.name)"></i>
-          </div>
-          <div class="role-menu">
-            <button class="menu-btn" @click="toggleMenu(role.id)">
-              <i class="fas fa-ellipsis-v"></i>
-            </button>
-            <div v-if="activeMenu === role.id" class="dropdown-menu">
-              <a :href="`/roles/${role.id}`" class="menu-item">
-                <i class="fas fa-eye"></i>
-                View Details
-              </a>
-              <a :href="`/role-assignments/users-with-role/${role.id}`" class="menu-item">
-                <i class="fas fa-users"></i>
-                View Users
-              </a>
-              <a v-if="role.is_editable" :href="`/roles/${role.id}/edit`" class="menu-item">
-                <i class="fas fa-edit"></i>
-                Edit Role
-              </a>
-              <button v-if="role.is_deletable" @click="handleDelete(role)" class="menu-item danger">
-                <i class="fas fa-trash"></i>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <div class="role-card-body">
-          <div class="role-header-info">
-            <h3 class="role-name">{{ role.display_name }}</h3>
-            <span class="role-id">#{{ role.id }}</span>
-          </div>
-
-          <div class="role-badge-container">
-            <span class="role-badge" :class="getRoleBadgeClass(role.name)">
-              {{ role.name }}
-            </span>
-            <span v-if="!role.is_editable || !role.is_deletable" class="protected-badge">
-              <i class="fas fa-lock"></i>
-              Protected
-            </span>
-          </div>
-
-          <p class="role-description">{{ truncate(role.description, 100) || 'No description available' }}</p>
-
-          <div class="role-stats">
-            <div class="stat-box">
-              <i class="fas fa-key"></i>
-              <div class="stat-info">
-                <span class="stat-value">{{ role.permissions_count }}</span>
-                <span class="stat-label">Permissions</span>
+    <!-- Table -->
+    <div v-else class="data-table-container">
+      <table class="modern-table">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Role</th>
+            <th>Description</th>
+            <th>Permissions</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody v-if="rolesData.length > 0">
+          <tr v-for="role in rolesData" :key="role.id">
+            <td><span class="id-badge">#{{ role.id }}</span></td>
+            <td>
+              <div class="role-cell">
+                <div class="role-icon-box" :class="getRoleColorClass(role.name)">
+                  <i :class="getRoleIcon(role.name)"></i>
+                </div>
+                <div class="role-info">
+                  <strong>{{ role.display_name }}</strong>
+                  <span class="role-slug">{{ role.name }}</span>
+                </div>
               </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="role-card-footer">
-          <a :href="`/roles/${role.id}`" class="action-btn outline-primary flex-1">
-            <i class="fas fa-eye"></i>
-            View
-          </a>
-          <a
-            v-if="role.is_editable"
-            :href="`/roles/${role.id}/edit`"
-            class="action-btn outline-warning flex-1"
-          >
-            <i class="fas fa-edit"></i>
-            Edit
-          </a>
-          <button
-            v-if="role.is_deletable"
-            @click="handleDelete(role)"
-            class="action-btn outline-danger flex-1"
-          >
-            <i class="fas fa-trash"></i>
-            Delete
-          </button>
-        </div>
-      </div>
-
-      <!-- Empty State -->
-      <div v-if="roles.data.length === 0" class="empty-state-advanced">
-        <div class="empty-icon">
-          <i class="fas fa-user-tag"></i>
-        </div>
-        <h3>No Roles Found</h3>
-        <p>Try adjusting your search criteria or create a new role</p>
-        <a href="/roles/create" class="action-btn primary">
-          <i class="fas fa-plus-circle"></i>
-          Create First Role
-        </a>
-      </div>
+            </td>
+            <td>
+              <span class="description-text">{{ role.description || 'No description' }}</span>
+            </td>
+            <td>
+              <span class="badge info">
+                <i class="fas fa-key"></i> {{ role.permissions_count }}
+              </span>
+            </td>
+            <td>
+              <span v-if="!role.is_editable || !role.is_deletable" class="badge warning">
+                <i class="fas fa-lock"></i> Protected
+              </span>
+              <span v-else class="badge success">
+                <i class="fas fa-check"></i> Editable
+              </span>
+            </td>
+            <td>
+              <div class="table-actions">
+                <a :href="`/roles/${role.id}`" class="action-btn-small view" title="View">
+                  <i class="fas fa-eye"></i>
+                </a>
+                <a v-if="role.is_editable" :href="`/roles/${role.id}/edit`" class="action-btn-small edit" title="Edit">
+                  <i class="fas fa-edit"></i>
+                </a>
+                <button v-if="role.is_deletable" @click="handleDelete(role)" class="action-btn-small delete" title="Delete">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+        <tbody v-else>
+          <tr>
+            <td colspan="6" class="empty-state">
+              <i class="fas fa-user-tag"></i>
+              <p>No roles found</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
 
-    <!-- Advanced Pagination -->
-    <div v-if="roles.data.length > 0" class="pagination-advanced">
-      <button
-        class="page-btn"
-        :disabled="roles.current_page === 1"
-        @click="loadRoles(roles.current_page - 1)"
-      >
-        <i class="fas fa-chevron-left"></i>
-        Previous
-      </button>
-
-      <div class="page-numbers">
+    <!-- Pagination -->
+    <div class="pagination-container" v-if="lastPage > 1">
+      <div class="pagination-info">
+        Showing {{ rolesData.length }} of {{ rolesTotal }} roles
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          :disabled="currentPage === 1"
+          @click="loadRoles(currentPage - 1)"
+        >
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
         <button
           v-for="page in visiblePages"
           :key="page"
-          class="page-number"
-          :class="{ active: page === roles.current_page }"
+          class="pagination-btn"
+          :class="{ active: page === currentPage }"
           @click="loadRoles(page)"
         >
           {{ page }}
         </button>
+        <button
+          class="pagination-btn"
+          :disabled="currentPage === lastPage"
+          @click="loadRoles(currentPage + 1)"
+        >
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
+    </div>
 
-      <button
-        class="page-btn"
-        :disabled="roles.current_page === roles.last_page"
-        @click="loadRoles(roles.current_page + 1)"
-      >
-        Next
-        <i class="fas fa-chevron-right"></i>
-      </button>
+    <!-- Delete Modal -->
+    <div class="modal-overlay" v-if="showDeleteModal" @click="showDeleteModal = false">
+      <div class="modern-modal" @click.stop>
+        <div class="modal-header">
+          <h3><i class="fas fa-exclamation-triangle text-danger"></i> Delete Role</h3>
+          <button class="close-btn" @click="showDeleteModal = false">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <p>Are you sure you want to delete the role <strong>{{ roleToDelete?.display_name }}</strong>?</p>
+          <p class="text-muted">This action cannot be undone.</p>
+        </div>
+        <div class="modal-footer">
+          <button class="action-btn secondary" @click="showDeleteModal = false">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          <button class="action-btn danger" @click="confirmDelete" :disabled="isDeleting">
+            <i v-if="isDeleting" class="fas fa-spinner fa-spin"></i>
+            <i v-else class="fas fa-trash"></i> Delete
+          </button>
+        </div>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, watch, reactive, computed, onBeforeUnmount } from 'vue'
-import { useRoles } from '../../composables/useRoles'
+import { ref, onMounted, watch, reactive, computed } from 'vue'
 
-const { roles, loading, fetchRoles, deleteRole } = useRoles()
-
-const activeMenu = ref(null)
+// Local state
+const rolesData = ref([])
+const rolesTotal = ref(0)
+const currentPage = ref(1)
+const lastPage = ref(1)
+const isLoading = ref(true)
+const showDeleteModal = ref(false)
+const roleToDelete = ref(null)
+const isDeleting = ref(false)
+const totalPermissions = ref(0)
 
 const filters = reactive({
   search: '',
@@ -239,10 +230,18 @@ const filters = reactive({
   sort_direction: 'desc'
 })
 
+const systemRolesCount = computed(() => {
+  return rolesData.value.filter(r => !r.is_editable || !r.is_deletable).length
+})
+
+const customRolesCount = computed(() => {
+  return rolesData.value.filter(r => r.is_editable && r.is_deletable).length
+})
+
 const visiblePages = computed(() => {
   const pages = []
-  const current = roles.value.current_page
-  const last = roles.value.last_page
+  const current = currentPage.value
+  const last = lastPage.value
 
   let start = Math.max(1, current - 2)
   let end = Math.min(last, current + 2)
@@ -254,20 +253,9 @@ const visiblePages = computed(() => {
   return pages
 })
 
-onMounted(async () => {
-  console.log('🎬 RolesList component mounted')
-  console.log('🎬 Initial roles.value:', roles.value)
-  console.log('🎬 Initial roles.value.data:', roles.value.data)
-  console.log('🎬 Initial loading:', loading.value)
-  await loadData()
-  document.addEventListener('click', closeMenus)
-  console.log('🎬 After loadData - roles.value:', roles.value)
-  console.log('🎬 After loadData - roles.value.data:', roles.value.data)
-  console.log('🎬 After loadData - loading:', loading.value)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', closeMenus)
+onMounted(() => {
+  loadRoles(1)
+  loadStats()
 })
 
 // Watch filters with debounce for search
@@ -277,223 +265,191 @@ watch(() => filters.search, () => {
   searchTimeout = setTimeout(() => loadRoles(1), 300)
 })
 
-watch(() => [filters.sort_by, filters.sort_direction], () => {
-  loadRoles(1)
-})
-
-const loadData = async () => {
-  await loadRoles()
-}
-
 const loadRoles = async (page = 1) => {
-  await fetchRoles({ ...filters, page })
-}
+  isLoading.value = true
 
-const resetFilters = () => {
-  filters.search = ''
-  filters.sort_by = 'id'
-  filters.sort_direction = 'desc'
-  loadRoles(1)
-}
+  try {
+    const params = new URLSearchParams()
+    if (filters.search) params.append('search', filters.search)
+    if (filters.sort_by) params.append('sort_by', filters.sort_by)
+    if (filters.sort_direction) params.append('sort_direction', filters.sort_direction)
+    params.append('page', page)
 
-const getRoleBadgeClass = (name) => {
-  const classes = {
-    'superadmin': 'superadmin',
-    'admin': 'admin',
-    'user': 'user'
+    const response = await fetch(`/api/admin/roles?${params.toString()}`)
+
+    if (!response.ok) throw new Error('Failed to fetch roles')
+
+    const data = await response.json()
+
+    if (data.roles) {
+      rolesData.value = data.roles.data || []
+      rolesTotal.value = data.roles.total || 0
+      currentPage.value = data.roles.current_page || 1
+      lastPage.value = data.roles.last_page || 1
+    }
+  } catch (error) {
+    console.error('Error loading roles:', error)
+  } finally {
+    isLoading.value = false
   }
-  return classes[name] || 'default'
+}
+
+const loadStats = async () => {
+  try {
+    const response = await fetch('/api/admin/permissions?per_page=1')
+    if (response.ok) {
+      const data = await response.json()
+      totalPermissions.value = data.permissions?.total || 0
+    }
+  } catch (error) {
+    console.error('Error loading stats:', error)
+  }
+}
+
+const toggleSortDirection = () => {
+  filters.sort_direction = filters.sort_direction === 'asc' ? 'desc' : 'asc'
+  loadRoles(1)
 }
 
 const getRoleIcon = (name) => {
   const icons = {
-    'superadmin': 'fas fa-crown',
-    'admin': 'fas fa-user-shield',
-    'user': 'fas fa-user'
+    admin: 'fas fa-user-shield',
+    superadmin: 'fas fa-crown',
+    moderator: 'fas fa-user-cog',
+    manager: 'fas fa-user-tie',
+    user: 'fas fa-user',
+    investor: 'fas fa-hand-holding-usd'
   }
   return icons[name] || 'fas fa-user-tag'
 }
 
-const getRoleIconClass = (name) => {
+const getRoleColorClass = (name) => {
   const classes = {
-    'superadmin': 'icon-danger',
-    'admin': 'icon-warning',
-    'user': 'icon-primary'
+    admin: 'red',
+    superadmin: 'gold',
+    moderator: 'blue',
+    manager: 'purple',
+    user: 'green',
+    investor: 'orange'
   }
-  return classes[name] || 'icon-info'
+  return classes[name] || 'blue'
 }
 
-const getRoleCardClass = (name) => {
-  const classes = {
-    'superadmin': 'card-danger',
-    'admin': 'card-warning',
-    'user': 'card-primary'
-  }
-  return classes[name] || 'card-info'
+const handleDelete = (role) => {
+  roleToDelete.value = role
+  showDeleteModal.value = true
 }
 
-const truncate = (text, length) => {
-  if (!text) return ''
-  return text.length > length ? text.substring(0, length) + '...' : text
-}
+const confirmDelete = async () => {
+  if (!roleToDelete.value) return
 
-const toggleMenu = (roleId) => {
-  activeMenu.value = activeMenu.value === roleId ? null : roleId
-}
-
-const closeMenus = () => {
-  activeMenu.value = null
-}
-
-const handleDelete = async (role) => {
-  closeMenus()
-
-  if (!confirm(`Are you sure you want to delete the role "${role.display_name}"? This action cannot be undone.`)) {
-    return
-  }
+  isDeleting.value = true
 
   try {
-    await deleteRole(role.id)
-    await loadRoles(roles.value.current_page)
+    const response = await fetch(`/api/admin/roles/${roleToDelete.value.id}`, {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+      }
+    })
+
+    if (!response.ok) {
+      const errorData = await response.json()
+      throw new Error(errorData.error || 'Failed to delete role')
+    }
+
+    showDeleteModal.value = false
+    roleToDelete.value = null
+    loadRoles(currentPage.value)
   } catch (error) {
-    alert(error.message || 'Failed to delete role')
+    console.error('Error deleting role:', error)
+    alert(error.message)
+  } finally {
+    isDeleting.value = false
   }
 }
 </script>
 
 <style scoped>
-.roles-management-advanced {
+.roles-modern {
   padding: 0;
-  background: #f5f7fa;
-  min-height: 100vh;
 }
 
-/* Advanced Stats Grid */
+/* Stats Grid */
 .stats-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
 }
 
-.stat-card-advanced {
-  background: white;
+.stat-card {
   border-radius: 16px;
-  padding: 1.75rem;
-  position: relative;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.stat-card-advanced::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 4px;
-  background: linear-gradient(90deg, var(--stat-color-start), var(--stat-color-end));
-}
-
-.stat-card-advanced.stat-info {
-  --stat-color-start: #17a2b8;
-  --stat-color-end: #138496;
-}
-
-.stat-card-advanced.stat-success {
-  --stat-color-start: #28a745;
-  --stat-color-end: #1e7e34;
-}
-
-.stat-card-advanced.stat-danger {
-  --stat-color-start: #dc3545;
-  --stat-color-end: #bd2130;
-}
-
-.stat-card-advanced.stat-warning {
-  --stat-color-start: #ffc107;
-  --stat-color-end: #e0a800;
-}
-
-.stat-card-advanced:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-.stat-icon-wrapper {
+  padding: 1.5rem;
+  color: white;
   display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.stat-card.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.stat-card.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
 
 .stat-icon {
-  width: 64px;
-  height: 64px;
+  width: 65px;
+  height: 65px;
+  background: rgba(255, 255, 255, 0.2);
   border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 1.75rem;
-  background: linear-gradient(135deg, var(--stat-color-start), var(--stat-color-end));
-  color: white;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
 }
 
-.stat-badge {
-  background: #e8f5e9;
-  color: #2e7d32;
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
+.stat-content { flex: 1; }
+.stat-value { font-size: 2rem; font-weight: 700; margin: 0; }
+.stat-label { font-size: 0.9rem; opacity: 0.9; margin: 0.25rem 0 0 0; }
 
-.stat-number {
-  font-size: 2.25rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 0.25rem 0;
-}
-
-.stat-label {
-  color: #6c757d;
-  font-size: 0.95rem;
-  margin: 0;
-  font-weight: 500;
-}
-
-/* Search & Filter Bar */
+/* Search & Filters */
 .search-filter-bar {
   background: white;
+  padding: 1.25rem;
   border-radius: 16px;
-  padding: 1.5rem;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .search-box {
-  flex: 1;
-  min-width: 300px;
   position: relative;
+  flex: 1;
+  min-width: 280px;
 }
 
 .search-icon {
   position: absolute;
-  left: 1.25rem;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #6c757d;
-  font-size: 1.1rem;
+  color: #999;
 }
 
 .search-input {
   width: 100%;
-  padding: 0.875rem 3rem 0.875rem 3.5rem;
-  border: 2px solid #e9ecef;
+  padding: 0.875rem 1rem 0.875rem 2.75rem;
+  border: 2px solid #eef2f7;
   border-radius: 12px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -505,74 +461,61 @@ const handleDelete = async (role) => {
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
 }
 
-.clear-search {
-  position: absolute;
-  right: 1.25rem;
-  top: 50%;
-  transform: translateY(-50%);
-  color: #6c757d;
-  cursor: pointer;
-  padding: 0.25rem;
-}
-
-.filter-controls {
+.filter-group {
   display: flex;
-  gap: 1rem;
-  align-items: center;
+  gap: 0.5rem;
 }
 
-.sort-select {
-  padding: 0.625rem 1.25rem;
-  border: 2px solid #e9ecef;
+.filter-select {
+  padding: 0.875rem 1rem;
+  border: 2px solid #eef2f7;
   border-radius: 12px;
-  font-weight: 500;
+  font-size: 0.9rem;
+  background: white;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
-.sort-select:focus {
+.filter-select:focus {
   outline: none;
   border-color: #667eea;
 }
 
-.sort-direction-toggle {
-  display: flex;
-  gap: 0.5rem;
-  background: #f8f9fa;
-  padding: 0.375rem;
+.sort-btn {
+  width: 46px;
+  height: 46px;
+  border: 2px solid #eef2f7;
   border-radius: 12px;
-}
-
-.direction-btn {
-  padding: 0.625rem 1rem;
-  border: none;
-  background: transparent;
-  border-radius: 8px;
+  background: white;
   cursor: pointer;
-  color: #6c757d;
-  transition: all 0.2s ease;
-}
-
-.direction-btn:hover {
-  background: white;
-}
-
-.direction-btn.active {
-  background: white;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   color: #667eea;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.sort-btn:hover {
+  background: #667eea;
+  color: white;
+  border-color: #667eea;
+}
+
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
 }
 
 .action-btn {
-  padding: 0.625rem 1.5rem;
+  padding: 0.75rem 1.25rem;
   border: none;
   border-radius: 12px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 0.5rem;
   text-decoration: none;
 }
@@ -582,69 +525,24 @@ const handleDelete = async (role) => {
   color: white;
 }
 
-.action-btn.success {
-  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+.action-btn.info {
+  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
   color: white;
 }
 
-.action-btn.outline-primary {
-  background: transparent;
-  border: 2px solid #667eea;
-  color: #667eea;
+.action-btn.secondary {
+  background: #6c757d;
+  color: white;
 }
 
-.action-btn.outline-warning {
-  background: transparent;
-  border: 2px solid #ffc107;
-  color: #ffc107;
-}
-
-.action-btn.outline-danger {
-  background: transparent;
-  border: 2px solid #dc3545;
-  color: #dc3545;
+.action-btn.danger {
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+  color: white;
 }
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-.flex-1 {
-  flex: 1;
-}
-
-/* View Controls */
-.view-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-}
-
-.view-info {
-  flex: 1;
-}
-
-.section-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #2c3e50;
-  margin: 0 0 0.5rem 0;
-  display: flex;
-  align-items: center;
-}
-
-.section-subtitle {
-  color: #6c757d;
-  margin: 0;
-  font-size: 1rem;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 1rem;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* Loading State */
@@ -653,15 +551,16 @@ const handleDelete = async (role) => {
   padding: 4rem 2rem;
   background: white;
   border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
 }
 
-.loader-advanced {
-  width: 60px;
-  height: 60px;
-  border: 4px solid #f3f3f3;
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  border: 4px solid #f3f4f6;
   border-top: 4px solid #667eea;
   border-radius: 50%;
-  margin: 0 auto 1rem;
   animation: spin 1s linear infinite;
 }
 
@@ -670,370 +569,297 @@ const handleDelete = async (role) => {
   100% { transform: rotate(360deg); }
 }
 
-/* Roles Grid */
-.roles-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
-}
-
-.role-card {
+/* Data Table */
+.data-table-container {
   background: white;
   border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  border-top: 4px solid #667eea;
-}
-
-.role-card.card-danger {
-  border-top-color: #dc3545;
-}
-
-.role-card.card-warning {
-  border-top-color: #ffc107;
-}
-
-.role-card.card-primary {
-  border-top-color: #007bff;
-}
-
-.role-card.card-info {
-  border-top-color: #17a2b8;
-}
-
-.role-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
-}
-
-.role-card-header {
-  padding: 1.5rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-}
-
-.role-icon-large {
-  width: 80px;
-  height: 80px;
-  border-radius: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 2.5rem;
-  color: white;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-}
-
-.icon-danger {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
-}
-
-.icon-warning {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-}
-
-.icon-primary {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-}
-
-.icon-info {
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-}
-
-.role-menu {
-  position: relative;
-}
-
-.menu-btn {
-  background: white;
-  border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.menu-btn:hover {
-  background: #f8f9fa;
-  transform: scale(1.1);
-}
-
-.dropdown-menu {
-  position: absolute;
-  right: 0;
-  top: 45px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  min-width: 200px;
-  z-index: 100;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 
-.menu-item {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  padding: 0.875rem 1.25rem;
-  border: none;
-  background: transparent;
+.modern-table {
   width: 100%;
+  border-collapse: collapse;
+}
+
+.modern-table thead {
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+}
+
+.modern-table th {
+  padding: 1.125rem 1rem;
   text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #495057;
-  text-decoration: none;
-  font-weight: 500;
-}
-
-.menu-item:hover {
-  background: #f8f9fa;
-}
-
-.menu-item.danger {
-  color: #dc3545;
-}
-
-.menu-item.danger:hover {
-  background: #fee;
-}
-
-.role-card-body {
-  padding: 1.5rem;
-}
-
-.role-header-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 1rem;
-}
-
-.role-name {
-  font-size: 1.5rem;
-  font-weight: 700;
-  margin: 0;
-  color: #2c3e50;
-  flex: 1;
-}
-
-.role-id {
-  color: #6c757d;
-  font-size: 0.875rem;
   font-weight: 600;
-}
-
-.role-badge-container {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-
-.role-badge {
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.8rem;
-  font-weight: 600;
+  color: white;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.role-badge.superadmin {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
-  color: white;
+.modern-table tbody tr {
+  border-bottom: 1px solid #f0f4f8;
+  transition: all 0.2s ease;
 }
 
-.role-badge.admin {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  color: #212529;
+.modern-table tbody tr:hover {
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
 }
 
-.role-badge.user {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
-}
-
-.role-badge.default {
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-  color: white;
-}
-
-.protected-badge {
-  background: #e9ecef;
-  color: #495057;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.role-description {
-  color: #6c757d;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin-bottom: 1.5rem;
-  min-height: 3rem;
-}
-
-.role-stats {
-  display: grid;
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.stat-box {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
+.modern-table td {
   padding: 1rem;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-radius: 12px;
+  font-size: 0.9rem;
+  color: #333;
+  vertical-align: middle;
 }
 
-.stat-box i {
-  font-size: 1.5rem;
-  color: #667eea;
-}
-
-.stat-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #2c3e50;
-}
-
-.stat-label {
-  color: #6c757d;
-  font-size: 0.875rem;
-  font-weight: 500;
-}
-
-.role-card-footer {
-  padding: 1rem 1.5rem;
-  background: #f8f9fa;
-  display: flex;
-  gap: 0.75rem;
-  border-top: 1px solid #e9ecef;
-}
-
-.role-card-footer .action-btn {
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
-}
-
-/* Empty State */
-.empty-state-advanced {
+.empty-state {
   text-align: center;
-  padding: 4rem 2rem;
-  background: white;
-  border-radius: 16px;
-  grid-column: 1 / -1;
+  padding: 4rem !important;
+  color: #999;
 }
 
-.empty-icon {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 2rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+.empty-state i {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  opacity: 0.3;
+}
+
+/* Role Cell */
+.role-cell {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.role-icon-box {
+  width: 45px;
+  height: 45px;
+  border-radius: 12px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 3rem;
-  color: #adb5bd;
+  font-size: 1.1rem;
+  color: white;
 }
 
-.empty-state-advanced h3 {
-  font-size: 1.5rem;
-  margin: 0 0 0.5rem 0;
-  color: #2c3e50;
+.role-icon-box.red { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); }
+.role-icon-box.gold { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); }
+.role-icon-box.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.role-icon-box.purple { background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); }
+.role-icon-box.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.role-icon-box.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+
+.role-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
-.empty-state-advanced p {
-  color: #6c757d;
-  margin: 0 0 2rem 0;
+.role-slug {
+  font-size: 0.8rem;
+  color: #888;
+}
+
+.description-text {
+  color: #666;
+  max-width: 250px;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Badges */
+.id-badge {
+  background: linear-gradient(135deg, #e8ecef 0%, #d1d8e0 100%);
+  padding: 0.35rem 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: #555;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: 8px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.badge.primary { background: #e3f2fd; color: #1976d2; }
+.badge.info { background: #e0f7fa; color: #00838f; }
+.badge.success { background: #e8f5e9; color: #2e7d32; }
+.badge.warning { background: #fff3e0; color: #ef6c00; }
+.badge.danger { background: #ffebee; color: #c62828; }
+
+/* Table Actions */
+.table-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.action-btn-small {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  font-size: 0.9rem;
+}
+
+.action-btn-small.view {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.action-btn-small.edit {
+  background: #fff3e0;
+  color: #ef6c00;
+}
+
+.action-btn-small.delete {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.action-btn-small:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Pagination */
-.pagination-advanced {
+.pagination-container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding: 1.5rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.page-btn {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #e9ecef;
-  background: white;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
+.pagination-info {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.pagination-controls {
   display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-btn {
+  padding: 0.6rem 1rem;
+  border: 2px solid #eef2f7;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #495057;
 }
 
-.page-btn:hover:not(:disabled) {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
-}
-
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.page-numbers {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.page-number {
-  width: 44px;
-  height: 44px;
-  border: 2px solid #e9ecef;
-  background: white;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  color: #495057;
-}
-
-.page-number.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-color: #667eea;
-}
-
-.page-number:hover:not(.active) {
+.pagination-btn:hover:not(:disabled) {
   border-color: #667eea;
   color: #667eea;
 }
+
+.pagination-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1050;
+  padding: 1rem;
+  backdrop-filter: blur(4px);
+}
+
+.modern-modal {
+  background: white;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+  max-width: 500px;
+  width: 100%;
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.modal-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.25rem;
+  color: #999;
+  cursor: pointer;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  transition: all 0.2s ease;
+}
+
+.close-btn:hover {
+  background: #f8f9fa;
+  color: #333;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-top: 1px solid #eef2f7;
+}
+
+.text-danger { color: #dc3545; }
+.text-muted { color: #888; font-size: 0.9rem; }
 
 /* Responsive */
 @media (max-width: 768px) {
@@ -1041,31 +867,29 @@ const handleDelete = async (role) => {
     flex-direction: column;
   }
 
-  .search-box {
-    min-width: 100%;
-  }
-
-  .filter-controls {
-    flex-wrap: wrap;
+  .search-box, .filter-group, .action-buttons {
     width: 100%;
-  }
-
-  .roles-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .view-controls {
-    flex-direction: column;
-    align-items: flex-start;
   }
 
   .action-buttons {
-    width: 100%;
-    flex-direction: column;
+    justify-content: stretch;
   }
 
-  .action-buttons .action-btn {
-    width: 100%;
+  .action-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .data-table-container {
+    overflow-x: auto;
+  }
+
+  .modern-table {
+    min-width: 800px;
+  }
+
+  .pagination-container {
+    flex-direction: column;
   }
 }
 </style>

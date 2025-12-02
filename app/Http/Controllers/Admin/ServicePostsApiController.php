@@ -102,7 +102,11 @@ class ServicePostsApiController extends Controller
                         'id' => $post->city->id,
                         'name' => $post->city->name,
                     ] : null,
-                    'image_url' => $post->photos->first()?->src ?? null,
+                    'media' => $post->photos->first() ? [
+                        'src' => $post->photos->first()->src,
+                        'is_video' => (bool) $post->photos->first()->isVideo,
+                        'is_external' => (bool) $post->photos->first()->is_external,
+                    ] : null,
                     'photos_count' => $post->photos->count(),
                     'created_at' => $post->created_at->toISOString(),
                     'updated_at' => $post->updated_at->toISOString(),

@@ -1,6 +1,46 @@
 <template>
-  <div class="subcategories-management-advanced">
-    <!-- Advanced Search & Filters -->
+  <div class="subcategories-modern">
+    <!-- Stats Cards -->
+    <div class="stats-grid mb-4">
+      <div class="stat-card blue">
+        <div class="stat-icon">
+          <i class="fas fa-layer-group"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ subcategories.total }}</h3>
+          <p class="stat-label">Total Subcategories</p>
+        </div>
+      </div>
+      <div class="stat-card green">
+        <div class="stat-icon">
+          <i class="fas fa-folder"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ parentCategories.length }}</h3>
+          <p class="stat-label">Parent Categories</p>
+        </div>
+      </div>
+      <div class="stat-card orange">
+        <div class="stat-icon">
+          <i class="fas fa-star"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ featuredCount }}</h3>
+          <p class="stat-label">Featured</p>
+        </div>
+      </div>
+      <div class="stat-card purple">
+        <div class="stat-icon">
+          <i class="fas fa-fire"></i>
+        </div>
+        <div class="stat-content">
+          <h3 class="stat-value">{{ popularCount }}</h3>
+          <p class="stat-label">Popular</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters -->
     <div class="search-filter-bar">
       <div class="search-box">
         <i class="fas fa-search search-icon"></i>
@@ -16,43 +56,45 @@
         </span>
       </div>
 
-      <div class="filter-controls">
-        <div class="filter-group">
+      <div class="filter-group">
+        <div class="status-filters">
           <button
             class="filter-btn"
             :class="{ active: filters.featured === '' && filters.popular === '' }"
             @click="filters.featured = ''; filters.popular = ''; applyFilters()"
           >
-            <i class="fas fa-th-large"></i>
-            All
+            <i class="fas fa-th-large"></i> All
           </button>
           <button
             class="filter-btn"
             :class="{ active: filters.featured === '1' }"
             @click="filters.featured = filters.featured === '1' ? '' : '1'; applyFilters()"
           >
-            <i class="fas fa-star"></i>
-            Featured
+            <i class="fas fa-star"></i> Featured
           </button>
           <button
             class="filter-btn"
             :class="{ active: filters.popular === '1' }"
             @click="filters.popular = filters.popular === '1' ? '' : '1'; applyFilters()"
           >
-            <i class="fas fa-fire"></i>
-            Popular
+            <i class="fas fa-fire"></i> Popular
           </button>
         </div>
 
-        <select v-model="filters.category_id" class="role-select" @change="applyFilters">
+        <select v-model="filters.category_id" class="filter-select" @change="applyFilters">
           <option value="">All Categories</option>
           <option v-for="category in parentCategories" :key="category.id" :value="category.id">
             {{ category.name.en }}
           </option>
         </select>
+      </div>
 
-        <button class="action-btn primary" @click="resetFilters">
+      <div class="action-buttons">
+        <button class="action-btn secondary" @click="resetFilters">
           <i class="fas fa-redo"></i>
+        </button>
+        <button class="action-btn primary" @click="openCreateModal">
+          <i class="fas fa-plus"></i> Add Subcategory
         </button>
       </div>
     </div>
@@ -65,48 +107,41 @@
           :class="{ active: viewMode === 'grid' }"
           @click="viewMode = 'grid'"
         >
-          <i class="fas fa-th"></i>
-          Grid
+          <i class="fas fa-th"></i> Grid
         </button>
         <button
           class="toggle-btn"
           :class="{ active: viewMode === 'list' }"
           @click="viewMode = 'list'"
         >
-          <i class="fas fa-list"></i>
-          List
+          <i class="fas fa-list"></i> List
         </button>
       </div>
 
       <div class="results-info">
         Showing {{ subcategories.data.length }} of {{ subcategories.total }} sub-categories
       </div>
-
-      <button class="action-btn success" @click="openCreateModal">
-        <i class="fas fa-plus-circle"></i>
-        Add Sub-Category
-      </button>
     </div>
 
     <!-- Loading State -->
     <div v-if="loading" class="loading-state">
-      <div class="loader-advanced"></div>
+      <div class="spinner"></div>
       <p>Loading sub-categories...</p>
     </div>
 
-    <!-- Sub-Categories Grid View -->
-    <div v-else-if="viewMode === 'grid'" class="items-grid">
+    <!-- Grid View -->
+    <div v-else-if="viewMode === 'grid'" class="subcategories-grid">
       <div
         v-for="subcategory in subcategories.data"
         :key="subcategory.id"
-        class="item-card"
+        class="subcategory-card"
       >
         <div class="card-header-custom">
-          <div class="item-image-wrapper">
+          <div class="subcategory-image-wrapper">
             <img
-              :src="subcategory.image_url ? (subcategory.image_url.startsWith('storage/') ? `/${subcategory.image_url}` : `/storage/${subcategory.image_url}`) : '/images/placeholder-category.png'"
+              :src="getImageUrl(subcategory.image_url)"
               :alt="subcategory.name.en"
-              class="item-image"
+              class="subcategory-image"
               @error="handleImageError"
             >
             <div class="overlay-badges">
@@ -122,7 +157,7 @@
             <button class="menu-btn" @click.stop="toggleMenu(subcategory.id)">
               <i class="fas fa-ellipsis-v"></i>
             </button>
-            <div v-if="activeMenu === subcategory.id" class="dropdown-menu">
+            <div v-if="activeMenu === subcategory.id" class="dropdown-menu" @click.stop>
               <button @click="handleToggleFeatured(subcategory)" class="menu-item">
                 <i class="fas fa-star"></i>
                 {{ subcategory.is_featured ? 'Remove Featured' : 'Set Featured' }}
@@ -132,40 +167,39 @@
                 {{ subcategory.is_popular ? 'Remove Popular' : 'Set Popular' }}
               </button>
               <button @click="openEditModal(subcategory)" class="menu-item">
-                <i class="fas fa-edit"></i>
-                Edit
+                <i class="fas fa-edit"></i> Edit
               </button>
               <button @click="handleDelete(subcategory)" class="menu-item danger">
-                <i class="fas fa-trash"></i>
-                Delete
+                <i class="fas fa-trash"></i> Delete
               </button>
             </div>
           </div>
         </div>
 
         <div class="card-body-custom">
-          <h3 class="item-name">{{ subcategory.name.en }}</h3>
-          <p class="item-subtitle">{{ subcategory.name.ar }}</p>
+          <h3 class="subcategory-name">{{ subcategory.name.en }}</h3>
+          <p class="subcategory-name-ar">{{ subcategory.name.ar }}</p>
 
-          <div class="item-meta">
-            <div class="meta-item">
-              <i class="fas fa-folder"></i>
-              <span>{{ subcategory.category?.name?.en || 'No Category' }}</span>
-            </div>
+          <div class="parent-category">
+            <i class="fas fa-folder"></i>
+            <span>{{ subcategory.category?.name?.en || 'No Category' }}</span>
           </div>
 
-          <div class="item-badges">
-            <span v-if="subcategory.is_featured" class="role-badge badge-warning">
+          <div class="subcategory-badges">
+            <span v-if="subcategory.is_featured" class="badge warning">
               <i class="fas fa-star"></i> Featured
             </span>
-            <span v-if="subcategory.is_popular" class="role-badge badge-danger">
+            <span v-if="subcategory.is_popular" class="badge fire">
               <i class="fas fa-fire"></i> Popular
+            </span>
+            <span v-if="!subcategory.is_featured && !subcategory.is_popular" class="badge secondary">
+              Standard
             </span>
           </div>
 
           <div class="spacer"></div>
 
-          <div class="item-stats">
+          <div class="subcategory-stats">
             <div class="stat-item">
               <i class="fas fa-file-alt"></i>
               <span>{{ subcategory.service_posts_count || 0 }} Posts</span>
@@ -183,28 +217,24 @@
             {{ subcategory.is_featured ? 'Featured' : 'Feature' }}
           </button>
           <button @click="openEditModal(subcategory)" class="action-btn primary">
-            <i class="fas fa-edit"></i>
-            Edit
+            <i class="fas fa-edit"></i> Edit
           </button>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div v-if="subcategories.data.length === 0" class="empty-state-advanced">
-        <div class="empty-icon">
-          <i class="fas fa-folder-open"></i>
-        </div>
+      <div v-if="subcategories.data.length === 0" class="empty-state-grid">
+        <i class="fas fa-layer-group"></i>
         <h3>No Sub-Categories Found</h3>
         <p>Try adjusting your filters or create a new sub-category</p>
         <button @click="resetFilters" class="action-btn primary">
-          <i class="fas fa-redo"></i>
-          Reset Filters
+          <i class="fas fa-redo"></i> Reset Filters
         </button>
       </div>
     </div>
 
-    <!-- Modern Table View -->
-    <div v-else class="modern-table-container">
+    <!-- Table View -->
+    <div v-else class="data-table-container">
       <table class="modern-table">
         <thead>
           <tr>
@@ -212,103 +242,86 @@
             <th>Name</th>
             <th>Category</th>
             <th>Status</th>
-            <th style="width: 100px;">Posts</th>
-            <th style="width: 180px; text-align: right;">Actions</th>
+            <th>Posts</th>
+            <th>Actions</th>
           </tr>
         </thead>
-        <tbody>
+        <tbody v-if="subcategories.data.length > 0">
           <tr v-for="subcategory in subcategories.data" :key="subcategory.id">
-            <!-- Image -->
             <td>
-              <img
-                :src="subcategory.image_url ? (subcategory.image_url.startsWith('storage/') ? `/${subcategory.image_url}` : `/storage/${subcategory.image_url}`) : '/images/placeholder-category.png'"
-                :alt="subcategory.name.en"
-                class="table-avatar"
-                @error="handleImageError"
-              >
-            </td>
-
-            <!-- Name -->
-            <td>
-              <div class="table-name">{{ subcategory.name.en }}</div>
-              <div class="table-subtitle">{{ subcategory.name.ar }}</div>
-            </td>
-
-            <!-- Category -->
-            <td>
-              <div class="table-subtitle">
-                <i class="fas fa-folder"></i> {{ subcategory.category?.name?.en || 'No Category' }}
+              <div class="media-cell">
+                <img
+                  :src="getImageUrl(subcategory.image_url)"
+                  :alt="subcategory.name.en"
+                  class="table-image"
+                  @error="handleImageError"
+                >
               </div>
             </td>
-
-            <!-- Status -->
             <td>
-              <span v-if="subcategory.is_featured" class="table-badge badge-warning">
-                <i class="fas fa-star"></i> Featured
-              </span>
-              <span v-if="subcategory.is_popular" class="table-badge badge-danger">
-                <i class="fas fa-fire"></i> Popular
-              </span>
-              <span v-if="!subcategory.is_featured && !subcategory.is_popular" class="table-badge badge-secondary">
-                Standard
+              <div class="name-cell">
+                <strong>{{ subcategory.name.en }}</strong>
+                <span class="name-ar">{{ subcategory.name.ar }}</span>
+              </div>
+            </td>
+            <td>
+              <span class="badge info">
+                <i class="fas fa-folder"></i> {{ subcategory.category?.name?.en || 'No Category' }}
               </span>
             </td>
-
-            <!-- Posts -->
             <td>
-              <div class="table-meta">
-                <span title="Posts">
-                  <i class="fas fa-file-alt"></i> {{ subcategory.service_posts_count || 0 }}
+              <div class="status-badges">
+                <span v-if="subcategory.is_featured" class="badge warning">
+                  <i class="fas fa-star"></i> Featured
+                </span>
+                <span v-if="subcategory.is_popular" class="badge fire">
+                  <i class="fas fa-fire"></i> Popular
+                </span>
+                <span v-if="!subcategory.is_featured && !subcategory.is_popular" class="badge secondary">
+                  Standard
                 </span>
               </div>
             </td>
-
-            <!-- Actions -->
+            <td>
+              <span class="badge info">
+                <i class="fas fa-file-alt"></i> {{ subcategory.service_posts_count || 0 }}
+              </span>
+            </td>
             <td>
               <div class="table-actions">
                 <button
                   @click="handleToggleFeatured(subcategory)"
-                  class="table-action-btn"
-                  :class="subcategory.is_featured ? 'btn-featured-active' : 'btn-featured'"
+                  class="action-btn-small"
+                  :class="subcategory.is_featured ? 'featured-active' : 'featured'"
                   title="Toggle Featured"
                 >
                   <i class="fas fa-star"></i>
                 </button>
                 <button
                   @click="handleTogglePopular(subcategory)"
-                  class="table-action-btn"
-                  :class="subcategory.is_popular ? 'btn-popular-active' : 'btn-popular'"
+                  class="action-btn-small"
+                  :class="subcategory.is_popular ? 'popular-active' : 'popular'"
                   title="Toggle Popular"
                 >
                   <i class="fas fa-fire"></i>
                 </button>
-                <button
-                  @click="openEditModal(subcategory)"
-                  class="table-action-btn btn-edit"
-                  title="Edit"
-                >
+                <button @click="openEditModal(subcategory)" class="action-btn-small edit" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
-                <button
-                  @click="handleDelete(subcategory)"
-                  class="table-action-btn btn-delete"
-                  title="Delete"
-                >
+                <button @click="handleDelete(subcategory)" class="action-btn-small delete" title="Delete">
                   <i class="fas fa-trash"></i>
                 </button>
               </div>
             </td>
           </tr>
-
-          <!-- Empty State Row -->
-          <tr v-if="subcategories.data.length === 0">
-            <td colspan="6" class="table-empty-state">
-              <i class="fas fa-folder-open"></i>
-              <h3>No Sub-Categories Found</h3>
-              <p>Try adjusting your filters or create a new sub-category</p>
+        </tbody>
+        <tbody v-else>
+          <tr>
+            <td colspan="6" class="empty-state">
+              <i class="fas fa-layer-group"></i>
+              <p>No sub-categories found</p>
               <button @click="resetFilters" class="action-btn primary">
-                <i class="fas fa-redo"></i>
-                Reset Filters
+                <i class="fas fa-redo"></i> Reset Filters
               </button>
             </td>
           </tr>
@@ -316,37 +329,36 @@
       </table>
     </div>
 
-    <!-- Advanced Pagination -->
-    <div v-if="subcategories.data.length > 0" class="pagination-advanced">
-      <button
-        class="page-btn"
-        :disabled="subcategories.current_page === 1"
-        @click="changePage(subcategories.current_page - 1)"
-      >
-        <i class="fas fa-chevron-left"></i>
-        Previous
-      </button>
-
-      <div class="page-numbers">
+    <!-- Pagination -->
+    <div class="pagination-container" v-if="subcategories.last_page > 1">
+      <div class="pagination-info">
+        Showing {{ subcategories.data.length }} of {{ subcategories.total }} sub-categories
+      </div>
+      <div class="pagination-controls">
+        <button
+          class="pagination-btn"
+          :disabled="subcategories.current_page === 1"
+          @click="changePage(subcategories.current_page - 1)"
+        >
+          <i class="fas fa-chevron-left"></i> Previous
+        </button>
         <button
           v-for="page in paginationPages"
           :key="page"
-          class="page-number"
+          class="pagination-btn"
           :class="{ active: page === subcategories.current_page }"
           @click="changePage(page)"
         >
           {{ page }}
         </button>
+        <button
+          class="pagination-btn"
+          :disabled="subcategories.current_page === subcategories.last_page"
+          @click="changePage(subcategories.current_page + 1)"
+        >
+          Next <i class="fas fa-chevron-right"></i>
+        </button>
       </div>
-
-      <button
-        class="page-btn"
-        :disabled="subcategories.current_page === subcategories.last_page"
-        @click="changePage(subcategories.current_page + 1)"
-      >
-        Next
-        <i class="fas fa-chevron-right"></i>
-      </button>
     </div>
 
     <!-- Form Modal -->
@@ -381,7 +393,31 @@ const modalMode = ref('create')
 const selectedSubCategory = ref(null)
 const viewMode = ref('list')
 const activeMenu = ref(null)
+const placeholderImage = '/storage/countryFlag/placeholder-flag.jpg'
 let searchTimeout = null
+
+const featuredCount = computed(() => {
+  return subcategories.value.data.filter(s => s.is_featured).length
+})
+
+const popularCount = computed(() => {
+  return subcategories.value.data.filter(s => s.is_popular).length
+})
+
+const paginationPages = computed(() => {
+  const pages = []
+  const currentPage = subcategories.value.current_page
+  const lastPage = subcategories.value.last_page
+
+  let startPage = Math.max(1, currentPage - 2)
+  let endPage = Math.min(lastPage, currentPage + 2)
+
+  for (let i = startPage; i <= endPage; i++) {
+    pages.push(i)
+  }
+
+  return pages
+})
 
 onMounted(async () => {
   await loadSubCategories()
@@ -432,21 +468,6 @@ const changePage = (page) => {
   filters.value.page = page
   loadSubCategories()
 }
-
-const paginationPages = computed(() => {
-  const pages = []
-  const currentPage = subcategories.value.current_page
-  const lastPage = subcategories.value.last_page
-
-  let startPage = Math.max(1, currentPage - 2)
-  let endPage = Math.min(lastPage, currentPage + 2)
-
-  for (let i = startPage; i <= endPage; i++) {
-    pages.push(i)
-  }
-
-  return pages
-})
 
 const toggleMenu = (id) => {
   activeMenu.value = activeMenu.value === id ? null : id
@@ -504,7 +525,6 @@ const handleDelete = async (subcategory) => {
   if (!confirm(`Are you sure you want to delete "${subcategory.name.en}"?`)) {
     return
   }
-
   try {
     await deleteSubCategory(subcategory.id)
     await loadSubCategories()
@@ -513,49 +533,97 @@ const handleDelete = async (subcategory) => {
   }
 }
 
+const getImageUrl = (url) => {
+  if (!url) return placeholderImage
+  if (url.startsWith('storage/')) return `/${url}`
+  if (url.startsWith('/')) return url
+  return `/storage/${url}`
+}
+
 const handleImageError = (event) => {
-  event.target.src = '/images/placeholder-category.png'
+  event.target.src = placeholderImage
 }
 </script>
 
 <style scoped>
-.subcategories-management-advanced {
+.subcategories-modern {
   padding: 0;
-  background: #f5f7fa;
-  min-height: 100vh;
 }
 
-/* Search & Filter Bar */
-.search-filter-bar {
-  background: white;
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1.25rem;
+}
+
+.stat-card {
   border-radius: 16px;
   padding: 1.5rem;
+  color: white;
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+.stat-card.orange { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); }
+.stat-card.purple { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+
+.stat-icon {
+  width: 65px;
+  height: 65px;
+  background: rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.75rem;
+}
+
+.stat-content { flex: 1; }
+.stat-value { font-size: 2rem; font-weight: 700; margin: 0; }
+.stat-label { font-size: 0.9rem; opacity: 0.9; margin: 0.25rem 0 0 0; }
+
+/* Search & Filters */
+.search-filter-bar {
+  background: white;
+  padding: 1.25rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
   margin-bottom: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
   display: flex;
   gap: 1rem;
   flex-wrap: wrap;
+  align-items: center;
 }
 
 .search-box {
-  flex: 1;
-  min-width: 300px;
   position: relative;
+  flex: 1;
+  min-width: 280px;
 }
 
 .search-icon {
   position: absolute;
-  left: 1.25rem;
+  left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #6c757d;
-  font-size: 1.1rem;
+  color: #999;
 }
 
 .search-input {
   width: 100%;
-  padding: 0.875rem 3rem 0.875rem 3.5rem;
-  border: 2px solid #e9ecef;
+  padding: 0.875rem 2.5rem 0.875rem 2.75rem;
+  border: 2px solid #eef2f7;
   border-radius: 12px;
   font-size: 0.95rem;
   transition: all 0.3s ease;
@@ -569,30 +637,30 @@ const handleImageError = (event) => {
 
 .clear-search {
   position: absolute;
-  right: 1.25rem;
+  right: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #6c757d;
+  color: #999;
   cursor: pointer;
-  padding: 0.25rem;
-}
-
-.filter-controls {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
 }
 
 .filter-group {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.status-filters {
+  display: flex;
+  gap: 0.25rem;
   background: #f8f9fa;
-  padding: 0.375rem;
-  border-radius: 12px;
+  padding: 0.25rem;
+  border-radius: 10px;
 }
 
 .filter-btn {
-  padding: 0.625rem 1.25rem;
+  padding: 0.6rem 1rem;
   border: none;
   background: transparent;
   border-radius: 8px;
@@ -602,7 +670,8 @@ const handleImageError = (event) => {
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  font-size: 0.85rem;
 }
 
 .filter-btn:hover {
@@ -611,32 +680,39 @@ const handleImageError = (event) => {
 }
 
 .filter-btn.active {
-  background: white;
-  color: #667eea;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
 }
 
-.role-select {
-  padding: 0.625rem 1.25rem;
-  border: 2px solid #e9ecef;
+.filter-select {
+  padding: 0.875rem 1rem;
+  border: 2px solid #eef2f7;
   border-radius: 12px;
-  font-weight: 500;
+  font-size: 0.9rem;
+  background: white;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
 }
 
-.role-select:focus {
+.filter-select:focus {
   outline: none;
   border-color: #667eea;
 }
 
+.action-buttons {
+  display: flex;
+  gap: 0.75rem;
+}
+
 .action-btn {
-  padding: 0.625rem 1.5rem;
+  padding: 0.75rem 1.25rem;
   border: none;
   border-radius: 12px;
+  font-size: 0.9rem;
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.3s ease;
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
@@ -648,29 +724,19 @@ const handleImageError = (event) => {
   color: white;
 }
 
-.action-btn.success {
-  background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
-  color: white;
-}
-
-.action-btn.danger {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+.action-btn.secondary {
+  background: #6c757d;
   color: white;
 }
 
 .action-btn.warning {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  color: #212529;
-}
-
-.action-btn.secondary {
-  background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
-  color: white;
+  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
+  color: #333;
 }
 
 .action-btn:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
 }
 
 /* View Controls */
@@ -684,15 +750,15 @@ const handleImageError = (event) => {
 
 .view-toggle {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.25rem;
   background: white;
-  padding: 0.375rem;
-  border-radius: 12px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.07);
+  padding: 0.25rem;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 .toggle-btn {
-  padding: 0.625rem 1.25rem;
+  padding: 0.6rem 1rem;
   border: none;
   background: transparent;
   border-radius: 8px;
@@ -702,7 +768,8 @@ const handleImageError = (event) => {
   transition: all 0.2s ease;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
+  font-size: 0.85rem;
 }
 
 .toggle-btn.active {
@@ -711,8 +778,8 @@ const handleImageError = (event) => {
 }
 
 .results-info {
-  color: #6c757d;
-  font-weight: 500;
+  color: #666;
+  font-size: 0.9rem;
 }
 
 /* Loading State */
@@ -721,15 +788,16 @@ const handleImageError = (event) => {
   padding: 4rem 2rem;
   background: white;
   border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
 }
 
-.loader-advanced {
-  width: 60px;
-  height: 60px;
-  border: 4px solid #f3f3f3;
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  border: 4px solid #f3f4f6;
   border-top: 4px solid #667eea;
   border-radius: 50%;
-  margin: 0 auto 1rem;
   animation: spin 1s linear infinite;
 }
 
@@ -738,48 +806,45 @@ const handleImageError = (event) => {
   100% { transform: rotate(360deg); }
 }
 
-/* Items Grid */
-.items-grid {
+/* Subcategories Grid */
+.subcategories-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1.5rem;
 }
 
-.item-card {
+.subcategory-card {
   background: white;
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  min-height: 420px;
+  min-height: 380px;
 }
 
-.item-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+.subcategory-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
 }
 
 .card-header-custom {
-  padding: 1.5rem;
+  padding: 1.25rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #f8f9ff 0%, #eef2f7 100%);
 }
 
-.item-image-wrapper {
+.subcategory-image-wrapper {
   position: relative;
-  width: 100px;
-  height: 100px;
 }
 
-.item-image {
-  width: 100px;
-  height: 100px;
-  border-radius: 16px;
+.subcategory-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 12px;
   border: 4px solid white;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   object-fit: cover;
@@ -795,24 +860,24 @@ const handleImageError = (event) => {
 }
 
 .status-indicator {
-  width: 28px;
-  height: 28px;
+  width: 24px;
+  height: 24px;
   border-radius: 50%;
-  border: 3px solid white;
+  border: 2px solid white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.7rem;
+  font-size: 0.6rem;
   color: white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
 }
 
 .status-indicator.featured {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
+  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
 }
 
 .status-indicator.popular {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
 }
 
 .card-menu {
@@ -826,7 +891,7 @@ const handleImageError = (event) => {
   height: 36px;
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   transition: all 0.2s ease;
 }
 
@@ -838,11 +903,11 @@ const handleImageError = (event) => {
 .dropdown-menu {
   position: absolute;
   right: 0;
-  top: 45px;
+  top: 42px;
   background: white;
   border-radius: 12px;
   box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  min-width: 200px;
+  min-width: 180px;
   z-index: 100;
   overflow: hidden;
 }
@@ -851,7 +916,7 @@ const handleImageError = (event) => {
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  padding: 0.875rem 1.25rem;
+  padding: 0.75rem 1rem;
   border: none;
   background: transparent;
   width: 100%;
@@ -859,8 +924,7 @@ const handleImageError = (event) => {
   cursor: pointer;
   transition: all 0.2s ease;
   color: #495057;
-  text-decoration: none;
-  font-weight: 500;
+  font-size: 0.9rem;
 }
 
 .menu-item:hover {
@@ -876,97 +940,62 @@ const handleImageError = (event) => {
 }
 
 .card-body-custom {
-  padding: 1.5rem;
+  padding: 1.25rem;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-.item-name {
-  font-size: 1.25rem;
+.subcategory-name {
+  font-size: 1.15rem;
   font-weight: 700;
   margin: 0 0 0.25rem 0;
   color: #2c3e50;
 }
 
-.item-subtitle {
-  color: #6c757d;
-  font-size: 0.875rem;
-  margin: 0 0 1rem 0;
+.subcategory-name-ar {
+  color: #888;
+  font-size: 0.9rem;
+  margin: 0 0 0.75rem 0;
 }
 
-.item-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
-}
-
-.meta-item {
+.parent-category {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  color: #6c757d;
-  font-size: 0.875rem;
+  color: #666;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
 }
 
-.meta-item i {
-  width: 16px;
+.parent-category i {
   color: #667eea;
 }
 
-.item-badges {
+.subcategory-badges {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-wrap: wrap;
-  margin-bottom: 1rem;
-}
-
-.role-badge {
-  padding: 0.375rem 0.875rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-}
-
-.role-badge.badge-warning {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  color: #212529;
-}
-
-.role-badge.badge-danger {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
-  color: white;
-}
-
-.role-badge.badge-primary {
-  background: linear-gradient(135deg, #007bff 0%, #0056b3 100%);
-  color: white;
+  margin-bottom: 0.75rem;
 }
 
 .spacer {
   flex: 1;
 }
 
-.item-stats {
+.subcategory-stats {
   display: flex;
-  gap: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e9ecef;
+  gap: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #eef2f7;
 }
 
 .stat-item {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: #6c757d;
-  font-size: 0.875rem;
-  font-weight: 500;
+  gap: 0.4rem;
+  color: #666;
+  font-size: 0.8rem;
 }
 
 .stat-item i {
@@ -974,26 +1003,59 @@ const handleImageError = (event) => {
 }
 
 .card-footer-custom {
-  padding: 1rem 1.5rem;
-  background: #f8f9fa;
+  padding: 1rem 1.25rem;
+  background: #f8f9ff;
   display: flex;
   gap: 0.75rem;
-  border-top: 1px solid #e9ecef;
+  border-top: 1px solid #eef2f7;
 }
 
 .card-footer-custom .action-btn {
   flex: 1;
   justify-content: center;
-  padding: 0.75rem 1rem;
-  font-size: 0.875rem;
+  padding: 0.65rem 1rem;
+  font-size: 0.85rem;
 }
 
-/* Modern Table */
-.modern-table-container {
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.7rem;
+  border-radius: 8px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.badge.success { background: #e8f5e9; color: #2e7d32; }
+.badge.danger { background: #ffebee; color: #c62828; }
+.badge.warning { background: #fff8e1; color: #ff8f00; }
+.badge.fire { background: #fce4ec; color: #c2185b; }
+.badge.info { background: #e0f7fa; color: #00838f; }
+.badge.secondary { background: #f5f5f5; color: #616161; }
+
+/* Empty State Grid */
+.empty-state-grid {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 4rem 2rem;
   background: white;
   border-radius: 16px;
+}
+
+.empty-state-grid i {
+  font-size: 4rem;
+  color: #ddd;
+  margin-bottom: 1rem;
+}
+
+/* Data Table */
+.data-table-container {
+  background: white;
+  border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
   overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
 }
 
 .modern-table {
@@ -1002,263 +1064,186 @@ const handleImageError = (event) => {
 }
 
 .modern-table thead {
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
 }
 
 .modern-table th {
-  padding: 1rem 1.5rem;
+  padding: 1.125rem 1rem;
   text-align: left;
   font-weight: 600;
-  color: #495057;
-  font-size: 0.875rem;
+  color: white;
+  font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.modern-table td {
-  padding: 1rem 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-  vertical-align: middle;
+.modern-table tbody tr {
+  border-bottom: 1px solid #f0f4f8;
+  transition: all 0.2s ease;
 }
 
 .modern-table tbody tr:hover {
-  background: #f8f9fa;
+  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
 }
 
-.table-avatar {
-  width: 50px;
-  height: 50px;
-  border-radius: 12px;
+.modern-table td {
+  padding: 1rem;
+  font-size: 0.9rem;
+  color: #333;
+  vertical-align: middle;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 4rem !important;
+  color: #999;
+}
+
+.empty-state i {
+  font-size: 3.5rem;
+  margin-bottom: 1rem;
+  display: block;
+  opacity: 0.3;
+}
+
+.empty-state p {
+  margin-bottom: 1.5rem;
+}
+
+/* Table Cells */
+.media-cell {
+  display: inline-block;
+}
+
+.table-image {
+  width: 55px;
+  height: 55px;
+  border-radius: 10px;
   object-fit: cover;
 }
 
-.table-name {
-  font-weight: 600;
-  color: #2c3e50;
-  margin-bottom: 0.25rem;
-}
-
-.table-subtitle {
-  color: #6c757d;
-  font-size: 0.875rem;
+.name-cell {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  flex-direction: column;
+  gap: 0.2rem;
 }
 
-.table-subtitle i {
-  color: #adb5bd;
+.name-ar {
+  font-size: 0.85rem;
+  color: #888;
 }
 
-.table-badge {
-  padding: 0.375rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  margin-right: 0.5rem;
-}
-
-.table-badge.badge-warning {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  color: #212529;
-}
-
-.table-badge.badge-danger {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
-  color: white;
-}
-
-.table-badge.badge-secondary {
-  background: #e9ecef;
-  color: #6c757d;
-}
-
-.table-meta {
+.status-badges {
   display: flex;
-  gap: 1rem;
-  color: #6c757d;
-  font-size: 0.875rem;
+  gap: 0.4rem;
+  flex-wrap: wrap;
 }
 
-.table-meta i {
-  color: #667eea;
-  margin-right: 0.25rem;
-}
-
+/* Table Actions */
 .table-actions {
   display: flex;
-  gap: 0.5rem;
-  justify-content: flex-end;
+  gap: 0.4rem;
 }
 
-.table-action-btn {
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
+.action-btn-small {
+  width: 32px;
+  height: 32px;
   border: none;
+  border-radius: 8px;
   cursor: pointer;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  font-size: 0.85rem;
+}
+
+.action-btn-small.edit {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.action-btn-small.featured {
+  background: #f5f5f5;
+  color: #999;
+}
+
+.action-btn-small.featured-active {
+  background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
   color: white;
 }
 
-.table-action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+.action-btn-small.popular {
+  background: #f5f5f5;
+  color: #999;
 }
 
-.table-action-btn.btn-featured {
-  background: #e9ecef;
-  color: #6c757d;
+.action-btn-small.popular-active {
+  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  color: white;
 }
 
-.table-action-btn.btn-featured-active {
-  background: linear-gradient(135deg, #ffc107 0%, #e0a800 100%);
-  color: #212529;
+.action-btn-small.delete {
+  background: #ffebee;
+  color: #c62828;
 }
 
-.table-action-btn.btn-popular {
-  background: #e9ecef;
-  color: #6c757d;
-}
-
-.table-action-btn.btn-popular-active {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
-}
-
-.table-action-btn.btn-edit {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.table-action-btn.btn-delete {
-  background: linear-gradient(135deg, #dc3545 0%, #bd2130 100%);
-}
-
-.table-empty-state {
-  text-align: center;
-  padding: 4rem 2rem;
-}
-
-.table-empty-state i {
-  font-size: 3rem;
-  color: #adb5bd;
-  margin-bottom: 1rem;
-  display: block;
-}
-
-.table-empty-state h3 {
-  font-size: 1.25rem;
-  color: #2c3e50;
-  margin: 0 0 0.5rem 0;
-}
-
-.table-empty-state p {
-  color: #6c757d;
-  margin: 0 0 1.5rem 0;
-}
-
-/* Empty State */
-.empty-state-advanced {
-  text-align: center;
-  padding: 4rem 2rem;
-  background: white;
-  border-radius: 16px;
-  grid-column: 1 / -1;
-}
-
-.empty-icon {
-  width: 120px;
-  height: 120px;
-  margin: 0 auto 2rem;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 3rem;
-  color: #adb5bd;
-}
-
-.empty-state-advanced h3 {
-  font-size: 1.5rem;
-  margin: 0 0 0.5rem 0;
-  color: #2c3e50;
-}
-
-.empty-state-advanced p {
-  color: #6c757d;
-  margin: 0 0 2rem 0;
+.action-btn-small:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 /* Pagination */
-.pagination-advanced {
+.pagination-container {
   display: flex;
-  justify-content: center;
+  justify-content: space-between;
   align-items: center;
-  gap: 1rem;
-  margin-top: 2rem;
-  padding: 1.5rem;
+  margin-top: 1.5rem;
+  padding: 1.25rem;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  flex-wrap: wrap;
+  gap: 1rem;
 }
 
-.page-btn {
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #e9ecef;
-  background: white;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
+.pagination-info {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.pagination-controls {
   display: flex;
+  gap: 0.5rem;
+}
+
+.pagination-btn {
+  padding: 0.6rem 1rem;
+  border: 2px solid #eef2f7;
+  background: white;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s ease;
+  display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  color: #495057;
 }
 
-.page-btn:hover:not(:disabled) {
-  background: #667eea;
-  color: white;
-  border-color: #667eea;
-}
-
-.page-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.page-numbers {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.page-number {
-  width: 44px;
-  height: 44px;
-  border: 2px solid #e9ecef;
-  background: white;
-  border-radius: 12px;
-  cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
-  color: #495057;
-}
-
-.page-number.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-  border-color: #667eea;
-}
-
-.page-number:hover:not(.active) {
+.pagination-btn:hover:not(:disabled) {
   border-color: #667eea;
   color: #667eea;
+}
+
+.pagination-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-color: transparent;
+  color: white;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 /* Responsive */
@@ -1267,33 +1252,45 @@ const handleImageError = (event) => {
     flex-direction: column;
   }
 
-  .search-box {
-    min-width: 100%;
-  }
-
-  .filter-controls {
-    flex-wrap: wrap;
+  .search-box, .filter-group, .action-buttons {
     width: 100%;
   }
 
-  .items-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .view-controls {
+  .filter-group {
     flex-direction: column;
-    align-items: stretch;
   }
 
-  .view-toggle {
+  .status-filters {
+    width: 100%;
     justify-content: center;
   }
 
-  .results-info {
-    text-align: center;
+  .filter-select {
+    width: 100%;
   }
 
-  .pagination-advanced {
+  .action-buttons {
+    justify-content: stretch;
+  }
+
+  .action-btn {
+    flex: 1;
+    justify-content: center;
+  }
+
+  .subcategories-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .data-table-container {
+    overflow-x: auto;
+  }
+
+  .modern-table {
+    min-width: 800px;
+  }
+
+  .pagination-container {
     flex-direction: column;
   }
 }

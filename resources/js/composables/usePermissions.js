@@ -39,26 +39,32 @@ export function usePermissions() {
             console.log('📊 Permissions nested object:', data.permissions)
             console.log('📊 Actual permissions array:', data.permissions?.data)
 
-            // Update ref properties individually to maintain reactivity
+            // Replace the entire ref value to ensure reactivity
             if (data.permissions) {
-                permissions.value.data = data.permissions.data || []
-                permissions.value.current_page = data.permissions.current_page || 1
-                permissions.value.last_page = data.permissions.last_page || 1
-                permissions.value.per_page = data.permissions.per_page || 15
-                permissions.value.total = data.permissions.total || 0
+                permissions.value = {
+                    data: [...(data.permissions.data || [])],
+                    current_page: data.permissions.current_page || 1,
+                    last_page: data.permissions.last_page || 1,
+                    per_page: data.permissions.per_page || 15,
+                    total: data.permissions.total || 0
+                }
             } else if (data.data) {
-                permissions.value.data = data.data || []
-                permissions.value.current_page = data.current_page || 1
-                permissions.value.last_page = data.last_page || 1
-                permissions.value.per_page = data.per_page || 15
-                permissions.value.total = data.total || 0
+                permissions.value = {
+                    data: [...(data.data || [])],
+                    current_page: data.current_page || 1,
+                    last_page: data.last_page || 1,
+                    per_page: data.per_page || 15,
+                    total: data.total || 0
+                }
             } else {
                 console.warn('⚠️ Unexpected data format:', data)
-                permissions.value.data = []
-                permissions.value.current_page = 1
-                permissions.value.last_page = 1
-                permissions.value.per_page = 15
-                permissions.value.total = 0
+                permissions.value = {
+                    data: [],
+                    current_page: 1,
+                    last_page: 1,
+                    per_page: 15,
+                    total: 0
+                }
             }
 
             console.log('🔄 Permissions updated:', permissions.value.data.length, 'items')

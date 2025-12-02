@@ -58,6 +58,7 @@ Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 Route::get('/sitemap-pages.xml', [SitemapController::class, 'pages']);
 Route::get('/sitemap-categories.xml', [SitemapController::class, 'categories']);
 Route::get('/sitemap-listings-{page}.xml', [SitemapController::class, 'listings'])->where('page', '[0-9]+');
+Route::get('/sitemap-users-{page}.xml', [SitemapController::class, 'users'])->where('page', '[0-9]+');
 Route::get('/robots.txt', [SitemapController::class, 'robots']);
 
 // Legacy Policy Route (redirect to SPA)
@@ -118,6 +119,34 @@ Route::get('/api/validate-deep-link/{route}/{id}', [DeepLinkController::class, '
 
 // Authentication Routes
 Auth::routes();
+
+// API route to get current authenticated user (for SPA)
+Route::get('/api/user', function () {
+    if (Auth::check()) {
+        $user = Auth::user()->load(['roles', 'photos']);
+        return response()->json([
+            'user' => [
+                'id' => $user->id,
+                'name' => $user->name,
+                'user_name' => $user->user_name,
+                'email' => $user->email,
+                'avatar' => $user->photos && $user->photos->count() > 0
+                    ? ($user->photos->first()->is_external
+                        ? $user->photos->first()->src
+                        : '/storage/' . $user->photos->first()->src)
+                    : null,
+                'roles' => $user->roles->map(function ($role) {
+                    return [
+                        'id' => $role->id,
+                        'name' => $role->name,
+                        'display_name' => $role->display_name,
+                    ];
+                }),
+            ]
+        ]);
+    }
+    return response()->json(['user' => null], 401);
+})->middleware('web');
 
 /*
 |--------------------------------------------------------------------------

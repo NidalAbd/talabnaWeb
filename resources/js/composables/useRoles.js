@@ -1,6 +1,9 @@
 import { ref } from 'vue'
 
+// Updated: Force cache bust
 export function useRoles() {
+    console.log('🔧 useRoles composable initialized')
+
     const roles = ref({
         data: [],
         current_page: 1,
@@ -41,26 +44,32 @@ export function useRoles() {
             console.log('📊 Roles nested object:', data.roles)
             console.log('📊 Actual roles array:', data.roles?.data)
 
-            // Update ref properties individually to maintain reactivity
+            // Replace the entire ref value to ensure reactivity
             if (data.roles) {
-                roles.value.data = data.roles.data || []
-                roles.value.current_page = data.roles.current_page || 1
-                roles.value.last_page = data.roles.last_page || 1
-                roles.value.per_page = data.roles.per_page || 10
-                roles.value.total = data.roles.total || 0
+                roles.value = {
+                    data: [...(data.roles.data || [])],
+                    current_page: data.roles.current_page || 1,
+                    last_page: data.roles.last_page || 1,
+                    per_page: data.roles.per_page || 10,
+                    total: data.roles.total || 0
+                }
             } else if (data.data) {
-                roles.value.data = data.data || []
-                roles.value.current_page = data.current_page || 1
-                roles.value.last_page = data.last_page || 1
-                roles.value.per_page = data.per_page || 10
-                roles.value.total = data.total || 0
+                roles.value = {
+                    data: [...(data.data || [])],
+                    current_page: data.current_page || 1,
+                    last_page: data.last_page || 1,
+                    per_page: data.per_page || 10,
+                    total: data.total || 0
+                }
             } else {
                 console.warn('⚠️ Unexpected data format:', data)
-                roles.value.data = []
-                roles.value.current_page = 1
-                roles.value.last_page = 1
-                roles.value.per_page = 10
-                roles.value.total = 0
+                roles.value = {
+                    data: [],
+                    current_page: 1,
+                    last_page: 1,
+                    per_page: 10,
+                    total: 0
+                }
             }
 
             console.log('🔄 Roles updated:', roles.value.data.length, 'items')

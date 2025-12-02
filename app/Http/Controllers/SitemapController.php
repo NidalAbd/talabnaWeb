@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Categories;
 use App\Models\ServicePost;
 use App\Models\Sub_categories;
+use App\Models\User;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Cache;
 
@@ -32,14 +33,23 @@ class SitemapController extends Controller
             $xml .= '</sitemap>';
 
             // Listings sitemap (paginated)
-            $totalListings = ServicePost::where('isSuspended', false)
-                ->where('status', 'active')
-                ->count();
-            $pages = ceil($totalListings / 1000);
+            $totalListings = ServicePost::where('state', 'published')->count();
+            $listingPages = ceil($totalListings / 1000);
 
-            for ($i = 1; $i <= $pages; $i++) {
+            for ($i = 1; $i <= max(1, $listingPages); $i++) {
                 $xml .= '<sitemap>';
                 $xml .= '<loc>' . url("/sitemap-listings-{$i}.xml") . '</loc>';
+                $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
+                $xml .= '</sitemap>';
+            }
+
+            // Users sitemap (paginated) - public profiles
+            $totalUsers = User::where('is_active', '!=', 'banned')->count();
+            $userPages = ceil($totalUsers / 1000);
+
+            for ($i = 1; $i <= max(1, $userPages); $i++) {
+                $xml .= '<sitemap>';
+                $xml .= '<loc>' . url("/sitemap-users-{$i}.xml") . '</loc>';
                 $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
                 $xml .= '</sitemap>';
             }
@@ -150,8 +160,7 @@ class SitemapController extends Controller
             $perPage = 1000;
             $offset = ($page - 1) * $perPage;
 
-            $listings = ServicePost::where('isSuspended', false)
-                ->where('status', 'active')
+            $listings = ServicePost::where('state', 'published')
                 ->orderBy('id')
                 ->skip($offset)
                 ->take($perPage)
@@ -180,18 +189,85 @@ class SitemapController extends Controller
     }
 
     /**
+     * Generate sitemap for users (public profiles - paginated)
+     */
+    public function users($page = 1)
+    {
+        $cacheKey = "sitemap-users-{$page}";
+
+        $content = Cache::remember($cacheKey, 1800, function () use ($page) {
+            $perPage = 1000;
+            $offset = ($page - 1) * $perPage;
+
+            $users = User::where('is_active', '!=', 'banned')
+                ->orderBy('id')
+                ->skip($offset)
+                ->take($perPage)
+                ->get(['id', 'user_name', 'updated_at']);
+
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+
+            foreach ($users as $user) {
+                $xml .= '<url>';
+                $xml .= '<loc>' . url("/user/{$user->id}") . '</loc>';
+                $xml .= '<lastmod>' . ($user->updated_at ?? now())->toIso8601String() . '</lastmod>';
+                $xml .= '<changefreq>weekly</changefreq>';
+                $xml .= '<priority>0.5</priority>';
+                $xml .= '</url>';
+            }
+
+            $xml .= '</urlset>';
+
+            return $xml;
+        });
+
+        return response($content, 200)
+            ->header('Content-Type', 'application/xml');
+    }
+
+    /**
      * Generate robots.txt
      */
     public function robots()
     {
         $content = "User-agent: *\n";
         $content .= "Allow: /\n";
+        $content .= "Allow: /browse\n";
+        $content .= "Allow: /category/\n";
+        $content .= "Allow: /listing/\n";
+        $content .= "Allow: /user/\n";
+        $content .= "Allow: /search\n";
+        $content .= "Allow: /about\n";
+        $content .= "Allow: /contact\n";
+        $content .= "Allow: /privacy\n";
+        $content .= "Allow: /terms\n";
+        $content .= "\n";
+        $content .= "# Disallow admin and authenticated routes\n";
         $content .= "Disallow: /dashboard\n";
         $content .= "Disallow: /admin\n";
         $content .= "Disallow: /login\n";
         $content .= "Disallow: /register\n";
         $content .= "Disallow: /password\n";
         $content .= "Disallow: /api/\n";
+        $content .= "Disallow: /users\n";
+        $content .= "Disallow: /categories\n";
+        $content .= "Disallow: /subcategories\n";
+        $content .= "Disallow: /countries\n";
+        $content .= "Disallow: /cities\n";
+        $content .= "Disallow: /roles\n";
+        $content .= "Disallow: /permissions\n";
+        $content .= "Disallow: /service_posts\n";
+        $content .= "Disallow: /reports\n";
+        $content .= "Disallow: /badge-types\n";
+        $content .= "Disallow: /role-assignments\n";
+        $content .= "Disallow: /palservice_points\n";
+        $content .= "Disallow: /purchase_points\n";
+        $content .= "Disallow: /point_transactions\n";
+        $content .= "Disallow: /notifications\n";
+        $content .= "\n";
+        $content .= "# Crawl delay for politeness\n";
+        $content .= "Crawl-delay: 1\n";
         $content .= "\n";
         $content .= "Sitemap: " . url('/sitemap.xml') . "\n";
 
