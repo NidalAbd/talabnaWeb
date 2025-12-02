@@ -280,6 +280,12 @@ class SitemapController extends Controller
      */
     private function slugify($text)
     {
+        // Handle array/JSON names (multilingual)
+        if (is_array($text)) {
+            // Prefer Arabic, then English, then first available
+            $text = $text['ar'] ?? $text['en'] ?? (count($text) > 0 ? array_values($text)[0] : 'item');
+        }
+
         // Convert Arabic text to a safe format
         $text = preg_replace('/[^\p{L}\p{N}\s-]/u', '', $text);
         $text = preg_replace('/[\s-]+/', '-', $text);
