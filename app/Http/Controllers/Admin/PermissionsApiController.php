@@ -109,12 +109,12 @@ class PermissionsApiController extends Controller
                 'id' => $permission->id,
                 'name' => $permission->name,
                 'display_name' => $permission->display_name ?? $permission->name,
-                'description' => $permission->description,
+                'description' => $permission->description ?? '',
                 'category' => $category,
-                'role_count' => $roleCount,
+                'role_count' => $roleCount ?? 0,
                 'is_system' => $isSystem,
                 'is_deletable' => !$isSystem && $roleCount == 0,
-                'created_at' => $permission->created_at?->format('Y-m-d H:i:s'),
+                'created_at' => $permission->created_at ? $permission->created_at->format('Y-m-d H:i:s') : null,
             ];
         });
 

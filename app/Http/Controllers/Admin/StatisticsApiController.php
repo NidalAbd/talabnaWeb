@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\BadgeType;
 use App\Models\Categories;
 use App\Models\point_purchase_requests;
 use App\Models\ServicePost;
 use App\Models\User;
-use App\Models\Level;
 use Illuminate\Http\JsonResponse;
 
 class StatisticsApiController extends Controller
@@ -53,14 +53,21 @@ class StatisticsApiController extends Controller
             $realEstatePosts = ServicePost::where('categories_id', $categoryMap['Real Estate'])->count();
             $servicesPosts = ServicePost::where('categories_id', $categoryMap['Services'])->count();
 
-            // Badge counts using level IDs
-            $goldLevel = Level::where('name->ar', 'ذهبي')->first();
-            $diamondLevel = Level::where('name->ar', 'ماسي')->first();
-            $regularLevel = Level::where('name->ar', 'عادي')->first();
+            // Badge counts using badge_type_id or have_badge field
+            $goldBadge = BadgeType::where('slug', 'gold')->first();
+            $diamondBadge = BadgeType::where('slug', 'diamond')->first();
+            $regularBadge = BadgeType::where('slug', 'normal')->orWhere('is_default', true)->first();
 
-            $goldenPosts = $goldLevel ? ServicePost::where('level_id', $goldLevel->id)->count() : 0;
-            $diamondPosts = $diamondLevel ? ServicePost::where('level_id', $diamondLevel->id)->count() : 0;
-            $normalPosts = $regularLevel ? ServicePost::where('level_id', $regularLevel->id)->count() : 0;
+            // Count posts by badge_type_id if exists, otherwise by have_badge field
+            $goldenPosts = $goldBadge
+                ? ServicePost::where('badge_type_id', $goldBadge->id)->count()
+                : ServicePost::where('have_badge', 'ذهبي')->count();
+            $diamondPosts = $diamondBadge
+                ? ServicePost::where('badge_type_id', $diamondBadge->id)->count()
+                : ServicePost::where('have_badge', 'ماسي')->count();
+            $normalPosts = $regularBadge
+                ? ServicePost::where('badge_type_id', $regularBadge->id)->count()
+                : ServicePost::where('have_badge', 'عادي')->orWhereNull('have_badge')->count();
 
             // Post status counts
             $publishedPosts = ServicePost::where('state', 'published')->count();

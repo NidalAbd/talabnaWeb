@@ -39,12 +39,29 @@ export function usePermissions() {
             console.log('📊 Permissions nested object:', data.permissions)
             console.log('📊 Actual permissions array:', data.permissions?.data)
 
-            // Check if data is wrapped in 'permissions' key or is direct pagination
+            // Update ref properties individually to maintain reactivity
             if (data.permissions) {
-                permissions.value = data.permissions
+                permissions.value.data = data.permissions.data || []
+                permissions.value.current_page = data.permissions.current_page || 1
+                permissions.value.last_page = data.permissions.last_page || 1
+                permissions.value.per_page = data.permissions.per_page || 15
+                permissions.value.total = data.permissions.total || 0
+            } else if (data.data) {
+                permissions.value.data = data.data || []
+                permissions.value.current_page = data.current_page || 1
+                permissions.value.last_page = data.last_page || 1
+                permissions.value.per_page = data.per_page || 15
+                permissions.value.total = data.total || 0
             } else {
-                permissions.value = data
+                console.warn('⚠️ Unexpected data format:', data)
+                permissions.value.data = []
+                permissions.value.current_page = 1
+                permissions.value.last_page = 1
+                permissions.value.per_page = 15
+                permissions.value.total = 0
             }
+
+            console.log('🔄 Permissions updated:', permissions.value.data.length, 'items')
         } catch (error) {
             console.error('❌ Error fetching permissions:', error)
             throw error
@@ -52,7 +69,7 @@ export function usePermissions() {
             loading.value = false
             console.log('⏱️ Loading complete. Permissions count:', permissions.value.data?.length || 0)
             console.log('🔍 Loading state:', loading.value)
-            console.log('🔍 Final permissions.value:', permissions.value)
+            console.log('🔍 Final permissions:', permissions.value)
         }
     }
 

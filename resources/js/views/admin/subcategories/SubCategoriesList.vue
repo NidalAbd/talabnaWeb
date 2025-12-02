@@ -104,7 +104,7 @@
         <div class="card-header-custom">
           <div class="item-image-wrapper">
             <img
-              :src="subcategory.image_url ? `/storage/${subcategory.image_url}` : '/images/placeholder-category.png'"
+              :src="subcategory.image_url ? (subcategory.image_url.startsWith('storage/') ? `/${subcategory.image_url}` : `/storage/${subcategory.image_url}`) : '/images/placeholder-category.png'"
               :alt="subcategory.name.en"
               class="item-image"
               @error="handleImageError"
@@ -221,7 +221,7 @@
             <!-- Image -->
             <td>
               <img
-                :src="subcategory.image_url ? `/storage/${subcategory.image_url}` : '/images/placeholder-category.png'"
+                :src="subcategory.image_url ? (subcategory.image_url.startsWith('storage/') ? `/${subcategory.image_url}` : `/storage/${subcategory.image_url}`) : '/images/placeholder-category.png'"
                 :alt="subcategory.name.en"
                 class="table-avatar"
                 @error="handleImageError"

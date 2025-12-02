@@ -411,6 +411,7 @@ onMounted(async () => {
 
 .stat-card.orange {
     background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    color: #212529;
 }
 
 .stat-card.purple {
@@ -568,6 +569,7 @@ onMounted(async () => {
 
 .info-box.orange {
     background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    color: #212529;
 }
 
 .info-box.purple {

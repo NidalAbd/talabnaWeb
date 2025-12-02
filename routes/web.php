@@ -498,11 +498,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
         Route::get('/roles/list', [ApiController::class, 'getRoles'])->name('roles.list');
         Route::get('/countries/list', [ApiController::class, 'getCountries'])->name('countries.list');
 
-        // Dashboard API (separate from mobile API)
-        Route::get('/dashboard', [DashboardApiController::class, 'index'])->name('dashboard');
-
         // Users API (for Vue.js admin dashboard)
         Route::prefix('admin')->group(function () {
+            // Dashboard API (separate from mobile API)
+            Route::get('/dashboard', [DashboardApiController::class, 'index'])->name('api.admin.dashboard');
             // Users
             Route::get('/users/stats', [\App\Http\Controllers\Admin\UsersApiController::class, 'getStats'])->name('api.admin.users.stats');
             Route::get('/users/roles', [\App\Http\Controllers\Admin\UsersApiController::class, 'getRoles'])->name('api.admin.users.roles');

@@ -54,9 +54,20 @@ class CitiesApiController extends Controller
         $perPage = $request->get('per_page', 15);
         $cities = $query->paginate($perPage);
 
-        // Transform data to include image URL
+        // Transform data to include image URL and ensure name is properly formatted
         $cities->getCollection()->transform(function ($city) {
             $city->image_url = $city->photos->first()?->url ?? 'countryFlag/placeholder-flag.jpg';
+
+            // Ensure name is properly decoded as array/object
+            if (is_string($city->name)) {
+                $city->name = json_decode($city->name, true) ?: ['en' => '', 'ar' => ''];
+            }
+
+            // Ensure country name is also properly formatted
+            if ($city->country && is_string($city->country->name)) {
+                $city->country->name = json_decode($city->country->name, true) ?: ['en' => '', 'ar' => ''];
+            }
+
             unset($city->photos);
             return $city;
         });

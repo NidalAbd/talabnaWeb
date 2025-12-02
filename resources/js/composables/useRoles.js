@@ -41,12 +41,29 @@ export function useRoles() {
             console.log('📊 Roles nested object:', data.roles)
             console.log('📊 Actual roles array:', data.roles?.data)
 
-            // Check if data is wrapped in 'roles' key or is direct pagination
+            // Update ref properties individually to maintain reactivity
             if (data.roles) {
-                roles.value = data.roles
+                roles.value.data = data.roles.data || []
+                roles.value.current_page = data.roles.current_page || 1
+                roles.value.last_page = data.roles.last_page || 1
+                roles.value.per_page = data.roles.per_page || 10
+                roles.value.total = data.roles.total || 0
+            } else if (data.data) {
+                roles.value.data = data.data || []
+                roles.value.current_page = data.current_page || 1
+                roles.value.last_page = data.last_page || 1
+                roles.value.per_page = data.per_page || 10
+                roles.value.total = data.total || 0
             } else {
-                roles.value = data
+                console.warn('⚠️ Unexpected data format:', data)
+                roles.value.data = []
+                roles.value.current_page = 1
+                roles.value.last_page = 1
+                roles.value.per_page = 10
+                roles.value.total = 0
             }
+
+            console.log('🔄 Roles updated:', roles.value.data.length, 'items')
         } catch (err) {
             error.value = err.message
             console.error('❌ Error fetching roles:', err)
@@ -54,7 +71,7 @@ export function useRoles() {
             loading.value = false
             console.log('⏱️ Loading complete. Roles count:', roles.value.data?.length || 0)
             console.log('🔍 Loading state:', loading.value)
-            console.log('🔍 Final roles.value:', roles.value)
+            console.log('🔍 Final roles:', roles.value)
         }
     }
 

@@ -70,6 +70,16 @@
       </div>
     </div>
 
+    <!-- Debug Info - set to true to enable -->
+    <div class="debug-info" style="background: #fff3cd; padding: 1rem; margin-bottom: 1rem; border-radius: 8px;">
+      <strong>Debug:</strong>
+      Loading: {{ loading }} |
+      Data Length: {{ roles.data?.length || 0 }} |
+      Total: {{ roles.total }} |
+      Current Page: {{ roles.current_page }} |
+      Last Page: {{ roles.last_page }}
+    </div>
+
     <!-- Loading State -->
     <div v-if="loading" class="loading-state">
       <div class="loader-advanced"></div>

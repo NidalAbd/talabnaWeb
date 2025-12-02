@@ -190,8 +190,8 @@
                 borderLeft: `4px solid ${formData.color}`
               }"
             >
-              <i :class="formData.icon || 'fas fa-certificate'" style="font-size: 2rem; color: white;"></i>
-              <div style="color: white; margin-top: 0.5rem;">
+              <i :class="formData.icon || 'fas fa-certificate'" :style="{ fontSize: '2rem', color: getContrastColor(formData.color) }"></i>
+              <div :style="{ color: getContrastColor(formData.color), marginTop: '0.5rem' }">
                 <strong>{{ formData.name.en || 'Badge Name' }}</strong>
               </div>
             </div>
@@ -254,6 +254,21 @@ const formData = ref({
   is_active: true,
   is_default: false
 })
+
+// Function to determine contrasting text color based on background
+const getContrastColor = (hexColor) => {
+  if (!hexColor) return '#ffffff'
+  // Remove # if present
+  const hex = hexColor.replace('#', '')
+  // Convert to RGB
+  const r = parseInt(hex.substr(0, 2), 16)
+  const g = parseInt(hex.substr(2, 2), 16)
+  const b = parseInt(hex.substr(4, 2), 16)
+  // Calculate luminance
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  // Return dark text for light backgrounds, white for dark backgrounds
+  return luminance > 0.5 ? '#212529' : '#ffffff'
+}
 
 // Initialize form data when editing
 watch(() => props.badgeType, (newBadgeType) => {

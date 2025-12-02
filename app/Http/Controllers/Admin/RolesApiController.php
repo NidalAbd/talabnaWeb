@@ -95,10 +95,10 @@ class RolesApiController extends Controller
                     'name' => $role->name,
                     'display_name' => $role->display_name ?? $role->name,
                     'description' => $role->description,
-                    'permissions_count' => $role->permissions_count,
+                    'permissions_count' => $role->permissions_count ?? 0,
                     'is_editable' => !in_array($role->name, ['superadmin', 'admin']),
                     'is_deletable' => !in_array($role->name, ['superadmin', 'admin', 'user']),
-                    'created_at' => $role->created_at->toISOString(),
+                    'created_at' => $role->created_at ? $role->created_at->toISOString() : null,
                 ];
             });
 

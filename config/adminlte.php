@@ -299,97 +299,22 @@ return [
     */
 
     'menu' => [
-        // Dashboard Section
+        // ========================================
+        // MAIN
+        // ========================================
         [
             'text' => 'Dashboard',
-            'url'  => 'dashboard', // Change this from 'admin/dashboard' to 'dashboard'
+            'url'  => 'dashboard',
             'icon' => 'fas fa-tachometer-alt',
             'permission' => ['user_index']
         ],
 
-        // Administration Section
-        [
-            'text'    => 'Admin Management',
-            'icon'    => 'fas fa-cogs',
-            'permission' => ['user_index', 'user_view'],
-            'submenu' => [
-                [
-                    'text' => 'Users',
-                    'url'  => 'users',
-                    'icon' => 'fas fa-users',
-                    'permission' => ['user_index']
-                ],
-                [
-                    'text' => 'Roles',
-                    'url'  => 'roles',
-                    'icon' => 'fas fa-user-tag',
-                    'permission' => ['view_role']
-                ],
-                [
-                    'text' => 'Permissions',
-                    'url'  => 'permissions',
-                    'icon' => 'fas fa-key',
-                    'permission' => ['view_permission']
-                ],
-                [
-                    'text' => 'Role Assignments',
-                    'url'  => 'admin/role-assignments',
-                    'icon' => 'fas fa-user-cog',
-                    'permission' => ['edit_role']
-                ],
-                [
-                    'text' => 'Banned Users',
-                    'url'  => 'admin/users/banned',
-                    'icon' => 'fas fa-user-slash',
-                    'permission' => ['user_index']
-                ],
-                [
-                    'text' => 'Banned Devices',
-                    'url'  => 'admin/devices/banned',
-                    'icon' => 'fas fa-mobile-alt',
-                    'permission' => ['user_index']
-                ]
-            ]
-        ],
-        [
-            'text' => 'Marketing',
-            'icon' => 'fas fa-bullhorn',
-            'permission' => ['view_statistics'],
-            'submenu' => [
-                [
-                    'text' => 'Marketing Notifications',
-                    'url'  => 'admin/marketing-notifications',
-                    'icon' => 'fas fa-bell',
-                    'permission' => ['view_statistics']
-                ]
-            ]
-        ],
+        ['header' => 'CONTENT MANAGEMENT'],
 
-        // Location Management Section
-        [
-            'text'    => 'Location Management',
-            'icon'    => 'fas fa-map-marker-alt',
-            'permission' => ['view_service'],
-            'submenu' => [
-                [
-                    'text' => 'Countries',
-                    'url'  => 'countries',
-                    'icon' => 'fas fa-globe',
-                    'permission' => ['view_service']
-                ],
-                [
-                    'text' => 'Cities',
-                    'url'  => 'cities',
-                    'icon' => 'fas fa-city',
-                    'permission' => ['view_service']
-                ],
-            ]
-        ],
-
-        // Categories Section
+        // Categories & Sub-Categories
         [
             'text'    => 'Categories',
-            'icon'    => 'fas fa-list',
+            'icon'    => 'fas fa-th-large',
             'permission' => ['view_service'],
             'submenu' => [
                 [
@@ -407,7 +332,7 @@ return [
             ]
         ],
 
-        // Service Posts Section
+        // Service Posts
         [
             'text'    => 'Service Posts',
             'icon'    => 'fas fa-clipboard-list',
@@ -428,26 +353,93 @@ return [
             ]
         ],
 
+        // Badge Types
         [
-            'text' => 'Analytics',
-            'url'  => 'admin/analytics',
-            'icon' => 'fas fa-chart-line',
-            'permission' => ['view_statistics']
-        ],
-        [
-            'text' => 'Statistics',
-            'url'  => 'admin/statistics',
-            'icon' => 'fas fa-chart-pie',
-            'permission' => ['view_statistics']
-        ],
-        [
-            'text' => 'Reports',
-            'url'  => 'reports',
-            'icon' => 'fas fa-file-alt',
-            'permission' => ['report_index']
+            'text' => 'Badge Types',
+            'url'  => 'badge-types',
+            'icon' => 'fas fa-award',
         ],
 
-        // Points System Section
+        // Location Management
+        [
+            'text'    => 'Locations',
+            'icon'    => 'fas fa-map-marker-alt',
+            'permission' => ['view_service'],
+            'submenu' => [
+                [
+                    'text' => 'Countries',
+                    'url'  => 'countries',
+                    'icon' => 'fas fa-globe',
+                    'permission' => ['view_service']
+                ],
+                [
+                    'text' => 'Cities',
+                    'url'  => 'cities',
+                    'icon' => 'fas fa-city',
+                    'permission' => ['view_service']
+                ],
+            ]
+        ],
+
+        ['header' => 'USERS & ACCESS'],
+
+        // User Management
+        [
+            'text'    => 'User Management',
+            'icon'    => 'fas fa-users-cog',
+            'permission' => ['user_index', 'user_view'],
+            'submenu' => [
+                [
+                    'text' => 'All Users',
+                    'url'  => 'users',
+                    'icon' => 'fas fa-users',
+                    'permission' => ['user_index']
+                ],
+                [
+                    'text' => 'Banned Users',
+                    'url'  => 'admin/users/banned',
+                    'icon' => 'fas fa-user-slash',
+                    'permission' => ['user_index']
+                ],
+                [
+                    'text' => 'Banned Devices',
+                    'url'  => 'admin/devices/banned',
+                    'icon' => 'fas fa-mobile-alt',
+                    'permission' => ['user_index']
+                ]
+            ]
+        ],
+
+        // Roles & Permissions
+        [
+            'text'    => 'Roles & Permissions',
+            'icon'    => 'fas fa-user-shield',
+            'permission' => ['view_role', 'view_permission'],
+            'submenu' => [
+                [
+                    'text' => 'Roles',
+                    'url'  => 'roles',
+                    'icon' => 'fas fa-user-tag',
+                    'permission' => ['view_role']
+                ],
+                [
+                    'text' => 'Permissions',
+                    'url'  => 'permissions',
+                    'icon' => 'fas fa-key',
+                    'permission' => ['view_permission']
+                ],
+                [
+                    'text' => 'Role Assignments',
+                    'url'  => 'admin/role-assignments',
+                    'icon' => 'fas fa-user-cog',
+                    'permission' => ['edit_role']
+                ],
+            ]
+        ],
+
+        ['header' => 'POINTS & MONETIZATION'],
+
+        // Points System
         [
             'text'    => 'Points System',
             'icon'    => 'fas fa-coins',
@@ -456,7 +448,7 @@ return [
                 [
                     'text' => 'Points Overview',
                     'url'  => 'admin/palservice-points',
-                    'icon' => 'fas fa-piggy-bank',
+                    'icon' => 'fas fa-chart-bar',
                 ],
                 [
                     'text' => 'Point Packages',
@@ -473,6 +465,15 @@ return [
                     'url'  => 'admin/point-transactions',
                     'icon' => 'fas fa-exchange-alt',
                 ],
+            ]
+        ],
+
+        // Premium Features
+        [
+            'text'    => 'Premium',
+            'icon'    => 'fas fa-gem',
+            'permission' => ['view_statistics'],
+            'submenu' => [
                 [
                     'text' => 'Premium Features',
                     'url'  => 'admin/premium-features',
@@ -486,11 +487,36 @@ return [
             ]
         ],
 
-        // Badge Types Section
+        ['header' => 'ANALYTICS & REPORTS'],
+
+        // Analytics & Statistics
         [
-            'text' => 'Badge Types',
-            'url'  => 'badge-types',
-            'icon' => 'fas fa-award',
+            'text' => 'Analytics',
+            'url'  => 'admin/analytics',
+            'icon' => 'fas fa-chart-line',
+            'permission' => ['view_statistics']
+        ],
+        [
+            'text' => 'Statistics',
+            'url'  => 'admin/statistics',
+            'icon' => 'fas fa-chart-pie',
+            'permission' => ['view_statistics']
+        ],
+        [
+            'text' => 'Reports',
+            'url'  => 'reports',
+            'icon' => 'fas fa-flag',
+            'permission' => ['report_index']
+        ],
+
+        ['header' => 'MARKETING'],
+
+        // Marketing
+        [
+            'text' => 'Marketing Notifications',
+            'url'  => 'admin/marketing-notifications',
+            'icon' => 'fas fa-bullhorn',
+            'permission' => ['view_statistics']
         ],
 
     ],    /*

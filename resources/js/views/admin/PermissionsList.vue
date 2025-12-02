@@ -89,6 +89,16 @@
       </select>
     </div>
 
+    <!-- Debug Info -->
+    <div class="debug-info" style="background: #fff3cd; padding: 1rem; margin-bottom: 1rem; border-radius: 8px;">
+      <strong>Debug:</strong>
+      Loading: {{ loading }} |
+      Data Length: {{ permissions.data?.length || 0 }} |
+      Total: {{ permissions.total }} |
+      Current Page: {{ permissions.current_page }} |
+      View Mode: {{ viewMode }}
+    </div>
+
     <!-- Loading State -->
     <div v-if="loading" class="loading-state">
       <div class="loader-advanced"></div>

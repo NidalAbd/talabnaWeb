@@ -405,6 +405,7 @@ const getUserStatusBadgeClass = (isActive) => {
 .stat-card-3 {
   background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
   box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+  color: #212529;
 }
 
 .stat-card-3:hover {
@@ -414,6 +415,7 @@ const getUserStatusBadgeClass = (isActive) => {
 .stat-card-4 {
   background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
   box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4);
+  color: #212529;
 }
 
 .stat-card-4:hover {

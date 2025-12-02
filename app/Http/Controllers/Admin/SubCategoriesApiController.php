@@ -65,7 +65,7 @@ class SubCategoriesApiController extends Controller
 
         // Transform data to include image URL
         $subcategories->getCollection()->transform(function ($subcategory) {
-            $subcategory->image_url = $subcategory->photos->first()?->url ?? null;
+            $subcategory->image_url = $subcategory->photos->first()?->src ?? null;
             unset($subcategory->photos);
             return $subcategory;
         });
@@ -137,7 +137,7 @@ class SubCategoriesApiController extends Controller
             ->withCount('servicePosts')
             ->findOrFail($id);
 
-        $subcategory->image_url = $subcategory->photos->first()?->url ?? null;
+        $subcategory->image_url = $subcategory->photos->first()?->src ?? null;
 
         return response()->json($subcategory);
     }
@@ -185,7 +185,7 @@ class SubCategoriesApiController extends Controller
         }
 
         $subcategory->load(['photos', 'category']);
-        $subcategory->image_url = $subcategory->photos->first()?->url ?? null;
+        $subcategory->image_url = $subcategory->photos->first()?->src ?? null;
 
         return response()->json([
             'message' => 'Sub-category created successfully',
@@ -261,7 +261,7 @@ class SubCategoriesApiController extends Controller
         }
 
         $subcategory->load(['photos', 'category']);
-        $subcategory->image_url = $subcategory->photos->first()?->url ?? null;
+        $subcategory->image_url = $subcategory->photos->first()?->src ?? null;
 
         return response()->json([
             'message' => 'Sub-category updated successfully',
