@@ -181,6 +181,7 @@ const isSubmitting = ref(false)
 const errorMessage = ref('')
 const imagePreview = ref(null)
 const imageFile = ref(null)
+const originalCountryCode = ref('')
 
 const formData = ref({
   name: {
@@ -198,6 +199,7 @@ const formData = ref({
 // Initialize form data when editing
 watch(() => props.country, (newCountry) => {
   if (newCountry && props.mode === 'edit') {
+    originalCountryCode.value = newCountry.country_code || ''
     formData.value = {
       name: {
         en: newCountry.name?.en || '',
@@ -214,6 +216,8 @@ watch(() => props.country, (newCountry) => {
     if (newCountry.flag_url) {
       imagePreview.value = `/storage/${newCountry.flag_url}`
     }
+  } else {
+    originalCountryCode.value = ''
   }
 }, { immediate: true })
 
@@ -245,9 +249,17 @@ const handleSubmit = async () => {
     submitData.append('name[en]', formData.value.name.en || '')
     submitData.append('name[ar]', formData.value.name.ar || '')
 
-    // Only include country_code if it has a value
-    if (formData.value.country_code && formData.value.country_code.trim()) {
-      submitData.append('country_code', formData.value.country_code.trim().toUpperCase().substring(0, 3))
+    // Only include country_code if it has changed from original (for edit) or has value (for create)
+    const newCountryCode = formData.value.country_code?.trim().toUpperCase().substring(0, 3) || ''
+    if (props.mode === 'create') {
+      if (newCountryCode) {
+        submitData.append('country_code', newCountryCode)
+      }
+    } else {
+      // Only send if changed
+      if (newCountryCode !== originalCountryCode.value.toUpperCase()) {
+        submitData.append('country_code', newCountryCode)
+      }
     }
 
     // Only include currency_code if it has a value

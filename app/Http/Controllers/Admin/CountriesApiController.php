@@ -51,7 +51,9 @@ class CountriesApiController extends Controller
 
         // Transform data to include flag URL
         $countries->getCollection()->transform(function ($country) {
-            $country->flag_url = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
+            $flagSrc = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
+            // Remove 'storage/' prefix if it exists to avoid double path
+            $country->flag_url = preg_replace('#^storage/#', '', $flagSrc);
             unset($country->photos);
             return $country;
         });
@@ -107,7 +109,9 @@ class CountriesApiController extends Controller
             ->withCount('cities')
             ->findOrFail($id);
 
-        $country->flag_url = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
+        $flagSrc = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
+        // Remove 'storage/' prefix if it exists to avoid double path
+        $country->flag_url = preg_replace('#^storage/#', '', $flagSrc);
 
         return response()->json($country);
     }
@@ -158,7 +162,8 @@ class CountriesApiController extends Controller
         }
 
         $country->load('photos');
-        $country->flag_url = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
+        $flagSrc = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
+        $country->flag_url = preg_replace('#^storage/#', '', $flagSrc);
 
         return response()->json([
             'message' => 'Country created successfully',
@@ -249,7 +254,8 @@ class CountriesApiController extends Controller
         }
 
         $country->load('photos');
-        $country->flag_url = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
+        $flagSrc = $country->photos->first()?->src ?? 'countryFlag/placeholder-flag.jpg';
+        $country->flag_url = preg_replace('#^storage/#', '', $flagSrc);
 
         return response()->json([
             'message' => 'Country updated successfully',
