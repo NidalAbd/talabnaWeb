@@ -234,9 +234,11 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { useAdvancedSeo } from '@/composables/useAdvancedSeo'
 
 const route = useRoute()
 const appStore = useAppStore()
+const { setLocationSeo, setSeo } = useAdvancedSeo()
 
 const loading = ref(true)
 const viewMode = ref('grid')
@@ -422,9 +424,9 @@ async function loadData() {
         total: data.listings?.total || 0
       }
 
-      // Update page title for SEO
+      // Update SEO data
       if (locationInfo.value) {
-        document.title = `${pageTitle.value} - طلبنا | Talabna`
+        setLocationSeo(locationInfo.value, stats.value.totalListings, appStore.locale)
       }
     }
   } catch (error) {

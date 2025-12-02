@@ -216,12 +216,12 @@
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { useSeo } from '@/composables/useSeo'
+import { useAdvancedSeo } from '@/composables/useAdvancedSeo'
 import ListingCard from '@/components/ListingCard.vue'
 
 const route = useRoute()
 const appStore = useAppStore()
-const { updateMeta, setListingSchema, setBreadcrumbSchema } = useSeo()
+const { setListingSeo } = useAdvancedSeo()
 
 const listing = ref(null)
 const related = ref([])
@@ -378,16 +378,9 @@ const fetchListing = async () => {
     listing.value = data.listing
     related.value = Array.isArray(data.related) ? data.related : []
 
-    // Update SEO
+    // Update SEO using advanced SEO composable
     if (listing.value) {
-      updateMeta({
-        title: `${listing.value.title} - طلبنا`,
-        description: listing.value.description?.substring(0, 160) || '',
-        image: getPhotoUrl(listing.value.photos?.[0]),
-        type: 'product',
-      })
-      setListingSchema(listing.value)
-      setBreadcrumbSchema(breadcrumbs.value)
+      setListingSeo(listing.value, locale.value)
     }
   } catch (error) {
     console.error('Error:', error)

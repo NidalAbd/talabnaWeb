@@ -52,6 +52,9 @@ Route::prefix('public')->group(function () {
     // Services by Location (SEO pages)
     Route::get('/services', [PublicController::class, 'services']);
 
+    // SEO Data endpoint
+    Route::get('/seo', [\App\Http\Controllers\SeoController::class, 'getSeoData']);
+
     // User Profile
     Route::get('/users/{id}', [PublicController::class, 'userProfile']);
 

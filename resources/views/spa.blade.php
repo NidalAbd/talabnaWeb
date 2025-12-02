@@ -1,5 +1,10 @@
+@php
+    // Server-side SEO data generation for search engine crawlers
+    $seoController = app(\App\Http\Controllers\SeoController::class);
+    $seoData = $seoController->getServerSideSeo(request()->path(), 'ar');
+@endphp
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="rtl">
+<html lang="{{ $seoData['locale'] ?? 'ar' }}" dir="rtl">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -17,30 +22,83 @@
         gtag('config', 'G-E68NQJJES2');
     </script>
 
-    <!-- SEO Meta Tags -->
-    <title>طلبنا - Talabna | أكبر سوق للإعلانات المبوبة</title>
-    <meta name="description" content="طلبنا - أكبر منصة للإعلانات المبوبة في الوطن العربي. بيع واشتري السيارات، العقارات، الهواتف، الوظائف والمزيد بسهولة وأمان.">
-    <meta name="keywords" content="إعلانات مبوبة, سيارات للبيع, عقارات, وظائف, هواتف, بيع وشراء, classified ads">
+    <!-- Dynamic SEO Meta Tags -->
+    <title>{{ $seoData['title'] ?? 'طلبنا - Talabna | أكبر سوق للإعلانات المبوبة' }}</title>
+    <meta name="description" content="{{ $seoData['description'] ?? 'طلبنا - أكبر منصة للإعلانات المبوبة في الوطن العربي. بيع واشتري السيارات، العقارات، الهواتف، الوظائف والمزيد بسهولة وأمان.' }}">
+    <meta name="keywords" content="{{ $seoData['keywords'] ?? 'إعلانات مبوبة, سيارات للبيع, عقارات, وظائف, هواتف, بيع وشراء, classified ads' }}">
     <meta name="author" content="Talabna">
     <meta name="robots" content="index, follow">
 
     <!-- OpenGraph Meta -->
-    <meta property="og:type" content="website">
+    <meta property="og:type" content="{{ $seoData['og']['type'] ?? 'website' }}">
     <meta property="og:site_name" content="Talabna - طلبنا">
-    <meta property="og:title" content="طلبنا - Talabna | أكبر سوق للإعلانات المبوبة">
-    <meta property="og:description" content="أكبر منصة للإعلانات المبوبة في الوطن العربي">
-    <meta property="og:image" content="{{ asset('storage/photos/og-image.jpg') }}">
-    <meta property="og:url" content="{{ url()->current() }}">
-    <meta property="og:locale" content="ar_SA">
+    <meta property="og:title" content="{{ $seoData['title'] ?? 'طلبنا - Talabna | أكبر سوق للإعلانات المبوبة' }}">
+    <meta property="og:description" content="{{ $seoData['description'] ?? 'أكبر منصة للإعلانات المبوبة في الوطن العربي' }}">
+    <meta property="og:image" content="{{ $seoData['og']['image'] ?? asset('storage/photos/og-image.jpg') }}">
+    <meta property="og:image:width" content="{{ $seoData['og']['image_width'] ?? '1200' }}">
+    <meta property="og:image:height" content="{{ $seoData['og']['image_height'] ?? '630' }}">
+    <meta property="og:url" content="{{ $seoData['canonical'] ?? url()->current() }}">
+    <meta property="og:locale" content="{{ $seoData['og']['locale'] ?? 'ar_SA' }}">
+    <meta property="og:locale:alternate" content="en_US">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="طلبنا - Talabna">
-    <meta name="twitter:description" content="أكبر منصة للإعلانات المبوبة">
-    <meta name="twitter:image" content="{{ asset('storage/photos/og-image.jpg') }}">
+    <meta name="twitter:site" content="@talabna">
+    <meta name="twitter:title" content="{{ $seoData['title'] ?? 'طلبنا - Talabna' }}">
+    <meta name="twitter:description" content="{{ $seoData['description'] ?? 'أكبر منصة للإعلانات المبوبة' }}">
+    <meta name="twitter:image" content="{{ $seoData['og']['image'] ?? asset('storage/photos/og-image.jpg') }}">
 
     <!-- Canonical URL -->
-    <link rel="canonical" href="{{ url()->current() }}">
+    <link rel="canonical" href="{{ $seoData['canonical'] ?? url()->current() }}">
+
+    <!-- Hreflang for multilingual SEO -->
+    <link rel="alternate" hreflang="ar" href="{{ url()->current() }}?locale=ar">
+    <link rel="alternate" hreflang="en" href="{{ url()->current() }}?locale=en">
+    <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
+
+    <!-- JSON-LD Structured Data -->
+    @if(!empty($seoData['jsonLd']))
+        @foreach($seoData['jsonLd'] as $schema)
+            <script type="application/ld+json">
+                {!! json_encode($schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT) !!}
+            </script>
+        @endforeach
+    @else
+        <!-- Default Organization Schema -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "Organization",
+            "name": "Talabna - طلبنا",
+            "url": "{{ url('/') }}",
+            "logo": "{{ asset('storage/photos/logo.png') }}",
+            "sameAs": [
+                "https://facebook.com/talabna",
+                "https://twitter.com/talabna",
+                "https://instagram.com/talabna"
+            ],
+            "contactPoint": {
+                "@type": "ContactPoint",
+                "contactType": "customer service",
+                "availableLanguage": ["Arabic", "English"]
+            }
+        }
+        </script>
+        <!-- Default WebSite Schema with SearchAction -->
+        <script type="application/ld+json">
+        {
+            "@context": "https://schema.org",
+            "@type": "WebSite",
+            "name": "Talabna - طلبنا",
+            "url": "{{ url('/') }}",
+            "potentialAction": {
+                "@type": "SearchAction",
+                "target": "{{ url('/browse') }}?q={search_term_string}",
+                "query-input": "required name=search_term_string"
+            }
+        }
+        </script>
+    @endif
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ asset('storage/photos/favicon.ico') }}">
