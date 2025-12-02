@@ -97,8 +97,8 @@
                 v-model="formData.country_code"
                 type="text"
                 class="form-input-modern"
-                placeholder="e.g., US, GB, SA"
-                maxlength="3"
+                placeholder="e.g., 00966, 00971, 00962"
+                maxlength="10"
                 required
               >
             </div>
@@ -250,19 +250,19 @@ const handleSubmit = async () => {
     submitData.append('name[ar]', formData.value.name.ar || '')
 
     // Only include country_code if it has changed from original (for edit) or has value (for create)
-    const newCountryCode = formData.value.country_code?.trim().toUpperCase().substring(0, 3) || ''
+    const newCountryCode = formData.value.country_code?.trim() || ''
     if (props.mode === 'create') {
       if (newCountryCode) {
         submitData.append('country_code', newCountryCode)
       }
     } else {
       // Only send if changed
-      if (newCountryCode !== originalCountryCode.value.toUpperCase()) {
+      if (newCountryCode !== originalCountryCode.value) {
         submitData.append('country_code', newCountryCode)
       }
     }
 
-    // Only include currency_code if it has a value
+    // Only include currency_code if it has a value (currency codes are typically 3 chars like USD, EUR)
     if (formData.value.currency_code && formData.value.currency_code.trim()) {
       submitData.append('currency_code', formData.value.currency_code.trim().toUpperCase().substring(0, 3))
     }
