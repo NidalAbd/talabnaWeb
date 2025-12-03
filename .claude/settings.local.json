@@ -15,7 +15,8 @@
       "Bash(if exist \"lib\\DEEPLINK_INTEGRATION_EXAMPLE.dart\" ren \"lib\\DEEPLINK_INTEGRATION_EXAMPLE.dart\" \"DEEPLINK_INTEGRATION_EXAMPLE.dart.bak\")",
       "Bash(npm install:*)",
       "Bash(curl:*)",
-      "Bash(scp:*)"
+      "Bash(scp:*)",
+      "Bash(copy \"C:\\Users\\Nidal.Abd\\PhpstormProjects\\Talabna Flutter Laravel\\talabnaWeb\\public\\favicon.ico\" \"C:\\Users\\Nidal.Abd\\PhpstormProjects\\Talabna Flutter Laravel\\talabnaWeb\\public\\favicons\\favicon.ico\")"
     ],
     "deny": [],
     "ask": []
