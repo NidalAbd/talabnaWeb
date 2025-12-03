@@ -438,14 +438,24 @@ class SitemapController extends Controller
 
     /**
      * Generate URL-friendly slug from multilingual text
+     * Handles double-encoded JSON (e.g., '"{\"ar\":\"...\",\"en\":\"...\"}"')
      */
     private function slugify($text, $preferredLocale = 'ar')
     {
         // Handle JSON string (e.g., '{"ar":"فلسطين","en":"Palestine"}')
-        if (is_string($text) && (str_starts_with($text, '{') || str_starts_with($text, '['))) {
+        // Also handles double-encoded JSON
+        if (is_string($text)) {
             $decoded = json_decode($text, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                $text = $decoded;
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // If decoded result is still a string, it was double-encoded
+                if (is_string($decoded)) {
+                    $decoded2 = json_decode($decoded, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded2)) {
+                        $text = $decoded2;
+                    }
+                } elseif (is_array($decoded)) {
+                    $text = $decoded;
+                }
             }
         }
 
