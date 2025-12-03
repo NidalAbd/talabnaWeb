@@ -161,13 +161,17 @@ class SeoController extends Controller
         $seo['twitter']['description'] = $seo['description'];
         $seo['twitter']['image'] = $seo['og']['image'];
 
-        // JSON-LD Product Schema
+        // JSON-LD Product Schema with required merchant fields
         $seo['jsonLd'][] = [
             '@context' => 'https://schema.org',
             '@type' => 'Product',
             'name' => $listing->title,
             'description' => mb_substr(strip_tags($listing->description), 0, 500),
             'image' => $seo['og']['image'],
+            'brand' => [
+                '@type' => 'Brand',
+                'name' => 'Talabna',
+            ],
             'offers' => [
                 '@type' => 'Offer',
                 'price' => $listing->price ?? 0,
@@ -177,6 +181,43 @@ class SeoController extends Controller
                 'seller' => [
                     '@type' => 'Person',
                     'name' => $listing->user?->name ?? $listing->user?->user_name ?? 'Seller',
+                ],
+                'priceValidUntil' => now()->addYear()->format('Y-m-d'),
+                'itemCondition' => 'https://schema.org/NewCondition',
+                // Merchant return policy (required by Google)
+                'hasMerchantReturnPolicy' => [
+                    '@type' => 'MerchantReturnPolicy',
+                    'applicableCountry' => $countryName ?: 'PS',
+                    'returnPolicyCategory' => 'https://schema.org/MerchantReturnNotPermitted',
+                    'merchantReturnDays' => 0,
+                ],
+                // Shipping details (required by Google)
+                'shippingDetails' => [
+                    '@type' => 'OfferShippingDetails',
+                    'shippingRate' => [
+                        '@type' => 'MonetaryAmount',
+                        'value' => 0,
+                        'currency' => $listing->price_currency_code ?? 'USD',
+                    ],
+                    'shippingDestination' => [
+                        '@type' => 'DefinedRegion',
+                        'addressCountry' => $countryName ?: 'PS',
+                    ],
+                    'deliveryTime' => [
+                        '@type' => 'ShippingDeliveryTime',
+                        'handlingTime' => [
+                            '@type' => 'QuantitativeValue',
+                            'minValue' => 0,
+                            'maxValue' => 1,
+                            'unitCode' => 'DAY',
+                        ],
+                        'transitTime' => [
+                            '@type' => 'QuantitativeValue',
+                            'minValue' => 0,
+                            'maxValue' => 7,
+                            'unitCode' => 'DAY',
+                        ],
+                    ],
                 ],
             ],
             'category' => $categoryName,
