@@ -468,14 +468,6 @@ return [
             ]
         ],
 
-        // User Levels
-        [
-            'text'    => 'User Levels',
-            'url'     => 'admin/levels',
-            'icon'    => 'fas fa-layer-group',
-            'permission' => ['view_statistics'],
-        ],
-
         ['header' => 'ANALYTICS & REPORTS'],
 
         // Analytics & Statistics

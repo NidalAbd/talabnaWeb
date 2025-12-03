@@ -461,10 +461,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/point-packages', [HomeController::class, 'index'])
         ->name('point_packages.index');
 
-    // User Levels - Vue SPA
-    Route::get('/levels', [HomeController::class, 'index'])
-        ->name('levels.index');
-
     // Point Purchase Requests - Vue SPA
     Route::get('/point-purchase-requests', [HomeController::class, 'index'])
         ->name('point_purchase_requests.index');
@@ -652,18 +648,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::post('/point-packages/{id}/duplicate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'duplicate'])->name('api.admin.point-packages.duplicate');
             Route::post('/point-packages/bulk-activate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'bulkActivate'])->name('api.admin.point-packages.bulk-activate');
             Route::post('/point-packages/bulk-deactivate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'bulkDeactivate'])->name('api.admin.point-packages.bulk-deactivate');
-
-            // User Levels
-            Route::get('/levels/stats', [\App\Http\Controllers\Admin\LevelsApiController::class, 'getStats'])->name('api.admin.levels.stats');
-            Route::get('/levels', [\App\Http\Controllers\Admin\LevelsApiController::class, 'index'])->name('api.admin.levels.index');
-            Route::post('/levels', [\App\Http\Controllers\Admin\LevelsApiController::class, 'store'])->name('api.admin.levels.store');
-            Route::put('/levels/{id}', [\App\Http\Controllers\Admin\LevelsApiController::class, 'update'])->name('api.admin.levels.update');
-            Route::delete('/levels/{id}', [\App\Http\Controllers\Admin\LevelsApiController::class, 'destroy'])->name('api.admin.levels.destroy');
-            Route::post('/levels/{id}/toggle-status', [\App\Http\Controllers\Admin\LevelsApiController::class, 'toggleStatus'])->name('api.admin.levels.toggle-status');
-            Route::post('/levels/{id}/duplicate', [\App\Http\Controllers\Admin\LevelsApiController::class, 'duplicate'])->name('api.admin.levels.duplicate');
-            Route::post('/levels/update-order', [\App\Http\Controllers\Admin\LevelsApiController::class, 'updateOrder'])->name('api.admin.levels.update-order');
-            Route::post('/levels/bulk-activate', [\App\Http\Controllers\Admin\LevelsApiController::class, 'bulkActivate'])->name('api.admin.levels.bulk-activate');
-            Route::post('/levels/bulk-deactivate', [\App\Http\Controllers\Admin\LevelsApiController::class, 'bulkDeactivate'])->name('api.admin.levels.bulk-deactivate');
 
             // Point Purchase Requests
             Route::get('/point-purchase-requests/stats', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'getStats'])->name('api.admin.point-purchase-requests.stats');
