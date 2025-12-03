@@ -112,17 +112,44 @@ class PublicController extends Controller
      */
     public function categories(Request $request): JsonResponse
     {
-        $categories = Cache::remember('public_categories', 3600, function () {
+        $categories = Cache::remember('public_categories_v2', 3600, function () {
+            // Get special counts for Near and Reels categories
+            // Near: posts with valid location coordinates
+            $nearCount = ServicePost::where('state', 'published')
+                ->whereNotNull('location_latitudes')
+                ->whereNotNull('location_longitudes')
+                ->where('location_latitudes', '!=', 0)
+                ->where('location_longitudes', '!=', 0)
+                ->count();
+
+            // Reels: posts with video files
+            $reelsCount = ServicePost::where('state', 'published')
+                ->whereHas('photos', function ($q) {
+                    $q->where('isVideo', true)
+                        ->orWhere('src', 'like', '%.mp4')
+                        ->orWhere('src', 'like', '%.webm')
+                        ->orWhere('src', 'like', '%.mov');
+                })
+                ->count();
+
             return Categories::withCount(['servicePosts' => function ($query) {
                 $query->where('state', 'published');
             }])
                 ->where('isSuspended', false)
                 ->orderBy('id')
                 ->get()
-                ->map(function ($cat) {
+                ->map(function ($cat) use ($nearCount, $reelsCount) {
                     // Handle name as JSON object with ar/en keys
                     $nameAr = is_array($cat->name) ? ($cat->name['ar'] ?? '') : $cat->name;
                     $nameEn = is_array($cat->name) ? ($cat->name['en'] ?? $nameAr) : $cat->name;
+
+                    // Use special counts for Near (ID: 6) and Reels (ID: 7)
+                    $postsCount = $cat->service_posts_count;
+                    if ($cat->id == self::CATEGORY_NEAR) {
+                        $postsCount = $nearCount;
+                    } elseif ($cat->id == self::CATEGORY_REELS) {
+                        $postsCount = $reelsCount;
+                    }
 
                     return [
                         'id' => $cat->id,
@@ -131,7 +158,7 @@ class PublicController extends Controller
                         'icon' => $cat->icon ?? null,
                         'color' => $cat->color ?? null,
                         'slug' => \Str::slug($nameEn),
-                        'posts_count' => $cat->service_posts_count,
+                        'posts_count' => $postsCount,
                     ];
                 });
         });
@@ -175,6 +202,12 @@ class PublicController extends Controller
     }
 
     /**
+     * Special category IDs
+     */
+    const CATEGORY_NEAR = 6;   // قربي - Near me (location-based)
+    const CATEGORY_REELS = 7;  // فيديو - Reels (video posts only)
+
+    /**
      * Get listings with filters
      */
     public function listings(Request $request): JsonResponse
@@ -183,13 +216,61 @@ class PublicController extends Controller
             ->withCount(['favorites', 'comments'])
             ->where('state', 'published');
 
-        // Apply category filter
-        if ($request->filled('category_id')) {
+        $categoryId = $request->get('category_id');
+        $isNearCategory = $categoryId == self::CATEGORY_NEAR;
+        $isReelsCategory = $categoryId == self::CATEGORY_REELS;
+
+        // Special handling for "Near" category (ID: 6)
+        if ($isNearCategory) {
+            $lat = $request->get('lat');
+            $lng = $request->get('lng');
+            $radius = $request->get('radius', 50); // Default 50 km radius
+
+            if ($lat && $lng) {
+                // Filter listings that have location data and are within radius
+                $query->whereNotNull('location_latitudes')
+                    ->whereNotNull('location_longitudes')
+                    ->where('location_latitudes', '!=', 0)
+                    ->where('location_longitudes', '!=', 0);
+
+                // Calculate distance using Haversine formula and order by nearest
+                $query->selectRaw("
+                    *,
+                    (6371 * acos(
+                        cos(radians(?)) *
+                        cos(radians(location_latitudes)) *
+                        cos(radians(location_longitudes) - radians(?)) +
+                        sin(radians(?)) *
+                        sin(radians(location_latitudes))
+                    )) AS distance
+                ", [$lat, $lng, $lat])
+                ->having('distance', '<=', $radius)
+                ->orderBy('distance', 'asc');
+            } else {
+                // No location provided - just show listings with location data
+                $query->whereNotNull('location_latitudes')
+                    ->whereNotNull('location_longitudes')
+                    ->where('location_latitudes', '!=', 0)
+                    ->where('location_longitudes', '!=', 0);
+            }
+        }
+        // Special handling for "Reels" category (ID: 7)
+        elseif ($isReelsCategory) {
+            // Only show listings that have video files
+            $query->whereHas('photos', function ($q) {
+                $q->where('isVideo', true)
+                    ->orWhere('src', 'like', '%.mp4')
+                    ->orWhere('src', 'like', '%.webm')
+                    ->orWhere('src', 'like', '%.mov');
+            });
+        }
+        // Normal category filter
+        elseif ($request->filled('category_id')) {
             $query->where('categories_id', $request->category_id);
         }
 
-        // Apply subcategory filter
-        if ($request->filled('subcategory_id')) {
+        // Apply subcategory filter (not for special categories)
+        if ($request->filled('subcategory_id') && !$isNearCategory && !$isReelsCategory) {
             $query->where('sub_categories_id', $request->subcategory_id);
         }
 
@@ -225,18 +306,20 @@ class PublicController extends Controller
             $query->where('price', '<=', $request->max_price);
         }
 
-        // Apply sorting
-        $sortBy = $request->get('sort_by', 'created_at');
-        $sortOrder = $request->get('sort_order', 'desc');
-        $allowedSortFields = ['created_at', 'price', 'view_count', 'favorites_count'];
+        // Apply sorting (skip for Near category which sorts by distance)
+        if (!$isNearCategory || !$request->filled('lat')) {
+            $sortBy = $request->get('sort_by', 'created_at');
+            $sortOrder = $request->get('sort_order', 'desc');
+            $allowedSortFields = ['created_at', 'price', 'view_count', 'favorites_count'];
 
-        if (in_array($sortBy, $allowedSortFields)) {
-            // Premium listings first
-            $query->orderByRaw(BadgeType::getLegacyOrderByClause());
-            $query->orderBy($sortBy, $sortOrder);
-        } else {
-            $query->orderByRaw(BadgeType::getLegacyOrderByClause());
-            $query->orderBy('created_at', 'desc');
+            if (in_array($sortBy, $allowedSortFields)) {
+                // Premium listings first
+                $query->orderByRaw(BadgeType::getLegacyOrderByClause());
+                $query->orderBy($sortBy, $sortOrder);
+            } else {
+                $query->orderByRaw(BadgeType::getLegacyOrderByClause());
+                $query->orderBy('created_at', 'desc');
+            }
         }
 
         // Pagination
@@ -244,8 +327,13 @@ class PublicController extends Controller
         $listings = $query->paginate($perPage);
 
         // Transform listings to fix JSON name fields
-        $transformedListings = collect($listings->items())->map(function ($listing) {
-            return $this->transformListing($listing);
+        $transformedListings = collect($listings->items())->map(function ($listing) use ($isNearCategory) {
+            $data = $this->transformListing($listing);
+            // Add distance info for Near category
+            if ($isNearCategory && isset($listing->distance)) {
+                $data['distance'] = round($listing->distance, 2);
+            }
+            return $data;
         });
 
         return response()->json([
@@ -258,6 +346,8 @@ class PublicController extends Controller
                 'from' => $listings->firstItem(),
                 'to' => $listings->lastItem(),
             ],
+            'is_special_category' => $isNearCategory || $isReelsCategory,
+            'category_type' => $isNearCategory ? 'near' : ($isReelsCategory ? 'reels' : 'normal'),
         ]);
     }
 

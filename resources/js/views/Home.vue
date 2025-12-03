@@ -372,19 +372,25 @@ const statsItems = computed(() => [
 ])
 
 const categoryIcons = {
-  1: 'mdi-cellphone',      // Mobile & Devices
-  2: 'mdi-car',            // Vehicles
-  3: 'mdi-briefcase',      // Jobs
-  4: 'mdi-home-city',      // Real Estate
-  5: 'mdi-tools',          // General Services
+  1: 'mdi-briefcase',      // Jobs (وظائف)
+  2: 'mdi-cellphone',      // Devices (اجهزة)
+  3: 'mdi-home-city',      // Houses (عقارات)
+  4: 'mdi-car',            // Cars (سيارات)
+  5: 'mdi-tools',          // Services (خدمات)
+  6: 'mdi-map-marker-radius', // Near (قربي)
+  7: 'mdi-video',          // Reels (فيديو)
+  8: 'mdi-alert-circle',   // Emergency (طوارئ)
 }
 
 const categoryColors = {
-  1: 'blue',
-  2: 'red',
-  3: 'green',
-  4: 'purple',
-  5: 'orange',
+  1: 'green',              // Jobs
+  2: 'blue',               // Devices
+  3: 'purple',             // Houses
+  4: 'red',                // Cars
+  5: 'orange',             // Services
+  6: 'teal',               // Near
+  7: 'pink',               // Reels
+  8: 'deep-orange',        // Emergency
 }
 
 const getCategoryIcon = (id) => categoryIcons[id] || 'mdi-folder'
