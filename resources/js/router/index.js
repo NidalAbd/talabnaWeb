@@ -46,6 +46,14 @@ const routes = [
     },
   },
   {
+    path: '/category/:id/:slug/subcategory/:subcategoryId/:subcategorySlug?',
+    name: 'subcategory',
+    component: Category,
+    meta: {
+      title: 'التصنيف الفرعي - طلبنا',
+    },
+  },
+  {
     path: '/listing/:id/:slug?',
     name: 'listing',
     component: ListingDetails,

@@ -140,7 +140,7 @@ class SitemapController extends Controller
                 $xml .= '</url>';
             }
 
-            // Subcategories
+            // Subcategories - SEO friendly URLs: /category/{id}/{slug}/subcategory/{subId}/{subSlug}
             $subcategories = Sub_categories::where('isSuspended', false)
                 ->with('category')
                 ->get();
@@ -148,9 +148,11 @@ class SitemapController extends Controller
             foreach ($subcategories as $sub) {
                 if ($sub->category && !$sub->category->isSuspended) {
                     $categorySlug = $this->slugify($sub->category->name, 'ar');
+                    $subcategorySlug = $this->slugify($sub->name, 'ar');
 
+                    // SEO-friendly path-based URL
                     $xml .= '<url>';
-                    $xml .= '<loc>' . url("/category/{$sub->categories_id}/{$categorySlug}?subcategory={$sub->id}") . '</loc>';
+                    $xml .= '<loc>' . url("/category/{$sub->categories_id}/{$categorySlug}/subcategory/{$sub->id}/{$subcategorySlug}") . '</loc>';
                     $xml .= '<lastmod>' . ($sub->updated_at ?? now())->toIso8601String() . '</lastmod>';
                     $xml .= '<changefreq>daily</changefreq>';
                     $xml .= '<priority>0.7</priority>';

@@ -3,12 +3,34 @@
     <!-- Hero -->
     <section class="hero-gradient py-12">
       <v-container>
+        <!-- Breadcrumb for subcategory -->
+        <v-breadcrumbs v-if="isSubcategoryRoute && category" class="pa-0 mb-2" density="compact">
+          <v-breadcrumbs-item :to="{ name: 'home' }" class="text-white-darken-2">
+            {{ locale === 'ar' ? 'الرئيسية' : 'Home' }}
+          </v-breadcrumbs-item>
+          <v-breadcrumbs-divider class="text-white-darken-2">/</v-breadcrumbs-divider>
+          <v-breadcrumbs-item :to="{ name: 'category', params: { id: category.id, slug: category.slug } }" class="text-white-darken-2">
+            {{ locale === 'ar' ? category.name : category.name_en }}
+          </v-breadcrumbs-item>
+          <v-breadcrumbs-divider class="text-white-darken-2">/</v-breadcrumbs-divider>
+          <v-breadcrumbs-item class="text-white">
+            {{ locale === 'ar' ? currentSubcategory?.name : currentSubcategory?.name_en }}
+          </v-breadcrumbs-item>
+        </v-breadcrumbs>
+
         <v-avatar :color="getCategoryColor(category?.id)" size="80" class="mb-4">
           <v-icon size="40" color="white">{{ getCategoryIcon(category?.id) }}</v-icon>
         </v-avatar>
         <h1 class="text-h3 font-weight-bold text-white mb-2">
-          {{ locale === 'ar' ? category?.name : category?.name_en }}
+          <!-- Show subcategory name if on subcategory route -->
+          {{ isSubcategoryRoute && currentSubcategory
+              ? (locale === 'ar' ? currentSubcategory.name : currentSubcategory.name_en)
+              : (locale === 'ar' ? category?.name : category?.name_en)
+          }}
         </h1>
+        <p v-if="isSubcategoryRoute && category" class="text-subtitle-1 text-white-darken-2 mb-2">
+          {{ locale === 'ar' ? 'في' : 'in' }} {{ locale === 'ar' ? category.name : category.name_en }}
+        </p>
         <p class="text-h6 text-white-darken-1">
           {{ pagination.total }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}
         </p>
@@ -49,8 +71,8 @@
         </v-chip-group>
       </div>
 
-      <!-- Subcategories (hidden for special categories) -->
-      <div v-if="subcategories.length > 0 && !isSpecialCategory" class="mb-8">
+      <!-- Subcategories (hidden for special categories and subcategory route) -->
+      <div v-if="subcategories.length > 0 && !isSpecialCategory && !isSubcategoryRoute" class="mb-8">
         <h2 class="text-h6 font-weight-bold mb-4">{{ locale === 'ar' ? 'التصنيفات الفرعية' : 'Subcategories' }}</h2>
         <v-chip-group v-model="selectedSubcategory" column @update:model-value="onSubcategoryChange">
           <v-chip filter :value="null">{{ locale === 'ar' ? 'الكل' : 'All' }}</v-chip>
@@ -58,6 +80,17 @@
             {{ locale === 'ar' ? sub.name : sub.name_en }} ({{ sub.posts_count }})
           </v-chip>
         </v-chip-group>
+      </div>
+
+      <!-- Back to category button when on subcategory route -->
+      <div v-if="isSubcategoryRoute && category" class="mb-6">
+        <v-btn
+          variant="outlined"
+          :to="{ name: 'category', params: { id: category.id, slug: category.slug } }"
+          prepend-icon="mdi-arrow-left"
+        >
+          {{ locale === 'ar' ? 'عرض كل التصنيفات الفرعية' : 'View all subcategories' }}
+        </v-btn>
       </div>
 
       <!-- Listings -->
@@ -125,6 +158,7 @@ const { updateMeta, setBreadcrumbSchema } = useSeo()
 
 const category = ref(null)
 const subcategories = ref([])
+const currentSubcategory = ref(null)
 const listings = ref([])
 const loading = ref(true)
 const selectedSubcategory = ref(null)
@@ -142,6 +176,10 @@ const categoryId = computed(() => parseInt(route.params.id))
 const isNearCategory = computed(() => categoryId.value === CATEGORY_NEAR)
 const isReelsCategory = computed(() => categoryId.value === CATEGORY_REELS)
 const isSpecialCategory = computed(() => isNearCategory.value || isReelsCategory.value)
+
+// Check if we're on the subcategory route
+const isSubcategoryRoute = computed(() => route.name === 'subcategory' && route.params.subcategoryId)
+const subcategoryIdFromRoute = computed(() => route.params.subcategoryId ? parseInt(route.params.subcategoryId) : null)
 
 // Updated icons and colors for all 8 categories
 const categoryIcons = {
@@ -229,8 +267,13 @@ const fetchCategory = async () => {
     category.value = cats.find(c => c.id === parseInt(route.params.id))
 
     if (category.value) {
+      // Update SEO meta
+      const title = isSubcategoryRoute.value && currentSubcategory.value
+        ? `${locale.value === 'ar' ? currentSubcategory.value.name : currentSubcategory.value.name_en} - ${locale.value === 'ar' ? category.value.name : category.value.name_en} - طلبنا`
+        : `${locale.value === 'ar' ? category.value.name : category.value.name_en} - طلبنا`
+
       updateMeta({
-        title: `${locale.value === 'ar' ? category.value.name : category.value.name_en} - طلبنا`,
+        title,
         description: `تصفح إعلانات ${category.value.name} على طلبنا`,
       })
     }
@@ -252,10 +295,15 @@ const fetchSubcategories = async () => {
     const data = await response.json()
     subcategories.value = Array.isArray(data.subcategories) ? data.subcategories : []
 
-    // Check if subcategory is specified in URL query and pre-select it
-    const subcatFromUrl = route.query.subcategory
-    if (subcatFromUrl) {
-      selectedSubcategory.value = parseInt(subcatFromUrl)
+    // Set current subcategory if on subcategory route
+    if (isSubcategoryRoute.value && subcategoryIdFromRoute.value) {
+      currentSubcategory.value = subcategories.value.find(s => s.id === subcategoryIdFromRoute.value)
+      selectedSubcategory.value = subcategoryIdFromRoute.value
+    }
+    // Check if subcategory is specified in URL query (legacy support)
+    else if (route.query.subcategory) {
+      selectedSubcategory.value = parseInt(route.query.subcategory)
+      currentSubcategory.value = subcategories.value.find(s => s.id === selectedSubcategory.value)
     }
   } catch (error) {
     console.error('Error:', error)
@@ -277,8 +325,10 @@ const fetchListings = async () => {
       params.append('radius', searchRadius.value)
     }
 
-    if (selectedSubcategory.value && !isSpecialCategory.value) {
-      params.append('subcategory_id', selectedSubcategory.value)
+    // Use subcategory from route or selected
+    const subcatId = isSubcategoryRoute.value ? subcategoryIdFromRoute.value : selectedSubcategory.value
+    if (subcatId && !isSpecialCategory.value) {
+      params.append('subcategory_id', subcatId)
     }
 
     const response = await fetch(`/api/public/listings?${params}`)
@@ -295,20 +345,47 @@ const fetchListings = async () => {
 
 const onSubcategoryChange = () => {
   currentPage.value = 1
-  // Update URL query when subcategory changes
+
   if (selectedSubcategory.value) {
-    router.replace({ query: { subcategory: selectedSubcategory.value } })
-  } else {
-    router.replace({ query: {} })
+    // Navigate to SEO-friendly subcategory URL
+    const subcat = subcategories.value.find(s => s.id === selectedSubcategory.value)
+    if (subcat && category.value) {
+      router.push({
+        name: 'subcategory',
+        params: {
+          id: category.value.id,
+          slug: category.value.slug || encodeURIComponent(locale.value === 'ar' ? category.value.name : category.value.name_en),
+          subcategoryId: subcat.id,
+          subcategorySlug: subcat.slug || encodeURIComponent(locale.value === 'ar' ? subcat.name : subcat.name_en)
+        }
+      })
+      return
+    }
   }
-  fetchListings()
+
+  // Navigate back to category (all subcategories)
+  if (category.value) {
+    router.push({
+      name: 'category',
+      params: {
+        id: category.value.id,
+        slug: category.value.slug
+      }
+    })
+  }
 }
 
-onMounted(() => {
-  // Check for subcategory in URL query on mount
-  const subcatFromUrl = route.query.subcategory
-  if (subcatFromUrl) {
-    selectedSubcategory.value = parseInt(subcatFromUrl)
+const initPage = () => {
+  // Reset state
+  currentSubcategory.value = null
+
+  // Set selected subcategory from route
+  if (isSubcategoryRoute.value && subcategoryIdFromRoute.value) {
+    selectedSubcategory.value = subcategoryIdFromRoute.value
+  } else if (route.query.subcategory) {
+    selectedSubcategory.value = parseInt(route.query.subcategory)
+  } else {
+    selectedSubcategory.value = null
   }
 
   fetchCategory()
@@ -320,33 +397,30 @@ onMounted(() => {
   } else {
     fetchListings()
   }
+}
+
+onMounted(() => {
+  initPage()
 })
 
-watch(() => route.params.id, () => {
-  selectedSubcategory.value = null
+// Watch for route changes (category ID or subcategory ID)
+watch([() => route.params.id, () => route.params.subcategoryId], () => {
   currentPage.value = 1
   userLocation.value = null
   locationError.value = null
-
-  fetchCategory()
-  fetchSubcategories()
-
-  // For Near category, request location
-  if (isNearCategory.value) {
-    requestLocation()
-  } else {
-    fetchListings()
-  }
+  initPage()
 })
 
-// Watch for URL query changes (e.g., when user navigates via sitemap link)
+// Watch for URL query changes (legacy support for ?subcategory=)
 watch(() => route.query.subcategory, (newVal) => {
-  if (isSpecialCategory.value) return
+  if (isSpecialCategory.value || isSubcategoryRoute.value) return
 
   if (newVal) {
     selectedSubcategory.value = parseInt(newVal)
+    currentSubcategory.value = subcategories.value.find(s => s.id === selectedSubcategory.value)
   } else {
     selectedSubcategory.value = null
+    currentSubcategory.value = null
   }
   currentPage.value = 1
   fetchListings()
