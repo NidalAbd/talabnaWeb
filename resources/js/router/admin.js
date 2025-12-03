@@ -15,7 +15,6 @@ import ReportsList from '../views/admin/ReportsList.vue'
 import BannedUsersList from '../views/admin/BannedUsersList.vue'
 import BannedDevicesList from '../views/admin/BannedDevicesList.vue'
 import PointPackagesList from '../views/admin/PointPackagesList.vue'
-import PremiumFeaturesList from '../views/admin/PremiumFeaturesList.vue'
 import LevelsList from '../views/admin/LevelsList.vue'
 import PointPurchaseRequestsList from '../views/admin/PointPurchaseRequestsList.vue'
 import PointTransactionsList from '../views/admin/PointTransactionsList.vue'
@@ -109,12 +108,6 @@ const routes = [
     name: 'point_packages.index',
     component: PointPackagesList,
     meta: { title: 'Point Packages Management' }
-  },
-  {
-    path: '/admin/premium-features',
-    name: 'premium_features.index',
-    component: PremiumFeaturesList,
-    meta: { title: 'Premium Features Management' }
   },
   {
     path: '/admin/levels',

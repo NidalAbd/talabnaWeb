@@ -468,23 +468,12 @@ return [
             ]
         ],
 
-        // Premium Features
+        // User Levels
         [
-            'text'    => 'Premium',
-            'icon'    => 'fas fa-gem',
+            'text'    => 'User Levels',
+            'url'     => 'admin/levels',
+            'icon'    => 'fas fa-layer-group',
             'permission' => ['view_statistics'],
-            'submenu' => [
-                [
-                    'text' => 'Premium Features',
-                    'url'  => 'admin/premium-features',
-                    'icon' => 'fas fa-star',
-                ],
-                [
-                    'text' => 'User Levels',
-                    'url'  => 'admin/levels',
-                    'icon' => 'fas fa-layer-group',
-                ]
-            ]
         ],
 
         ['header' => 'ANALYTICS & REPORTS'],

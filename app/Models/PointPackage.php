@@ -34,11 +34,6 @@ class PointPackage extends Model
         'is_active' => 'boolean',
     ];
 
-    public function features()
-    {
-        return $this->belongsToMany(PremiumFeature::class, 'package_features');
-    }
-
     public function sales()
     {
         return $this->hasMany(point_transactions::class, 'package_id');

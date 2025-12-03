@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\PointPackage;
-use App\Models\PremiumFeature;
 use App\Models\User;
 use App\Models\point_transactions;
 use Illuminate\Http\Request;
@@ -21,9 +20,8 @@ class PointPackageController extends Controller
     public function index()
     {
         $packages = PointPackage::all();
-        $features = PremiumFeature::all();
-        
-        return view('admin.point_packages.index', compact('packages', 'features'));
+
+        return view('admin.point_packages.index', compact('packages'));
     }
 
     public function create()
@@ -300,114 +298,25 @@ class PointPackageController extends Controller
         }
     }
 
-    // Premium Features Management
-    public function features()
-    {
-        $features = PremiumFeature::all();
-        return view('admin.premium_features.index', compact('features'));
-    }
-
-    public function createFeature()
-    {
-        return view('admin.premium_features.create');
-    }
-
-    public function storeFeature(Request $request)
-    {
-        $request->validate([
-            'name' => 'required|array',
-            'name.ar' => 'required|string|max:255',
-            'name.en' => 'required|string|max:255',
-            'description' => 'nullable|array',
-            'description.ar' => 'nullable|string',
-            'description.en' => 'nullable|string',
-            'points_cost' => 'required|integer|min:1',
-            'duration_days' => 'required|integer|min:1',
-            'category' => 'required|string|max:100',
-            'icon' => 'nullable|string|max:100',
-            'color' => 'nullable|string|max:7',
-            'is_active' => 'boolean',
-            'is_popular' => 'boolean'
-        ]);
-
-        PremiumFeature::create($request->all());
-
-        return redirect()->route('admin.premium-features.index')
-            ->with('success', 'Premium feature created successfully.');
-    }
-
-    public function editFeature(PremiumFeature $feature)
-    {
-        return view('admin.premium_features.edit', compact('feature'));
-    }
-
-    public function updateFeature(Request $request, PremiumFeature $feature)
-    {
-        $request->validate([
-            'name' => 'required|array',
-            'name.ar' => 'required|string|max:255',
-            'name.en' => 'required|string|max:255',
-            'description' => 'nullable|array',
-            'description.ar' => 'nullable|string',
-            'description.en' => 'nullable|string',
-            'points_cost' => 'required|integer|min:1',
-            'duration_days' => 'required|integer|min:1',
-            'category' => 'required|string|max:100',
-            'icon' => 'nullable|string|max:100',
-            'color' => 'nullable|string|max:7',
-            'is_active' => 'boolean',
-            'is_popular' => 'boolean'
-        ]);
-
-        try {
-            $feature->update($request->all());
-            return response()->json(['success' => true, 'message' => 'Premium feature updated successfully.']);
-        } catch (\Exception $e) {
-            Log::error("Error updating premium feature: " . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to update premium feature.'], 500);
-        }
-    }
-
-    public function destroyFeature(PremiumFeature $feature)
-    {
-        try {
-            $feature->delete();
-            return response()->json(['success' => true, 'message' => 'Premium feature deleted successfully.']);
-        } catch (\Exception $e) {
-            Log::error("Error deleting premium feature: " . $e->getMessage());
-            return response()->json(['success' => false, 'message' => 'Failed to delete premium feature.'], 500);
-        }
-    }
-
-    public function showFeature(PremiumFeature $feature)
-    {
-        return view('admin.premium_features.show', compact('feature'));
-    }
-
     // User Point Purchase
     public function purchasePackage(Request $request, PointPackage $package)
     {
         $user = Auth::user();
-        
+
         // Check if user has enough points
         $userPoints = $user->palservice_points->sum('point') ?? 0;
-        
+
         if ($userPoints < $package->points) {
             return back()->with('error', 'Insufficient points to purchase this package.');
         }
 
-        DB::transaction(function () use ($user, $package) {
+        DB::transaction(function () use ($user, $package, $userPoints) {
             // Deduct points from user
             $user->palservice_points()->create([
                 'points' => -$package->points,
                 'type' => 'used',
                 'description' => "Purchased package: {$package->name}"
             ]);
-
-            // Grant package features to user
-            foreach ($package->features as $feature) {
-                $this->grantFeatureToUser($user, $feature);
-            }
 
             // Record transaction
             point_transactions::create([
@@ -420,36 +329,6 @@ class PointPackageController extends Controller
         });
 
         return back()->with('success', "Successfully purchased {$package->name} package!");
-    }
-
-    private function grantFeatureToUser(User $user, PremiumFeature $feature)
-    {
-        // Implement feature granting logic based on feature type
-        switch ($feature->feature_type) {
-            case 'post_enhancement':
-                // Grant ability to create premium posts
-                $user->premium_features()->updateOrCreate(
-                    ['feature_id' => $feature->id],
-                    ['expires_at' => now()->addDays(30)]
-                );
-                break;
-                
-            case 'user_benefit':
-                // Grant user benefits (profile highlights, etc.)
-                $user->user_benefits()->updateOrCreate(
-                    ['feature_id' => $feature->id],
-                    ['expires_at' => now()->addDays(30)]
-                );
-                break;
-                
-            case 'system_feature':
-                // Grant system-wide features
-                $user->system_features()->updateOrCreate(
-                    ['feature_id' => $feature->id],
-                    ['expires_at' => now()->addDays(30)]
-                );
-                break;
-        }
     }
 
     // Analytics

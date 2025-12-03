@@ -461,10 +461,6 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/point-packages', [HomeController::class, 'index'])
         ->name('point_packages.index');
 
-    // Premium Features - Vue SPA
-    Route::get('/premium-features', [HomeController::class, 'index'])
-        ->name('premium_features.index');
-
     // User Levels - Vue SPA
     Route::get('/levels', [HomeController::class, 'index'])
         ->name('levels.index');
@@ -656,15 +652,6 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::post('/point-packages/{id}/duplicate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'duplicate'])->name('api.admin.point-packages.duplicate');
             Route::post('/point-packages/bulk-activate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'bulkActivate'])->name('api.admin.point-packages.bulk-activate');
             Route::post('/point-packages/bulk-deactivate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'bulkDeactivate'])->name('api.admin.point-packages.bulk-deactivate');
-
-            // Premium Features
-            Route::get('/premium-features/stats', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'getStats'])->name('api.admin.premium-features.stats');
-            Route::get('/premium-features/types', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'getTypes'])->name('api.admin.premium-features.types');
-            Route::get('/premium-features', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'index'])->name('api.admin.premium-features.index');
-            Route::post('/premium-features', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'store'])->name('api.admin.premium-features.store');
-            Route::put('/premium-features/{id}', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'update'])->name('api.admin.premium-features.update');
-            Route::delete('/premium-features/{id}', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'destroy'])->name('api.admin.premium-features.destroy');
-            Route::post('/premium-features/{id}/toggle-status', [\App\Http\Controllers\Admin\PremiumFeaturesApiController::class, 'toggleStatus'])->name('api.admin.premium-features.toggle-status');
 
             // User Levels
             Route::get('/levels/stats', [\App\Http\Controllers\Admin\LevelsApiController::class, 'getStats'])->name('api.admin.levels.stats');
