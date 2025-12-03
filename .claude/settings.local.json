@@ -14,7 +14,8 @@
       "Bash(exit 0)",
       "Bash(if exist \"lib\\DEEPLINK_INTEGRATION_EXAMPLE.dart\" ren \"lib\\DEEPLINK_INTEGRATION_EXAMPLE.dart\" \"DEEPLINK_INTEGRATION_EXAMPLE.dart.bak\")",
       "Bash(npm install:*)",
-      "Bash(curl:*)"
+      "Bash(curl:*)",
+      "Bash(scp:*)"
     ],
     "deny": [],
     "ask": []
