@@ -284,7 +284,7 @@ const cancelEdit = () => {
 const saveCity = async (city) => {
   isSaving.value = true
   try {
-    await axios.put(`/api/admin/cities/${city.id}`, {
+    await axios.post(`/api/admin/cities/${city.id}`, {
       name: {
         en: editForm.value.name_en,
         ar: editForm.value.name_ar
