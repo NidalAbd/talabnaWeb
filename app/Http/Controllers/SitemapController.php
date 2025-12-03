@@ -19,7 +19,8 @@ class SitemapController extends Controller
      */
     public function index()
     {
-        $content = Cache::remember('sitemap-index', 3600, function () {
+        try {
+        $content = Cache::remember('sitemap-index-v2', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
@@ -76,6 +77,10 @@ class SitemapController extends Controller
 
         return response($content, 200)
             ->header('Content-Type', 'application/xml');
+        } catch (\Exception $e) {
+            \Log::error('Sitemap index error: ' . $e->getMessage());
+            return response($this->emptyIndex(), 200)->header('Content-Type', 'application/xml');
+        }
     }
 
     /**
@@ -120,7 +125,8 @@ class SitemapController extends Controller
      */
     public function categories()
     {
-        $content = Cache::remember('sitemap-categories', 3600, function () {
+        try {
+        $content = Cache::remember('sitemap-categories-v2', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
 
@@ -167,6 +173,10 @@ class SitemapController extends Controller
 
         return response($content, 200)
             ->header('Content-Type', 'application/xml');
+        } catch (\Exception $e) {
+            \Log::error('Sitemap categories error: ' . $e->getMessage());
+            return response($this->emptyUrlset(), 200)->header('Content-Type', 'application/xml');
+        }
     }
 
     /**
@@ -489,5 +499,27 @@ class SitemapController extends Controller
 
         // URL encode for safe transport
         return rawurlencode($text) ?: 'item';
+    }
+
+    /**
+     * Return empty sitemap index for error cases
+     */
+    private function emptyIndex(): string
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        $xml .= '</sitemapindex>';
+        return $xml;
+    }
+
+    /**
+     * Return empty urlset for error cases
+     */
+    private function emptyUrlset(): string
+    {
+        $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+        $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+        $xml .= '</urlset>';
+        return $xml;
     }
 }
