@@ -504,15 +504,12 @@ const handleToggleFeatured = async (subcategory) => {
   closeMenus()
   try {
     const result = await toggleFeatured(subcategory.id)
-    console.log('🔄 Toggle featured result:', result)
     // Update the item in the reactive array for immediate UI feedback
     const index = subcategories.value.data.findIndex(s => s.id === subcategory.id)
     if (index !== -1) {
       subcategories.value.data[index].is_featured = result.is_featured
-      console.log('✅ Updated item at index', index, 'is_featured =', result.is_featured)
     }
-  } catch (error) {
-    console.error('❌ Toggle featured error:', error)
+  } catch (err) {
     alert('Failed to toggle featured status')
   }
 }
@@ -521,15 +518,12 @@ const handleTogglePopular = async (subcategory) => {
   closeMenus()
   try {
     const result = await togglePopular(subcategory.id)
-    console.log('🔄 Toggle popular result:', result)
     // Update the item in the reactive array for immediate UI feedback
     const index = subcategories.value.data.findIndex(s => s.id === subcategory.id)
     if (index !== -1) {
       subcategories.value.data[index].is_popular = result.is_popular
-      console.log('✅ Updated item at index', index, 'is_popular =', result.is_popular)
     }
-  } catch (error) {
-    console.error('❌ Toggle popular error:', error)
+  } catch (err) {
     alert('Failed to toggle popular status')
   }
 }
