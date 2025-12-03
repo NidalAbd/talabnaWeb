@@ -17,7 +17,8 @@
       "Bash(curl:*)",
       "Bash(scp:*)",
       "Bash(copy \"C:\\Users\\Nidal.Abd\\PhpstormProjects\\Talabna Flutter Laravel\\talabnaWeb\\public\\favicon.ico\" \"C:\\Users\\Nidal.Abd\\PhpstormProjects\\Talabna Flutter Laravel\\talabnaWeb\\public\\favicons\\favicon.ico\")",
-      "Bash(timeout:*)"
+      "Bash(timeout:*)",
+      "Bash(git checkout:*)"
     ],
     "deny": [],
     "ask": []

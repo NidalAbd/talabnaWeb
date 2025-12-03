@@ -40,7 +40,7 @@
             </label>
             <div class="image-upload-container">
               <div class="image-preview" v-if="imagePreview || (subcategory && subcategory.image_url)">
-                <img :src="imagePreview || `/storage/${subcategory.image_url}`" alt="Preview">
+                <img :src="imagePreview || getImageUrl(subcategory.image_url)" alt="Preview">
                 <button type="button" class="remove-image-btn" @click="removeImage">
                   <i class="fas fa-times"></i>
                 </button>
@@ -290,6 +290,14 @@ const validateForm = () => {
   }
 
   return isValid
+}
+
+const getImageUrl = (url) => {
+  if (!url) return null
+  if (url.startsWith('http')) return url
+  if (url.startsWith('/storage/')) return url
+  if (url.startsWith('storage/')) return `/${url}`
+  return `/storage/${url}`
 }
 
 const handleSubmit = async () => {

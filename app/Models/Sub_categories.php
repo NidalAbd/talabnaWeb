@@ -17,7 +17,9 @@ class Sub_categories extends Model
         'categories_id','name','is_featured','is_popular',
     ];
     protected $casts = [
-        'name' => 'array', // Converts JSON to PHP array automatically
+        'name' => 'array',
+        'is_featured' => 'boolean',
+        'is_popular' => 'boolean',
     ];
     protected $primaryKey = 'id';
     public function category(): BelongsTo
