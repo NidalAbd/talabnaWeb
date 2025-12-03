@@ -17,13 +17,24 @@ export function useSubCategories() {
 
     try {
       const queryString = new URLSearchParams(params).toString()
-      const response = await fetch(`/api/admin/subcategories?${queryString}`)
+      const url = `/api/admin/subcategories?${queryString}`
+      console.log('📋 Fetching subcategories from:', url)
+
+      const response = await fetch(url)
 
       if (!response.ok) {
         throw new Error('Failed to fetch sub-categories')
       }
 
       const data = await response.json()
+      console.log('📋 Subcategories fetched, count:', data.data?.length, 'page:', data.current_page)
+      // Log items with featured/popular status
+      const markedItems = data.data?.filter(item => item.is_featured || item.is_popular) || []
+      if (markedItems.length > 0) {
+        console.log('📋 Featured/Popular items on this page:', markedItems.map(item => `ID ${item.id}: featured=${item.is_featured}, popular=${item.is_popular}`).join('; '))
+      } else {
+        console.log('📋 No featured/popular items on this page')
+      }
       subcategories.value = data
     } catch (err) {
       error.value = err.message
