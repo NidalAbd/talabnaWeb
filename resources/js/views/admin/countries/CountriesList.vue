@@ -95,6 +95,10 @@
                 <i class="fas fa-edit"></i>
                 Edit Country
               </button>
+              <button @click="openCitiesModal(country)" class="menu-item">
+                <i class="fas fa-city"></i>
+                Manage Cities ({{ country.cities_count || 0 }})
+              </button>
               <button @click="handleDelete(country)" class="menu-item danger">
                 <i class="fas fa-trash"></i>
                 Delete
@@ -132,6 +136,10 @@
           <button @click="openEditModal(country)" class="action-btn primary">
             <i class="fas fa-edit"></i>
             Edit
+          </button>
+          <button @click="openCitiesModal(country)" class="action-btn info">
+            <i class="fas fa-city"></i>
+            Cities
           </button>
         </div>
       </div>
@@ -219,6 +227,13 @@
                   <i class="fas fa-edit"></i>
                 </button>
                 <button
+                  @click="openCitiesModal(country)"
+                  class="table-action-btn btn-info"
+                  title="Manage Cities"
+                >
+                  <i class="fas fa-city"></i>
+                </button>
+                <button
                   @click="handleDelete(country)"
                   class="table-action-btn btn-delete"
                   title="Delete"
@@ -286,6 +301,14 @@
       @close="closeModal"
       @saved="handleSaved"
     />
+
+    <!-- Cities Modal -->
+    <CitiesModal
+      v-if="showCitiesModal"
+      :country="selectedCountry"
+      @close="closeCitiesModal"
+      @saved="handleCitiesSaved"
+    />
   </div>
 </template>
 
@@ -293,6 +316,7 @@
 import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useCountries } from '../../../composables/useCountries'
 import CountryFormModal from '../../../components/admin/countries/CountryFormModal.vue'
+import CitiesModal from '../../../components/admin/countries/CitiesModal.vue'
 
 const { countries, loading, fetchCountries, deleteCountry } = useCountries()
 
@@ -308,6 +332,7 @@ const filters = ref({
 const showModal = ref(false)
 const modalMode = ref('create')
 const selectedCountry = ref(null)
+const showCitiesModal = ref(false)
 
 const visiblePages = computed(() => {
   const pages = []
@@ -407,6 +432,20 @@ const handleDelete = async (country) => {
 
 const handleImageError = (event) => {
   event.target.src = '/storage/countryFlag/placeholder-flag.jpg'
+}
+
+const openCitiesModal = (country) => {
+  closeMenus()
+  selectedCountry.value = country
+  showCitiesModal.value = true
+}
+
+const closeCitiesModal = () => {
+  showCitiesModal.value = false
+}
+
+const handleCitiesSaved = () => {
+  loadCountries(countries.value.current_page)
 }
 </script>
 
@@ -509,6 +548,20 @@ const handleImageError = (event) => {
 
 .action-btn.success {
   background: linear-gradient(135deg, #28a745 0%, #1e7e34 100%);
+  color: white;
+}
+
+.action-btn.info {
+  background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
+  color: white;
+}
+
+.table-action-btn.btn-info {
+  color: #17a2b8;
+}
+
+.table-action-btn.btn-info:hover {
+  background: #17a2b8;
   color: white;
 }
 

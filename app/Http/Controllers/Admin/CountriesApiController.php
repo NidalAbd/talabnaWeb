@@ -264,6 +264,41 @@ class CountriesApiController extends Controller
     }
 
     /**
+     * Get cities for a specific country
+     */
+    public function getCities($id): JsonResponse
+    {
+        $country = countries::findOrFail($id);
+
+        $cities = \App\Models\cities::where('country_id', $id)
+            ->withCount(['servicePosts' => function($query) {
+                $query->where('state', 'published');
+            }])
+            ->orderBy('id')
+            ->get()
+            ->map(function ($city) {
+                // Ensure name is properly decoded as array/object
+                if (is_string($city->name)) {
+                    $decoded = json_decode($city->name, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        // Handle double-encoded JSON
+                        if (is_string($decoded)) {
+                            $decoded2 = json_decode($decoded, true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded2)) {
+                                $city->name = $decoded2;
+                            }
+                        } else {
+                            $city->name = $decoded;
+                        }
+                    }
+                }
+                return $city;
+            });
+
+        return response()->json(['cities' => $cities]);
+    }
+
+    /**
      * Delete country
      */
     public function destroy($id): JsonResponse

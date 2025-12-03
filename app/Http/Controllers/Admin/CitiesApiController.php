@@ -129,6 +129,40 @@ class CitiesApiController extends Controller
     }
 
     /**
+     * Create new city for a specific country (from country management)
+     */
+    public function storeForCountry(Request $request, $countryId): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'name.ar' => 'required|string|max:255',
+            'name.en' => 'required|string|max:255',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'message' => 'Validation failed',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        // Verify country exists
+        $country = countries::findOrFail($countryId);
+
+        $city = cities::create([
+            'name' => [
+                'ar' => $request->input('name.ar'),
+                'en' => $request->input('name.en')
+            ],
+            'country_id' => $countryId
+        ]);
+
+        return response()->json([
+            'message' => 'City created successfully',
+            'city' => $city
+        ], 201);
+    }
+
+    /**
      * Create new city
      */
     public function store(Request $request): JsonResponse

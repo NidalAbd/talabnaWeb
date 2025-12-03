@@ -599,6 +599,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/countries/stats', [\App\Http\Controllers\Admin\CountriesApiController::class, 'getStats'])->name('api.admin.countries.stats');
             Route::get('/countries', [\App\Http\Controllers\Admin\CountriesApiController::class, 'index'])->name('api.admin.countries.index');
             Route::get('/countries/{id}', [\App\Http\Controllers\Admin\CountriesApiController::class, 'show'])->name('api.admin.countries.show');
+            Route::get('/countries/{id}/cities', [\App\Http\Controllers\Admin\CountriesApiController::class, 'getCities'])->name('api.admin.countries.cities');
+            Route::post('/countries/{id}/cities', [\App\Http\Controllers\Admin\CitiesApiController::class, 'storeForCountry'])->name('api.admin.countries.cities.store');
             Route::post('/countries', [\App\Http\Controllers\Admin\CountriesApiController::class, 'store'])->name('api.admin.countries.store');
             Route::post('/countries/{id}', [\App\Http\Controllers\Admin\CountriesApiController::class, 'update'])->name('api.admin.countries.update');
             Route::delete('/countries/{id}', [\App\Http\Controllers\Admin\CountriesApiController::class, 'destroy'])->name('api.admin.countries.destroy');
