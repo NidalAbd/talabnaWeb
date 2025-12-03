@@ -139,8 +139,12 @@ export function useSubCategories() {
   }
 
   const toggleFeatured = async (id) => {
+    console.log('🔄 Toggle Featured called for subcategory ID:', id)
     try {
-      const response = await fetch(`/api/admin/subcategories/${id}/toggle-featured`, {
+      const url = `/api/admin/subcategories/${id}/toggle-featured`
+      console.log('📡 Calling:', url)
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -148,21 +152,31 @@ export function useSubCategories() {
         }
       })
 
+      console.log('📡 Response status:', response.status)
+
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Response error:', errorText)
         throw new Error('Failed to toggle featured status')
       }
 
-      return await response.json()
+      const data = await response.json()
+      console.log('✅ Toggle Featured success:', data)
+      return data
     } catch (err) {
       error.value = err.message
-      console.error('Error toggling featured status:', err)
+      console.error('❌ Error toggling featured status:', err)
       throw err
     }
   }
 
   const togglePopular = async (id) => {
+    console.log('🔄 Toggle Popular called for subcategory ID:', id)
     try {
-      const response = await fetch(`/api/admin/subcategories/${id}/toggle-popular`, {
+      const url = `/api/admin/subcategories/${id}/toggle-popular`
+      console.log('📡 Calling:', url)
+
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -170,14 +184,20 @@ export function useSubCategories() {
         }
       })
 
+      console.log('📡 Response status:', response.status)
+
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('❌ Response error:', errorText)
         throw new Error('Failed to toggle popular status')
       }
 
-      return await response.json()
+      const data = await response.json()
+      console.log('✅ Toggle Popular success:', data)
+      return data
     } catch (err) {
       error.value = err.message
-      console.error('Error toggling popular status:', err)
+      console.error('❌ Error toggling popular status:', err)
       throw err
     }
   }
