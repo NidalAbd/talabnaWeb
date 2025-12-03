@@ -17,25 +17,13 @@ export function useSubCategories() {
 
     try {
       const queryString = new URLSearchParams(params).toString()
-      const url = `/api/admin/subcategories?${queryString}`
-      console.log('📋 Fetching subcategories from:', url)
-
-      const response = await fetch(url)
+      const response = await fetch(`/api/admin/subcategories?${queryString}`)
 
       if (!response.ok) {
         throw new Error('Failed to fetch sub-categories')
       }
 
-      const data = await response.json()
-      console.log('📋 Subcategories fetched, count:', data.data?.length, 'page:', data.current_page)
-      // Log items with featured/popular status
-      const markedItems = data.data?.filter(item => item.is_featured || item.is_popular) || []
-      if (markedItems.length > 0) {
-        console.log('📋 Featured/Popular items on this page:', markedItems.map(item => `ID ${item.id}: featured=${item.is_featured}, popular=${item.is_popular}`).join('; '))
-      } else {
-        console.log('📋 No featured/popular items on this page')
-      }
-      subcategories.value = data
+      subcategories.value = await response.json()
     } catch (err) {
       error.value = err.message
       console.error('Error fetching sub-categories:', err)
@@ -150,12 +138,8 @@ export function useSubCategories() {
   }
 
   const toggleFeatured = async (id) => {
-    console.log('🔄 Toggle Featured called for subcategory ID:', id)
     try {
-      const url = `/api/admin/subcategories/${id}/toggle-featured`
-      console.log('📡 Calling:', url)
-
-      const response = await fetch(url, {
+      const response = await fetch(`/api/admin/subcategories/${id}/toggle-featured`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,31 +147,21 @@ export function useSubCategories() {
         }
       })
 
-      console.log('📡 Response status:', response.status)
-
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error('❌ Response error:', errorText)
         throw new Error('Failed to toggle featured status')
       }
 
-      const data = await response.json()
-      console.log('✅ Toggle Featured success:', data)
-      return data
+      return await response.json()
     } catch (err) {
       error.value = err.message
-      console.error('❌ Error toggling featured status:', err)
+      console.error('Error toggling featured status:', err)
       throw err
     }
   }
 
   const togglePopular = async (id) => {
-    console.log('🔄 Toggle Popular called for subcategory ID:', id)
     try {
-      const url = `/api/admin/subcategories/${id}/toggle-popular`
-      console.log('📡 Calling:', url)
-
-      const response = await fetch(url, {
+      const response = await fetch(`/api/admin/subcategories/${id}/toggle-popular`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -195,20 +169,14 @@ export function useSubCategories() {
         }
       })
 
-      console.log('📡 Response status:', response.status)
-
       if (!response.ok) {
-        const errorText = await response.text()
-        console.error('❌ Response error:', errorText)
         throw new Error('Failed to toggle popular status')
       }
 
-      const data = await response.json()
-      console.log('✅ Toggle Popular success:', data)
-      return data
+      return await response.json()
     } catch (err) {
       error.value = err.message
-      console.error('❌ Error toggling popular status:', err)
+      console.error('Error toggling popular status:', err)
       throw err
     }
   }
