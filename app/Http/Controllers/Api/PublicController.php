@@ -19,7 +19,7 @@ use Carbon\Carbon;
 class PublicController extends Controller
 {
     /**
-     * Helper to decode JSON name field
+     * Helper to decode JSON name field (handles double-encoded JSON)
      */
     private function decodeName($name)
     {
@@ -28,8 +28,17 @@ class PublicController extends Controller
         }
         if (is_string($name)) {
             $decoded = json_decode($name, true);
-            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                return $decoded;
+            if (json_last_error() === JSON_ERROR_NONE) {
+                // If decoded result is still a string, it was double-encoded
+                if (is_string($decoded)) {
+                    $decoded2 = json_decode($decoded, true);
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded2)) {
+                        return $decoded2;
+                    }
+                }
+                if (is_array($decoded)) {
+                    return $decoded;
+                }
             }
         }
         return ['ar' => $name, 'en' => $name];
@@ -400,9 +409,9 @@ class PublicController extends Controller
      */
     public function countries(): JsonResponse
     {
-        $countries = Cache::remember('countries_list_v2', 3600, function () {
+        $countries = Cache::remember('countries_list_v3', 3600, function () {
             return countries::withCount(['cities'])
-                ->with(['cities' => function ($query) {
+                ->with(['photos', 'cities' => function ($query) {
                     $query->withCount(['servicePosts' => function ($q) {
                         $q->where('state', 'published');
                     }])
@@ -413,34 +422,22 @@ class PublicController extends Controller
                 ->orderBy('id')
                 ->get()
                 ->map(function ($country) {
-                    // Handle name - could be array, JSON string, or plain string
+                    // The model's accessor already returns name as array
                     $name = $country->name;
-                    if (is_string($name)) {
-                        $decoded = json_decode($name, true);
-                        if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                            $name = $decoded;
-                        }
-                    }
-
-                    $nameAr = is_array($name) ? ($name['ar'] ?? '') : $name;
-                    $nameEn = is_array($name) ? ($name['en'] ?? $nameAr) : $name;
+                    $nameAr = is_array($name) ? ($name['ar'] ?? '') : (string)$name;
+                    $nameEn = is_array($name) ? ($name['en'] ?? $nameAr) : (string)$name;
 
                     // Count total listings in this country
                     $listingsCount = ServicePost::where('state', 'published')
                         ->where('country_id', $country->id)
                         ->count();
 
-                    // Get top cities with their names decoded
-                    $topCities = $country->cities->map(function ($city) use ($nameAr) {
+                    // Get top cities with their names (model accessor already decodes)
+                    $topCities = $country->cities->map(function ($city) {
+                        // The model's accessor already returns name as array
                         $cityName = $city->name;
-                        if (is_string($cityName)) {
-                            $decoded = json_decode($cityName, true);
-                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                                $cityName = $decoded;
-                            }
-                        }
-                        $cityNameAr = is_array($cityName) ? ($cityName['ar'] ?? '') : $cityName;
-                        $cityNameEn = is_array($cityName) ? ($cityName['en'] ?? $cityNameAr) : $cityName;
+                        $cityNameAr = is_array($cityName) ? ($cityName['ar'] ?? '') : (string)$cityName;
+                        $cityNameEn = is_array($cityName) ? ($cityName['en'] ?? $cityNameAr) : (string)$cityName;
 
                         return [
                             'id' => $city->id,
@@ -451,13 +448,17 @@ class PublicController extends Controller
                         ];
                     });
 
+                    // Get flag from photos relationship (same as admin controller)
+                    $flagSrc = $country->photos->first()?->src ?? null;
+                    $flagUrl = $flagSrc ? '/storage/' . preg_replace('#^storage/#', '', $flagSrc) : null;
+
                     return [
                         'id' => $country->id,
                         'name' => $nameAr,
                         'name_en' => $nameEn,
                         'slug' => \Str::slug($nameEn ?: $nameAr) ?: rawurlencode($nameAr),
                         'code' => $country->code ?? $country->country_code,
-                        'flag' => $country->flag ? '/storage/' . $country->flag : null,
+                        'flag' => $flagUrl,
                         'cities_count' => $country->cities_count,
                         'listings_count' => $listingsCount,
                         'top_cities' => $topCities,

@@ -30,9 +30,20 @@ class cities extends Model
                     return $value;
                 }
                 if (is_string($value)) {
+                    // Handle double-encoded JSON (string wrapped in quotes)
+                    // e.g., '"{\"ar\":\"...\",\"en\":\"...\"}"'
                     $decoded = json_decode($value, true);
-                    if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
-                        return $decoded;
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        // If decoded result is a string, it was double-encoded, decode again
+                        if (is_string($decoded)) {
+                            $decoded2 = json_decode($decoded, true);
+                            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded2)) {
+                                return $decoded2;
+                            }
+                        }
+                        if (is_array($decoded)) {
+                            return $decoded;
+                        }
                     }
                     return ['ar' => $value, 'en' => $value];
                 }
