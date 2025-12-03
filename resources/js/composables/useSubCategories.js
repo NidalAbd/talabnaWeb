@@ -8,6 +8,12 @@ export function useSubCategories() {
     per_page: 15,
     total: 0
   })
+  const stats = ref({
+    total: 0,
+    featured: 0,
+    popular: 0,
+    parentCategories: 0
+  })
   const loading = ref(false)
   const error = ref(null)
 
@@ -29,6 +35,25 @@ export function useSubCategories() {
       console.error('Error fetching sub-categories:', err)
     } finally {
       loading.value = false
+    }
+  }
+
+  const fetchStats = async () => {
+    try {
+      const response = await fetch('/api/admin/subcategories/stats')
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats')
+      }
+      const data = await response.json()
+      // Extract values from the stats array
+      stats.value = {
+        total: data.stats?.find(s => s.label === 'Total Sub-Categories')?.value || 0,
+        featured: data.stats?.find(s => s.label === 'Featured Sub-Categories')?.value || 0,
+        popular: data.stats?.find(s => s.label === 'Popular Sub-Categories')?.value || 0,
+        parentCategories: data.top_categories?.length || 0
+      }
+    } catch (err) {
+      console.error('Error fetching stats:', err)
     }
   }
 
@@ -183,9 +208,11 @@ export function useSubCategories() {
 
   return {
     subcategories,
+    stats,
     loading,
     error,
     fetchSubCategories,
+    fetchStats,
     getSubCategory,
     createSubCategory,
     updateSubCategory,

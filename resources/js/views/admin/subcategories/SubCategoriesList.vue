@@ -377,7 +377,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useSubCategories } from '../../../composables/useSubCategories'
 import SubCategoryFormModal from '../../../components/admin/subcategories/SubCategoryFormModal.vue'
 
-const { subcategories, loading, fetchSubCategories, deleteSubCategory, toggleFeatured, togglePopular } = useSubCategories()
+const { subcategories, stats, loading, fetchSubCategories, fetchStats, deleteSubCategory, toggleFeatured, togglePopular } = useSubCategories()
 
 const filters = ref({
   search: '',
@@ -397,11 +397,11 @@ const placeholderImage = '/storage/countryFlag/placeholder-flag.jpg'
 let searchTimeout = null
 
 const featuredCount = computed(() => {
-  return subcategories.value.data.filter(s => s.is_featured).length
+  return stats.value.featured
 })
 
 const popularCount = computed(() => {
-  return subcategories.value.data.filter(s => s.is_popular).length
+  return stats.value.popular
 })
 
 const paginationPages = computed(() => {
@@ -420,8 +420,7 @@ const paginationPages = computed(() => {
 })
 
 onMounted(async () => {
-  await loadSubCategories()
-  await loadParentCategories()
+  await Promise.all([loadSubCategories(), loadParentCategories(), fetchStats()])
   document.addEventListener('click', closeMenus)
 })
 
@@ -503,12 +502,11 @@ const handleSaved = () => {
 const handleToggleFeatured = async (subcategory) => {
   closeMenus()
   try {
-    const result = await toggleFeatured(subcategory.id)
-    // Update the item in the reactive array for immediate UI feedback
-    const index = subcategories.value.data.findIndex(s => s.id === subcategory.id)
-    if (index !== -1) {
-      subcategories.value.data[index].is_featured = result.is_featured
-    }
+    await toggleFeatured(subcategory.id)
+    await Promise.all([
+      fetchSubCategories({ ...filters.value, page: subcategories.value.current_page }),
+      fetchStats()
+    ])
   } catch (err) {
     alert('Failed to toggle featured status')
   }
@@ -517,12 +515,11 @@ const handleToggleFeatured = async (subcategory) => {
 const handleTogglePopular = async (subcategory) => {
   closeMenus()
   try {
-    const result = await togglePopular(subcategory.id)
-    // Update the item in the reactive array for immediate UI feedback
-    const index = subcategories.value.data.findIndex(s => s.id === subcategory.id)
-    if (index !== -1) {
-      subcategories.value.data[index].is_popular = result.is_popular
-    }
+    await togglePopular(subcategory.id)
+    await Promise.all([
+      fetchSubCategories({ ...filters.value, page: subcategories.value.current_page }),
+      fetchStats()
+    ])
   } catch (err) {
     alert('Failed to toggle popular status')
   }
