@@ -499,7 +499,7 @@ class PublicController extends Controller
      */
     public function countries(): JsonResponse
     {
-        $countries = Cache::remember('countries_list_v3', 3600, function () {
+        $countries = Cache::remember('countries_list_v4', 3600, function () {
             return countries::withCount(['cities'])
                 ->with(['photos', 'cities' => function ($query) {
                     $query->withCount(['servicePosts' => function ($q) {
@@ -554,9 +554,8 @@ class PublicController extends Controller
                         'top_cities' => $topCities,
                     ];
                 })
-                ->filter(function ($country) {
-                    return $country['listings_count'] > 0;
-                })
+                // Show all countries, sorted by listings count (countries with posts first)
+                ->sortByDesc('listings_count')
                 ->values();
         });
 

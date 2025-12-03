@@ -192,20 +192,29 @@
                 <h3 class="text-subtitle-1 font-weight-bold mb-1">
                   {{ locale === 'ar' ? country.name : country.name_en }}
                 </h3>
-                <p class="text-caption text-medium-emphasis mb-2">
-                  {{ formatNumber(country.listings_count) }} {{ locale === 'ar' ? 'إعلان' : 'Listings' }}
-                </p>
-                <div class="d-flex flex-wrap justify-center gap-1">
-                  <v-chip
-                    v-for="city in (country.top_cities || []).slice(0, 3)"
-                    :key="city.id"
-                    size="x-small"
-                    :to="`/services/${country.id}/${country.slug}/${city.id}/${city.slug}`"
-                    class="city-chip"
-                  >
-                    {{ locale === 'ar' ? city.name : city.name_en }}
-                  </v-chip>
-                </div>
+                <!-- Show listings count or friendly message -->
+                <template v-if="country.listings_count > 0">
+                  <p class="text-caption text-medium-emphasis mb-2">
+                    {{ formatNumber(country.listings_count) }} {{ locale === 'ar' ? 'إعلان' : 'Listings' }}
+                  </p>
+                  <div class="d-flex flex-wrap justify-center gap-1">
+                    <v-chip
+                      v-for="city in (country.top_cities || []).slice(0, 3)"
+                      :key="city.id"
+                      size="x-small"
+                      :to="`/services/${country.id}/${country.slug}/${city.id}/${city.slug}`"
+                      class="city-chip"
+                    >
+                      {{ locale === 'ar' ? city.name : city.name_en }}
+                    </v-chip>
+                  </div>
+                </template>
+                <template v-else>
+                  <p class="text-caption text-primary mb-2">
+                    {{ locale === 'ar' ? 'كن أول من يضيف إعلان!' : 'Be the first to add a listing!' }}
+                  </p>
+                  <v-icon color="primary" size="24">mdi-plus-circle-outline</v-icon>
+                </template>
               </v-card-text>
             </v-card>
           </v-col>
