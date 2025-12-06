@@ -484,6 +484,12 @@ return [
             'permission' => ['view_statistics']
         ],
         [
+            'text' => 'SEO Analytics',
+            'url'  => 'admin/seo',
+            'icon' => 'fas fa-search',
+            'permission' => ['view_statistics']
+        ],
+        [
             'text' => 'Reports',
             'url'  => 'reports',
             'icon' => 'fas fa-flag',

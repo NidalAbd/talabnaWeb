@@ -22,6 +22,7 @@ import Analytics from '../views/admin/Analytics.vue'
 import StatisticsDashboard from '../views/admin/StatisticsDashboard.vue'
 import RoleAssignmentsList from '../views/admin/RoleAssignmentsList.vue'
 import PalServicePointsOverview from '../views/admin/PalServicePointsOverview.vue'
+import SeoDashboard from '../views/admin/seo/SeoDashboard.vue'
 
 const routes = [
   {
@@ -149,6 +150,12 @@ const routes = [
     name: 'palservice_points.index',
     component: PalServicePointsOverview,
     meta: { title: 'Points Overview' }
+  },
+  {
+    path: '/admin/seo',
+    name: 'seo.index',
+    component: SeoDashboard,
+    meta: { title: 'SEO Analytics' }
   }
 ]
 

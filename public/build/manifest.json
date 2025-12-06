@@ -75,10 +75,11 @@
     "css": [
       "assets/admin-25889e59.css"
     ],
-    "file": "assets/admin-33962078.js",
+    "file": "assets/admin-82f46dce.js",
     "imports": [
       "_vue-router-ff319777.js",
       "__plugin-vue_export-helper-c27b6911.js",
+      "resources/js/views/admin/seo/SeoDashboard.vue",
       "_MixedChart-d106661a.js"
     ],
     "isEntry": true,
