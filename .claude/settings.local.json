@@ -20,7 +20,13 @@
       "Bash(timeout:*)",
       "Bash(git checkout:*)",
       "Bash(cat:*)",
-      "Bash(findstr:*)"
+      "Bash(findstr:*)",
+      "Bash(cd:*)",
+      "Bash(if not exist \"C:\\Users\\Nidal.Abd\\PhpstormProjects\\Talabna Flutter Laravel\\talabnaWeb\\resources\\js\\composables\\useSeo.js\" echo \"File does not exist\")",
+      "Bash(composer show:*)",
+      "Bash(composer require:*)",
+      "WebSearch",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []
