@@ -17,6 +17,7 @@ const NotFound = () => import('@/views/NotFound.vue')
 // Admin views
 const AdminLayout = () => import('@/layouts/AdminLayout.vue')
 const AdminDashboard = () => import('@/views/admin/Dashboard.vue')
+const SeoDashboard = () => import('@/views/admin/seo/SeoDashboard.vue')
 
 const routes = [
   {
@@ -167,6 +168,14 @@ const routes = [
         component: AdminDashboard,
         meta: {
           title: 'لوحة التحكم - طلبنا',
+        },
+      },
+      {
+        path: 'seo',
+        name: 'seo.index',
+        component: SeoDashboard,
+        meta: {
+          title: 'SEO Analytics - طلبنا',
         },
       },
     ],

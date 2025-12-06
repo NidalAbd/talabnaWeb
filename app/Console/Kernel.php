@@ -18,6 +18,17 @@ class Kernel extends ConsoleKernel
         // Run badge expiration check every 15 minutes
         // This ensures badges expire at approximately the same time they were created
         $schedule->command('badges:expire')->everyFifteenMinutes();
+
+        // SEO: Sync Google Search Console data daily at 3 AM
+        $schedule->command('seo:sync --days=3')
+            ->dailyAt('03:00')
+            ->withoutOverlapping()
+            ->runInBackground();
+
+        // SEO: Clean up old data weekly on Sunday at 4 AM
+        $schedule->command('seo:cleanup')
+            ->weeklyOn(0, '04:00')
+            ->withoutOverlapping();
     }
 
     /**

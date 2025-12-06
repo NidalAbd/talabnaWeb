@@ -22,8 +22,8 @@
   "__plugin-vue_export-helper-c27b6911.js": {
     "file": "assets/_plugin-vue_export-helper-c27b6911.js"
   },
-  "_useAdvancedSeo-2a508801.js": {
-    "file": "assets/useAdvancedSeo-2a508801.js",
+  "_useAdvancedSeo-faa6075b.js": {
+    "file": "assets/useAdvancedSeo-faa6075b.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js"
@@ -112,9 +112,10 @@
       "resources/js/views/Terms.vue",
       "resources/js/views/NotFound.vue",
       "resources/js/layouts/AdminLayout.vue",
-      "resources/js/views/admin/Dashboard.vue"
+      "resources/js/views/admin/Dashboard.vue",
+      "resources/js/views/admin/seo/SeoDashboard.vue"
     ],
-    "file": "assets/app-64152018.js",
+    "file": "assets/app-3dc352cc.js",
     "imports": [
       "_vue-router-ff319777.js"
     ],
@@ -122,14 +123,14 @@
     "src": "resources/js/app.js"
   },
   "resources/js/layouts/AdminLayout.css": {
-    "file": "assets/AdminLayout-9e067dfa.css",
+    "file": "assets/AdminLayout-35808b2f.css",
     "src": "resources/js/layouts/AdminLayout.css"
   },
   "resources/js/layouts/AdminLayout.vue": {
     "css": [
-      "assets/AdminLayout-9e067dfa.css"
+      "assets/AdminLayout-35808b2f.css"
     ],
-    "file": "assets/AdminLayout-3c3ae36f.js",
+    "file": "assets/AdminLayout-418c2a46.js",
     "imports": [
       "_vue-router-ff319777.js",
       "__plugin-vue_export-helper-c27b6911.js"
@@ -145,7 +146,7 @@
     "css": [
       "assets/About-0ee1938d.css"
     ],
-    "file": "assets/About-d7b205cb.js",
+    "file": "assets/About-2f613fcd.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -163,7 +164,7 @@
     "css": [
       "assets/Browse-27f0afdd.css"
     ],
-    "file": "assets/Browse-03bfc3d3.js",
+    "file": "assets/Browse-264aa9c3.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -182,7 +183,7 @@
     "css": [
       "assets/Category-581c695a.css"
     ],
-    "file": "assets/Category-c4af357f.js",
+    "file": "assets/Category-029cb274.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -201,7 +202,7 @@
     "css": [
       "assets/Contact-30dd5ae0.css"
     ],
-    "file": "assets/Contact-22023607.js",
+    "file": "assets/Contact-46049c44.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -219,7 +220,7 @@
     "css": [
       "assets/Home-c4815d4e.css"
     ],
-    "file": "assets/Home-464cdf41.js",
+    "file": "assets/Home-2b6aef3a.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -238,11 +239,11 @@
     "css": [
       "assets/ListingDetails-5688c5cb.css"
     ],
-    "file": "assets/ListingDetails-51edb8dc.js",
+    "file": "assets/ListingDetails-f85eb86e.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
-      "_useAdvancedSeo-2a508801.js",
+      "_useAdvancedSeo-faa6075b.js",
       "_ListingCard-1bbf2789.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
@@ -250,7 +251,7 @@
     "src": "resources/js/views/ListingDetails.vue"
   },
   "resources/js/views/NotFound.vue": {
-    "file": "assets/NotFound-2dc6c94a.js",
+    "file": "assets/NotFound-242d79a5.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -267,7 +268,7 @@
     "css": [
       "assets/Privacy-5cba7e3c.css"
     ],
-    "file": "assets/Privacy-a4cf4c1e.js",
+    "file": "assets/Privacy-36af3978.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -278,7 +279,7 @@
     "src": "resources/js/views/Privacy.vue"
   },
   "resources/js/views/Search.vue": {
-    "file": "assets/Search-1fe2d9e5.js",
+    "file": "assets/Search-b4db414d.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -297,11 +298,11 @@
     "css": [
       "assets/Services-d3ab985e.css"
     ],
-    "file": "assets/Services-0dc04894.js",
+    "file": "assets/Services-bd99f85e.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
-      "_useAdvancedSeo-2a508801.js",
+      "_useAdvancedSeo-faa6075b.js",
       "__plugin-vue_export-helper-c27b6911.js"
     ],
     "isDynamicEntry": true,
@@ -315,7 +316,7 @@
     "css": [
       "assets/Terms-c49f3fd4.css"
     ],
-    "file": "assets/Terms-b2e0dd54.js",
+    "file": "assets/Terms-f33e8425.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -326,7 +327,7 @@
     "src": "resources/js/views/Terms.vue"
   },
   "resources/js/views/UserProfile.vue": {
-    "file": "assets/UserProfile-71ce348d.js",
+    "file": "assets/UserProfile-5735756a.js",
     "imports": [
       "_vue-router-ff319777.js",
       "resources/js/app.js",
@@ -353,6 +354,22 @@
     ],
     "isDynamicEntry": true,
     "src": "resources/js/views/admin/Dashboard.vue"
+  },
+  "resources/js/views/admin/seo/SeoDashboard.css": {
+    "file": "assets/SeoDashboard-f6e1717c.css",
+    "src": "resources/js/views/admin/seo/SeoDashboard.css"
+  },
+  "resources/js/views/admin/seo/SeoDashboard.vue": {
+    "css": [
+      "assets/SeoDashboard-f6e1717c.css"
+    ],
+    "file": "assets/SeoDashboard-565b2bae.js",
+    "imports": [
+      "_vue-router-ff319777.js",
+      "__plugin-vue_export-helper-c27b6911.js"
+    ],
+    "isDynamicEntry": true,
+    "src": "resources/js/views/admin/seo/SeoDashboard.vue"
   },
   "resources/sass/app.scss": {
     "file": "assets/app-4cbc73b6.css",

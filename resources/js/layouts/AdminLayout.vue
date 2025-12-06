@@ -183,6 +183,12 @@ const menuItems = [
     icon: 'mdi-diamond-stone',
     to: { name: 'point_packages.index' },
     value: 'points'
+  },
+  {
+    title: 'SEO Analytics',
+    icon: 'mdi-google-analytics',
+    to: { name: 'seo.index' },
+    value: 'seo'
   }
 ]
 

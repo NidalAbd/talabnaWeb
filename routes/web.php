@@ -493,6 +493,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/point-transactions/fix', [PointTransactionsController::class, 'fixTransactionRecords'])
         ->name('point_transactions.fix');
 
+    // SEO Management - Vue SPA
+    Route::get('/seo', [HomeController::class, 'index'])
+        ->name('seo.index');
+
     // Unsuspend Routes
     Route::patch('/users/{id}/unsuspend', function($id) {
         $user = User::findOrFail($id);
@@ -693,6 +697,27 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/palservice-points/stats', [PalServicePointsApiController::class, 'getStats'])->name('api.admin.palservice-points.stats');
             Route::get('/palservice-points/top-users', [PalServicePointsApiController::class, 'getTopUsers'])->name('api.admin.palservice-points.top-users');
             Route::get('/palservice-points', [PalServicePointsApiController::class, 'index'])->name('api.admin.palservice-points.index');
+
+            // SEO Management
+            Route::prefix('seo')->group(function () {
+                Route::get('/dashboard', [\App\Http\Controllers\Admin\SeoApiController::class, 'dashboard'])->name('api.admin.seo.dashboard');
+                Route::get('/stats', [\App\Http\Controllers\Admin\SeoApiController::class, 'getStats'])->name('api.admin.seo.stats');
+                Route::get('/config', [\App\Http\Controllers\Admin\SeoApiController::class, 'getConfig'])->name('api.admin.seo.config');
+                Route::get('/keywords', [\App\Http\Controllers\Admin\SeoApiController::class, 'keywords'])->name('api.admin.seo.keywords');
+                Route::get('/keywords/trending', [\App\Http\Controllers\Admin\SeoApiController::class, 'getTrendingKeywords'])->name('api.admin.seo.keywords.trending');
+                Route::get('/pages', [\App\Http\Controllers\Admin\SeoApiController::class, 'pages'])->name('api.admin.seo.pages');
+                Route::get('/pages/details', [\App\Http\Controllers\Admin\SeoApiController::class, 'pageDetails'])->name('api.admin.seo.pages.details');
+                Route::get('/pages/declining', [\App\Http\Controllers\Admin\SeoApiController::class, 'getDecliningingPages'])->name('api.admin.seo.pages.declining');
+                Route::get('/daily-stats', [\App\Http\Controllers\Admin\SeoApiController::class, 'dailyStats'])->name('api.admin.seo.daily-stats');
+                Route::get('/performance-by-type', [\App\Http\Controllers\Admin\SeoApiController::class, 'performanceByType'])->name('api.admin.seo.performance-by-type');
+                Route::get('/countries', [\App\Http\Controllers\Admin\SeoApiController::class, 'getCountries'])->name('api.admin.seo.countries');
+                Route::get('/issues', [\App\Http\Controllers\Admin\SeoApiController::class, 'issues'])->name('api.admin.seo.issues');
+                Route::post('/issues/{id}', [\App\Http\Controllers\Admin\SeoApiController::class, 'updateIssue'])->name('api.admin.seo.issues.update');
+                Route::get('/logs', [\App\Http\Controllers\Admin\SeoApiController::class, 'logs'])->name('api.admin.seo.logs');
+                Route::post('/sync', [\App\Http\Controllers\Admin\SeoApiController::class, 'sync'])->name('api.admin.seo.sync');
+                Route::get('/test-connection', [\App\Http\Controllers\Admin\SeoApiController::class, 'testConnection'])->name('api.admin.seo.test-connection');
+                Route::post('/cleanup', [\App\Http\Controllers\Admin\SeoApiController::class, 'cleanup'])->name('api.admin.seo.cleanup');
+            });
         });
     });
 });
