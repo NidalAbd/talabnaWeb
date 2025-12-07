@@ -8,7 +8,7 @@ on:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 60
 
     steps:
       - name: Checkout code
@@ -24,67 +24,321 @@ jobs:
           npm ci
           npm run build
 
-      - name: Create deployment archive
+      - name: Create deploy folders
         run: |
-          # Create archive excluding unnecessary files
-          tar -czf deploy.tar.gz \
+          mkdir -p deploy_laravel
+          mkdir -p deploy_public
+
+      - name: Prepare deploy_laravel (exclude public & vendor)
+        run: |
+          rsync -av --delete \
+            --exclude='public' \
+            --exclude='vendor' \
             --exclude='node_modules' \
             --exclude='.git' \
             --exclude='.github' \
-            --exclude='.env' \
-            --exclude='.env.*' \
-            --exclude='vendor' \
-            --exclude='storage/logs/*' \
-            --exclude='storage/framework/cache/*' \
-            --exclude='storage/framework/sessions/*' \
-            --exclude='storage/framework/views/*' \
-            .
+            --exclude='README.md' \
+            --exclude='.env*' \
+            --exclude='deploy_laravel' \
+            --exclude='deploy_public' \
+            ./ deploy_laravel/
+          # Ensure composer.json and composer.lock are included (needed for composer install on server)
+          cp composer.json deploy_laravel/ 2>/dev/null || true
+          cp composer.lock deploy_laravel/ 2>/dev/null || true
 
-      - name: Deploy via SSH/SCP
-        uses: appleboy/scp-action@v0.1.7
+      - name: Prepare deploy_public
+        run: |
+          rm -rf deploy_public/*
+          cp -a public/. deploy_public/
+          rm -f deploy_public/storage || true
+          rm -f deploy_public/hot || true
+          # Verify files are copied
+          echo "Files in deploy_public:"
+          ls -la deploy_public/ | head -20
+          echo "Checking for index.php:"
+          ls -la deploy_public/index.php || echo "WARNING: index.php not found!"
+
+      - name: Create post-deployment setup script
+        run: |
+          cat > deploy_public/setup_deployment.php << 'EOF'
+          <?php
+          /**
+           * Post-deployment script to:
+           * 1. Run composer install/update
+           * 2. Create storage symlink
+           * 3. Clear Laravel caches
+           * This script will be automatically called after deployment
+           *
+           * Access this script via browser: https://talbna.cloud/setup_deployment.php
+           */
+          error_reporting(E_ALL);
+          ini_set('display_errors', 1);
+
+          // Output as HTML for browser viewing
+          header('Content-Type: text/html; charset=utf-8');
+          echo '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Deployment Setup</title>';
+          echo '<style>body{font-family:monospace;background:#1a1a1a;color:#0f0;padding:20px;line-height:1.6;}';
+          echo '.error{color:#f00;}.success{color:#0f0;}.warning{color:#ff0;}</style></head><body>';
+          echo '<h1>🚀 Post-Deployment Setup</h1><pre>';
+
+          echo "🚀 Starting post-deployment setup...\n\n";
+
+          // Paths relative to public_html
+          // Structure: domains/talbna.cloud/ (Laravel files) and domains/talbna.cloud/public_html/ (public files)
+          $publicPath = __DIR__; // domains/talbna.cloud/public_html/ directory
+          $laravelPath = dirname($publicPath); // domains/talbna.cloud/ (Laravel root, parent of public_html)
+
+          echo "📁 Public path: $publicPath\n";
+          echo "📁 Laravel path: $laravelPath\n\n";
+
+          // Check if Laravel directory exists
+          if (!is_dir($laravelPath)) {
+              die("❌ ERROR: Laravel directory not found at: $laravelPath\n");
+          }
+
+          // Change to Laravel directory for all operations
+          chdir($laravelPath);
+
+          // Step 1: Run Composer Install/Update
+          echo "📦 Step 1: Running composer install...\n";
+          if (file_exists('composer.json')) {
+              // Check if composer.phar exists, otherwise use global composer
+              $composerCmd = file_exists('composer.phar')
+                  ? 'php composer.phar'
+                  : 'composer';
+
+              $composerOutput = [];
+              $composerReturn = 0;
+              exec("$composerCmd install --no-dev --optimize-autoloader --no-interaction 2>&1", $composerOutput, $composerReturn);
+
+              if ($composerReturn === 0) {
+                  echo "✅ Composer install completed successfully!\n";
+              } else {
+                  echo "⚠️ Composer install returned code $composerReturn\n";
+                  echo "Output: " . implode("\n", $composerOutput) . "\n";
+                  echo "⚠️ You may need to run 'composer install' manually via SSH\n";
+              }
+          } else {
+              echo "⚠️ composer.json not found, skipping composer install\n";
+          }
+          echo "\n";
+
+          // Step 2: Create storage symlink
+          echo "🔗 Step 2: Creating storage symlink...\n";
+          $storagePath = $laravelPath . '/storage/app/public';
+          $storageLink = $publicPath . '/storage';
+
+          // Create storage/app/public if it doesn't exist
+          if (!is_dir($storagePath)) {
+              if (!mkdir($storagePath, 0755, true)) {
+                  echo "❌ ERROR: Failed to create storage directory: $storagePath\n";
+              } else {
+                  echo "✅ Created storage directory: $storagePath\n";
+              }
+          }
+
+          // Remove existing storage link/directory if it exists
+          if (file_exists($storageLink)) {
+              if (is_link($storageLink)) {
+                  if (unlink($storageLink)) {
+                      echo "✅ Removed existing symlink\n";
+                  }
+              } elseif (is_dir($storageLink)) {
+                  // Try to remove directory contents and then directory
+                  $files = array_diff(scandir($storageLink), array('.', '..'));
+                  foreach ($files as $file) {
+                      @unlink("$storageLink/$file");
+                  }
+                  if (@rmdir($storageLink)) {
+                      echo "✅ Removed existing directory\n";
+                  }
+              } else {
+                  if (@unlink($storageLink)) {
+                      echo "✅ Removed existing file\n";
+                  }
+              }
+          }
+
+          // Create the symlink
+          if (symlink($storagePath, $storageLink)) {
+              echo "✅ Storage symlink created successfully!\n";
+              echo "   Link: $storageLink -> $storagePath\n";
+          } else {
+              echo "❌ Failed to create storage symlink\n";
+              echo "   You may need to create it manually via SSH:\n";
+              echo "   ln -s $storagePath $storageLink\n";
+          }
+          echo "\n";
+
+          // Step 3: Clear Laravel caches
+          echo "🧹 Step 3: Clearing Laravel caches...\n";
+          $cacheCommands = [
+              'php artisan config:clear',
+              'php artisan cache:clear',
+              'php artisan view:clear',
+              'php artisan route:clear',
+              'php artisan optimize:clear'
+          ];
+
+          foreach ($cacheCommands as $command) {
+              $output = [];
+              $return = 0;
+              exec("$command 2>&1", $output, $return);
+              if ($return === 0) {
+                  echo "   ✅ $command\n";
+              } else {
+                  echo "   ⚠️ $command (returned code $return)\n";
+              }
+          }
+          echo "\n";
+
+          // Set permissions on storage directory
+          @chmod($storagePath, 0755);
+          @chmod($laravelPath . '/storage', 0755);
+          @chmod($laravelPath . '/bootstrap/cache', 0755);
+
+          echo "✅ Post-deployment setup completed!\n\n";
+          echo "📝 Note: node_modules are NOT needed on the server.\n";
+          echo "   Only the built assets (in public/build) are deployed.\n";
+          echo "   Assets are built during GitHub Actions workflow.\n\n";
+
+          $success = true;
+          // Check if vendor directory exists
+          if (!is_dir($laravelPath . '/vendor')) {
+              echo "❌ WARNING: vendor directory still not found!\n";
+              echo "   Composer install may have failed.\n";
+              $success = false;
+          } else {
+              echo "✅ Vendor directory exists!\n";
+          }
+
+          // Check if storage symlink exists
+          if (!is_link($storageLink)) {
+              echo "⚠️ WARNING: Storage symlink not created!\n";
+              $success = false;
+          }
+
+          echo "\n";
+          if ($success) {
+              echo "✅ All checks passed! Your site should be working now.\n";
+              echo "🔒 This script will be deleted for security...\n";
+              echo "</pre></body></html>";
+              // Delete this script after successful execution
+              if (file_exists(__FILE__)) {
+                  @unlink(__FILE__);
+              }
+          } else {
+              echo "⚠️ Some issues detected. Please review the output above.\n";
+              echo "⚠️ This script will remain available for troubleshooting.\n";
+              echo "⚠️ Delete it manually after fixing issues: " . basename(__FILE__) . "\n";
+              echo "</pre></body></html>";
+          }
+          EOF
+
+      - name: Deploy Laravel files to domains/talbna.cloud/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
         with:
-          host: ${{ secrets.FTP_SERVER }}
+          server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          port: 65002
-          source: "deploy.tar.gz"
-          target: "/home/u252000670/domains/talbna.cloud/"
-          timeout: 300s
+          protocol: ftp
+          security: loose
+          port: 21
+          local-dir: ./deploy_laravel/
+          server-dir: domains/talbna.cloud/
+          exclude: |
+            public/**
+            vendor/**
+            node_modules/**
+            .git/**
+            .github/**
+            deploy_laravel/**
+            deploy_public/**
+          log-level: minimal
+          dangerous-clean-slate: false
 
-      - name: Extract and setup on server
+      - name: Deploy public files to domains/talbna.cloud/public_html/
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          security: loose
+          port: 21
+          local-dir: ./deploy_public/
+          server-dir: domains/talbna.cloud/public_html/
+          exclude: |
+            **/storage
+            **/storage/**
+            storage
+          log-level: verbose
+          dangerous-clean-slate: false
+
+      - name: Run post-deployment setup (composer install, storage symlink, clear cache)
+        run: |
+          echo "Waiting for files to sync..."
+          sleep 20
+          echo "Running post-deployment setup..."
+
+          # Try to run the setup script via HTTP
+          # The script is at domains/talbna.cloud/public_html/setup_deployment.php
+          echo "Attempting to access setup script..."
+          response=$(curl -s -w "\nHTTPSTATUS:%{http_code}" --max-time 30 https://talbna.cloud/setup_deployment.php 2>&1 || echo "HTTPSTATUS:000")
+          http_code=$(echo "$response" | grep "HTTPSTATUS" | cut -d':' -f2)
+          body=$(echo "$response" | sed '/HTTPSTATUS/d')
+
+          echo "HTTP Status: $http_code"
+          echo "Response:"
+          echo "$body"
+
+          # 200 = success, 404 = script already deleted itself (also success), 000 = connection failed, 500 = server error (might still work)
+          if [ "$http_code" -eq 200 ] || [ "$http_code" -eq 404 ]; then
+            echo "✅ Post-deployment setup completed successfully!"
+          elif [ "$http_code" -eq 500 ]; then
+            echo "⚠️ Server returned 500, but script may have executed. Check the response above."
+            echo "⚠️ If composer install failed, you may need to run it manually via SSH:"
+            echo "   cd domains/talbna.cloud"
+            echo "   composer install --no-dev --optimize-autoloader"
+            echo "   php artisan storage:link"
+            echo "   php artisan optimize:clear"
+          elif [ "$http_code" -eq 000 ]; then
+            echo "⚠️ Could not connect to server. Please run setup_deployment.php manually:"
+            echo "   1. Via browser: https://talbna.cloud/setup_deployment.php"
+            echo "   2. Or via SSH:"
+            echo "      cd domains/talbna.cloud"
+            echo "      composer install --no-dev --optimize-autoloader"
+            echo "      php artisan storage:link"
+            echo "      php artisan optimize:clear"
+          else
+            echo "⚠️ Setup returned HTTP $http_code - check the response above"
+            echo "⚠️ You may need to run setup_deployment.php manually: https://talbna.cloud/setup_deployment.php"
+            echo "⚠️ Or via SSH:"
+            echo "   cd domains/talbna.cloud"
+            echo "   composer install --no-dev --optimize-autoloader"
+            echo "   php artisan storage:link"
+            echo "   php artisan optimize:clear"
+          fi
+
+      - name: Fix storage symlink via SSH
         uses: appleboy/ssh-action@v1.0.0
         with:
           host: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
           port: 65002
-          timeout: 300s
           script: |
             cd /home/u252000670/domains/talbna.cloud
-
-            echo "📦 Extracting deployment archive..."
-            tar -xzf deploy.tar.gz
-            rm deploy.tar.gz
-
-            echo "📦 Running composer install..."
-            composer install --no-dev --optimize-autoloader --no-interaction
-
-            echo "🔗 Creating storage symlink..."
+            # Remove existing storage link if it exists
             if [ -e public_html/storage ]; then
                 rm -f public_html/storage
+                echo "Removed old storage link"
             fi
+            # Create fresh symlink
             ln -s /home/u252000670/domains/talbna.cloud/storage/app/public public_html/storage
+            echo "✅ Storage symlink created successfully"
+            ls -la public_html/storage
 
-            echo "📁 Copying public files..."
-            cp -r public/* public_html/
-
-            echo "🧹 Clearing caches..."
-            php artisan config:clear
-            php artisan cache:clear
-            php artisan view:clear
-            php artisan route:clear
-
-            echo "🔒 Setting permissions..."
-            chmod -R 755 storage bootstrap/cache
-
-            echo "✅ Deployment completed!"
+      - name: Cleanup
+        run: |
+          rm -rf deploy_laravel deploy_public
