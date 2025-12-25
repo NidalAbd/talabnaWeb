@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\BadgeType;
 use App\Models\Categories;
+use App\Services\BadgeService;
 use App\Models\cities;
 use App\Models\countries;
 use App\Models\Notification;
@@ -223,7 +224,8 @@ class ServicePostController extends Controller
             'locationLatitudes' => 'required|numeric',
             'locationLongitudes' => 'required|numeric',
             'type' => 'required',
-            'haveBadge' => 'nullable|in:عادي,ذهبي,ماسي',
+            'badge_type_id' => 'nullable|integer|exists:badge_types,id', // New dynamic badge system
+            'haveBadge' => 'nullable|string', // Legacy support - now accepts any badge name
             'badgeDuration' => 'nullable|integer|min:0',
             'state' => 'nullable',
             'images.*' => 'nullable|file|mimes:jpeg,jpg,png,mp4',
@@ -265,26 +267,35 @@ class ServicePostController extends Controller
         }
 
         // Pre-check badge parameters before entering transaction
-        $badgeType = $request->haveBadge ?? 'عادي';
         $badgeDuration = $request->badgeDuration ?? 0;
+        $badgeTypeModel = null;
+        $pointCost = 0;
 
-        // Only perform badge check if user selected a premium badge
-        if ($badgeType !== 'عادي') {
-            // Badge prices per day
-            $badgePrices = ['ذهبي' => 2, 'ماسي' => 10, 'عادي' => 0];
-
-            // Validate badge type
-            if (!isset($badgePrices[$badgeType])) {
-                return response()->json(['error' => 'Invalid badge type'], 400);
+        // Dynamic badge system: prefer badge_type_id, fallback to haveBadge for legacy
+        if ($request->badge_type_id) {
+            $badgeTypeModel = BadgeType::find($request->badge_type_id);
+            if (!$badgeTypeModel) {
+                return response()->json(['error' => 'Invalid badge type ID'], 400);
             }
+            if (!$badgeTypeModel->is_active) {
+                return response()->json(['error' => 'Badge type is not active'], 400);
+            }
+        } elseif ($request->haveBadge && $request->haveBadge !== 'عادي') {
+            // Legacy support: lookup badge by Arabic name
+            $badgeTypeModel = BadgeType::getByOldBadgeName($request->haveBadge);
+            if (!$badgeTypeModel) {
+                return response()->json(['error' => 'Invalid badge type: ' . $request->haveBadge], 400);
+            }
+        }
 
-            // Calculate point cost
-            $pointCost = $badgeDuration * $badgePrices[$badgeType];
+        // Calculate cost and check points if a premium badge is selected
+        if ($badgeTypeModel && !$badgeTypeModel->is_default && $badgeDuration > 0) {
+            $pointCost = $badgeTypeModel->calculateCost($badgeDuration);
 
             // Check if user has enough points
             if ($user->pointsBalance < $pointCost) {
                 return response()->json([
-                    'error' => "Needed $pointCost points for $badgeType, but your balance is not enough."
+                    'error' => "Needed $pointCost points for {$badgeTypeModel->name_ar}, but your balance is not enough."
                 ], 400);
             }
         }
@@ -294,20 +305,19 @@ class ServicePostController extends Controller
         Log::info('Transaction started for service post creation');
 
         try {
-            $badgeDetails = [
-                'badge' => 'عادي',
-                'duration' => 0,
-                'expires_at' => null
-            ];
+            // Get default badge if no premium badge selected
+            $defaultBadge = BadgeType::getDefault();
+            $badgeExpiresAt = null;
+            $badgeName = $defaultBadge?->name_ar ?? 'عادي';
+            $badgeTypeId = $defaultBadge?->id;
+            $finalBadgeDuration = 0;
 
             // Handle badge logic if a premium badge is selected
-            if ($badgeType !== 'عادي') {
-                $badgePrices = ['ذهبي' => 2, 'ماسي' => 10];
-                $pointCost = $badgeDuration * $badgePrices[$badgeType];
-
+            if ($badgeTypeModel && !$badgeTypeModel->is_default && $badgeDuration > 0) {
                 Log::info('Deducting points for badge', [
                     'userId' => $user->id,
-                    'badge' => $badgeType,
+                    'badge_type_id' => $badgeTypeModel->id,
+                    'badge_name' => $badgeTypeModel->name_ar,
                     'duration' => $badgeDuration,
                     'cost' => $pointCost
                 ]);
@@ -325,17 +335,11 @@ class ServicePostController extends Controller
 
                 Log::info('Point transaction created', ['transaction_id' => $pointTransaction->id]);
 
-                $badgeDetails = [
-                    'badge' => $badgeType,
-                    'duration' => $badgeDuration,
-                    'expires_at' => Carbon::now()->addDays($badgeDuration)
-                ];
-            }
-
-            // Calculate badge expiration date
-            $badgeExpiresAt = null;
-            if ($badgeDetails['badge'] !== 'عادي' && $badgeDetails['duration'] > 0) {
-                $badgeExpiresAt = $badgeDetails['expires_at'];
+                // Set badge details from the dynamic badge model
+                $badgeName = $badgeTypeModel->name_ar;
+                $badgeTypeId = $badgeTypeModel->id;
+                $finalBadgeDuration = $badgeDuration;
+                $badgeExpiresAt = Carbon::now()->addDays($badgeDuration);
             }
 
             // Create service post
@@ -354,8 +358,9 @@ class ServicePostController extends Controller
                 'location_latitudes' => $request->locationLatitudes ?? $defaultLatitude,
                 'location_longitudes' => $request->locationLongitudes ?? $defaultLongitude,
                 'type' => $request->type,
-                'have_badge' => $badgeDetails['badge'],
-                'badge_duration' => $badgeDetails['duration'],
+                'badge_type_id' => $badgeTypeId,
+                'have_badge' => $badgeName,
+                'badge_duration' => $finalBadgeDuration,
                 'badge_expires_at' => $badgeExpiresAt,
                 'state' => $request->state ?? 'published',
             ]);
@@ -397,22 +402,17 @@ class ServicePostController extends Controller
             $this->servicePostNotification($servicePost, $user, $request->all());
 
             // 2. Badge benefit notification if premium badge
-            if ($badgeDetails['badge'] !== 'عادي') {
+            if ($badgeTypeModel && !$badgeTypeModel->is_default && $badgeExpiresAt) {
                 Log::info('Creating badge benefit notification');
 
-                // Define view boost estimates based on badge type
-                $viewBoosts = [
-                    'ذهبي' => 200, // Gold badge provides approximately 200% view boost
-                    'ماسي' => 500  // Diamond badge provides approximately 500% view boost
-                ];
-
-                $viewBoost = $viewBoosts[$badgeDetails['badge']] ?? 0;
+                // Use dynamic view_boost_percent from badge type
+                $viewBoost = $badgeTypeModel->view_boost_percent ?? 0;
                 $expiresAt = $badgeExpiresAt->format('Y-m-d H:i:s');
 
                 // Create localized message with benefits information
                 $message = json_encode([
-                    'ar' => "تم تطبيق شارة " . $this->translateBadgeType($badgeDetails['badge'], 'ar') . " على منشورك بعنوان: {$servicePost->title}. ستحصل على زيادة تقريبية بنسبة {$viewBoost}٪ في المشاهدات وسيتم عرض منشورك في مكان مميز. ستنتهي الشارة في {$expiresAt}. [post_id:{$servicePost->id}]",
-                    'en' => "Applied " . $this->translateBadgeType($badgeDetails['badge'], 'en') . " badge to your post titled: {$servicePost->title}. You will get approximately {$viewBoost}% more views and your post will be displayed in premium positions. Badge will expire at {$expiresAt}. [post_id:{$servicePost->id}]"
+                    'ar' => "تم تطبيق شارة {$badgeTypeModel->name_ar} على منشورك بعنوان: {$servicePost->title}. ستحصل على زيادة تقريبية بنسبة {$viewBoost}٪ في المشاهدات وسيتم عرض منشورك في مكان مميز. ستنتهي الشارة في {$expiresAt}. [post_id:{$servicePost->id}]",
+                    'en' => "Applied {$badgeTypeModel->name_en} badge to your post titled: {$servicePost->title}. You will get approximately {$viewBoost}% more views and your post will be displayed in premium positions. Badge will expire at {$expiresAt}. [post_id:{$servicePost->id}]"
                 ]);
 
                 // Create new notification record directly
