@@ -135,6 +135,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('search', [SearchController::class, 'search']);
     Route::resource('comments', CommentController::class);
     Route::get('commentsForPost/{postId}', [CommentController::class, 'index']);
+    Route::get('comments/{commentId}/replies', [CommentController::class, 'getReplies']);
 
     Route::get('/purchase-requests/user/{userId}', [App\Http\Controllers\Api\PointPurchaseRequestsController::class, 'index']);
     Route::post('/purchase-requests', [App\Http\Controllers\Api\PointPurchaseRequestsController::class, 'store']);

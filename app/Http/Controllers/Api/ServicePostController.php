@@ -1034,7 +1034,8 @@ class ServicePostController extends Controller
             'locationLatitudes' => 'required|numeric',
             'locationLongitudes' => 'required|numeric',
             'type' => 'required',
-            'haveBadge' => 'nullable|in:عادي,ذهبي,ماسي',
+            'badge_type_id' => 'nullable|integer|exists:badge_types,id', // New dynamic badge system
+            'haveBadge' => 'nullable|string', // Legacy support - now accepts any badge name
             'badgeDuration' => 'nullable|integer|min:0',
             'images.*' => 'nullable|file|mimes:jpeg,jpg,png,mp4',
         ]);
@@ -1066,17 +1067,35 @@ class ServicePostController extends Controller
                 }
             }
 
-            // Handle badge updates if any
-            if (isset($validatedData['haveBadge']) &&
-                isset($validatedData['badgeDuration']) &&
-                ($servicePost->have_badge !== $validatedData['haveBadge'] ||
-                    $servicePost->badge_duration !== $validatedData['badgeDuration'])) {
+            // Handle badge updates if any - using dynamic badge system
+            $badgeDuration = $validatedData['badgeDuration'] ?? 0;
+            $badgeTypeModel = null;
 
-                $badgeResult = $this->updateServicePostBadge(
+            // Dynamic badge system: prefer badge_type_id, fallback to haveBadge for legacy
+            if ($request->badge_type_id) {
+                $badgeTypeModel = BadgeType::find($request->badge_type_id);
+            } elseif (isset($validatedData['haveBadge']) && $validatedData['haveBadge'] !== 'عادي') {
+                // Legacy support: lookup badge by Arabic name
+                $badgeTypeModel = BadgeType::getByOldBadgeName($validatedData['haveBadge']);
+            }
+
+            // Check if badge is changing
+            $isBadgeChanging = false;
+            if ($badgeTypeModel && !$badgeTypeModel->is_default) {
+                $isBadgeChanging = $servicePost->badge_type_id !== $badgeTypeModel->id ||
+                                   $servicePost->badge_duration !== $badgeDuration;
+            } elseif (!$badgeTypeModel || $badgeTypeModel->is_default) {
+                // Changing to default/normal badge
+                $isBadgeChanging = $servicePost->badge_type_id !== null &&
+                                   $servicePost->have_badge !== 'عادي';
+            }
+
+            if ($isBadgeChanging && $badgeDuration > 0) {
+                $badgeResult = $this->updateServicePostBadgeDynamic(
                     $servicePost,
                     $user,
-                    $validatedData['haveBadge'],
-                    $validatedData['badgeDuration']
+                    $badgeTypeModel,
+                    $badgeDuration
                 );
 
                 if (!$badgeResult['success']) {
@@ -1267,6 +1286,73 @@ class ServicePostController extends Controller
             'en' => "Your Post titled: {$servicePost->title} badge is changed to " . $this->translateBadgeType($badgeType, 'en') . " for $duration days. Badge will expire at $expirationTimeString. [post_id:{$servicePost->id}]"
         ]);
 
+
+        Notification::create([
+            'message' => $message,
+            'user_id' => $user->id,
+            'type' => 'badge'
+        ]);
+
+        return ['success' => true];
+    }
+
+    /**
+     * Dynamic badge update method - uses BadgeType model instead of hardcoded values
+     */
+    private function updateServicePostBadgeDynamic(ServicePost $servicePost, User $user, ?BadgeType $badgeTypeModel, int $duration): array
+    {
+        // Get default badge for resetting
+        $defaultBadge = BadgeType::getDefault();
+
+        // If no badge model or it's the default, reset to normal
+        if (!$badgeTypeModel || $badgeTypeModel->is_default) {
+            $servicePost->badge_type_id = $defaultBadge?->id;
+            $servicePost->have_badge = $defaultBadge?->name_ar ?? 'عادي';
+            $servicePost->badge_duration = 0;
+            $servicePost->badge_expires_at = null;
+            $servicePost->save();
+
+            return ['success' => true];
+        }
+
+        // Calculate point cost dynamically from badge model
+        $pointCost = $badgeTypeModel->calculateCost($duration);
+
+        // Check if user has enough points
+        if ($user->pointsBalance < $pointCost) {
+            return [
+                'success' => false,
+                'message' => "Needed $pointCost Points for {$badgeTypeModel->name_ar}, Your Balance is not enough."
+            ];
+        }
+
+        // Deduct points
+        palservice_points::where('user_id', $user->id)->decrement('point', $pointCost);
+
+        // Create transaction record
+        point_transactions::create([
+            'to_user_id' => $user->id,
+            'from_user_id' => $user->id,
+            'type' => 'used',
+            'point' => $pointCost,
+        ]);
+
+        // Set exact expiration time (current time + duration days)
+        $expirationDate = Carbon::now()->addDays($duration);
+        $expirationTimeString = $expirationDate->format('Y-m-d H:i:s');
+
+        // Update service post badge with dynamic values
+        $servicePost->badge_type_id = $badgeTypeModel->id;
+        $servicePost->have_badge = $badgeTypeModel->name_ar;
+        $servicePost->badge_duration = $duration;
+        $servicePost->badge_expires_at = $expirationDate;
+        $servicePost->save();
+
+        // Create notification with dynamic badge names
+        $message = json_encode([
+            'ar' => "تم تغيير شارة منشورك بعنوان: {$servicePost->title} إلى {$badgeTypeModel->name_ar} لمدة $duration يوم. ستنتهي الشارة في $expirationTimeString. [post_id:{$servicePost->id}]",
+            'en' => "Your Post titled: {$servicePost->title} badge is changed to {$badgeTypeModel->name_en} for $duration days. Badge will expire at $expirationTimeString. [post_id:{$servicePost->id}]"
+        ]);
 
         Notification::create([
             'message' => $message,
