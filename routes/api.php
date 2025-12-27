@@ -148,6 +148,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/transfer', [App\Http\Controllers\Api\PointsController::class, 'transfer']);
         Route::get('/balance', [App\Http\Controllers\Api\PointsController::class, 'balance']);
         Route::get('/transfer-limits', [App\Http\Controllers\Api\PointsController::class, 'transferLimits']);
+        // Packages endpoint - under points for consistency with Flutter app
+        Route::get('/packages', [App\Http\Controllers\Api\PointsController::class, 'packages']);
     });
 
     // PIN Management Routes (with rate limiting)
@@ -160,7 +162,6 @@ Route::middleware(['auth:api'])->group(function () {
     // Purchase Routes (with rate limiting)
     Route::middleware(['throttle:purchases'])->prefix('purchase')->group(function () {
         Route::post('/create', [App\Http\Controllers\Api\PointsController::class, 'purchase']);
-        Route::get('/packages', [App\Http\Controllers\Api\PointsController::class, 'packages']);
     });
 
     // ==================== LEGACY ENDPOINT (DEPRECATED) ====================
