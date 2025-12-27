@@ -340,7 +340,7 @@ class PointsService
     public function getPackages(): \Illuminate\Database\Eloquent\Collection
     {
         return PointPackage::active()
-            ->orderBy('sort_order')
+            ->orderBy('display_order')
             ->orderBy('points_amount')
             ->get();
     }
