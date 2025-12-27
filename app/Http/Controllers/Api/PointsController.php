@@ -14,6 +14,7 @@ use App\Services\PointsService;
 use App\Services\TransferPinService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
 class PointsController extends Controller
@@ -264,11 +265,45 @@ class PointsController extends Controller
     }
 
     /**
-     * Get available point packages (GET /api/purchase/packages)
+     * Get available point packages (GET /api/points/packages)
      */
     public function packages(): JsonResponse
     {
         $packages = $this->pointsService->getPackages();
+        $user = Auth::user();
+
+        // Get user's country and currency
+        $currency = 'ILS'; // Default
+        $currencyName = ['ar' => 'شيكل', 'en' => 'ILS'];
+
+        if ($user && $user->country_id) {
+            $country = \App\Models\countries::find($user->country_id);
+            if ($country) {
+                $currency = $country->currency_code ?? 'ILS';
+                // Map currency codes to display names
+                $currencyNames = [
+                    'ILS' => ['ar' => 'شيكل', 'en' => 'ILS'],
+                    'EGP' => ['ar' => 'جنيه', 'en' => 'EGP'],
+                    'SAR' => ['ar' => 'ريال', 'en' => 'SAR'],
+                    'AED' => ['ar' => 'درهم', 'en' => 'AED'],
+                    'USD' => ['ar' => 'دولار', 'en' => 'USD'],
+                    'JOD' => ['ar' => 'دينار', 'en' => 'JOD'],
+                    'KWD' => ['ar' => 'دينار', 'en' => 'KWD'],
+                    'QAR' => ['ar' => 'ريال', 'en' => 'QAR'],
+                    'BHD' => ['ar' => 'دينار', 'en' => 'BHD'],
+                    'OMR' => ['ar' => 'ريال', 'en' => 'OMR'],
+                    'LBP' => ['ar' => 'ليرة', 'en' => 'LBP'],
+                    'SYP' => ['ar' => 'ليرة', 'en' => 'SYP'],
+                    'IQD' => ['ar' => 'دينار', 'en' => 'IQD'],
+                    'DZD' => ['ar' => 'دينار', 'en' => 'DZD'],
+                    'MAD' => ['ar' => 'درهم', 'en' => 'MAD'],
+                    'TND' => ['ar' => 'دينار', 'en' => 'TND'],
+                    'LYD' => ['ar' => 'دينار', 'en' => 'LYD'],
+                    'SDG' => ['ar' => 'جنيه', 'en' => 'SDG'],
+                ];
+                $currencyName = $currencyNames[$currency] ?? ['ar' => $currency, 'en' => $currency];
+            }
+        }
 
         return response()->json([
             'success' => true,
@@ -285,6 +320,8 @@ class PointsController extends Controller
                 ];
             }),
             'base_price_per_point' => PointsService::BASE_PRICE_PER_POINT,
+            'currency' => $currency,
+            'currency_name' => $currencyName,
         ]);
     }
 }
