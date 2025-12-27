@@ -236,7 +236,7 @@ jobs:
           EOF
 
       - name: Deploy Laravel files to domains/talbna.cloud/
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -246,6 +246,7 @@ jobs:
           port: 21
           local-dir: ./deploy_laravel/
           server-dir: domains/talbna.cloud/
+          timeout: 60000
           exclude: |
             public/**
             vendor/**
@@ -254,11 +255,15 @@ jobs:
             .github/**
             deploy_laravel/**
             deploy_public/**
+            storage/logs/**
+            storage/framework/cache/**
+            storage/framework/sessions/**
+            storage/framework/views/**
           log-level: minimal
           dangerous-clean-slate: false
 
       - name: Deploy public files to domains/talbna.cloud/public_html/
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
@@ -268,6 +273,7 @@ jobs:
           port: 21
           local-dir: ./deploy_public/
           server-dir: domains/talbna.cloud/public_html/
+          timeout: 60000
           exclude: |
             **/storage
             **/storage/**
