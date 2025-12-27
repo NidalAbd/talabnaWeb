@@ -140,7 +140,43 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('/purchase-requests/user/{userId}', [App\Http\Controllers\Api\PointPurchaseRequestsController::class, 'index']);
     Route::post('/purchase-requests', [App\Http\Controllers\Api\PointPurchaseRequestsController::class, 'store']);
     Route::delete('/purchase-requests/{point_purchase_requests}', [App\Http\Controllers\Api\PointPurchaseRequestsController::class, 'destroy']);
-    Route::get('talbna_points/transfer/{pointsRequested}/fromUser/{fromUser}/toUser/{toUser}', [PalservicePointsController::class, 'store'])->name('talbna_points.store');
+
+    // ==================== NEW SECURE POINTS ENDPOINTS ====================
+
+    // Secure Point Transfer Routes (with rate limiting)
+    Route::middleware(['throttle:transfers'])->prefix('points')->group(function () {
+        Route::post('/transfer', [App\Http\Controllers\Api\PointsController::class, 'transfer']);
+        Route::get('/balance', [App\Http\Controllers\Api\PointsController::class, 'balance']);
+        Route::get('/transfer-limits', [App\Http\Controllers\Api\PointsController::class, 'transferLimits']);
+    });
+
+    // PIN Management Routes (with rate limiting)
+    Route::middleware(['throttle:pin'])->prefix('points/pin')->group(function () {
+        Route::post('/set', [App\Http\Controllers\Api\PointsController::class, 'setPin']);
+        Route::post('/verify', [App\Http\Controllers\Api\PointsController::class, 'verifyPin']);
+        Route::get('/status', [App\Http\Controllers\Api\PointsController::class, 'pinStatus']);
+    });
+
+    // Purchase Routes (with rate limiting)
+    Route::middleware(['throttle:purchases'])->prefix('purchase')->group(function () {
+        Route::post('/create', [App\Http\Controllers\Api\PointsController::class, 'purchase']);
+        Route::get('/packages', [App\Http\Controllers\Api\PointsController::class, 'packages']);
+    });
+
+    // ==================== LEGACY ENDPOINT (DEPRECATED) ====================
+    // Keep for backward compatibility - returns upgrade required error
+    Route::get('talbna_points/transfer/{pointsRequested}/fromUser/{fromUser}/toUser/{toUser}', function ($pointsRequested, $fromUser, $toUser) {
+        return response()->json([
+            'success' => false,
+            'error' => 'endpoint_deprecated',
+            'message' => 'This endpoint is deprecated. Please update your app to use the new secure transfer endpoint.',
+            'upgrade_required' => true,
+            'new_endpoint' => 'POST /api/points/transfer',
+        ], 426);
+    })->name('talbna_points.store.deprecated');
+
+    // ==================== END NEW ENDPOINTS ====================
+
     Route::post('/stripe/webhook', [App\Http\Controllers\Api\StripeWebhookController::class, 'handleWebhook']);
     Route::get('/user-transactions/{userId}', [PointTransactionsController::class, 'getUserTransactions']);
     Route::get('/transactions-between/{userId1}/{userId2}', [PointTransactionsController::class, 'getTransactionsBetweenUsers']);

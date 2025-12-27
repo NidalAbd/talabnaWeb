@@ -68,6 +68,64 @@ Route::get('/policy', function() {
     return view('spa');
 })->name('policy.index');
 
+// Test routes for comment replies (REMOVE AFTER TESTING)
+Route::get('/test-comment-replies/{postId}', function($postId) {
+    $comments = \App\Models\Comment::with(['user:id,user_name,name,email', 'user.photos', 'replies.user:id,user_name,name,email', 'replies.user.photos'])
+        ->where('service_post_id', $postId)
+        ->whereNull('parent_id')
+        ->withCount('replies')
+        ->orderBy('created_at', 'desc')
+        ->take(10)
+        ->get();
+
+    return response()->json([
+        'success' => true,
+        'total_comments' => $comments->count(),
+        'comments' => $comments->map(function($comment) {
+            return [
+                'id' => $comment->id,
+                'content' => $comment->content,
+                'user' => $comment->user ? $comment->user->user_name : 'Unknown',
+                'replies_count' => $comment->replies_count,
+                'replies' => $comment->replies->map(function($reply) {
+                    return [
+                        'id' => $reply->id,
+                        'content' => $reply->content,
+                        'user' => $reply->user ? $reply->user->user_name : 'Unknown',
+                        'parent_id' => $reply->parent_id,
+                    ];
+                }),
+            ];
+        }),
+    ]);
+});
+
+// Test adding a reply (REMOVE AFTER TESTING)
+Route::get('/test-add-reply/{parentCommentId}', function($parentCommentId) {
+    $parentComment = \App\Models\Comment::find($parentCommentId);
+    if (!$parentComment) {
+        return response()->json(['error' => 'Parent comment not found'], 404);
+    }
+
+    $reply = \App\Models\Comment::create([
+        'user_id' => $parentComment->user_id,
+        'service_post_id' => $parentComment->service_post_id,
+        'parent_id' => $parentCommentId,
+        'content' => 'Test reply at ' . now()->toDateTimeString(),
+    ]);
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Reply created successfully',
+        'reply' => [
+            'id' => $reply->id,
+            'content' => $reply->content,
+            'parent_id' => $reply->parent_id,
+        ],
+        'view_replies_url' => url('/test-comment-replies/' . $parentComment->service_post_id),
+    ]);
+});
+
 /*
 |--------------------------------------------------------------------------
 | Vue SPA Routes (Public)
