@@ -188,16 +188,23 @@ class PointPurchaseRequestsApiController extends Controller
                 'description' => 'Point purchase request approved #' . $purchaseRequest->id
             ]);
 
-            // Send notification
-            $user = User::find($purchaseRequest->user_id);
-            if ($user) {
-                $user->notify(new point_purchase_notifications(
-                    'approved',
-                    $purchaseRequest->points_requested
-                ));
-            }
-
             DB::commit();
+
+            // Send push notification (after commit to ensure data is saved)
+            try {
+                $user = User::find($purchaseRequest->user_id);
+                if ($user && !empty($user->fcm_token)) {
+                    $user->notify(new point_purchase_notifications(
+                        'approved',
+                        $purchaseRequest->points_requested,
+                        (string) $purchaseRequest->id
+                    ));
+                    Log::info("FCM notification sent to user {$user->id} for approved purchase request #{$purchaseRequest->id}");
+                }
+            } catch (\Exception $notificationError) {
+                // Log notification error but don't fail the approval
+                Log::warning("Failed to send FCM notification for purchase request #{$purchaseRequest->id}: " . $notificationError->getMessage());
+            }
 
             return response()->json([
                 'message' => 'Purchase request approved successfully',
@@ -230,13 +237,19 @@ class PointPurchaseRequestsApiController extends Controller
 
             $purchaseRequest->update(['status' => 'cancelled']);
 
-            // Send notification
-            $user = User::find($purchaseRequest->user_id);
-            if ($user) {
-                $user->notify(new point_purchase_notifications(
-                    'cancelled',
-                    $purchaseRequest->points_requested
-                ));
+            // Send push notification
+            try {
+                $user = User::find($purchaseRequest->user_id);
+                if ($user && !empty($user->fcm_token)) {
+                    $user->notify(new point_purchase_notifications(
+                        'cancelled',
+                        $purchaseRequest->points_requested,
+                        (string) $purchaseRequest->id
+                    ));
+                    Log::info("FCM notification sent to user {$user->id} for cancelled purchase request #{$purchaseRequest->id}");
+                }
+            } catch (\Exception $notificationError) {
+                Log::warning("Failed to send FCM notification for cancelled purchase request #{$purchaseRequest->id}: " . $notificationError->getMessage());
             }
 
             return response()->json([
@@ -319,19 +332,26 @@ class PointPurchaseRequestsApiController extends Controller
                     'description' => 'Point purchase request approved #' . $purchaseRequest->id
                 ]);
 
-                // Send notification
-                $user = User::find($purchaseRequest->user_id);
-                if ($user) {
-                    $user->notify(new point_purchase_notifications(
-                        'approved',
-                        $purchaseRequest->points_requested
-                    ));
-                }
-
                 $approvedCount++;
             }
 
             DB::commit();
+
+            // Send notifications after commit (batch)
+            foreach ($pendingRequests as $purchaseRequest) {
+                try {
+                    $user = User::find($purchaseRequest->user_id);
+                    if ($user && !empty($user->fcm_token)) {
+                        $user->notify(new point_purchase_notifications(
+                            'approved',
+                            $purchaseRequest->points_requested,
+                            (string) $purchaseRequest->id
+                        ));
+                    }
+                } catch (\Exception $notificationError) {
+                    Log::warning("Failed to send FCM notification for bulk approved request #{$purchaseRequest->id}: " . $notificationError->getMessage());
+                }
+            }
 
             return response()->json([
                 'message' => "{$approvedCount} purchase requests approved successfully"

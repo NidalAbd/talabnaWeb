@@ -150,6 +150,10 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/transfer-limits', [App\Http\Controllers\Api\PointsController::class, 'transferLimits']);
         // Packages endpoint - under points for consistency with Flutter app
         Route::get('/packages', [App\Http\Controllers\Api\PointsController::class, 'packages']);
+        // Country-specific pricing info
+        Route::get('/pricing', [App\Http\Controllers\Api\PointsController::class, 'pricing']);
+        // Check if transfer is allowed to another user (same country validation)
+        Route::get('/can-transfer/{toUserId}', [App\Http\Controllers\Api\PointsController::class, 'canTransfer']);
     });
 
     // Purchase endpoint - matches Flutter's /api/points/purchase call (uses purchases throttle)

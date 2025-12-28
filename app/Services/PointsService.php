@@ -6,6 +6,8 @@ use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\InvalidPinException;
 use App\Exceptions\PinLockedException;
 use App\Exceptions\TransferLimitExceededException;
+use App\Exceptions\CountryMismatchException;
+use App\Models\countries;
 use App\Models\Notification;
 use App\Models\palservice_points;
 use App\Models\point_purchase_requests;
@@ -74,6 +76,9 @@ class PointsService
         if ($fromUserId === $toUserId) {
             throw new \InvalidArgumentException('Cannot transfer points to yourself');
         }
+
+        // Validate same country
+        $this->validateSameCountry($fromUser, $toUser);
 
         // Validate PIN
         if (!$this->pinService->hasPin($fromUser)) {
@@ -182,8 +187,11 @@ class PointsService
 
         $user = User::findOrFail($userId);
 
-        // Calculate price
-        $pricePerPoint = self::BASE_PRICE_PER_POINT;
+        // Get country-specific price per point
+        $countryPricing = $this->getCountryPricing($user);
+        $pricePerPoint = $countryPricing['price_per_point'];
+        $currencyCode = $countryPricing['currency_code'];
+        $currencySymbol = $countryPricing['currency_symbol'];
         $discount = 0;
 
         if ($packageId) {
@@ -191,7 +199,8 @@ class PointsService
             if ($package) {
                 $amount = $package->points_amount;
                 $discount = $package->discount_percentage;
-                $pricePerPoint = $package->price / $package->points_amount;
+                // Calculate discounted price based on country's price
+                $pricePerPoint = ($pricePerPoint * (100 - $discount)) / 100;
             }
         }
 
@@ -485,11 +494,119 @@ class PointsService
         // Send FCM notification
         if (!empty($user->fcm_token)) {
             try {
-                $notification = new point_purchase_notifications($amount, 'Points Purchase Confirmation', $user->fcm_token);
+                $notification = new point_purchase_notifications('approved', $amount);
                 $user->notify($notification);
             } catch (\Exception $e) {
                 Log::error('Failed to send FCM purchase notification: ' . $e->getMessage());
             }
         }
+    }
+
+    /**
+     * Validate that both users are in the same country for transfers
+     */
+    private function validateSameCountry(User $fromUser, User $toUser): void
+    {
+        // If either user doesn't have a country set, allow the transfer
+        if (empty($fromUser->country_id) || empty($toUser->country_id)) {
+            return;
+        }
+
+        // Check if the sender's country allows transfers
+        $fromCountry = countries::find($fromUser->country_id);
+        if ($fromCountry && !$fromCountry->allow_point_transfers) {
+            throw new CountryMismatchException('Point transfers are not allowed from your country');
+        }
+
+        // Check if users are in the same country
+        if ($fromUser->country_id !== $toUser->country_id) {
+            throw new CountryMismatchException('Point transfers are only allowed between users in the same country');
+        }
+    }
+
+    /**
+     * Get country-specific pricing for a user
+     */
+    public function getCountryPricing(User $user): array
+    {
+        $defaultPricing = [
+            'price_per_point' => self::BASE_PRICE_PER_POINT,
+            'currency_code' => 'ILS',
+            'currency_symbol' => '₪',
+            'currency_name' => ['en' => 'Israeli New Shekel', 'ar' => 'شيكل إسرائيلي جديد'],
+            'country_id' => null,
+            'country_name' => null,
+        ];
+
+        if (empty($user->country_id)) {
+            return $defaultPricing;
+        }
+
+        $country = countries::find($user->country_id);
+        if (!$country) {
+            return $defaultPricing;
+        }
+
+        return [
+            'price_per_point' => $country->price_per_point ?? self::BASE_PRICE_PER_POINT,
+            'currency_code' => $country->currency_code ?? 'ILS',
+            'currency_symbol' => $country->currency_symbol ?? '₪',
+            'currency_name' => $country->currency_name ?? $defaultPricing['currency_name'],
+            'country_id' => $country->id,
+            'country_name' => $country->name,
+        ];
+    }
+
+    /**
+     * Check if a user can transfer to another user (same country check)
+     */
+    public function canTransferToUser(int $fromUserId, int $toUserId): array
+    {
+        $fromUser = User::find($fromUserId);
+        $toUser = User::find($toUserId);
+
+        if (!$fromUser || !$toUser) {
+            return [
+                'can_transfer' => false,
+                'reason' => 'user_not_found',
+                'message' => 'One or both users not found',
+            ];
+        }
+
+        // Check if sender's country allows transfers
+        if (!empty($fromUser->country_id)) {
+            $fromCountry = countries::find($fromUser->country_id);
+            if ($fromCountry && !$fromCountry->allow_point_transfers) {
+                return [
+                    'can_transfer' => false,
+                    'reason' => 'transfers_disabled',
+                    'message' => 'Point transfers are not allowed from your country',
+                ];
+            }
+        }
+
+        // If either user doesn't have a country, allow
+        if (empty($fromUser->country_id) || empty($toUser->country_id)) {
+            return [
+                'can_transfer' => true,
+                'reason' => null,
+                'message' => null,
+            ];
+        }
+
+        // Check same country
+        if ($fromUser->country_id !== $toUser->country_id) {
+            return [
+                'can_transfer' => false,
+                'reason' => 'country_mismatch',
+                'message' => 'Point transfers are only allowed between users in the same country',
+            ];
+        }
+
+        return [
+            'can_transfer' => true,
+            'reason' => null,
+            'message' => null,
+        ];
     }
 }

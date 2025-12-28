@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exceptions\CountryMismatchException;
 use App\Exceptions\InsufficientBalanceException;
 use App\Exceptions\InvalidPinException;
 use App\Exceptions\PinLockedException;
@@ -86,6 +87,13 @@ class PointsController extends Controller
                 'locked_until' => $e->getLockedUntil()->toIso8601String(),
                 'remaining_minutes' => $e->getRemainingMinutes(),
             ], 423);
+
+        } catch (CountryMismatchException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'country_mismatch',
+                'message' => $e->getMessage(),
+            ], 403);
 
         } catch (\InvalidArgumentException $e) {
             return response()->json([
@@ -280,56 +288,74 @@ class PointsController extends Controller
         $packages = $this->pointsService->getPackages();
         $user = Auth::user();
 
-        // Get user's country and currency
-        $currency = 'ILS'; // Default
-        $currencyName = ['ar' => 'شيكل', 'en' => 'ILS'];
+        // Get country-specific pricing
+        $pricing = $user
+            ? $this->pointsService->getCountryPricing($user)
+            : [
+                'price_per_point' => PointsService::BASE_PRICE_PER_POINT,
+                'currency_code' => 'ILS',
+                'currency_symbol' => '₪',
+                'currency_name' => ['en' => 'Israeli New Shekel', 'ar' => 'شيكل إسرائيلي جديد'],
+            ];
 
-        if ($user && $user->country_id) {
-            $country = \App\Models\countries::find($user->country_id);
-            if ($country) {
-                $currency = $country->currency_code ?? 'ILS';
-                // Map currency codes to display names
-                $currencyNames = [
-                    'ILS' => ['ar' => 'شيكل', 'en' => 'ILS'],
-                    'EGP' => ['ar' => 'جنيه', 'en' => 'EGP'],
-                    'SAR' => ['ar' => 'ريال', 'en' => 'SAR'],
-                    'AED' => ['ar' => 'درهم', 'en' => 'AED'],
-                    'USD' => ['ar' => 'دولار', 'en' => 'USD'],
-                    'JOD' => ['ar' => 'دينار', 'en' => 'JOD'],
-                    'KWD' => ['ar' => 'دينار', 'en' => 'KWD'],
-                    'QAR' => ['ar' => 'ريال', 'en' => 'QAR'],
-                    'BHD' => ['ar' => 'دينار', 'en' => 'BHD'],
-                    'OMR' => ['ar' => 'ريال', 'en' => 'OMR'],
-                    'LBP' => ['ar' => 'ليرة', 'en' => 'LBP'],
-                    'SYP' => ['ar' => 'ليرة', 'en' => 'SYP'],
-                    'IQD' => ['ar' => 'دينار', 'en' => 'IQD'],
-                    'DZD' => ['ar' => 'دينار', 'en' => 'DZD'],
-                    'MAD' => ['ar' => 'درهم', 'en' => 'MAD'],
-                    'TND' => ['ar' => 'دينار', 'en' => 'TND'],
-                    'LYD' => ['ar' => 'دينار', 'en' => 'LYD'],
-                    'SDG' => ['ar' => 'جنيه', 'en' => 'SDG'],
-                ];
-                $currencyName = $currencyNames[$currency] ?? ['ar' => $currency, 'en' => $currency];
-            }
-        }
+        $basePricePerPoint = $pricing['price_per_point'];
 
         return response()->json([
             'success' => true,
-            'packages' => $packages->map(function ($package) {
+            'packages' => $packages->map(function ($package) use ($basePricePerPoint) {
+                // Calculate price based on country's base price and package discount
+                $discountedPrice = $package->points_amount * $basePricePerPoint * (100 - $package->discount_percentage) / 100;
+
                 return [
                     'id' => $package->id,
                     'name' => $package->name,
                     'points_amount' => $package->points_amount,
-                    'price' => $package->price,
+                    'price' => round($discountedPrice, 2),
+                    'original_price' => round($package->points_amount * $basePricePerPoint, 2),
                     'discount_percentage' => $package->discount_percentage,
-                    'effective_price_per_point' => round($package->price / $package->points_amount, 4),
-                    'savings' => round(($package->points_amount * PointsService::BASE_PRICE_PER_POINT) - $package->price, 2),
+                    'effective_price_per_point' => round($discountedPrice / $package->points_amount, 4),
+                    'savings' => round(($package->points_amount * $basePricePerPoint) - $discountedPrice, 2),
                     'is_popular' => $package->is_popular ?? false,
                 ];
             }),
-            'base_price_per_point' => PointsService::BASE_PRICE_PER_POINT,
-            'currency' => $currency,
-            'currency_name' => $currencyName,
+            'base_price_per_point' => $basePricePerPoint,
+            'currency_code' => $pricing['currency_code'],
+            'currency_symbol' => $pricing['currency_symbol'],
+            'currency_name' => $pricing['currency_name'],
+        ]);
+    }
+
+    /**
+     * Check if user can transfer to another user (GET /api/points/can-transfer/{toUserId})
+     */
+    public function canTransfer(Request $request, int $toUserId): JsonResponse
+    {
+        $result = $this->pointsService->canTransferToUser($request->user()->id, $toUserId);
+
+        return response()->json([
+            'success' => true,
+            'can_transfer' => $result['can_transfer'],
+            'reason' => $result['reason'],
+            'message' => $result['message'],
+        ]);
+    }
+
+    /**
+     * Get user's pricing info (GET /api/points/pricing)
+     */
+    public function pricing(Request $request): JsonResponse
+    {
+        $user = $request->user();
+        $pricing = $this->pointsService->getCountryPricing($user);
+
+        return response()->json([
+            'success' => true,
+            'price_per_point' => $pricing['price_per_point'],
+            'currency_code' => $pricing['currency_code'],
+            'currency_symbol' => $pricing['currency_symbol'],
+            'currency_name' => $pricing['currency_name'],
+            'country_id' => $pricing['country_id'],
+            'country_name' => $pricing['country_name'],
         ]);
     }
 }

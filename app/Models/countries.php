@@ -17,7 +17,15 @@ class countries extends Model
         'country_code',
         'currency_code',
         'currency_name',
-        'flag'
+        'flag',
+        'price_per_point',
+        'currency_symbol',
+        'allow_point_transfers',
+    ];
+
+    protected $casts = [
+        'price_per_point' => 'decimal:2',
+        'allow_point_transfers' => 'boolean',
     ];
 
     // Note: Do NOT add 'name' or 'currency_name' casts here as they conflict with the Attribute accessors below
