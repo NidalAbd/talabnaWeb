@@ -527,6 +527,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/point-transactions', [HomeController::class, 'index'])
         ->name('point_transactions.index');
 
+    // Country Pricing - Vue SPA
+    Route::get('/country-pricing', [HomeController::class, 'index'])
+        ->name('country_pricing.index');
+
     // Marketing Notifications - Vue SPA
     Route::get('/marketing-notifications', [HomeController::class, 'index'])
         ->name('marketing_notifications.index');

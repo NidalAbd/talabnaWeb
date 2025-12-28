@@ -256,6 +256,28 @@
                                     </div>
                                 </div>
                             </div>
+                            <!-- FCM Token -->
+                            <div class="col-md-12">
+                                <div class="info-box bg-light">
+                                    <div class="info-box-content">
+                                        <span class="info-box-text text-muted">
+                                            <i class="fas fa-bell mr-1"></i> FCM Token (Push Notifications)
+                                        </span>
+                                        <span class="info-box-number">
+                                            @if($user->fcm_token)
+                                                <div class="d-flex align-items-center">
+                                                    <code class="text-truncate" style="max-width: 500px; display: inline-block;">{{ $user->fcm_token }}</code>
+                                                    <button class="btn btn-xs btn-outline-info ml-2 copy-btn" data-coords="{{ $user->fcm_token }}" title="Copy FCM Token">
+                                                        <i class="fas fa-copy"></i>
+                                                    </button>
+                                                </div>
+                                            @else
+                                                <span class="text-muted">Not set (User has not enabled push notifications)</span>
+                                            @endif
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
                             <!-- Latitude -->
                             <div class="col-md-6">
                                 <div class="info-box bg-light">
@@ -499,6 +521,23 @@
                 title: "{{ $user->name }}'s Location"
             });
             @endif
+
+            // Copy button functionality
+            $('.copy-btn').on('click', function() {
+                var textToCopy = $(this).data('coords');
+                navigator.clipboard.writeText(textToCopy).then(function() {
+                    // Show temporary success feedback
+                    var btn = $(this);
+                    var originalHtml = btn.html();
+                    btn.html('<i class="fas fa-check"></i>');
+                    setTimeout(function() {
+                        btn.html(originalHtml);
+                    }, 1500);
+                }.bind(this)).catch(function(err) {
+                    console.error('Failed to copy: ', err);
+                    alert('Failed to copy to clipboard');
+                });
+            });
         });
     </script>
 @stop

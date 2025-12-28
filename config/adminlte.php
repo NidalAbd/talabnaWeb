@@ -465,6 +465,11 @@ return [
                     'url'  => 'admin/point-transactions',
                     'icon' => 'fas fa-exchange-alt',
                 ],
+                [
+                    'text' => 'Country Pricing',
+                    'url'  => 'admin/country-pricing',
+                    'icon' => 'fas fa-money-bill-wave',
+                ],
             ]
         ],
 
