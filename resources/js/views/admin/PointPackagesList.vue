@@ -488,11 +488,26 @@ const openCreateModal = () => {
     showFormModal.value = true
 }
 
+// Helper to convert array to string (for features that may come as arrays from DB)
+const arrayToString = (value) => {
+    if (Array.isArray(value)) {
+        return value.join('\n')
+    }
+    return value || ''
+}
+
 const openEditModal = (pkg) => {
+    // Handle features - convert arrays to strings for textarea
+    const features = pkg.features || { ar: '', en: '' }
+    const processedFeatures = {
+        ar: arrayToString(features.ar),
+        en: arrayToString(features.en)
+    }
+
     formData.value = {
         name: pkg.name || { ar: '', en: '' },
         description: pkg.description || { ar: '', en: '' },
-        features: pkg.features || { ar: '', en: '' },
+        features: processedFeatures,
         points: pkg.points_amount,
         price: pkg.price,
         currency: pkg.currency_code,

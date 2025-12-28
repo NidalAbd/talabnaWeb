@@ -223,8 +223,8 @@ class PointPackagesApiController extends Controller
             'discount_percentage' => 'nullable|numeric|min:0|max:100',
             'description.ar' => 'nullable|string',
             'description.en' => 'nullable|string',
-            'features.ar' => 'nullable|string',
-            'features.en' => 'nullable|string',
+            'features.ar' => 'nullable',  // Accept both string and array
+            'features.en' => 'nullable',  // Accept both string and array
             'icon' => 'nullable|string|max:100',
             'color' => 'nullable|string|max:7',
             'display_order' => 'nullable|integer|min:0',
@@ -234,6 +234,16 @@ class PointPackagesApiController extends Controller
 
         try {
             $package = PointPackage::findOrFail($id);
+
+            // Handle features - convert arrays to newline-separated strings
+            $featuresAr = $validated['features']['ar'] ?? '';
+            $featuresEn = $validated['features']['en'] ?? '';
+            if (is_array($featuresAr)) {
+                $featuresAr = implode("\n", $featuresAr);
+            }
+            if (is_array($featuresEn)) {
+                $featuresEn = implode("\n", $featuresEn);
+            }
 
             $updateData = [
                 'name' => [
@@ -253,8 +263,8 @@ class PointPackagesApiController extends Controller
                 'is_popular' => $validated['is_popular'] ?? false,
                 'display_order' => $validated['display_order'] ?? 0,
                 'features' => [
-                    'ar' => $validated['features']['ar'] ?? '',
-                    'en' => $validated['features']['en'] ?? ''
+                    'ar' => $featuresAr,
+                    'en' => $featuresEn
                 ],
                 'icon' => $validated['icon'] ?? null,
                 'color' => $validated['color'] ?? null,
