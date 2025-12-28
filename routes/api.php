@@ -150,6 +150,8 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/transfer-limits', [App\Http\Controllers\Api\PointsController::class, 'transferLimits']);
         // Packages endpoint - under points for consistency with Flutter app
         Route::get('/packages', [App\Http\Controllers\Api\PointsController::class, 'packages']);
+        // Purchase endpoint - matches Flutter's /api/points/purchase call
+        Route::post('/purchase', [App\Http\Controllers\Api\PointsController::class, 'purchase']);
     });
 
     // PIN Management Routes (with rate limiting)
