@@ -179,10 +179,16 @@ const menuItems = [
     value: 'reports'
   },
   {
-    title: 'Points System',
+    title: 'Point Packages',
     icon: 'mdi-diamond-stone',
     to: { name: 'point_packages.index' },
-    value: 'points'
+    value: 'point_packages'
+  },
+  {
+    title: 'Country Pricing',
+    icon: 'mdi-currency-usd',
+    to: { name: 'country_pricing.index' },
+    value: 'country_pricing'
   },
   {
     title: 'SEO Analytics',

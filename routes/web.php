@@ -711,6 +711,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::post('/point-packages/bulk-activate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'bulkActivate'])->name('api.admin.point-packages.bulk-activate');
             Route::post('/point-packages/bulk-deactivate', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'bulkDeactivate'])->name('api.admin.point-packages.bulk-deactivate');
 
+            // Country Pricing
+            Route::get('/country-pricing', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'index'])->name('api.admin.country-pricing.index');
+            Route::post('/country-pricing/{id}', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'update'])->name('api.admin.country-pricing.update');
+            Route::post('/country-pricing/{id}/toggle-transfers', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'toggleTransfers'])->name('api.admin.country-pricing.toggle-transfers');
+
             // Point Purchase Requests
             Route::get('/point-purchase-requests/stats', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'getStats'])->name('api.admin.point-purchase-requests.stats');
             Route::get('/point-purchase-requests', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'index'])->name('api.admin.point-purchase-requests.index');
