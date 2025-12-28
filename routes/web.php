@@ -703,7 +703,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/point-packages/stats', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'getStats'])->name('api.admin.point-packages.stats');
             Route::get('/point-packages', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'index'])->name('api.admin.point-packages.index');
             Route::post('/point-packages', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'store'])->name('api.admin.point-packages.store');
-            Route::put('/point-packages/{id}', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'update'])->name('api.admin.point-packages.update');
+            Route::post('/point-packages/{id}', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'update'])->name('api.admin.point-packages.update');
             Route::delete('/point-packages/{id}', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'destroy'])->name('api.admin.point-packages.destroy');
             Route::post('/point-packages/{id}/toggle-status', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'toggleStatus'])->name('api.admin.point-packages.toggle-status');
             Route::post('/point-packages/{id}/toggle-popular', [\App\Http\Controllers\Admin\PointPackagesApiController::class, 'togglePopular'])->name('api.admin.point-packages.toggle-popular');

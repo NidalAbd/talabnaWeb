@@ -95,23 +95,28 @@ export function usePointPackages() {
     }
 
     const updatePackage = async (packageId, packageData) => {
+        console.log('🔵 updatePackage called with:', { packageId, packageDataKeys: Object.keys(packageData || {}) })
+
         if (!packageId) {
             console.error('❌ updatePackage called without packageId!')
             throw new Error('Package ID is required for update')
         }
 
         const url = `/api/admin/point-packages/${packageId}`
-        console.log('📝 Updating package:', packageId, 'URL:', url)
+        console.log('📝 Full URL being called:', url)
+        console.log('📝 Window location:', window.location.href)
 
         try {
+            console.log('🚀 Making fetch request to:', url, 'with method: POST')
             const response = await fetch(url, {
-                method: 'PUT',
+                method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify(packageData)
             })
+            console.log('📡 Fetch completed. Response URL:', response.url)
 
             console.log('📡 Update response:', response.status, response.statusText)
 
