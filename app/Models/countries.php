@@ -20,11 +20,15 @@ class countries extends Model
         'flag',
         'price_per_point',
         'currency_symbol',
+        'exchange_rate_to_usd',
+        'use_custom_price',
         'allow_point_transfers',
     ];
 
     protected $casts = [
         'price_per_point' => 'decimal:2',
+        'exchange_rate_to_usd' => 'decimal:6',
+        'use_custom_price' => 'boolean',
         'allow_point_transfers' => 'boolean',
     ];
 

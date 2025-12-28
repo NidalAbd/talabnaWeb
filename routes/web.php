@@ -717,8 +717,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
             // Country Pricing
             Route::get('/country-pricing', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'index'])->name('api.admin.country-pricing.index');
+            Route::post('/country-pricing/apply-base-price', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'applyBasePrice'])->name('api.admin.country-pricing.apply-base-price');
             Route::post('/country-pricing/{id}', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'update'])->name('api.admin.country-pricing.update');
             Route::post('/country-pricing/{id}/toggle-transfers', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'toggleTransfers'])->name('api.admin.country-pricing.toggle-transfers');
+            Route::post('/country-pricing/{id}/exchange-rate', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'updateExchangeRate'])->name('api.admin.country-pricing.exchange-rate');
+            Route::post('/country-pricing/{id}/custom-price', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'setCustomPrice'])->name('api.admin.country-pricing.custom-price');
 
             // Point Purchase Requests
             Route::get('/point-purchase-requests/stats', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'getStats'])->name('api.admin.point-purchase-requests.stats');

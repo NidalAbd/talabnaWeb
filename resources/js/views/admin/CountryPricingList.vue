@@ -15,6 +15,59 @@
                 </div>
             </div>
 
+            <!-- Base Price Section -->
+            <div class="base-price-section">
+                <div class="base-price-card">
+                    <div class="base-price-header">
+                        <i class="fas fa-dollar-sign"></i>
+                        <h3>Base Price (USD)</h3>
+                    </div>
+                    <div class="base-price-content">
+                        <div class="input-group">
+                            <span class="input-prefix">$</span>
+                            <input
+                                type="number"
+                                v-model="basePriceUsd"
+                                step="0.01"
+                                min="0.01"
+                                placeholder="2.00"
+                                class="base-price-input"
+                            >
+                            <span class="input-suffix">USD per point</span>
+                        </div>
+                        <div class="base-price-actions">
+                            <label class="checkbox-inline">
+                                <input type="checkbox" v-model="overrideCustom">
+                                <span>Override custom prices</span>
+                            </label>
+                            <button
+                                @click="applyBasePriceToAll"
+                                :disabled="applyingPrice || !basePriceUsd"
+                                class="apply-btn"
+                            >
+                                <i v-if="applyingPrice" class="fas fa-spinner fa-spin"></i>
+                                <i v-else class="fas fa-sync"></i>
+                                Apply to All Countries
+                            </button>
+                            <button
+                                v-if="selectedCountries.length > 0"
+                                @click="applyBasePriceToSelected"
+                                :disabled="applyingPrice || !basePriceUsd"
+                                class="apply-btn secondary"
+                            >
+                                <i v-if="applyingPrice" class="fas fa-spinner fa-spin"></i>
+                                <i v-else class="fas fa-check-double"></i>
+                                Apply to Selected ({{ selectedCountries.length }})
+                            </button>
+                        </div>
+                        <p class="helper-text">
+                            <i class="fas fa-info-circle"></i>
+                            Automatically converts USD to local currency using exchange rates
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Loading State -->
             <div v-if="loading" class="loading-state">
                 <div class="spinner"></div>
@@ -35,10 +88,17 @@
                 <table class="modern-table">
                     <thead>
                         <tr>
+                            <th class="checkbox-col">
+                                <input
+                                    type="checkbox"
+                                    @change="toggleSelectAll"
+                                    :checked="isAllSelected"
+                                >
+                            </th>
                             <th>ID</th>
                             <th>Country</th>
-                            <th>Currency Code</th>
-                            <th>Currency Symbol</th>
+                            <th>Currency</th>
+                            <th>Exchange Rate</th>
                             <th>Price per Point</th>
                             <th>Allow Transfers</th>
                             <th>Actions</th>
@@ -46,12 +106,19 @@
                     </thead>
                     <tbody>
                         <tr v-if="countries.length === 0">
-                            <td colspan="7" class="empty-state">
+                            <td colspan="8" class="empty-state">
                                 <i class="fas fa-globe"></i>
                                 <p>No countries found</p>
                             </td>
                         </tr>
-                        <tr v-for="country in countries" :key="country.id">
+                        <tr v-for="country in countries" :key="country.id" :class="{ 'selected-row': selectedCountries.includes(country.id) }">
+                            <td class="checkbox-col">
+                                <input
+                                    type="checkbox"
+                                    :value="country.id"
+                                    v-model="selectedCountries"
+                                >
+                            </td>
                             <td>
                                 <span class="id-badge">{{ country.id }}</span>
                             </td>
@@ -62,13 +129,26 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="currency-code">{{ country.currency_code || 'N/A' }}</span>
+                                <div class="currency-info">
+                                    <span class="currency-code">{{ country.currency_code || 'N/A' }}</span>
+                                    <span class="currency-symbol">{{ country.currency_symbol || '-' }}</span>
+                                </div>
                             </td>
                             <td>
-                                <span class="currency-symbol">{{ country.currency_symbol || '₪' }}</span>
+                                <div class="exchange-rate">
+                                    <span class="rate-value">{{ formatExchangeRate(country.exchange_rate_to_usd) }}</span>
+                                    <span class="rate-label">per USD</span>
+                                </div>
                             </td>
                             <td>
-                                <span class="price-badge">{{ country.price_per_point || 7.5 }}</span>
+                                <div class="price-display">
+                                    <span class="price-badge" :class="{ 'custom': country.use_custom_price }">
+                                        {{ country.currency_symbol || '' }}{{ country.price_per_point || '0.00' }}
+                                    </span>
+                                    <span v-if="country.use_custom_price" class="custom-badge">
+                                        <i class="fas fa-star"></i> Custom
+                                    </span>
+                                </div>
                             </td>
                             <td>
                                 <button
@@ -80,9 +160,14 @@
                                 </button>
                             </td>
                             <td>
-                                <button @click="openEditModal(country)" class="action-btn edit" title="Edit Pricing">
-                                    <i class="fas fa-edit"></i>
-                                </button>
+                                <div class="action-buttons">
+                                    <button @click="openEditModal(country)" class="action-btn edit" title="Edit Pricing">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button @click="openExchangeRateModal(country)" class="action-btn rate" title="Edit Exchange Rate">
+                                        <i class="fas fa-exchange-alt"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     </tbody>
@@ -135,7 +220,7 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Price per Point</label>
+                            <label>Price per Point ({{ formData.currency_code || 'Local Currency' }})</label>
                             <input
                                 type="number"
                                 v-model="formData.price_per_point"
@@ -143,7 +228,15 @@
                                 min="0"
                                 placeholder="7.50"
                             >
-                            <small>Base price for 1 point in this country's currency</small>
+                            <small>Price for 1 point in local currency</small>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="checkbox-label">
+                                <input type="checkbox" v-model="formData.use_custom_price">
+                                <span>Use Custom Price</span>
+                            </label>
+                            <small>Custom prices won't be overwritten when applying base USD price</small>
                         </div>
 
                         <div class="form-group">
@@ -167,25 +260,113 @@
                 </div>
             </div>
         </div>
+
+        <!-- Exchange Rate Modal -->
+        <div class="modal-overlay" v-if="showExchangeRateModal" @click="closeExchangeRateModal">
+            <div class="modern-modal small" @click.stop>
+                <div class="modal-header">
+                    <h3>
+                        <i class="fas fa-exchange-alt"></i>
+                        Edit Exchange Rate
+                    </h3>
+                    <button class="close-btn" @click="closeExchangeRateModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div class="country-info">
+                        <i class="fas fa-flag"></i>
+                        <div>
+                            <div class="country-title">{{ selectedCountry?.name?.en }}</div>
+                            <div class="country-subtitle">{{ selectedCountry?.currency_code }} ({{ selectedCountry?.currency_symbol }})</div>
+                        </div>
+                    </div>
+
+                    <form @submit.prevent="handleExchangeRateSubmit">
+                        <div class="form-group">
+                            <label>Exchange Rate ({{ selectedCountry?.currency_code }} per 1 USD)</label>
+                            <input
+                                type="number"
+                                v-model="exchangeRateData.exchange_rate_to_usd"
+                                step="0.000001"
+                                min="0.000001"
+                                placeholder="3.67"
+                            >
+                            <small>How many {{ selectedCountry?.currency_code || 'local currency' }} equals 1 USD</small>
+                        </div>
+
+                        <div class="preview-box">
+                            <div class="preview-label">Preview Conversion</div>
+                            <div class="preview-value">
+                                $1.00 USD = {{ exchangeRateData.exchange_rate_to_usd || 1 }} {{ selectedCountry?.currency_symbol || '' }}
+                            </div>
+                            <div class="preview-value" v-if="basePriceUsd">
+                                ${{ basePriceUsd }} USD = {{ (basePriceUsd * (exchangeRateData.exchange_rate_to_usd || 1)).toFixed(2) }} {{ selectedCountry?.currency_symbol || '' }}
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" @click="closeExchangeRateModal" class="btn-cancel">
+                        <i class="fas fa-times"></i> Cancel
+                    </button>
+                    <button type="button" @click="handleExchangeRateSubmit" :disabled="processing" class="btn-primary">
+                        <i v-if="processing" class="fas fa-spinner fa-spin"></i>
+                        <i v-else class="fas fa-save"></i>
+                        {{ processing ? 'Saving...' : 'Save Rate' }}
+                    </button>
+                </div>
+            </div>
+        </div>
     </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const countries = ref([])
 const loading = ref(true)
 const error = ref(null)
 const showEditModal = ref(false)
+const showExchangeRateModal = ref(false)
 const selectedCountry = ref(null)
 const processing = ref(false)
+const applyingPrice = ref(false)
+const selectedCountries = ref([])
+const basePriceUsd = ref(2.00)
+const overrideCustom = ref(false)
 
 const formData = ref({
     currency_code: '',
     currency_symbol: '',
     price_per_point: 7.5,
+    use_custom_price: false,
     allow_point_transfers: true
 })
+
+const exchangeRateData = ref({
+    exchange_rate_to_usd: 1
+})
+
+const isAllSelected = computed(() => {
+    return countries.value.length > 0 && selectedCountries.value.length === countries.value.length
+})
+
+const formatExchangeRate = (rate) => {
+    if (!rate) return '1.00'
+    const num = parseFloat(rate)
+    if (num >= 100) return num.toFixed(2)
+    if (num >= 1) return num.toFixed(4)
+    return num.toFixed(6)
+}
+
+const toggleSelectAll = (event) => {
+    if (event.target.checked) {
+        selectedCountries.value = countries.value.map(c => c.id)
+    } else {
+        selectedCountries.value = []
+    }
+}
 
 const loadCountries = async () => {
     loading.value = true
@@ -214,12 +395,105 @@ const loadCountries = async () => {
     }
 }
 
+const applyBasePriceToAll = async () => {
+    if (!basePriceUsd.value) return
+
+    applyingPrice.value = true
+
+    try {
+        const response = await fetch('/api/admin/country-pricing/apply-base-price', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                base_price_usd: parseFloat(basePriceUsd.value),
+                override_custom: overrideCustom.value
+            })
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.message || 'Failed to apply base price')
+        }
+
+        const result = await response.json()
+
+        window.$(document).Toasts('create', {
+            class: 'bg-success',
+            title: 'Success',
+            body: result.message || `Updated ${result.updated_count} countries`
+        })
+
+        await loadCountries()
+    } catch (err) {
+        window.$(document).Toasts('create', {
+            class: 'bg-danger',
+            title: 'Error',
+            body: err.message || 'Failed to apply base price'
+        })
+    } finally {
+        applyingPrice.value = false
+    }
+}
+
+const applyBasePriceToSelected = async () => {
+    if (!basePriceUsd.value || selectedCountries.value.length === 0) return
+
+    applyingPrice.value = true
+
+    try {
+        const response = await fetch('/api/admin/country-pricing/apply-base-price', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify({
+                base_price_usd: parseFloat(basePriceUsd.value),
+                country_ids: selectedCountries.value,
+                override_custom: overrideCustom.value
+            })
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.message || 'Failed to apply base price')
+        }
+
+        const result = await response.json()
+
+        window.$(document).Toasts('create', {
+            class: 'bg-success',
+            title: 'Success',
+            body: result.message || `Updated ${result.updated_count} countries`
+        })
+
+        selectedCountries.value = []
+        await loadCountries()
+    } catch (err) {
+        window.$(document).Toasts('create', {
+            class: 'bg-danger',
+            title: 'Error',
+            body: err.message || 'Failed to apply base price'
+        })
+    } finally {
+        applyingPrice.value = false
+    }
+}
+
 const openEditModal = (country) => {
     selectedCountry.value = country
     formData.value = {
         currency_code: country.currency_code || '',
-        currency_symbol: country.currency_symbol || '₪',
+        currency_symbol: country.currency_symbol || '',
         price_per_point: country.price_per_point || 7.5,
+        use_custom_price: country.use_custom_price || false,
         allow_point_transfers: country.allow_point_transfers !== false
     }
     showEditModal.value = true
@@ -227,6 +501,19 @@ const openEditModal = (country) => {
 
 const closeEditModal = () => {
     showEditModal.value = false
+    selectedCountry.value = null
+}
+
+const openExchangeRateModal = (country) => {
+    selectedCountry.value = country
+    exchangeRateData.value = {
+        exchange_rate_to_usd: country.exchange_rate_to_usd || 1
+    }
+    showExchangeRateModal.value = true
+}
+
+const closeExchangeRateModal = () => {
+    showExchangeRateModal.value = false
     selectedCountry.value = null
 }
 
@@ -265,6 +552,47 @@ const handleSubmit = async () => {
             class: 'bg-danger',
             title: 'Error',
             body: err.message || 'Failed to update pricing'
+        })
+    } finally {
+        processing.value = false
+    }
+}
+
+const handleExchangeRateSubmit = async () => {
+    if (!selectedCountry.value) return
+
+    processing.value = true
+
+    try {
+        const response = await fetch(`/api/admin/country-pricing/${selectedCountry.value.id}/exchange-rate`, {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+            },
+            credentials: 'same-origin',
+            body: JSON.stringify(exchangeRateData.value)
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(errorData.message || 'Failed to update exchange rate')
+        }
+
+        window.$(document).Toasts('create', {
+            class: 'bg-success',
+            title: 'Success',
+            body: 'Exchange rate updated successfully'
+        })
+
+        closeExchangeRateModal()
+        await loadCountries()
+    } catch (err) {
+        window.$(document).Toasts('create', {
+            class: 'bg-danger',
+            title: 'Error',
+            body: err.message || 'Failed to update exchange rate'
         })
     } finally {
         processing.value = false
@@ -358,6 +686,140 @@ onMounted(() => {
     gap: 8px;
 }
 
+/* Base Price Section */
+.base-price-section {
+    padding: 25px 30px;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.base-price-card {
+    background: white;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.base-price-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.base-price-header i {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    color: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.base-price-header h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    color: #2c3e50;
+}
+
+.base-price-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.input-prefix {
+    font-size: 1.3rem;
+    font-weight: 600;
+    color: #667eea;
+}
+
+.base-price-input {
+    width: 120px;
+    padding: 12px 15px;
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.base-price-input:focus {
+    outline: none;
+    border-color: #667eea;
+}
+
+.input-suffix {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.base-price-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.checkbox-inline {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    color: #495057;
+}
+
+.checkbox-inline input {
+    width: 16px;
+    height: 16px;
+}
+
+.apply-btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.3s ease;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.apply-btn.secondary {
+    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+}
+
+.apply-btn:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.apply-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.helper-text {
+    font-size: 13px;
+    color: #6c757d;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
 .loading-state,
 .error-state {
     padding: 60px;
@@ -421,6 +883,11 @@ onMounted(() => {
     letter-spacing: 0.5px;
 }
 
+.checkbox-col {
+    width: 40px;
+    text-align: center;
+}
+
 .modern-table tbody tr {
     border-bottom: 1px solid #e9ecef;
     transition: all 0.3s ease;
@@ -428,6 +895,10 @@ onMounted(() => {
 
 .modern-table tbody tr:hover {
     background: #f8f9fa;
+}
+
+.modern-table tbody tr.selected-row {
+    background: #e8f4fd;
 }
 
 .modern-table tbody td {
@@ -465,18 +936,48 @@ onMounted(() => {
     color: #6c757d;
 }
 
+.currency-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
 .currency-code {
     background: #e9ecef;
-    padding: 5px 12px;
+    padding: 4px 10px;
     border-radius: 6px;
     font-weight: 600;
     font-family: monospace;
+    font-size: 13px;
+    display: inline-block;
 }
 
 .currency-symbol {
-    font-size: 1.2rem;
+    font-size: 1rem;
     font-weight: 600;
     color: #667eea;
+}
+
+.exchange-rate {
+    display: flex;
+    flex-direction: column;
+}
+
+.rate-value {
+    font-weight: 600;
+    color: #2c3e50;
+    font-family: monospace;
+}
+
+.rate-label {
+    font-size: 11px;
+    color: #6c757d;
+}
+
+.price-display {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .price-badge {
@@ -485,6 +986,19 @@ onMounted(() => {
     padding: 5px 12px;
     border-radius: 20px;
     font-weight: 600;
+    display: inline-block;
+}
+
+.price-badge.custom {
+    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+}
+
+.custom-badge {
+    font-size: 11px;
+    color: #f5576c;
+    display: flex;
+    align-items: center;
+    gap: 4px;
 }
 
 .transfer-toggle {
@@ -515,6 +1029,11 @@ onMounted(() => {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
 }
 
+.action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
 .action-btn {
     padding: 8px 12px;
     border: none;
@@ -526,6 +1045,10 @@ onMounted(() => {
 
 .action-btn.edit {
     background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.action-btn.rate {
+    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
 }
 
 .action-btn:hover {
@@ -556,6 +1079,10 @@ onMounted(() => {
     max-height: 90vh;
     overflow-y: auto;
     box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+}
+
+.modern-modal.small {
+    max-width: 400px;
 }
 
 .modal-header {
@@ -673,6 +1200,28 @@ onMounted(() => {
     font-weight: 500;
 }
 
+.preview-box {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 20px;
+}
+
+.preview-label {
+    font-size: 12px;
+    color: #6c757d;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 10px;
+}
+
+.preview-value {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 5px;
+}
+
 .modal-footer {
     padding: 20px 30px;
     background: #f8f9fa;
@@ -721,6 +1270,15 @@ onMounted(() => {
     .card-header {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .base-price-actions {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .input-group {
+        flex-wrap: wrap;
     }
 }
 </style>
