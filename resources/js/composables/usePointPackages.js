@@ -30,7 +30,12 @@ export function usePointPackages() {
             const url = `/api/admin/point-packages?${params.toString()}`
             console.log('🔍 Fetching point packages from:', url)
 
-            const response = await fetch(url)
+            const response = await fetch(url, {
+                headers: {
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
             console.log('📡 Response status:', response.status, response.statusText)
 
             if (!response.ok) {
@@ -58,7 +63,12 @@ export function usePointPackages() {
 
     const fetchStats = async () => {
         try {
-            const response = await fetch('/api/admin/point-packages/stats')
+            const response = await fetch('/api/admin/point-packages/stats', {
+                headers: {
+                    'Accept': 'application/json'
+                },
+                credentials: 'same-origin'
+            })
 
             if (!response.ok) {
                 throw new Error('Failed to fetch stats')
@@ -77,8 +87,10 @@ export function usePointPackages() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify(packageData)
             })
 
@@ -112,8 +124,10 @@ export function usePointPackages() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
+                credentials: 'same-origin',
                 body: JSON.stringify(packageData)
             })
             console.log('📡 Fetch completed. Response URL:', response.url)
@@ -143,8 +157,10 @@ export function usePointPackages() {
             const response = await fetch(`/api/admin/point-packages/${packageId}`, {
                 method: 'DELETE',
                 headers: {
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
+                },
+                credentials: 'same-origin'
             })
 
             if (!response.ok) {
@@ -164,8 +180,10 @@ export function usePointPackages() {
             const response = await fetch(`/api/admin/point-packages/${packageId}/toggle-status`, {
                 method: 'POST',
                 headers: {
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
+                },
+                credentials: 'same-origin'
             })
 
             if (!response.ok) {
@@ -185,8 +203,10 @@ export function usePointPackages() {
             const response = await fetch(`/api/admin/point-packages/${packageId}/toggle-popular`, {
                 method: 'POST',
                 headers: {
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
+                },
+                credentials: 'same-origin'
             })
 
             if (!response.ok) {
@@ -206,8 +226,10 @@ export function usePointPackages() {
             const response = await fetch(`/api/admin/point-packages/${packageId}/duplicate`, {
                 method: 'POST',
                 headers: {
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
+                },
+                credentials: 'same-origin'
             })
 
             if (!response.ok) {
@@ -227,8 +249,10 @@ export function usePointPackages() {
             const response = await fetch('/api/admin/point-packages/bulk-activate', {
                 method: 'POST',
                 headers: {
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
+                },
+                credentials: 'same-origin'
             })
 
             if (!response.ok) {
@@ -248,8 +272,10 @@ export function usePointPackages() {
             const response = await fetch('/api/admin/point-packages/bulk-deactivate', {
                 method: 'POST',
                 headers: {
+                    'Accept': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                }
+                },
+                credentials: 'same-origin'
             })
 
             if (!response.ok) {
