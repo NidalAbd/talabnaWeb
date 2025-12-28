@@ -150,7 +150,10 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/transfer-limits', [App\Http\Controllers\Api\PointsController::class, 'transferLimits']);
         // Packages endpoint - under points for consistency with Flutter app
         Route::get('/packages', [App\Http\Controllers\Api\PointsController::class, 'packages']);
-        // Purchase endpoint - matches Flutter's /api/points/purchase call
+    });
+
+    // Purchase endpoint - matches Flutter's /api/points/purchase call (uses purchases throttle)
+    Route::middleware(['throttle:purchases'])->prefix('points')->group(function () {
         Route::post('/purchase', [App\Http\Controllers\Api\PointsController::class, 'purchase']);
     });
 
