@@ -95,8 +95,16 @@ export function usePointPackages() {
     }
 
     const updatePackage = async (packageId, packageData) => {
+        if (!packageId) {
+            console.error('❌ updatePackage called without packageId!')
+            throw new Error('Package ID is required for update')
+        }
+
+        const url = `/api/admin/point-packages/${packageId}`
+        console.log('📝 Updating package:', packageId, 'URL:', url)
+
         try {
-            const response = await fetch(`/api/admin/point-packages/${packageId}`, {
+            const response = await fetch(url, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -105,9 +113,17 @@ export function usePointPackages() {
                 body: JSON.stringify(packageData)
             })
 
+            console.log('📡 Update response:', response.status, response.statusText)
+
             if (!response.ok) {
-                const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to update package')
+                const errorText = await response.text()
+                console.error('❌ Update failed:', errorText)
+                try {
+                    const errorData = JSON.parse(errorText)
+                    throw new Error(errorData.error || 'Failed to update package')
+                } catch (e) {
+                    throw new Error(`Failed to update package: ${response.status}`)
+                }
             }
 
             return await response.json()
