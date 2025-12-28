@@ -12,6 +12,6 @@ class VerifyCsrfToken extends Middleware
      * @var array<int, string>
      */
     protected $except = [
-//        'palservice_points'
+        'api/admin/*',  // Admin API endpoints use session auth + CSRF via header
     ];
 }
