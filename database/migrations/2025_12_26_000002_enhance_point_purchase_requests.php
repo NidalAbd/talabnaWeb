@@ -24,6 +24,9 @@ return new class extends Migration
             $table->unsignedBigInteger('point_package_id')->nullable()->after('approval_type');
             $table->decimal('discount_applied', 5, 2)->default(0)->after('point_package_id');
 
+            // Stripe client secret for payment
+            $table->string('client_secret')->nullable()->after('discount_applied');
+
             // Add indexes for performance
             $table->index(['user_id', 'status']);
         });
@@ -60,6 +63,7 @@ return new class extends Migration
                 'approval_type',
                 'point_package_id',
                 'discount_applied',
+                'client_secret',
             ]);
         });
     }

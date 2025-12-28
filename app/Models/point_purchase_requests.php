@@ -8,9 +8,33 @@ use Illuminate\Database\Eloquent\Model;
 class point_purchase_requests extends Model
 {
     use HasFactory;
-    protected $fillable = ['user_id', 'points_requested', 'price_per_point', 'total_price', 'status'];
+
+    protected $fillable = [
+        'user_id',
+        'points_requested',
+        'price_per_point',
+        'total_price',
+        'status',
+        'idempotency_key',
+        'auto_approved',
+        'approval_type',
+        'point_package_id',
+        'discount_applied',
+        'client_secret',
+    ];
+
+    protected $casts = [
+        'auto_approved' => 'boolean',
+        'discount_applied' => 'decimal:2',
+    ];
+
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function package()
+    {
+        return $this->belongsTo(PointPackage::class, 'point_package_id');
     }
 }
