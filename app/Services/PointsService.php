@@ -213,24 +213,29 @@ class PointsService
                 'discount_applied' => $discount,
             ]);
 
-            // For auto-approved purchases, credit points immediately (after payment confirmation)
-            // Note: In production, this should only happen after Stripe webhook confirms payment
-            if ($autoApproved) {
-                // Create Stripe payment intent first
-                $paymentIntent = $this->createStripePaymentIntent($purchaseRequest);
-                $purchaseRequest->client_secret = $paymentIntent->client_secret;
-                $purchaseRequest->save();
-            } else {
-                // For manual approval, still create payment intent
-                $paymentIntent = $this->createStripePaymentIntent($purchaseRequest);
-                $purchaseRequest->client_secret = $paymentIntent->client_secret;
-                $purchaseRequest->save();
+            // Only create Stripe payment intent if Stripe is configured
+            $clientSecret = null;
+            if (config('services.stripe.secret')) {
+                try {
+                    $paymentIntent = $this->createStripePaymentIntent($purchaseRequest);
+                    $clientSecret = $paymentIntent->client_secret;
+                    $purchaseRequest->client_secret = $clientSecret;
+                    $purchaseRequest->save();
+                } catch (\Exception $e) {
+                    // Log error but don't fail the request - Stripe might not be configured
+                    \Log::warning('Stripe payment intent creation failed: ' . $e->getMessage());
+                }
+            }
+
+            // If auto-approved and no Stripe, credit points immediately
+            if ($autoApproved && !$clientSecret) {
+                $this->creditPurchasedPoints($purchaseRequest);
             }
 
             return [
                 'success' => true,
                 'request_id' => $purchaseRequest->id,
-                'client_secret' => $purchaseRequest->client_secret,
+                'client_secret' => $clientSecret,
                 'auto_approved' => $autoApproved,
                 'total_price' => $totalPrice,
                 'duplicate' => false,

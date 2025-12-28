@@ -1,0 +1,120 @@
+[u252000670@de-fra-web2069 talbna.cloud]$   php artisan migrate --force
+
+   INFO  Nothing to migrate.
+
+[u252000670@de-fra-web2069 talbna.cloud]$
+  php artisan config:clear
+
+  Then check the logs:
+  tail -100 storage/logs/laravel.log
+
+  And check Stripe config:
+  grep STRIPE .env
+
+   INFO  Configuration cache cleared successfully.
+
+-bash: Then: command not found
+#14 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Route.php(205): Illuminate\\Routing\\Route->runController()
+#15 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(806): Illuminate\\Routing\\Route->run()
+#16 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(144): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}()
+#17 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#18 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle()
+#19 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(159): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#20 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(125): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest()
+#21 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(87): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequestUsingNamedLimiter()
+#22 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle()
+#23 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(159): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#24 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(125): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest()
+#25 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(87): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequestUsingNamedLimiter()
+#26 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle()
+#27 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(57): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#28 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Auth\\Middleware\\Authenticate->handle()
+#29 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(119): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#30 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(805): Illuminate\\Pipeline\\Pipeline->then()
+#31 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(784): Illuminate\\Routing\\Router->runRouteWithinStack()
+#32 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(748): Illuminate\\Routing\\Router->runRoute()
+#33 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(737): Illuminate\\Routing\\Router->dispatchToRoute()
+#34 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch()
+#35 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(144): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}()
+#36 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#37 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
+#38 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle()
+#39 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#40 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(40): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
+#41 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle()
+#42 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#43 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\ValidatePostSize->handle()
+#44 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(99): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#45 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle()
+#46 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(62): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#47 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Http\\Middleware\\HandleCors->handle()
+#48 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(39): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#49 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Http\\Middleware\\TrustProxies->handle()
+#50 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(119): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#51 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then()
+#52 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter()
+#53 /home/u252000670/domains/talbna.cloud/public_html/index.php(51): Illuminate\\Foundation\\Http\\Kernel->handle()
+#54 {main}
+"}
+[2025-12-28 15:02:47] production.ERROR: Purchase request failed: No API key provided.  (HINT: set your API key using "Stripe::setApiKey(<API-KEY>)".  You can generate API keys from
+ the Stripe web interface.  See https://stripe.com/api for details, or email support@stripe.com if you have any questions. {"user_id":100100100100,"amount":1000,"exception":"[objec
+t] (Stripe\\Exception\\AuthenticationException(code: 0): No API key provided.  (HINT: set your API key using \"Stripe::setApiKey(<API-KEY>)\".  You can generate API keys from the S
+tripe web interface.  See https://stripe.com/api for details, or email support@stripe.com if you have any questions. at /home/u252000670/domains/talbna.cloud/vendor/stripe/stripe-php/lib/ApiRequestor.php:368)
+[stacktrace]
+#0 /home/u252000670/domains/talbna.cloud/vendor/stripe/stripe-php/lib/ApiRequestor.php(448): Stripe\\ApiRequestor->_prepareRequest()
+#1 /home/u252000670/domains/talbna.cloud/vendor/stripe/stripe-php/lib/ApiRequestor.php(123): Stripe\\ApiRequestor->_requestRaw()
+#2 /home/u252000670/domains/talbna.cloud/vendor/stripe/stripe-php/lib/ApiOperations/Request.php(78): Stripe\\ApiRequestor->request()
+#3 /home/u252000670/domains/talbna.cloud/vendor/stripe/stripe-php/lib/ApiOperations/Create.php(25): Stripe\\ApiResource::_staticRequest()
+#4 /home/u252000670/domains/talbna.cloud/app/Services/PointsService.php(418): Stripe\\PaymentIntent::create()
+#5 /home/u252000670/domains/talbna.cloud/app/Services/PointsService.php(225): App\\Services\\PointsService->createStripePaymentIntent()
+#6 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Database/Concerns/ManagesTransactions.php(30): App\\Services\\PointsService->App\\Services\\{closure}()
+#7 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Database/DatabaseManager.php(509): Illuminate\\Database\\Connection->transaction()
+#8 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Support/Facades/Facade.php(355): Illuminate\\Database\\DatabaseManager->__call()
+#9 /home/u252000670/domains/talbna.cloud/app/Services/PointsService.php(201): Illuminate\\Support\\Facades\\Facade::__callStatic()
+#10 /home/u252000670/domains/talbna.cloud/app/Http/Controllers/Api/PointsController.php(232): App\\Services\\PointsService->purchasePoints()
+#11 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): App\\Http\\Controllers\\Api\\PointsController->purchase()
+#12 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\\Routing\\Controller->callAction()
+#13 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Route.php(259): Illuminate\\Routing\\ControllerDispatcher->dispatch()
+#14 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Route.php(205): Illuminate\\Routing\\Route->runController()
+#15 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(806): Illuminate\\Routing\\Route->run()
+#16 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(144): Illuminate\\Routing\\Router->Illuminate\\Routing\\{closure}()
+#17 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/SubstituteBindings.php(50): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#18 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Routing\\Middleware\\SubstituteBindings->handle()
+#19 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(159): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#20 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(125): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest()
+#21 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(87): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequestUsingNamedLimiter()
+#22 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle()
+#23 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(159): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#24 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(125): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequest()
+#25 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Middleware/ThrottleRequests.php(87): Illuminate\\Routing\\Middleware\\ThrottleRequests->handleRequestUsingNamedLimiter()
+#26 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Routing\\Middleware\\ThrottleRequests->handle()
+#27 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Auth/Middleware/Authenticate.php(57): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#28 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Auth\\Middleware\\Authenticate->handle()
+#29 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(119): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#30 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(805): Illuminate\\Pipeline\\Pipeline->then()
+#31 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(784): Illuminate\\Routing\\Router->runRouteWithinStack()
+#32 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(748): Illuminate\\Routing\\Router->runRoute()
+#33 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Routing/Router.php(737): Illuminate\\Routing\\Router->dispatchToRoute()
+#34 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(200): Illuminate\\Routing\\Router->dispatch()
+#35 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(144): Illuminate\\Foundation\\Http\\Kernel->Illuminate\\Foundation\\Http\\{closure}()
+#36 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#37 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ConvertEmptyStringsToNull.php(31): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
+#38 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\ConvertEmptyStringsToNull->handle()
+#39 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TransformsRequest.php(21): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#40 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/TrimStrings.php(40): Illuminate\\Foundation\\Http\\Middleware\\TransformsRequest->handle()
+#41 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\TrimStrings->handle()
+#42 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/ValidatePostSize.php(27): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#43 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\ValidatePostSize->handle()
+#44 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Middleware/PreventRequestsDuringMaintenance.php(99): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#45 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Foundation\\Http\\Middleware\\PreventRequestsDuringMaintenance->handle()
+#46 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Http/Middleware/HandleCors.php(62): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#47 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Http\\Middleware\\HandleCors->handle()
+#48 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Http/Middleware/TrustProxies.php(39): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#49 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(183): Illuminate\\Http\\Middleware\\TrustProxies->handle()
+#50 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(119): Illuminate\\Pipeline\\Pipeline->Illuminate\\Pipeline\\{closure}()
+#51 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(175): Illuminate\\Pipeline\\Pipeline->then()
+#52 /home/u252000670/domains/talbna.cloud/vendor/laravel/framework/src/Illuminate/Foundation/Http/Kernel.php(144): Illuminate\\Foundation\\Http\\Kernel->sendRequestThroughRouter()
+#53 /home/u252000670/domains/talbna.cloud/public_html/index.php(51): Illuminate\\Foundation\\Http\\Kernel->handle()
+#54 {main}
+"}
+-bash: And: command not found
