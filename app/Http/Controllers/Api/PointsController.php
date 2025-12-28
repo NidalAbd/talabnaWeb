@@ -253,13 +253,21 @@ class PointsController extends Controller
             Log::error('Purchase request failed: ' . $e->getMessage(), [
                 'user_id' => $request->user()->id,
                 'amount' => $request->validated('points_amount'),
-                'exception' => $e,
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
+            // Return actual error in response for debugging
             return response()->json([
                 'success' => false,
                 'error' => 'purchase_failed',
                 'message' => 'Failed to create purchase request',
+                'debug' => config('app.debug') ? [
+                    'exception' => $e->getMessage(),
+                    'file' => $e->getFile(),
+                    'line' => $e->getLine(),
+                ] : null,
             ], 500);
         }
     }
