@@ -24,6 +24,8 @@ import StatisticsDashboard from '../views/admin/StatisticsDashboard.vue'
 import RoleAssignmentsList from '../views/admin/RoleAssignmentsList.vue'
 import PalServicePointsOverview from '../views/admin/PalServicePointsOverview.vue'
 import SeoDashboard from '../views/admin/seo/SeoDashboard.vue'
+import LanguagesList from '../views/admin/languages/LanguagesList.vue'
+import TranslationsList from '../views/admin/translations/TranslationsList.vue'
 
 const routes = [
   {
@@ -163,6 +165,18 @@ const routes = [
     name: 'seo.index',
     component: SeoDashboard,
     meta: { title: 'SEO Analytics' }
+  },
+  {
+    path: '/admin/languages',
+    name: 'languages.index',
+    component: LanguagesList,
+    meta: { title: 'Languages Management' }
+  },
+  {
+    path: '/admin/translations',
+    name: 'translations.index',
+    component: TranslationsList,
+    meta: { title: 'Translations Management' }
   }
 ]
 

@@ -346,7 +346,7 @@ return [
                 ],
                 [
                     'text' => 'User Services',
-                    'url'  => 'userAllServiceIndex',
+                    'url'  => 'service-posts/userAllServiceIndex',
                     'icon' => 'fas fa-user-tag',
                     'permission' => ['view_service']
                 ]
@@ -509,6 +509,29 @@ return [
             'url'  => 'admin/marketing-notifications',
             'icon' => 'fas fa-bullhorn',
             'permission' => ['view_statistics']
+        ],
+
+        ['header' => 'LOCALIZATION'],
+
+        // Language & Translation Management
+        [
+            'text'    => 'Localization',
+            'icon'    => 'fas fa-globe',
+            'permission' => ['view_statistics'],
+            'submenu' => [
+                [
+                    'text' => 'Languages',
+                    'url'  => 'admin/languages',
+                    'icon' => 'fas fa-language',
+                    'permission' => ['view_statistics']
+                ],
+                [
+                    'text' => 'Translations',
+                    'url'  => 'admin/translations',
+                    'icon' => 'fas fa-book',
+                    'permission' => ['view_statistics']
+                ],
+            ]
         ],
 
     ],    /*

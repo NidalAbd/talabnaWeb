@@ -559,6 +559,12 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/seo', [HomeController::class, 'index'])
         ->name('seo.index');
 
+    // Localization - Vue SPA
+    Route::get('/languages', [HomeController::class, 'index'])
+        ->name('languages.index');
+    Route::get('/translations', [HomeController::class, 'index'])
+        ->name('translations.index');
+
     // Unsuspend Routes
     Route::patch('/users/{id}/unsuspend', function($id) {
         $user = User::findOrFail($id);
@@ -615,13 +621,17 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/users/roles', [\App\Http\Controllers\Admin\UsersApiController::class, 'getRoles'])->name('api.admin.users.roles');
             Route::get('/users', [\App\Http\Controllers\Admin\UsersApiController::class, 'index'])->name('api.admin.users.index');
             Route::get('/users/{id}', [\App\Http\Controllers\Admin\UsersApiController::class, 'show'])->name('api.admin.users.show');
+            Route::put('/users/{id}', [\App\Http\Controllers\Admin\UsersApiController::class, 'update'])->name('api.admin.users.update');
             Route::post('/users/{id}/toggle-ban', [\App\Http\Controllers\Admin\UsersApiController::class, 'toggleBan'])->name('api.admin.users.toggle-ban');
             Route::delete('/users/{id}', [\App\Http\Controllers\Admin\UsersApiController::class, 'destroy'])->name('api.admin.users.destroy');
 
             // Roles
             Route::get('/roles/stats', [\App\Http\Controllers\Admin\RolesApiController::class, 'getStats'])->name('api.admin.roles.stats');
+            Route::get('/roles/permissions', [\App\Http\Controllers\Admin\RolesApiController::class, 'getPermissions'])->name('api.admin.roles.permissions');
             Route::get('/roles', [\App\Http\Controllers\Admin\RolesApiController::class, 'index'])->name('api.admin.roles.index');
+            Route::post('/roles', [\App\Http\Controllers\Admin\RolesApiController::class, 'store'])->name('api.admin.roles.store');
             Route::get('/roles/{id}', [\App\Http\Controllers\Admin\RolesApiController::class, 'show'])->name('api.admin.roles.show');
+            Route::put('/roles/{id}', [\App\Http\Controllers\Admin\RolesApiController::class, 'update'])->name('api.admin.roles.update');
             Route::get('/roles/{id}/users', [\App\Http\Controllers\Admin\RolesApiController::class, 'getUsersWithRole'])->name('api.admin.roles.users');
             Route::delete('/roles/{id}', [\App\Http\Controllers\Admin\RolesApiController::class, 'destroy'])->name('api.admin.roles.destroy');
 
@@ -629,6 +639,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/permissions/stats', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'getStats'])->name('api.admin.permissions.stats');
             Route::get('/permissions/categories', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'getCategories'])->name('api.admin.permissions.categories');
             Route::get('/permissions', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'index'])->name('api.admin.permissions.index');
+            Route::post('/permissions', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'store'])->name('api.admin.permissions.store');
             Route::post('/permissions/generate', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'generate'])->name('api.admin.permissions.generate');
             Route::delete('/permissions/{id}', [\App\Http\Controllers\Admin\PermissionsApiController::class, 'destroy'])->name('api.admin.permissions.destroy');
 
@@ -787,6 +798,33 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::post('/sync', [\App\Http\Controllers\Admin\SeoApiController::class, 'sync'])->name('api.admin.seo.sync');
                 Route::get('/test-connection', [\App\Http\Controllers\Admin\SeoApiController::class, 'testConnection'])->name('api.admin.seo.test-connection');
                 Route::post('/cleanup', [\App\Http\Controllers\Admin\SeoApiController::class, 'cleanup'])->name('api.admin.seo.cleanup');
+            });
+
+            // Languages Management (using API controller for web admin)
+            Route::prefix('languages')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'index'])->name('api.admin.languages.index');
+                Route::post('/', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'store'])->name('api.admin.languages.store');
+                Route::get('/stats', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'stats'])->name('api.admin.languages.stats');
+                Route::post('/reorder', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'reorder'])->name('api.admin.languages.reorder');
+                Route::get('/{id}', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'show'])->name('api.admin.languages.show');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'update'])->name('api.admin.languages.update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'destroy'])->name('api.admin.languages.destroy');
+                Route::post('/{id}/toggle', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'toggle'])->name('api.admin.languages.toggle');
+                Route::post('/{id}/set-default', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'setDefault'])->name('api.admin.languages.set-default');
+            });
+
+            // Translations Management (using API controller for web admin)
+            Route::prefix('translations')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'index'])->name('api.admin.translations.index');
+                Route::post('/', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'store'])->name('api.admin.translations.store');
+                Route::get('/stats', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'stats'])->name('api.admin.translations.stats');
+                Route::get('/groups', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'groups'])->name('api.admin.translations.groups');
+                Route::get('/export', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'export'])->name('api.admin.translations.export');
+                Route::post('/import', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'import'])->name('api.admin.translations.import');
+                Route::post('/bulk', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'bulk'])->name('api.admin.translations.bulk');
+                Route::get('/missing/{locale}', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'missing'])->name('api.admin.translations.missing');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'update'])->name('api.admin.translations.update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'destroy'])->name('api.admin.translations.destroy');
             });
         });
     });

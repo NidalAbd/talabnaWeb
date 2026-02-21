@@ -1,11 +1,14 @@
 <?php
 
 use App\Http\Controllers\Admin\BanController;
+use App\Http\Controllers\Admin\LanguageManagementController;
+use App\Http\Controllers\Admin\TranslationManagementController;
 use App\Http\Controllers\Api\BanCheckController;
 use App\Http\Controllers\Api\CategoriesController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\LanguageApiController;
 use App\Http\Controllers\Api\PalservicePointsController;
 use App\Http\Controllers\Api\PublicController;
 use App\Http\Controllers\Api\BadgeTypeController;
@@ -21,6 +24,20 @@ use App\Http\Controllers\UserController;
 
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| Language API Routes (No Authentication Required)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('languages')->group(function () {
+    Route::get('/', [LanguageApiController::class, 'index']);
+    Route::get('/config', [LanguageApiController::class, 'config']);
+    Route::get('/status/{locale}', [LanguageApiController::class, 'status']);
+});
+Route::get('/translations/{locale}/check', [LanguageApiController::class, 'checkUpdates']);
+Route::get('/translations/{locale}', [LanguageApiController::class, 'translations']);
+Route::get('/translations/{locale}/{group}', [LanguageApiController::class, 'translationsByGroup']);
 
 /*
 |--------------------------------------------------------------------------
@@ -269,4 +286,31 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('service_posts/{servicePost}/apply-badge', [BadgeTypeController::class, 'applyBadgeToPost']);
     Route::post('service_posts/{servicePost}/remove-badge', [BadgeTypeController::class, 'removeBadgeFromPost']);
     Route::post('service_posts/{servicePost}/upgrade-badge', [BadgeTypeController::class, 'upgradeBadge']);
+
+    // Language Management Routes (Admin)
+    Route::prefix('admin/languages')->group(function () {
+        Route::get('/', [LanguageManagementController::class, 'index']);
+        Route::post('/', [LanguageManagementController::class, 'store']);
+        Route::get('/stats', [LanguageManagementController::class, 'stats']);
+        Route::post('/reorder', [LanguageManagementController::class, 'reorder']);
+        Route::get('/{id}', [LanguageManagementController::class, 'show']);
+        Route::put('/{id}', [LanguageManagementController::class, 'update']);
+        Route::delete('/{id}', [LanguageManagementController::class, 'destroy']);
+        Route::post('/{id}/toggle', [LanguageManagementController::class, 'toggle']);
+        Route::post('/{id}/set-default', [LanguageManagementController::class, 'setDefault']);
+    });
+
+    // Translation Management Routes (Admin)
+    Route::prefix('admin/translations')->group(function () {
+        Route::get('/', [TranslationManagementController::class, 'index']);
+        Route::post('/', [TranslationManagementController::class, 'store']);
+        Route::get('/stats', [TranslationManagementController::class, 'stats']);
+        Route::get('/groups', [TranslationManagementController::class, 'groups']);
+        Route::get('/export', [TranslationManagementController::class, 'export']);
+        Route::post('/import', [TranslationManagementController::class, 'import']);
+        Route::post('/bulk', [TranslationManagementController::class, 'bulk']);
+        Route::get('/missing/{locale}', [TranslationManagementController::class, 'missing']);
+        Route::put('/{id}', [TranslationManagementController::class, 'update']);
+        Route::delete('/{id}', [TranslationManagementController::class, 'destroy']);
+    });
 });
