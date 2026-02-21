@@ -121,6 +121,7 @@ class BadgeType extends Model
         $mapping = [
             'ماسي' => 'diamond',
             'ذهبي' => 'gold',
+            'فضي' => 'silver',
             'عادي' => 'normal',
         ];
 

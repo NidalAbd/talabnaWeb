@@ -209,6 +209,7 @@ class LanguageSeeder extends Seeder
             // ========== BADGES GROUP ==========
             'badges.normal' => 'عادي',
             'badges.gold' => 'ذهبي',
+            'badges.silver' => 'فضي',
             'badges.diamond' => 'ماسي',
             'badges.featured' => 'مميز',
             'badges.select' => 'اختر الشارة',
@@ -1257,6 +1258,7 @@ class LanguageSeeder extends Seeder
             // ========== BADGES GROUP ==========
             'badges.normal' => 'Normal',
             'badges.gold' => 'Gold',
+            'badges.silver' => 'Silver',
             'badges.diamond' => 'Diamond',
             'badges.featured' => 'Featured',
             'badges.select' => 'Select Badge',
