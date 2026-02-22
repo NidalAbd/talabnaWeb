@@ -9,58 +9,37 @@
     <!-- Dashboard Content -->
     <div v-else>
       <!-- Stats Cards -->
-      <div class="stats-grid">
-        <a href="/users" class="stat-card stat-card-1">
-          <div class="stat-icon">
-            <i class="fas fa-users"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.totalUsers }}</div>
-            <div class="stat-label">Total Users</div>
-          </div>
-          <div class="stat-arrow">
-            <i class="fas fa-arrow-right"></i>
-          </div>
-        </a>
-
-        <a href="/users?status=active" class="stat-card stat-card-2">
-          <div class="stat-icon">
-            <i class="fas fa-user-check"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.activeUsers }}</div>
-            <div class="stat-label">Active Users</div>
-          </div>
-          <div class="stat-arrow">
-            <i class="fas fa-arrow-right"></i>
-          </div>
-        </a>
-
-        <a href="/service_posts" class="stat-card stat-card-3">
-          <div class="stat-icon">
-            <i class="fas fa-clipboard-list"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.totalPosts }}</div>
-            <div class="stat-label">Total Posts</div>
-          </div>
-          <div class="stat-arrow">
-            <i class="fas fa-arrow-right"></i>
-          </div>
-        </a>
-
-        <a href="/service_posts?state=published" class="stat-card stat-card-4">
-          <div class="stat-icon">
-            <i class="fas fa-check-circle"></i>
-          </div>
-          <div class="stat-content">
-            <div class="stat-value">{{ stats.publishedPosts }}</div>
-            <div class="stat-label">Published Posts</div>
-          </div>
-          <div class="stat-arrow">
-            <i class="fas fa-arrow-right"></i>
-          </div>
-        </a>
+      <div class="stats-dashboard">
+        <div class="stats-grid">
+          <a href="/users" class="stat-card-compact stat-blue" style="text-decoration:none;">
+            <div class="stat-icon"><i class="fas fa-users"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.totalUsers) }}</div>
+              <div class="stat-label-compact">Total Users</div>
+            </div>
+          </a>
+          <a href="/users?status=active" class="stat-card-compact stat-green" style="text-decoration:none;">
+            <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.activeUsers) }}</div>
+              <div class="stat-label-compact">Active Users</div>
+            </div>
+          </a>
+          <a href="/service_posts" class="stat-card-compact stat-orange" style="text-decoration:none;">
+            <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.totalPosts) }}</div>
+              <div class="stat-label-compact">Total Posts</div>
+            </div>
+          </a>
+          <a href="/service_posts?state=published" class="stat-card-compact stat-purple" style="text-decoration:none;">
+            <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.publishedPosts) }}</div>
+              <div class="stat-label-compact">Published Posts</div>
+            </div>
+          </a>
+        </div>
       </div>
 
       <!-- Charts Row -->
@@ -304,6 +283,11 @@ const loadDashboardData = async () => {
   }
 }
 
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
+
 const formatDate = (dateString) => {
   const date = new Date(dateString)
   return date.toLocaleDateString()
@@ -350,109 +334,6 @@ const getUserStatusBadgeClass = (isActive) => {
 }
 
 /* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 20px;
-  margin-bottom: 30px;
-}
-
-.stat-card {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 15px;
-  padding: 25px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  color: white;
-  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-  transition: all 0.3s ease;
-  text-decoration: none;
-  position: relative;
-  overflow: hidden;
-}
-
-.stat-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(255, 255, 255, 0.1);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-}
-
-.stat-card:hover::before {
-  opacity: 1;
-}
-
-.stat-card-2 {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-  box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
-}
-
-.stat-card-2:hover {
-  box-shadow: 0 8px 25px rgba(240, 147, 251, 0.5);
-}
-
-.stat-card-3 {
-  background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-  box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
-  color: #212529;
-}
-
-.stat-card-3:hover {
-  box-shadow: 0 8px 25px rgba(79, 172, 254, 0.5);
-}
-
-.stat-card-4 {
-  background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-  box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4);
-  color: #212529;
-}
-
-.stat-card-4:hover {
-  box-shadow: 0 8px 25px rgba(67, 233, 123, 0.5);
-}
-
-.stat-icon {
-  font-size: 3rem;
-  opacity: 0.9;
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 5px;
-}
-
-.stat-label {
-  font-size: 0.95rem;
-  opacity: 0.95;
-}
-
-.stat-arrow {
-  font-size: 1.5rem;
-  opacity: 0.7;
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover .stat-arrow {
-  opacity: 1;
-  transform: translateX(5px);
-}
-
 /* Charts Grid */
 .charts-grid {
   display: grid;
@@ -609,12 +490,5 @@ const getUserStatusBadgeClass = (isActive) => {
     padding: 8px 10px;
   }
 
-  .stat-value {
-    font-size: 1.5rem;
-  }
-
-  .stat-icon {
-    font-size: 2rem;
-  }
 }
 </style>

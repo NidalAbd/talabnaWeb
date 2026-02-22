@@ -1,41 +1,35 @@
 <template>
   <div class="subcategories-modern">
     <!-- Stats Cards -->
-    <div class="stats-grid mb-4">
-      <div class="stat-card blue">
-        <div class="stat-icon">
-          <i class="fas fa-layer-group"></i>
+    <div class="stats-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-blue">
+          <div class="stat-icon"><i class="fas fa-layer-group"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(subcategories.total) }}</div>
+            <div class="stat-label-compact">Total Subcategories</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ subcategories.total }}</h3>
-          <p class="stat-label">Total Subcategories</p>
+        <div class="stat-card-compact stat-green">
+          <div class="stat-icon"><i class="fas fa-folder"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(parentCategories.length) }}</div>
+            <div class="stat-label-compact">Parent Categories</div>
+          </div>
         </div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-icon">
-          <i class="fas fa-folder"></i>
+        <div class="stat-card-compact stat-orange">
+          <div class="stat-icon"><i class="fas fa-star"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(featuredCount) }}</div>
+            <div class="stat-label-compact">Featured</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ parentCategories.length }}</h3>
-          <p class="stat-label">Parent Categories</p>
-        </div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-icon">
-          <i class="fas fa-star"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ featuredCount }}</h3>
-          <p class="stat-label">Featured</p>
-        </div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-icon">
-          <i class="fas fa-fire"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ popularCount }}</h3>
-          <p class="stat-label">Popular</p>
+        <div class="stat-card-compact stat-purple">
+          <div class="stat-icon"><i class="fas fa-fire"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(popularCount) }}</div>
+            <div class="stat-label-compact">Popular</div>
+          </div>
         </div>
       </div>
     </div>
@@ -379,6 +373,11 @@ import SubCategoryFormModal from '../../../components/admin/subcategories/SubCat
 
 const { subcategories, stats, loading, fetchSubCategories, fetchStats, deleteSubCategory, toggleFeatured, togglePopular } = useSubCategories()
 
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
+
 const filters = ref({
   search: '',
   category_id: '',
@@ -554,49 +553,6 @@ const handleImageError = (event) => {
 .subcategories-modern {
   padding: 0;
 }
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
-}
-
-.stat-card {
-  border-radius: 16px;
-  padding: 1.5rem;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.stat-card.orange { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); }
-.stat-card.purple { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-
-.stat-icon {
-  width: 65px;
-  height: 65px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-}
-
-.stat-content { flex: 1; }
-.stat-value { font-size: 2rem; font-weight: 700; margin: 0; }
-.stat-label { font-size: 0.9rem; opacity: 0.9; margin: 0.25rem 0 0 0; }
 
 /* Search & Filters */
 .search-filter-bar {

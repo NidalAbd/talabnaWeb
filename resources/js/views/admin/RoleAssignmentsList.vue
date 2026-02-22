@@ -2,41 +2,35 @@
     <div class="role-assignments-modern">
 
         <!-- Stats Cards -->
-        <div class="stats-grid mb-4" v-if="stats">
-            <div class="stat-card blue">
-                <div class="stat-icon">
-                    <i class="fas fa-users"></i>
+        <div class="stats-dashboard" v-if="stats">
+            <div class="stats-grid">
+                <div class="stat-card-compact stat-blue">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ formatNumber(stats.total_users) }}</div>
+                        <div class="stat-label-compact">Total Users</div>
+                    </div>
                 </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stats.total_users }}</h3>
-                    <p class="stat-label">Total Users</p>
+                <div class="stat-card-compact stat-green">
+                    <div class="stat-icon"><i class="fas fa-user-tag"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ formatNumber(stats.users_with_roles) }}</div>
+                        <div class="stat-label-compact">Users with Roles</div>
+                    </div>
                 </div>
-            </div>
-            <div class="stat-card green">
-                <div class="stat-icon">
-                    <i class="fas fa-user-tag"></i>
+                <div class="stat-card-compact stat-orange">
+                    <div class="stat-icon"><i class="fas fa-user-minus"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ formatNumber(stats.users_without_roles) }}</div>
+                        <div class="stat-label-compact">Users without Roles</div>
+                    </div>
                 </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stats.users_with_roles }}</h3>
-                    <p class="stat-label">Users with Roles</p>
-                </div>
-            </div>
-            <div class="stat-card orange">
-                <div class="stat-icon">
-                    <i class="fas fa-user-minus"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stats.users_without_roles }}</h3>
-                    <p class="stat-label">Users without Roles</p>
-                </div>
-            </div>
-            <div class="stat-card purple">
-                <div class="stat-icon">
-                    <i class="fas fa-key"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stats.users_with_permissions }}</h3>
-                    <p class="stat-label">Custom Permissions</p>
+                <div class="stat-card-compact stat-purple">
+                    <div class="stat-icon"><i class="fas fa-key"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ formatNumber(stats.users_with_permissions) }}</div>
+                        <div class="stat-label-compact">Custom Permissions</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -246,6 +240,11 @@ const {
     updateRoleAssignment
 } = useRoleAssignments()
 
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
+
 const searchQuery = ref('')
 const roleFilter = ref('')
 const editingUser = ref(null)
@@ -380,73 +379,6 @@ onMounted(() => {
 .section-subtitle {
     color: #666;
     font-size: 0.95rem;
-    margin: 0;
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    border-radius: 12px;
-    padding: 1.5rem;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card.blue {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.stat-card.green {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-}
-
-.stat-card.orange {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-}
-
-.stat-card.purple {
-    background: linear-gradient(135deg, #6f42c1 0%, #5a32a3 100%);
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0 0 0.25rem 0;
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    opacity: 0.95;
     margin: 0;
 }
 

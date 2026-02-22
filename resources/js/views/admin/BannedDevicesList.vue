@@ -12,16 +12,16 @@
         </div>
 
         <!-- Stats Cards -->
-        <div class="stats-grid mb-4">
-            <div class="stat-card red" v-for="stat in stats" :key="stat.label">
-                <div class="stat-icon">
-                    <i :class="stat.icon"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stat.value }}</h3>
-                    <p class="stat-label">{{ stat.label }}</p>
-                </div>
+        <div class="stats-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card-compact" :class="stat.color" v-for="stat in stats" :key="stat.label">
+              <div class="stat-icon"><i :class="stat.icon"></i></div>
+              <div class="stat-info">
+                <div class="stat-value-compact">{{ formatNumber(stat.value) }}</div>
+                <div class="stat-label-compact">{{ stat.label }}</div>
+              </div>
             </div>
+          </div>
         </div>
 
         <!-- Search & Filters -->
@@ -294,6 +294,11 @@ const displayPages = computed(() => {
     return rangeWithDots.filter(p => p !== '...' || rangeWithDots.indexOf(p) === rangeWithDots.lastIndexOf(p))
 })
 
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
+
 const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('en-US', {
@@ -386,58 +391,6 @@ onMounted(async () => {
 .section-subtitle {
     color: #666;
     font-size: 0.95rem;
-    margin: 0;
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    border-radius: 12px;
-    padding: 1.5rem;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: 0 4px 6px rgba(231, 76, 60, 0.2);
-    transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 12px rgba(231, 76, 60, 0.3);
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0 0 0.25rem 0;
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    opacity: 0.95;
     margin: 0;
 }
 

@@ -1,41 +1,35 @@
 <template>
   <div class="translations-modern">
     <!-- Stats Cards -->
-    <div class="stats-grid mb-4">
-      <div class="stat-card blue">
-        <div class="stat-icon">
-          <i class="fas fa-language"></i>
+    <div class="stats-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-blue">
+          <div class="stat-icon"><i class="fas fa-language"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(translations.total) }}</div>
+            <div class="stat-label-compact">Total Translations</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ translations.total }}</h3>
-          <p class="stat-label">Total Translations</p>
+        <div class="stat-card-compact stat-green">
+          <div class="stat-icon"><i class="fas fa-globe"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(availableLanguages.length) }}</div>
+            <div class="stat-label-compact">Languages</div>
+          </div>
         </div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-icon">
-          <i class="fas fa-globe"></i>
+        <div class="stat-card-compact stat-orange">
+          <div class="stat-icon"><i class="fas fa-folder"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(groups.length) }}</div>
+            <div class="stat-label-compact">Groups</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ availableLanguages.length }}</h3>
-          <p class="stat-label">Languages</p>
-        </div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-icon">
-          <i class="fas fa-folder"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ groups.length }}</h3>
-          <p class="stat-label">Groups</p>
-        </div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-icon">
-          <i class="fas fa-key"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ uniqueKeysCount }}</h3>
-          <p class="stat-label">Unique Keys</p>
+        <div class="stat-card-compact stat-purple">
+          <div class="stat-icon"><i class="fas fa-key"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(uniqueKeysCount) }}</div>
+            <div class="stat-label-compact">Unique Keys</div>
+          </div>
         </div>
       </div>
     </div>
@@ -476,6 +470,11 @@ const router = useRouter()
 const { translations, groups, loading, fetchTranslations, fetchGroups, deleteTranslation, exportTranslations, importTranslations, updateTranslation, createTranslation } = useTranslations()
 const { languages: languagesData, fetchLanguages } = useLanguages()
 
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
+
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const showImportModal = ref(false)
@@ -850,49 +849,6 @@ const refreshMissingTranslations = async () => {
 .translations-modern {
   padding: 0;
 }
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1.25rem;
-}
-
-.stat-card {
-  border-radius: 16px;
-  padding: 1.5rem;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.stat-card.orange { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); }
-.stat-card.purple { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-
-.stat-icon {
-  width: 55px;
-  height: 55px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.5rem;
-}
-
-.stat-content { flex: 1; }
-.stat-value { font-size: 1.75rem; font-weight: 700; margin: 0; color: #ffffff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); }
-.stat-label { font-size: 0.85rem; opacity: 0.9; margin: 0.25rem 0 0 0; color: #ffffff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
 
 /* Search & Filters */
 .search-filter-bar {

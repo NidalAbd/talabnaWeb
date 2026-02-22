@@ -1,5 +1,25 @@
 <template>
   <div class="countries-management-advanced">
+    <!-- Stats Cards -->
+    <div class="stats-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-blue">
+          <div class="stat-icon"><i class="fas fa-globe"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(countries.total) }}</div>
+            <div class="stat-label-compact">Total Countries</div>
+          </div>
+        </div>
+        <div class="stat-card-compact stat-green">
+          <div class="stat-icon"><i class="fas fa-city"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(totalCitiesCount) }}</div>
+            <div class="stat-label-compact">Total Cities</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Advanced Search & Filters -->
     <div class="search-filter-bar">
       <div class="search-box">
@@ -319,6 +339,15 @@ import CountryFormModal from '../../../components/admin/countries/CountryFormMod
 import CitiesModal from '../../../components/admin/countries/CitiesModal.vue'
 
 const { countries, loading, fetchCountries, deleteCountry } = useCountries()
+
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
+
+const totalCitiesCount = computed(() => {
+  return countries.value.data.reduce((sum, c) => sum + (c.cities_count || 0), 0)
+})
 
 const viewMode = ref('list')
 const activeMenu = ref(null)

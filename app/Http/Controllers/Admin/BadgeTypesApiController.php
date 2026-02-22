@@ -63,79 +63,105 @@ class BadgeTypesApiController extends Controller
      */
     public function getStats(): JsonResponse
     {
-        $today = Carbon::today();
-        $endOfWeek = Carbon::today()->endOfWeek();
+        try {
+            $today = Carbon::today();
+            $endOfWeek = Carbon::today()->endOfWeek();
 
-        // Badge type stats
-        $total = BadgeType::count();
-        $active = BadgeType::where('is_active', true)->count();
+            // Badge type stats
+            $total = BadgeType::count();
+            $active = BadgeType::where('is_active', true)->count();
 
-        // Points stats
-        $totalPoints = DB::table('palservice_points')->sum('point');
-        $pointsPurchased = DB::table('point_transactions')->where('type', 'purchase')->sum('point');
-        $pointsUsed = DB::table('point_transactions')->where('type', 'used')->sum('point');
-        $pointsTransferred = DB::table('point_transactions')->where('type', 'transfer')->sum('point');
+            // Points stats (wrapped individually to handle missing columns/tables)
+            $totalPoints = 0;
+            $pointsPurchased = 0;
+            $pointsUsed = 0;
+            $pointsTransferred = 0;
+            $activeBadgePosts = 0;
+            $expiringToday = 0;
+            $expiringThisWeek = 0;
+            $pendingPurchaseRequests = 0;
 
-        // Badge expiry stats
-        $activeBadgePosts = DB::table('service_posts')
-            ->whereNotNull('badge_type_id')
-            ->where('badge_expires_at', '>', $today)
-            ->count();
+            try {
+                $totalPoints = (int) DB::table('palservice_points')->sum('point');
+            } catch (\Exception $e) {}
 
-        $expiringToday = DB::table('service_posts')
-            ->whereNotNull('badge_type_id')
-            ->whereDate('badge_expires_at', $today)
-            ->count();
+            try {
+                $pointsPurchased = (int) DB::table('point_transactions')->where('type', 'purchase')->sum('point');
+                $pointsUsed = (int) abs(DB::table('point_transactions')->where('type', 'used')->sum('point'));
+                $pointsTransferred = (int) abs(DB::table('point_transactions')->where('type', 'transfer')->sum('point'));
+            } catch (\Exception $e) {}
 
-        $expiringThisWeek = DB::table('service_posts')
-            ->whereNotNull('badge_type_id')
-            ->whereBetween('badge_expires_at', [$today, $endOfWeek])
-            ->count();
+            try {
+                $activeBadgePosts = DB::table('service_posts')
+                    ->whereNotNull('badge_type_id')
+                    ->where('badge_expires_at', '>', $today)
+                    ->count();
 
-        $pendingPurchaseRequests = DB::table('point_purchase_requests')
-            ->where('status', 'pending')
-            ->count();
+                $expiringToday = DB::table('service_posts')
+                    ->whereNotNull('badge_type_id')
+                    ->whereDate('badge_expires_at', $today)
+                    ->count();
 
-        return response()->json([
-            'stats' => [
-                [
-                    'label' => 'Total Badge Types',
-                    'value' => $total,
-                    'icon' => 'fas fa-certificate',
-                    'color' => 'info'
+                $expiringThisWeek = DB::table('service_posts')
+                    ->whereNotNull('badge_type_id')
+                    ->whereBetween('badge_expires_at', [$today, $endOfWeek])
+                    ->count();
+            } catch (\Exception $e) {}
+
+            try {
+                $pendingPurchaseRequests = DB::table('point_purchase_requests')
+                    ->where('status', 'pending')
+                    ->count();
+            } catch (\Exception $e) {}
+
+            return response()->json([
+                'stats' => [
+                    [
+                        'label' => 'Total Badge Types',
+                        'value' => $total,
+                        'icon' => 'fas fa-certificate',
+                        'color' => 'info'
+                    ],
+                    [
+                        'label' => 'Active Badges',
+                        'value' => $active,
+                        'icon' => 'fas fa-check-circle',
+                        'color' => 'success'
+                    ],
+                    [
+                        'label' => 'Active Badge Posts',
+                        'value' => $activeBadgePosts,
+                        'icon' => 'fas fa-award',
+                        'color' => 'warning'
+                    ],
+                    [
+                        'label' => 'Inactive Badges',
+                        'value' => $total - $active,
+                        'icon' => 'fas fa-times-circle',
+                        'color' => 'secondary'
+                    ]
                 ],
-                [
-                    'label' => 'Active Badges',
-                    'value' => $active,
-                    'icon' => 'fas fa-check-circle',
-                    'color' => 'success'
+                'points_stats' => [
+                    'total_points' => $totalPoints,
+                    'points_purchased' => $pointsPurchased,
+                    'points_used' => $pointsUsed,
+                    'points_transferred' => $pointsTransferred,
                 ],
-                [
-                    'label' => 'Active Badge Posts',
-                    'value' => $activeBadgePosts,
-                    'icon' => 'fas fa-award',
-                    'color' => 'warning'
+                'badge_stats' => [
+                    'active_badge_posts' => $activeBadgePosts,
+                    'expiring_today' => $expiringToday,
+                    'expiring_this_week' => $expiringThisWeek,
+                    'pending_purchase_requests' => $pendingPurchaseRequests,
                 ],
-                [
-                    'label' => 'Inactive Badges',
-                    'value' => $total - $active,
-                    'icon' => 'fas fa-times-circle',
-                    'color' => 'secondary'
-                ]
-            ],
-            'points_stats' => [
-                'total_points' => (int) $totalPoints,
-                'points_purchased' => (int) $pointsPurchased,
-                'points_used' => (int) abs($pointsUsed),
-                'points_transferred' => (int) abs($pointsTransferred),
-            ],
-            'badge_stats' => [
-                'active_badge_posts' => $activeBadgePosts,
-                'expiring_today' => $expiringToday,
-                'expiring_this_week' => $expiringThisWeek,
-                'pending_purchase_requests' => $pendingPurchaseRequests,
-            ],
-        ]);
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'stats' => [],
+                'points_stats' => ['total_points' => 0, 'points_purchased' => 0, 'points_used' => 0, 'points_transferred' => 0],
+                'badge_stats' => ['active_badge_posts' => 0, 'expiring_today' => 0, 'expiring_this_week' => 0, 'pending_purchase_requests' => 0],
+                'error' => $e->getMessage()
+            ], 200);
+        }
     }
 
     /**

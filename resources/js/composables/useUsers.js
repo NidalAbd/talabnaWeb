@@ -85,12 +85,68 @@ export function useUsers() {
         }
     }
 
+    const fetchUser = async (userId) => {
+        try {
+            const response = await fetch(`/api/admin/users/${userId}`)
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch user')
+            }
+
+            return await response.json()
+        } catch (err) {
+            console.error('Error fetching user:', err)
+            throw err
+        }
+    }
+
+    const updateUser = async (userId, userData) => {
+        try {
+            const response = await fetch(`/api/admin/users/${userId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(userData)
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || errorData.message || 'Failed to update user')
+            }
+
+            return await response.json()
+        } catch (err) {
+            console.error('Error updating user:', err)
+            throw err
+        }
+    }
+
+    const getRoles = async () => {
+        try {
+            const response = await fetch('/api/admin/users/roles')
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch roles')
+            }
+
+            return await response.json()
+        } catch (err) {
+            console.error('Error fetching roles:', err)
+            throw err
+        }
+    }
+
     return {
         users,
         loading,
         error,
         fetchUsers,
+        fetchUser,
+        updateUser,
         toggleBan,
-        deleteUser
+        deleteUser,
+        getRoles
     }
 }

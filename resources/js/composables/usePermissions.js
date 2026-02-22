@@ -79,6 +79,29 @@ export function usePermissions() {
         }
     }
 
+    const createPermission = async (permissionData) => {
+        try {
+            const response = await fetch('/api/admin/permissions', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(permissionData)
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || errorData.message || 'Failed to create permission')
+            }
+
+            return await response.json()
+        } catch (error) {
+            console.error('Error creating permission:', error)
+            throw error
+        }
+    }
+
     const generatePermissions = async (moduleName) => {
         try {
             const response = await fetch('/api/admin/permissions/generate', {
@@ -127,6 +150,7 @@ export function usePermissions() {
         permissions,
         loading,
         fetchPermissions,
+        createPermission,
         generatePermissions,
         deletePermission
     }

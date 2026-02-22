@@ -1,5 +1,25 @@
 <template>
   <div class="cities-management-advanced">
+    <!-- Stats Cards -->
+    <div class="stats-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-blue">
+          <div class="stat-icon"><i class="fas fa-city"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(cities.total) }}</div>
+            <div class="stat-label-compact">Total Cities</div>
+          </div>
+        </div>
+        <div class="stat-card-compact stat-green">
+          <div class="stat-icon"><i class="fas fa-globe"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(countries.length) }}</div>
+            <div class="stat-label-compact">Countries</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Advanced Search & Filters -->
     <div class="search-filter-bar">
       <div class="search-box">
@@ -270,6 +290,11 @@ import { useCities } from '../../../composables/useCities'
 import CityFormModal from '../../../components/admin/cities/CityFormModal.vue'
 
 const { cities, loading, fetchCities, deleteCity } = useCities()
+
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
 
 const viewMode = ref('list')
 const activeMenu = ref(null)

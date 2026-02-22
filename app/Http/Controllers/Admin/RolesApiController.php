@@ -165,6 +165,147 @@ class RolesApiController extends Controller
     }
 
     /**
+     * Create a new role
+     */
+    public function store(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:100|unique:roles,name',
+                'display_name' => 'nullable|string|max:100',
+                'description' => 'nullable|string|max:255',
+                'permissions' => 'array',
+                'permissions.*' => 'exists:permissions,id',
+            ]);
+
+            DB::beginTransaction();
+
+            $role = Role::create([
+                'name' => strtolower(str_replace(' ', '_', $request->name)),
+                'display_name' => $request->display_name ?? $request->name,
+                'description' => $request->description,
+            ]);
+
+            // Attach permissions if provided
+            if ($request->has('permissions') && count($request->permissions) > 0) {
+                $role->syncPermissions($request->permissions);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Role created successfully',
+                'role' => [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'display_name' => $role->display_name,
+                    'description' => $role->description,
+                    'permissions_count' => $role->permissions()->count(),
+                ]
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Failed to create role',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Update a role
+     */
+    public function update(Request $request, $id): JsonResponse
+    {
+        try {
+            $role = Role::findOrFail($id);
+
+            // Prevent updating protected roles
+            if (in_array($role->name, ['superadmin', 'admin'])) {
+                return response()->json([
+                    'error' => 'Cannot modify system roles'
+                ], 403);
+            }
+
+            $request->validate([
+                'display_name' => 'nullable|string|max:100',
+                'description' => 'nullable|string|max:255',
+                'permissions' => 'array',
+                'permissions.*' => 'exists:permissions,id',
+            ]);
+
+            DB::beginTransaction();
+
+            $role->update([
+                'display_name' => $request->display_name ?? $role->display_name,
+                'description' => $request->description ?? $role->description,
+            ]);
+
+            // Sync permissions if provided
+            if ($request->has('permissions')) {
+                $role->syncPermissions($request->permissions);
+            }
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Role updated successfully',
+                'role' => [
+                    'id' => $role->id,
+                    'name' => $role->name,
+                    'display_name' => $role->display_name,
+                    'description' => $role->description,
+                    'permissions_count' => $role->permissions()->count(),
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return response()->json([
+                'error' => 'Failed to update role',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Get all permissions for role form
+     */
+    public function getPermissions(): JsonResponse
+    {
+        try {
+            $permissions = Permission::orderBy('name')->get();
+
+            // Group permissions by category
+            $grouped = $permissions->groupBy(function ($permission) {
+                $parts = explode('_', $permission->name);
+                return count($parts) > 1 ? $parts[0] : 'general';
+            });
+
+            return response()->json([
+                'permissions' => $permissions,
+                'grouped_permissions' => $grouped
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to load permissions',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Delete role
      */
     public function destroy($id): JsonResponse

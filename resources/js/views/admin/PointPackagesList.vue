@@ -1,14 +1,14 @@
 <template>
     <div class="modern-packages-container">
         <!-- Stats Cards -->
-        <div class="stats-grid">
-            <div class="stat-card" v-for="stat in stats" :key="stat.label">
-                <div class="stat-icon">
-                    <i :class="stat.icon"></i>
-                </div>
-                <div class="stat-content">
-                    <div class="stat-value">{{ stat.value }}</div>
-                    <div class="stat-label">{{ stat.label }}</div>
+        <div class="stats-dashboard">
+            <div class="stats-grid">
+                <div class="stat-card-compact" :class="stat.color" v-for="stat in stats" :key="stat.label">
+                    <div class="stat-icon"><i :class="stat.icon"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ formatNumber(stat.value) }}</div>
+                        <div class="stat-label-compact">{{ stat.label }}</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -384,6 +384,11 @@ const {
     bulkDeactivate
 } = usePointPackages()
 
+const formatNumber = (value) => {
+    if (value === null || value === undefined) return '0'
+    return new Intl.NumberFormat().format(value)
+}
+
 const filters = ref({
     search: '',
     status: '',
@@ -703,82 +708,6 @@ onMounted(async () => {
 <style scoped>
 .modern-packages-container {
     padding: 20px;
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.stat-card {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 15px;
-    padding: 25px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    color: white;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
-    transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.5);
-}
-
-.stat-card:nth-child(2) {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    box-shadow: 0 4px 15px rgba(240, 147, 251, 0.4);
-}
-
-.stat-card:nth-child(2):hover {
-    box-shadow: 0 8px 25px rgba(240, 147, 251, 0.5);
-}
-
-.stat-card:nth-child(3) {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
-}
-
-.stat-card:nth-child(3):hover {
-    box-shadow: 0 8px 25px rgba(243, 156, 18, 0.5);
-}
-
-.stat-card:nth-child(4) {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
-}
-
-.stat-card:nth-child(4):hover {
-    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
-}
-
-.stat-icon {
-    font-size: 3rem;
-    opacity: 0.9;
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 5px;
-    color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-}
-
-.stat-label {
-    font-size: 0.95rem;
-    opacity: 0.95;
-    color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Modern Card */

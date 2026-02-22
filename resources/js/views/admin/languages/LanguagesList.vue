@@ -1,41 +1,35 @@
 <template>
   <div class="languages-modern">
     <!-- Stats Cards -->
-    <div class="stats-grid mb-4">
-      <div class="stat-card blue">
-        <div class="stat-icon">
-          <i class="fas fa-globe"></i>
+    <div class="stats-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-blue">
+          <div class="stat-icon"><i class="fas fa-globe"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(languages.total) }}</div>
+            <div class="stat-label-compact">Total Languages</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ languages.total }}</h3>
-          <p class="stat-label">Total Languages</p>
+        <div class="stat-card-compact stat-green">
+          <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(activeCount) }}</div>
+            <div class="stat-label-compact">Active</div>
+          </div>
         </div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-icon">
-          <i class="fas fa-check-circle"></i>
+        <div class="stat-card-compact stat-orange">
+          <div class="stat-icon"><i class="fas fa-arrow-right"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(ltrCount) }}</div>
+            <div class="stat-label-compact">LTR Languages</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ activeCount }}</h3>
-          <p class="stat-label">Active</p>
-        </div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-icon">
-          <i class="fas fa-arrow-right"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ ltrCount }}</h3>
-          <p class="stat-label">LTR Languages</p>
-        </div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-icon">
-          <i class="fas fa-arrow-left"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ rtlCount }}</h3>
-          <p class="stat-label">RTL Languages</p>
+        <div class="stat-card-compact stat-purple">
+          <div class="stat-icon"><i class="fas fa-arrow-left"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(rtlCount) }}</div>
+            <div class="stat-label-compact">RTL Languages</div>
+          </div>
         </div>
       </div>
     </div>
@@ -425,6 +419,11 @@ import LanguageFormModal from '../../../components/admin/languages/LanguageFormM
 const router = useRouter()
 const { languages, loading, fetchLanguages, deleteLanguage, toggleActive, setDefault } = useLanguages()
 
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
+
 const viewMode = ref('list')
 const activeMenu = ref(null)
 const showCreateModal = ref(false)
@@ -679,49 +678,6 @@ const handleLanguageSaved = (eventData) => {
 .languages-modern {
   padding: 0;
 }
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
-}
-
-.stat-card {
-  border-radius: 16px;
-  padding: 1.5rem;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.stat-card.orange { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); }
-.stat-card.purple { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-
-.stat-icon {
-  width: 65px;
-  height: 65px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-}
-
-.stat-content { flex: 1; }
-.stat-value { font-size: 2rem; font-weight: 700; margin: 0; color: #ffffff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15); }
-.stat-label { font-size: 0.9rem; opacity: 0.9; margin: 0.25rem 0 0 0; color: #ffffff; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1); }
 
 /* Search & Filters */
 .search-filter-bar {

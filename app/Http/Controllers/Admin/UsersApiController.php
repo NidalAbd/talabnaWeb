@@ -227,6 +227,70 @@ class UsersApiController extends Controller
     }
 
     /**
+     * Update user
+     */
+    public function update(Request $request, $id): JsonResponse
+    {
+        try {
+            $user = User::findOrFail($id);
+
+            $request->validate([
+                'name' => 'nullable|string|max:255',
+                'email' => 'nullable|email|unique:users,email,' . $id,
+                'phones' => 'nullable|string|max:50',
+                'is_active' => 'nullable|in:active,inactive,banned',
+                'roles' => 'nullable|array',
+                'roles.*' => 'exists:roles,id',
+            ]);
+
+            // Update basic info
+            if ($request->has('name')) {
+                $user->name = $request->name;
+            }
+            if ($request->has('email')) {
+                $user->email = $request->email;
+            }
+            if ($request->has('phones')) {
+                $user->phones = $request->phones;
+            }
+            if ($request->has('is_active')) {
+                $user->is_active = $request->is_active;
+            }
+
+            $user->save();
+
+            // Sync roles if provided
+            if ($request->has('roles')) {
+                $user->syncRoles($request->roles);
+            }
+
+            return response()->json([
+                'success' => true,
+                'message' => 'User updated successfully',
+                'user' => [
+                    'id' => $user->id,
+                    'user_name' => $user->user_name,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phones' => $user->phones,
+                    'is_active' => $user->is_active,
+                    'roles' => $user->roles->pluck('display_name')->filter()->values()->toArray(),
+                ]
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to update user',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Delete user
      */
     public function destroy($id): JsonResponse

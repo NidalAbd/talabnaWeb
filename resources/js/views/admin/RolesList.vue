@@ -1,41 +1,35 @@
 <template>
   <div class="roles-modern">
     <!-- Stats Cards -->
-    <div class="stats-grid mb-4">
-      <div class="stat-card blue">
-        <div class="stat-icon">
-          <i class="fas fa-user-tag"></i>
+    <div class="stats-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-blue">
+          <div class="stat-icon"><i class="fas fa-user-tag"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(rolesTotal) }}</div>
+            <div class="stat-label-compact">Total Roles</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ rolesTotal }}</h3>
-          <p class="stat-label">Total Roles</p>
+        <div class="stat-card-compact stat-green">
+          <div class="stat-icon"><i class="fas fa-shield-alt"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(systemRolesCount) }}</div>
+            <div class="stat-label-compact">System Roles</div>
+          </div>
         </div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-icon">
-          <i class="fas fa-shield-alt"></i>
+        <div class="stat-card-compact stat-orange">
+          <div class="stat-icon"><i class="fas fa-user-cog"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(customRolesCount) }}</div>
+            <div class="stat-label-compact">Custom Roles</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ systemRolesCount }}</h3>
-          <p class="stat-label">System Roles</p>
-        </div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-icon">
-          <i class="fas fa-user-cog"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ customRolesCount }}</h3>
-          <p class="stat-label">Custom Roles</p>
-        </div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-icon">
-          <i class="fas fa-key"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ totalPermissions }}</h3>
-          <p class="stat-label">Total Permissions</p>
+        <div class="stat-card-compact stat-purple">
+          <div class="stat-icon"><i class="fas fa-key"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(totalPermissions) }}</div>
+            <div class="stat-label-compact">Total Permissions</div>
+          </div>
         </div>
       </div>
     </div>
@@ -67,12 +61,12 @@
         </button>
       </div>
       <div class="action-buttons">
-        <a href="/permissions" class="action-btn info">
+        <router-link to="/admin/permissions" class="action-btn info">
           <i class="fas fa-key"></i> Permissions
-        </a>
-        <a href="/roles/create" class="action-btn primary">
+        </router-link>
+        <button class="action-btn primary" @click="openCreateModal">
           <i class="fas fa-plus"></i> Create Role
-        </a>
+        </button>
       </div>
     </div>
 
@@ -127,12 +121,12 @@
             </td>
             <td>
               <div class="table-actions">
-                <a :href="`/roles/${role.id}`" class="action-btn-small view" title="View">
+                <button @click="viewRole(role)" class="action-btn-small view" title="View">
                   <i class="fas fa-eye"></i>
-                </a>
-                <a v-if="role.is_editable" :href="`/roles/${role.id}/edit`" class="action-btn-small edit" title="Edit">
+                </button>
+                <button v-if="role.is_editable" @click="openEditModal(role)" class="action-btn-small edit" title="Edit">
                   <i class="fas fa-edit"></i>
-                </a>
+                </button>
                 <button v-if="role.is_deletable" @click="handleDelete(role)" class="action-btn-small delete" title="Delete">
                   <i class="fas fa-trash"></i>
                 </button>
@@ -207,11 +201,80 @@
         </div>
       </div>
     </div>
+
+    <!-- View Role Modal -->
+    <div class="modal-overlay" v-if="showViewModal" @click="showViewModal = false">
+      <div class="modern-modal modal-lg" @click.stop>
+        <div class="modal-header">
+          <h3><i class="fas fa-user-tag text-info"></i> Role Details</h3>
+          <button class="close-btn" @click="showViewModal = false">
+            <i class="fas fa-times"></i>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div v-if="loadingView" class="text-center py-4">
+            <i class="fas fa-spinner fa-spin fa-2x"></i>
+            <p class="mt-2">Loading role details...</p>
+          </div>
+          <div v-else-if="viewRoleData">
+            <div class="role-view-header">
+              <div class="role-icon-box" :class="getRoleColorClass(viewRoleData.name)">
+                <i :class="getRoleIcon(viewRoleData.name)"></i>
+              </div>
+              <div class="role-view-info">
+                <h4>{{ viewRoleData.display_name }}</h4>
+                <span class="role-slug">{{ viewRoleData.name }}</span>
+              </div>
+            </div>
+            <p class="role-description">{{ viewRoleData.description || 'No description provided' }}</p>
+            <div class="permissions-section">
+              <h5><i class="fas fa-key"></i> Permissions ({{ viewRoleData.permissions?.length || 0 }})</h5>
+              <div class="permissions-list">
+                <span
+                  v-for="perm in viewRoleData.permissions"
+                  :key="perm.id"
+                  class="permission-badge"
+                >
+                  {{ perm.display_name || perm.name }}
+                </span>
+                <span v-if="!viewRoleData.permissions?.length" class="text-muted">No permissions assigned</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="action-btn secondary" @click="showViewModal = false">
+            <i class="fas fa-times"></i> Close
+          </button>
+          <button v-if="viewRoleData?.is_editable" class="action-btn primary" @click="openEditFromView">
+            <i class="fas fa-edit"></i> Edit Role
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Create/Edit Role Modal -->
+    <RoleFormModal
+      v-if="showFormModal"
+      :mode="formMode"
+      :role="selectedRole"
+      @close="showFormModal = false"
+      @saved="handleRoleSaved"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, reactive, computed } from 'vue'
+import RoleFormModal from '../../components/admin/roles/RoleFormModal.vue'
+import { useRoles } from '../../composables/useRoles'
+
+const { fetchRole } = useRoles()
+
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
 
 // Local state
 const rolesData = ref([])
@@ -223,6 +286,16 @@ const showDeleteModal = ref(false)
 const roleToDelete = ref(null)
 const isDeleting = ref(false)
 const totalPermissions = ref(0)
+
+// Form modal state
+const showFormModal = ref(false)
+const formMode = ref('create')
+const selectedRole = ref(null)
+
+// View modal state
+const showViewModal = ref(false)
+const viewRoleData = ref(null)
+const loadingView = ref(false)
 
 const filters = reactive({
   search: '',
@@ -369,55 +442,59 @@ const confirmDelete = async () => {
     isDeleting.value = false
   }
 }
+
+// Modal handlers
+const openCreateModal = () => {
+  formMode.value = 'create'
+  selectedRole.value = null
+  showFormModal.value = true
+}
+
+const openEditModal = async (role) => {
+  formMode.value = 'edit'
+  try {
+    const data = await fetchRole(role.id)
+    selectedRole.value = { ...data.role, permissions: data.permissions }
+    showFormModal.value = true
+  } catch (error) {
+    console.error('Error loading role:', error)
+    alert('Failed to load role details')
+  }
+}
+
+const viewRole = async (role) => {
+  loadingView.value = true
+  showViewModal.value = true
+  try {
+    const data = await fetchRole(role.id)
+    viewRoleData.value = { ...data.role, permissions: data.permissions }
+  } catch (error) {
+    console.error('Error loading role:', error)
+    showViewModal.value = false
+    alert('Failed to load role details')
+  } finally {
+    loadingView.value = false
+  }
+}
+
+const openEditFromView = () => {
+  showViewModal.value = false
+  selectedRole.value = viewRoleData.value
+  formMode.value = 'edit'
+  showFormModal.value = true
+}
+
+const handleRoleSaved = () => {
+  showFormModal.value = false
+  loadRoles(currentPage.value)
+  loadStats()
+}
 </script>
 
 <style scoped>
 .roles-modern {
   padding: 0;
 }
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
-}
-
-.stat-card {
-  border-radius: 16px;
-  padding: 1.5rem;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.stat-card.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.stat-card.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-
-.stat-icon {
-  width: 65px;
-  height: 65px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-}
-
-.stat-content { flex: 1; }
-.stat-value { font-size: 2rem; font-weight: 700; margin: 0; }
-.stat-label { font-size: 0.9rem; opacity: 0.9; margin: 0.25rem 0 0 0; }
 
 /* Search & Filters */
 .search-filter-bar {
@@ -860,6 +937,62 @@ const confirmDelete = async () => {
 
 .text-danger { color: #dc3545; }
 .text-muted { color: #888; font-size: 0.9rem; }
+.text-info { color: #17a2b8; }
+.text-center { text-align: center; }
+.py-4 { padding: 1.5rem 0; }
+.mt-2 { margin-top: 0.5rem; }
+
+/* View Modal Enhancements */
+.modal-lg {
+  max-width: 700px;
+}
+
+.role-view-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid #eef2f7;
+}
+
+.role-view-info h4 {
+  margin: 0;
+  font-size: 1.25rem;
+}
+
+.role-description {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.permissions-section h5 {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+  color: #333;
+}
+
+.permissions-section h5 i {
+  color: #667eea;
+}
+
+.permissions-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.permission-badge {
+  display: inline-block;
+  padding: 0.35rem 0.75rem;
+  background: #e3f2fd;
+  color: #1976d2;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
 
 /* Responsive */
 @media (max-width: 768px) {

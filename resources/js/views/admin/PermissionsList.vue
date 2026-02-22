@@ -1,41 +1,35 @@
 <template>
   <div class="permissions-modern">
     <!-- Stats Cards -->
-    <div class="stats-grid mb-4">
-      <div class="stat-card blue">
-        <div class="stat-icon">
-          <i class="fas fa-key"></i>
+    <div class="stats-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-blue">
+          <div class="stat-icon"><i class="fas fa-key"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(permissionsTotal) }}</div>
+            <div class="stat-label-compact">Total Permissions</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ permissionsTotal }}</h3>
-          <p class="stat-label">Total Permissions</p>
+        <div class="stat-card-compact stat-green">
+          <div class="stat-icon"><i class="fas fa-lock"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(systemPermissionsCount) }}</div>
+            <div class="stat-label-compact">System Permissions</div>
+          </div>
         </div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-icon">
-          <i class="fas fa-lock"></i>
+        <div class="stat-card-compact stat-orange">
+          <div class="stat-icon"><i class="fas fa-user-edit"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(customPermissionsCount) }}</div>
+            <div class="stat-label-compact">Custom Permissions</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ systemPermissionsCount }}</h3>
-          <p class="stat-label">System Permissions</p>
-        </div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-icon">
-          <i class="fas fa-user-edit"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ customPermissionsCount }}</h3>
-          <p class="stat-label">Custom Permissions</p>
-        </div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-icon">
-          <i class="fas fa-folder"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ categories.length }}</h3>
-          <p class="stat-label">Categories</p>
+        <div class="stat-card-compact stat-purple">
+          <div class="stat-icon"><i class="fas fa-folder"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(categories.length) }}</div>
+            <div class="stat-label-compact">Categories</div>
+          </div>
         </div>
       </div>
     </div>
@@ -69,11 +63,14 @@
         </select>
       </div>
       <div class="action-buttons">
-        <a href="/roles" class="action-btn info">
+        <router-link to="/admin/roles" class="action-btn info">
           <i class="fas fa-user-tag"></i> Roles
-        </a>
+        </router-link>
+        <button class="action-btn success" @click="showCreateModal = true">
+          <i class="fas fa-plus"></i> Create
+        </button>
         <button class="action-btn primary" @click="showGenerateModal = true">
-          <i class="fas fa-plus"></i> Generate
+          <i class="fas fa-cogs"></i> Generate
         </button>
       </div>
     </div>
@@ -251,11 +248,24 @@
         </div>
       </div>
     </div>
+
+    <!-- Create Permission Modal -->
+    <PermissionFormModal
+      v-if="showCreateModal"
+      @close="showCreateModal = false"
+      @saved="handlePermissionSaved"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, reactive, computed } from 'vue'
+import PermissionFormModal from '../../components/admin/permissions/PermissionFormModal.vue'
+
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
 
 // Local state
 const permissionsData = ref([])
@@ -266,6 +276,7 @@ const isLoading = ref(true)
 const categories = ref([])
 const showGenerateModal = ref(false)
 const showDeleteModal = ref(false)
+const showCreateModal = ref(false)
 const permissionToDelete = ref(null)
 const isDeleting = ref(false)
 const isGenerating = ref(false)
@@ -471,55 +482,18 @@ const generatePermissions = async () => {
     isGenerating.value = false
   }
 }
+
+const handlePermissionSaved = () => {
+  showCreateModal.value = false
+  loadPermissions(1)
+  loadCategories()
+}
 </script>
 
 <style scoped>
 .permissions-modern {
   padding: 0;
 }
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
-}
-
-.stat-card {
-  border-radius: 16px;
-  padding: 1.5rem;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.stat-card.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.stat-card.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-
-.stat-icon {
-  width: 65px;
-  height: 65px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-}
-
-.stat-content { flex: 1; }
-.stat-value { font-size: 2rem; font-weight: 700; margin: 0; }
-.stat-label { font-size: 0.9rem; opacity: 0.9; margin: 0.25rem 0 0 0; }
 
 /* Search & Filters */
 .search-filter-bar {

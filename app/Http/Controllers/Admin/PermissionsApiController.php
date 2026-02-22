@@ -154,6 +154,47 @@ class PermissionsApiController extends Controller
     }
 
     /**
+     * Create a new permission
+     */
+    public function store(Request $request): JsonResponse
+    {
+        try {
+            $request->validate([
+                'name' => 'required|string|max:100|unique:permissions,name|regex:/^[a-z_]+$/',
+                'display_name' => 'nullable|string|max:100',
+                'description' => 'nullable|string|max:255',
+            ]);
+
+            $permission = Permission::create([
+                'name' => strtolower($request->name),
+                'display_name' => $request->display_name ?? ucfirst(str_replace('_', ' ', $request->name)),
+                'description' => $request->description,
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Permission created successfully',
+                'permission' => [
+                    'id' => $permission->id,
+                    'name' => $permission->name,
+                    'display_name' => $permission->display_name,
+                    'description' => $permission->description,
+                ]
+            ], 201);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to create permission',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Generate CRUD permissions for a module
      */
     public function generate(Request $request): JsonResponse

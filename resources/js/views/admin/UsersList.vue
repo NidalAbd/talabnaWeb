@@ -1,41 +1,35 @@
 <template>
   <div class="users-modern">
     <!-- Stats Cards -->
-    <div class="stats-grid mb-4">
-      <div class="stat-card blue">
-        <div class="stat-icon">
-          <i class="fas fa-users"></i>
+    <div class="stats-dashboard">
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-blue">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(users.total) }}</div>
+            <div class="stat-label-compact">Total Users</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ users.total }}</h3>
-          <p class="stat-label">Total Users</p>
+        <div class="stat-card-compact stat-green">
+          <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(activeUsersCount) }}</div>
+            <div class="stat-label-compact">Active Users</div>
+          </div>
         </div>
-      </div>
-      <div class="stat-card green">
-        <div class="stat-icon">
-          <i class="fas fa-user-check"></i>
+        <div class="stat-card-compact stat-orange">
+          <div class="stat-icon"><i class="fas fa-user-slash"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(bannedUsersCount) }}</div>
+            <div class="stat-label-compact">Banned Users</div>
+          </div>
         </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ activeUsersCount }}</h3>
-          <p class="stat-label">Active Users</p>
-        </div>
-      </div>
-      <div class="stat-card orange">
-        <div class="stat-icon">
-          <i class="fas fa-user-slash"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ bannedUsersCount }}</h3>
-          <p class="stat-label">Banned Users</p>
-        </div>
-      </div>
-      <div class="stat-card purple">
-        <div class="stat-icon">
-          <i class="fas fa-user-shield"></i>
-        </div>
-        <div class="stat-content">
-          <h3 class="stat-value">{{ adminUsersCount }}</h3>
-          <p class="stat-label">Admin Users</p>
+        <div class="stat-card-compact stat-purple">
+          <div class="stat-icon"><i class="fas fa-user-shield"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(adminUsersCount) }}</div>
+            <div class="stat-label-compact">Admin Users</div>
+          </div>
         </div>
       </div>
     </div>
@@ -145,9 +139,9 @@
               <a :href="`/users/${user.id}`" class="menu-item">
                 <i class="fas fa-eye"></i> View Details
               </a>
-              <a :href="`/users/${user.id}/edit`" class="menu-item">
+              <button @click="openEditModal(user)" class="menu-item">
                 <i class="fas fa-edit"></i> Edit User
-              </a>
+              </button>
               <button @click="handleToggleBan(user)" class="menu-item">
                 <i :class="user.is_active === 'active' ? 'fas fa-ban' : 'fas fa-check'"></i>
                 {{ user.is_active === 'active' ? 'Ban User' : 'Unban User' }}
@@ -292,9 +286,9 @@
                 <a :href="`/users/${user.id}`" class="action-btn-small view" title="View">
                   <i class="fas fa-eye"></i>
                 </a>
-                <a :href="`/users/${user.id}/edit`" class="action-btn-small edit" title="Edit">
+                <button @click="openEditModal(user)" class="action-btn-small edit" title="Edit">
                   <i class="fas fa-edit"></i>
-                </a>
+                </button>
                 <button
                   @click="handleToggleBan(user)"
                   class="action-btn-small"
@@ -386,14 +380,28 @@
         </div>
       </div>
     </div>
+
+    <!-- Edit User Modal -->
+    <UserEditModal
+      v-if="showEditModal"
+      :userId="selectedUserId"
+      @close="showEditModal = false"
+      @saved="handleUserSaved"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted, watch, reactive, computed, onBeforeUnmount } from 'vue'
 import { useUsers } from '../../composables/useUsers'
+import UserEditModal from '../../components/admin/users/UserEditModal.vue'
 
 const { users, loading, fetchUsers, toggleBan, deleteUser } = useUsers()
+
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
 
 const roles = ref([])
 const togglingBan = reactive({})
@@ -402,6 +410,10 @@ const activeMenu = ref(null)
 const showDeleteModal = ref(false)
 const userToDelete = ref(null)
 const isDeleting = ref(false)
+
+// Edit modal state
+const showEditModal = ref(false)
+const selectedUserId = ref(null)
 
 const filters = reactive({
   status: '',
@@ -548,55 +560,25 @@ const confirmDelete = async () => {
     isDeleting.value = false
   }
 }
+
+// Edit modal handlers
+const openEditModal = (user) => {
+  closeMenus()
+  selectedUserId.value = user.id
+  showEditModal.value = true
+}
+
+const handleUserSaved = () => {
+  showEditModal.value = false
+  selectedUserId.value = null
+  loadUsers(users.value.current_page)
+}
 </script>
 
 <style scoped>
 .users-modern {
   padding: 0;
 }
-
-/* Stats Grid */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 1.25rem;
-}
-
-.stat-card {
-  border-radius: 16px;
-  padding: 1.5rem;
-  color: white;
-  display: flex;
-  align-items: center;
-  gap: 1.25rem;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card.blue { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
-.stat-card.green { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
-.stat-card.orange { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.stat-card.purple { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-
-.stat-icon {
-  width: 65px;
-  height: 65px;
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.75rem;
-}
-
-.stat-content { flex: 1; }
-.stat-value { font-size: 2rem; font-weight: 700; margin: 0; }
-.stat-label { font-size: 0.9rem; opacity: 0.9; margin: 0.25rem 0 0 0; }
 
 /* Search & Filters */
 .search-filter-bar {

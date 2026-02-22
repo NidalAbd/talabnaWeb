@@ -2,16 +2,16 @@
     <div class="analytics-modern">
 
         <!-- Overview Stats -->
-        <div class="stats-grid mb-4">
-            <div class="stat-card" v-for="stat in overview" :key="stat.label" :class="stat.color">
-                <div class="stat-icon">
-                    <i :class="stat.icon"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stat.value }}</h3>
-                    <p class="stat-label">{{ stat.label }}</p>
-                </div>
+        <div class="stats-dashboard">
+          <div class="stats-grid">
+            <div class="stat-card-compact" :class="stat.color" v-for="stat in overview" :key="stat.label">
+              <div class="stat-icon"><i :class="stat.icon"></i></div>
+              <div class="stat-info">
+                <div class="stat-value-compact">{{ formatNumber(stat.value) }}</div>
+                <div class="stat-label-compact">{{ stat.label }}</div>
+              </div>
             </div>
+          </div>
         </div>
 
         <!-- Modern Tabs -->
@@ -316,6 +316,11 @@ const {
 
 const activeTab = ref('users')
 
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
+
 const truncate = (text, length) => {
     if (!text) return ''
     return text.length > length ? text.substring(0, length) + '...' : text
@@ -375,90 +380,6 @@ onMounted(async () => {
     color: #666;
     font-size: 0.95rem;
     margin: 0;
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.25rem;
-    margin-bottom: 2rem;
-}
-
-.stat-card {
-    border-radius: 12px;
-    padding: 1.5rem;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
-}
-
-.stat-card.blue, .stat-card.primary {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.stat-card.green, .stat-card.success {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-}
-
-.stat-card.orange, .stat-card.warning {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-    color: #212529;
-}
-
-.stat-card.purple {
-    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-}
-
-.stat-card.red, .stat-card.danger {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.stat-card.info {
-    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-}
-
-.stat-card.secondary {
-    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.75rem;
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 2rem;
-    font-weight: 700;
-    margin: 0 0 0.25rem 0;
-    color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-}
-
-.stat-label {
-    font-size: 0.9rem;
-    opacity: 0.95;
-    margin: 0;
-    color: #ffffff;
-    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Tabs Container */

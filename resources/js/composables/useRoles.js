@@ -100,6 +100,52 @@ export function useRoles() {
         }
     }
 
+    const createRole = async (roleData) => {
+        try {
+            const response = await fetch('/api/admin/roles', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(roleData)
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || errorData.message || 'Failed to create role')
+            }
+
+            return await response.json()
+        } catch (err) {
+            console.error('Error creating role:', err)
+            throw err
+        }
+    }
+
+    const updateRole = async (roleId, roleData) => {
+        try {
+            const response = await fetch(`/api/admin/roles/${roleId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(roleData)
+            })
+
+            if (!response.ok) {
+                const errorData = await response.json()
+                throw new Error(errorData.error || errorData.message || 'Failed to update role')
+            }
+
+            return await response.json()
+        } catch (err) {
+            console.error('Error updating role:', err)
+            throw err
+        }
+    }
+
     const deleteRole = async (roleId) => {
         try {
             const response = await fetch(`/api/admin/roles/${roleId}`, {
@@ -119,6 +165,21 @@ export function useRoles() {
             return data
         } catch (err) {
             console.error('Error deleting role:', err)
+            throw err
+        }
+    }
+
+    const fetchAllPermissions = async () => {
+        try {
+            const response = await fetch('/api/admin/roles/permissions')
+
+            if (!response.ok) {
+                throw new Error('Failed to fetch permissions')
+            }
+
+            return await response.json()
+        } catch (err) {
+            console.error('Error fetching permissions:', err)
             throw err
         }
     }
@@ -145,7 +206,10 @@ export function useRoles() {
         error,
         fetchRoles,
         fetchRole,
+        createRole,
+        updateRole,
         deleteRole,
+        fetchAllPermissions,
         getUsersWithRole
     }
 }
