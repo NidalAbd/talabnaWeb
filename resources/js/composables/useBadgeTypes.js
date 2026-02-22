@@ -225,12 +225,7 @@ export function useBadgeTypes() {
     statsLoading.value = true
 
     try {
-      const response = await fetch('/api/admin/badge-types/stats', {
-        headers: {
-          'Accept': 'application/json'
-        },
-        credentials: 'same-origin'
-      })
+      const response = await fetch('/api/admin/badge-types/stats')
 
       if (!response.ok) {
         throw new Error('Failed to fetch stats')
