@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Notifications\MarketingNotification;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,7 +31,6 @@ class MarketingNotificationsApiController extends Controller
                     'users.user_name as admin_name'
                 );
 
-            // Apply search
             if ($search) {
                 $query->where(function($q) use ($search) {
                     $q->where('notification_logs.title', 'like', "%{$search}%")
@@ -39,7 +39,6 @@ class MarketingNotificationsApiController extends Controller
                 });
             }
 
-            // Apply sorting
             $allowedSortFields = ['id', 'created_at', 'total_recipients', 'successful_count', 'failed_count'];
             if (in_array($sortBy, $allowedSortFields)) {
                 $query->orderBy('notification_logs.' . $sortBy, $sortDirection);
@@ -57,7 +56,11 @@ class MarketingNotificationsApiController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            Log::error('Marketing Notifications API Error: ' . $e->getMessage());
+            Log::error('Marketing Notifications index() error', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]);
 
             return response()->json([
                 'error' => 'Failed to load notification logs',
@@ -67,42 +70,105 @@ class MarketingNotificationsApiController extends Controller
     }
 
     /**
-     * Get statistics
+     * Get statistics with chart data
      */
     public function getStats(): JsonResponse
     {
         try {
+            $now = Carbon::now();
+
+            $totalCampaigns = DB::table('notification_logs')->count();
+            $activeWithFcm  = User::whereNotNull('fcm_token')->where('is_active', 'active')->count();
+            $totalSent      = (int) DB::table('notification_logs')->sum('successful_count');
+            $totalFailed    = (int) DB::table('notification_logs')->sum('failed_count');
+            $totalAttempted = $totalSent + $totalFailed;
+            $deliveryRate   = $totalAttempted > 0 ? round(($totalSent / $totalAttempted) * 100, 1) : 0;
+
+            // Week-over-week campaign comparison
+            $thisWeekCampaigns = DB::table('notification_logs')
+                ->whereBetween('created_at', [$now->copy()->subDays(7), $now])
+                ->count();
+            $lastWeekCampaigns = DB::table('notification_logs')
+                ->whereBetween('created_at', [$now->copy()->subDays(14), $now->copy()->subDays(7)])
+                ->count();
+
             $stats = [
                 [
                     'label' => 'Total Campaigns',
-                    'value' => DB::table('notification_logs')->count(),
-                    'icon' => 'fas fa-bullhorn',
-                    'color' => 'primary'
+                    'value' => $totalCampaigns,
+                    'icon'  => 'fas fa-bullhorn',
+                    'color' => 'primary',
                 ],
                 [
                     'label' => 'Active Users with FCM',
-                    'value' => User::whereNotNull('fcm_token')
-                        ->where('is_active', 'active')
-                        ->count(),
-                    'icon' => 'fas fa-users',
-                    'color' => 'success'
+                    'value' => $activeWithFcm,
+                    'icon'  => 'fas fa-users',
+                    'color' => 'success',
                 ],
                 [
-                    'label' => 'Total Sent',
-                    'value' => DB::table('notification_logs')->sum('successful_count'),
-                    'icon' => 'fas fa-paper-plane',
-                    'color' => 'info'
+                    'label' => 'Total Delivered',
+                    'value' => $totalSent,
+                    'icon'  => 'fas fa-check-circle',
+                    'color' => 'info',
                 ],
                 [
                     'label' => 'Failed Deliveries',
-                    'value' => DB::table('notification_logs')->sum('failed_count'),
-                    'icon' => 'fas fa-exclamation-triangle',
-                    'color' => 'danger'
-                ]
+                    'value' => $totalFailed,
+                    'icon'  => 'fas fa-exclamation-triangle',
+                    'color' => 'danger',
+                ],
             ];
 
-            return response()->json(['stats' => $stats]);
+            // Campaign volume chart (last 30 days)
+            $dailyCampaigns = DB::table('notification_logs')
+                ->whereBetween('created_at', [$now->copy()->subDays(30), $now])
+                ->select(
+                    DB::raw('DATE(created_at) as date'),
+                    DB::raw('SUM(successful_count) as delivered'),
+                    DB::raw('SUM(failed_count) as failed')
+                )
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            $campaignChart = [
+                'labels'   => $dailyCampaigns->pluck('date')->toArray(),
+                'datasets' => [
+                    [
+                        'label'           => 'Delivered',
+                        'data'            => $dailyCampaigns->pluck('delivered')->toArray(),
+                        'borderColor'     => '#22c55e',
+                        'backgroundColor' => 'rgba(34,197,94,0.1)',
+                        'fill'            => true,
+                        'tension'         => 0.3,
+                    ],
+                    [
+                        'label'           => 'Failed',
+                        'data'            => $dailyCampaigns->pluck('failed')->toArray(),
+                        'borderColor'     => '#ef4444',
+                        'backgroundColor' => 'rgba(239,68,68,0.1)',
+                        'fill'            => true,
+                        'tension'         => 0.3,
+                    ],
+                ],
+            ];
+
+            return response()->json([
+                'stats'          => $stats,
+                'delivery_rate'  => $deliveryRate,
+                'campaign_chart' => $campaignChart,
+                'week_trend'     => [
+                    'this_week' => $thisWeekCampaigns,
+                    'last_week' => $lastWeekCampaigns,
+                ],
+            ]);
         } catch (\Exception $e) {
+            Log::error('Marketing Notifications getStats() error', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]);
+
             return response()->json([
                 'error' => 'Failed to load statistics',
                 'message' => $e->getMessage()
@@ -123,7 +189,6 @@ class MarketingNotificationsApiController extends Controller
         ]);
 
         try {
-            // Get all users with FCM tokens
             $users = User::whereNotNull('fcm_token')
                 ->where('is_active', 'active')
                 ->get();
@@ -149,17 +214,21 @@ class MarketingNotificationsApiController extends Controller
                     $failedCount++;
                     $errors[] = [
                         'user_id' => $user->id,
+                        'user_name' => $user->user_name,
                         'error' => $e->getMessage()
                     ];
 
-                    Log::error('FCM Notification Error: ' . $e->getMessage(), [
-                        'user_id' => $user->id,
-                        'fcm_token' => $user->fcm_token
+                    Log::error('FCM send failed for user', [
+                        'user_id'   => $user->id,
+                        'user_name' => $user->user_name,
+                        'fcm_token' => substr($user->fcm_token, 0, 20) . '...',
+                        'error'     => $e->getMessage(),
+                        'campaign_title' => $validated['title'],
                     ]);
                 }
             }
 
-            // Log notification campaign
+            // Log the campaign
             DB::table('notification_logs')->insert([
                 'title' => $validated['title'],
                 'body' => $validated['body'],
@@ -175,6 +244,23 @@ class MarketingNotificationsApiController extends Controller
 
             DB::commit();
 
+            // Log summary
+            Log::info('Marketing campaign sent', [
+                'title'      => $validated['title'],
+                'admin_id'   => auth()->id(),
+                'total'      => count($users),
+                'successful' => $successCount,
+                'failed'     => $failedCount,
+            ]);
+
+            if ($failedCount > 0) {
+                Log::warning('Marketing campaign had failures', [
+                    'title'       => $validated['title'],
+                    'failed_count' => $failedCount,
+                    'errors'      => array_slice($errors, 0, 20), // Log first 20 errors
+                ]);
+            }
+
             return response()->json([
                 'message' => 'Notification sent successfully',
                 'result' => [
@@ -186,7 +272,12 @@ class MarketingNotificationsApiController extends Controller
             ]);
         } catch (\Exception $e) {
             DB::rollBack();
-            Log::error('Error sending marketing notification: ' . $e->getMessage());
+            Log::error('Marketing campaign sendToAll() critical error', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+                'title'   => $validated['title'] ?? 'unknown',
+            ]);
 
             return response()->json([
                 'error' => 'Failed to send notification',
@@ -212,6 +303,11 @@ class MarketingNotificationsApiController extends Controller
             $user = User::find($validated['user_id']);
 
             if (!$user->fcm_token) {
+                Log::warning('Test notification failed: no FCM token', [
+                    'user_id' => $user->id,
+                    'user_name' => $user->user_name,
+                ]);
+
                 return response()->json([
                     'error' => 'User does not have a valid FCM token'
                 ], 422);
@@ -225,6 +321,13 @@ class MarketingNotificationsApiController extends Controller
                 $user->fcm_token
             ));
 
+            Log::info('Test notification sent', [
+                'user_id'   => $user->id,
+                'user_name' => $user->user_name,
+                'title'     => $validated['title'],
+                'admin_id'  => auth()->id(),
+            ]);
+
             return response()->json([
                 'message' => 'Test notification sent successfully',
                 'user' => [
@@ -234,7 +337,13 @@ class MarketingNotificationsApiController extends Controller
                 ]
             ]);
         } catch (\Exception $e) {
-            Log::error('Error sending test notification: ' . $e->getMessage());
+            Log::error('Test notification sendTest() error', [
+                'message'   => $e->getMessage(),
+                'file'      => $e->getFile(),
+                'line'      => $e->getLine(),
+                'user_id'   => $validated['user_id'],
+                'title'     => $validated['title'],
+            ]);
 
             return response()->json([
                 'error' => 'Failed to send test notification',
@@ -249,13 +358,30 @@ class MarketingNotificationsApiController extends Controller
     public function destroy($id): JsonResponse
     {
         try {
+            $log = DB::table('notification_logs')->where('id', $id)->first();
+
+            if (!$log) {
+                return response()->json([
+                    'error' => 'Notification log not found'
+                ], 404);
+            }
+
             DB::table('notification_logs')->where('id', $id)->delete();
+
+            Log::info('Notification log deleted', [
+                'log_id'   => $id,
+                'title'    => $log->title,
+                'admin_id' => auth()->id(),
+            ]);
 
             return response()->json([
                 'message' => 'Notification log deleted successfully'
             ]);
         } catch (\Exception $e) {
-            Log::error('Error deleting notification log: ' . $e->getMessage());
+            Log::error('Notification log destroy() error', [
+                'message' => $e->getMessage(),
+                'log_id'  => $id,
+            ]);
 
             return response()->json([
                 'error' => 'Failed to delete notification log',
@@ -286,6 +412,12 @@ class MarketingNotificationsApiController extends Controller
 
             return response()->json(['users' => $users]);
         } catch (\Exception $e) {
+            Log::error('Marketing Notifications getActiveUsers() error', [
+                'message' => $e->getMessage(),
+                'file'    => $e->getFile(),
+                'line'    => $e->getLine(),
+            ]);
+
             return response()->json([
                 'error' => 'Failed to load users',
                 'message' => $e->getMessage()

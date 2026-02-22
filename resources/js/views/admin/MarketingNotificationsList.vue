@@ -1,9 +1,27 @@
 <template>
-    <div class="modern-notifications-container">
+    <div class="marketing-notifications">
+
+        <!-- Toast Notification -->
+        <transition name="toast-fade">
+            <div v-if="toast.show" class="toast-notification" :class="toast.type">
+                <i :class="toast.icon"></i>
+                <div class="toast-content">
+                    <div class="toast-title">{{ toast.title }}</div>
+                    <div class="toast-message">{{ toast.message }}</div>
+                </div>
+                <button class="toast-close" @click="toast.show = false"><i class="fas fa-times"></i></button>
+            </div>
+        </transition>
+
         <!-- Stats Cards -->
         <div class="stats-dashboard">
             <div class="stats-grid">
-                <div class="stat-card-compact" :class="stat.color" v-for="stat in stats" :key="stat.label">
+                <div
+                    v-for="stat in stats"
+                    :key="stat.label"
+                    class="stat-card-compact"
+                    :class="stat.color"
+                >
                     <div class="stat-icon"><i :class="stat.icon"></i></div>
                     <div class="stat-info">
                         <div class="stat-value-compact">{{ formatNumber(stat.value) }}</div>
@@ -13,220 +31,309 @@
             </div>
         </div>
 
-        <!-- Send Notification Card -->
-        <div class="modern-card send-card">
-            <div class="card-header">
-                <div class="header-left">
-                    <i class="fas fa-paper-plane"></i>
-                    <h2>Send Push Notification</h2>
+        <!-- Delivery Rate + Campaign Chart Row -->
+        <div class="charts-row" v-if="deliveryRate !== null || campaignChart">
+            <div class="chart-card">
+                <h4 class="chart-title">Delivery Performance</h4>
+                <div class="chart-body delivery-metrics">
+                    <div class="delivery-rate-ring">
+                        <svg viewBox="0 0 120 120">
+                            <circle cx="60" cy="60" r="52" fill="none" stroke="#f0f0f0" stroke-width="10" />
+                            <circle
+                                cx="60" cy="60" r="52" fill="none"
+                                :stroke="deliveryRate >= 90 ? '#22c55e' : deliveryRate >= 70 ? '#f97316' : '#ef4444'"
+                                stroke-width="10"
+                                stroke-linecap="round"
+                                :stroke-dasharray="`${deliveryRate * 3.267} 326.7`"
+                                stroke-dashoffset="0"
+                                transform="rotate(-90 60 60)"
+                            />
+                        </svg>
+                        <div class="rate-center">
+                            <span class="rate-number">{{ deliveryRate }}%</span>
+                            <span class="rate-text">Delivery</span>
+                        </div>
+                    </div>
+                    <div class="delivery-details">
+                        <div class="detail-item">
+                            <span class="dot green"></span>
+                            <span>Delivered: {{ formatNumber(getStatValue('Total Delivered')) }}</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="dot red"></span>
+                            <span>Failed: {{ formatNumber(getStatValue('Failed Deliveries')) }}</span>
+                        </div>
+                        <div class="detail-item" v-if="weekTrend">
+                            <span class="dot blue"></span>
+                            <span>This week: {{ weekTrend.this_week }} campaigns</span>
+                        </div>
+                        <div class="detail-item" v-if="weekTrend">
+                            <span class="dot gray"></span>
+                            <span>Last week: {{ weekTrend.last_week }} campaigns</span>
+                        </div>
+                    </div>
                 </div>
             </div>
+            <div class="chart-card" v-if="campaignChart">
+                <h4 class="chart-title">Delivery Trend (30 days)</h4>
+                <div class="chart-body" style="height: 260px;">
+                    <LineChart :data="campaignChart" :height="260" />
+                </div>
+            </div>
+        </div>
 
-            <div class="card-body">
-                <form @submit.prevent="handleSend">
+        <!-- Send Notification + Preview -->
+        <div class="compose-section">
+            <div class="compose-card">
+                <div class="compose-header">
+                    <i class="fas fa-paper-plane"></i>
+                    <h3>Compose Notification</h3>
+                </div>
+
+                <form @submit.prevent="handleSend" class="compose-form">
                     <div class="form-group">
-                        <label>Title *</label>
+                        <label>Title <span class="required">*</span></label>
                         <input
                             type="text"
                             v-model="formData.title"
                             maxlength="100"
                             required
                             placeholder="Enter notification title"
+                            class="form-input"
                         >
-                        <small>{{ formData.title.length }}/100 characters</small>
+                        <div class="char-count">{{ formData.title.length }}/100</div>
                     </div>
 
                     <div class="form-group">
-                        <label>Message *</label>
+                        <label>Message <span class="required">*</span></label>
                         <textarea
                             v-model="formData.body"
                             rows="4"
                             maxlength="500"
                             required
                             placeholder="Enter notification message"
+                            class="form-input"
                         ></textarea>
-                        <small>{{ formData.body.length }}/500 characters</small>
+                        <div class="char-count">{{ formData.body.length }}/500</div>
                     </div>
 
-                    <div class="form-row">
+                    <div class="form-row-2">
                         <div class="form-group">
-                            <label>Image URL (Optional)</label>
+                            <label>Image URL</label>
                             <input
                                 type="url"
                                 v-model="formData.image_url"
                                 placeholder="https://example.com/image.jpg"
+                                class="form-input"
                             >
                         </div>
                         <div class="form-group">
-                            <label>Deep Link (Optional)</label>
+                            <label>Deep Link</label>
                             <input
                                 type="text"
                                 v-model="formData.deep_link"
                                 placeholder="talabna://page/details"
+                                class="form-input"
                             >
                         </div>
                     </div>
 
-                    <div class="form-group" v-if="showTestUser">
+                    <!-- Test user selector -->
+                    <div v-if="showTestUser" class="form-group test-user-group">
                         <label>Test User</label>
-                        <select v-model="formData.user_id">
-                            <option value="">Select a user for testing</option>
-                            <option v-for="user in users" :key="user.id" :value="user.id">
-                                {{ user.user_name }} ({{ user.email }})
-                            </option>
-                        </select>
+                        <div class="user-search-container">
+                            <input
+                                type="text"
+                                v-model="userSearch"
+                                @input="debouncedUserSearch"
+                                placeholder="Search users by name or email..."
+                                class="form-input"
+                            >
+                            <select v-model="formData.user_id" class="form-input">
+                                <option value="">Select a user</option>
+                                <option v-for="user in users" :key="user.id" :value="user.id">
+                                    {{ user.user_name }} ({{ user.email }})
+                                </option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="button-group">
+                    <div class="send-actions">
                         <button
                             type="submit"
-                            class="btn-send-all"
-                            :disabled="processing"
+                            class="btn-action btn-send"
+                            :disabled="processing || !formData.title || !formData.body"
                             @click="sendType = 'all'"
                         >
                             <i v-if="processing && sendType === 'all'" class="fas fa-spinner fa-spin"></i>
                             <i v-else class="fas fa-paper-plane"></i>
-                            {{ processing && sendType === 'all' ? 'Sending to All...' : 'Send to All Users' }}
+                            {{ processing && sendType === 'all' ? 'Sending...' : 'Send to All' }}
                         </button>
 
                         <button
                             type="button"
-                            class="btn-test"
-                            :disabled="processing"
+                            class="btn-action btn-test-toggle"
                             @click="toggleTestMode"
                         >
                             <i class="fas fa-vial"></i>
-                            {{ showTestUser ? 'Cancel Test' : 'Send Test' }}
+                            {{ showTestUser ? 'Cancel Test' : 'Test Mode' }}
                         </button>
 
                         <button
                             v-if="showTestUser"
                             type="button"
-                            class="btn-send-test"
-                            :disabled="processing || !formData.user_id"
+                            class="btn-action btn-test-send"
+                            :disabled="processing || !formData.user_id || !formData.title || !formData.body"
                             @click="handleSendTest"
                         >
                             <i v-if="processing && sendType === 'test'" class="fas fa-spinner fa-spin"></i>
                             <i v-else class="fas fa-flask"></i>
-                            {{ processing && sendType === 'test' ? 'Sending Test...' : 'Send Test Notification' }}
+                            {{ processing && sendType === 'test' ? 'Sending...' : 'Send Test' }}
                         </button>
                     </div>
                 </form>
             </div>
+
+            <!-- Live Preview -->
+            <div class="preview-card">
+                <div class="preview-header">
+                    <i class="fas fa-mobile-alt"></i>
+                    <h3>Preview</h3>
+                </div>
+                <div class="phone-preview">
+                    <div class="phone-frame">
+                        <div class="phone-notch"></div>
+                        <div class="notification-preview" :class="{ 'has-content': formData.title || formData.body }">
+                            <div class="preview-app-icon">
+                                <i class="fas fa-bell"></i>
+                            </div>
+                            <div class="preview-content">
+                                <div class="preview-app-name">Talabna</div>
+                                <div class="preview-title">{{ formData.title || 'Notification Title' }}</div>
+                                <div class="preview-body">{{ formData.body || 'Your notification message will appear here...' }}</div>
+                            </div>
+                            <div v-if="formData.image_url" class="preview-image">
+                                <img :src="formData.image_url" alt="Preview" @error="$event.target.style.display='none'">
+                            </div>
+                        </div>
+                        <div class="preview-time">now</div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Notification History -->
-        <div class="modern-card">
-            <div class="card-header">
-                <div class="header-left">
+        <div class="history-card">
+            <div class="history-header">
+                <div class="history-title-row">
                     <i class="fas fa-history"></i>
-                    <h2>Notification History</h2>
+                    <h3>Campaign History</h3>
+                    <span class="history-count">{{ logs.total }} campaigns</span>
                 </div>
-            </div>
 
-            <!-- Filters -->
-            <div class="filters-section">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input
-                        type="text"
-                        v-model="filters.search"
-                        @input="debouncedSearch"
-                        placeholder="Search by title, message, or admin..."
-                    >
+                <!-- Filters -->
+                <div class="history-filters">
+                    <div class="search-input-wrap">
+                        <i class="fas fa-search"></i>
+                        <input
+                            type="text"
+                            v-model="filters.search"
+                            @input="debouncedSearch"
+                            placeholder="Search campaigns..."
+                            class="form-input"
+                        >
+                    </div>
+                    <select class="form-input filter-select" v-model="filters.sort_by" @change="loadLogs">
+                        <option value="created_at">Date</option>
+                        <option value="total_recipients">Recipients</option>
+                        <option value="successful_count">Delivered</option>
+                        <option value="failed_count">Failed</option>
+                    </select>
+                    <select class="form-input filter-select" v-model="filters.sort_direction" @change="loadLogs">
+                        <option value="desc">Newest first</option>
+                        <option value="asc">Oldest first</option>
+                    </select>
                 </div>
-                <select class="filter-select" v-model="filters.sort_by" @change="loadLogs">
-                    <option value="created_at">Sort by Date</option>
-                    <option value="total_recipients">Sort by Recipients</option>
-                    <option value="successful_count">Sort by Successful</option>
-                    <option value="failed_count">Sort by Failed</option>
-                </select>
-                <select class="filter-select" v-model="filters.sort_direction" @change="loadLogs">
-                    <option value="desc">Descending</option>
-                    <option value="asc">Ascending</option>
-                </select>
             </div>
 
             <!-- Loading State -->
             <div v-if="loading" class="loading-state">
                 <div class="spinner"></div>
-                <p>Loading notification logs...</p>
+                <p>Loading campaigns...</p>
             </div>
 
             <!-- Error State -->
-            <div v-else-if="error" class="error-state">
+            <div v-else-if="error" class="error-banner">
                 <i class="fas fa-exclamation-circle"></i>
-                <p>{{ error }}</p>
+                <span>{{ error }}</span>
+                <button @click="loadLogs" class="retry-btn">Retry</button>
             </div>
 
-            <!-- Table -->
-            <div v-else class="table-container">
-                <table class="modern-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Title & Message</th>
-                            <th>Recipients</th>
-                            <th>Successful</th>
-                            <th>Failed</th>
-                            <th>Sent By</th>
-                            <th>Date</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr v-if="logs.data.length === 0">
-                            <td colspan="8" class="empty-state">
-                                <i class="fas fa-bell-slash"></i>
-                                <p>No notification logs found</p>
-                            </td>
-                        </tr>
-                        <tr v-for="log in logs.data" :key="log.id">
-                            <td>
-                                <span class="id-badge">{{ log.id }}</span>
-                            </td>
-                            <td>
-                                <div class="notification-info">
-                                    <div class="notification-title">{{ log.title }}</div>
-                                    <div class="notification-body">{{ truncate(log.body, 50) }}</div>
-                                </div>
-                            </td>
-                            <td>
-                                <span class="count-badge recipients">{{ log.total_recipients }}</span>
-                            </td>
-                            <td>
-                                <span class="count-badge success">{{ log.successful_count }}</span>
-                            </td>
-                            <td>
-                                <span class="count-badge failed">{{ log.failed_count }}</span>
-                            </td>
-                            <td>
-                                <div class="admin-info">{{ log.admin_name || 'Unknown' }}</div>
-                            </td>
-                            <td>
-                                <div class="date-info">{{ formatDate(log.created_at) }}</div>
-                            </td>
-                            <td>
-                                <div class="action-buttons">
-                                    <button @click="openDetailsModal(log)" class="action-btn view" title="View Details">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                    <button @click="openDeleteModal(log)" class="action-btn delete" title="Delete">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+            <!-- Campaign Cards / Table -->
+            <div v-else-if="logs.data.length > 0" class="campaigns-list">
+                <div
+                    v-for="log in logs.data"
+                    :key="log.id"
+                    class="campaign-item"
+                >
+                    <div class="campaign-main">
+                        <div class="campaign-id">#{{ log.id }}</div>
+                        <div class="campaign-info">
+                            <div class="campaign-title-text">{{ log.title }}</div>
+                            <div class="campaign-body-text">{{ truncate(log.body, 80) }}</div>
+                            <div class="campaign-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-user-shield"></i> {{ log.admin_name || 'Unknown' }}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-calendar"></i> {{ formatDate(log.created_at) }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="campaign-stats">
+                        <div class="campaign-stat">
+                            <span class="stat-num">{{ log.total_recipients }}</span>
+                            <span class="stat-desc">Recipients</span>
+                        </div>
+                        <div class="campaign-stat success">
+                            <span class="stat-num">{{ log.successful_count }}</span>
+                            <span class="stat-desc">Delivered</span>
+                        </div>
+                        <div class="campaign-stat" :class="log.failed_count > 0 ? 'danger' : ''">
+                            <span class="stat-num">{{ log.failed_count }}</span>
+                            <span class="stat-desc">Failed</span>
+                        </div>
+                        <div class="campaign-stat">
+                            <span class="stat-num">{{ getDeliveryPct(log) }}%</span>
+                            <span class="stat-desc">Rate</span>
+                        </div>
+                    </div>
+
+                    <div class="campaign-actions">
+                        <button @click="openDetailsModal(log)" class="icon-btn view" title="View Details">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button @click="openDeleteModal(log)" class="icon-btn delete" title="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Empty State -->
+            <div v-else class="empty-state">
+                <i class="fas fa-bullhorn"></i>
+                <h4>No campaigns yet</h4>
+                <p>Create your first push notification campaign above</p>
             </div>
 
             <!-- Pagination -->
-            <div class="pagination-container" v-if="logs.last_page > 1">
+            <div class="pagination-bar" v-if="logs.last_page > 1">
                 <div class="pagination-info">
-                    Showing {{ ((logs.current_page - 1) * logs.per_page) + 1 }}
-                    to {{ Math.min(logs.current_page * logs.per_page, logs.total) }}
-                    of {{ logs.total }} entries
+                    {{ ((logs.current_page - 1) * logs.per_page) + 1 }}-{{ Math.min(logs.current_page * logs.per_page, logs.total) }}
+                    of {{ logs.total }}
                 </div>
                 <div class="pagination-controls">
                     <button
@@ -257,98 +364,108 @@
 
         <!-- Details Modal -->
         <div class="modal-overlay" v-if="showDetailsModal" @click="closeDetailsModal">
-            <div class="modern-modal large" @click.stop>
-                <div class="modal-header">
-                    <h3><i class="fas fa-info-circle"></i> Notification Details</h3>
-                    <button class="close-btn" @click="closeDetailsModal">
-                        <i class="fas fa-times"></i>
-                    </button>
+            <div class="modal-dialog" @click.stop>
+                <div class="modal-top">
+                    <h3><i class="fas fa-info-circle"></i> Campaign Details</h3>
+                    <button class="modal-close" @click="closeDetailsModal"><i class="fas fa-times"></i></button>
                 </div>
-                <div class="modal-body" v-if="selectedLog">
-                    <div class="details-table">
-                        <div class="detail-row">
-                            <div class="detail-label">Campaign ID</div>
-                            <div class="detail-value">{{ selectedLog.id }}</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Title</div>
-                            <div class="detail-value"><strong>{{ selectedLog.title }}</strong></div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Message</div>
-                            <div class="detail-value">{{ selectedLog.body }}</div>
-                        </div>
-                        <div class="detail-row" v-if="selectedLog.image_url">
-                            <div class="detail-label">Image URL</div>
-                            <div class="detail-value">
-                                <a :href="selectedLog.image_url" target="_blank" class="link">{{ selectedLog.image_url }}</a>
+                <div class="modal-inner" v-if="selectedLog">
+                    <!-- Campaign Summary -->
+                    <div class="detail-section">
+                        <div class="detail-grid">
+                            <div class="detail-cell">
+                                <span class="detail-key">Campaign ID</span>
+                                <span class="detail-val">#{{ selectedLog.id }}</span>
+                            </div>
+                            <div class="detail-cell">
+                                <span class="detail-key">Sent By</span>
+                                <span class="detail-val">{{ selectedLog.admin_name || 'Unknown' }}</span>
+                            </div>
+                            <div class="detail-cell">
+                                <span class="detail-key">Date</span>
+                                <span class="detail-val">{{ formatDate(selectedLog.created_at) }}</span>
+                            </div>
+                            <div class="detail-cell">
+                                <span class="detail-key">Delivery Rate</span>
+                                <span class="detail-val" :class="getDeliveryPct(selectedLog) >= 90 ? 'text-success' : 'text-warning'">
+                                    {{ getDeliveryPct(selectedLog) }}%
+                                </span>
                             </div>
                         </div>
-                        <div class="detail-row" v-if="selectedLog.deep_link">
-                            <div class="detail-label">Deep Link</div>
-                            <div class="detail-value"><code>{{ selectedLog.deep_link }}</code></div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Total Recipients</div>
-                            <div class="detail-value">
-                                <span class="count-badge recipients large">{{ selectedLog.total_recipients }}</span>
+                    </div>
+
+                    <!-- Notification Content -->
+                    <div class="detail-section">
+                        <h4>Notification Content</h4>
+                        <div class="content-preview-box">
+                            <div class="content-title">{{ selectedLog.title }}</div>
+                            <div class="content-body">{{ selectedLog.body }}</div>
+                            <div v-if="selectedLog.image_url" class="content-link">
+                                <i class="fas fa-image"></i>
+                                <a :href="selectedLog.image_url" target="_blank">{{ selectedLog.image_url }}</a>
+                            </div>
+                            <div v-if="selectedLog.deep_link" class="content-link">
+                                <i class="fas fa-link"></i>
+                                <code>{{ selectedLog.deep_link }}</code>
                             </div>
                         </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Successful Deliveries</div>
-                            <div class="detail-value">
-                                <span class="count-badge success large">{{ selectedLog.successful_count }}</span>
+                    </div>
+
+                    <!-- Delivery Stats -->
+                    <div class="detail-section">
+                        <h4>Delivery Statistics</h4>
+                        <div class="delivery-stats-row">
+                            <div class="delivery-stat-card blue">
+                                <div class="ds-value">{{ selectedLog.total_recipients }}</div>
+                                <div class="ds-label">Recipients</div>
+                            </div>
+                            <div class="delivery-stat-card green">
+                                <div class="ds-value">{{ selectedLog.successful_count }}</div>
+                                <div class="ds-label">Delivered</div>
+                            </div>
+                            <div class="delivery-stat-card red">
+                                <div class="ds-value">{{ selectedLog.failed_count }}</div>
+                                <div class="ds-label">Failed</div>
                             </div>
                         </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Failed Deliveries</div>
-                            <div class="detail-value">
-                                <span class="count-badge failed large">{{ selectedLog.failed_count }}</span>
-                            </div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Sent By</div>
-                            <div class="detail-value">{{ selectedLog.admin_name || 'Unknown' }}</div>
-                        </div>
-                        <div class="detail-row">
-                            <div class="detail-label">Date Sent</div>
-                            <div class="detail-value">{{ formatDate(selectedLog.created_at) }}</div>
+                        <!-- Delivery progress bar -->
+                        <div class="delivery-progress">
+                            <div
+                                class="delivery-progress-fill"
+                                :style="{ width: getDeliveryPct(selectedLog) + '%' }"
+                            ></div>
                         </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button @click="closeDetailsModal" class="btn-cancel">
-                        <i class="fas fa-times"></i> Close
-                    </button>
+                <div class="modal-bottom">
+                    <button @click="closeDetailsModal" class="btn-action btn-cancel">Close</button>
                 </div>
             </div>
         </div>
 
-        <!-- Delete Modal -->
+        <!-- Delete Confirmation Modal -->
         <div class="modal-overlay" v-if="showDeleteModal" @click="closeDeleteModal">
-            <div class="modern-modal small" @click.stop>
-                <div class="modal-header danger">
-                    <h3><i class="fas fa-exclamation-triangle"></i> Delete Notification Log</h3>
-                    <button class="close-btn" @click="closeDeleteModal">
-                        <i class="fas fa-times"></i>
-                    </button>
+            <div class="modal-dialog small" @click.stop>
+                <div class="modal-top danger">
+                    <h3><i class="fas fa-exclamation-triangle"></i> Delete Campaign</h3>
+                    <button class="modal-close" @click="closeDeleteModal"><i class="fas fa-times"></i></button>
                 </div>
-                <div class="modal-body">
-                    <p>Are you sure you want to delete this notification log?</p>
-                    <div v-if="selectedLog" class="warning-box">
-                        <strong>Campaign:</strong> {{ selectedLog.title }}<br>
-                        <strong>Recipients:</strong> {{ selectedLog.total_recipients }}
+                <div class="modal-inner">
+                    <p>Are you sure you want to delete this campaign log?</p>
+                    <div v-if="selectedLog" class="delete-target">
+                        <strong>{{ selectedLog.title }}</strong>
+                        <span>{{ selectedLog.total_recipients }} recipients</span>
                     </div>
-                    <p class="warning-text"><i class="fas fa-exclamation-circle"></i> This action cannot be undone.</p>
+                    <p class="destructive-warning">
+                        <i class="fas fa-exclamation-circle"></i> This action cannot be undone.
+                    </p>
                 </div>
-                <div class="modal-footer">
-                    <button @click="closeDeleteModal" class="btn-cancel">
-                        <i class="fas fa-times"></i> Cancel
-                    </button>
-                    <button @click="handleDelete" :disabled="processing" class="btn-danger">
+                <div class="modal-bottom">
+                    <button @click="closeDeleteModal" class="btn-action btn-cancel">Cancel</button>
+                    <button @click="handleDelete" :disabled="processing" class="btn-action btn-delete">
                         <i v-if="processing" class="fas fa-spinner fa-spin"></i>
-                        <i v-else class="fas fa-trash"></i>
-                        {{ processing ? 'Deleting...' : 'Delete Log' }}
+                        <i v-else class="fas fa-trash-alt"></i>
+                        {{ processing ? 'Deleting...' : 'Delete' }}
                     </button>
                 </div>
             </div>
@@ -357,12 +474,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, reactive, onMounted } from 'vue'
 import { useMarketingNotifications } from '../../composables/useMarketingNotifications'
+import LineChart from '../../components/admin/charts/LineChart.vue'
 
 const {
     logs,
     stats,
+    deliveryRate,
+    campaignChart,
+    weekTrend,
     users,
     loading,
     error,
@@ -379,7 +500,7 @@ const formatNumber = (value) => {
     return new Intl.NumberFormat().format(value)
 }
 
-const filters = ref({
+const filters = reactive({
     search: '',
     sort_by: 'created_at',
     sort_direction: 'desc',
@@ -401,63 +522,88 @@ const selectedLog = ref(null)
 const processing = ref(false)
 const showTestUser = ref(false)
 const sendType = ref('all')
+const userSearch = ref('')
+
+// Toast system
+const toast = reactive({
+    show: false,
+    type: 'success',
+    title: '',
+    message: '',
+    icon: 'fas fa-check-circle',
+    timeout: null
+})
+
+function showToast(type, title, message) {
+    if (toast.timeout) clearTimeout(toast.timeout)
+    toast.type = type
+    toast.title = title
+    toast.message = message
+    toast.icon = type === 'success' ? 'fas fa-check-circle'
+        : type === 'error' ? 'fas fa-exclamation-circle'
+        : 'fas fa-info-circle'
+    toast.show = true
+    toast.timeout = setTimeout(() => { toast.show = false }, 5000)
+}
 
 let searchTimeout = null
-
 const debouncedSearch = () => {
     clearTimeout(searchTimeout)
     searchTimeout = setTimeout(() => {
-        filters.value.page = 1
+        filters.page = 1
         loadLogs()
-    }, 500)
+    }, 400)
+}
+
+let userSearchTimeout = null
+const debouncedUserSearch = () => {
+    clearTimeout(userSearchTimeout)
+    userSearchTimeout = setTimeout(() => {
+        fetchActiveUsers(userSearch.value)
+    }, 400)
 }
 
 const loadLogs = async () => {
-    await fetchLogs(filters.value)
+    await fetchLogs(filters)
 }
 
 const changePage = (page) => {
     if (page < 1 || page > logs.value.last_page) return
-    filters.value.page = page
+    filters.page = page
     loadLogs()
 }
 
 const displayPages = computed(() => {
     const current = logs.value.current_page
     const last = logs.value.last_page
-    const delta = 2
-    const range = []
-    const rangeWithDots = []
+    const pages = []
 
-    for (let i = Math.max(2, current - delta); i <= Math.min(last - 1, current + delta); i++) {
-        range.push(i)
+    for (let i = Math.max(1, current - 2); i <= Math.min(last, current + 2); i++) {
+        pages.push(i)
     }
 
-    if (current - delta > 2) {
-        rangeWithDots.push(1, '...')
-    } else {
-        rangeWithDots.push(1)
-    }
-
-    rangeWithDots.push(...range)
-
-    if (current + delta < last - 1) {
-        rangeWithDots.push('...', last)
-    } else if (last > 1) {
-        rangeWithDots.push(last)
-    }
-
-    return rangeWithDots.filter(p => p !== '...' || rangeWithDots.indexOf(p) === rangeWithDots.lastIndexOf(p))
+    return pages
 })
 
 const formatDate = (dateString) => {
     const date = new Date(dateString)
-    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString()
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' })
 }
 
 const truncate = (text, length) => {
     if (!text) return ''
     return text.length > length ? text.substring(0, length) + '...' : text
+}
+
+const getDeliveryPct = (log) => {
+    const total = (log.successful_count || 0) + (log.failed_count || 0)
+    if (total === 0) return 0
+    return Math.round((log.successful_count / total) * 100)
+}
+
+const getStatValue = (label) => {
+    const stat = stats.value.find(s => s.label === label)
+    return stat ? stat.value : 0
 }
 
 const toggleTestMode = async () => {
@@ -478,33 +624,27 @@ const resetForm = () => {
 }
 
 const handleSend = async () => {
-    if (!confirm(`Are you sure you want to send this notification to all users? This will send to approximately ${stats.value[1]?.value || 0} users.`)) {
-        return
-    }
+    const fcmCount = getStatValue('Active Users with FCM')
+    if (!confirm(`Send this notification to all ${fcmCount} active users?`)) return
 
     processing.value = true
     sendType.value = 'all'
 
     try {
         const result = await sendToAll(formData.value)
+        showToast('success', 'Campaign Sent',
+            `Delivered: ${result.result.successful}, Failed: ${result.result.failed}`)
 
-        window.$(document).Toasts('create', {
-            class: 'bg-success',
-            title: 'Success',
-            body: `Notification sent! Success: ${result.result.successful}, Failed: ${result.result.failed}`,
-            autohide: true,
-            delay: 5000
-        })
+        if (result.result.failed > 0) {
+            console.warn('Campaign delivery failures:', result.result.errors)
+        }
 
         resetForm()
         await loadLogs()
         await fetchStats()
     } catch (err) {
-        window.$(document).Toasts('create', {
-            class: 'bg-danger',
-            title: 'Error',
-            body: err.message || 'Failed to send notification'
-        })
+        showToast('error', 'Send Failed', err.message || 'Failed to send notification')
+        console.error('Send to all error:', err)
     } finally {
         processing.value = false
     }
@@ -512,11 +652,7 @@ const handleSend = async () => {
 
 const handleSendTest = async () => {
     if (!formData.value.user_id) {
-        window.$(document).Toasts('create', {
-            class: 'bg-warning',
-            title: 'Warning',
-            body: 'Please select a user for testing'
-        })
+        showToast('error', 'No User', 'Please select a user for testing')
         return
     }
 
@@ -525,20 +661,11 @@ const handleSendTest = async () => {
 
     try {
         const result = await sendTest(formData.value)
-
-        window.$(document).Toasts('create', {
-            class: 'bg-success',
-            title: 'Success',
-            body: `Test notification sent to ${result.user.name}`
-        })
-
+        showToast('success', 'Test Sent', `Notification sent to ${result.user.name}`)
         showTestUser.value = false
     } catch (err) {
-        window.$(document).Toasts('create', {
-            class: 'bg-danger',
-            title: 'Error',
-            body: err.message || 'Failed to send test notification'
-        })
+        showToast('error', 'Test Failed', err.message || 'Failed to send test notification')
+        console.error('Send test error:', err)
     } finally {
         processing.value = false
     }
@@ -571,452 +698,718 @@ const handleDelete = async () => {
     try {
         await deleteLog(selectedLog.value.id)
         closeDeleteModal()
-
-        window.$(document).Toasts('create', {
-            class: 'bg-success',
-            title: 'Success',
-            body: 'Notification log deleted successfully'
-        })
-
+        showToast('success', 'Deleted', 'Campaign log deleted successfully')
         await loadLogs()
         await fetchStats()
     } catch (err) {
-        window.$(document).Toasts('create', {
-            class: 'bg-danger',
-            title: 'Error',
-            body: err.message || 'Failed to delete log'
-        })
+        showToast('error', 'Delete Failed', err.message || 'Failed to delete log')
+        console.error('Delete log error:', err)
     } finally {
         processing.value = false
     }
 }
 
 onMounted(async () => {
-    console.log('📋 MarketingNotificationsList component mounted')
-    await loadLogs()
-    await fetchStats()
+    await Promise.all([loadLogs(), fetchStats()])
 })
 </script>
 
 <style scoped>
-.modern-notifications-container {
-    padding: 20px;
+.marketing-notifications {
+    padding: 0;
 }
 
-/* Modern Card */
-.modern-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    margin-bottom: 30px;
-}
-
-.send-card {
-    background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-}
-
-.card-header {
+/* ── Toast ─────────────────────────── */
+.toast-notification {
+    position: fixed;
+    top: 24px;
+    right: 24px;
+    z-index: 10000;
     display: flex;
-    justify-content: space-between;
     align-items: center;
-    padding: 25px 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: 12px;
     color: white;
+    font-size: 0.9rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+    max-width: 420px;
 }
 
-.header-left {
+.toast-notification.success { background: linear-gradient(135deg, #22c55e, #16a34a); }
+.toast-notification.error { background: linear-gradient(135deg, #ef4444, #dc2626); }
+.toast-notification.info { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+
+.toast-notification > i { font-size: 1.25rem; flex-shrink: 0; }
+.toast-content { flex: 1; }
+.toast-title { font-weight: 700; font-size: 0.85rem; }
+.toast-message { opacity: 0.9; font-size: 0.8rem; margin-top: 2px; }
+.toast-close {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 15px;
+    justify-content: center;
+    flex-shrink: 0;
 }
 
-.header-left i {
-    font-size: 1.8rem;
+.toast-fade-enter-active { animation: slideIn 0.35s ease; }
+.toast-fade-leave-active { animation: slideOut 0.25s ease; }
+@keyframes slideIn { from { transform: translateX(120%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+@keyframes slideOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(120%); opacity: 0; } }
+
+/* ── Compose Section ──────────────── */
+.compose-section {
+    display: grid;
+    grid-template-columns: 1fr 320px;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
 }
 
-.header-left h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
+.compose-card, .preview-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    overflow: hidden;
 }
 
-.card-body {
-    padding: 30px;
+.compose-header, .preview-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 1rem 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #f0f0f0;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a1a2e;
 }
 
-/* Form Styles */
+.compose-header i, .preview-header i {
+    color: #3b82f6;
+}
+
+.compose-form {
+    padding: 1.5rem;
+}
+
 .form-group {
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
+    position: relative;
 }
 
 .form-group label {
     display: block;
     font-weight: 600;
-    color: #495057;
-    margin-bottom: 8px;
-    font-size: 14px;
+    color: #374151;
+    margin-bottom: 6px;
+    font-size: 0.85rem;
 }
 
-.form-group input,
-.form-group textarea,
-.form-group select {
+.required { color: #ef4444; }
+
+.form-input {
     width: 100%;
-    padding: 10px 15px;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.3s ease;
+    padding: 10px 14px;
+    border: 2px solid #e5e7eb;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    background: white;
+    color: #1a1a2e;
 }
 
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
+.form-input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59,130,246,0.1);
 }
 
-.form-group small {
-    display: block;
-    color: #6c757d;
-    font-size: 12px;
-    margin-top: 5px;
+.char-count {
+    position: absolute;
+    right: 12px;
+    bottom: -18px;
+    font-size: 0.7rem;
+    color: #9ca3af;
+    font-weight: 500;
 }
 
-.form-row {
+.form-row-2 {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
 }
 
-.button-group {
+.test-user-group {
+    background: #f0f9ff;
+    padding: 1rem;
+    border-radius: 10px;
+    border: 1px solid #bae6fd;
+}
+
+.user-search-container {
     display: flex;
-    gap: 12px;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.send-actions {
+    display: flex;
+    gap: 0.75rem;
     flex-wrap: wrap;
+    margin-top: 0.5rem;
 }
 
-.btn-send-all,
-.btn-test,
-.btn-send-test {
-    padding: 12px 24px;
+.btn-action {
+    padding: 10px 20px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: 600;
+    font-size: 0.85rem;
     cursor: pointer;
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 8px;
-    transition: all 0.3s ease;
-    font-size: 15px;
+    transition: all 0.2s ease;
 }
 
-.btn-send-all {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    color: white;
-}
-
-.btn-test {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    color: white;
-}
-
-.btn-send-test {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
-}
-
-.btn-send-all:hover,
-.btn-test:hover,
-.btn-send-test:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
-
-.btn-send-all:disabled,
-.btn-test:disabled,
-.btn-send-test:disabled {
-    opacity: 0.6;
+.btn-action:disabled {
+    opacity: 0.5;
     cursor: not-allowed;
-    transform: none;
+    transform: none !important;
 }
 
-/* Filters Section */
-.filters-section {
-    padding: 25px 30px;
+.btn-send {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: white;
+}
+
+.btn-test-toggle {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.btn-test-send {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+}
+
+.btn-cancel {
+    background: #e5e7eb;
+    color: #374151;
+}
+
+.btn-delete {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: white;
+}
+
+.btn-action:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* ── Phone Preview ────────────────── */
+.phone-preview {
+    padding: 1.5rem;
     display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
+    justify-content: center;
 }
 
-.search-box {
-    flex: 1;
-    min-width: 250px;
+.phone-frame {
+    width: 260px;
+    min-height: 200px;
+    background: linear-gradient(180deg, #1a1a2e, #16213e);
+    border-radius: 28px;
+    padding: 16px;
     position: relative;
 }
 
-.search-box i {
-    position: absolute;
-    left: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    color: #6c757d;
+.phone-notch {
+    width: 80px;
+    height: 6px;
+    background: #2a2a4a;
+    border-radius: 3px;
+    margin: 0 auto 16px;
 }
 
-.search-box input {
+.notification-preview {
+    background: rgba(255,255,255,0.95);
+    border-radius: 14px;
+    padding: 12px;
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    transition: all 0.3s ease;
+}
+
+.notification-preview.has-content {
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+
+.preview-app-icon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+.preview-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.preview-app-name {
+    font-size: 0.65rem;
+    color: #9ca3af;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.preview-title {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #1a1a2e;
+    margin: 2px 0;
+    word-break: break-word;
+}
+
+.preview-body {
+    font-size: 0.72rem;
+    color: #6b7280;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.preview-image {
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.preview-image img {
     width: 100%;
-    padding: 10px 15px 10px 45px;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.3s ease;
+    height: 100%;
+    object-fit: cover;
 }
 
-.search-box input:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.preview-time {
+    text-align: right;
+    color: rgba(255,255,255,0.4);
+    font-size: 0.7rem;
+    margin-top: 8px;
 }
 
-.filter-select {
-    padding: 10px 15px;
-    border: 2px solid #e9ecef;
-    border-radius: 8px;
-    font-size: 14px;
-    background: white;
-    cursor: pointer;
-    transition: all 0.3s ease;
+/* ── Delivery Metrics ─────────────── */
+.delivery-metrics {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    padding: 1.5rem;
 }
 
-.filter-select:focus {
-    outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+.delivery-rate-ring {
+    position: relative;
+    width: 120px;
+    height: 120px;
+    flex-shrink: 0;
 }
 
-/* Loading & Error States */
-.loading-state,
-.error-state {
-    padding: 60px;
+.delivery-rate-ring svg {
+    width: 100%;
+    height: 100%;
+}
+
+.rate-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
 }
 
-.spinner {
-    width: 50px;
-    height: 50px;
-    margin: 0 auto 20px;
-    border: 4px solid #f3f4f6;
-    border-top-color: #667eea;
-    border-radius: 50%;
-    animation: spin 1s linear infinite;
+.rate-number {
+    display: block;
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1a1a2e;
 }
 
-@keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.error-state {
-    color: #dc3545;
-}
-
-.error-state i {
-    font-size: 3rem;
-    margin-bottom: 15px;
-}
-
-/* Table Container */
-.table-container {
-    padding: 30px;
-    overflow-x: auto;
-}
-
-.modern-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-.modern-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-}
-
-.modern-table thead th {
-    padding: 15px;
-    text-align: left;
+.rate-text {
+    display: block;
+    font-size: 0.7rem;
+    color: #9ca3af;
     font-weight: 600;
-    font-size: 14px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
-.modern-table tbody tr {
-    border-bottom: 1px solid #e9ecef;
-    transition: all 0.3s ease;
+.delivery-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
 }
 
-.modern-table tbody tr:hover {
-    background: #f8f9fa;
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: #374151;
 }
 
-.modern-table tbody td {
-    padding: 15px;
-    vertical-align: middle;
+.dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.dot.green { background: #22c55e; }
+.dot.red { background: #ef4444; }
+.dot.blue { background: #3b82f6; }
+.dot.gray { background: #9ca3af; }
+
+/* ── History Card ─────────────────── */
+.history-card {
+    background: white;
+    border-radius: 14px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.07);
+    overflow: hidden;
+}
+
+.history-header {
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.history-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 1rem;
+}
+
+.history-title-row i {
+    color: #3b82f6;
+    font-size: 1.1rem;
+}
+
+.history-title-row h3 {
+    margin: 0;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a1a2e;
+}
+
+.history-count {
+    margin-left: auto;
+    font-size: 0.8rem;
+    color: #9ca3af;
+    font-weight: 500;
+}
+
+.history-filters {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.search-input-wrap {
+    flex: 1;
+    min-width: 200px;
+    position: relative;
+}
+
+.search-input-wrap i {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    font-size: 0.85rem;
+}
+
+.search-input-wrap .form-input {
+    padding-left: 40px;
+}
+
+.filter-select {
+    width: auto;
+    min-width: 140px;
+}
+
+/* ── Campaign Items ───────────────── */
+.campaigns-list {
+    padding: 0.5rem 0;
+}
+
+.campaign-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #f5f5f5;
+    transition: background 0.15s ease;
+}
+
+.campaign-item:last-child {
+    border-bottom: none;
+}
+
+.campaign-item:hover {
+    background: #fafbfc;
+}
+
+.campaign-id {
+    width: 52px;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.8rem;
+    color: #3b82f6;
+    background: rgba(59,130,246,0.08);
+    padding: 6px 0;
+    border-radius: 8px;
+    flex-shrink: 0;
+}
+
+.campaign-main {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex: 1;
+    min-width: 0;
+}
+
+.campaign-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.campaign-title-text {
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: #1a1a2e;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.campaign-body-text {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.campaign-meta {
+    display: flex;
+    gap: 1rem;
+    margin-top: 4px;
+}
+
+.meta-item {
+    font-size: 0.72rem;
+    color: #b0b8c4;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.campaign-stats {
+    display: flex;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.campaign-stat {
+    text-align: center;
+    min-width: 55px;
+}
+
+.stat-num {
+    display: block;
+    font-weight: 800;
+    font-size: 1rem;
+    color: #1a1a2e;
+}
+
+.campaign-stat.success .stat-num { color: #22c55e; }
+.campaign-stat.danger .stat-num { color: #ef4444; }
+
+.stat-desc {
+    display: block;
+    font-size: 0.65rem;
+    color: #9ca3af;
+    text-transform: uppercase;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+}
+
+.campaign-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.icon-btn {
+    width: 34px;
+    height: 34px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.icon-btn.view {
+    background: rgba(59,130,246,0.1);
+    color: #3b82f6;
+}
+
+.icon-btn.delete {
+    background: rgba(239,68,68,0.1);
+    color: #ef4444;
+}
+
+.icon-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* ── Loading / Error / Empty ──────── */
+.loading-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: #9ca3af;
+}
+
+.spinner {
+    width: 40px;
+    height: 40px;
+    margin: 0 auto 1rem;
+    border: 3px solid #f3f4f6;
+    border-top-color: #3b82f6;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+.error-banner {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 1rem 1.5rem;
+    background: #fef2f2;
+    color: #dc2626;
+    font-size: 0.9rem;
+}
+
+.retry-btn {
+    margin-left: auto;
+    padding: 6px 14px;
+    border: 1px solid #fca5a5;
+    background: white;
+    border-radius: 6px;
+    color: #dc2626;
+    font-weight: 600;
+    cursor: pointer;
+    font-size: 0.8rem;
 }
 
 .empty-state {
     text-align: center;
-    padding: 60px 20px;
-    color: #6c757d;
+    padding: 4rem 2rem;
+    color: #9ca3af;
 }
 
 .empty-state i {
-    font-size: 3rem;
-    margin-bottom: 15px;
-    opacity: 0.5;
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    opacity: 0.4;
 }
 
-.id-badge {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 13px;
-    display: inline-block;
+.empty-state h4 {
+    margin: 0 0 0.5rem;
+    color: #6b7280;
 }
 
-.notification-info {
-    max-width: 300px;
+.empty-state p {
+    margin: 0;
+    font-size: 0.85rem;
 }
 
-.notification-title {
-    font-weight: 600;
-    color: #2c3e50;
-    margin-bottom: 5px;
-}
-
-.notification-body {
-    font-size: 13px;
-    color: #6c757d;
-}
-
-.count-badge {
-    padding: 5px 12px;
-    border-radius: 20px;
-    font-weight: 600;
-    font-size: 13px;
-    color: white;
-    display: inline-block;
-}
-
-.count-badge.recipients {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.count-badge.success {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.count-badge.failed {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.count-badge.large {
-    font-size: 1rem;
-    padding: 8px 16px;
-}
-
-.admin-info,
-.date-info {
-    font-size: 13px;
-    color: #6c757d;
-}
-
-.action-buttons {
-    display: flex;
-    gap: 8px;
-}
-
-.action-btn {
-    padding: 8px 12px;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: white;
-}
-
-.action-btn.view {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-}
-
-.action-btn.delete {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.action-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-}
-
-/* Pagination */
-.pagination-container {
+/* ── Pagination ───────────────────── */
+.pagination-bar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 30px;
-    border-top: 1px solid #e9ecef;
-    flex-wrap: wrap;
-    gap: 15px;
+    padding: 1rem 1.5rem;
+    border-top: 1px solid #f0f0f0;
 }
 
 .pagination-info {
-    color: #6c757d;
-    font-size: 14px;
+    font-size: 0.8rem;
+    color: #9ca3af;
 }
 
 .pagination-controls {
     display: flex;
-    gap: 5px;
+    gap: 4px;
 }
 
 .page-btn {
-    padding: 8px 12px;
-    border: 1px solid #e9ecef;
+    padding: 6px 12px;
+    border: 1px solid #e5e7eb;
     background: white;
-    border-radius: 6px;
+    border-radius: 8px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    color: #495057;
+    color: #374151;
     font-weight: 500;
+    font-size: 0.85rem;
+    transition: all 0.15s ease;
 }
 
 .page-btn:hover:not(:disabled) {
-    background: #f8f9fa;
-    border-color: #667eea;
+    background: #f3f4f6;
+    border-color: #3b82f6;
 }
 
 .page-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: #3b82f6;
     color: white;
-    border-color: transparent;
+    border-color: #3b82f6;
 }
 
 .page-btn:disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
-/* Modal Overlay */
+/* ── Modal ────────────────────────── */
 .modal-overlay {
     position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.5);
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.45);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1024,217 +1417,274 @@ onMounted(async () => {
     padding: 20px;
 }
 
-.modern-modal {
+.modal-dialog {
     background: white;
-    border-radius: 15px;
+    border-radius: 16px;
     width: 100%;
+    max-width: 700px;
     max-height: 90vh;
     overflow-y: auto;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
 }
 
-.modern-modal.small {
-    max-width: 500px;
+.modal-dialog.small {
+    max-width: 460px;
 }
 
-.modern-modal.large {
-    max-width: 800px;
-}
-
-.modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px 25px;
+.modal-top {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-radius: 15px 15px 0 0;
+    padding: 1.25rem 1.5rem;
+    background: #f8f9fa;
+    border-bottom: 1px solid #f0f0f0;
+    border-radius: 16px 16px 0 0;
 }
 
-.modal-header.danger {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+.modal-top.danger {
+    background: #fef2f2;
+    border-bottom-color: #fecaca;
 }
 
-.modal-header h3 {
+.modal-top h3 {
     margin: 0;
-    font-size: 1.3rem;
+    font-size: 1.1rem;
+    font-weight: 700;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+    color: #1a1a2e;
 }
 
-.close-btn {
-    background: rgba(255, 255, 255, 0.2);
+.modal-top.danger h3 { color: #dc2626; }
+
+.modal-close {
+    width: 32px;
+    height: 32px;
     border: none;
-    color: white;
-    width: 35px;
-    height: 35px;
+    background: rgba(0,0,0,0.06);
     border-radius: 50%;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.3s ease;
+    color: #6b7280;
+    transition: all 0.2s ease;
 }
 
-.close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+.modal-close:hover {
+    background: rgba(0,0,0,0.1);
     transform: rotate(90deg);
 }
 
-.modal-body {
-    padding: 30px;
+.modal-inner {
+    padding: 1.5rem;
 }
 
-.modal-body p {
-    margin: 10px 0;
-    color: #495057;
-}
-
-.details-table {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.detail-row {
-    display: grid;
-    grid-template-columns: 200px 1fr;
-    gap: 20px;
-    padding: 12px;
-    background: #f8f9fa;
-    border-radius: 8px;
-}
-
-.detail-label {
-    font-weight: 600;
-    color: #495057;
-}
-
-.detail-value {
-    color: #2c3e50;
-}
-
-.detail-value .link {
-    color: #667eea;
-    text-decoration: none;
-}
-
-.detail-value .link:hover {
-    text-decoration: underline;
-}
-
-.detail-value code {
-    background: #e9ecef;
-    padding: 4px 8px;
-    border-radius: 4px;
-    font-family: monospace;
-}
-
-.warning-box {
-    background: #fff3cd;
-    border: 1px solid #ffc107;
-    padding: 15px;
-    border-radius: 8px;
-    margin: 15px 0;
-}
-
-.warning-text {
-    color: #dc3545;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-top: 15px;
-    padding: 10px;
-    background: #fff5f5;
-    border-radius: 8px;
-}
-
-.modal-footer {
-    padding: 20px 30px;
+.modal-bottom {
+    padding: 1rem 1.5rem;
     background: #f8f9fa;
     display: flex;
     justify-content: flex-end;
-    gap: 12px;
-    border-radius: 0 0 15px 15px;
+    gap: 10px;
+    border-radius: 0 0 16px 16px;
 }
 
-.btn-cancel,
-.btn-danger {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 8px;
+/* Detail sections in modal */
+.detail-section {
+    margin-bottom: 1.5rem;
+}
+
+.detail-section:last-child {
+    margin-bottom: 0;
+}
+
+.detail-section h4 {
+    margin: 0 0 0.75rem;
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #374151;
+}
+
+.detail-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+}
+
+.detail-cell {
+    background: #f8f9fa;
+    padding: 0.75rem 1rem;
+    border-radius: 10px;
+}
+
+.detail-key {
+    display: block;
+    font-size: 0.72rem;
+    color: #9ca3af;
     font-weight: 600;
-    cursor: pointer;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.detail-val {
+    font-weight: 700;
+    color: #1a1a2e;
+    font-size: 0.95rem;
+}
+
+.text-success { color: #22c55e !important; }
+.text-warning { color: #f97316 !important; }
+
+.content-preview-box {
+    background: #f8f9fa;
+    padding: 1rem 1.25rem;
+    border-radius: 10px;
+    border-left: 4px solid #3b82f6;
+}
+
+.content-title {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1a1a2e;
+    margin-bottom: 6px;
+}
+
+.content-body {
+    color: #6b7280;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.content-link {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    color: #9ca3af;
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
+    gap: 6px;
 }
 
-.btn-cancel {
-    background: #6c757d;
-    color: white;
+.content-link a {
+    color: #3b82f6;
+    text-decoration: none;
+    word-break: break-all;
 }
 
-.btn-danger {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
+.content-link code {
+    background: #e5e7eb;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.78rem;
 }
 
-.btn-cancel:hover,
-.btn-danger:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+.delivery-stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
 }
 
-.btn-danger:disabled {
-    opacity: 0.6;
-    cursor: not-allowed;
-    transform: none;
+.delivery-stat-card {
+    text-align: center;
+    padding: 1rem;
+    border-radius: 10px;
+    background: #f8f9fa;
 }
 
-/* Responsive Design */
-@media (max-width: 768px) {
-    .filters-section {
-        flex-direction: column;
-    }
+.delivery-stat-card.blue { background: rgba(59,130,246,0.08); }
+.delivery-stat-card.green { background: rgba(34,197,94,0.08); }
+.delivery-stat-card.red { background: rgba(239,68,68,0.08); }
 
-    .search-box {
-        width: 100%;
-    }
+.ds-value {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #1a1a2e;
+}
 
-    .filter-select {
-        width: 100%;
-    }
+.delivery-stat-card.blue .ds-value { color: #3b82f6; }
+.delivery-stat-card.green .ds-value { color: #22c55e; }
+.delivery-stat-card.red .ds-value { color: #ef4444; }
 
-    .button-group {
-        flex-direction: column;
-    }
+.ds-label {
+    font-size: 0.72rem;
+    color: #9ca3af;
+    font-weight: 600;
+    text-transform: uppercase;
+}
 
-    .btn-send-all,
-    .btn-test,
-    .btn-send-test {
-        width: 100%;
-    }
+.delivery-progress {
+    width: 100%;
+    height: 8px;
+    background: #fee2e2;
+    border-radius: 4px;
+    overflow: hidden;
+}
 
-    .detail-row {
+.delivery-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #22c55e, #4ade80);
+    border-radius: 4px;
+    transition: width 0.8s ease;
+}
+
+.delete-target {
+    background: #fef3cd;
+    border: 1px solid #fde68a;
+    padding: 1rem;
+    border-radius: 10px;
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.delete-target strong {
+    color: #1a1a2e;
+}
+
+.delete-target span {
+    font-size: 0.8rem;
+    color: #9ca3af;
+}
+
+.destructive-warning {
+    color: #dc2626;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 0;
+}
+
+/* ── Responsive ───────────────────── */
+@media (max-width: 900px) {
+    .compose-section {
         grid-template-columns: 1fr;
-        gap: 8px;
     }
 
-    .modern-table {
-        font-size: 13px;
+    .form-row-2 {
+        grid-template-columns: 1fr;
     }
 
-    .modern-table thead th,
-    .modern-table tbody td {
-        padding: 10px;
-    }
-
-    .pagination-container {
+    .delivery-metrics {
         flex-direction: column;
-        text-align: center;
+        align-items: center;
+    }
+
+    .campaign-item {
+        flex-wrap: wrap;
+    }
+
+    .campaign-stats {
+        width: 100%;
+        justify-content: space-around;
+        padding-top: 0.75rem;
+        border-top: 1px solid #f5f5f5;
+    }
+
+    .detail-grid {
+        grid-template-columns: 1fr;
     }
 }
 </style>

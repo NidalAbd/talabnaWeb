@@ -9,6 +9,9 @@ export function useMarketingNotifications() {
         total: 0
     })
     const stats = ref([])
+    const deliveryRate = ref(0)
+    const campaignChart = ref(null)
+    const weekTrend = ref(null)
     const users = ref([])
     const loading = ref(false)
     const error = ref(null)
@@ -26,20 +29,15 @@ export function useMarketingNotifications() {
             if (filters.page) params.append('page', filters.page)
             if (filters.per_page) params.append('per_page', filters.per_page)
 
-            const url = `/api/admin/marketing-notifications?${params.toString()}`
-            console.log('🔍 Fetching notification logs from:', url)
-
-            const response = await fetch(url)
-            console.log('📡 Response status:', response.status, response.statusText)
+            const response = await fetch(`/api/admin/marketing-notifications?${params.toString()}`)
 
             if (!response.ok) {
                 const errorText = await response.text()
-                console.error('❌ Response error:', errorText)
+                console.error('Fetch logs error response:', errorText)
                 throw new Error('Failed to fetch notification logs')
             }
 
             const data = await response.json()
-            console.log('✅ Notification logs data received:', data)
 
             if (data.logs) {
                 logs.value = data.logs
@@ -48,10 +46,9 @@ export function useMarketingNotifications() {
             }
         } catch (err) {
             error.value = err.message
-            console.error('❌ Error fetching notification logs:', err)
+            console.error('Error fetching notification logs:', err)
         } finally {
             loading.value = false
-            console.log('⏱️ Loading complete. Logs count:', logs.value.data?.length || 0)
         }
     }
 
@@ -65,6 +62,9 @@ export function useMarketingNotifications() {
 
             const data = await response.json()
             stats.value = data.stats
+            deliveryRate.value = data.delivery_rate || 0
+            campaignChart.value = data.campaign_chart || null
+            weekTrend.value = data.week_trend || null
         } catch (err) {
             console.error('Error fetching notification stats:', err)
         }
@@ -99,7 +99,7 @@ export function useMarketingNotifications() {
 
             if (!response.ok) {
                 const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to send notification')
+                throw new Error(errorData.error || errorData.message || 'Failed to send notification')
             }
 
             return await response.json()
@@ -122,7 +122,7 @@ export function useMarketingNotifications() {
 
             if (!response.ok) {
                 const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to send test notification')
+                throw new Error(errorData.error || errorData.message || 'Failed to send test notification')
             }
 
             return await response.json()
@@ -143,7 +143,7 @@ export function useMarketingNotifications() {
 
             if (!response.ok) {
                 const errorData = await response.json()
-                throw new Error(errorData.error || 'Failed to delete log')
+                throw new Error(errorData.error || errorData.message || 'Failed to delete log')
             }
 
             return await response.json()
@@ -156,6 +156,9 @@ export function useMarketingNotifications() {
     return {
         logs,
         stats,
+        deliveryRate,
+        campaignChart,
+        weekTrend,
         users,
         loading,
         error,
