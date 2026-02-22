@@ -1,17 +1,45 @@
 <template>
     <div class="analytics-modern">
 
-        <!-- Overview Stats -->
-        <div class="stats-dashboard">
-          <div class="stats-grid">
-            <div class="stat-card-compact" :class="stat.color" v-for="stat in overview" :key="stat.label">
-              <div class="stat-icon"><i :class="stat.icon"></i></div>
-              <div class="stat-info">
-                <div class="stat-value-compact">{{ formatNumber(stat.value) }}</div>
-                <div class="stat-label-compact">{{ stat.label }}</div>
-              </div>
+        <!-- Date Range Picker -->
+        <div class="date-range-bar">
+            <div class="range-buttons">
+                <button
+                    v-for="range in dateRanges"
+                    :key="range.days"
+                    class="range-btn"
+                    :class="{ active: activeDays === range.days }"
+                    @click="changeRange(range.days)"
+                >
+                    {{ range.label }}
+                </button>
             </div>
-          </div>
+        </div>
+
+        <!-- Overview Stat Cards -->
+        <div class="stats-dashboard">
+            <div class="stats-grid">
+                <div
+                    v-for="stat in overview"
+                    :key="stat.label"
+                    class="stat-card-compact"
+                    :class="stat.color"
+                >
+                    <div class="stat-icon"><i :class="stat.icon"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ formatNumber(stat.value) }}</div>
+                        <div class="stat-label-compact">{{ stat.label }}</div>
+                        <div
+                            v-if="stat.change !== undefined"
+                            class="stat-trend"
+                            :class="stat.change >= 0 ? 'trend-up' : 'trend-down'"
+                        >
+                            <i :class="stat.change >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                            {{ Math.abs(stat.change) }}%
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Modern Tabs -->
@@ -20,273 +48,174 @@
                 <button
                     class="tab-btn"
                     :class="{ active: activeTab === 'users' }"
-                    @click="activeTab = 'users'; loadTabData('users')"
+                    @click="changeTab('users')"
                 >
-                    <i class="fas fa-users"></i> User Analytics
+                    <i class="fas fa-users"></i> Users
                 </button>
                 <button
                     class="tab-btn"
                     :class="{ active: activeTab === 'points' }"
-                    @click="activeTab = 'points'; loadTabData('points')"
+                    @click="changeTab('points')"
                 >
-                    <i class="fas fa-coins"></i> Point Analytics
+                    <i class="fas fa-coins"></i> Points
                 </button>
                 <button
                     class="tab-btn"
                     :class="{ active: activeTab === 'posts' }"
-                    @click="activeTab = 'posts'; loadTabData('posts')"
+                    @click="changeTab('posts')"
                 >
-                    <i class="fas fa-file-alt"></i> Post Analytics
+                    <i class="fas fa-file-alt"></i> Posts
                 </button>
             </div>
 
             <div class="tabs-body">
-                <!-- User Analytics Tab -->
-                <div v-show="activeTab === 'users'" class="tab-content">
-                    <div v-if="loading" class="loading-state">
-                        <div class="spinner"></div>
-                        <p>Loading user analytics...</p>
-                    </div>
-                    <div v-else-if="userAnalytics">
-                        <!-- User Stats Cards -->
-                        <div class="info-boxes-grid mb-4">
-                            <div class="info-box blue">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Total Users</span>
-                                    <span class="info-box-value">{{ userAnalytics.stats.total_users }}</span>
-                                </div>
-                            </div>
-                            <div class="info-box green">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-user-check"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Active Users</span>
-                                    <span class="info-box-value">{{ userAnalytics.stats.active_users }}</span>
-                                </div>
-                            </div>
-                            <div class="info-box orange">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-user-plus"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">New This Month</span>
-                                    <span class="info-box-value">{{ userAnalytics.stats.new_this_month }}</span>
-                                </div>
-                            </div>
-                            <div class="info-box purple">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Growth Rate</span>
-                                    <span class="info-box-value">{{ userAnalytics.stats.growth_rate }}%</span>
-                                </div>
+                <!-- Loading -->
+                <div v-if="loading" class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading analytics...</p>
+                </div>
+
+                <!-- Users Tab -->
+                <div v-else-if="activeTab === 'users' && tabData" class="tab-content">
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h4 class="chart-title">Registrations Over Time</h4>
+                            <div class="chart-body" style="height: 280px;">
+                                <LineChart :data="tabData.registrations_chart" :height="280" />
                             </div>
                         </div>
-
-                        <!-- Additional Metrics -->
-                        <div class="cards-grid">
-                            <div class="metric-card">
-                                <h3 class="card-title">User Engagement</h3>
-                                <div class="metric-table">
-                                    <div class="metric-row">
-                                        <span class="metric-label">Users with Posts:</span>
-                                        <span class="metric-value">{{ userAnalytics.stats.users_with_posts }}</span>
-                                    </div>
-                                    <div class="metric-row">
-                                        <span class="metric-label">Users with Points:</span>
-                                        <span class="metric-value">{{ userAnalytics.stats.users_with_points }}</span>
-                                    </div>
-                                    <div class="metric-row">
-                                        <span class="metric-label">Premium Users:</span>
-                                        <span class="metric-value">{{ userAnalytics.stats.premium_users }}</span>
-                                    </div>
-                                    <div class="metric-row">
-                                        <span class="metric-label">Monthly Active:</span>
-                                        <span class="metric-value">{{ userAnalytics.stats.monthly_active }}</span>
-                                    </div>
-                                </div>
+                        <div class="chart-card">
+                            <h4 class="chart-title">User Status</h4>
+                            <div class="chart-body">
+                                <PieChart :data="tabData.status_chart" :height="250" />
                             </div>
-
-                            <div class="metric-card">
-                                <h3 class="card-title">Top Users by Posts</h3>
-                                <div class="top-list">
-                                    <div class="top-item" v-for="user in userAnalytics.top_users" :key="user.id">
-                                        <span class="top-name">{{ user.name }}</span>
-                                        <span class="badge primary">{{ user.posts_count }}</span>
-                                    </div>
+                        </div>
+                    </div>
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h4 class="chart-title">Users by Country (Top 10)</h4>
+                            <div class="chart-body" style="height: 280px;">
+                                <BarChart :data="tabData.country_chart" :height="280" />
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h4 class="chart-title">Engagement Rates</h4>
+                            <div class="chart-body metric-card-body" v-if="tabData.metrics">
+                                <div class="metric-row">
+                                    <span class="metric-label">Total Users</span>
+                                    <span class="metric-value">{{ formatNumber(tabData.metrics.total_users) }}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Active Users</span>
+                                    <span class="metric-value">{{ formatNumber(tabData.metrics.active_users) }}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Users with Posts</span>
+                                    <span class="metric-value">{{ formatNumber(tabData.metrics.users_with_posts) }}</span>
+                                </div>
+                                <div class="metric-row highlight">
+                                    <span class="metric-label">Engagement Rate</span>
+                                    <span class="metric-value accent">{{ tabData.metrics.engagement_pct }}%</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Point Analytics Tab -->
-                <div v-show="activeTab === 'points'" class="tab-content">
-                    <div v-if="loading" class="loading-state">
-                        <div class="spinner"></div>
-                        <p>Loading point analytics...</p>
-                    </div>
-                    <div v-else-if="pointAnalytics">
-                        <!-- Point Stats Cards -->
-                        <div class="info-boxes-grid mb-4">
-                            <div class="info-box orange">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-coins"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Total Points</span>
-                                    <span class="info-box-value">{{ pointAnalytics.stats.total_points }}</span>
-                                </div>
-                            </div>
-                            <div class="info-box green">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Monthly Sold</span>
-                                    <span class="info-box-value">{{ pointAnalytics.stats.monthly_sold }}</span>
-                                </div>
-                            </div>
-                            <div class="info-box red">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-minus-circle"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Monthly Used</span>
-                                    <span class="info-box-value">{{ pointAnalytics.stats.monthly_used }}</span>
-                                </div>
-                            </div>
-                            <div class="info-box blue">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Growth Rate</span>
-                                    <span class="info-box-value">{{ pointAnalytics.stats.growth_rate }}%</span>
-                                </div>
+                <!-- Points Tab -->
+                <div v-else-if="activeTab === 'points' && tabData" class="tab-content">
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h4 class="chart-title">Inflow vs Outflow</h4>
+                            <div class="chart-body" style="height: 280px;">
+                                <LineChart :data="tabData.flow_chart" :height="280" />
                             </div>
                         </div>
-
-                        <div class="cards-grid">
-                            <div class="metric-card">
-                                <h3 class="card-title">Point System Overview</h3>
-                                <div class="metric-table">
-                                    <div class="metric-row">
-                                        <span class="metric-label">Total Transactions:</span>
-                                        <span class="metric-value">{{ pointAnalytics.stats.total_transactions }}</span>
-                                    </div>
-                                    <div class="metric-row">
-                                        <span class="metric-label">Total Requests:</span>
-                                        <span class="metric-value">{{ pointAnalytics.stats.total_requests }}</span>
-                                    </div>
-                                    <div class="metric-row">
-                                        <span class="metric-label">Pending Requests:</span>
-                                        <span class="badge warning">{{ pointAnalytics.stats.pending_requests }}</span>
-                                    </div>
-                                    <div class="metric-row">
-                                        <span class="metric-label">Approved Requests:</span>
-                                        <span class="badge success">{{ pointAnalytics.stats.approved_requests }}</span>
-                                    </div>
-                                </div>
+                        <div class="chart-card">
+                            <h4 class="chart-title">Transaction Types</h4>
+                            <div class="chart-body">
+                                <PieChart :data="tabData.type_chart" :height="250" />
                             </div>
-
-                            <div class="metric-card">
-                                <h3 class="card-title">Top Users by Points</h3>
-                                <div class="top-list">
-                                    <div class="top-item" v-for="user in pointAnalytics.top_users" :key="user.id">
-                                        <span class="top-name">{{ user.name }}</span>
-                                        <span class="badge warning">{{ user.total_points }}</span>
-                                    </div>
+                        </div>
+                    </div>
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h4 class="chart-title">Revenue Trend</h4>
+                            <div class="chart-body" style="height: 280px;">
+                                <LineChart :data="tabData.revenue_chart" :height="280" />
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h4 class="chart-title">Points Health</h4>
+                            <div class="chart-body metric-card-body" v-if="tabData.metrics">
+                                <div class="metric-row">
+                                    <span class="metric-label">Total in System</span>
+                                    <span class="metric-value">{{ formatNumber(tabData.metrics.total_in_system) }}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Period Inflow</span>
+                                    <span class="metric-value text-green">+{{ formatNumber(tabData.metrics.period_inflow) }}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Period Outflow</span>
+                                    <span class="metric-value text-red">-{{ formatNumber(tabData.metrics.period_outflow) }}</span>
+                                </div>
+                                <div class="metric-row highlight">
+                                    <span class="metric-label">Net Flow</span>
+                                    <span class="metric-value" :class="tabData.metrics.net_flow >= 0 ? 'text-green' : 'text-red'">
+                                        {{ tabData.metrics.net_flow >= 0 ? '+' : '' }}{{ formatNumber(tabData.metrics.net_flow) }}
+                                    </span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Pending Requests</span>
+                                    <span class="metric-value text-orange">{{ tabData.metrics.pending_requests }}</span>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Post Analytics Tab -->
-                <div v-show="activeTab === 'posts'" class="tab-content">
-                    <div v-if="loading" class="loading-state">
-                        <div class="spinner"></div>
-                        <p>Loading post analytics...</p>
-                    </div>
-                    <div v-else-if="postAnalytics">
-                        <!-- Post Stats Cards -->
-                        <div class="info-boxes-grid mb-4">
-                            <div class="info-box blue">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-file-alt"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Total Posts</span>
-                                    <span class="info-box-value">{{ postAnalytics.stats.total }}</span>
-                                </div>
-                            </div>
-                            <div class="info-box green">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Published</span>
-                                    <span class="info-box-value">{{ postAnalytics.stats.published }}</span>
-                                </div>
-                            </div>
-                            <div class="info-box orange">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-clock"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Pending</span>
-                                    <span class="info-box-value">{{ postAnalytics.stats.pending }}</span>
-                                </div>
-                            </div>
-                            <div class="info-box purple">
-                                <div class="info-box-icon">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="info-box-content">
-                                    <span class="info-box-label">Growth Rate</span>
-                                    <span class="info-box-value">{{ postAnalytics.stats.growth_rate }}%</span>
-                                </div>
+                <!-- Posts Tab -->
+                <div v-else-if="activeTab === 'posts' && tabData" class="tab-content">
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h4 class="chart-title">Post Creation Over Time</h4>
+                            <div class="chart-body" style="height: 280px;">
+                                <LineChart :data="tabData.creation_chart" :height="280" />
                             </div>
                         </div>
-
-                        <div class="cards-grid">
-                            <div class="metric-card">
-                                <h3 class="card-title">Badge Distribution</h3>
-                                <div class="metric-table">
-                                    <div class="metric-row">
-                                        <span class="metric-label">
-                                            <i class="fas fa-gem" style="color: #17a2b8;"></i> Diamond Posts:
-                                        </span>
-                                        <span class="metric-value">{{ postAnalytics.stats.diamond }}</span>
-                                    </div>
-                                    <div class="metric-row">
-                                        <span class="metric-label">
-                                            <i class="fas fa-medal" style="color: #f39c12;"></i> Golden Posts:
-                                        </span>
-                                        <span class="metric-value">{{ postAnalytics.stats.golden }}</span>
-                                    </div>
-                                    <div class="metric-row">
-                                        <span class="metric-label">
-                                            <i class="fas fa-circle" style="color: #6c757d;"></i> Normal Posts:
-                                        </span>
-                                        <span class="metric-value">{{ postAnalytics.stats.normal }}</span>
-                                    </div>
-                                </div>
+                        <div class="chart-card">
+                            <h4 class="chart-title">Post Type</h4>
+                            <div class="chart-body">
+                                <PieChart :data="tabData.type_chart" :height="250" />
                             </div>
-
-                            <div class="metric-card">
-                                <h3 class="card-title">Top Posts by Views</h3>
-                                <div class="top-list">
-                                    <div class="top-item" v-for="post in postAnalytics.top_posts" :key="post.id">
-                                        <span class="top-name">{{ truncate(post.title, 30) }}</span>
-                                        <span class="badge info">{{ post.view_count }}</span>
-                                    </div>
+                        </div>
+                    </div>
+                    <div class="charts-row">
+                        <div class="chart-card">
+                            <h4 class="chart-title">Posts by Category</h4>
+                            <div class="chart-body" style="height: 280px;">
+                                <BarChart :data="tabData.category_chart" :height="280" />
+                            </div>
+                        </div>
+                        <div class="chart-card">
+                            <h4 class="chart-title">Post Metrics</h4>
+                            <div class="chart-body metric-card-body" v-if="tabData.metrics">
+                                <div class="metric-row">
+                                    <span class="metric-label">Total Posts</span>
+                                    <span class="metric-value">{{ formatNumber(tabData.metrics.total_posts) }}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Published</span>
+                                    <span class="metric-value text-green">{{ formatNumber(tabData.metrics.published_posts) }}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Avg Views</span>
+                                    <span class="metric-value">{{ tabData.metrics.avg_views }}</span>
+                                </div>
+                                <div class="metric-row">
+                                    <span class="metric-label">Avg Favorites</span>
+                                    <span class="metric-value">{{ tabData.metrics.avg_favorites }}</span>
                                 </div>
                             </div>
                         </div>
@@ -298,50 +227,42 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { onMounted } from 'vue'
 import { useAnalytics } from '../../composables/useAnalytics'
+import LineChart from '../../components/admin/charts/LineChart.vue'
+import PieChart from '../../components/admin/charts/PieChart.vue'
+import BarChart from '../../components/admin/charts/BarChart.vue'
 
 const {
-    userAnalytics,
-    pointAnalytics,
-    postAnalytics,
     overview,
+    tabData,
+    activeTab,
+    activeDays,
     loading,
     error,
-    fetchUserAnalytics,
-    fetchPointAnalytics,
-    fetchPostAnalytics,
-    fetchOverview
+    fetchAnalytics,
+    changeRange,
+    changeTab,
 } = useAnalytics()
 
-const activeTab = ref('users')
+const dateRanges = [
+    { label: '7 Days', days: 7 },
+    { label: '30 Days', days: 30 },
+    { label: '90 Days', days: 90 },
+    { label: '1 Year', days: 365 },
+]
 
 const formatNumber = (value) => {
-  if (value === null || value === undefined) return '0'
-  return new Intl.NumberFormat().format(value)
-}
-
-const truncate = (text, length) => {
-    if (!text) return ''
-    return text.length > length ? text.substring(0, length) + '...' : text
-}
-
-const loadTabData = async (tab) => {
-    if (tab === 'users' && !userAnalytics.value) {
-        await fetchUserAnalytics()
-    } else if (tab === 'points' && !pointAnalytics.value) {
-        await fetchPointAnalytics()
-    } else if (tab === 'posts' && !postAnalytics.value) {
-        await fetchPostAnalytics()
-    }
+    if (value === null || value === undefined) return '0'
+    const str = String(value)
+    if (str.includes('%')) return str
+    const num = Number(value)
+    if (isNaN(num)) return str
+    return new Intl.NumberFormat().format(num)
 }
 
 onMounted(async () => {
-    console.log('📊 Analytics component mounted')
-
-    // Load overview and user analytics by default
-    await fetchOverview()
-    await fetchUserAnalytics()
+    await fetchAnalytics()
 })
 </script>
 
@@ -350,36 +271,44 @@ onMounted(async () => {
     padding: 0;
 }
 
-/* Header Section */
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 2rem;
-}
-
-.header-content {
-    flex: 1;
-}
-
-.section-title {
-    font-size: 1.75rem;
-    font-weight: 700;
-    color: #1a1a1a;
-    margin: 0 0 0.5rem 0;
+/* Date Range Bar */
+.date-range-bar {
+    background: white;
+    border-radius: 12px;
+    padding: 0.75rem 1.25rem;
+    margin-bottom: 1.25rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    justify-content: flex-end;
 }
 
-.section-title i {
-    color: #3498db;
+.range-buttons {
+    display: flex;
+    gap: 0.5rem;
 }
 
-.section-subtitle {
-    color: #666;
-    font-size: 0.95rem;
-    margin: 0;
+.range-btn {
+    padding: 0.5rem 1rem;
+    border: 1px solid #e5e7eb;
+    background: white;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.range-btn:hover {
+    background: #f3f4f6;
+    color: #374151;
+}
+
+.range-btn.active {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: white;
+    border-color: #3b82f6;
 }
 
 /* Tabs Container */
@@ -414,12 +343,12 @@ onMounted(async () => {
 }
 
 .tab-btn:hover {
-    background: rgba(52, 152, 219, 0.1);
-    color: #3498db;
+    background: rgba(59, 130, 246, 0.1);
+    color: #3b82f6;
 }
 
 .tab-btn.active {
-    color: #3498db;
+    color: #3b82f6;
     background: white;
 }
 
@@ -430,11 +359,11 @@ onMounted(async () => {
     left: 0;
     right: 0;
     height: 2px;
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
 }
 
 .tabs-body {
-    padding: 2rem;
+    padding: 1.5rem;
 }
 
 .tab-content {
@@ -463,7 +392,7 @@ onMounted(async () => {
     height: 50px;
     margin: 0 auto 1rem;
     border: 4px solid #f3f4f6;
-    border-top: 4px solid #3498db;
+    border-top: 4px solid #3b82f6;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -473,105 +402,12 @@ onMounted(async () => {
     100% { transform: rotate(360deg); }
 }
 
-/* Info Boxes Grid */
-.info-boxes-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.25rem;
-}
-
-.info-box {
-    border-radius: 12px;
+/* Metric Card Body */
+.metric-card-body {
     padding: 1.25rem;
-    color: white;
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-}
-
-.info-box:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.info-box.blue {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.info-box.green {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-}
-
-.info-box.orange {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-    color: #212529;
-}
-
-.info-box.purple {
-    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-}
-
-.info-box.red {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.info-box-icon {
-    width: 50px;
-    height: 50px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 10px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.5rem;
-}
-
-.info-box-content {
-    flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 0.25rem;
-}
-
-.info-box-label {
-    font-size: 0.85rem;
-    opacity: 0.95;
-}
-
-.info-box-value {
-    font-size: 1.75rem;
-    font-weight: 700;
-}
-
-/* Cards Grid */
-.cards-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-    margin-top: 1.5rem;
-}
-
-.metric-card {
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-}
-
-.card-title {
-    padding: 1.25rem 1.5rem;
-    margin: 0;
-    font-size: 1.1rem;
-    font-weight: 600;
-    color: #1a1a1a;
-    border-bottom: 1px solid #e8ecef;
-    background: #f8f9fa;
-}
-
-.metric-table {
-    padding: 1rem 1.5rem;
+    gap: 0;
 }
 
 .metric-row {
@@ -586,78 +422,37 @@ onMounted(async () => {
     border-bottom: none;
 }
 
-.metric-label {
-    color: #666;
-    font-size: 0.9rem;
-}
-
-.metric-value {
-    font-weight: 600;
-    color: #1a1a1a;
-    font-size: 1rem;
-}
-
-.top-list {
-    padding: 1rem 1.5rem;
-}
-
-.top-item {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f0f0f0;
-}
-
-.top-item:last-child {
+.metric-row.highlight {
+    background: #f8f9fa;
+    margin: 0.25rem -1.25rem;
+    padding: 0.75rem 1.25rem;
+    border-radius: 8px;
     border-bottom: none;
 }
 
-.top-name {
-    color: #333;
+.metric-label {
+    color: #6b7280;
     font-size: 0.9rem;
-    flex: 1;
+    font-weight: 500;
 }
 
-.badge {
-    padding: 0.35rem 0.75rem;
-    border-radius: 6px;
-    font-size: 0.85rem;
-    font-weight: 600;
+.metric-value {
+    font-weight: 700;
+    color: #1a1a2e;
+    font-size: 1rem;
 }
 
-.badge.primary {
-    background: #cfe2ff;
-    color: #0d6efd;
+.metric-value.accent {
+    color: #3b82f6;
+    font-size: 1.15rem;
 }
 
-.badge.success {
-    background: #d4edda;
-    color: #28a745;
-}
-
-.badge.warning {
-    background: #fff3cd;
-    color: #f39c12;
-}
-
-.badge.info {
-    background: #d1ecf1;
-    color: #17a2b8;
-}
-
-.mb-4 {
-    margin-bottom: 1.5rem;
-}
+.text-green { color: #22c55e; }
+.text-red { color: #ef4444; }
+.text-orange { color: #f97316; }
 
 /* Responsive */
 @media (max-width: 768px) {
-    .section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 1rem;
-    }
-
     .tabs-header {
         flex-direction: column;
     }
@@ -675,8 +470,13 @@ onMounted(async () => {
         padding: 1rem;
     }
 
-    .cards-grid {
-        grid-template-columns: 1fr;
+    .date-range-bar {
+        justify-content: center;
+    }
+
+    .range-buttons {
+        flex-wrap: wrap;
+        justify-content: center;
     }
 }
 </style>

@@ -5,337 +5,389 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\User;
 use App\Models\ServicePost;
+use App\Models\Categories;
+use App\Models\countries;
 use App\Models\palservice_points;
 use App\Models\point_transactions;
 use App\Models\point_purchase_requests;
-use App\Models\Level;
+use App\Models\BadgeType;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class AnalyticsApiController extends Controller
 {
     /**
-     * Get user analytics data
+     * Unified analytics endpoint.
+     * GET /api/admin/analytics?days=30&tab=users
      */
-    public function getUserAnalytics(): JsonResponse
+    public function getAnalytics(Request $request): JsonResponse
     {
         try {
-            $currentMonth = Carbon::now()->startOfMonth();
-            $previousMonth = Carbon::now()->subMonth()->startOfMonth();
+            $days = (int) $request->input('days', 30);
+            $tab  = $request->input('tab', 'users');
 
-            // User statistics
-            $totalUsers = User::count();
-            $activeUsers = User::where('is_active', 'active')->count();
-            $bannedUsers = User::where('is_active', 'banned')->count();
+            $now   = Carbon::now();
+            $start = $now->copy()->subDays($days)->startOfDay();
+            $prev  = $start->copy()->subDays($days);
 
-            // Monthly user growth
-            $newUsersThisMonth = User::whereMonth('created_at', $currentMonth->month)->count();
-            $newUsersLastMonth = User::whereMonth('created_at', $previousMonth->month)->count();
+            // --- Overview cards (always returned) ---
+            $overview = $this->buildOverview($start, $prev, $days);
 
-            // Growth calculations
-            $userGrowthRate = $newUsersLastMonth > 0 ?
-                (($newUsersThisMonth - $newUsersLastMonth) / $newUsersLastMonth) * 100 : 0;
-
-            // Get level IDs for premium user counting
-            $regularLevel = Level::where('name->ar', 'عادي')->first();
-
-            // User engagement metrics
-            $usersWithPosts = User::whereHas('servicePosts')->count();
-            $usersWithPoints = User::whereHas('palservicePoints')->count();
-            $premiumUsers = User::whereHas('servicePosts', function($query) use ($regularLevel) {
-                if ($regularLevel) {
-                    $query->where('level_id', '!=', $regularLevel->id);
-                }
-            })->count();
-
-            // Monthly user activity
-            $monthlyActiveUsers = User::whereHas('servicePosts', function($query) use ($currentMonth) {
-                $query->whereMonth('created_at', $currentMonth->month);
-            })->count();
-
-            // Top users by posts
-            $topUsersByPosts = User::withCount('servicePosts')
-                ->orderBy('service_posts_count', 'desc')
-                ->take(10)
-                ->get()
-                ->map(function($user) {
-                    return [
-                        'id' => $user->id,
-                        'name' => $user->user_name,
-                        'email' => $user->email,
-                        'posts_count' => $user->service_posts_count
-                    ];
-                });
-
-            // Recent user registrations
-            $recentUsers = User::latest()
-                ->take(10)
-                ->get()
-                ->map(function($user) {
-                    return [
-                        'id' => $user->id,
-                        'name' => $user->user_name,
-                        'email' => $user->email,
-                        'created_at' => $user->created_at->toISOString()
-                    ];
-                });
+            // --- Tab-specific data ---
+            $tabData = match ($tab) {
+                'users'  => $this->usersTab($start, $prev, $days),
+                'points' => $this->pointsTab($start, $prev, $days),
+                'posts'  => $this->postsTab($start, $prev, $days),
+                default  => [],
+            };
 
             return response()->json([
-                'stats' => [
-                    'total_users' => $totalUsers,
-                    'active_users' => $activeUsers,
-                    'banned_users' => $bannedUsers,
-                    'new_this_month' => $newUsersThisMonth,
-                    'growth_rate' => round($userGrowthRate, 2),
-                    'users_with_posts' => $usersWithPosts,
-                    'users_with_points' => $usersWithPoints,
-                    'premium_users' => $premiumUsers,
-                    'monthly_active' => $monthlyActiveUsers
-                ],
-                'top_users' => $topUsersByPosts,
-                'recent_users' => $recentUsers
+                'overview' => $overview,
+                'tab'      => $tab,
+                'days'     => $days,
+                'data'     => $tabData,
             ]);
         } catch (\Exception $e) {
-            Log::error('User Analytics Error: ' . $e->getMessage());
+            Log::error('Analytics Error: ' . $e->getMessage());
 
             return response()->json([
-                'error' => 'Failed to load user analytics',
-                'message' => $e->getMessage()
+                'error'   => 'Failed to load analytics',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
 
-    /**
-     * Get point analytics data
-     */
-    public function getPointAnalytics(): JsonResponse
+    /* ------------------------------------------------
+     *  Overview — 4 stat cards with % change
+     * ------------------------------------------------ */
+    private function buildOverview(Carbon $start, Carbon $prev, int $days): array
     {
-        try {
-            $currentMonth = Carbon::now()->startOfMonth();
-            $previousMonth = Carbon::now()->subMonth()->startOfMonth();
+        $now = Carbon::now();
 
-            // Point system statistics
-            $totalPointsInSystem = palservice_points::sum('point');
-            $totalTransactions = point_transactions::count();
-            $totalPurchaseRequests = point_purchase_requests::count();
+        // New users
+        $newUsers     = User::whereBetween('created_at', [$start, $now])->count();
+        $prevNewUsers = User::whereBetween('created_at', [$prev, $start])->count();
 
-            // Monthly point statistics
-            $monthlyPointsSold = point_purchase_requests::where('status', 'approved')
-                ->whereMonth('created_at', $currentMonth->month)
-                ->sum('points_requested');
-            $monthlyPointsUsed = point_transactions::where('type', 'used')
-                ->whereMonth('created_at', $currentMonth->month)
-                ->sum('point');
+        // New posts
+        $newPosts     = ServicePost::whereBetween('created_at', [$start, $now])->count();
+        $prevNewPosts = ServicePost::whereBetween('created_at', [$prev, $start])->count();
 
-            // Previous month for comparison
-            $previousMonthPointsSold = point_purchase_requests::where('status', 'approved')
-                ->whereMonth('created_at', $previousMonth->month)
-                ->sum('points_requested');
-            $pointsGrowthRate = $previousMonthPointsSold > 0 ?
-                (($monthlyPointsSold - $previousMonthPointsSold) / $previousMonthPointsSold) * 100 : 0;
+        // Points volume (all transactions)
+        $pointsVol     = point_transactions::whereBetween('created_at', [$start, $now])->sum('point');
+        $prevPointsVol = point_transactions::whereBetween('created_at', [$prev, $start])->sum('point');
 
-            // Get level IDs for badge counting
-            $regularLevel = Level::where('name->ar', 'عادي')->first();
+        // Engagement rate = users who created posts / total active users
+        $totalActive  = User::where('is_active', 'active')->count();
+        $usersPosted  = ServicePost::whereBetween('created_at', [$start, $now])
+                            ->distinct('user_id')->count('user_id');
+        $engagementRate = $totalActive > 0 ? round(($usersPosted / $totalActive) * 100, 1) : 0;
 
-            // Point usage by type
-            $pointsUsedForBadges = $regularLevel ? ServicePost::where('level_id', '!=', $regularLevel->id)->count() * 10 : 0;
-            $pointsUsedForFeatures = point_transactions::where('type', 'used')->sum('point');
-            $totalPointsUsed = $pointsUsedForBadges + $pointsUsedForFeatures;
+        $prevUsersPosted = ServicePost::whereBetween('created_at', [$prev, $start])
+                               ->distinct('user_id')->count('user_id');
+        $prevEngagement  = $totalActive > 0 ? round(($prevUsersPosted / $totalActive) * 100, 1) : 0;
 
-            // Purchase request statistics
-            $pendingRequests = point_purchase_requests::where('status', 'pending')->count();
-            $approvedRequests = point_purchase_requests::where('status', 'approved')->count();
-            $cancelledRequests = point_purchase_requests::where('status', 'cancelled')->count();
-
-            // Top point users
-            $topPointUsers = User::withSum('palservicePoints', 'point')
-                ->orderBy('palservice_points_sum_point', 'desc')
-                ->take(10)
-                ->get()
-                ->map(function($user) {
-                    return [
-                        'id' => $user->id,
-                        'name' => $user->user_name,
-                        'email' => $user->email,
-                        'total_points' => $user->palservice_points_sum_point ?? 0
-                    ];
-                });
-
-            // Recent point transactions
-            $recentTransactions = point_transactions::with(['fromUser:id,user_name', 'toUser:id,user_name'])
-                ->latest()
-                ->take(15)
-                ->get()
-                ->map(function($transaction) {
-                    return [
-                        'id' => $transaction->id,
-                        'from_user' => $transaction->fromUser ? $transaction->fromUser->user_name : null,
-                        'to_user' => $transaction->toUser ? $transaction->toUser->user_name : null,
-                        'point' => $transaction->point,
-                        'type' => $transaction->type,
-                        'created_at' => $transaction->created_at->toISOString()
-                    ];
-                });
-
-            return response()->json([
-                'stats' => [
-                    'total_points' => $totalPointsInSystem,
-                    'total_transactions' => $totalTransactions,
-                    'total_requests' => $totalPurchaseRequests,
-                    'monthly_sold' => $monthlyPointsSold,
-                    'monthly_used' => $monthlyPointsUsed,
-                    'growth_rate' => round($pointsGrowthRate, 2),
-                    'points_used_badges' => $pointsUsedForBadges,
-                    'points_used_features' => $pointsUsedForFeatures,
-                    'total_used' => $totalPointsUsed,
-                    'pending_requests' => $pendingRequests,
-                    'approved_requests' => $approvedRequests,
-                    'cancelled_requests' => $cancelledRequests
-                ],
-                'top_users' => $topPointUsers,
-                'recent_transactions' => $recentTransactions
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Point Analytics Error: ' . $e->getMessage());
-
-            return response()->json([
-                'error' => 'Failed to load point analytics',
-                'message' => $e->getMessage()
-            ], 500);
-        }
+        return [
+            [
+                'label'   => 'New Users',
+                'value'   => $newUsers,
+                'change'  => $this->pctChange($newUsers, $prevNewUsers),
+                'icon'    => 'fas fa-user-plus',
+                'color'   => 'primary',
+            ],
+            [
+                'label'   => 'New Posts',
+                'value'   => $newPosts,
+                'change'  => $this->pctChange($newPosts, $prevNewPosts),
+                'icon'    => 'fas fa-file-alt',
+                'color'   => 'success',
+            ],
+            [
+                'label'   => 'Points Volume',
+                'value'   => $pointsVol,
+                'change'  => $this->pctChange($pointsVol, $prevPointsVol),
+                'icon'    => 'fas fa-coins',
+                'color'   => 'warning',
+            ],
+            [
+                'label'   => 'Engagement Rate',
+                'value'   => $engagementRate . '%',
+                'change'  => round($engagementRate - $prevEngagement, 1),
+                'icon'    => 'fas fa-chart-line',
+                'color'   => 'info',
+            ],
+        ];
     }
 
-    /**
-     * Get post analytics data
-     */
-    public function getPostAnalytics(): JsonResponse
+    /* ------------------------------------------------
+     *  Users tab
+     * ------------------------------------------------ */
+    private function usersTab(Carbon $start, Carbon $prev, int $days): array
     {
-        try {
-            $currentMonth = Carbon::now()->startOfMonth();
-            $previousMonth = Carbon::now()->subMonth()->startOfMonth();
+        $now = Carbon::now();
 
-            // Post statistics
-            $totalPosts = ServicePost::count();
-            $publishedPosts = ServicePost::where('state', 'published')->count();
-            $pendingPosts = ServicePost::where('state', 'not published')->count();
-            $rejectedPosts = ServicePost::where('state', 'rejected')->count();
+        // Line chart: registrations over time
+        $registrations = User::whereBetween('created_at', [$start, $now])
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
 
-            // Monthly post growth
-            $newPostsThisMonth = ServicePost::whereMonth('created_at', $currentMonth->month)->count();
-            $newPostsLastMonth = ServicePost::whereMonth('created_at', $previousMonth->month)->count();
+        // Pie chart: user status
+        $statusCounts = User::select('is_active', DB::raw('COUNT(*) as count'))
+            ->groupBy('is_active')
+            ->pluck('count', 'is_active');
 
-            // Growth calculations
-            $postGrowthRate = $newPostsLastMonth > 0 ?
-                (($newPostsThisMonth - $newPostsLastMonth) / $newPostsLastMonth) * 100 : 0;
+        // Bar chart: users by country (top 10)
+        $byCountry = User::select('country_id', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('country_id')
+            ->groupBy('country_id')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
 
-            // Get level IDs for badge counting
-            $goldLevel = Level::where('name->ar', 'ذهبي')->first();
-            $diamondLevel = Level::where('name->ar', 'ماسي')->first();
-            $regularLevel = Level::where('name->ar', 'عادي')->first();
+        $countryIds = $byCountry->pluck('country_id')->toArray();
+        $countryNames = countries::whereIn('id', $countryIds)->pluck('name', 'id');
 
-            // Badge statistics
-            $goldenPosts = $goldLevel ? ServicePost::where('level_id', $goldLevel->id)->count() : 0;
-            $diamondPosts = $diamondLevel ? ServicePost::where('level_id', $diamondLevel->id)->count() : 0;
-            $normalPosts = $regularLevel ? ServicePost::where('level_id', $regularLevel->id)->count() : 0;
-
-            // Top posts by views
-            $topPostsByViews = ServicePost::with(['user:id,user_name', 'category:id,name'])
-                ->orderBy('view_count', 'desc')
-                ->take(10)
-                ->get()
-                ->map(function($post) {
-                    return [
-                        'id' => $post->id,
-                        'title' => $post->title,
-                        'user' => $post->user ? $post->user->user_name : 'Unknown',
-                        'category' => $post->category ? $post->category->name : 'Unknown',
-                        'view_count' => $post->view_count,
-                        'created_at' => $post->created_at->toISOString()
-                    ];
-                });
-
-            // Recent posts
-            $recentPosts = ServicePost::with(['user:id,user_name', 'category:id,name'])
-                ->latest()
-                ->take(15)
-                ->get()
-                ->map(function($post) {
-                    return [
-                        'id' => $post->id,
-                        'title' => $post->title,
-                        'user' => $post->user ? $post->user->user_name : 'Unknown',
-                        'category' => $post->category ? $post->category->name : 'Unknown',
-                        'state' => $post->state,
-                        'created_at' => $post->created_at->toISOString()
-                    ];
-                });
-
-            return response()->json([
-                'stats' => [
-                    'total' => $totalPosts,
-                    'published' => $publishedPosts,
-                    'pending' => $pendingPosts,
-                    'rejected' => $rejectedPosts,
-                    'new_this_month' => $newPostsThisMonth,
-                    'growth_rate' => round($postGrowthRate, 2),
-                    'golden' => $goldenPosts,
-                    'diamond' => $diamondPosts,
-                    'normal' => $normalPosts
-                ],
-                'top_posts' => $topPostsByViews,
-                'recent_posts' => $recentPosts
-            ]);
-        } catch (\Exception $e) {
-            Log::error('Post Analytics Error: ' . $e->getMessage());
-
-            return response()->json([
-                'error' => 'Failed to load post analytics',
-                'message' => $e->getMessage()
-            ], 500);
+        $countryLabels = [];
+        $countryCounts = [];
+        foreach ($byCountry as $row) {
+            $countryLabels[] = $countryNames[$row->country_id] ?? 'Unknown';
+            $countryCounts[] = $row->count;
         }
+
+        // Engagement metrics
+        $totalUsers     = User::count();
+        $activeUsers    = User::where('is_active', 'active')->count();
+        $usersWithPosts = User::whereHas('servicePosts')->count();
+
+        return [
+            'registrations_chart' => [
+                'labels'   => $registrations->pluck('date')->toArray(),
+                'datasets' => [[
+                    'label'           => 'Registrations',
+                    'data'            => $registrations->pluck('count')->toArray(),
+                    'borderColor'     => '#3b82f6',
+                    'backgroundColor' => 'rgba(59,130,246,0.1)',
+                    'fill'            => true,
+                    'tension'         => 0.3,
+                ]],
+            ],
+            'status_chart' => [
+                'labels'   => array_map('ucfirst', array_keys($statusCounts->toArray())),
+                'datasets' => [[
+                    'data'            => array_values($statusCounts->toArray()),
+                    'backgroundColor' => ['#22c55e', '#ef4444', '#94a3b8'],
+                ]],
+            ],
+            'country_chart' => [
+                'labels'   => $countryLabels,
+                'datasets' => [[
+                    'label'           => 'Users',
+                    'data'            => $countryCounts,
+                    'backgroundColor' => '#3b82f6',
+                ]],
+            ],
+            'metrics' => [
+                'total_users'      => $totalUsers,
+                'active_users'     => $activeUsers,
+                'users_with_posts' => $usersWithPosts,
+                'engagement_pct'   => $totalUsers > 0 ? round(($usersWithPosts / $totalUsers) * 100, 1) : 0,
+            ],
+        ];
     }
 
-    /**
-     * Get overview analytics (summary of all)
-     */
-    public function getOverview(): JsonResponse
+    /* ------------------------------------------------
+     *  Points tab
+     * ------------------------------------------------ */
+    private function pointsTab(Carbon $start, Carbon $prev, int $days): array
     {
-        try {
-            $stats = [
-                [
-                    'label' => 'Total Users',
-                    'value' => User::count(),
-                    'icon' => 'fas fa-users',
-                    'color' => 'primary'
-                ],
-                [
-                    'label' => 'Active Posts',
-                    'value' => ServicePost::where('state', 'published')->count(),
-                    'icon' => 'fas fa-file-alt',
-                    'color' => 'success'
-                ],
-                [
-                    'label' => 'Total Points',
-                    'value' => palservice_points::sum('point'),
-                    'icon' => 'fas fa-coins',
-                    'color' => 'warning'
-                ],
-                [
-                    'label' => 'Point Transactions',
-                    'value' => point_transactions::count(),
-                    'icon' => 'fas fa-exchange-alt',
-                    'color' => 'info'
-                ]
-            ];
+        $now = Carbon::now();
 
-            return response()->json(['stats' => $stats]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Failed to load overview',
-                'message' => $e->getMessage()
-            ], 500);
+        // Line chart: inflow vs outflow over time
+        $inflow = point_transactions::whereBetween('created_at', [$start, $now])
+            ->where('type', 'added')
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(point) as total'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total', 'date');
+
+        $outflow = point_transactions::whereBetween('created_at', [$start, $now])
+            ->where('type', 'used')
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(point) as total'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->pluck('total', 'date');
+
+        // Merge dates
+        $allDates = collect(array_merge($inflow->keys()->toArray(), $outflow->keys()->toArray()))
+            ->unique()->sort()->values()->toArray();
+
+        // Pie chart: transaction types
+        $typeCounts = point_transactions::select('type', DB::raw('COUNT(*) as count'))
+            ->groupBy('type')
+            ->pluck('count', 'type');
+
+        // Line chart: revenue trend (approved purchase requests)
+        $revenue = point_purchase_requests::where('status', 'approved')
+            ->whereBetween('created_at', [$start, $now])
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('SUM(points_requested) as total'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Points health metrics
+        $totalInSystem   = palservice_points::sum('point');
+        $pendingRequests = point_purchase_requests::where('status', 'pending')->count();
+        $totalTransactions = point_transactions::count();
+
+        $periodInflow  = point_transactions::whereBetween('created_at', [$start, $now])->where('type', 'added')->sum('point');
+        $periodOutflow = point_transactions::whereBetween('created_at', [$start, $now])->where('type', 'used')->sum('point');
+
+        return [
+            'flow_chart' => [
+                'labels'   => $allDates,
+                'datasets' => [
+                    [
+                        'label'       => 'Inflow',
+                        'data'        => array_map(fn($d) => $inflow[$d] ?? 0, $allDates),
+                        'borderColor' => '#22c55e',
+                        'backgroundColor' => 'rgba(34,197,94,0.1)',
+                        'fill'        => true,
+                        'tension'     => 0.3,
+                    ],
+                    [
+                        'label'       => 'Outflow',
+                        'data'        => array_map(fn($d) => $outflow[$d] ?? 0, $allDates),
+                        'borderColor' => '#ef4444',
+                        'backgroundColor' => 'rgba(239,68,68,0.1)',
+                        'fill'        => true,
+                        'tension'     => 0.3,
+                    ],
+                ],
+            ],
+            'type_chart' => [
+                'labels'   => array_map('ucfirst', array_keys($typeCounts->toArray())),
+                'datasets' => [[
+                    'data'            => array_values($typeCounts->toArray()),
+                    'backgroundColor' => ['#22c55e', '#ef4444', '#f97316', '#3b82f6', '#8b5cf6'],
+                ]],
+            ],
+            'revenue_chart' => [
+                'labels'   => $revenue->pluck('date')->toArray(),
+                'datasets' => [[
+                    'label'       => 'Revenue (Points)',
+                    'data'        => $revenue->pluck('total')->toArray(),
+                    'borderColor' => '#f97316',
+                    'backgroundColor' => 'rgba(249,115,22,0.1)',
+                    'fill'        => true,
+                    'tension'     => 0.3,
+                ]],
+            ],
+            'metrics' => [
+                'total_in_system'    => $totalInSystem,
+                'pending_requests'   => $pendingRequests,
+                'total_transactions' => $totalTransactions,
+                'period_inflow'      => $periodInflow,
+                'period_outflow'     => $periodOutflow,
+                'net_flow'           => $periodInflow - $periodOutflow,
+            ],
+        ];
+    }
+
+    /* ------------------------------------------------
+     *  Posts tab
+     * ------------------------------------------------ */
+    private function postsTab(Carbon $start, Carbon $prev, int $days): array
+    {
+        $now = Carbon::now();
+
+        // Line chart: post creation over time
+        $creations = ServicePost::whereBetween('created_at', [$start, $now])
+            ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+            ->groupBy('date')
+            ->orderBy('date')
+            ->get();
+
+        // Pie chart: post type (offer/request based on 'type' field)
+        $typeCounts = ServicePost::select('type', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('type')
+            ->groupBy('type')
+            ->pluck('count', 'type');
+
+        // Bar chart: posts by category (all categories)
+        $byCategory = ServicePost::select('categories_id', DB::raw('COUNT(*) as count'))
+            ->whereNotNull('categories_id')
+            ->groupBy('categories_id')
+            ->orderByDesc('count')
+            ->limit(10)
+            ->get();
+
+        $catIds = $byCategory->pluck('categories_id')->toArray();
+        $catNames = Categories::whereIn('id', $catIds)->get()->mapWithKeys(function ($cat) {
+            $name = is_array($cat->name) ? ($cat->name['en'] ?? $cat->name['ar'] ?? 'Unknown') : $cat->name;
+            return [$cat->id => $name];
+        });
+
+        $categoryLabels = [];
+        $categoryCounts = [];
+        foreach ($byCategory as $row) {
+            $categoryLabels[] = $catNames[$row->categories_id] ?? 'Unknown';
+            $categoryCounts[] = $row->count;
         }
+
+        // Metrics: avg views/favorites/comments
+        $avgViews     = ServicePost::avg('view_count') ?? 0;
+        $avgFavorites = ServicePost::avg('favorites_count') ?? 0;
+        $totalPosts   = ServicePost::count();
+        $publishedPosts = ServicePost::where('state', 'published')->count();
+
+        return [
+            'creation_chart' => [
+                'labels'   => $creations->pluck('date')->toArray(),
+                'datasets' => [[
+                    'label'           => 'Posts Created',
+                    'data'            => $creations->pluck('count')->toArray(),
+                    'borderColor'     => '#8b5cf6',
+                    'backgroundColor' => 'rgba(139,92,246,0.1)',
+                    'fill'            => true,
+                    'tension'         => 0.3,
+                ]],
+            ],
+            'type_chart' => [
+                'labels'   => array_map('ucfirst', array_keys($typeCounts->toArray())),
+                'datasets' => [[
+                    'data'            => array_values($typeCounts->toArray()),
+                    'backgroundColor' => ['#3b82f6', '#f97316', '#22c55e', '#ef4444'],
+                ]],
+            ],
+            'category_chart' => [
+                'labels'   => $categoryLabels,
+                'datasets' => [[
+                    'label'           => 'Posts',
+                    'data'            => $categoryCounts,
+                    'backgroundColor' => ['#3b82f6', '#22c55e', '#f97316', '#ef4444', '#8b5cf6', '#06b6d4', '#eab308', '#ec4899', '#14b8a6', '#6366f1'],
+                ]],
+            ],
+            'metrics' => [
+                'total_posts'     => $totalPosts,
+                'published_posts' => $publishedPosts,
+                'avg_views'       => round($avgViews, 1),
+                'avg_favorites'   => round($avgFavorites, 1),
+            ],
+        ];
+    }
+
+    /* ------------------------------------------------
+     *  Helper: calculate period-over-period % change
+     * ------------------------------------------------ */
+    private function pctChange($current, $previous): float
+    {
+        if ($previous == 0) {
+            return $current > 0 ? 100.0 : 0.0;
+        }
+        return round((($current - $previous) / $previous) * 100, 1);
     }
 }

@@ -5,120 +5,191 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\BadgeType;
 use App\Models\Categories;
+use App\Models\Report;
 use App\Models\point_purchase_requests;
+use App\Models\point_transactions;
 use App\Models\ServicePost;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 
 class StatisticsApiController extends Controller
 {
     /**
-     * Get all statistics for the statistics dashboard
+     * System health snapshot — the "is everything OK right now?" page.
      */
     public function index(): JsonResponse
     {
         try {
-            // Count users
-            $totalUsers = User::count();
-            $activeUsers = User::where('is_active', 'active')->count();
-            $bannedUsers = User::where('is_active', 'banned')->count();
+            $today = Carbon::today();
 
-            // Get categories with robust handling
-            $categories = Categories::get();
-
-            // Mapping of English names to category IDs
-            $categoryMap = [
-                'Devices' => $categories->first(fn($cat) =>
-                    isset($cat->name['en']) && $cat->name['en'] === 'Devices'
-                )?->id,
-                'Cars' => $categories->first(fn($cat) =>
-                    isset($cat->name['en']) && $cat->name['en'] === 'Cars'
-                )?->id,
-                'Jobs' => $categories->first(fn($cat) =>
-                    isset($cat->name['en']) && $cat->name['en'] === 'Jobs'
-                )?->id,
-                'Real Estate' => $categories->first(fn($cat) =>
-                    isset($cat->name['en']) && $cat->name['en'] === 'Real Estate'
-                )?->id,
-                'Services' => $categories->first(fn($cat) =>
-                    isset($cat->name['en']) && $cat->name['en'] === 'Services'
-                )?->id,
+            // ── Today's Pulse ────────────────────────────
+            $todaysPulse = [
+                [
+                    'label' => 'New Users Today',
+                    'value' => User::whereDate('created_at', $today)->count(),
+                    'icon'  => 'fas fa-user-plus',
+                    'color' => 'primary',
+                ],
+                [
+                    'label' => 'New Posts Today',
+                    'value' => ServicePost::whereDate('created_at', $today)->count(),
+                    'icon'  => 'fas fa-file-alt',
+                    'color' => 'success',
+                ],
+                [
+                    'label' => 'Transactions Today',
+                    'value' => point_transactions::whereDate('created_at', $today)->count(),
+                    'icon'  => 'fas fa-exchange-alt',
+                    'color' => 'warning',
+                ],
+                [
+                    'label' => 'Reports Today',
+                    'value' => Report::whereDate('created_at', $today)->count(),
+                    'icon'  => 'fas fa-flag',
+                    'color' => 'danger',
+                ],
             ];
 
-            // Count service posts
-            $allServicePosts = ServicePost::count();
-            $phonesPosts = ServicePost::where('categories_id', $categoryMap['Devices'])->count();
-            $carsPosts = ServicePost::where('categories_id', $categoryMap['Cars'])->count();
-            $jobsPosts = ServicePost::where('categories_id', $categoryMap['Jobs'])->count();
-            $realEstatePosts = ServicePost::where('categories_id', $categoryMap['Real Estate'])->count();
-            $servicesPosts = ServicePost::where('categories_id', $categoryMap['Services'])->count();
+            // ── Action Required ──────────────────────────
+            $actionRequired = [
+                [
+                    'label' => 'Pending Purchase Requests',
+                    'value' => point_purchase_requests::where('status', 'pending')->count(),
+                    'icon'  => 'fas fa-shopping-cart',
+                    'color' => 'warning',
+                    'link'  => '/admin/purchase-requests',
+                ],
+                [
+                    'label' => 'Unresolved Reports',
+                    'value' => Report::count(),
+                    'icon'  => 'fas fa-exclamation-triangle',
+                    'color' => 'danger',
+                    'link'  => '/admin/reports',
+                ],
+                [
+                    'label' => 'Pending Posts',
+                    'value' => ServicePost::where('state', 'not published')->count(),
+                    'icon'  => 'fas fa-clock',
+                    'color' => 'info',
+                    'link'  => '/admin/posts',
+                ],
+            ];
 
-            // Badge counts using badge_type_id or have_badge field
-            $goldBadge = BadgeType::where('slug', 'gold')->first();
-            $diamondBadge = BadgeType::where('slug', 'diamond')->first();
-            $regularBadge = BadgeType::where('slug', 'normal')->orWhere('is_default', true)->first();
+            // ── Distribution Charts ─────────────────────
 
-            // Count posts by badge_type_id if exists, otherwise by have_badge field
-            $goldenPosts = $goldBadge
-                ? ServicePost::where('badge_type_id', $goldBadge->id)->count()
-                : ServicePost::where('have_badge', 'ذهبي')->count();
-            $diamondPosts = $diamondBadge
-                ? ServicePost::where('badge_type_id', $diamondBadge->id)->count()
-                : ServicePost::where('have_badge', 'ماسي')->count();
-            $normalPosts = $regularBadge
-                ? ServicePost::where('badge_type_id', $regularBadge->id)->count()
-                : ServicePost::where('have_badge', 'عادي')->orWhereNull('have_badge')->count();
+            // 1. User status pie
+            $userStatusRaw = User::select('is_active', DB::raw('COUNT(*) as count'))
+                ->groupBy('is_active')
+                ->pluck('count', 'is_active');
 
-            // Post status counts
+            $userStatusChart = [
+                'labels'   => array_map('ucfirst', array_keys($userStatusRaw->toArray())),
+                'datasets' => [[
+                    'data'            => array_values($userStatusRaw->toArray()),
+                    'backgroundColor' => ['#22c55e', '#ef4444', '#94a3b8'],
+                ]],
+            ];
+
+            // 2. Post state pie
+            $postStateRaw = ServicePost::select('state', DB::raw('COUNT(*) as count'))
+                ->groupBy('state')
+                ->pluck('count', 'state');
+
+            $stateLabels = [
+                'published'     => 'Published',
+                'not published' => 'Pending',
+                'rejected'      => 'Rejected',
+                'archive'       => 'Archived',
+            ];
+
+            $postStateChart = [
+                'labels'   => array_map(fn($s) => $stateLabels[$s] ?? ucfirst($s), array_keys($postStateRaw->toArray())),
+                'datasets' => [[
+                    'data'            => array_values($postStateRaw->toArray()),
+                    'backgroundColor' => ['#22c55e', '#f97316', '#ef4444', '#94a3b8'],
+                ]],
+            ];
+
+            // 3. Posts by category bar
+            $byCategory = ServicePost::select('categories_id', DB::raw('COUNT(*) as count'))
+                ->whereNotNull('categories_id')
+                ->groupBy('categories_id')
+                ->orderByDesc('count')
+                ->limit(10)
+                ->get();
+
+            $catIds   = $byCategory->pluck('categories_id')->toArray();
+            $catNames = Categories::whereIn('id', $catIds)->get()->mapWithKeys(function ($cat) {
+                $name = is_array($cat->name) ? ($cat->name['en'] ?? $cat->name['ar'] ?? 'Unknown') : $cat->name;
+                return [$cat->id => $name];
+            });
+
+            $categoryChart = [
+                'labels'   => $byCategory->map(fn($r) => $catNames[$r->categories_id] ?? 'Unknown')->toArray(),
+                'datasets' => [[
+                    'label'           => 'Posts',
+                    'data'            => $byCategory->pluck('count')->toArray(),
+                    'backgroundColor' => ['#3b82f6', '#22c55e', '#f97316', '#ef4444', '#8b5cf6', '#06b6d4', '#eab308', '#ec4899', '#14b8a6', '#6366f1'],
+                ]],
+            ];
+
+            // 4. Badge distribution pie
+            $badgeTypes = BadgeType::orderBy('priority')->get();
+            $badgeChart = ['labels' => [], 'datasets' => [['data' => [], 'backgroundColor' => []]]];
+
+            foreach ($badgeTypes as $badge) {
+                $count = ServicePost::where('badge_type_id', $badge->id)->count();
+                $name  = is_array($badge->name) ? ($badge->name['en'] ?? $badge->name['ar'] ?? $badge->slug) : $badge->name;
+                $badgeChart['labels'][] = $name;
+                $badgeChart['datasets'][0]['data'][] = $count;
+                $badgeChart['datasets'][0]['backgroundColor'][] = $badge->color ?? '#94a3b8';
+            }
+
+            // ── System Health Rates ─────────────────────
+            $totalUsers     = User::count();
+            $activeUsers    = User::where('is_active', 'active')->count();
+            $totalPosts     = ServicePost::count();
             $publishedPosts = ServicePost::where('state', 'published')->count();
-            $pendingPosts = ServicePost::where('state', 'not published')->count();
-            $rejectedPosts = ServicePost::where('state', 'rejected')->count();
+            $totalPurchases = point_purchase_requests::count();
+            $approvedPurchases = point_purchase_requests::where('status', 'approved')->count();
 
-            // Purchase requests
-            $totalPurchaseRequests = point_purchase_requests::count();
-            $pendingRequests = point_purchase_requests::where('status', 'pending')->count();
-            $approvedRequests = point_purchase_requests::where('status', 'approved')->count();
-            $cancelledRequests = point_purchase_requests::where('status', 'cancelled')->count();
+            $systemRates = [
+                [
+                    'label' => 'User Engagement',
+                    'value' => $totalUsers > 0 ? round(($activeUsers / $totalUsers) * 100, 1) : 0,
+                    'color' => 'primary',
+                ],
+                [
+                    'label' => 'Post Approval Rate',
+                    'value' => $totalPosts > 0 ? round(($publishedPosts / $totalPosts) * 100, 1) : 0,
+                    'color' => 'success',
+                ],
+                [
+                    'label' => 'Purchase Approval Rate',
+                    'value' => $totalPurchases > 0 ? round(($approvedPurchases / $totalPurchases) * 100, 1) : 0,
+                    'color' => 'warning',
+                ],
+            ];
 
             return response()->json([
-                'users' => [
-                    'total' => $totalUsers,
-                    'active' => $activeUsers,
-                    'banned' => $bannedUsers
+                'todays_pulse'    => $todaysPulse,
+                'action_required' => $actionRequired,
+                'charts'          => [
+                    'user_status'  => $userStatusChart,
+                    'post_state'   => $postStateChart,
+                    'by_category'  => $categoryChart,
+                    'badge_dist'   => $badgeChart,
                 ],
-                'posts' => [
-                    'total' => $allServicePosts,
-                    'by_category' => [
-                        'devices' => $phonesPosts,
-                        'cars' => $carsPosts,
-                        'jobs' => $jobsPosts,
-                        'real_estate' => $realEstatePosts,
-                        'services' => $servicesPosts
-                    ],
-                    'by_badge' => [
-                        'golden' => $goldenPosts,
-                        'diamond' => $diamondPosts,
-                        'normal' => $normalPosts
-                    ],
-                    'by_status' => [
-                        'published' => $publishedPosts,
-                        'pending' => $pendingPosts,
-                        'rejected' => $rejectedPosts
-                    ]
-                ],
-                'purchase_requests' => [
-                    'total' => $totalPurchaseRequests,
-                    'pending' => $pendingRequests,
-                    'approved' => $approvedRequests,
-                    'cancelled' => $cancelledRequests
-                ]
+                'system_rates'    => $systemRates,
             ]);
         } catch (\Exception $e) {
             \Log::error('Statistics Error: ' . $e->getMessage());
 
             return response()->json([
-                'error' => 'Failed to load statistics',
-                'message' => $e->getMessage()
+                'error'   => 'Failed to load statistics',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

@@ -1,6 +1,47 @@
 <template>
   <div class="reports-management">
 
+    <!-- Stats + Charts Section -->
+    <div class="reports-overview">
+      <!-- 4 Stat Cards -->
+      <div class="stats-dashboard">
+        <div class="stats-grid">
+          <div
+            v-for="stat in reportStats"
+            :key="stat.label"
+            class="stat-card-compact"
+            :class="stat.color"
+          >
+            <div class="stat-icon"><i :class="stat.icon"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ stat.value }}</div>
+              <div class="stat-label-compact">{{ stat.label }}</div>
+              <div v-if="stat.change !== undefined" class="stat-trend" :class="stat.change >= 0 ? 'trend-up' : 'trend-down'">
+                <i :class="stat.change >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+                {{ Math.abs(stat.change) }}%
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2 Charts Row -->
+      <div v-if="reasonChart || trendChart" class="charts-row">
+        <div v-if="reasonChart" class="chart-card">
+          <h4 class="chart-title">Reports by Reason</h4>
+          <div class="chart-body">
+            <PieChart :data="reasonChart" :height="250" />
+          </div>
+        </div>
+        <div v-if="trendChart" class="chart-card">
+          <h4 class="chart-title">Daily Report Trend (30 days)</h4>
+          <div class="chart-body" style="height: 250px;">
+            <LineChart :data="trendChart" :height="250" />
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- Filters -->
     <div class="filters-card">
       <div class="filters-grid">
@@ -261,6 +302,8 @@
 <script setup>
 import { ref, onMounted, computed, reactive } from 'vue'
 import { useReports } from '../../composables/useReports'
+import PieChart from '../../components/admin/charts/PieChart.vue'
+import LineChart from '../../components/admin/charts/LineChart.vue'
 
 const {
   reports,
@@ -287,6 +330,11 @@ const actionLoading = ref(false)
 const currentReportableType = ref(null)
 const currentReportableId = ref(null)
 
+// Report stats + chart data
+const reportStats = ref([])
+const reasonChart = ref(null)
+const trendChart = ref(null)
+
 const visiblePages = computed(() => {
   const pages = []
   const current = reports.value.current_page
@@ -303,8 +351,21 @@ const visiblePages = computed(() => {
 })
 
 onMounted(async () => {
-  await loadData()
+  await Promise.all([loadData(), loadStats()])
 })
+
+async function loadStats() {
+  try {
+    const response = await fetch('/api/admin/reports/stats')
+    if (!response.ok) throw new Error('Failed to fetch report stats')
+    const data = await response.json()
+    reportStats.value = data.stats || []
+    reasonChart.value = data.reason_chart || null
+    trendChart.value = data.trend_chart || null
+  } catch (err) {
+    console.error('Error loading report stats:', err)
+  }
+}
 
 async function loadData() {
   filters.page = 1
@@ -378,6 +439,10 @@ function getStatusLabel(status) {
 <style scoped>
 .reports-management {
   padding: 1.5rem;
+}
+
+.reports-overview {
+  margin-bottom: 1.5rem;
 }
 
 .page-header {

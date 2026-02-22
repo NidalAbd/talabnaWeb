@@ -578,3 +578,65 @@
   padding: 0.75rem 1rem !important;
   font-size: 0.875rem !important;
 }
+
+/* ============================================
+   ANALYTICS / STATISTICS CHART STYLES
+   ============================================ */
+
+/* Stat trend indicator (up/down arrow with %) */
+.stat-trend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-weight: 700;
+  margin-top: 0.2rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+}
+
+.stat-trend.trend-up {
+  color: #16a34a;
+  background: rgba(34, 197, 94, 0.12);
+}
+
+.stat-trend.trend-down {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.12);
+}
+
+/* Charts row — 2-column layout */
+.charts-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+@media (max-width: 768px) {
+  .charts-row {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Chart card */
+.chart-card {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.chart-title {
+  padding: 1rem 1.25rem;
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #1a1a2e;
+  border-bottom: 1px solid #f0f0f0;
+  background: #fafafa;
+}
+
+.chart-body {
+  padding: 1rem;
+}

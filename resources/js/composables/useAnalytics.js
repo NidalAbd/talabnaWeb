@@ -1,101 +1,61 @@
 import { ref } from 'vue'
 
 export function useAnalytics() {
-    const userAnalytics = ref(null)
-    const pointAnalytics = ref(null)
-    const postAnalytics = ref(null)
     const overview = ref([])
+    const tabData = ref(null)
+    const activeTab = ref('users')
+    const activeDays = ref(30)
     const loading = ref(false)
     const error = ref(null)
 
-    const fetchUserAnalytics = async () => {
+    const fetchAnalytics = async (tab = null) => {
+        const t = tab || activeTab.value
         loading.value = true
         error.value = null
 
         try {
-            const response = await fetch('/api/admin/analytics/users')
+            const params = new URLSearchParams({
+                days: activeDays.value,
+                tab: t,
+            })
+
+            const response = await fetch(`/api/admin/analytics?${params.toString()}`)
 
             if (!response.ok) {
-                throw new Error('Failed to fetch user analytics')
+                throw new Error('Failed to fetch analytics')
             }
 
             const data = await response.json()
-            userAnalytics.value = data
+            overview.value = data.overview
+            tabData.value = data.data
+            activeTab.value = data.tab
         } catch (err) {
             error.value = err.message
-            console.error('❌ Error fetching user analytics:', err)
+            console.error('Error fetching analytics:', err)
         } finally {
             loading.value = false
         }
     }
 
-    const fetchPointAnalytics = async () => {
-        loading.value = true
-        error.value = null
-
-        try {
-            const response = await fetch('/api/admin/analytics/points')
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch point analytics')
-            }
-
-            const data = await response.json()
-            pointAnalytics.value = data
-        } catch (err) {
-            error.value = err.message
-            console.error('❌ Error fetching point analytics:', err)
-        } finally {
-            loading.value = false
-        }
+    const changeRange = async (days) => {
+        activeDays.value = days
+        await fetchAnalytics()
     }
 
-    const fetchPostAnalytics = async () => {
-        loading.value = true
-        error.value = null
-
-        try {
-            const response = await fetch('/api/admin/analytics/posts')
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch post analytics')
-            }
-
-            const data = await response.json()
-            postAnalytics.value = data
-        } catch (err) {
-            error.value = err.message
-            console.error('❌ Error fetching post analytics:', err)
-        } finally {
-            loading.value = false
-        }
-    }
-
-    const fetchOverview = async () => {
-        try {
-            const response = await fetch('/api/admin/analytics/overview')
-
-            if (!response.ok) {
-                throw new Error('Failed to fetch overview')
-            }
-
-            const data = await response.json()
-            overview.value = data.stats
-        } catch (err) {
-            console.error('❌ Error fetching overview:', err)
-        }
+    const changeTab = async (tab) => {
+        activeTab.value = tab
+        await fetchAnalytics(tab)
     }
 
     return {
-        userAnalytics,
-        pointAnalytics,
-        postAnalytics,
         overview,
+        tabData,
+        activeTab,
+        activeDays,
         loading,
         error,
-        fetchUserAnalytics,
-        fetchPointAnalytics,
-        fetchPostAnalytics,
-        fetchOverview
+        fetchAnalytics,
+        changeRange,
+        changeTab,
     }
 }

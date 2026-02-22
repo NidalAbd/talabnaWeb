@@ -72,19 +72,19 @@
     "src": "resources/css/app.css"
   },
   "resources/js/admin.css": {
-    "file": "assets/admin-553b3328.css",
+    "file": "assets/admin-38396aa3.css",
     "src": "resources/js/admin.css"
   },
   "resources/js/admin.js": {
     "css": [
-      "assets/admin-553b3328.css"
+      "assets/admin-38396aa3.css"
     ],
-    "file": "assets/admin-5d8fb4cd.js",
+    "file": "assets/admin-c7adafe3.js",
     "imports": [
       "_vue-router-86f17892.js",
       "__plugin-vue_export-helper-c27b6911.js",
-      "resources/js/views/admin/seo/SeoDashboard.vue",
       "_MixedChart-ebb3f596.js",
+      "resources/js/views/admin/seo/SeoDashboard.vue",
       "_chart-44191cde.js"
     ],
     "isEntry": true,

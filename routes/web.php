@@ -757,11 +757,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::post('/marketing-notifications/send-test', [\App\Http\Controllers\Admin\MarketingNotificationsApiController::class, 'sendTest'])->name('api.admin.marketing-notifications.send-test');
             Route::delete('/marketing-notifications/{id}', [\App\Http\Controllers\Admin\MarketingNotificationsApiController::class, 'destroy'])->name('api.admin.marketing-notifications.destroy');
 
-            // Analytics
-            Route::get('/analytics/overview', [AnalyticsApiController::class, 'getOverview'])->name('api.admin.analytics.overview');
-            Route::get('/analytics/users', [AnalyticsApiController::class, 'getUserAnalytics'])->name('api.admin.analytics.users');
-            Route::get('/analytics/points', [AnalyticsApiController::class, 'getPointAnalytics'])->name('api.admin.analytics.points');
-            Route::get('/analytics/posts', [AnalyticsApiController::class, 'getPostAnalytics'])->name('api.admin.analytics.posts');
+            // Analytics (unified endpoint)
+            Route::get('/analytics', [AnalyticsApiController::class, 'getAnalytics'])->name('api.admin.analytics');
 
             // Statistics
             Route::get('/statistics', [StatisticsApiController::class, 'index'])->name('api.admin.statistics.index');

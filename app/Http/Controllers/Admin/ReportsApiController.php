@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Report;
 use App\Models\ServicePost;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -259,43 +260,99 @@ class ReportsApiController extends Controller
     }
 
     /**
-     * Get report statistics
+     * Get report statistics with charts data
      */
     public function getStats(): JsonResponse
     {
         try {
+            $now   = Carbon::now();
+            $today = Carbon::today();
+
+            $totalReports = Report::count();
+            $reportsToday = Report::whereDate('created_at', $today)->count();
+
+            // Unique reported items
+            $uniqueItems = Report::select('reportable_type', 'reportable_id')
+                ->distinct()
+                ->count(DB::raw('CONCAT(reportable_type, reportable_id)'));
+
+            // Week-over-week trend
+            $thisWeek = Report::whereBetween('created_at', [$now->copy()->subDays(7), $now])->count();
+            $lastWeek = Report::whereBetween('created_at', [$now->copy()->subDays(14), $now->copy()->subDays(7)])->count();
+            $wowChange = $lastWeek > 0
+                ? round((($thisWeek - $lastWeek) / $lastWeek) * 100, 1)
+                : ($thisWeek > 0 ? 100.0 : 0.0);
+
             $stats = [
                 [
-                    'label' => 'Total Reports',
-                    'value' => Report::count(),
-                    'icon' => 'fas fa-flag',
-                    'color' => 'danger'
+                    'label'  => 'Total Reports',
+                    'value'  => $totalReports,
+                    'icon'   => 'fas fa-flag',
+                    'color'  => 'danger',
                 ],
                 [
-                    'label' => 'User Reports',
-                    'value' => Report::where('reportable_type', User::class)->count(),
-                    'icon' => 'fas fa-user-slash',
-                    'color' => 'warning'
+                    'label'  => 'Unique Items',
+                    'value'  => $uniqueItems,
+                    'icon'   => 'fas fa-bullseye',
+                    'color'  => 'warning',
                 ],
                 [
-                    'label' => 'Post Reports',
-                    'value' => Report::where('reportable_type', ServicePost::class)->count(),
-                    'icon' => 'fas fa-file-alt',
-                    'color' => 'info'
+                    'label'  => 'Reports Today',
+                    'value'  => $reportsToday,
+                    'icon'   => 'fas fa-clock',
+                    'color'  => 'info',
                 ],
                 [
-                    'label' => 'Recent (24h)',
-                    'value' => Report::where('created_at', '>=', now()->subDay())->count(),
-                    'icon' => 'fas fa-clock',
-                    'color' => 'primary'
-                ]
+                    'label'  => 'Week Trend',
+                    'value'  => ($wowChange >= 0 ? '+' : '') . $wowChange . '%',
+                    'change' => $wowChange,
+                    'icon'   => 'fas fa-chart-line',
+                    'color'  => 'primary',
+                ],
             ];
 
-            return response()->json(['stats' => $stats]);
+            // Pie chart: reports by reason
+            $byReason = Report::select('reason', DB::raw('COUNT(*) as count'))
+                ->groupBy('reason')
+                ->orderByDesc('count')
+                ->get();
+
+            $reasonChart = [
+                'labels'   => $byReason->pluck('reason')->map(fn($r) => ucfirst(str_replace('_', ' ', $r)))->toArray(),
+                'datasets' => [[
+                    'data'            => $byReason->pluck('count')->toArray(),
+                    'backgroundColor' => ['#ef4444', '#f97316', '#eab308', '#3b82f6', '#8b5cf6'],
+                ]],
+            ];
+
+            // Line chart: daily report trend (30 days)
+            $dailyTrend = Report::whereBetween('created_at', [$now->copy()->subDays(30), $now])
+                ->select(DB::raw('DATE(created_at) as date'), DB::raw('COUNT(*) as count'))
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            $trendChart = [
+                'labels'   => $dailyTrend->pluck('date')->toArray(),
+                'datasets' => [[
+                    'label'           => 'Reports',
+                    'data'            => $dailyTrend->pluck('count')->toArray(),
+                    'borderColor'     => '#ef4444',
+                    'backgroundColor' => 'rgba(239,68,68,0.1)',
+                    'fill'            => true,
+                    'tension'         => 0.3,
+                ]],
+            ];
+
+            return response()->json([
+                'stats'        => $stats,
+                'reason_chart' => $reasonChart,
+                'trend_chart'  => $trendChart,
+            ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Failed to load statistics',
-                'message' => $e->getMessage()
+                'error'   => 'Failed to load statistics',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }

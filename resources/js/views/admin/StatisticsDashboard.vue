@@ -22,213 +22,115 @@
 
         <!-- Statistics Content -->
         <div v-else-if="statistics" class="statistics-content">
-            <!-- User Statistics -->
+
+            <!-- Today's Pulse -->
             <div class="stats-section">
                 <h3 class="stats-section-title">
-                    <i class="fas fa-users"></i>
-                    User Statistics
+                    <i class="fas fa-heartbeat"></i>
+                    Today's Pulse
                 </h3>
-                <div class="stats-grid">
-                    <div class="stat-card blue">
-                        <div class="stat-icon">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.users.total }}</h3>
-                            <p class="stat-label">Total Users</p>
-                        </div>
-                    </div>
-                    <div class="stat-card green">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-check"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.users.active }}</h3>
-                            <p class="stat-label">Active Users</p>
-                        </div>
-                    </div>
-                    <div class="stat-card red">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-slash"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.users.banned }}</h3>
-                            <p class="stat-label">Banned Users</p>
+                <div class="stats-dashboard">
+                    <div class="stats-grid">
+                        <div
+                            v-for="stat in todaysPulse"
+                            :key="stat.label"
+                            class="stat-card-compact"
+                            :class="stat.color"
+                        >
+                            <div class="stat-icon"><i :class="stat.icon"></i></div>
+                            <div class="stat-info">
+                                <div class="stat-value-compact">{{ stat.value }}</div>
+                                <div class="stat-label-compact">{{ stat.label }}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Post Statistics -->
+            <!-- Action Required -->
             <div class="stats-section">
                 <h3 class="stats-section-title">
-                    <i class="fas fa-clipboard-list"></i>
-                    Service Post Statistics
+                    <i class="fas fa-exclamation-circle"></i>
+                    Action Required
                 </h3>
-                <div class="stats-grid">
-                    <div class="stat-card purple">
-                        <div class="stat-icon">
-                            <i class="fas fa-clipboard-list"></i>
+                <div class="action-required-grid">
+                    <a
+                        v-for="item in actionRequired"
+                        :key="item.label"
+                        :href="item.link"
+                        class="action-required-card"
+                        :class="item.color"
+                    >
+                        <div class="action-required-icon">
+                            <i :class="item.icon"></i>
                         </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.posts.total }}</h3>
-                            <p class="stat-label">Total Posts</p>
+                        <div class="action-required-info">
+                            <div class="action-required-value">{{ item.value }}</div>
+                            <div class="action-required-label">{{ item.label }}</div>
+                        </div>
+                        <div class="action-required-arrow">
+                            <i class="fas fa-chevron-right"></i>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Distribution Charts -->
+            <div class="stats-section">
+                <h3 class="stats-section-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Distributions
+                </h3>
+                <div class="charts-grid-2x2">
+                    <div v-if="charts.user_status" class="chart-card">
+                        <h4 class="chart-title">User Status</h4>
+                        <div class="chart-body">
+                            <PieChart :data="charts.user_status" :height="220" />
                         </div>
                     </div>
-                    <div class="stat-card green">
-                        <div class="stat-icon">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.posts.by_status.published }}</h3>
-                            <p class="stat-label">Published Posts</p>
+                    <div v-if="charts.post_state" class="chart-card">
+                        <h4 class="chart-title">Post State</h4>
+                        <div class="chart-body">
+                            <PieChart :data="charts.post_state" :height="220" />
                         </div>
                     </div>
-                    <div class="stat-card orange">
-                        <div class="stat-icon">
-                            <i class="fas fa-clock"></i>
+                    <div v-if="charts.by_category" class="chart-card">
+                        <h4 class="chart-title">Posts by Category</h4>
+                        <div class="chart-body" style="height: 250px;">
+                            <BarChart :data="charts.by_category" :height="250" />
                         </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.posts.by_status.pending }}</h3>
-                            <p class="stat-label">Pending Posts</p>
+                    </div>
+                    <div v-if="charts.badge_dist" class="chart-card">
+                        <h4 class="chart-title">Badge Distribution</h4>
+                        <div class="chart-body">
+                            <PieChart :data="charts.badge_dist" :height="220" />
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Posts by Category -->
+            <!-- System Health Rates -->
             <div class="stats-section">
                 <h3 class="stats-section-title">
-                    <i class="fas fa-folder"></i>
-                    Posts by Category
+                    <i class="fas fa-tachometer-alt"></i>
+                    System Health Rates
                 </h3>
-                <div class="category-grid">
-                    <div class="category-card">
-                        <div class="category-icon blue">
-                            <i class="fas fa-mobile-alt"></i>
+                <div class="rates-container">
+                    <div
+                        v-for="rate in systemRates"
+                        :key="rate.label"
+                        class="rate-item"
+                    >
+                        <div class="rate-header">
+                            <span class="rate-label">{{ rate.label }}</span>
+                            <span class="rate-value" :class="`text-${rate.color}`">{{ rate.value }}%</span>
                         </div>
-                        <div class="category-content">
-                            <span class="category-label">Devices</span>
-                            <span class="category-value">{{ statistics.posts.by_category.devices }}</span>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon green">
-                            <i class="fas fa-car"></i>
-                        </div>
-                        <div class="category-content">
-                            <span class="category-label">Cars</span>
-                            <span class="category-value">{{ statistics.posts.by_category.cars }}</span>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon orange">
-                            <i class="fas fa-briefcase"></i>
-                        </div>
-                        <div class="category-content">
-                            <span class="category-label">Jobs</span>
-                            <span class="category-value">{{ statistics.posts.by_category.jobs }}</span>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon red">
-                            <i class="fas fa-home"></i>
-                        </div>
-                        <div class="category-content">
-                            <span class="category-label">Real Estate</span>
-                            <span class="category-value">{{ statistics.posts.by_category.real_estate }}</span>
-                        </div>
-                    </div>
-                    <div class="category-card">
-                        <div class="category-icon purple">
-                            <i class="fas fa-cogs"></i>
-                        </div>
-                        <div class="category-content">
-                            <span class="category-label">Services</span>
-                            <span class="category-value">{{ statistics.posts.by_category.services }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Badge Statistics -->
-            <div class="stats-section">
-                <h3 class="stats-section-title">
-                    <i class="fas fa-award"></i>
-                    Badge Statistics
-                </h3>
-                <div class="stats-grid">
-                    <div class="stat-card gold">
-                        <div class="stat-icon">
-                            <i class="fas fa-award"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.posts.by_badge.golden }}</h3>
-                            <p class="stat-label">Golden Badges</p>
-                        </div>
-                    </div>
-                    <div class="stat-card diamond">
-                        <div class="stat-icon">
-                            <i class="fas fa-gem"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.posts.by_badge.diamond }}</h3>
-                            <p class="stat-label">Diamond Badges</p>
-                        </div>
-                    </div>
-                    <div class="stat-card gray">
-                        <div class="stat-icon">
-                            <i class="fas fa-certificate"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.posts.by_badge.normal }}</h3>
-                            <p class="stat-label">Normal Posts</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Purchase Requests Statistics -->
-            <div class="stats-section">
-                <h3 class="stats-section-title">
-                    <i class="fas fa-shopping-cart"></i>
-                    Point Purchase Requests
-                </h3>
-                <div class="stats-grid-4">
-                    <div class="stat-card blue">
-                        <div class="stat-icon">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.purchase_requests.total }}</h3>
-                            <p class="stat-label">Total Requests</p>
-                        </div>
-                    </div>
-                    <div class="stat-card orange">
-                        <div class="stat-icon">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.purchase_requests.pending }}</h3>
-                            <p class="stat-label">Pending</p>
-                        </div>
-                    </div>
-                    <div class="stat-card green">
-                        <div class="stat-icon">
-                            <i class="fas fa-check"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.purchase_requests.approved }}</h3>
-                            <p class="stat-label">Approved</p>
-                        </div>
-                    </div>
-                    <div class="stat-card red">
-                        <div class="stat-icon">
-                            <i class="fas fa-times"></i>
-                        </div>
-                        <div class="stat-content">
-                            <h3 class="stat-value">{{ statistics.purchase_requests.cancelled }}</h3>
-                            <p class="stat-label">Cancelled</p>
+                        <div class="rate-bar">
+                            <div
+                                class="rate-bar-fill"
+                                :class="`bg-${rate.color}`"
+                                :style="{ width: rate.value + '%' }"
+                            ></div>
                         </div>
                     </div>
                 </div>
@@ -240,8 +142,19 @@
 <script setup>
 import { onMounted } from 'vue'
 import { useStatistics } from '../../composables/useStatistics'
+import PieChart from '../../components/admin/charts/PieChart.vue'
+import BarChart from '../../components/admin/charts/BarChart.vue'
 
-const { statistics, loading, error, fetchStatistics } = useStatistics()
+const {
+    statistics,
+    loading,
+    error,
+    fetchStatistics,
+    todaysPulse,
+    actionRequired,
+    charts,
+    systemRates,
+} = useStatistics()
 
 const loadData = () => {
     fetchStatistics()
@@ -257,38 +170,7 @@ onMounted(() => {
     padding: 20px;
 }
 
-/* Header Section */
-.section-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 30px;
-}
-
-.header-content {
-    flex: 1;
-}
-
-.section-title {
-    font-size: 28px;
-    font-weight: 600;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0 0 8px 0;
-}
-
-.section-title i {
-    color: #3498db;
-}
-
-.section-subtitle {
-    font-size: 14px;
-    color: #7f8c8d;
-    margin: 0;
-}
-
+/* Action Bar */
 .action-btn {
     padding: 12px 24px;
     border: none;
@@ -351,220 +233,196 @@ onMounted(() => {
     display: block;
 }
 
-/* Statistics Sections */
+/* Stats Section */
 .stats-section {
-    margin-bottom: 40px;
+    margin-bottom: 2rem;
 }
 
 .stats-section-title {
-    font-size: 20px;
-    font-weight: 600;
+    font-size: 1.1rem;
+    font-weight: 700;
     color: #2c3e50;
-    margin-bottom: 20px;
+    margin: 0 0 1rem 0;
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 0.5rem;
 }
 
 .stats-section-title i {
-    color: #3498db;
+    color: #667eea;
 }
 
-/* Stats Grid (3 columns) */
-.stats-grid {
+/* Action Required */
+.action-required-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
+    gap: 1rem;
 }
 
-/* Stats Grid (4 columns) */
-.stats-grid-4 {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 20px;
-    margin-bottom: 20px;
-}
-
-/* Stat Card */
-.stat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
+.action-required-card {
     display: flex;
     align-items: center;
-    gap: 20px;
+    gap: 1rem;
+    padding: 1.25rem;
+    background: white;
+    border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    text-decoration: none;
+    color: inherit;
     transition: all 0.3s ease;
+    border-left: 4px solid transparent;
 }
 
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12);
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: white;
-    flex-shrink: 0;
-}
-
-.stat-card.blue .stat-icon {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-}
-
-.stat-card.green .stat-icon {
-    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-}
-
-.stat-card.red .stat-icon {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.stat-card.orange .stat-icon {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-}
-
-.stat-card.purple .stat-icon {
-    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-}
-
-.stat-card.gold .stat-icon {
-    background: linear-gradient(135deg, #f39c12 0%, #f1c40f 100%);
-}
-
-.stat-card.diamond .stat-icon {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.stat-card.gray .stat-icon {
-    background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 32px;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0 0 4px 0;
-    line-height: 1;
-}
-
-.stat-label {
-    font-size: 14px;
-    color: #7f8c8d;
-    margin: 0;
-}
-
-/* Category Grid */
-.category-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
-}
-
-.category-card {
-    background: white;
-    border-radius: 10px;
-    padding: 20px;
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.06);
-    transition: all 0.3s;
-}
-
-.category-card:hover {
+.action-required-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 }
 
-.category-icon {
-    width: 50px;
-    height: 50px;
+.action-required-card.warning {
+    border-left-color: #f97316;
+}
+
+.action-required-card.danger {
+    border-left-color: #ef4444;
+}
+
+.action-required-card.info {
+    border-left-color: #06b6d4;
+}
+
+.action-required-icon {
+    width: 48px;
+    height: 48px;
     border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
-    color: white;
+    font-size: 1.25rem;
     flex-shrink: 0;
 }
 
-.category-icon.blue {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.action-required-card.warning .action-required-icon {
+    background: rgba(249, 115, 22, 0.15);
+    color: #f97316;
 }
 
-.category-icon.green {
-    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+.action-required-card.danger .action-required-icon {
+    background: rgba(239, 68, 68, 0.15);
+    color: #ef4444;
 }
 
-.category-icon.orange {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+.action-required-card.info .action-required-icon {
+    background: rgba(6, 182, 212, 0.15);
+    color: #06b6d4;
 }
 
-.category-icon.red {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.category-icon.purple {
-    background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
-}
-
-.category-content {
+.action-required-info {
     flex: 1;
+}
+
+.action-required-value {
+    font-size: 1.75rem;
+    font-weight: 800;
+    color: #1a1a2e;
+    line-height: 1.2;
+}
+
+.action-required-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.action-required-arrow {
+    color: #d1d5db;
+    font-size: 1rem;
+}
+
+.action-required-card:hover .action-required-arrow {
+    color: #6b7280;
+}
+
+/* Charts 2x2 Grid */
+.charts-grid-2x2 {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+}
+
+/* System Health Rates */
+.rates-container {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 1.25rem;
 }
 
-.category-label {
-    font-size: 13px;
-    color: #7f8c8d;
-    font-weight: 500;
+.rate-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
 }
 
-.category-value {
-    font-size: 24px;
+.rate-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.rate-label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+.rate-value {
+    font-size: 0.9rem;
     font-weight: 700;
-    color: #2c3e50;
 }
 
-/* Responsive Design */
+.text-primary { color: #3b82f6; }
+.text-success { color: #22c55e; }
+.text-warning { color: #f97316; }
+
+.rate-bar {
+    width: 100%;
+    height: 10px;
+    background: #f3f4f6;
+    border-radius: 5px;
+    overflow: hidden;
+}
+
+.rate-bar-fill {
+    height: 100%;
+    border-radius: 5px;
+    transition: width 1s ease-out;
+}
+
+.bg-primary { background: linear-gradient(90deg, #3b82f6, #60a5fa); }
+.bg-success { background: linear-gradient(90deg, #22c55e, #4ade80); }
+.bg-warning { background: linear-gradient(90deg, #f97316, #fb923c); }
+
+/* Responsive */
 @media (max-width: 768px) {
     .statistics-dashboard-modern {
         padding: 15px;
     }
 
-    .section-header {
-        flex-direction: column;
-        gap: 16px;
-    }
-
-    .stats-grid,
-    .stats-grid-4 {
+    .charts-grid-2x2 {
         grid-template-columns: 1fr;
     }
 
-    .category-grid {
+    .action-required-grid {
         grid-template-columns: 1fr;
     }
+}
 
-    .stat-value {
-        font-size: 24px;
-    }
-
-    .section-title {
-        font-size: 22px;
-    }
+.mb-4 {
+    margin-bottom: 1rem;
 }
 </style>
