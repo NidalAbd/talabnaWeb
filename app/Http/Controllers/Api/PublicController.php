@@ -86,21 +86,24 @@ class PublicController extends Controller
                 'name_en' => $listing->badgeType->name_en,
                 'slug' => $listing->badgeType->slug,
                 'color' => $listing->badgeType->color,
+                'secondary_color' => $listing->badgeType->secondary_color,
                 'icon' => $listing->badgeType->icon,
                 'is_default' => $listing->badgeType->is_default,
             ];
         } else {
             // Fallback for old data using have_badge
             $haveBadge = $data['have_badge'] ?? 'عادي';
+            $fallbackBadge = \App\Models\BadgeType::getByOldBadgeName($haveBadge);
             $data['badge'] = [
-                'id' => null,
-                'name' => ['ar' => $haveBadge, 'en' => $haveBadge],
-                'name_ar' => $haveBadge,
-                'name_en' => $haveBadge,
-                'slug' => null,
-                'color' => $haveBadge === 'ماسي' ? '#9C27B0' : ($haveBadge === 'ذهبي' ? '#FFD700' : '#808080'),
-                'icon' => $haveBadge === 'ماسي' ? 'mdi-diamond-stone' : ($haveBadge === 'ذهبي' ? 'mdi-star' : 'mdi-tag'),
-                'is_default' => $haveBadge === 'عادي',
+                'id' => $fallbackBadge?->id,
+                'name' => $fallbackBadge ? $fallbackBadge->name : ['ar' => $haveBadge, 'en' => $haveBadge],
+                'name_ar' => $fallbackBadge?->name_ar ?? $haveBadge,
+                'name_en' => $fallbackBadge?->name_en ?? $haveBadge,
+                'slug' => $fallbackBadge?->slug,
+                'color' => $fallbackBadge?->color ?? '#808080',
+                'secondary_color' => $fallbackBadge?->secondary_color,
+                'icon' => $fallbackBadge?->icon ?? 'mdi-tag',
+                'is_default' => $fallbackBadge?->is_default ?? ($haveBadge === 'عادي'),
             ];
         }
 
@@ -872,6 +875,7 @@ class PublicController extends Controller
                         'name_en' => $badge->name_en,
                         'slug' => $badge->slug,
                         'color' => $badge->color,
+                        'secondary_color' => $badge->secondary_color,
                         'icon' => $badge->icon,
                         'points_per_day' => $badge->points_per_day,
                         'view_boost_percent' => $badge->view_boost_percent,
