@@ -246,7 +246,6 @@ jobs:
           port: 21
           local-dir: ./deploy_laravel/
           server-dir: domains/talbna.cloud/
-          timeout: 120000
           exclude: |
             public/**
             vendor/**
@@ -276,7 +275,6 @@ jobs:
           port: 21
           local-dir: ./deploy_public/
           server-dir: domains/talbna.cloud/public_html/
-          timeout: 120000
           exclude: |
             **/storage
             **/storage/**
