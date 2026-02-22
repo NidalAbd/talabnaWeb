@@ -10,6 +10,8 @@ export function useBadgeTypes() {
   })
   const loading = ref(false)
   const error = ref(null)
+  const stats = ref(null)
+  const statsLoading = ref(false)
 
   const fetchBadgeTypes = async (filters = {}) => {
     loading.value = true
@@ -219,16 +221,38 @@ export function useBadgeTypes() {
     }
   }
 
+  const fetchStats = async () => {
+    statsLoading.value = true
+
+    try {
+      const response = await fetch('/api/admin/badge-types/stats')
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch stats')
+      }
+
+      const data = await response.json()
+      stats.value = data
+    } catch (err) {
+      console.error('Error fetching badge stats:', err)
+    } finally {
+      statsLoading.value = false
+    }
+  }
+
   return {
     badgeTypes,
     loading,
     error,
+    stats,
+    statsLoading,
     fetchBadgeTypes,
     getBadgeType,
     createBadgeType,
     updateBadgeType,
     deleteBadgeType,
     toggleStatus,
-    setDefault
+    setDefault,
+    fetchStats
   }
 }

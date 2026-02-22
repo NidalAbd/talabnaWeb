@@ -1,5 +1,86 @@
 <template>
   <div class="badge-types-management-advanced">
+    <!-- Points & Badge Statistics -->
+    <div v-if="stats" class="stats-dashboard">
+      <div class="stats-section">
+        <h3 class="stats-section-title">
+          <i class="fas fa-coins"></i> Points Stats
+        </h3>
+        <div class="stats-grid">
+          <div class="stat-card-compact stat-blue">
+            <div class="stat-icon"><i class="fas fa-database"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.points_stats?.total_points) }}</div>
+              <div class="stat-label-compact">Total Points in System</div>
+            </div>
+          </div>
+          <div class="stat-card-compact stat-green">
+            <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.points_stats?.points_purchased) }}</div>
+              <div class="stat-label-compact">Points Purchased</div>
+            </div>
+          </div>
+          <div class="stat-card-compact stat-orange">
+            <div class="stat-icon"><i class="fas fa-minus-circle"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.points_stats?.points_used) }}</div>
+              <div class="stat-label-compact">Points Used</div>
+            </div>
+          </div>
+          <div class="stat-card-compact stat-purple">
+            <div class="stat-icon"><i class="fas fa-exchange-alt"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.points_stats?.points_transferred) }}</div>
+              <div class="stat-label-compact">Points Transferred</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="stats-section">
+        <h3 class="stats-section-title">
+          <i class="fas fa-award"></i> Badge Stats
+        </h3>
+        <div class="stats-grid">
+          <div class="stat-card-compact stat-blue">
+            <div class="stat-icon"><i class="fas fa-check-double"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.badge_stats?.active_badge_posts) }}</div>
+              <div class="stat-label-compact">Active Badge Posts</div>
+            </div>
+          </div>
+          <div class="stat-card-compact stat-red">
+            <div class="stat-icon"><i class="fas fa-clock"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.badge_stats?.expiring_today) }}</div>
+              <div class="stat-label-compact">Expiring Today</div>
+            </div>
+          </div>
+          <div class="stat-card-compact stat-orange">
+            <div class="stat-icon"><i class="fas fa-calendar-week"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.badge_stats?.expiring_this_week) }}</div>
+              <div class="stat-label-compact">Expiring This Week</div>
+            </div>
+          </div>
+          <div class="stat-card-compact stat-yellow">
+            <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+            <div class="stat-info">
+              <div class="stat-value-compact">{{ formatNumber(stats.badge_stats?.pending_purchase_requests) }}</div>
+              <div class="stat-label-compact">Pending Purchases</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats Loading State -->
+    <div v-else-if="statsLoading" class="stats-dashboard stats-loading">
+      <div class="loader-advanced loader-small"></div>
+      <span>Loading statistics...</span>
+    </div>
+
     <!-- Advanced Search & Filters -->
     <div class="search-filter-bar">
       <div class="search-box">
@@ -374,7 +455,7 @@ import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useBadgeTypes } from '../../../composables/useBadgeTypes'
 import BadgeTypeFormModal from '../../../components/admin/badge-types/BadgeTypeFormModal.vue'
 
-const { badgeTypes, loading, fetchBadgeTypes, deleteBadgeType, toggleStatus, setDefault } = useBadgeTypes()
+const { badgeTypes, loading, fetchBadgeTypes, deleteBadgeType, toggleStatus, setDefault, stats, statsLoading, fetchStats } = useBadgeTypes()
 
 const filters = ref({
   search: '',
@@ -391,8 +472,14 @@ const viewMode = ref('list')
 const activeMenu = ref(null)
 let searchTimeout = null
 
+const formatNumber = (value) => {
+  if (value === null || value === undefined) return '0'
+  return new Intl.NumberFormat().format(value)
+}
+
 onMounted(async () => {
   await loadBadgeTypes()
+  fetchStats()
   document.addEventListener('click', closeMenus)
 })
 
@@ -1246,8 +1333,174 @@ const handleDelete = async (badge) => {
   color: #667eea;
 }
 
+/* Stats Dashboard */
+.stats-dashboard {
+  background: white;
+  border-radius: 16px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
+}
+
+.stats-dashboard.stats-loading {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  color: #6c757d;
+}
+
+.loader-small {
+  width: 24px;
+  height: 24px;
+  border-width: 3px;
+}
+
+.stats-section {
+  margin-bottom: 1.5rem;
+}
+
+.stats-section:last-child {
+  margin-bottom: 0;
+}
+
+.stats-section-title {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin: 0 0 1rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.stats-section-title i {
+  color: #667eea;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.stat-card-compact {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 12px;
+  border-left: 4px solid transparent;
+  background: #f8f9fa;
+  transition: all 0.2s ease;
+}
+
+.stat-card-compact:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card-compact .stat-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.stat-card-compact .stat-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.stat-value-compact {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #2c3e50;
+  line-height: 1.2;
+}
+
+.stat-label-compact {
+  font-size: 0.75rem;
+  color: #6c757d;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Stat color variants */
+.stat-blue {
+  border-left-color: #3b82f6;
+  background: linear-gradient(135deg, #eff6ff, #f8f9fa);
+}
+.stat-blue .stat-icon {
+  background: rgba(59, 130, 246, 0.15);
+  color: #3b82f6;
+}
+
+.stat-green {
+  border-left-color: #22c55e;
+  background: linear-gradient(135deg, #f0fdf4, #f8f9fa);
+}
+.stat-green .stat-icon {
+  background: rgba(34, 197, 94, 0.15);
+  color: #22c55e;
+}
+
+.stat-orange {
+  border-left-color: #f97316;
+  background: linear-gradient(135deg, #fff7ed, #f8f9fa);
+}
+.stat-orange .stat-icon {
+  background: rgba(249, 115, 22, 0.15);
+  color: #f97316;
+}
+
+.stat-purple {
+  border-left-color: #8b5cf6;
+  background: linear-gradient(135deg, #f5f3ff, #f8f9fa);
+}
+.stat-purple .stat-icon {
+  background: rgba(139, 92, 246, 0.15);
+  color: #8b5cf6;
+}
+
+.stat-red {
+  border-left-color: #ef4444;
+  background: linear-gradient(135deg, #fef2f2, #f8f9fa);
+}
+.stat-red .stat-icon {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.stat-yellow {
+  border-left-color: #eab308;
+  background: linear-gradient(135deg, #fefce8, #f8f9fa);
+}
+.stat-yellow .stat-icon {
+  background: rgba(234, 179, 8, 0.15);
+  color: #eab308;
+}
+
 /* Responsive */
+@media (max-width: 1200px) {
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
 @media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
   .search-filter-bar {
     flex-direction: column;
   }

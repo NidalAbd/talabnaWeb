@@ -4,8 +4,10 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\BadgeType;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 
@@ -57,43 +59,83 @@ class BadgeTypesApiController extends Controller
     }
 
     /**
-     * Get statistics for badge types
+     * Get statistics for badge types, points, and badges
      */
     public function getStats(): JsonResponse
     {
+        $today = Carbon::today();
+        $endOfWeek = Carbon::today()->endOfWeek();
+
+        // Badge type stats
         $total = BadgeType::count();
         $active = BadgeType::where('is_active', true)->count();
-        $totalPosts = \DB::table('service_posts')->whereNotNull('badge_type_id')->count();
-        $defaultBadge = BadgeType::where('is_default', true)->first();
 
-        $stats = [
-            [
-                'label' => 'Total Badge Types',
-                'value' => $total,
-                'icon' => 'fas fa-certificate',
-                'color' => 'info'
-            ],
-            [
-                'label' => 'Active Badges',
-                'value' => $active,
-                'icon' => 'fas fa-check-circle',
-                'color' => 'success'
-            ],
-            [
-                'label' => 'Posts with Badges',
-                'value' => $totalPosts,
-                'icon' => 'fas fa-award',
-                'color' => 'warning'
-            ],
-            [
-                'label' => 'Inactive Badges',
-                'value' => $total - $active,
-                'icon' => 'fas fa-times-circle',
-                'color' => 'secondary'
-            ]
-        ];
+        // Points stats
+        $totalPoints = DB::table('palservice_points')->sum('point');
+        $pointsPurchased = DB::table('point_transactions')->where('type', 'purchase')->sum('point');
+        $pointsUsed = DB::table('point_transactions')->where('type', 'used')->sum('point');
+        $pointsTransferred = DB::table('point_transactions')->where('type', 'transfer')->sum('point');
 
-        return response()->json(['stats' => $stats]);
+        // Badge expiry stats
+        $activeBadgePosts = DB::table('service_posts')
+            ->whereNotNull('badge_type_id')
+            ->where('badge_expires_at', '>', $today)
+            ->count();
+
+        $expiringToday = DB::table('service_posts')
+            ->whereNotNull('badge_type_id')
+            ->whereDate('badge_expires_at', $today)
+            ->count();
+
+        $expiringThisWeek = DB::table('service_posts')
+            ->whereNotNull('badge_type_id')
+            ->whereBetween('badge_expires_at', [$today, $endOfWeek])
+            ->count();
+
+        $pendingPurchaseRequests = DB::table('point_purchase_requests')
+            ->where('status', 'pending')
+            ->count();
+
+        return response()->json([
+            'stats' => [
+                [
+                    'label' => 'Total Badge Types',
+                    'value' => $total,
+                    'icon' => 'fas fa-certificate',
+                    'color' => 'info'
+                ],
+                [
+                    'label' => 'Active Badges',
+                    'value' => $active,
+                    'icon' => 'fas fa-check-circle',
+                    'color' => 'success'
+                ],
+                [
+                    'label' => 'Active Badge Posts',
+                    'value' => $activeBadgePosts,
+                    'icon' => 'fas fa-award',
+                    'color' => 'warning'
+                ],
+                [
+                    'label' => 'Inactive Badges',
+                    'value' => $total - $active,
+                    'icon' => 'fas fa-times-circle',
+                    'color' => 'secondary'
+                ]
+            ],
+            'points_stats' => [
+                'total_points' => (int) $totalPoints,
+                'points_purchased' => (int) $pointsPurchased,
+                'points_used' => (int) abs($pointsUsed),
+                'points_transferred' => (int) abs($pointsTransferred),
+            ],
+            'badge_stats' => [
+                'active_badge_posts' => $activeBadgePosts,
+                'expiring_today' => $expiringToday,
+                'expiring_this_week' => $expiringThisWeek,
+                'pending_purchase_requests' => $pendingPurchaseRequests,
+            ],
+        ]);
     }
 
     /**

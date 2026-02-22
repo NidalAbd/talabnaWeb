@@ -353,13 +353,6 @@ return [
             ]
         ],
 
-        // Badge Types
-        [
-            'text' => 'Badge Types',
-            'url'  => 'badge-types',
-            'icon' => 'fas fa-award',
-        ],
-
         // Location Management
         [
             'text'    => 'Locations',
@@ -446,9 +439,9 @@ return [
             'permission' => ['view_statistics'],
             'submenu' => [
                 [
-                    'text' => 'Points Overview',
-                    'url'  => 'admin/palservice-points',
-                    'icon' => 'fas fa-chart-bar',
+                    'text' => 'Badge Types',
+                    'url'  => 'badge-types',
+                    'icon' => 'fas fa-award',
                 ],
                 [
                     'text' => 'Point Packages',
@@ -464,6 +457,11 @@ return [
                     'text' => 'Point Transactions',
                     'url'  => 'admin/point-transactions',
                     'icon' => 'fas fa-exchange-alt',
+                ],
+                [
+                    'text' => 'Points Overview',
+                    'url'  => 'admin/palservice-points',
+                    'icon' => 'fas fa-chart-bar',
                 ],
                 [
                     'text' => 'Country Pricing',
