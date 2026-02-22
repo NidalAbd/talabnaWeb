@@ -18,11 +18,14 @@
                         <div class="stat-label-compact">Users with Roles</div>
                     </div>
                 </div>
-                <div class="stat-card-compact stat-orange">
+                <div class="stat-card-compact stat-orange" :class="{ clickable: stats.users_without_roles > 0 }" @click="stats.users_without_roles > 0 && confirmFixUsers()">
                     <div class="stat-icon"><i class="fas fa-user-minus"></i></div>
                     <div class="stat-info">
                         <div class="stat-value-compact">{{ formatNumber(stats.users_without_roles) }}</div>
                         <div class="stat-label-compact">Users without Roles</div>
+                        <div class="stat-action" v-if="stats.users_without_roles > 0">
+                            <i class="fas fa-wrench"></i> Click to fix
+                        </div>
                     </div>
                 </div>
                 <div class="stat-card-compact stat-purple">
@@ -251,6 +254,7 @@ const editingUser = ref(null)
 const selectedRoles = ref([])
 const selectedPermissions = ref([])
 const showEditModal = ref(false)
+const fixingUsers = ref(false)
 
 let searchTimeout = null
 
@@ -337,6 +341,36 @@ const saveRoleAssignment = async () => {
     }
 }
 
+const confirmFixUsers = async () => {
+    if (fixingUsers.value) return
+    if (!confirm(`Assign default "user" role to ${stats.value.users_without_roles} users without roles?`)) return
+
+    fixingUsers.value = true
+    try {
+        const response = await fetch('/api/admin/role-assignments/fix-without-roles', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            }
+        })
+
+        if (!response.ok) {
+            const data = await response.json()
+            throw new Error(data.error || 'Failed to fix users')
+        }
+
+        const data = await response.json()
+        window.toastr.success(data.message)
+        loadData(pagination.value.current_page)
+        fetchStats()
+    } catch (error) {
+        window.toastr.error(error.message || 'Failed to fix users without roles')
+    } finally {
+        fixingUsers.value = false
+    }
+}
+
 onMounted(() => {
     loadData()
     fetchStats()
@@ -380,6 +414,24 @@ onMounted(() => {
     color: #666;
     font-size: 0.95rem;
     margin: 0;
+}
+
+/* Clickable stat card */
+.stat-card-compact.clickable {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-card-compact.clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.stat-action {
+    font-size: 0.75rem;
+    color: #e67e22;
+    font-weight: 600;
+    margin-top: 0.25rem;
 }
 
 /* Search & Filters */

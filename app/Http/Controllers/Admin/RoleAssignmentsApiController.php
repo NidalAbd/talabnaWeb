@@ -189,6 +189,49 @@ class RoleAssignmentsApiController extends Controller
     }
 
     /**
+     * Assign default 'user' role to all users who have no roles
+     */
+    public function fixUsersWithoutRoles(): JsonResponse
+    {
+        try {
+            $role = Role::where('name', 'user')->first();
+
+            if (!$role) {
+                return response()->json([
+                    'error' => 'Default "user" role not found'
+                ], 404);
+            }
+
+            $usersWithoutRoles = User::whereDoesntHave('roles')->get();
+            $fixedCount = 0;
+
+            foreach ($usersWithoutRoles as $user) {
+                $user->attachRole($role);
+                $user->syncPermissions($role->permissions);
+                $fixedCount++;
+            }
+
+            Log::info('Fixed users without roles', [
+                'fixed_count' => $fixedCount,
+                'role' => $role->name,
+                'admin_id' => auth()->id(),
+            ]);
+
+            return response()->json([
+                'message' => "Assigned 'user' role to {$fixedCount} users",
+                'fixed_count' => $fixedCount,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Fix Users Without Roles Error: ' . $e->getMessage());
+
+            return response()->json([
+                'error' => 'Failed to fix users',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Get all available permissions for assignment
      */
     public function getPermissions(): JsonResponse

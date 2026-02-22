@@ -767,6 +767,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/role-assignments/stats', [RoleAssignmentsApiController::class, 'getStats'])->name('api.admin.role-assignments.stats');
             Route::get('/role-assignments/roles', [RoleAssignmentsApiController::class, 'getRoles'])->name('api.admin.role-assignments.roles');
             Route::get('/role-assignments/permissions', [RoleAssignmentsApiController::class, 'getPermissions'])->name('api.admin.role-assignments.permissions');
+            Route::post('/role-assignments/fix-without-roles', [RoleAssignmentsApiController::class, 'fixUsersWithoutRoles'])->name('api.admin.role-assignments.fix-without-roles');
             Route::get('/role-assignments', [RoleAssignmentsApiController::class, 'index'])->name('api.admin.role-assignments.index');
             Route::get('/role-assignments/{id}', [RoleAssignmentsApiController::class, 'show'])->name('api.admin.role-assignments.show');
             Route::put('/role-assignments/{id}', [RoleAssignmentsApiController::class, 'update'])->name('api.admin.role-assignments.update');

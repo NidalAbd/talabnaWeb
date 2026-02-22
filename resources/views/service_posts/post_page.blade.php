@@ -355,7 +355,7 @@
                                                         {{ $post->city->name }},
                                                     @endif
                                                     @if($post->country)
-                                                        {{ getTranslatedName($country->name) }}
+                                                        {{ getTranslatedName($post->country->name) }}
                                                     @endif
                                                 </small>
                                             @endif

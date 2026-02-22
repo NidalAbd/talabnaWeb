@@ -138,59 +138,22 @@ class GoogleAuthController extends Controller
                 }
                 $user->photos()->save($photo);
 
-                // Assign role to user if using roles
-                Log::info('Attempting to assign role', [
-                    'Role class exists' => class_exists('App\Models\Role'),
-                    'Role model' => get_class($user)
-                ]);
+                // Assign default 'user' role and permissions (same as RegisterController)
+                $role = Role::where('name', 'user')->first();
+                if ($role) {
+                    $user->attachRole($role);
+                    $user->syncPermissions($role->permissions);
 
-                if (class_exists('App\\Models\\Role')) {
-                    $role = Role::where('name', 'user')->first();
-
-                    Log::info('Role query results', [
-                        'role_found' => $role ? true : false,
-                        'role_name' => $role ? $role->name : 'No role found',
-                        'role_id' => $role ? $role->id : null
+                    Log::info('Role and permissions assigned to Google user', [
+                        'user_id' => $user->id,
+                        'role' => $role->name,
+                        'permission_count' => $role->permissions->count(),
                     ]);
-
-                    // Assign role to user
-                    $role = Role::where('name', 'user')->first();
-
-                    if ($role) {
-                        try {
-                            // Manually attach role
-                            $user->roles()->attach($role->id, ['user_type' => get_class($user)]);
-
-                            // Get all permissions associated with this role
-                            $permissions = $role->permissions;
-
-                            // Sync permissions
-                            if ($permissions->isNotEmpty()) {
-                                $permissionIds = $permissions->pluck('id')->toArray();
-                                $user->permissions()->sync($permissionIds);
-
-                                Log::info('Role and permissions synced', [
-                                    'user_id' => $user->id,
-                                    'role_id' => $role->id,
-                                    'permission_count' => count($permissionIds)
-                                ]);
-                            } else {
-                                Log::warning('No permissions found for role', [
-                                    'role_id' => $role->id,
-                                    'role_name' => $role->name
-                                ]);
-                            }
-                        } catch (\Exception $e) {
-                            Log::error('Role and permission sync failed', [
-                                'error' => $e->getMessage(),
-                                'trace' => $e->getTraceAsString()
-                            ]);
-                        }
-                    } else {
-                        Log::warning('No default user role found', [
-                            'available_roles' => Role::pluck('name')->toArray()
-                        ]);
-                    }
+                } else {
+                    Log::error('Default "user" role not found — Google user has no role', [
+                        'user_id' => $user->id,
+                        'available_roles' => Role::pluck('name')->toArray(),
+                    ]);
                 }
 
                 // Create welcome notification
