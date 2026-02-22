@@ -401,21 +401,33 @@ onMounted(async () => {
     box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15);
 }
 
-.stat-card.blue {
+.stat-card.blue, .stat-card.primary {
     background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 }
 
-.stat-card.green {
+.stat-card.green, .stat-card.success {
     background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
 }
 
-.stat-card.orange {
+.stat-card.orange, .stat-card.warning {
     background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
     color: #212529;
 }
 
 .stat-card.purple {
     background: linear-gradient(135deg, #9b59b6 0%, #8e44ad 100%);
+}
+
+.stat-card.red, .stat-card.danger {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+}
+
+.stat-card.info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+}
+
+.stat-card.secondary {
+    background: linear-gradient(135deg, #6c757d 0%, #545b62 100%);
 }
 
 .stat-icon {
@@ -437,12 +449,16 @@ onMounted(async () => {
     font-size: 2rem;
     font-weight: 700;
     margin: 0 0 0.25rem 0;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
 }
 
 .stat-label {
     font-size: 0.9rem;
     opacity: 0.95;
     margin: 0;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
 }
 
 /* Tabs Container */

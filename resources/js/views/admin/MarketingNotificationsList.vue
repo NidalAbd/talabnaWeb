@@ -633,26 +633,27 @@ onMounted(async () => {
 }
 
 .stat-card:nth-child(3) {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-    box-shadow: 0 4px 15px rgba(79, 172, 254, 0.4);
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+    box-shadow: 0 4px 15px rgba(243, 156, 18, 0.4);
 }
 
 .stat-card:nth-child(3):hover {
-    box-shadow: 0 8px 25px rgba(79, 172, 254, 0.5);
+    box-shadow: 0 8px 25px rgba(243, 156, 18, 0.5);
 }
 
 .stat-card:nth-child(4) {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    box-shadow: 0 4px 15px rgba(67, 233, 123, 0.4);
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4);
 }
 
 .stat-card:nth-child(4):hover {
-    box-shadow: 0 8px 25px rgba(67, 233, 123, 0.5);
+    box-shadow: 0 8px 25px rgba(231, 76, 60, 0.5);
 }
 
 .stat-icon {
     font-size: 3rem;
     opacity: 0.9;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .stat-content {
@@ -663,11 +664,15 @@ onMounted(async () => {
     font-size: 2rem;
     font-weight: 700;
     margin-bottom: 5px;
+    color: #ffffff;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .stat-label {
     font-size: 0.95rem;
-    opacity: 0.95;
+    opacity: 1;
+    color: #ffffff;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 /* Modern Card */
