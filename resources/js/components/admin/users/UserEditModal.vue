@@ -1,0 +1,507 @@
+<template>
+  <div class="modal-overlay-advanced" @click.self="$emit('close')">
+    <div class="modal-container-advanced modal-lg">
+      <div class="modal-header-advanced">
+        <h2>
+          <i class="fas fa-user-edit"></i>
+          Edit User
+        </h2>
+        <button class="modal-close-btn" @click="$emit('close')">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+
+      <div class="modal-body-advanced">
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+          <div class="spinner"></div>
+          <p>Loading user details...</p>
+        </div>
+
+        <template v-else-if="userData">
+          <!-- User Profile Header -->
+          <div class="user-profile-header">
+            <div class="user-avatar">
+              <img :src="userData.avatar" :alt="userData.name">
+            </div>
+            <div class="user-info">
+              <h3>{{ userData.name }}</h3>
+              <p class="username">@{{ userData.user_name }}</p>
+              <div class="user-badges">
+                <span
+                  v-for="role in userData.roles"
+                  :key="role.id"
+                  class="role-badge"
+                  :class="getRoleBadgeClass(role.name)"
+                >
+                  {{ role.display_name || role.name }}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <form @submit.prevent="handleSubmit">
+            <!-- Basic Info Section -->
+            <div class="form-section">
+              <h4 class="section-title">
+                <i class="fas fa-info-circle"></i> Basic Information
+              </h4>
+
+              <div class="form-row">
+                <div class="form-group-modern">
+                  <label class="form-label-modern">Full Name</label>
+                  <input
+                    v-model="formData.name"
+                    type="text"
+                    class="form-input-modern"
+                    placeholder="Enter full name"
+                  >
+                </div>
+
+                <div class="form-group-modern">
+                  <label class="form-label-modern">Email</label>
+                  <input
+                    v-model="formData.email"
+                    type="email"
+                    class="form-input-modern"
+                    placeholder="Enter email address"
+                  >
+                </div>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group-modern">
+                  <label class="form-label-modern">Phone</label>
+                  <input
+                    v-model="formData.phones"
+                    type="text"
+                    class="form-input-modern"
+                    placeholder="Enter phone number"
+                  >
+                </div>
+
+                <div class="form-group-modern">
+                  <label class="form-label-modern">Status</label>
+                  <select v-model="formData.is_active" class="form-input-modern">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                    <option value="banned">Banned</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <!-- Roles Section -->
+            <div class="form-section">
+              <h4 class="section-title">
+                <i class="fas fa-user-tag"></i> Roles
+              </h4>
+
+              <div v-if="loadingRoles" class="loading-mini">
+                <i class="fas fa-spinner fa-spin"></i> Loading roles...
+              </div>
+
+              <div v-else class="roles-grid">
+                <label
+                  v-for="role in availableRoles"
+                  :key="role.id"
+                  class="role-checkbox"
+                  :class="{ protected: role.name === 'superadmin' }"
+                >
+                  <input
+                    type="checkbox"
+                    :value="role.id"
+                    v-model="formData.roles"
+                    :disabled="role.name === 'superadmin'"
+                    class="form-checkbox-modern"
+                  >
+                  <span class="role-icon" :class="getRoleBadgeClass(role.name)">
+                    <i :class="getRoleIcon(role.name)"></i>
+                  </span>
+                  <span class="role-name">{{ role.display_name || role.name }}</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Additional Info -->
+            <div class="form-section info-section">
+              <h4 class="section-title">
+                <i class="fas fa-chart-bar"></i> User Statistics
+              </h4>
+
+              <div class="stats-row">
+                <div class="stat-item">
+                  <i class="fas fa-file-alt"></i>
+                  <span class="stat-value">{{ userData.service_posts_count || 0 }}</span>
+                  <span class="stat-label">Posts</span>
+                </div>
+                <div class="stat-item">
+                  <i class="fas fa-flag"></i>
+                  <span class="stat-value">{{ userData.reports_count || 0 }}</span>
+                  <span class="stat-label">Reports</span>
+                </div>
+                <div class="stat-item">
+                  <i class="fas fa-coins"></i>
+                  <span class="stat-value">{{ userData.points_balance || 0 }}</span>
+                  <span class="stat-label">Points</span>
+                </div>
+                <div class="stat-item">
+                  <i class="fas fa-calendar-alt"></i>
+                  <span class="stat-value">{{ formatDate(userData.created_at) }}</span>
+                  <span class="stat-label">Joined</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Error Message -->
+            <div v-if="errorMessage" class="error-message-modern">
+              <i class="fas fa-exclamation-circle"></i>
+              {{ errorMessage }}
+            </div>
+          </form>
+        </template>
+      </div>
+
+      <div class="modal-footer-advanced">
+        <button type="button" class="btn-cancel-advanced" @click="$emit('close')">
+          Cancel
+        </button>
+        <button type="button" class="btn-submit-advanced" @click="handleSubmit" :disabled="isSubmitting || loading">
+          <i :class="isSubmitting ? 'fas fa-spinner fa-spin' : 'fas fa-save'"></i>
+          {{ isSubmitting ? 'Saving...' : 'Save Changes' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</template>
+
+<script setup>
+import { ref, onMounted, watch } from 'vue'
+import { useUsers } from '../../../composables/useUsers'
+
+const props = defineProps({
+  userId: {
+    type: Number,
+    required: true
+  }
+})
+
+const emit = defineEmits(['close', 'saved'])
+
+const { fetchUser, updateUser, getRoles } = useUsers()
+
+const loading = ref(true)
+const loadingRoles = ref(true)
+const isSubmitting = ref(false)
+const errorMessage = ref('')
+const userData = ref(null)
+const availableRoles = ref([])
+
+const formData = ref({
+  name: '',
+  email: '',
+  phones: '',
+  is_active: 'active',
+  roles: []
+})
+
+onMounted(async () => {
+  await Promise.all([loadUserData(), loadRoles()])
+})
+
+watch(() => props.userId, async () => {
+  await loadUserData()
+}, { immediate: false })
+
+const loadUserData = async () => {
+  loading.value = true
+  try {
+    const data = await fetchUser(props.userId)
+    userData.value = data.user
+
+    formData.value = {
+      name: data.user.name || '',
+      email: data.user.email || '',
+      phones: data.user.phones || '',
+      is_active: data.user.is_active || 'active',
+      roles: data.user.roles?.map(r => r.id) || []
+    }
+  } catch (error) {
+    console.error('Error loading user:', error)
+    errorMessage.value = 'Failed to load user details'
+  } finally {
+    loading.value = false
+  }
+}
+
+const loadRoles = async () => {
+  loadingRoles.value = true
+  try {
+    const data = await getRoles()
+    availableRoles.value = data.roles || []
+  } catch (error) {
+    console.error('Error loading roles:', error)
+  } finally {
+    loadingRoles.value = false
+  }
+}
+
+const handleSubmit = async () => {
+  isSubmitting.value = true
+  errorMessage.value = ''
+
+  try {
+    await updateUser(props.userId, formData.value)
+    emit('saved')
+  } catch (error) {
+    errorMessage.value = error.message || 'Failed to update user'
+  } finally {
+    isSubmitting.value = false
+  }
+}
+
+const getRoleBadgeClass = (roleName) => {
+  const classes = {
+    superadmin: 'role-superadmin',
+    admin: 'role-admin',
+    moderator: 'role-moderator',
+    manager: 'role-manager',
+    investor: 'role-investor',
+    user: 'role-user'
+  }
+  return classes[roleName] || 'role-default'
+}
+
+const getRoleIcon = (roleName) => {
+  const icons = {
+    superadmin: 'fas fa-crown',
+    admin: 'fas fa-user-shield',
+    moderator: 'fas fa-user-cog',
+    manager: 'fas fa-user-tie',
+    investor: 'fas fa-hand-holding-usd',
+    user: 'fas fa-user'
+  }
+  return icons[roleName] || 'fas fa-user-tag'
+}
+
+const formatDate = (dateString) => {
+  if (!dateString) return 'N/A'
+  const date = new Date(dateString)
+  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+}
+</script>
+
+<style scoped>
+.modal-lg {
+  max-width: 800px;
+}
+
+.loading-state,
+.loading-mini {
+  text-align: center;
+  padding: 2rem;
+  color: #666;
+}
+
+.spinner {
+  width: 50px;
+  height: 50px;
+  margin: 0 auto 1rem;
+  border: 4px solid #f3f4f6;
+  border-top: 4px solid #667eea;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.user-profile-header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  border-radius: 12px;
+  margin-bottom: 1.5rem;
+}
+
+.user-avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid white;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.user-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-info h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #333;
+}
+
+.user-info .username {
+  margin: 0.25rem 0 0.5rem;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+.user-badges {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.role-badge {
+  padding: 0.25rem 0.75rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.role-superadmin { background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%); color: white; }
+.role-admin { background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%); color: white; }
+.role-moderator { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; }
+.role-manager { background: linear-gradient(135deg, #a855f7 0%, #6366f1 100%); color: white; }
+.role-investor { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; }
+.role-user { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); color: white; }
+.role-default { background: #e9ecef; color: #333; }
+
+.form-section {
+  margin-bottom: 1.5rem;
+  padding: 1.25rem;
+  background: #f8f9fa;
+  border-radius: 12px;
+}
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #333;
+  margin: 0 0 1rem 0;
+}
+
+.section-title i {
+  color: #667eea;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.roles-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 0.75rem;
+}
+
+.role-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  background: white;
+  border: 1px solid #eee;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.role-checkbox:hover {
+  border-color: #667eea;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.15);
+}
+
+.role-checkbox.protected {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.role-checkbox input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  accent-color: #667eea;
+}
+
+.role-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 0.9rem;
+}
+
+.role-name {
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.info-section {
+  background: linear-gradient(135deg, #e8f4f8 0%, #e3f2fd 100%);
+}
+
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 1rem;
+}
+
+.stat-item {
+  text-align: center;
+  padding: 1rem;
+  background: white;
+  border-radius: 10px;
+}
+
+.stat-item i {
+  font-size: 1.25rem;
+  color: #667eea;
+  margin-bottom: 0.5rem;
+  display: block;
+}
+
+.stat-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #333;
+}
+
+.stat-label {
+  display: block;
+  font-size: 0.8rem;
+  color: #888;
+  margin-top: 0.25rem;
+}
+
+@media (max-width: 768px) {
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .roles-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-row {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+</style>
