@@ -95,10 +95,21 @@ class UserController extends Controller
         ]);
 
         // Attach roles if provided, otherwise attach default user role
+        $userType = get_class($user);
         if (!empty($validatedData['roles'])) {
-            $user->attachRoles($validatedData['roles']);
+            foreach ($validatedData['roles'] as $roleId) {
+                $user->roles()->attach($roleId, ['user_type' => $userType]);
+            }
         } else {
-            $user->attachRole('user');
+            $defaultRole = \App\Models\Role::where('name', 'user')->first();
+            if ($defaultRole) {
+                $user->roles()->attach($defaultRole->id, ['user_type' => $userType]);
+                $permSync = [];
+                foreach ($defaultRole->permissions->pluck('id')->toArray() as $pid) {
+                    $permSync[$pid] = ['user_type' => $userType];
+                }
+                $user->permissions()->sync($permSync);
+            }
         }
 
         // Handle profile image upload

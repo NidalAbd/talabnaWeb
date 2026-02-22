@@ -75,9 +75,17 @@ class RegisterController extends Controller
             'password' => Hash::make($data['password']),
         ]);
         $role = Role::where('name', 'user')->first();
-        $permissions = $role->permissions;
-        $user->attachRole($role);
-        $user->syncPermissions($permissions);
+        $userType = get_class($user);
+
+        // Attach role with user_type (required by Laratrust)
+        $user->roles()->attach($role->id, ['user_type' => $userType]);
+
+        // Sync permissions with user_type
+        $permSync = [];
+        foreach ($role->permissions->pluck('id')->toArray() as $pid) {
+            $permSync[$pid] = ['user_type' => $userType];
+        }
+        $user->permissions()->sync($permSync);
         $photo = new Photos([
             'src' => fake()->randomElement(['storage/photos/avatar1.png', 'storage/photos/avatar2.png', 'storage/photos/avatar3.png', 'storage/photos/avatar4.png', 'storage/photos/avatar5.png']),
         ]);
