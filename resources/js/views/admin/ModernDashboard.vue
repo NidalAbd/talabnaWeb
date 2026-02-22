@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <!-- Dashboard Header -->
+    <!-- Row 1: Dashboard Header -->
     <div class="dashboard-header">
       <div class="header-left">
         <h1 class="dashboard-title">Dashboard</h1>
@@ -25,248 +25,188 @@
     </div>
 
     <template v-else>
-      <!-- Growth Summary Section -->
-      <div class="section-row">
-        <div class="growth-card growth-users">
-          <div class="growth-content">
-            <div class="growth-icon">
-              <i class="fas fa-user-plus"></i>
+      <!-- Row 2: Key Metrics (4 stat cards with growth trends) -->
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-blue" style="cursor:pointer" @click="navigateTo('/users')">
+          <div class="stat-icon"><i class="fas fa-users"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(stats.totalUsers) }}</div>
+            <div class="stat-label-compact">Total Users</div>
+            <div
+              v-if="growthStats.users?.growth !== undefined"
+              class="stat-trend"
+              :class="growthStats.users.growth >= 0 ? 'trend-up' : 'trend-down'"
+            >
+              <i :class="growthStats.users.growth >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+              {{ Math.abs(growthStats.users.growth) }}%
             </div>
-            <div class="growth-info">
-              <span class="growth-value">{{ formatNumber(growthStats.users?.current || 0) }}</span>
-              <span class="growth-label">New Users This Month</span>
-            </div>
-            <div class="growth-trend" :class="(growthStats.users?.growth || 0) >= 0 ? 'trend-up' : 'trend-down'">
-              <i :class="(growthStats.users?.growth || 0) >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
-              {{ Math.abs(growthStats.users?.growth || 0) }}%
-            </div>
-          </div>
-          <div class="growth-comparison">
-            vs {{ formatNumber(growthStats.users?.previous || 0) }} last month
-          </div>
-          <div class="growth-bar">
-            <div class="growth-bar-fill" :style="{ width: calculateGrowthWidth(growthStats.users) + '%' }"></div>
           </div>
         </div>
 
-        <div class="growth-card growth-posts">
-          <div class="growth-content">
-            <div class="growth-icon">
-              <i class="fas fa-file-alt"></i>
+        <div class="stat-card-compact stat-purple" style="cursor:pointer" @click="navigateTo('/service_posts')">
+          <div class="stat-icon"><i class="fas fa-clipboard-list"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(stats.totalPosts) }}</div>
+            <div class="stat-label-compact">Total Posts</div>
+            <div
+              v-if="growthStats.posts?.growth !== undefined"
+              class="stat-trend"
+              :class="growthStats.posts.growth >= 0 ? 'trend-up' : 'trend-down'"
+            >
+              <i :class="growthStats.posts.growth >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
+              {{ Math.abs(growthStats.posts.growth) }}%
             </div>
-            <div class="growth-info">
-              <span class="growth-value">{{ formatNumber(growthStats.posts?.current || 0) }}</span>
-              <span class="growth-label">New Posts This Month</span>
-            </div>
-            <div class="growth-trend" :class="(growthStats.posts?.growth || 0) >= 0 ? 'trend-up' : 'trend-down'">
-              <i :class="(growthStats.posts?.growth || 0) >= 0 ? 'fas fa-arrow-up' : 'fas fa-arrow-down'"></i>
-              {{ Math.abs(growthStats.posts?.growth || 0) }}%
-            </div>
-          </div>
-          <div class="growth-comparison">
-            vs {{ formatNumber(growthStats.posts?.previous || 0) }} last month
-          </div>
-          <div class="growth-bar">
-            <div class="growth-bar-fill" :style="{ width: calculateGrowthWidth(growthStats.posts) + '%' }"></div>
           </div>
         </div>
-      </div>
 
-      <!-- Main Stats Grid -->
-      <div class="stats-section">
-        <h3 class="section-title"><i class="fas fa-chart-bar"></i> Overview Statistics</h3>
-        <div class="stats-grid-modern">
-          <div class="stat-card-modern stat-blue" @click="navigateTo('/users')">
-            <div class="stat-icon-modern"><i class="fas fa-users"></i></div>
-            <div class="stat-info-modern">
-              <span class="stat-value-modern">{{ formatNumber(stats.totalUsers) }}</span>
-              <span class="stat-label-modern">Total Users</span>
-            </div>
-            <div class="stat-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="stat-card-compact stat-cyan">
+          <div class="stat-icon"><i class="fas fa-coins"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(stats.totalPoints) }}</div>
+            <div class="stat-label-compact">Points Volume</div>
           </div>
+        </div>
 
-          <div class="stat-card-modern stat-green" @click="navigateTo('/users?status=active')">
-            <div class="stat-icon-modern"><i class="fas fa-user-check"></i></div>
-            <div class="stat-info-modern">
-              <span class="stat-value-modern">{{ formatNumber(stats.activeUsers) }}</span>
-              <span class="stat-label-modern">Active Users</span>
-            </div>
-            <div class="stat-arrow"><i class="fas fa-chevron-right"></i></div>
-          </div>
-
-          <div class="stat-card-modern stat-orange" @click="navigateTo('/users?status=banned')">
-            <div class="stat-icon-modern"><i class="fas fa-user-slash"></i></div>
-            <div class="stat-info-modern">
-              <span class="stat-value-modern">{{ formatNumber(stats.bannedUsers) }}</span>
-              <span class="stat-label-modern">Banned Users</span>
-            </div>
-            <div class="stat-arrow"><i class="fas fa-chevron-right"></i></div>
-          </div>
-
-          <div class="stat-card-modern stat-red" @click="navigateTo('/reports')">
-            <div class="stat-icon-modern"><i class="fas fa-flag"></i></div>
-            <div class="stat-info-modern">
-              <span class="stat-value-modern">{{ formatNumber(stats.totalReports) }}</span>
-              <span class="stat-label-modern">Total Reports</span>
-            </div>
-            <div class="stat-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="stat-card-compact stat-red" style="cursor:pointer" @click="navigateTo('/reports')">
+          <div class="stat-icon"><i class="fas fa-flag"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(stats.totalReports) }}</div>
+            <div class="stat-label-compact">Active Reports</div>
           </div>
         </div>
       </div>
 
-      <!-- Posts Stats -->
-      <div class="stats-section">
-        <h3 class="section-title"><i class="fas fa-clipboard-list"></i> Service Posts</h3>
-        <div class="stats-grid-modern">
-          <div class="stat-card-modern stat-purple" @click="navigateTo('/service_posts')">
-            <div class="stat-icon-modern"><i class="fas fa-clipboard-list"></i></div>
-            <div class="stat-info-modern">
-              <span class="stat-value-modern">{{ formatNumber(stats.totalPosts) }}</span>
-              <span class="stat-label-modern">Total Posts</span>
-            </div>
-            <div class="stat-arrow"><i class="fas fa-chevron-right"></i></div>
+      <!-- Row 3: Secondary Metrics (4 stat cards) -->
+      <div class="stats-grid">
+        <div class="stat-card-compact stat-green" style="cursor:pointer" @click="navigateTo('/service_posts?status=published')">
+          <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(stats.publishedPosts) }}</div>
+            <div class="stat-label-compact">Published Posts</div>
           </div>
+        </div>
 
-          <div class="stat-card-modern stat-green" @click="navigateTo('/service_posts?status=published')">
-            <div class="stat-icon-modern"><i class="fas fa-check-circle"></i></div>
-            <div class="stat-info-modern">
-              <span class="stat-value-modern">{{ formatNumber(stats.publishedPosts) }}</span>
-              <span class="stat-label-modern">Published</span>
-            </div>
-            <div class="stat-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="stat-card-compact stat-yellow" style="cursor:pointer" @click="navigateTo('/service_posts?status=pending')">
+          <div class="stat-icon"><i class="fas fa-clock"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(stats.notPublishedPosts) }}</div>
+            <div class="stat-label-compact">Pending Posts</div>
           </div>
+        </div>
 
-          <div class="stat-card-modern stat-yellow" @click="navigateTo('/service_posts?status=pending')">
-            <div class="stat-icon-modern"><i class="fas fa-clock"></i></div>
-            <div class="stat-info-modern">
-              <span class="stat-value-modern">{{ formatNumber(stats.notPublishedPosts) }}</span>
-              <span class="stat-label-modern">Pending</span>
-            </div>
-            <div class="stat-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="stat-card-compact stat-orange">
+          <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ formatNumber(stats.pointsUsed) }}</div>
+            <div class="stat-label-compact">Points Used</div>
           </div>
+        </div>
 
-          <div class="stat-card-modern stat-red" @click="navigateTo('/service_posts?status=rejected')">
-            <div class="stat-icon-modern"><i class="fas fa-times-circle"></i></div>
-            <div class="stat-info-modern">
-              <span class="stat-value-modern">{{ formatNumber(stats.rejectedPosts) }}</span>
-              <span class="stat-label-modern">Rejected</span>
-            </div>
-            <div class="stat-arrow"><i class="fas fa-chevron-right"></i></div>
+        <div class="stat-card-compact stat-red">
+          <div class="stat-icon"><i class="fas fa-hourglass-half"></i></div>
+          <div class="stat-info">
+            <div class="stat-value-compact">{{ stats.pendingPurchaseRequests }}</div>
+            <div class="stat-label-compact">Pending Purchases</div>
           </div>
         </div>
       </div>
 
-      <!-- Points & System Health Row -->
-      <div class="two-column-section">
-        <!-- Points Stats -->
-        <div class="column-card">
-          <h3 class="card-title"><i class="fas fa-coins"></i> Points System</h3>
-          <div class="points-stats">
-            <div class="point-item">
-              <div class="point-icon bg-blue"><i class="fas fa-gem"></i></div>
-              <div class="point-info">
-                <span class="point-value">{{ formatNumber(stats.totalPoints) }}</span>
-                <span class="point-label">Total Points</span>
-              </div>
-            </div>
-            <div class="point-item">
-              <div class="point-icon bg-orange"><i class="fas fa-shopping-cart"></i></div>
-              <div class="point-info">
-                <span class="point-value">{{ formatNumber(stats.pointsUsed) }}</span>
-                <span class="point-label">Points Used</span>
-              </div>
-            </div>
-            <div class="point-item">
-              <div class="point-icon bg-red"><i class="fas fa-hourglass-half"></i></div>
-              <div class="point-info">
-                <span class="point-value">{{ stats.pendingPurchaseRequests }}</span>
-                <span class="point-label">Pending Requests</span>
-              </div>
-            </div>
+      <!-- Row 4: Growth Charts (2-column) -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <h4 class="chart-title"><i class="fas fa-user-plus"></i> User Registrations (12 Months)</h4>
+          <div class="chart-body" style="height: 280px;">
+            <LineChart :data="usersChartData" :height="280" />
           </div>
         </div>
-
-        <!-- System Health -->
-        <div class="column-card">
-          <h3 class="card-title"><i class="fas fa-heartbeat"></i> System Health</h3>
-          <div class="health-metrics">
-            <div class="health-item">
-              <div class="health-header">
-                <span>User Engagement</span>
-                <span class="health-value">{{ userEngagementPercent }}%</span>
-              </div>
-              <div class="health-bar">
-                <div class="health-bar-fill bg-green" :style="{ width: userEngagementPercent + '%' }"></div>
-              </div>
-            </div>
-            <div class="health-item">
-              <div class="health-header">
-                <span>Post Approval Rate</span>
-                <span class="health-value">{{ postApprovalRate }}%</span>
-              </div>
-              <div class="health-bar">
-                <div class="health-bar-fill bg-blue" :style="{ width: postApprovalRate + '%' }"></div>
-              </div>
-            </div>
-            <div class="health-item">
-              <div class="health-header">
-                <span>Points Utilization</span>
-                <span class="health-value">{{ pointsUtilization }}%</span>
-              </div>
-              <div class="health-bar">
-                <div class="health-bar-fill bg-orange" :style="{ width: pointsUtilization + '%' }"></div>
-              </div>
-            </div>
-          </div>
-          <div class="system-status">
-            <span class="status-badge status-online"><i class="fas fa-circle"></i> System Online</span>
-            <span class="status-info">{{ formatNumber(stats.totalPosts + stats.totalUsers) }} Total Records</span>
+        <div class="chart-card">
+          <h4 class="chart-title"><i class="fas fa-file-alt"></i> Posts Created (12 Months)</h4>
+          <div class="chart-body" style="height: 280px;">
+            <LineChart :data="postsChartData" :height="280" />
           </div>
         </div>
       </div>
 
-      <!-- Activity & Top Users Row -->
-      <div class="two-column-section">
-        <!-- Recent Activity Timeline -->
-        <div class="column-card">
-          <h3 class="card-title"><i class="fas fa-stream"></i> Recent Activity</h3>
-          <div class="activity-list">
-            <div v-for="activity in recentActivity" :key="activity.id" class="activity-item">
-              <div class="activity-dot" :class="`dot-${activity.color}`"></div>
-              <div class="activity-content">
-                <div class="activity-title">{{ activity.title }}</div>
-                <div class="activity-desc">{{ activity.description }}</div>
-              </div>
-              <div class="activity-time">{{ activity.time }}</div>
-            </div>
-            <div v-if="recentActivity.length === 0" class="empty-state">
-              <i class="fas fa-inbox"></i>
-              <p>No recent activity</p>
-            </div>
+      <!-- Row 5: Distribution Charts (2-column) -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <h4 class="chart-title"><i class="fas fa-chart-pie"></i> Posts by State</h4>
+          <div class="chart-body">
+            <PieChart :data="postStateChartData" :height="250" />
           </div>
         </div>
+        <div class="chart-card">
+          <h4 class="chart-title"><i class="fas fa-tags"></i> Posts by Category (Top 10)</h4>
+          <div class="chart-body" style="height: 280px;">
+            <BarChart :data="categoryChartData" :height="280" />
+          </div>
+        </div>
+      </div>
 
-        <!-- Top Users -->
-        <div class="column-card">
-          <h3 class="card-title"><i class="fas fa-trophy"></i> Top Users by Posts</h3>
-          <div class="top-users-list">
-            <div v-for="(user, index) in topUsers" :key="user.id" class="top-user-item">
-              <div class="user-rank" :class="`rank-${index + 1}`">{{ index + 1 }}</div>
-              <div class="user-info">
-                <div class="user-name">{{ user.user_name }}</div>
-                <div class="user-email">{{ user.email }}</div>
+      <!-- Row 6: Points & Content Charts (2-column) -->
+      <div class="charts-row">
+        <div class="chart-card">
+          <h4 class="chart-title"><i class="fas fa-exchange-alt"></i> Point Transactions (12 Months)</h4>
+          <div class="chart-body" style="height: 280px;">
+            <MixedChart :data="pointsChartData" :height="280" />
+          </div>
+        </div>
+        <div class="chart-card">
+          <h4 class="chart-title"><i class="fas fa-chart-pie"></i> Content Distribution</h4>
+          <div class="chart-body">
+            <div class="dual-pie-container">
+              <div class="mini-pie-section">
+                <div class="mini-pie-label">Post Types</div>
+                <PieChart :data="postTypeChartData" :height="180" />
               </div>
-              <div class="user-posts">{{ user.posts_count }} posts</div>
-            </div>
-            <div v-if="topUsers.length === 0" class="empty-state">
-              <i class="fas fa-users"></i>
-              <p>No users data</p>
+              <div class="mini-pie-section">
+                <div class="mini-pie-label">Badge Distribution</div>
+                <PieChart :data="badgeChartData" :height="180" />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Recent Tables Row -->
+      <!-- Row 7: System Health (full-width card) -->
+      <div class="column-card" style="margin-bottom: 1.5rem;">
+        <h3 class="card-title"><i class="fas fa-heartbeat"></i> System Health</h3>
+        <div class="health-metrics-row">
+          <div class="health-item">
+            <div class="health-header">
+              <span>User Engagement</span>
+              <span class="health-value">{{ userEngagementPercent }}%</span>
+            </div>
+            <div class="health-bar">
+              <div class="health-bar-fill bg-green" :style="{ width: userEngagementPercent + '%' }"></div>
+            </div>
+          </div>
+          <div class="health-item">
+            <div class="health-header">
+              <span>Post Approval Rate</span>
+              <span class="health-value">{{ postApprovalRate }}%</span>
+            </div>
+            <div class="health-bar">
+              <div class="health-bar-fill bg-blue" :style="{ width: postApprovalRate + '%' }"></div>
+            </div>
+          </div>
+          <div class="health-item">
+            <div class="health-header">
+              <span>Points Utilization</span>
+              <span class="health-value">{{ pointsUtilization }}%</span>
+            </div>
+            <div class="health-bar">
+              <div class="health-bar-fill bg-orange" :style="{ width: pointsUtilization + '%' }"></div>
+            </div>
+          </div>
+        </div>
+        <div class="system-status">
+          <span class="status-badge status-online"><i class="fas fa-circle"></i> System Online</span>
+          <span class="status-info">{{ formatNumber(stats.totalPosts + stats.totalUsers) }} Total Records</span>
+        </div>
+      </div>
+
+      <!-- Row 8: Recent Tables (2-column) -->
       <div class="two-column-section">
         <!-- Recent Posts Table -->
         <div class="column-card">
@@ -338,6 +278,47 @@
           </div>
         </div>
       </div>
+
+      <!-- Row 9: Activity & Top Users (2-column) -->
+      <div class="two-column-section">
+        <!-- Recent Activity Timeline -->
+        <div class="column-card">
+          <h3 class="card-title"><i class="fas fa-stream"></i> Recent Activity</h3>
+          <div class="activity-list">
+            <div v-for="activity in recentActivity" :key="activity.id" class="activity-item">
+              <div class="activity-dot" :class="`dot-${activity.color}`"></div>
+              <div class="activity-content">
+                <div class="activity-title">{{ activity.title }}</div>
+                <div class="activity-desc">{{ activity.description }}</div>
+              </div>
+              <div class="activity-time">{{ activity.time }}</div>
+            </div>
+            <div v-if="recentActivity.length === 0" class="empty-state">
+              <i class="fas fa-inbox"></i>
+              <p>No recent activity</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Users -->
+        <div class="column-card">
+          <h3 class="card-title"><i class="fas fa-trophy"></i> Top Users by Posts</h3>
+          <div class="top-users-list">
+            <div v-for="(user, index) in topUsers" :key="user.id" class="top-user-item">
+              <div class="user-rank" :class="`rank-${index + 1}`">{{ index + 1 }}</div>
+              <div class="user-info">
+                <div class="user-name">{{ user.user_name }}</div>
+                <div class="user-email">{{ user.email }}</div>
+              </div>
+              <div class="user-posts">{{ user.posts_count }} posts</div>
+            </div>
+            <div v-if="topUsers.length === 0" class="empty-state">
+              <i class="fas fa-users"></i>
+              <p>No users data</p>
+            </div>
+          </div>
+        </div>
+      </div>
     </template>
   </div>
 </template>
@@ -345,6 +326,10 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import LineChart from '../../components/admin/charts/LineChart.vue'
+import PieChart from '../../components/admin/charts/PieChart.vue'
+import BarChart from '../../components/admin/charts/BarChart.vue'
+import MixedChart from '../../components/admin/charts/MixedChart.vue'
 
 const router = useRouter()
 const loading = ref(true)
@@ -372,6 +357,18 @@ const growthStats = ref({
   posts: { current: 0, previous: 0, growth: 0 }
 })
 
+// Chart data refs
+const postsByMonth = ref({ labels: [], data: [] })
+const usersByMonth = ref({ labels: [], data: [] })
+const postsByCategory = ref({ labels: [], data: [] })
+const pointTransactions = ref({ labels: [], counts: [], points: [] })
+const postsByState = ref({ labels: [], data: [], backgroundColor: [] })
+const normalPosts = ref(0)
+const goldenPosts = ref(0)
+const diamondPosts = ref(0)
+const offerPosts = ref(0)
+const requestPosts = ref(0)
+
 const currentDate = computed(() => {
   return new Date().toLocaleDateString('en-US', {
     weekday: 'long',
@@ -396,6 +393,90 @@ const pointsUtilization = computed(() => {
   if (!stats.value.totalPoints) return 0
   return Math.min(Math.round((stats.value.pointsUsed / stats.value.totalPoints) * 100), 100)
 })
+
+// Chart.js computed properties
+const usersChartData = computed(() => ({
+  labels: usersByMonth.value.labels,
+  datasets: [{
+    label: 'User Registrations',
+    data: usersByMonth.value.data,
+    borderColor: '#3b82f6',
+    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    fill: true,
+    tension: 0.4
+  }]
+}))
+
+const postsChartData = computed(() => ({
+  labels: postsByMonth.value.labels,
+  datasets: [{
+    label: 'Posts Created',
+    data: postsByMonth.value.data,
+    borderColor: '#8b5cf6',
+    backgroundColor: 'rgba(139, 92, 246, 0.1)',
+    fill: true,
+    tension: 0.4
+  }]
+}))
+
+const postStateChartData = computed(() => ({
+  labels: postsByState.value.labels,
+  datasets: [{
+    data: postsByState.value.data,
+    backgroundColor: postsByState.value.backgroundColor
+  }]
+}))
+
+const categoryChartData = computed(() => ({
+  labels: postsByCategory.value.labels,
+  datasets: [{
+    label: 'Posts',
+    data: postsByCategory.value.data,
+    backgroundColor: [
+      '#3b82f6', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b',
+      '#ef4444', '#ec4899', '#6366f1', '#14b8a6', '#f97316'
+    ]
+  }]
+}))
+
+const pointsChartData = computed(() => ({
+  labels: pointTransactions.value.labels,
+  datasets: [
+    {
+      type: 'bar',
+      label: 'Transaction Count',
+      data: pointTransactions.value.counts,
+      backgroundColor: 'rgba(59, 130, 246, 0.6)',
+      yAxisID: 'y'
+    },
+    {
+      type: 'line',
+      label: 'Points Volume',
+      data: pointTransactions.value.points,
+      borderColor: '#f59e0b',
+      backgroundColor: 'rgba(245, 158, 11, 0.1)',
+      fill: true,
+      tension: 0.4,
+      yAxisID: 'y1'
+    }
+  ]
+}))
+
+const postTypeChartData = computed(() => ({
+  labels: ['Offers', 'Requests'],
+  datasets: [{
+    data: [offerPosts.value, requestPosts.value],
+    backgroundColor: ['#3b82f6', '#f59e0b']
+  }]
+}))
+
+const badgeChartData = computed(() => ({
+  labels: ['Normal', 'Golden', 'Diamond'],
+  datasets: [{
+    data: [normalPosts.value, goldenPosts.value, diamondPosts.value],
+    backgroundColor: ['#6b7280', '#f59e0b', '#06b6d4']
+  }]
+}))
 
 // Recent Activity
 const recentActivity = computed(() => {
@@ -456,6 +537,20 @@ const loadAllStats = async () => {
       users: { current: 0, previous: 0, growth: 0 },
       posts: { current: 0, previous: 0, growth: 0 }
     }
+
+    // Chart data
+    postsByMonth.value = data.postsByMonth || { labels: [], data: [] }
+    usersByMonth.value = data.usersByMonth || { labels: [], data: [] }
+    postsByCategory.value = data.postsByCategory || { labels: [], data: [] }
+    pointTransactions.value = data.pointTransactions || { labels: [], counts: [], points: [] }
+    postsByState.value = data.postsByState || { labels: [], data: [], backgroundColor: [] }
+
+    // Badge & type counts
+    normalPosts.value = data.normalPosts || 0
+    goldenPosts.value = data.goldenPosts || 0
+    diamondPosts.value = data.diamondPosts || 0
+    offerPosts.value = data.offerPosts || 0
+    requestPosts.value = data.requestPosts || 0
   } catch (error) {
     console.error('Error loading dashboard stats:', error)
   } finally {
@@ -503,12 +598,6 @@ const getStatusClass = (status) => {
     'archive': 'gray'
   }
   return map[status] || 'gray'
-}
-
-const calculateGrowthWidth = (data) => {
-  if (!data || !data.previous) return 50
-  const ratio = data.current / Math.max(data.previous, 1)
-  return Math.min(Math.max(ratio * 50, 10), 100)
 }
 </script>
 
@@ -605,201 +694,47 @@ const calculateGrowthWidth = (data) => {
   to { transform: rotate(360deg); }
 }
 
-/* Section Row */
-.section-row {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 1.5rem;
+/* Stats grid spacing */
+.stats-grid {
+  margin-bottom: 1.25rem;
 }
 
-/* Growth Cards */
-.growth-card {
-  background: white;
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-
-.growth-card.growth-users {
-  border-left: 4px solid #10b981;
-}
-
-.growth-card.growth-posts {
-  border-left: 4px solid #6366f1;
-}
-
-.growth-content {
+/* Dual Pie Container */
+.dual-pie-container {
   display: flex;
-  align-items: center;
   gap: 1rem;
-  margin-bottom: 0.75rem;
-}
-
-.growth-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  align-items: flex-start;
 }
 
-.growth-users .growth-icon {
-  background: #d1fae5;
-  color: #10b981;
-}
-
-.growth-posts .growth-icon {
-  background: #e0e7ff;
-  color: #6366f1;
-}
-
-.growth-info {
+.mini-pie-section {
   flex: 1;
-}
-
-.growth-value {
-  display: block;
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.growth-label {
-  display: block;
-  font-size: 0.875rem;
-  color: #64748b;
-}
-
-.growth-trend {
-  padding: 0.375rem 0.75rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
-  font-weight: 600;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.25rem;
 }
 
-.growth-trend.trend-up {
-  background: #d1fae5;
-  color: #059669;
-}
-
-.growth-trend.trend-down {
-  background: #fee2e2;
-  color: #dc2626;
-}
-
-.growth-comparison {
+.mini-pie-label {
   font-size: 0.8rem;
-  color: #94a3b8;
-  margin-bottom: 0.75rem;
-}
-
-.growth-bar {
-  height: 6px;
-  background: #e2e8f0;
-  border-radius: 3px;
-  overflow: hidden;
-}
-
-.growth-bar-fill {
-  height: 100%;
-  border-radius: 3px;
-  transition: width 0.5s ease;
-}
-
-.growth-users .growth-bar-fill {
-  background: linear-gradient(90deg, #10b981, #34d399);
-}
-
-.growth-posts .growth-bar-fill {
-  background: linear-gradient(90deg, #6366f1, #818cf8);
-}
-
-/* Stats Section */
-.stats-section {
-  margin-bottom: 1.5rem;
-}
-
-.section-title {
-  font-size: 1rem;
   font-weight: 600;
   color: #475569;
-  margin: 0 0 1rem 0;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.5rem;
 }
 
-.stats-grid-modern {
+/* Health Metrics Row - 3 column grid */
+.health-metrics-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1rem;
 }
 
-.stat-card-modern {
-  background: white;
-  border-radius: 12px;
-  padding: 1.25rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  cursor: pointer;
-  transition: all 0.2s;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-}
-
-.stat-card-modern:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-}
-
-.stat-icon-modern {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-}
-
-.stat-blue .stat-icon-modern { background: #dbeafe; color: #2563eb; }
-.stat-green .stat-icon-modern { background: #d1fae5; color: #059669; }
-.stat-orange .stat-icon-modern { background: #ffedd5; color: #ea580c; }
-.stat-red .stat-icon-modern { background: #fee2e2; color: #dc2626; }
-.stat-purple .stat-icon-modern { background: #ede9fe; color: #7c3aed; }
-.stat-yellow .stat-icon-modern { background: #fef3c7; color: #d97706; }
-
-.stat-info-modern {
-  flex: 1;
-}
-
-.stat-value-modern {
-  display: block;
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.stat-label-modern {
-  display: block;
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
-.stat-arrow {
-  color: #cbd5e1;
-  transition: all 0.2s;
-}
-
-.stat-card-modern:hover .stat-arrow {
+/* Chart title icon spacing */
+.chart-title i {
+  margin-right: 0.5rem;
   color: #667eea;
-  transform: translateX(3px);
 }
 
 /* Two Column Section */
@@ -852,61 +787,7 @@ const calculateGrowthWidth = (data) => {
   text-decoration: underline;
 }
 
-/* Points Stats */
-.points-stats {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-}
-
-.point-item {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  padding: 0.75rem;
-  background: #f8fafc;
-  border-radius: 10px;
-}
-
-.point-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-}
-
-.point-icon.bg-blue { background: linear-gradient(135deg, #3b82f6, #2563eb); }
-.point-icon.bg-orange { background: linear-gradient(135deg, #f97316, #ea580c); }
-.point-icon.bg-red { background: linear-gradient(135deg, #ef4444, #dc2626); }
-
-.point-info {
-  flex: 1;
-}
-
-.point-value {
-  display: block;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.point-label {
-  display: block;
-  font-size: 0.8rem;
-  color: #64748b;
-}
-
 /* Health Metrics */
-.health-metrics {
-  display: flex;
-  flex-direction: column;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
 .health-item {
   padding: 0.5rem 0;
 }
@@ -1171,7 +1052,7 @@ const calculateGrowthWidth = (data) => {
 
 /* Responsive */
 @media (max-width: 1200px) {
-  .stats-grid-modern {
+  .health-metrics-row {
     grid-template-columns: repeat(2, 1fr);
   }
 }
@@ -1188,19 +1069,21 @@ const calculateGrowthWidth = (data) => {
     justify-content: space-between;
   }
 
-  .section-row,
   .two-column-section {
     grid-template-columns: 1fr;
   }
 
-  .stats-grid-modern {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 480px) {
-  .stats-grid-modern {
+  .health-metrics-row {
     grid-template-columns: 1fr;
+  }
+
+  .dual-pie-container {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .mini-pie-section {
+    width: 100%;
   }
 }
 </style>
