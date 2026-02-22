@@ -111,6 +111,116 @@
         </div>
       </div>
 
+      <!-- Reported Items - Quick Actions (sorted by report count desc) -->
+      <div class="column-card" style="margin-bottom: 1.5rem;" v-if="reportedItems.length > 0">
+        <div class="card-header-row">
+          <h3 class="card-title"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Reported Items — Quick Actions</h3>
+          <router-link to="/reports" class="view-all-link">All Reports <i class="fas fa-arrow-right"></i></router-link>
+        </div>
+        <div class="modern-table-container">
+          <table class="modern-table">
+            <thead>
+              <tr>
+                <th>Type</th>
+                <th>Item</th>
+                <th>Status</th>
+                <th>Reports</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="item in reportedItems" :key="`${item.reportable_type}-${item.reportable_id}`">
+                <td>
+                  <span class="type-badge" :class="item.reportable_type === 'post' ? 'type-post' : 'type-user'">
+                    <i :class="item.reportable_type === 'post' ? 'fas fa-file-alt' : 'fas fa-user'"></i>
+                    {{ item.reportable_type }}
+                  </span>
+                </td>
+                <td class="cell-truncate">{{ item.reportable?.title || 'Deleted' }}</td>
+                <td>
+                  <span class="status-pill" :class="`status-${getReportableStatusClass(item)}`">
+                    {{ item.reportable?.status || 'N/A' }}
+                  </span>
+                </td>
+                <td>
+                  <span class="report-count-badge">{{ item.total_reports }}</span>
+                </td>
+                <td class="actions-cell">
+                  <div class="quick-actions" v-if="item.reportable">
+                    <!-- Post actions -->
+                    <template v-if="item.reportable_type === 'post'">
+                      <button
+                        class="action-btn-sm action-archive"
+                        @click="handleReport(item, 'suspend')"
+                        :disabled="actionLoading[`${item.reportable_type}-${item.reportable_id}`]"
+                        title="Archive post"
+                      >
+                        <i class="fas fa-archive"></i> Archive
+                      </button>
+                      <button
+                        class="action-btn-sm action-unpublish"
+                        @click="handleReport(item, 'warning')"
+                        :disabled="actionLoading[`${item.reportable_type}-${item.reportable_id}`]"
+                        title="Unpublish post"
+                      >
+                        <i class="fas fa-eye-slash"></i> Unpublish
+                      </button>
+                      <button
+                        class="action-btn-sm action-delete"
+                        @click="handleReport(item, 'delete')"
+                        :disabled="actionLoading[`${item.reportable_type}-${item.reportable_id}`]"
+                        title="Delete post"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </template>
+                    <!-- User actions -->
+                    <template v-else>
+                      <button
+                        class="action-btn-sm action-ban"
+                        @click="handleReport(item, 'suspend')"
+                        :disabled="actionLoading[`${item.reportable_type}-${item.reportable_id}`]"
+                        title="Ban user"
+                        v-if="item.reportable.status !== 'banned'"
+                      >
+                        <i class="fas fa-ban"></i> Ban
+                      </button>
+                      <button
+                        class="action-btn-sm action-unban"
+                        @click="toggleUserBan(item)"
+                        :disabled="actionLoading[`${item.reportable_type}-${item.reportable_id}`]"
+                        title="Unban user"
+                        v-else
+                      >
+                        <i class="fas fa-check-circle"></i> Unban
+                      </button>
+                      <button
+                        class="action-btn-sm action-warn"
+                        @click="handleReport(item, 'warning')"
+                        :disabled="actionLoading[`${item.reportable_type}-${item.reportable_id}`]"
+                        title="Issue warning"
+                      >
+                        <i class="fas fa-exclamation-circle"></i> Warn
+                      </button>
+                    </template>
+                    <!-- Dismiss report for both types -->
+                    <button
+                      class="action-btn-sm action-dismiss"
+                      @click="dismissReports(item)"
+                      :disabled="actionLoading[`${item.reportable_type}-${item.reportable_id}`]"
+                      title="Dismiss reports"
+                    >
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                  <span v-else class="text-muted">Item deleted</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- Row 4: Growth Charts (2-column) -->
       <div class="charts-row">
         <div class="chart-card">
@@ -206,9 +316,9 @@
         </div>
       </div>
 
-      <!-- Row 8: Recent Tables (2-column) -->
+      <!-- Row 8: Recent Tables with Quick Actions (2-column) -->
       <div class="two-column-section">
-        <!-- Recent Posts Table -->
+        <!-- Recent Posts Table with Quick Actions -->
         <div class="column-card">
           <div class="card-header-row">
             <h3 class="card-title"><i class="fas fa-file-alt"></i> Latest Posts</h3>
@@ -221,7 +331,7 @@
                   <th>Title</th>
                   <th>User</th>
                   <th>Status</th>
-                  <th>Date</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -233,7 +343,45 @@
                       {{ post.state }}
                     </span>
                   </td>
-                  <td class="cell-date">{{ formatShortDate(post.created_at) }}</td>
+                  <td class="actions-cell">
+                    <div class="quick-actions">
+                      <button
+                        v-if="post.state !== 'published'"
+                        class="action-btn-sm action-publish"
+                        @click="changePostState(post, 'published')"
+                        :disabled="actionLoading[`post-${post.id}`]"
+                        title="Publish"
+                      >
+                        <i class="fas fa-check"></i>
+                      </button>
+                      <button
+                        v-if="post.state === 'published'"
+                        class="action-btn-sm action-unpublish"
+                        @click="changePostState(post, 'not published')"
+                        :disabled="actionLoading[`post-${post.id}`]"
+                        title="Unpublish"
+                      >
+                        <i class="fas fa-eye-slash"></i>
+                      </button>
+                      <button
+                        v-if="post.state !== 'archive'"
+                        class="action-btn-sm action-archive"
+                        @click="changePostState(post, 'archive')"
+                        :disabled="actionLoading[`post-${post.id}`]"
+                        title="Archive"
+                      >
+                        <i class="fas fa-archive"></i>
+                      </button>
+                      <button
+                        class="action-btn-sm action-delete"
+                        @click="deletePost(post)"
+                        :disabled="actionLoading[`post-${post.id}`]"
+                        title="Delete"
+                      >
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
                 <tr v-if="recentPosts.length === 0">
                   <td colspan="4" class="empty-cell">No posts found</td>
@@ -243,7 +391,7 @@
           </div>
         </div>
 
-        <!-- Recent Users Table -->
+        <!-- Recent Users Table with Quick Actions -->
         <div class="column-card">
           <div class="card-header-row">
             <h3 class="card-title"><i class="fas fa-user-friends"></i> Recent Users</h3>
@@ -256,7 +404,7 @@
                   <th>Username</th>
                   <th>Email</th>
                   <th>Status</th>
-                  <th>Date</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -268,7 +416,28 @@
                       {{ user.is_active }}
                     </span>
                   </td>
-                  <td class="cell-date">{{ formatShortDate(user.created_at) }}</td>
+                  <td class="actions-cell">
+                    <div class="quick-actions">
+                      <button
+                        v-if="user.is_active !== 'banned'"
+                        class="action-btn-sm action-ban"
+                        @click="toggleBan(user)"
+                        :disabled="actionLoading[`user-${user.id}`]"
+                        title="Ban user"
+                      >
+                        <i class="fas fa-ban"></i>
+                      </button>
+                      <button
+                        v-else
+                        class="action-btn-sm action-unban"
+                        @click="toggleBan(user)"
+                        :disabled="actionLoading[`user-${user.id}`]"
+                        title="Unban user"
+                      >
+                        <i class="fas fa-check-circle"></i>
+                      </button>
+                    </div>
+                  </td>
                 </tr>
                 <tr v-if="recentUsers.length === 0">
                   <td colspan="4" class="empty-cell">No users found</td>
@@ -320,11 +489,19 @@
         </div>
       </div>
     </template>
+
+    <!-- Toast Notification -->
+    <transition name="toast">
+      <div v-if="toast.show" class="toast-notification" :class="`toast-${toast.type}`">
+        <i :class="toast.type === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+        {{ toast.message }}
+      </div>
+    </transition>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import LineChart from '../../components/admin/charts/LineChart.vue'
 import PieChart from '../../components/admin/charts/PieChart.vue'
@@ -333,6 +510,15 @@ import MixedChart from '../../components/admin/charts/MixedChart.vue'
 
 const router = useRouter()
 const loading = ref(true)
+const actionLoading = reactive({})
+
+const toast = reactive({ show: false, message: '', type: 'success' })
+const showToast = (message, type = 'success') => {
+  toast.show = true
+  toast.message = message
+  toast.type = type
+  setTimeout(() => { toast.show = false }, 3000)
+}
 
 const stats = ref({
   totalUsers: 0,
@@ -352,6 +538,7 @@ const recentPosts = ref([])
 const recentUsers = ref([])
 const topUsers = ref([])
 const recentReports = ref([])
+const reportedItems = ref([])
 const growthStats = ref({
   users: { current: 0, previous: 0, growth: 0 },
   posts: { current: 0, previous: 0, growth: 0 }
@@ -525,8 +712,12 @@ onMounted(async () => {
 const loadAllStats = async () => {
   loading.value = true
   try {
-    const response = await fetch('/api/admin/dashboard')
-    const data = await response.json()
+    const [dashRes, reportsRes] = await Promise.all([
+      fetch('/api/admin/dashboard'),
+      fetch('/api/admin/reports?sort_by=total&sort_direction=desc&per_page=10')
+    ])
+
+    const data = await dashRes.json()
 
     Object.assign(stats.value, data.stats)
     recentPosts.value = data.recentPosts || []
@@ -551,11 +742,209 @@ const loadAllStats = async () => {
     diamondPosts.value = data.diamondPosts || 0
     offerPosts.value = data.offerPosts || 0
     requestPosts.value = data.requestPosts || 0
+
+    // Reported items
+    if (reportsRes.ok) {
+      const reportsData = await reportsRes.json()
+      reportedItems.value = reportsData.reports?.data || []
+    }
   } catch (error) {
     console.error('Error loading dashboard stats:', error)
   } finally {
     loading.value = false
   }
+}
+
+// === Quick Actions ===
+
+// Handle report action (suspend/warning/delete) via reports API
+const handleReport = async (item, action) => {
+  const key = `${item.reportable_type}-${item.reportable_id}`
+  actionLoading[key] = true
+  try {
+    const res = await fetch(`/api/admin/reports/handle/${item.reportable_type}/${item.reportable_id}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': getCsrfToken() },
+      body: JSON.stringify({ action, reason: 'Action taken from dashboard' })
+    })
+    const result = await res.json()
+    if (res.ok) {
+      showToast(result.message || 'Action completed')
+      // Remove from reported items list
+      reportedItems.value = reportedItems.value.filter(
+        r => !(r.reportable_type === item.reportable_type && r.reportable_id === item.reportable_id)
+      )
+      // Refresh stats in background
+      refreshStats()
+    } else {
+      showToast(result.error || 'Action failed', 'error')
+    }
+  } catch (e) {
+    showToast('Network error', 'error')
+  } finally {
+    actionLoading[key] = false
+  }
+}
+
+// Dismiss all reports for an item
+const dismissReports = async (item) => {
+  const key = `${item.reportable_type}-${item.reportable_id}`
+  actionLoading[key] = true
+  try {
+    // Fetch the individual reports for this item, then delete them
+    const type = item.reportable_type
+    const id = item.reportable_id
+    const res = await fetch(`/api/admin/reports/${type}/${id}`)
+    if (res.ok) {
+      const data = await res.json()
+      const reports = data.reports?.data || []
+      // Delete each report
+      await Promise.all(reports.map(r =>
+        fetch(`/api/admin/reports/${r.id}`, {
+          method: 'DELETE',
+          headers: { 'X-CSRF-TOKEN': getCsrfToken() }
+        })
+      ))
+      showToast(`${reports.length} report(s) dismissed`)
+      reportedItems.value = reportedItems.value.filter(
+        r => !(r.reportable_type === type && r.reportable_id === id)
+      )
+      refreshStats()
+    }
+  } catch (e) {
+    showToast('Failed to dismiss reports', 'error')
+  } finally {
+    actionLoading[key] = false
+  }
+}
+
+// Toggle user ban from users table
+const toggleBan = async (user) => {
+  const key = `user-${user.id}`
+  actionLoading[key] = true
+  try {
+    const res = await fetch(`/api/admin/users/${user.id}/toggle-ban`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': getCsrfToken() }
+    })
+    const result = await res.json()
+    if (res.ok) {
+      user.is_active = result.status
+      showToast(result.message)
+    } else {
+      showToast(result.error || 'Action failed', 'error')
+    }
+  } catch (e) {
+    showToast('Network error', 'error')
+  } finally {
+    actionLoading[key] = false
+  }
+}
+
+// Toggle user ban from reported items (uses same endpoint)
+const toggleUserBan = async (item) => {
+  const key = `${item.reportable_type}-${item.reportable_id}`
+  actionLoading[key] = true
+  try {
+    const res = await fetch(`/api/admin/users/${item.reportable_id}/toggle-ban`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': getCsrfToken() }
+    })
+    const result = await res.json()
+    if (res.ok) {
+      if (item.reportable) item.reportable.status = result.status
+      showToast(result.message)
+    } else {
+      showToast(result.error || 'Action failed', 'error')
+    }
+  } catch (e) {
+    showToast('Network error', 'error')
+  } finally {
+    actionLoading[key] = false
+  }
+}
+
+// Change post state via reports handle endpoint (reuses suspend/warning actions)
+const changePostState = async (post, newState) => {
+  const key = `post-${post.id}`
+  actionLoading[key] = true
+  try {
+    // Map desired state to report action
+    const actionMap = { 'archive': 'suspend', 'not published': 'warning', 'published': 'publish' }
+    const action = actionMap[newState]
+
+    if (action === 'publish') {
+      // No direct report action for publishing — use service posts update
+      // We'll call the general update endpoint via api.php
+      const res = await fetch(`/api/service_posts`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': getCsrfToken() },
+        body: JSON.stringify({ id: post.id, state: 'published' })
+      })
+      if (res.ok) {
+        post.state = 'published'
+        showToast('Post published')
+      } else {
+        showToast('Failed to publish', 'error')
+      }
+    } else {
+      const res = await fetch(`/api/admin/reports/handle/post/${post.id}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': getCsrfToken() },
+        body: JSON.stringify({ action, reason: 'State changed from dashboard' })
+      })
+      const result = await res.json()
+      if (res.ok) {
+        post.state = newState
+        showToast(result.message || `Post ${newState}`)
+      } else {
+        showToast(result.error || 'Action failed', 'error')
+      }
+    }
+  } catch (e) {
+    showToast('Network error', 'error')
+  } finally {
+    actionLoading[key] = false
+  }
+}
+
+// Delete post
+const deletePost = async (post) => {
+  const key = `post-${post.id}`
+  actionLoading[key] = true
+  try {
+    const res = await fetch(`/api/admin/service-posts/${post.id}`, {
+      method: 'DELETE',
+      headers: { 'X-CSRF-TOKEN': getCsrfToken() }
+    })
+    if (res.ok) {
+      recentPosts.value = recentPosts.value.filter(p => p.id !== post.id)
+      showToast('Post deleted')
+      refreshStats()
+    } else {
+      const result = await res.json()
+      showToast(result.error || 'Delete failed', 'error')
+    }
+  } catch (e) {
+    showToast('Network error', 'error')
+  } finally {
+    actionLoading[key] = false
+  }
+}
+
+// Refresh just the stats (lightweight, no loading spinner)
+const refreshStats = async () => {
+  try {
+    const res = await fetch('/api/admin/dashboard')
+    const data = await res.json()
+    Object.assign(stats.value, data.stats)
+  } catch (e) {
+    // silent
+  }
+}
+
+const getCsrfToken = () => {
+  return document.querySelector('meta[name="csrf-token"]')?.content || ''
 }
 
 const navigateTo = (path) => {
@@ -598,6 +987,15 @@ const getStatusClass = (status) => {
     'archive': 'gray'
   }
   return map[status] || 'gray'
+}
+
+const getReportableStatusClass = (item) => {
+  if (!item.reportable) return 'gray'
+  const status = item.reportable.status
+  if (item.reportable_type === 'user') {
+    return status === 'active' ? 'active' : status === 'banned' ? 'banned' : 'inactive'
+  }
+  return getStatusClass(status)
 }
 </script>
 
@@ -1033,6 +1431,171 @@ const getStatusClass = (status) => {
 .status-pill.status-red, .status-pill.status-banned { background: #fee2e2; color: #dc2626; }
 .status-pill.status-gray, .status-pill.status-inactive { background: #f1f5f9; color: #64748b; }
 
+/* Type Badge */
+.type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.type-badge.type-post {
+  background: #ede9fe;
+  color: #7c3aed;
+}
+
+.type-badge.type-user {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+/* Report Count Badge */
+.report-count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fee2e2;
+  color: #dc2626;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 10px;
+  min-width: 28px;
+}
+
+/* Quick Action Buttons */
+.actions-cell {
+  white-space: nowrap;
+}
+
+.quick-actions {
+  display: flex;
+  gap: 0.35rem;
+  align-items: center;
+}
+
+.action-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.5rem;
+  border: none;
+  border-radius: 6px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.action-btn-sm:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.action-btn-sm:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.action-publish {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.action-unpublish {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.action-archive {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.action-delete {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.action-ban {
+  background: #fee2e2;
+  color: #dc2626;
+}
+
+.action-unban {
+  background: #d1fae5;
+  color: #059669;
+}
+
+.action-warn {
+  background: #fef3c7;
+  color: #d97706;
+}
+
+.action-dismiss {
+  background: #f1f5f9;
+  color: #94a3b8;
+}
+
+.action-dismiss:hover:not(:disabled) {
+  background: #e2e8f0;
+  color: #64748b;
+}
+
+.text-muted {
+  color: #94a3b8;
+  font-size: 0.8rem;
+}
+
+/* Toast Notification */
+.toast-notification {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: 10px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  z-index: 9999;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.toast-success {
+  background: #059669;
+  color: white;
+}
+
+.toast-error {
+  background: #dc2626;
+  color: white;
+}
+
+.toast-enter-active {
+  animation: toastIn 0.3s ease;
+}
+
+.toast-leave-active {
+  animation: toastOut 0.3s ease;
+}
+
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(20px); }
+}
+
 /* Empty State */
 .empty-state {
   text-align: center;
@@ -1084,6 +1647,10 @@ const getStatusClass = (status) => {
 
   .mini-pie-section {
     width: 100%;
+  }
+
+  .quick-actions {
+    flex-wrap: wrap;
   }
 }
 </style>

@@ -72,14 +72,14 @@
     "src": "resources/css/app.css"
   },
   "resources/js/admin.css": {
-    "file": "assets/admin-204879d6.css",
+    "file": "assets/admin-8b8830f0.css",
     "src": "resources/js/admin.css"
   },
   "resources/js/admin.js": {
     "css": [
-      "assets/admin-204879d6.css"
+      "assets/admin-8b8830f0.css"
     ],
-    "file": "assets/admin-01c59d52.js",
+    "file": "assets/admin-619aae3e.js",
     "imports": [
       "_vue-router-86f17892.js",
       "_MixedChart-b297deda.js",
