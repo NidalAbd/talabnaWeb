@@ -683,7 +683,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::delete('/cities/{id}', [\App\Http\Controllers\Admin\CitiesApiController::class, 'destroy'])->name('api.admin.cities.destroy');
 
             // Badge Types
-            Route::get('/badge-types/stats', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'getStats'])->name('api.admin.badge-types.stats');
+            Route::get('/badge-types-stats', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'getStats'])->name('api.admin.badge-types.stats');
             Route::get('/badge-types', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'index'])->name('api.admin.badge-types.index');
             Route::get('/badge-types/{id}', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'show'])->name('api.admin.badge-types.show');
             Route::post('/badge-types', [\App\Http\Controllers\Admin\BadgeTypesApiController::class, 'store'])->name('api.admin.badge-types.store');
