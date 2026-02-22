@@ -28,9 +28,19 @@ class CategoriesController extends Controller
 
         // Start query for categories and relationships
         $baseQuery = Categories::with(['sub_categories' => function($query) {
-            $query->withCount(['servicePosts'])->with('photos');
+            $query->withCount(['servicePosts' => function ($q) {
+                $q->where('state', 'published')
+                  ->whereHas('user', function ($u) {
+                      $u->where('is_active', 'active');
+                  });
+            }])->with('photos');
         }, 'photos'])
-            ->withCount(['servicePosts', 'sub_categories as sub_categories_with_service_posts_count' => function ($query) {
+            ->withCount(['servicePosts' => function ($q) {
+                $q->where('state', 'published')
+                  ->whereHas('user', function ($u) {
+                      $u->where('is_active', 'active');
+                  });
+            }, 'sub_categories as sub_categories_with_service_posts_count' => function ($query) {
                 $query->has('servicePosts');
             }]);
 
@@ -115,11 +125,21 @@ class CategoriesController extends Controller
         $user = Auth::user();
 
         $baseQuery = Categories::with(['sub_categories' => function($query) {
-            $query->withCount(['servicePosts'])->with('photos');
+            $query->withCount(['servicePosts' => function ($q) {
+                $q->where('state', 'published')
+                  ->whereHas('user', function ($u) {
+                      $u->where('is_active', 'active');
+                  });
+            }])->with('photos');
         }, 'photos'])
             ->featured()
             ->where('isSuspended', false)
-            ->withCount(['servicePosts']);
+            ->withCount(['servicePosts' => function ($q) {
+                $q->where('state', 'published')
+                  ->whereHas('user', function ($u) {
+                      $u->where('is_active', 'active');
+                  });
+            }]);
 
         $query = $this->directCategoryFilter($baseQuery, $user);
         $categories = $query->get();
@@ -137,11 +157,21 @@ class CategoriesController extends Controller
         $user = Auth::user();
 
         $baseQuery = Categories::with(['sub_categories' => function($query) {
-            $query->withCount(['servicePosts'])->with('photos');
+            $query->withCount(['servicePosts' => function ($q) {
+                $q->where('state', 'published')
+                  ->whereHas('user', function ($u) {
+                      $u->where('is_active', 'active');
+                  });
+            }])->with('photos');
         }, 'photos'])
             ->popular()
             ->where('isSuspended', false)
-            ->withCount(['servicePosts']);
+            ->withCount(['servicePosts' => function ($q) {
+                $q->where('state', 'published')
+                  ->whereHas('user', function ($u) {
+                      $u->where('is_active', 'active');
+                  });
+            }]);
 
         $query = $this->directCategoryFilter($baseQuery, $user);
         $categories = $query->get();

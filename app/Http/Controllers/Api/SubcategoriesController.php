@@ -32,7 +32,10 @@ class SubcategoriesController extends Controller
     {
         $subcategories = Sub_categories::where('categories_id', $categories)
             ->withCount(['servicePosts' => function ($query) {
-                $query->where('state', 'published');
+                $query->where('state', 'published')
+                      ->whereHas('user', function ($q) {
+                          $q->where('is_active', 'active');
+                      });
             }])
             ->with('photos')
             ->orderByDesc('service_posts_count') // Order by most service posts
@@ -86,7 +89,10 @@ class SubcategoriesController extends Controller
         $subcategories = Sub_categories::featured()
             ->where('isSuspended', false)
             ->withCount(['servicePosts' => function ($query) {
-                $query->where('state', 'published');
+                $query->where('state', 'published')
+                      ->whereHas('user', function ($q) {
+                          $q->where('is_active', 'active');
+                      });
             }])
             ->with('photos')
             ->orderByDesc('service_posts_count')
@@ -105,7 +111,10 @@ class SubcategoriesController extends Controller
         $subcategories = Sub_categories::popular()
             ->where('isSuspended', false)
             ->withCount(['servicePosts' => function ($query) {
-                $query->where('state', 'published');
+                $query->where('state', 'published')
+                      ->whereHas('user', function ($q) {
+                          $q->where('is_active', 'active');
+                      });
             }])
             ->with('photos')
             ->orderByDesc('service_posts_count')

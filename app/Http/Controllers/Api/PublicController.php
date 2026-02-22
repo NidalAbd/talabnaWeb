@@ -136,7 +136,10 @@ class PublicController extends Controller
                 ->count();
 
             return Categories::withCount(['servicePosts' => function ($query) {
-                $query->where('state', 'published');
+                $query->where('state', 'published')
+                      ->whereHas('user', function ($q) {
+                          $q->where('is_active', 'active');
+                      });
             }])
                 ->where('isSuspended', false)
                 ->orderBy('id')
@@ -178,7 +181,10 @@ class PublicController extends Controller
     {
         $subcategories = Cache::remember("subcategories_{$categoryId}", 3600, function () use ($categoryId) {
             return Sub_categories::withCount(['servicePosts' => function ($query) {
-                $query->where('state', 'published');
+                $query->where('state', 'published')
+                      ->whereHas('user', function ($q) {
+                          $q->where('is_active', 'active');
+                      });
             }])
                 ->where('categories_id', $categoryId)
                 ->where('isSuspended', false)
@@ -506,7 +512,10 @@ class PublicController extends Controller
             return countries::withCount(['cities'])
                 ->with(['photos', 'cities' => function ($query) {
                     $query->withCount(['servicePosts' => function ($q) {
-                        $q->where('state', 'published');
+                        $q->where('state', 'published')
+                          ->whereHas('user', function ($u) {
+                              $u->where('is_active', 'active');
+                          });
                     }])
                     ->having('service_posts_count', '>', 0)
                     ->orderByDesc('service_posts_count')
@@ -652,7 +661,10 @@ class PublicController extends Controller
     {
         $user = User::with('photos')
             ->withCount(['servicePosts' => function ($query) {
-                $query->where('state', 'published');
+                $query->where('state', 'published')
+                      ->whereHas('user', function ($q) {
+                          $q->where('is_active', 'active');
+                      });
             }])
             ->find($id);
 
@@ -791,7 +803,10 @@ class PublicController extends Controller
             // Show cities in this country with service count
             $citiesData = cities::where('country_id', $countryId)
                 ->withCount(['servicePosts' => function($q) {
-                    $q->where('state', 'published');
+                    $q->where('state', 'published')
+                      ->whereHas('user', function ($u) {
+                          $u->where('is_active', 'active');
+                      });
                 }])
                 ->having('service_posts_count', '>', 0)
                 ->orderByDesc('service_posts_count')
@@ -813,7 +828,11 @@ class PublicController extends Controller
             // Show categories available in this city
             $categoriesData = Categories::where('isSuspended', false)
                 ->withCount(['servicePosts' => function($q) use ($cityId) {
-                    $q->where('state', 'published')->where('city_id', $cityId);
+                    $q->where('state', 'published')
+                      ->where('city_id', $cityId)
+                      ->whereHas('user', function ($u) {
+                          $u->where('is_active', 'active');
+                      });
                 }])
                 ->having('service_posts_count', '>', 0)
                 ->orderByDesc('service_posts_count')
