@@ -402,7 +402,6 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::resource('favorites', FavoriteController::class);
     Route::post('{reported}/{reportedId}/reports', [ReportController::class, 'store'])
         ->name('reports.store');
-    Route::get('reports', [ReportController::class, 'index'])->name('reports.index');
 
     /*
     |--------------------------------------------------------------------------

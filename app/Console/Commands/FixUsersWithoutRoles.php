@@ -9,7 +9,7 @@ use Illuminate\Console\Command;
 class FixUsersWithoutRoles extends Command
 {
     protected $signature = 'users:fix-roles';
-    protected $description = 'Assign default "user" role to all users who have no roles assigned';
+    protected $description = 'Fix users: assign missing roles and sync permissions for "user" role';
 
     public function handle()
     {
@@ -20,41 +20,45 @@ class FixUsersWithoutRoles extends Command
             return 1;
         }
 
-        $usersWithoutRoles = User::whereDoesntHave('roles')->get();
-        $count = $usersWithoutRoles->count();
-
-        if ($count === 0) {
-            $this->info('All users already have roles assigned. Nothing to fix.');
-            return 0;
-        }
-
-        $this->info("Found {$count} users without roles. Fixing...");
-
-        $bar = $this->output->createProgressBar($count);
-        $bar->start();
-
         $permissions = $role->permissions;
         $permissionIds = $permissions->pluck('id')->toArray();
+        $userType = 'App\Models\User';
 
-        $fixed = 0;
-        foreach ($usersWithoutRoles as $user) {
-            // Attach role with user_type (required by Laratrust)
-            $user->roles()->attach($role->id, ['user_type' => get_class($user)]);
-
-            // Sync permissions with user_type
-            $syncData = [];
-            foreach ($permissionIds as $pid) {
-                $syncData[$pid] = ['user_type' => get_class($user)];
-            }
-            $user->permissions()->sync($syncData);
-
-            $fixed++;
-            $bar->advance();
+        $permSync = [];
+        foreach ($permissionIds as $pid) {
+            $permSync[$pid] = ['user_type' => $userType];
         }
 
-        $bar->finish();
-        $this->newLine(2);
-        $this->info("Done! Assigned 'user' role and permissions to {$fixed} users.");
+        // Step 1: Fix users without any roles
+        $usersWithoutRoles = User::whereDoesntHave('roles')->get();
+        if ($usersWithoutRoles->count() > 0) {
+            $this->info("Fixing {$usersWithoutRoles->count()} users without roles...");
+            foreach ($usersWithoutRoles as $user) {
+                $user->roles()->attach($role->id, ['user_type' => $userType]);
+                $user->permissions()->sync($permSync);
+            }
+            $this->info("  Assigned 'user' role + {$permissions->count()} permissions.");
+        } else {
+            $this->info('All users have roles assigned.');
+        }
+
+        // Step 2: Fix users with 'user' role but missing permissions
+        $usersWithRole = User::whereHas('roles', function ($q) use ($role) {
+            $q->where('roles.id', $role->id);
+        })->whereDoesntHave('permissions')->get();
+
+        if ($usersWithRole->count() > 0) {
+            $this->info("Fixing {$usersWithRole->count()} users with 'user' role but 0 permissions...");
+            foreach ($usersWithRole as $user) {
+                $user->permissions()->sync($permSync);
+            }
+            $this->info("  Synced {$permissions->count()} permissions.");
+        } else {
+            $this->info('All users with "user" role have permissions.');
+        }
+
+        $total = $usersWithoutRoles->count() + $usersWithRole->count();
+        $this->info("Done! Fixed {$total} users total.");
 
         return 0;
     }
