@@ -141,13 +141,19 @@ class GoogleAuthController extends Controller
                 // Assign default 'user' role and permissions (same as RegisterController)
                 $role = Role::where('name', 'user')->first();
                 if ($role) {
-                    $user->attachRole($role);
-                    $user->syncPermissions($role->permissions);
+                    $user->roles()->attach($role->id, ['user_type' => get_class($user)]);
+
+                    $permissionIds = $role->permissions->pluck('id')->toArray();
+                    $permSync = [];
+                    foreach ($permissionIds as $pid) {
+                        $permSync[$pid] = ['user_type' => get_class($user)];
+                    }
+                    $user->permissions()->sync($permSync);
 
                     Log::info('Role and permissions assigned to Google user', [
                         'user_id' => $user->id,
                         'role' => $role->name,
-                        'permission_count' => $role->permissions->count(),
+                        'permission_count' => count($permissionIds),
                     ]);
                 } else {
                     Log::error('Default "user" role not found — Google user has no role', [

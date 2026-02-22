@@ -33,10 +33,21 @@ class FixUsersWithoutRoles extends Command
         $bar = $this->output->createProgressBar($count);
         $bar->start();
 
+        $permissions = $role->permissions;
+        $permissionIds = $permissions->pluck('id')->toArray();
+
         $fixed = 0;
         foreach ($usersWithoutRoles as $user) {
-            $user->attachRole($role);
-            $user->syncPermissions($role->permissions);
+            // Attach role with user_type (required by Laratrust)
+            $user->roles()->attach($role->id, ['user_type' => get_class($user)]);
+
+            // Sync permissions with user_type
+            $syncData = [];
+            foreach ($permissionIds as $pid) {
+                $syncData[$pid] = ['user_type' => get_class($user)];
+            }
+            $user->permissions()->sync($syncData);
+
             $fixed++;
             $bar->advance();
         }

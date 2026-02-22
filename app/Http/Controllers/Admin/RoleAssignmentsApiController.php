@@ -205,9 +205,17 @@ class RoleAssignmentsApiController extends Controller
             $usersWithoutRoles = User::whereDoesntHave('roles')->get();
             $fixedCount = 0;
 
+            $permissionIds = $role->permissions->pluck('id')->toArray();
+
             foreach ($usersWithoutRoles as $user) {
-                $user->attachRole($role);
-                $user->syncPermissions($role->permissions);
+                $user->roles()->attach($role->id, ['user_type' => get_class($user)]);
+
+                $permSync = [];
+                foreach ($permissionIds as $pid) {
+                    $permSync[$pid] = ['user_type' => get_class($user)];
+                }
+                $user->permissions()->sync($permSync);
+
                 $fixedCount++;
             }
 
