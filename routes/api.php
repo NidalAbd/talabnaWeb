@@ -300,6 +300,17 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/{id}/set-default', [LanguageManagementController::class, 'setDefault']);
     });
 
+    // Request Monitor Routes (Admin Only)
+    Route::middleware(['admin'])->prefix('admin/monitor')->group(function () {
+        Route::get('/overview', [App\Http\Controllers\Api\RequestMonitorController::class, 'overview']);
+        Route::get('/top-endpoints', [App\Http\Controllers\Api\RequestMonitorController::class, 'topEndpoints']);
+        Route::get('/user-stats', [App\Http\Controllers\Api\RequestMonitorController::class, 'userStats']);
+        Route::get('/user/{userId}', [App\Http\Controllers\Api\RequestMonitorController::class, 'userDetail']);
+        Route::get('/live', [App\Http\Controllers\Api\RequestMonitorController::class, 'liveActivity']);
+        Route::get('/history', [App\Http\Controllers\Api\RequestMonitorController::class, 'history']);
+        Route::delete('/cleanup', [App\Http\Controllers\Api\RequestMonitorController::class, 'cleanup']);
+    });
+
     // Translation Management Routes (Admin)
     Route::prefix('admin/translations')->group(function () {
         Route::get('/', [TranslationManagementController::class, 'index']);

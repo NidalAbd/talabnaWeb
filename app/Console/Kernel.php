@@ -29,6 +29,11 @@ class Kernel extends ConsoleKernel
         $schedule->command('seo:cleanup')
             ->weeklyOn(0, '04:00')
             ->withoutOverlapping();
+
+        // Aggregate old API request logs into daily stats and delete raw data (keep 3 days)
+        $schedule->command('monitor:cleanup --keep=3')
+            ->dailyAt('02:00')
+            ->withoutOverlapping();
     }
 
     /**
