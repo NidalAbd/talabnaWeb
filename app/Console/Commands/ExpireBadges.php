@@ -5,6 +5,8 @@ namespace App\Console\Commands;
 use App\Models\BadgeType;
 use App\Models\Notification;
 use App\Models\ServicePost;
+use App\Models\User;
+use App\Notifications\BadgeExpirationNotification;
 use App\Services\BadgeService;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
@@ -165,5 +167,16 @@ class ExpireBadges extends Command
             'user_id' => $post->user_id,
             'type' => 'badge'
         ]);
+
+        // Send Firebase push notification
+        try {
+            $user = User::find($post->user_id);
+            if ($user && !empty($user->fcm_token)) {
+                $user->notify(new BadgeExpirationNotification($oldBadgeName, $post->id));
+                $this->info("FCM notification sent to user #{$post->user_id}");
+            }
+        } catch (\Exception $e) {
+            Log::warning("Failed to send FCM for badge expiration on post #{$post->id}: " . $e->getMessage());
+        }
     }
 }
