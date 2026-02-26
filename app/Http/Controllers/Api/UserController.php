@@ -449,8 +449,15 @@ class UserController extends Controller
             ]);
 
             $followedUser->notifications()->save($notification);
-            // Send email notification to user
-//            $followedUser->notify(new new_follower($currentUser));
+
+            try {
+                if (!empty($followedUser->fcm_token)) {
+                    $followerName = $currentUser->user_name ?? $currentUser->name ?? 'Someone';
+                    $followedUser->notify(new \App\Notifications\NewFollowerNotification($followerName, $currentUser->id));
+                }
+            } catch (\Exception $e) {
+                \Log::warning('FCM follower notification failed: ' . $e->getMessage());
+            }
         }
 
         return response()->json(['is_follower' => $isFollower]);

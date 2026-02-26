@@ -6,8 +6,11 @@ use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Notification;
 use App\Models\ServicePost;
+use App\Models\User;
+use App\Notifications\CommentNotification;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
 class CommentController extends Controller
 {
@@ -106,6 +109,15 @@ class CommentController extends Controller
             'type' => 'comment_reply',
             'read' => false,
         ]);
+
+        try {
+            $user = User::find($parentComment->user_id);
+            if ($user && !empty($user->fcm_token)) {
+                $user->notify(new CommentNotification($replierName, $postTitle, $reply->service_post_id, true));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM comment reply notification failed: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -131,6 +143,15 @@ class CommentController extends Controller
             'type' => 'comment',
             'read' => false,
         ]);
+
+        try {
+            $user = User::find($post->user_id);
+            if ($user && !empty($user->fcm_token)) {
+                $user->notify(new CommentNotification($commenterName, $postTitle, $comment->service_post_id, false));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM comment notification failed: ' . $e->getMessage());
+        }
     }
 
     /**

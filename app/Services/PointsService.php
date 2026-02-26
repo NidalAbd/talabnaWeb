@@ -455,6 +455,15 @@ class PointsService
             'type' => 'pointOut'
         ]);
 
+        // Send FCM to sender
+        if (!empty($fromUser->fcm_token)) {
+            try {
+                $fromUser->notify(new \App\Notifications\PointSentFcmNotification($amount, $toUser->id));
+            } catch (\Exception $e) {
+                Log::error('Failed to send FCM point sent notification: ' . $e->getMessage());
+            }
+        }
+
         // Notification for receiver
         $receiverMessage = json_encode([
             'en' => "You've received $amount points from user #{$fromUser->id}.",

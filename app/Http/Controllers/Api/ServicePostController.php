@@ -15,6 +15,7 @@ use App\Models\point_transactions;
 use App\Models\ServicePost;
 use App\Models\Sub_categories;
 use App\Models\User;
+use App\Notifications\BadgeChangeNotification;
 use App\Notifications\new_servicepost_notification;
 use Carbon\Carbon;
 use Google\Service\Dfareporting\City;
@@ -1220,6 +1221,15 @@ class ServicePostController extends Controller
             'type' => 'badge'
         ]);
 
+        try {
+            $user = User::find($servicePost->user_id);
+            if ($user && !empty($user->fcm_token)) {
+                $user->notify(new BadgeChangeNotification('expired', 'الشارة', $servicePost->id));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM badge expiry notification failed: ' . $e->getMessage());
+        }
+
         Log::info("Badge expired for service post #{$servicePost->id}");
     }
 
@@ -1293,6 +1303,15 @@ class ServicePostController extends Controller
             'type' => 'badge'
         ]);
 
+        try {
+            if (!empty($user->fcm_token)) {
+                $badgeNameAr = $this->translateBadgeType($badgeType, 'ar');
+                $user->notify(new BadgeChangeNotification('applied', $badgeNameAr, $servicePost->id));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM badge applied notification failed: ' . $e->getMessage());
+        }
+
         return ['success' => true];
     }
 
@@ -1359,6 +1378,14 @@ class ServicePostController extends Controller
             'user_id' => $user->id,
             'type' => 'badge'
         ]);
+
+        try {
+            if (!empty($user->fcm_token)) {
+                $user->notify(new BadgeChangeNotification('applied', $badgeTypeModel->name_ar, $servicePost->id));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM badge dynamic notification failed: ' . $e->getMessage());
+        }
 
         return ['success' => true];
     }
@@ -1459,11 +1486,12 @@ class ServicePostController extends Controller
         ]);
     }
 
-    private function createBadgeChangeNotification($user, $badgeType)
+    private function createBadgeChangeNotification($user, $badgeType, $servicePost = null)
     {
+        $postId = $servicePost->id ?? 0;
         $message = json_encode([
-            'ar' => "تم تغيير شارة منشورك إلى " . $this->translateBadgeType($badgeType, 'ar') . ". [post_id:{$servicePost->id}]",
-            'en' => "Your Post badge is changed to " . $this->translateBadgeType($badgeType, 'en') . ". [post_id:{$servicePost->id}]"
+            'ar' => "تم تغيير شارة منشورك إلى " . $this->translateBadgeType($badgeType, 'ar') . ". [post_id:{$postId}]",
+            'en' => "Your Post badge is changed to " . $this->translateBadgeType($badgeType, 'en') . ". [post_id:{$postId}]"
         ]);
 
         Notification::create([
@@ -1471,6 +1499,15 @@ class ServicePostController extends Controller
             'user_id' => $user->id,
             'type' => 'badge'
         ]);
+
+        try {
+            if (!empty($user->fcm_token)) {
+                $badgeNameAr = $this->translateBadgeType($badgeType, 'ar');
+                $user->notify(new BadgeChangeNotification('applied', $badgeNameAr, $postId));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM badge change notification failed: ' . $e->getMessage());
+        }
     }
 
     private function handleBadge($user, $badgeType, $badgeDuration): array

@@ -8,8 +8,10 @@ use App\Models\User;
 use App\Models\palservice_points;
 use App\Models\point_transactions;
 use App\Models\Notification;
+use App\Notifications\BadgeChangeNotification;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class BadgeService
@@ -484,6 +486,15 @@ class BadgeService
                 'days' => $days,
             ]),
         ]);
+
+        try {
+            $user = User::find($post->user_id);
+            if ($user && !empty($user->fcm_token)) {
+                $user->notify(new BadgeChangeNotification('applied', $badge->name_ar, $post->id, "تم تفعيل شارة {$badge->name_ar} على إعلانك لمدة {$days} يوم"));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM badge applied notification failed: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -526,6 +537,15 @@ class BadgeService
                 'net_amount' => $netAmount,
             ]),
         ]);
+
+        try {
+            $user = User::find($post->user_id);
+            if ($user && !empty($user->fcm_token)) {
+                $user->notify(new BadgeChangeNotification('upgraded', $newBadge->name_ar, $post->id, $message));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM badge upgraded notification failed: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -569,6 +589,15 @@ class BadgeService
                 'net_amount' => $netAmount,
             ]),
         ]);
+
+        try {
+            $user = User::find($post->user_id);
+            if ($user && !empty($user->fcm_token)) {
+                $user->notify(new BadgeChangeNotification('switched', $newBadge->name_ar, $post->id, $message));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM badge switched notification failed: ' . $e->getMessage());
+        }
     }
 
     /**
@@ -585,6 +614,15 @@ class BadgeService
                 'service_post_id' => $post->id,
             ]),
         ]);
+
+        try {
+            $user = User::find($post->user_id);
+            if ($user && !empty($user->fcm_token)) {
+                $user->notify(new BadgeChangeNotification('expired', 'الشارة', $post->id, "انتهت صلاحية الشارة على إعلانك: {$post->title}"));
+            }
+        } catch (\Exception $e) {
+            Log::warning('FCM badge expired notification failed: ' . $e->getMessage());
+        }
     }
 
     /**
