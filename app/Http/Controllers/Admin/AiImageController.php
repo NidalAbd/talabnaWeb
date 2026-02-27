@@ -28,6 +28,8 @@ class AiImageController extends Controller
 
         $success = $this->dalleService->generateForCategory($category);
 
+        $errorDetail = $this->dalleService->getLastError();
+
         if ($request->expectsJson()) {
             if ($success) {
                 $category->load('photos');
@@ -39,7 +41,7 @@ class AiImageController extends Controller
             }
             return response()->json([
                 'success' => false,
-                'message' => "Failed to generate AI image for \"{$name}\".",
+                'message' => "Failed to generate AI image for \"{$name}\". " . ($errorDetail ?: 'Check server logs.'),
             ], 500);
         }
 
@@ -47,7 +49,7 @@ class AiImageController extends Controller
             return redirect()->back()->with('success', "AI image generated for \"{$name}\".");
         }
 
-        return redirect()->back()->with('error', "Failed to generate AI image for \"{$name}\". Check logs for details.");
+        return redirect()->back()->with('error', "Failed to generate AI image for \"{$name}\". " . ($errorDetail ?: 'Check server logs.'));
     }
 
     /**
@@ -59,6 +61,7 @@ class AiImageController extends Controller
         $name = $subcategory->name['en'] ?? $subcategory->name['ar'] ?? 'Subcategory';
 
         $success = $this->dalleService->generateForSubcategory($subcategory);
+        $errorDetail = $this->dalleService->getLastError();
 
         if ($request->expectsJson()) {
             if ($success) {
@@ -71,7 +74,7 @@ class AiImageController extends Controller
             }
             return response()->json([
                 'success' => false,
-                'message' => "Failed to generate AI image for \"{$name}\".",
+                'message' => "Failed to generate AI image for \"{$name}\". " . ($errorDetail ?: 'Check server logs.'),
             ], 500);
         }
 
@@ -79,7 +82,7 @@ class AiImageController extends Controller
             return redirect()->back()->with('success', "AI image generated for \"{$name}\".");
         }
 
-        return redirect()->back()->with('error', "Failed to generate AI image for \"{$name}\". Check logs for details.");
+        return redirect()->back()->with('error', "Failed to generate AI image for \"{$name}\". " . ($errorDetail ?: 'Check server logs.'));
     }
 
     /**
