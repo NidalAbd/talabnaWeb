@@ -6,6 +6,10 @@
     <div class="d-flex justify-content-between align-items-center">
         <h1><i class="fas fa-sitemap text-primary mr-2"></i> Subcategories Management</h1>
         <div>
+            <form action="{{ route('ai-image.generate-all-subcategories') }}" method="POST" class="d-inline mr-2">
+                @csrf
+                <button class="btn btn-dark"><i class="fas fa-magic mr-1"></i> AI Generate All</button>
+            </form>
             <a href="{{ route('subcategories.create') }}" class="btn btn-success">
                 <i class="fas fa-plus mr-1"></i> Add Subcategory
             </a>
@@ -133,6 +137,12 @@
                                 </td>
                                 <td>
                                     <div class="btn-group btn-group-sm">
+                                        <form action="{{ route('ai-image.generate-subcategory', $subCategory->id) }}" method="POST" class="d-inline">
+                                            @csrf
+                                            <button type="submit" class="btn btn-dark" title="Generate AI Image">
+                                                <i class="fas fa-magic"></i>
+                                            </button>
+                                        </form>
                                         <a href="{{ route('subcategories.show', $subCategory->id) }}"
                                            class="btn btn-info" title="View">
                                             <i class="fas fa-eye"></i>

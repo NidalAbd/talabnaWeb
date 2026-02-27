@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AiImageController;
 use App\Http\Controllers\Admin\BanController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\CategoriesController;
@@ -339,6 +340,22 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
         ->name('subcategories.toggle-suspend');
     Route::get('indexSubCategory', [SubcategoriesController::class, 'indexSubCategory'])
         ->name('indexSubCategory.index');
+
+    /*
+    |--------------------------------------------------------------------------
+    | AI Image Generation Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::post('ai-image/generate-category/{id}', [AiImageController::class, 'generateCategory'])
+        ->name('ai-image.generate-category');
+    Route::post('ai-image/generate-subcategory/{id}', [AiImageController::class, 'generateSubcategory'])
+        ->name('ai-image.generate-subcategory');
+    Route::post('ai-image/generate-all-categories', [AiImageController::class, 'generateAllCategories'])
+        ->name('ai-image.generate-all-categories');
+    Route::post('ai-image/generate-all-subcategories', [AiImageController::class, 'generateAllSubcategories'])
+        ->name('ai-image.generate-all-subcategories');
+    Route::get('ai-image/status', [AiImageController::class, 'status'])
+        ->name('ai-image.status');
 
     // Subcategories API
     Route::get('/sub-categories/{categoryId}', function($categoryId) {

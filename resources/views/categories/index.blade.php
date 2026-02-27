@@ -22,6 +22,10 @@
                             Categories
                         </h5>
                         <div>
+                            <form action="{{ route('ai-image.generate-all-categories') }}" method="POST" class="d-inline mr-2">
+                                @csrf
+                                <button class="btn btn-sm btn-dark"><i class="fas fa-magic mr-1"></i> AI Generate All</button>
+                            </form>
                             <a href="{{ route('categories.create') }}" class="btn btn-sm btn-primary">
                                 <i class="fas fa-plus mr-1"></i> Add New Category
                             </a>
@@ -103,6 +107,12 @@
                                             </td>
                                             <td>
                                                 <div class="btn-group">
+                                                    <form action="{{ route('ai-image.generate-category', $category->id) }}" method="POST" class="d-inline">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-dark" title="Generate AI Image">
+                                                            <i class="fas fa-magic"></i>
+                                                        </button>
+                                                    </form>
                                                     <a href="{{ route('categories.show', $category->id) }}"
                                                        class="btn btn-sm btn-info" title="View">
                                                         <i class="fas fa-eye"></i>
