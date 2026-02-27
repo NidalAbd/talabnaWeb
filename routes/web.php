@@ -356,6 +356,8 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
         ->name('ai-image.generate-all-subcategories');
     Route::get('ai-image/status', [AiImageController::class, 'status'])
         ->name('ai-image.status');
+    Route::get('ai-image/gallery/{type}/{id}', [AiImageController::class, 'galleryImages'])
+        ->name('ai-image.gallery');
 
     // Subcategories API
     Route::get('/sub-categories/{categoryId}', function($categoryId) {

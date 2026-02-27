@@ -269,8 +269,30 @@ class CategoriesApiController extends Controller
 
             $category->save();
 
+            // Handle gallery image selection
+            if ($request->has('gallery_image') && $request->gallery_image) {
+                $galleryPath = $request->gallery_image;
+                if (Storage::disk('public')->exists($galleryPath)) {
+                    // Delete old photo record
+                    $oldPhoto = $category->photos()->first();
+                    if ($oldPhoto) {
+                        $this->deletePhoto($oldPhoto);
+                        $oldPhoto->delete();
+                    }
+
+                    // Copy gallery image to active category folder
+                    $fileName = \Illuminate\Support\Str::uuid() . '.png';
+                    $newPath = "category/{$fileName}";
+                    Storage::disk('public')->copy($galleryPath, $newPath);
+
+                    $photo = new Photos([
+                        'src' => 'storage/' . $newPath,
+                    ]);
+                    $category->photos()->save($photo);
+                }
+            }
             // Handle photo upload if new photo provided
-            if ($request->hasFile('photo')) {
+            elseif ($request->hasFile('photo')) {
                 // Delete old photo
                 $oldPhoto = $category->photos()->first();
                 if ($oldPhoto) {

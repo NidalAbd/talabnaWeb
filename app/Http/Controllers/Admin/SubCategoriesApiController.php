@@ -5,9 +5,12 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Sub_categories;
 use App\Models\Categories;
+use App\Models\Photos;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 
 class SubCategoriesApiController extends Controller
 {
@@ -239,13 +242,42 @@ class SubCategoriesApiController extends Controller
 
         $subcategory->save();
 
+        // Handle gallery image selection
+        if ($request->has('gallery_image') && $request->gallery_image) {
+            $galleryPath = $request->gallery_image;
+            if (Storage::disk('public')->exists($galleryPath)) {
+                // Delete old photo record
+                if ($subcategory->photos()->exists()) {
+                    $oldPhoto = $subcategory->photos()->first();
+                    if ($oldPhoto) {
+                        $oldSrc = str_replace('storage/', '', $oldPhoto->src);
+                        if (Storage::disk('public')->exists($oldSrc)) {
+                            Storage::disk('public')->delete($oldSrc);
+                        }
+                        $oldPhoto->delete();
+                    }
+                }
+
+                // Copy gallery image to active subcategory folder
+                $category = $subcategory->category;
+                $categoryName = $category ? ($category->name['ar'] ?? 'unknown') : 'unknown';
+                $fileName = Str::uuid() . '.png';
+                $newPath = "subcategory/{$categoryName}/{$fileName}";
+                Storage::disk('public')->copy($galleryPath, $newPath);
+
+                $photo = new Photos([
+                    'src' => 'storage/' . $newPath,
+                ]);
+                $subcategory->photos()->save($photo);
+            }
+        }
         // Handle image upload
-        if ($request->hasFile('photo')) {
+        elseif ($request->hasFile('photo')) {
             // Delete old photo if exists
             if ($subcategory->photos()->exists()) {
                 $oldPhoto = $subcategory->photos()->first();
-                if ($oldPhoto && \Storage::disk('public')->exists($oldPhoto->url)) {
-                    \Storage::disk('public')->delete($oldPhoto->url);
+                if ($oldPhoto && Storage::disk('public')->exists($oldPhoto->url)) {
+                    Storage::disk('public')->delete($oldPhoto->url);
                 }
                 $oldPhoto->delete();
             }

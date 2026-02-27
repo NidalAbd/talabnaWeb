@@ -61,6 +61,34 @@
             <div v-if="errors.photo" class="error-message">{{ errors.photo }}</div>
           </div>
 
+          <!-- AI Image Gallery (edit mode only) -->
+          <div class="form-group" v-if="mode === 'edit' && subcategory">
+            <label class="form-label">
+              <i class="fas fa-robot"></i>
+              AI Generated Images
+            </label>
+            <div v-if="galleryLoading" class="gallery-loading">
+              <i class="fas fa-spinner fa-spin"></i> Loading gallery...
+            </div>
+            <div v-else-if="galleryImages.length === 0" class="gallery-empty">
+              No AI-generated images yet.
+            </div>
+            <div v-else class="gallery-grid">
+              <div
+                v-for="(img, index) in galleryImages"
+                :key="index"
+                class="gallery-item"
+                :class="{ selected: selectedGalleryImage === img.path }"
+                @click="selectGalleryImage(img)"
+              >
+                <img :src="img.url" :alt="'AI Image ' + (index + 1)">
+                <div class="gallery-check" v-if="selectedGalleryImage === img.path">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <!-- Multilingual Names -->
           <div class="form-group">
             <label class="form-label">
@@ -194,6 +222,9 @@ const submitting = ref(false)
 const errorMessage = ref('')
 const errors = reactive({})
 const parentCategories = ref([])
+const galleryImages = ref([])
+const galleryLoading = ref(false)
+const selectedGalleryImage = ref(null)
 
 const formData = reactive({
   categories_id: '',
@@ -207,6 +238,7 @@ const formData = reactive({
 
 onMounted(async () => {
   await loadParentCategories()
+  loadGalleryImages()
 })
 
 // Initialize form data if editing
@@ -265,6 +297,31 @@ const removeImage = () => {
   }
 }
 
+const loadGalleryImages = async () => {
+  if (props.mode !== 'edit' || !props.subcategory) return
+  galleryLoading.value = true
+  try {
+    const response = await fetch(`/ai-image/gallery/subcategory/${props.subcategory.id}`)
+    const data = await response.json()
+    galleryImages.value = data.images || []
+  } catch (error) {
+    console.error('Error loading gallery images:', error)
+  } finally {
+    galleryLoading.value = false
+  }
+}
+
+const selectGalleryImage = (img) => {
+  if (selectedGalleryImage.value === img.path) {
+    selectedGalleryImage.value = null
+    imagePreview.value = null
+  } else {
+    selectedGalleryImage.value = img.path
+    imagePreview.value = img.url
+    imageFile.value = null
+  }
+}
+
 const validateForm = () => {
   Object.keys(errors).forEach(key => delete errors[key])
   let isValid = true
@@ -317,7 +374,9 @@ const handleSubmit = async () => {
     data.append('is_featured', formData.is_featured ? '1' : '0')
     data.append('is_popular', formData.is_popular ? '1' : '0')
 
-    if (imageFile.value) {
+    if (selectedGalleryImage.value) {
+      data.append('gallery_image', selectedGalleryImage.value)
+    } else if (imageFile.value) {
       data.append('photo', imageFile.value)
     }
 
@@ -664,6 +723,63 @@ const handleSubmit = async () => {
   cursor: not-allowed;
 }
 
+/* AI Gallery */
+.gallery-loading,
+.gallery-empty {
+  text-align: center;
+  padding: 1rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.gallery-item {
+  position: relative;
+  cursor: pointer;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 2px solid #e9ecef;
+  transition: all 0.2s ease;
+}
+
+.gallery-item:hover {
+  border-color: #667eea;
+  transform: scale(1.02);
+}
+
+.gallery-item.selected {
+  border-color: #667eea;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.3);
+}
+
+.gallery-item img {
+  width: 100%;
+  height: 80px;
+  object-fit: cover;
+  display: block;
+}
+
+.gallery-check {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  color: #667eea;
+  font-size: 1.2rem;
+  background: white;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 /* Responsive */
 @media (max-width: 768px) {
   .modal-dialog-advanced {
@@ -671,6 +787,10 @@ const handleSubmit = async () => {
     margin: 0;
     border-radius: 0;
     max-height: 100vh;
+  }
+
+  .gallery-grid {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 </style>

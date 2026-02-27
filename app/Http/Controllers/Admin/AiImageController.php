@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Categories;
 use App\Models\Sub_categories;
 use App\Services\DalleImageService;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AiImageController extends Controller
 {
@@ -83,6 +85,39 @@ class AiImageController extends Controller
         }
 
         return redirect()->back()->with('error', "Failed to generate AI image for \"{$name}\". " . ($errorDetail ?: 'Check server logs.'));
+    }
+
+    /**
+     * Get gallery images for a category or subcategory.
+     */
+    public function galleryImages(string $type, int $id): JsonResponse
+    {
+        if (!in_array($type, ['category', 'subcategory'])) {
+            return response()->json(['error' => 'Invalid type'], 400);
+        }
+
+        $galleryDir = "ai-gallery/{$type}/{$id}";
+
+        if (!Storage::disk('public')->exists($galleryDir)) {
+            return response()->json(['images' => []]);
+        }
+
+        $files = Storage::disk('public')->files($galleryDir);
+
+        $images = array_map(function ($file) {
+            return [
+                'url' => url('storage/' . $file),
+                'path' => $file,
+                'filename' => basename($file),
+            ];
+        }, $files);
+
+        // Sort by modification time (newest first)
+        usort($images, function ($a, $b) {
+            return Storage::disk('public')->lastModified($b['path']) - Storage::disk('public')->lastModified($a['path']);
+        });
+
+        return response()->json(['images' => array_values($images)]);
     }
 
     /**

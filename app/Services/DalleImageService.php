@@ -39,7 +39,7 @@ class DalleImageService
         $nameEn = $category->name['en'] ?? '';
         $nameAr = $category->name['ar'] ?? '';
 
-        $prompt = "Single clean 3D icon of a real object representing '{$nameEn}' (Arabic: '{$nameAr}') for a modern mobile marketplace app. Front-facing, centered, isolated object, smooth matte plastic material, friendly minimal style. Background: soft neutral studio gradient (light gray to very light gray), no pattern, no grid, no frame, no tile, no container shape, no decorative elements. Subtle soft shadow beneath object. No text, no letters, no logo, no watermark.";
+        $prompt = "Single minimal 3D icon representing the main category '{$nameEn}' (Arabic: '{$nameAr}') for a mobile marketplace app. Use a simple broad symbol that represents the entire category, not a specific item. Clean front view, centered composition, smooth matte plastic material. Bold vibrant colors with strong contrast against background. Background: soft neutral light gray studio gradient, low saturation, no pattern, no grid, no frame, no tile. Subtle soft shadow beneath icon. No text, no logo, no watermark.";
         try {
             $this->lastError = null;
 
@@ -59,9 +59,10 @@ class DalleImageService
             $fileName = Str::uuid() . '.png';
             $storagePath = "category/{$fileName}";
 
-            // Delete old photo if exists
+            // Move old photo to gallery instead of deleting
             $oldPhoto = $category->photos()->first();
             if ($oldPhoto) {
+                $this->copyToGallery('category', $category->id, $oldPhoto->src);
                 $oldPath = str_replace('storage/', '', $oldPhoto->src);
                 Storage::disk('public')->delete($oldPath);
                 $oldPhoto->delete();
@@ -74,6 +75,9 @@ class DalleImageService
                 'src' => 'storage/' . $storagePath,
             ]);
             $category->photos()->save($photo);
+
+            // Also save a copy to the gallery
+            $this->saveToGallery('category', $category->id, $storagePath);
 
             return true;
         } catch (\GuzzleHttp\Exception\ClientException $e) {
@@ -97,7 +101,7 @@ class DalleImageService
         $nameEn = $subcategory->name['en'] ?? '';
         $nameAr = $subcategory->name['ar'] ?? '';
 
-        $prompt = "Single clean 3D icon of a real object representing '{$nameEn}' (Arabic: '{$nameAr}') for a modern mobile marketplace app. Front-facing, centered, isolated object, smooth matte plastic material, friendly minimal style. Background: soft neutral studio gradient (light gray to very light gray), no pattern, no grid, no frame, no tile, no container shape, no decorative elements. Subtle soft shadow beneath object. No text, no letters, no logo, no watermark.";
+$prompt = "Single detailed 3D icon representing the specific subcategory '{$nameEn}' (Arabic: '{$nameAr}') for a mobile marketplace app. Use a clear real object that directly represents this subcategory. Front-facing, centered composition, smooth matte plastic material. Vibrant colors with strong contrast against background. Background: soft neutral light gray studio gradient, low saturation, no pattern, no grid, no frame, no tile. Subtle soft shadow beneath object. No text, no logo, no watermark.";
         try {
             $this->lastError = null;
 
@@ -121,9 +125,10 @@ class DalleImageService
             $categoryName = $category ? ($category->name['ar'] ?? 'unknown') : 'unknown';
             $storagePath = "subcategory/{$categoryName}/{$fileName}";
 
-            // Delete old photo if exists
+            // Move old photo to gallery instead of deleting
             $oldPhoto = $subcategory->photos()->first();
             if ($oldPhoto) {
+                $this->copyToGallery('subcategory', $subcategory->id, $oldPhoto->src);
                 $oldPath = str_replace('storage/', '', $oldPhoto->src);
                 Storage::disk('public')->delete($oldPath);
                 $oldPhoto->delete();
@@ -137,6 +142,9 @@ class DalleImageService
             ]);
             $subcategory->photos()->save($photo);
 
+            // Also save a copy to the gallery
+            $this->saveToGallery('subcategory', $subcategory->id, $storagePath);
+
             return true;
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $responseBody = $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response';
@@ -149,6 +157,39 @@ class DalleImageService
             Log::error("DALL-E generation failed for subcategory {$subcategory->id}: " . $e->getMessage());
             return false;
         }
+    }
+
+    /**
+     * Copy an existing photo file to the gallery folder.
+     */
+    protected function copyToGallery(string $type, int $id, string $src): void
+    {
+        $sourcePath = str_replace('storage/', '', $src);
+        if (!Storage::disk('public')->exists($sourcePath)) {
+            return;
+        }
+
+        $galleryDir = "ai-gallery/{$type}/{$id}";
+        $fileName = Str::uuid() . '.png';
+        $galleryPath = "{$galleryDir}/{$fileName}";
+
+        Storage::disk('public')->copy($sourcePath, $galleryPath);
+    }
+
+    /**
+     * Save a copy of the new image to the gallery folder.
+     */
+    protected function saveToGallery(string $type, int $id, string $storagePath): void
+    {
+        if (!Storage::disk('public')->exists($storagePath)) {
+            return;
+        }
+
+        $galleryDir = "ai-gallery/{$type}/{$id}";
+        $fileName = Str::uuid() . '.png';
+        $galleryPath = "{$galleryDir}/{$fileName}";
+
+        Storage::disk('public')->copy($storagePath, $galleryPath);
     }
 
     /**
