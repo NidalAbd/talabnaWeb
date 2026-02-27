@@ -39,8 +39,7 @@ class DalleImageService
         $nameEn = $category->name['en'] ?? '';
         $nameAr = $category->name['ar'] ?? '';
 
-        $prompt = "Single minimal 3D icon representing '{$nameEn}' category (Arabic: '{$nameAr}') for a premium mobile marketplace app. Soft rounded geometry, smooth matte plastic material, vibrant modern gradients, centered, isolated object. Transparent background (no white background), no text, no watermark, no border, no extra objects.";
-
+$prompt = "Single realistic 3D icon of a clear everyday object that represents '{$nameEn}' category (Arabic: '{$nameAr}') for a local services marketplace app. Simple recognizable item only, front view, centered, isolated, smooth matte plastic material, friendly modern style, transparent background, subtle shadow, no text, no symbols, no abstract shapes, no decorative UI elements, no extra objects.";
         try {
             $this->lastError = null;
 
@@ -98,8 +97,7 @@ class DalleImageService
         $nameEn = $subcategory->name['en'] ?? '';
         $nameAr = $subcategory->name['ar'] ?? '';
 
-        $prompt = "Single minimal 3D icon representing '{$nameEn}' subcategory (Arabic: '{$nameAr}') for a premium mobile marketplace app. Specific object symbolizing the subcategory, soft rounded geometry, smooth matte plastic material, vibrant but balanced modern colors, centered front view, isolated object, transparent background (no white background), subtle soft shadow, clean composition, no text, no letters, no watermark, no border, no extra elements, consistent professional app icon style.";
-
+$prompt = "Single 3D icon of a real physical object representing '{$nameEn}' category (Arabic: '{$nameAr}') for a marketplace app. Must depict a recognizable everyday item, not abstract art. Front view, centered, isolated, matte plastic material, friendly style, transparent background, no text, no decorative shapes.";
         try {
             $this->lastError = null;
 
