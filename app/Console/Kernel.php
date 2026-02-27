@@ -34,6 +34,14 @@ class Kernel extends ConsoleKernel
         $schedule->command('monitor:cleanup --keep=3')
             ->dailyAt('02:00')
             ->withoutOverlapping();
+
+        // AI Image Generation: run daily at 1 AM, auto-continue from last progress
+        // Uses withoutOverlapping() since it can run for hours (65s per image)
+        $schedule->command('ai:generate --auto')
+            ->dailyAt('01:00')
+            ->withoutOverlapping(1440) // 24h lock expiry
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/ai-generate.log'));
     }
 
     /**

@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Storage;
 
 class GenerateAiImages extends Command
 {
-    protected $signature = 'ai:generate {type? : category or subcategory (omit to generate both)}';
+    protected $signature = 'ai:generate
+        {type? : category or subcategory (omit to generate both)}
+        {--auto : Run non-interactively, auto-continue from last progress (for cron/scheduler)}
+        {--fresh : When used with --auto, start from beginning instead of continuing}';
     protected $description = 'Generate AI images for categories and/or subcategories with rate-limit-safe 65s delay';
 
     protected DalleImageService $dalleService;
@@ -59,14 +62,22 @@ class GenerateAiImages extends Command
         $progressFile = "ai_generate_progress_{$type}.json";
         $progress = $this->loadProgress($progressFile);
 
+        $isAuto = $this->option('auto');
+
         $this->newLine();
         $this->renderSectionHeader($type === 'category' ? '📁 CATEGORIES' : '📂 SUBCATEGORIES');
 
-        $choice = $this->choice(
-            "[$type] Start from beginning or continue from last?",
-            ['start', 'continue'],
-            $progress ? 'continue' : 'start'
-        );
+        if ($isAuto) {
+            // Non-interactive: auto-continue from last, or start fresh with --fresh
+            $choice = $this->option('fresh') ? 'start' : 'continue';
+            $this->info("  [Auto mode] " . ($choice === 'start' ? 'Starting from beginning' : 'Continuing from last progress'));
+        } else {
+            $choice = $this->choice(
+                "[$type] Start from beginning or continue from last?",
+                ['start', 'continue'],
+                $progress ? 'continue' : 'start'
+            );
+        }
 
         if ($choice === 'start') {
             $progress = ['last_id' => 0, 'completed' => [], 'errors' => []];
@@ -140,9 +151,14 @@ class GenerateAiImages extends Command
             $errors = count($progress['errors']);
             $this->line("  <fg=gray>  Stats: {$completed} done, {$errors} failed, " . ($total - $current) . " remaining</>");
 
-            // Countdown timer between images (skip after last item)
+            // Wait between images (skip after last item)
             if ($index < $total - 1) {
-                $this->renderCountdown(65);
+                if ($isAuto) {
+                    $this->info("  Waiting 65s for rate limit...");
+                    sleep(65);
+                } else {
+                    $this->renderCountdown(65);
+                }
             }
 
             $this->newLine();
