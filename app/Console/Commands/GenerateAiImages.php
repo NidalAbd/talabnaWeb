@@ -10,8 +10,8 @@ use Illuminate\Support\Facades\Storage;
 
 class GenerateAiImages extends Command
 {
-    protected $signature = 'ai:generate {type : category or subcategory}';
-    protected $description = 'Generate AI images for categories or subcategories with rate-limit-safe 65s delay';
+    protected $signature = 'ai:generate {type? : category or subcategory (omit to generate both)}';
+    protected $description = 'Generate AI images for categories and/or subcategories with rate-limit-safe 65s delay';
 
     protected DalleImageService $dalleService;
 
@@ -25,16 +25,45 @@ class GenerateAiImages extends Command
     {
         $type = $this->argument('type');
 
-        if (!in_array($type, ['category', 'subcategory'])) {
-            $this->error('Type must be "category" or "subcategory".');
+        if ($type && !in_array($type, ['category', 'subcategory'])) {
+            $this->error('Type must be "category", "subcategory", or omit for both.');
             return Command::FAILURE;
         }
 
+        // If no type specified, run both sequentially
+        if (!$type) {
+            $this->renderHeader('AI Image Generator — Categories + Subcategories');
+
+            $catResult = $this->processType('category');
+            $subResult = $this->processType('subcategory');
+
+            $this->newLine();
+            $this->renderFinalSummary();
+
+            return ($catResult === Command::SUCCESS && $subResult === Command::SUCCESS)
+                ? Command::SUCCESS
+                : Command::FAILURE;
+        }
+
+        $this->renderHeader('AI Image Generator — ' . ucfirst($type));
+        $result = $this->processType($type);
+
+        $this->newLine();
+        $this->renderFinalSummary();
+
+        return $result;
+    }
+
+    protected function processType(string $type): int
+    {
         $progressFile = "ai_generate_progress_{$type}.json";
         $progress = $this->loadProgress($progressFile);
 
+        $this->newLine();
+        $this->renderSectionHeader($type === 'category' ? '📁 CATEGORIES' : '📂 SUBCATEGORIES');
+
         $choice = $this->choice(
-            'Start from beginning or continue from last?',
+            "[$type] Start from beginning or continue from last?",
             ['start', 'continue'],
             $progress ? 'continue' : 'start'
         );
@@ -53,22 +82,35 @@ class GenerateAiImages extends Command
         }
 
         if ($items->isEmpty()) {
-            $this->info('No items to process. All done!');
+            $this->info("  No {$type} items to process. All done!");
             return Command::SUCCESS;
         }
 
-        $this->info("Found {$items->count()} {$type}(s) to process (after ID {$lastId}).");
+        $total = $items->count();
+        $alreadyDone = count($progress['completed'] ?? []);
+
+        $this->info("  Found {$total} {$type}(s) remaining (after ID {$lastId}).");
         $this->newLine();
 
-        $bar = $this->output->createProgressBar($items->count());
-        $bar->start();
+        // Show items table before starting
+        $this->renderItemsTable($type, $items);
+        $this->newLine();
 
         foreach ($items as $index => $item) {
+            $current = $index + 1;
             $nameEn = $item->name['en'] ?? '';
             $nameAr = $item->name['ar'] ?? '';
             $displayName = $nameEn ?: $nameAr;
 
-            $bar->setMessage("Processing: {$displayName} (ID: {$item->id})");
+            // For subcategories, show parent category
+            $parentInfo = '';
+            if ($type === 'subcategory' && $item->category) {
+                $catName = $item->category->name['en'] ?? $item->category->name['ar'] ?? '';
+                $parentInfo = " [Category: {$catName}]";
+            }
+
+            // Current item header
+            $this->renderCurrentItem($current, $total, $displayName, $item->id, $parentInfo, $type);
 
             try {
                 if ($type === 'category') {
@@ -79,49 +121,160 @@ class GenerateAiImages extends Command
 
                 if ($success) {
                     $progress['completed'][] = ['id' => $item->id, 'name' => $displayName];
-                    $this->newLine();
-                    $this->info("  ✓ Generated image for \"{$displayName}\" (ID: {$item->id})");
+                    $this->line("  <fg=green>  ✓ SUCCESS</> — Image generated for \"{$displayName}\"");
                 } else {
                     $error = $this->dalleService->getLastError() ?: 'Unknown error';
                     $progress['errors'][] = ['id' => $item->id, 'name' => $displayName, 'error' => $error];
-                    $this->newLine();
-                    $this->warn("  ✗ Failed for \"{$displayName}\" (ID: {$item->id}): {$error}");
+                    $this->line("  <fg=red>  ✗ FAILED</> — \"{$displayName}\": {$error}");
                 }
             } catch (\Exception $e) {
                 $progress['errors'][] = ['id' => $item->id, 'name' => $displayName, 'error' => $e->getMessage()];
-                $this->newLine();
-                $this->error("  ✗ Exception for \"{$displayName}\" (ID: {$item->id}): {$e->getMessage()}");
+                $this->line("  <fg=red>  ✗ ERROR</> — \"{$displayName}\": {$e->getMessage()}");
             }
 
             $progress['last_id'] = $item->id;
             $this->saveProgress($progressFile, $progress);
 
-            $bar->advance();
+            // Show running stats
+            $completed = count($progress['completed']);
+            $errors = count($progress['errors']);
+            $this->line("  <fg=gray>  Stats: {$completed} done, {$errors} failed, " . ($total - $current) . " remaining</>");
 
-            // Sleep 65s between images (skip after last item)
-            if ($index < $items->count() - 1) {
-                $this->newLine();
-                $this->info("  Waiting 65 seconds for rate limit...");
-                sleep(65);
+            // Countdown timer between images (skip after last item)
+            if ($index < $total - 1) {
+                $this->renderCountdown(65);
             }
+
+            $this->newLine();
         }
 
-        $bar->finish();
-        $this->newLine(2);
+        // Section summary
+        $this->renderSectionSummary($type, $progress);
 
-        $this->info("=== Generation Complete ===");
-        $this->info("Completed: " . count($progress['completed']));
-        $this->info("Errors: " . count($progress['errors']));
+        return Command::SUCCESS;
+    }
+
+    protected function renderHeader(string $title): void
+    {
+        $line = str_repeat('═', strlen($title) + 4);
+        $this->newLine();
+        $this->line("<fg=cyan>╔{$line}╗</>");
+        $this->line("<fg=cyan>║</>  <fg=white;options=bold>{$title}</>  <fg=cyan>║</>");
+        $this->line("<fg=cyan>╚{$line}╝</>");
+    }
+
+    protected function renderSectionHeader(string $title): void
+    {
+        $line = str_repeat('─', 50);
+        $this->line("<fg=yellow>┌{$line}┐</>");
+        $this->line("<fg=yellow>│</> <fg=white;options=bold>{$title}</>" . str_repeat(' ', max(0, 49 - mb_strlen($title))) . "<fg=yellow>│</>");
+        $this->line("<fg=yellow>└{$line}┘</>");
+    }
+
+    protected function renderItemsTable(string $type, $items): void
+    {
+        $headers = $type === 'category'
+            ? ['#', 'ID', 'Name (EN)', 'Name (AR)']
+            : ['#', 'ID', 'Name (EN)', 'Name (AR)', 'Parent Category'];
+
+        $rows = [];
+        foreach ($items as $index => $item) {
+            $row = [
+                $index + 1,
+                $item->id,
+                $item->name['en'] ?? '—',
+                $item->name['ar'] ?? '—',
+            ];
+
+            if ($type === 'subcategory') {
+                $row[] = $item->category
+                    ? ($item->category->name['en'] ?? $item->category->name['ar'] ?? '—')
+                    : '—';
+            }
+
+            $rows[] = $row;
+        }
+
+        $this->table($headers, $rows);
+    }
+
+    protected function renderCurrentItem(int $current, int $total, string $name, int $id, string $parentInfo, string $type): void
+    {
+        $percent = round(($current / $total) * 100);
+        $barWidth = 30;
+        $filled = (int) round(($percent / 100) * $barWidth);
+        $empty = $barWidth - $filled;
+        $bar = str_repeat('█', $filled) . str_repeat('░', $empty);
+
+        $icon = $type === 'category' ? '📁' : '📄';
+
+        $this->line("  <fg=cyan>┌──────────────────────────────────────────────────┐</>");
+        $this->line("  <fg=cyan>│</> {$icon} <fg=white;options=bold>[{$current}/{$total}]</> <fg=yellow>{$name}</> <fg=gray>(ID: {$id})</>{$parentInfo}");
+        $this->line("  <fg=cyan>│</> <fg=green>{$bar}</> {$percent}%");
+        $this->line("  <fg=cyan>└──────────────────────────────────────────────────┘</>");
+    }
+
+    protected function renderCountdown(int $seconds): void
+    {
+        $this->newLine();
+        for ($i = $seconds; $i > 0; $i--) {
+            $mins = intdiv($i, 60);
+            $secs = $i % 60;
+            $timeStr = $mins > 0 ? sprintf('%dm %02ds', $mins, $secs) : "{$secs}s";
+
+            // Overwrite same line
+            $this->output->write("\r  <fg=gray>  ⏳ Next image in:</> <fg=yellow;options=bold>{$timeStr}</> <fg=gray>" . str_repeat('·', min($i, 30)) . "</>   ");
+            sleep(1);
+        }
+        // Clear the countdown line
+        $this->output->write("\r" . str_repeat(' ', 80) . "\r");
+    }
+
+    protected function renderSectionSummary(string $type, array $progress): void
+    {
+        $completed = count($progress['completed']);
+        $errors = count($progress['errors']);
+        $icon = $type === 'category' ? '📁' : '📂';
+
+        $this->line("<fg=cyan>  ═══════════════════════════════════════</>");
+        $this->line("  {$icon} <fg=white;options=bold>" . strtoupper($type) . " SUMMARY</>");
+        $this->line("  <fg=green>  ✓ Completed:</> {$completed}");
+        $this->line("  <fg=red>  ✗ Errors:</>    {$errors}");
 
         if (!empty($progress['errors'])) {
             $this->newLine();
-            $this->warn("Failed items:");
+            $this->line("  <fg=red;options=bold>  Failed items:</>");
             foreach ($progress['errors'] as $err) {
-                $this->warn("  - {$err['name']} (ID: {$err['id']}): {$err['error']}");
+                $this->line("  <fg=red>    • {$err['name']} (ID: {$err['id']}): {$err['error']}</>");
             }
         }
 
-        return Command::SUCCESS;
+        $this->line("<fg=cyan>  ═══════════════════════════════════════</>");
+    }
+
+    protected function renderFinalSummary(): void
+    {
+        // Load both progress files for final overview
+        $catProgress = $this->loadProgress('ai_generate_progress_category.json');
+        $subProgress = $this->loadProgress('ai_generate_progress_subcategory.json');
+
+        $this->line("<fg=cyan;options=bold>╔══════════════════════════════════════════╗</>");
+        $this->line("<fg=cyan;options=bold>║</>  <fg=white;options=bold>FINAL OVERVIEW</>                          <fg=cyan;options=bold>║</>");
+        $this->line("<fg=cyan;options=bold>╠══════════════════════════════════════════╣</>");
+
+        if ($catProgress) {
+            $cc = count($catProgress['completed'] ?? []);
+            $ce = count($catProgress['errors'] ?? []);
+            $this->line("<fg=cyan;options=bold>║</>  📁 Categories:   <fg=green>{$cc} done</>  <fg=red>{$ce} failed</>      <fg=cyan;options=bold>║</>");
+        }
+
+        if ($subProgress) {
+            $sc = count($subProgress['completed'] ?? []);
+            $se = count($subProgress['errors'] ?? []);
+            $this->line("<fg=cyan;options=bold>║</>  📂 Subcategories: <fg=green>{$sc} done</>  <fg=red>{$se} failed</>      <fg=cyan;options=bold>║</>");
+        }
+
+        $this->line("<fg=cyan;options=bold>╚══════════════════════════════════════════╝</>");
     }
 
     protected function loadProgress(string $file): ?array
