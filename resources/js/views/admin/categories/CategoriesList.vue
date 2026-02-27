@@ -379,6 +379,7 @@
 import { ref, computed, onMounted, watch, reactive, onBeforeUnmount } from 'vue'
 import { useCategories } from '../../../composables/useCategories'
 import CategoryFormModal from '../../../components/admin/categories/CategoryFormModal.vue'
+import Swal from 'sweetalert2'
 
 const { categories, loading, fetchCategories, deleteCategory, toggleStatus, toggleFeatured, togglePopular } = useCategories()
 
@@ -479,14 +480,21 @@ const editCategory = (category) => {
 
 const handleToggleStatus = async (category) => {
   closeMenus()
-  if (!confirm(`Are you sure you want to ${category.is_suspended ? 'activate' : 'suspend'} "${category.name.en}"?`)) {
-    return
-  }
+  const action = category.is_suspended ? 'activate' : 'suspend'
+  const result = await Swal.fire({
+    icon: 'question',
+    title: `${action.charAt(0).toUpperCase() + action.slice(1)} Category?`,
+    text: `Are you sure you want to ${action} "${category.name.en}"?`,
+    showCancelButton: true,
+    confirmButtonText: `Yes, ${action} it`,
+    cancelButtonText: 'Cancel',
+  })
+  if (!result.isConfirmed) return
   try {
     await toggleStatus(category.id)
     await loadCategories(categories.value.current_page)
   } catch (error) {
-    alert(error.message || 'Failed to toggle status')
+    Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Failed to toggle status' })
   }
 }
 
@@ -496,7 +504,7 @@ const handleToggleFeatured = async (category) => {
     await toggleFeatured(category.id)
     await loadCategories(categories.value.current_page)
   } catch (error) {
-    alert(error.message || 'Failed to toggle featured status')
+    Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Failed to toggle featured status' })
   }
 }
 
@@ -506,20 +514,28 @@ const handleTogglePopular = async (category) => {
     await togglePopular(category.id)
     await loadCategories(categories.value.current_page)
   } catch (error) {
-    alert(error.message || 'Failed to toggle popular status')
+    Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Failed to toggle popular status' })
   }
 }
 
 const handleDelete = async (category) => {
   closeMenus()
-  if (!confirm(`Are you sure you want to delete "${category.name.en}"? This action cannot be undone.`)) {
-    return
-  }
+  const result = await Swal.fire({
+    icon: 'warning',
+    title: 'Delete Category?',
+    text: `Are you sure you want to delete "${category.name.en}"? This action cannot be undone.`,
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel',
+  })
+  if (!result.isConfirmed) return
   try {
     await deleteCategory(category.id)
     await loadCategories(categories.value.current_page)
+    Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Category has been deleted.', timer: 2000, showConfirmButton: false })
   } catch (error) {
-    alert('Error deleting category: ' + (error.message || 'Unknown error'))
+    Swal.fire({ icon: 'error', title: 'Error', text: 'Error deleting category: ' + (error.message || 'Unknown error') })
   }
 }
 
@@ -543,13 +559,28 @@ const handleGenerateAiImage = async (category) => {
     })
     const data = await response.json()
     if (data.success) {
-      alert(data.message)
+      await Swal.fire({
+        icon: 'success',
+        title: 'Image Generated!',
+        text: data.message,
+        timer: 3000,
+        showConfirmButton: false,
+        toast: false,
+      })
       await loadCategories(categories.value.current_page)
     } else {
-      alert(data.message || 'Failed to generate AI image')
+      Swal.fire({
+        icon: 'error',
+        title: 'Generation Failed',
+        text: data.message || 'Failed to generate AI image',
+      })
     }
   } catch (error) {
-    alert('Error generating AI image: ' + (error.message || 'Unknown error'))
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error generating AI image: ' + (error.message || 'Unknown error'),
+    })
   } finally {
     const newSet2 = new Set(generatingIds.value)
     newSet2.delete(category.id)

@@ -385,6 +385,7 @@
 import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useSubCategories } from '../../../composables/useSubCategories'
 import SubCategoryFormModal from '../../../components/admin/subcategories/SubCategoryFormModal.vue'
+import Swal from 'sweetalert2'
 
 const { subcategories, stats, loading, fetchSubCategories, fetchStats, deleteSubCategory, toggleFeatured, togglePopular } = useSubCategories()
 
@@ -523,7 +524,7 @@ const handleToggleFeatured = async (subcategory) => {
       fetchStats()
     ])
   } catch (err) {
-    alert('Failed to toggle featured status')
+    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to toggle featured status' })
   }
 }
 
@@ -536,20 +537,28 @@ const handleTogglePopular = async (subcategory) => {
       fetchStats()
     ])
   } catch (err) {
-    alert('Failed to toggle popular status')
+    Swal.fire({ icon: 'error', title: 'Error', text: 'Failed to toggle popular status' })
   }
 }
 
 const handleDelete = async (subcategory) => {
   closeMenus()
-  if (!confirm(`Are you sure you want to delete "${subcategory.name.en}"?`)) {
-    return
-  }
+  const result = await Swal.fire({
+    icon: 'warning',
+    title: 'Delete Subcategory?',
+    text: `Are you sure you want to delete "${subcategory.name.en}"? This action cannot be undone.`,
+    showCancelButton: true,
+    confirmButtonColor: '#d33',
+    confirmButtonText: 'Yes, delete it',
+    cancelButtonText: 'Cancel',
+  })
+  if (!result.isConfirmed) return
   try {
     await deleteSubCategory(subcategory.id)
     await loadSubCategories()
+    Swal.fire({ icon: 'success', title: 'Deleted!', text: 'Subcategory has been deleted.', timer: 2000, showConfirmButton: false })
   } catch (error) {
-    alert(error.message || 'Failed to delete sub-category')
+    Swal.fire({ icon: 'error', title: 'Error', text: error.message || 'Failed to delete sub-category' })
   }
 }
 
@@ -573,13 +582,28 @@ const handleGenerateAiImage = async (subcategory) => {
     })
     const data = await response.json()
     if (data.success) {
-      alert(data.message)
+      await Swal.fire({
+        icon: 'success',
+        title: 'Image Generated!',
+        text: data.message,
+        timer: 3000,
+        showConfirmButton: false,
+        toast: false,
+      })
       await loadSubCategories()
     } else {
-      alert(data.message || 'Failed to generate AI image')
+      Swal.fire({
+        icon: 'error',
+        title: 'Generation Failed',
+        text: data.message || 'Failed to generate AI image',
+      })
     }
   } catch (error) {
-    alert('Error generating AI image: ' + (error.message || 'Unknown error'))
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error generating AI image: ' + (error.message || 'Unknown error'),
+    })
   } finally {
     const newSet2 = new Set(generatingIds.value)
     newSet2.delete(subcategory.id)
