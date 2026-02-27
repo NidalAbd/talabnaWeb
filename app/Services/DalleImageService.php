@@ -32,8 +32,7 @@ class DalleImageService
         $nameEn = $category->name['en'] ?? '';
         $nameAr = $category->name['ar'] ?? '';
 
-$prompt = "Single minimal 3D icon representing '{$nameEn}' category (Arabic: '{$nameAr}') for a premium mobile marketplace application. Soft rounded geometry, smooth matte plastic material, vibrant modern gradients, centered front view, isolated object, pure white background, subtle soft shadow beneath, clean composition, no text, no symbols, no watermark, no border, no additional elements, consistent professional app icon style.";
-        try {
+$prompt = "Single minimal 3D icon representing '{$nameEn}' category (Arabic: '{$nameAr}') for a premium mobile marketplace app. Soft rounded geometry, smooth matte plastic material, vibrant modern gradients, centered, isolated object. Transparent background (no white background), no text, no watermark, no border, no extra objects.";        try {
             $imageUrl = $this->callDalleApi($prompt);
             if (!$imageUrl) {
                 return false;
