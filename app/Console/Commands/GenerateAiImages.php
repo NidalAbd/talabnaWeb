@@ -84,6 +84,9 @@ class GenerateAiImages extends Command
             $this->saveProgress($progressFile, $progress);
         }
 
+        // Ensure all keys exist (handles legacy/incomplete progress files)
+        $progress = array_merge(['last_id' => 0, 'completed' => [], 'errors' => []], $progress ?? []);
+
         $lastId = $progress['last_id'] ?? 0;
 
         if ($type === 'category') {
