@@ -32,8 +32,7 @@ class DalleImageService
         $nameEn = $category->name['en'] ?? '';
         $nameAr = $category->name['ar'] ?? '';
 
-        $prompt = "3D illustrated icon for mobile app category '{$nameEn}' (Arabic: '{$nameAr}'). Soft 3D render, vibrant gradients, clean white background, professional digital identity style for app UI. No text in image.";
-
+$prompt = "Single minimal 3D icon representing '{$nameEn}' category (Arabic: '{$nameAr}') for a premium mobile marketplace application. Soft rounded geometry, smooth matte plastic material, vibrant modern gradients, centered front view, isolated object, pure white background, subtle soft shadow beneath, clean composition, no text, no symbols, no watermark, no border, no additional elements, consistent professional app icon style.";
         try {
             $imageUrl = $this->callDalleApi($prompt);
             if (!$imageUrl) {
