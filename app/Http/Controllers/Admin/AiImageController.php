@@ -21,12 +21,27 @@ class AiImageController extends Controller
     /**
      * Generate AI image for a single category.
      */
-    public function generateCategory(int $id): RedirectResponse
+    public function generateCategory(Request $request, int $id)
     {
         $category = Categories::findOrFail($id);
         $name = $category->name['en'] ?? $category->name['ar'] ?? 'Category';
 
         $success = $this->dalleService->generateForCategory($category);
+
+        if ($request->expectsJson()) {
+            if ($success) {
+                $category->load('photos');
+                return response()->json([
+                    'success' => true,
+                    'message' => "AI image generated for \"{$name}\".",
+                    'image_url' => $category->photos->first()?->src,
+                ]);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => "Failed to generate AI image for \"{$name}\".",
+            ], 500);
+        }
 
         if ($success) {
             return redirect()->back()->with('success', "AI image generated for \"{$name}\".");
@@ -38,12 +53,27 @@ class AiImageController extends Controller
     /**
      * Generate AI image for a single subcategory.
      */
-    public function generateSubcategory(int $id): RedirectResponse
+    public function generateSubcategory(Request $request, int $id)
     {
         $subcategory = Sub_categories::with('category')->findOrFail($id);
         $name = $subcategory->name['en'] ?? $subcategory->name['ar'] ?? 'Subcategory';
 
         $success = $this->dalleService->generateForSubcategory($subcategory);
+
+        if ($request->expectsJson()) {
+            if ($success) {
+                $subcategory->load('photos');
+                return response()->json([
+                    'success' => true,
+                    'message' => "AI image generated for \"{$name}\".",
+                    'image_url' => $subcategory->photos->first()?->src,
+                ]);
+            }
+            return response()->json([
+                'success' => false,
+                'message' => "Failed to generate AI image for \"{$name}\".",
+            ], 500);
+        }
 
         if ($success) {
             return redirect()->back()->with('success', "AI image generated for \"{$name}\".");

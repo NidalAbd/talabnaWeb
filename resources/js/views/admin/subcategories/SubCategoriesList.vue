@@ -87,6 +87,9 @@
         <button class="action-btn secondary" @click="resetFilters">
           <i class="fas fa-redo"></i>
         </button>
+        <button class="action-btn ai-generate" @click="generateAllSubcategories">
+          <i class="fas fa-magic"></i> AI Generate All
+        </button>
         <button class="action-btn primary" @click="openCreateModal">
           <i class="fas fa-plus"></i> Add Subcategory
         </button>
@@ -152,6 +155,10 @@
               <i class="fas fa-ellipsis-v"></i>
             </button>
             <div v-if="activeMenu === subcategory.id" class="dropdown-menu" @click.stop>
+              <button @click="handleGenerateAiImage(subcategory)" class="menu-item" :disabled="generatingIds.has(subcategory.id)">
+                <i :class="generatingIds.has(subcategory.id) ? 'fas fa-spinner fa-spin' : 'fas fa-magic'"></i>
+                {{ generatingIds.has(subcategory.id) ? 'Generating...' : 'AI Generate Image' }}
+              </button>
               <button @click="handleToggleFeatured(subcategory)" class="menu-item">
                 <i class="fas fa-star"></i>
                 {{ subcategory.is_featured ? 'Remove Featured' : 'Set Featured' }}
@@ -284,6 +291,14 @@
             <td>
               <div class="table-actions">
                 <button
+                  @click="handleGenerateAiImage(subcategory)"
+                  class="action-btn-small ai-gen"
+                  :disabled="generatingIds.has(subcategory.id)"
+                  title="Generate AI Image"
+                >
+                  <i :class="generatingIds.has(subcategory.id) ? 'fas fa-spinner fa-spin' : 'fas fa-magic'"></i>
+                </button>
+                <button
                   @click="handleToggleFeatured(subcategory)"
                   class="action-btn-small"
                   :class="subcategory.is_featured ? 'featured-active' : 'featured'"
@@ -393,6 +408,7 @@ const selectedSubCategory = ref(null)
 const viewMode = ref('list')
 const activeMenu = ref(null)
 const placeholderImage = '/storage/countryFlag/placeholder-flag.jpg'
+const generatingIds = ref(new Set())
 let searchTimeout = null
 
 const featuredCount = computed(() => {
@@ -535,6 +551,53 @@ const handleDelete = async (subcategory) => {
   } catch (error) {
     alert(error.message || 'Failed to delete sub-category')
   }
+}
+
+const handleGenerateAiImage = async (subcategory) => {
+  closeMenus()
+  if (generatingIds.value.has(subcategory.id)) return
+
+  const newSet = new Set(generatingIds.value)
+  newSet.add(subcategory.id)
+  generatingIds.value = newSet
+
+  try {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content
+    const response = await fetch(`/ai-image/generate-subcategory/${subcategory.id}`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': token,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    const data = await response.json()
+    if (data.success) {
+      alert(data.message)
+      await loadSubCategories()
+    } else {
+      alert(data.message || 'Failed to generate AI image')
+    }
+  } catch (error) {
+    alert('Error generating AI image: ' + (error.message || 'Unknown error'))
+  } finally {
+    const newSet2 = new Set(generatingIds.value)
+    newSet2.delete(subcategory.id)
+    generatingIds.value = newSet2
+  }
+}
+
+const generateAllSubcategories = () => {
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = '/ai-image/generate-all-subcategories'
+  const csrf = document.createElement('input')
+  csrf.type = 'hidden'
+  csrf.name = '_token'
+  csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || ''
+  form.appendChild(csrf)
+  document.body.appendChild(form)
+  form.submit()
 }
 
 const getImageUrl = (url) => {
@@ -693,6 +756,11 @@ const handleImageError = (event) => {
 .action-btn.warning {
   background: linear-gradient(135deg, #f7971e 0%, #ffd200 100%);
   color: #333;
+}
+
+.action-btn.ai-generate {
+  background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+  color: white;
 }
 
 .action-btn:hover {
@@ -1142,6 +1210,16 @@ const handleImageError = (event) => {
 .action-btn-small.popular-active {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
+}
+
+.action-btn-small.ai-gen {
+  background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+  color: white;
+}
+
+.action-btn-small.ai-gen:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .action-btn-small.delete {

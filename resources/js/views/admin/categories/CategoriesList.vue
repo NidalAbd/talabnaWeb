@@ -73,6 +73,9 @@
         <button class="action-btn secondary" @click="resetFilters">
           <i class="fas fa-redo"></i>
         </button>
+        <button class="action-btn ai-generate" @click="generateAllCategories">
+          <i class="fas fa-magic"></i> AI Generate All
+        </button>
         <button class="action-btn primary" @click="showCreateModal = true">
           <i class="fas fa-plus"></i> Add Category
         </button>
@@ -139,6 +142,10 @@
               <i class="fas fa-ellipsis-v"></i>
             </button>
             <div v-if="activeMenu === category.id" class="dropdown-menu" @click.stop>
+              <button @click="handleGenerateAiImage(category)" class="menu-item" :disabled="generatingIds.has(category.id)">
+                <i :class="generatingIds.has(category.id) ? 'fas fa-spinner fa-spin' : 'fas fa-magic'"></i>
+                {{ generatingIds.has(category.id) ? 'Generating...' : 'AI Generate Image' }}
+              </button>
               <button @click="editCategory(category)" class="menu-item">
                 <i class="fas fa-edit"></i> Edit Category
               </button>
@@ -269,6 +276,14 @@
             </td>
             <td>
               <div class="table-actions">
+                <button
+                  @click="handleGenerateAiImage(category)"
+                  class="action-btn-small ai-gen"
+                  :disabled="generatingIds.has(category.id)"
+                  title="Generate AI Image"
+                >
+                  <i :class="generatingIds.has(category.id) ? 'fas fa-spinner fa-spin' : 'fas fa-magic'"></i>
+                </button>
                 <button @click="editCategory(category)" class="action-btn-small edit" title="Edit">
                   <i class="fas fa-edit"></i>
                 </button>
@@ -378,6 +393,7 @@ const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const selectedCategory = ref(null)
 const placeholderImage = '/storage/countryFlag/placeholder-flag.jpg'
+const generatingIds = ref(new Set())
 
 const filters = reactive({
   search: '',
@@ -507,6 +523,53 @@ const handleDelete = async (category) => {
   }
 }
 
+const handleGenerateAiImage = async (category) => {
+  closeMenus()
+  if (generatingIds.value.has(category.id)) return
+
+  const newSet = new Set(generatingIds.value)
+  newSet.add(category.id)
+  generatingIds.value = newSet
+
+  try {
+    const token = document.querySelector('meta[name="csrf-token"]')?.content
+    const response = await fetch(`/ai-image/generate-category/${category.id}`, {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': token,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+    })
+    const data = await response.json()
+    if (data.success) {
+      alert(data.message)
+      await loadCategories(categories.value.current_page)
+    } else {
+      alert(data.message || 'Failed to generate AI image')
+    }
+  } catch (error) {
+    alert('Error generating AI image: ' + (error.message || 'Unknown error'))
+  } finally {
+    const newSet2 = new Set(generatingIds.value)
+    newSet2.delete(category.id)
+    generatingIds.value = newSet2
+  }
+}
+
+const generateAllCategories = () => {
+  const form = document.createElement('form')
+  form.method = 'POST'
+  form.action = '/ai-image/generate-all-categories'
+  const csrf = document.createElement('input')
+  csrf.type = 'hidden'
+  csrf.name = '_token'
+  csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || ''
+  form.appendChild(csrf)
+  document.body.appendChild(form)
+  form.submit()
+}
+
 const closeModal = () => {
   showCreateModal.value = false
   showEditModal.value = false
@@ -631,6 +694,11 @@ const handleImageError = (event) => {
 
 .action-btn.secondary {
   background: #6c757d;
+  color: white;
+}
+
+.action-btn.ai-generate {
+  background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
   color: white;
 }
 
@@ -1098,6 +1166,16 @@ const handleImageError = (event) => {
 .action-btn-small.popular-active {
   background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
   color: white;
+}
+
+.action-btn-small.ai-gen {
+  background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+  color: white;
+}
+
+.action-btn-small.ai-gen:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 .action-btn-small.delete {
