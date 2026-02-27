@@ -7,11 +7,6 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use Illuminate\Bus\Queueable;
-use NotificationChannels\Fcm\Resources\AndroidConfig;
-use NotificationChannels\Fcm\Resources\AndroidFcmOptions;
-use NotificationChannels\Fcm\Resources\AndroidNotification;
-use NotificationChannels\Fcm\Resources\ApnsConfig;
-use NotificationChannels\Fcm\Resources\ApnsFcmOptions;
 
 class new_servicepost_notification extends Notification
 {
@@ -39,21 +34,18 @@ class new_servicepost_notification extends Notification
         $type = ($this->servicePost->type === 'عرض') ? 'offer' : 'request';
         $body = "{$this->user->user_name} {$type} the following service";
         return FcmMessage::create()
-            ->setData(['data1' => 'value', 'data2' => 'value2'])
-            ->setNotification(\NotificationChannels\Fcm\Resources\Notification::create()
-                ->setTitle($title)
-                ->setBody($body))
-            ->setToken($this->token_fcm)
-            ->setAndroid(
-                AndroidConfig::create()
-                    ->setFcmOptions(AndroidFcmOptions::create()->setAnalyticsLabel('analytics'))
-                    ->setNotification(AndroidNotification::create()->setColor('#0A0A0A'))
-            )
-            ->setApns(
-                ApnsConfig::create()
-                    ->setFcmOptions(ApnsFcmOptions::create()->setAnalyticsLabel('analytics_ios'))
+            ->data([
+                'type' => 'new_service_post',
+                'post_id' => (string) $this->servicePost->id,
+                'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
+            ])
+            ->notification(
+                \NotificationChannels\Fcm\Resources\Notification::create()
+                    ->title($title)
+                    ->body($body)
             );
     }
+
     public function toMail($notifiable)
     {
         return (new MailMessage)

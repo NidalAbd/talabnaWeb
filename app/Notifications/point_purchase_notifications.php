@@ -6,11 +6,6 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use Illuminate\Bus\Queueable;
-use NotificationChannels\Fcm\Resources\AndroidConfig;
-use NotificationChannels\Fcm\Resources\AndroidFcmOptions;
-use NotificationChannels\Fcm\Resources\AndroidNotification;
-use NotificationChannels\Fcm\Resources\ApnsConfig;
-use NotificationChannels\Fcm\Resources\ApnsFcmOptions;
 
 class point_purchase_notifications extends Notification
 {
@@ -45,8 +40,6 @@ class point_purchase_notifications extends Notification
 
     public function toFcm($notifiable): FcmMessage
     {
-        $logoImageUrl = 'https://talbna.cloud/img/logo.png';
-
         if ($this->status === 'approved') {
             $title = 'Points Added Successfully!';
             $titleAr = 'تمت إضافة النقاط بنجاح!';
@@ -60,7 +53,7 @@ class point_purchase_notifications extends Notification
         }
 
         return FcmMessage::create()
-            ->setData([
+            ->data([
                 'type' => 'point_purchase',
                 'status' => $this->status,
                 'points' => (string) $this->points,
@@ -69,29 +62,10 @@ class point_purchase_notifications extends Notification
                 'body_ar' => $bodyAr,
                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
             ])
-            ->setNotification(\NotificationChannels\Fcm\Resources\Notification::create()
-                ->setTitle($title)
-                ->setBody($body)
-                ->setImage($logoImageUrl))
-            ->setAndroid(
-                AndroidConfig::create()
-                    ->setFcmOptions(AndroidFcmOptions::create()->setAnalyticsLabel('point_purchase_' . $this->status))
-                    ->setNotification(
-                        AndroidNotification::create()
-                            ->setColor('#4CAF50')
-                            ->setSound('default')
-                            ->setChannelId('points_channel')
-                    )
-            )
-            ->setApns(
-                ApnsConfig::create()
-                    ->setFcmOptions(ApnsFcmOptions::create()->setAnalyticsLabel('point_purchase_' . $this->status))
-                    ->setPayload([
-                        'aps' => [
-                            'sound' => 'default',
-                            'badge' => 1,
-                        ]
-                    ])
+            ->notification(
+                \NotificationChannels\Fcm\Resources\Notification::create()
+                    ->title($title)
+                    ->body($body)
             );
     }
 }

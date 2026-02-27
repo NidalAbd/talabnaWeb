@@ -6,11 +6,6 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use Illuminate\Bus\Queueable;
-use NotificationChannels\Fcm\Resources\AndroidConfig;
-use NotificationChannels\Fcm\Resources\AndroidFcmOptions;
-use NotificationChannels\Fcm\Resources\AndroidNotification;
-use NotificationChannels\Fcm\Resources\ApnsConfig;
-use NotificationChannels\Fcm\Resources\ApnsFcmOptions;
 
 class BadgeExpirationNotification extends Notification
 {
@@ -41,7 +36,7 @@ class BadgeExpirationNotification extends Notification
         $bodyAr = "انتهت صلاحية شارة {$this->oldBadgeName} على المنشور #{$this->postId} وتم تغييرها إلى عادي.";
 
         return FcmMessage::create()
-            ->setData([
+            ->data([
                 'type' => 'badge_expiration',
                 'post_id' => (string) $this->postId,
                 'old_badge' => $this->oldBadgeName,
@@ -49,29 +44,10 @@ class BadgeExpirationNotification extends Notification
                 'body_ar' => $bodyAr,
                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
             ])
-            ->setNotification(\NotificationChannels\Fcm\Resources\Notification::create()
-                ->setTitle($title)
-                ->setBody($body)
-                ->setImage('https://talbna.cloud/img/logo.png'))
-            ->setAndroid(
-                AndroidConfig::create()
-                    ->setFcmOptions(AndroidFcmOptions::create()->setAnalyticsLabel('badge_expiration'))
-                    ->setNotification(
-                        AndroidNotification::create()
-                            ->setColor('#FF9800')
-                            ->setSound('default')
-                            ->setChannelId('badge_channel')
-                    )
-            )
-            ->setApns(
-                ApnsConfig::create()
-                    ->setFcmOptions(ApnsFcmOptions::create()->setAnalyticsLabel('badge_expiration'))
-                    ->setPayload([
-                        'aps' => [
-                            'sound' => 'default',
-                            'badge' => 1,
-                        ]
-                    ])
+            ->notification(
+                \NotificationChannels\Fcm\Resources\Notification::create()
+                    ->title($title)
+                    ->body($body)
             );
     }
 }

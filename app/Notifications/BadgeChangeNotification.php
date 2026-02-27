@@ -6,11 +6,6 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use Illuminate\Bus\Queueable;
-use NotificationChannels\Fcm\Resources\AndroidConfig;
-use NotificationChannels\Fcm\Resources\AndroidFcmOptions;
-use NotificationChannels\Fcm\Resources\AndroidNotification;
-use NotificationChannels\Fcm\Resources\ApnsConfig;
-use NotificationChannels\Fcm\Resources\ApnsFcmOptions;
 
 class BadgeChangeNotification extends Notification
 {
@@ -67,7 +62,7 @@ class BadgeChangeNotification extends Notification
         }
 
         return FcmMessage::create()
-            ->setData([
+            ->data([
                 'type' => 'badge_' . $this->type,
                 'post_id' => (string) $this->postId,
                 'badge_name' => $this->badgeName,
@@ -75,24 +70,10 @@ class BadgeChangeNotification extends Notification
                 'body_ar' => $this->messageAr ?: $body,
                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
             ])
-            ->setNotification(\NotificationChannels\Fcm\Resources\Notification::create()
-                ->setTitle($title)
-                ->setBody($body)
-                ->setImage('https://talbna.cloud/img/logo.png'))
-            ->setAndroid(
-                AndroidConfig::create()
-                    ->setFcmOptions(AndroidFcmOptions::create()->setAnalyticsLabel('badge_' . $this->type))
-                    ->setNotification(
-                        AndroidNotification::create()
-                            ->setColor('#FF9800')
-                            ->setSound('default')
-                            ->setChannelId('badge_channel')
-                    )
-            )
-            ->setApns(
-                ApnsConfig::create()
-                    ->setFcmOptions(ApnsFcmOptions::create()->setAnalyticsLabel('badge_' . $this->type))
-                    ->setPayload(['aps' => ['sound' => 'default', 'badge' => 1]])
+            ->notification(
+                \NotificationChannels\Fcm\Resources\Notification::create()
+                    ->title($title)
+                    ->body($body)
             );
     }
 }

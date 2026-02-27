@@ -6,11 +6,6 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use Illuminate\Bus\Queueable;
-use NotificationChannels\Fcm\Resources\AndroidConfig;
-use NotificationChannels\Fcm\Resources\AndroidFcmOptions;
-use NotificationChannels\Fcm\Resources\AndroidNotification;
-use NotificationChannels\Fcm\Resources\ApnsConfig;
-use NotificationChannels\Fcm\Resources\ApnsFcmOptions;
 
 class CommentNotification extends Notification
 {
@@ -52,31 +47,17 @@ class CommentNotification extends Notification
         }
 
         return FcmMessage::create()
-            ->setData([
+            ->data([
                 'type' => $this->isReply ? 'comment_reply' : 'comment',
                 'post_id' => (string) $this->postId,
                 'title_ar' => $titleAr,
                 'body_ar' => $bodyAr,
                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
             ])
-            ->setNotification(\NotificationChannels\Fcm\Resources\Notification::create()
-                ->setTitle($title)
-                ->setBody($body)
-                ->setImage('https://talbna.cloud/img/logo.png'))
-            ->setAndroid(
-                AndroidConfig::create()
-                    ->setFcmOptions(AndroidFcmOptions::create()->setAnalyticsLabel('comment'))
-                    ->setNotification(
-                        AndroidNotification::create()
-                            ->setColor('#2196F3')
-                            ->setSound('default')
-                            ->setChannelId('comments_channel')
-                    )
-            )
-            ->setApns(
-                ApnsConfig::create()
-                    ->setFcmOptions(ApnsFcmOptions::create()->setAnalyticsLabel('comment'))
-                    ->setPayload(['aps' => ['sound' => 'default', 'badge' => 1]])
+            ->notification(
+                \NotificationChannels\Fcm\Resources\Notification::create()
+                    ->title($title)
+                    ->body($body)
             );
     }
 }

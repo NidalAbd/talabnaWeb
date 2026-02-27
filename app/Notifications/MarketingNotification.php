@@ -6,11 +6,6 @@ use Illuminate\Notifications\Notification;
 use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use Illuminate\Bus\Queueable;
-use NotificationChannels\Fcm\Resources\AndroidConfig;
-use NotificationChannels\Fcm\Resources\AndroidFcmOptions;
-use NotificationChannels\Fcm\Resources\AndroidNotification;
-use NotificationChannels\Fcm\Resources\ApnsConfig;
-use NotificationChannels\Fcm\Resources\ApnsFcmOptions;
 
 class MarketingNotification extends Notification
 {
@@ -81,23 +76,11 @@ class MarketingNotification extends Notification
         $data['logo_url'] = $logoImageUrl;
 
         return FcmMessage::create()
-            ->setData($data)
-            ->setNotification(\NotificationChannels\Fcm\Resources\Notification::create()
-                ->setTitle($this->title)
-                ->setBody($this->body)
-                ->setImage($this->imageUrl))
-            ->setToken($this->deviceToken)
-            ->setAndroid(
-                AndroidConfig::create()
-                    ->setFcmOptions(AndroidFcmOptions::create()->setAnalyticsLabel('marketing_campaign'))
-                    ->setNotification(AndroidNotification::create()
-                        ->setClickAction($deepLink) // Use the converted URL
-                        ->setColor('#FE7A1A')
-                        ->setIcon('@mipmap/ic_launcher'))
-            )
-            ->setApns(
-                ApnsConfig::create()
-                    ->setFcmOptions(ApnsFcmOptions::create()->setAnalyticsLabel('marketing_campaign_ios'))
+            ->data($data)
+            ->notification(
+                \NotificationChannels\Fcm\Resources\Notification::create()
+                    ->title($this->title)
+                    ->body($this->body)
             );
     }
 }
