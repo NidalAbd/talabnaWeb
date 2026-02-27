@@ -39,7 +39,7 @@ class DalleImageService
         $nameEn = $category->name['en'] ?? '';
         $nameAr = $category->name['ar'] ?? '';
 
-$prompt = "Single realistic 3D icon of a clear everyday object that represents '{$nameEn}' category (Arabic: '{$nameAr}') for a local services marketplace app. Simple recognizable item only, front view, centered, isolated, smooth matte plastic material, friendly modern style, transparent background, subtle shadow, no text, no symbols, no abstract shapes, no decorative UI elements, no extra objects.";
+        $prompt = "Single clean 3D icon of a real object representing '{$nameEn}' (Arabic: '{$nameAr}') for a modern mobile marketplace app. Front-facing, centered, isolated object, smooth matte plastic material, friendly minimal style. Background: soft neutral studio gradient (light gray to very light gray), no pattern, no grid, no frame, no tile, no container shape, no decorative elements. Subtle soft shadow beneath object. No text, no letters, no logo, no watermark.";
         try {
             $this->lastError = null;
 
@@ -97,7 +97,7 @@ $prompt = "Single realistic 3D icon of a clear everyday object that represents '
         $nameEn = $subcategory->name['en'] ?? '';
         $nameAr = $subcategory->name['ar'] ?? '';
 
-$prompt = "Single 3D icon of a real physical object representing '{$nameEn}' category (Arabic: '{$nameAr}') for a marketplace app. Must depict a recognizable everyday item, not abstract art. Front view, centered, isolated, matte plastic material, friendly style, transparent background, no text, no decorative shapes.";
+        $prompt = "Single clean 3D icon of a real object representing '{$nameEn}' (Arabic: '{$nameAr}') for a modern mobile marketplace app. Front-facing, centered, isolated object, smooth matte plastic material, friendly minimal style. Background: soft neutral studio gradient (light gray to very light gray), no pattern, no grid, no frame, no tile, no container shape, no decorative elements. Subtle soft shadow beneath object. No text, no letters, no logo, no watermark.";
         try {
             $this->lastError = null;
 
