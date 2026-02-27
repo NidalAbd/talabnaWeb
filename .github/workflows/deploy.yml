@@ -241,11 +241,11 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          security: loose
+          protocol: ftps
           port: 21
           local-dir: ./deploy_laravel/
           server-dir: domains/talbna.cloud/
+          timeout: 600000
           exclude: |
             public/**
             vendor/**
@@ -270,11 +270,11 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          security: loose
+          protocol: ftps
           port: 21
           local-dir: ./deploy_public/
           server-dir: domains/talbna.cloud/public_html/
+          timeout: 600000
           exclude: |
             **/storage
             **/storage/**
