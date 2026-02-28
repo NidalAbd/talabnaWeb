@@ -93,6 +93,7 @@ document.addEventListener('DOMContentLoaded', () => {
         href.includes('/admin/role-assignments') ||
         href.includes('/admin/palservice-points') ||
         href.includes('/admin/seo') ||
+        href.includes('/admin/command-monitor') ||
         href.includes('/dashboard')
       )) {
         e.preventDefault()
