@@ -382,7 +382,7 @@ class SeoApiController extends Controller
         return response()->json($keywords);
     }
 
-    public function getDecliningingPages(Request $request): JsonResponse
+    public function getDecliningPages(Request $request): JsonResponse
     {
         $limit = $request->get('limit', 20);
         $days = $request->get('days', 28);

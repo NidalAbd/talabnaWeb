@@ -820,7 +820,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::get('/keywords/trending', [\App\Http\Controllers\Admin\SeoApiController::class, 'getTrendingKeywords'])->name('api.admin.seo.keywords.trending');
                 Route::get('/pages', [\App\Http\Controllers\Admin\SeoApiController::class, 'pages'])->name('api.admin.seo.pages');
                 Route::get('/pages/details', [\App\Http\Controllers\Admin\SeoApiController::class, 'pageDetails'])->name('api.admin.seo.pages.details');
-                Route::get('/pages/declining', [\App\Http\Controllers\Admin\SeoApiController::class, 'getDecliningingPages'])->name('api.admin.seo.pages.declining');
+                Route::get('/pages/declining', [\App\Http\Controllers\Admin\SeoApiController::class, 'getDecliningPages'])->name('api.admin.seo.pages.declining');
                 Route::get('/daily-stats', [\App\Http\Controllers\Admin\SeoApiController::class, 'dailyStats'])->name('api.admin.seo.daily-stats');
                 Route::get('/performance-by-type', [\App\Http\Controllers\Admin\SeoApiController::class, 'performanceByType'])->name('api.admin.seo.performance-by-type');
                 Route::get('/countries', [\App\Http\Controllers\Admin\SeoApiController::class, 'getCountries'])->name('api.admin.seo.countries');
