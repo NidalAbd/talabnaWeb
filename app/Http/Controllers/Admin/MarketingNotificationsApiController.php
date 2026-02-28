@@ -189,9 +189,11 @@ class MarketingNotificationsApiController extends Controller
         ]);
 
         try {
-            $users = User::whereNotNull('fcm_token')
-                ->where('is_active', 'active')
-                ->get();
+            // Get ALL active users for in-app notifications
+            $allActiveUsers = User::where('is_active', 'active')->get();
+
+            // Get users with FCM tokens for push notifications
+            $usersWithFcm = $allActiveUsers->filter(fn($u) => !empty($u->fcm_token));
 
             $successCount = 0;
             $failedCount = 0;
@@ -199,7 +201,29 @@ class MarketingNotificationsApiController extends Controller
 
             DB::beginTransaction();
 
-            foreach ($users as $user) {
+            // 1. Create in-app database notifications for ALL active users
+            $notificationMessage = json_encode([
+                'en' => $validated['title'] . ': ' . $validated['body'],
+                'ar' => $validated['title'] . ': ' . $validated['body'],
+            ]);
+
+            $now = now();
+            $notificationRecords = $allActiveUsers->map(fn($user) => [
+                'user_id' => $user->id,
+                'message' => $notificationMessage,
+                'type' => 'marketing',
+                'read' => false,
+                'created_at' => $now,
+                'updated_at' => $now,
+            ])->toArray();
+
+            // Batch insert in-app notifications (chunks of 500)
+            foreach (array_chunk($notificationRecords, 500) as $chunk) {
+                DB::table('notifications')->insert($chunk);
+            }
+
+            // 2. Send FCM push notifications to users with tokens
+            foreach ($usersWithFcm as $user) {
                 try {
                     $user->notify(new MarketingNotification(
                         $validated['title'],
@@ -234,7 +258,7 @@ class MarketingNotificationsApiController extends Controller
                 'body' => $validated['body'],
                 'image_url' => $validated['image_url'] ?? null,
                 'deep_link' => $validated['deep_link'] ?? null,
-                'total_recipients' => count($users),
+                'total_recipients' => count($allActiveUsers),
                 'successful_count' => $successCount,
                 'failed_count' => $failedCount,
                 'admin_id' => auth()->id(),
@@ -248,25 +272,27 @@ class MarketingNotificationsApiController extends Controller
             Log::info('Marketing campaign sent', [
                 'title'      => $validated['title'],
                 'admin_id'   => auth()->id(),
-                'total'      => count($users),
-                'successful' => $successCount,
-                'failed'     => $failedCount,
+                'total_users' => count($allActiveUsers),
+                'in_app_notifications' => count($allActiveUsers),
+                'fcm_sent' => $successCount,
+                'fcm_failed' => $failedCount,
             ]);
 
             if ($failedCount > 0) {
-                Log::warning('Marketing campaign had failures', [
+                Log::warning('Marketing campaign had FCM failures', [
                     'title'       => $validated['title'],
                     'failed_count' => $failedCount,
-                    'errors'      => array_slice($errors, 0, 20), // Log first 20 errors
+                    'errors'      => array_slice($errors, 0, 20),
                 ]);
             }
 
             return response()->json([
                 'message' => 'Notification sent successfully',
                 'result' => [
-                    'total' => count($users),
-                    'successful' => $successCount,
-                    'failed' => $failedCount,
+                    'total' => count($allActiveUsers),
+                    'in_app' => count($allActiveUsers),
+                    'push_successful' => $successCount,
+                    'push_failed' => $failedCount,
                     'errors' => $errors
                 ]
             ]);
