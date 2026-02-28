@@ -222,34 +222,68 @@ class MarketingNotificationsApiController extends Controller
                 DB::table('notifications')->insert($chunk);
             }
 
-            // 2. Send FCM push notifications to users with tokens
-            foreach ($usersWithFcm as $user) {
-                try {
-                    $user->notify(new MarketingNotification(
-                        $validated['title'],
-                        $validated['body'],
-                        $validated['image_url'] ?? null,
-                        $validated['deep_link'] ?? null,
-                        $user->fcm_token
-                    ));
+            // 2. Send FCM push notifications using Firebase SDK directly
+            //    (laravel-notification-channels/fcm silently swallows errors)
+            try {
+                $messaging = app('firebase.messaging');
 
-                    $successCount++;
-                } catch (\Exception $e) {
-                    $failedCount++;
-                    $errors[] = [
-                        'user_id' => $user->id,
-                        'user_name' => $user->user_name,
-                        'error' => $e->getMessage()
+                $fcmTokens = $usersWithFcm->pluck('fcm_token')->filter()->values()->toArray();
+
+                if (!empty($fcmTokens)) {
+                    $deepLink = $validated['deep_link'] ?? null;
+                    if ($deepLink && !str_starts_with($deepLink, 'https://')) {
+                        $deepLink = preg_replace('/^talabna:\/\//', 'https://talbna.cloud/api/deep-link/', $deepLink);
+                    }
+
+                    $data = [
+                        'type' => 'marketing',
+                        'title' => $validated['title'],
+                        'body' => $validated['body'],
                     ];
+                    if ($validated['image_url'] ?? null) {
+                        $data['image_url'] = $validated['image_url'];
+                    }
+                    if ($deepLink) {
+                        $data['deep_link'] = $deepLink;
+                    }
+                    $data['logo_url'] = 'https://talbna.cloud/img/logo.png';
 
-                    Log::error('FCM send failed for user', [
-                        'user_id'   => $user->id,
-                        'user_name' => $user->user_name,
-                        'fcm_token' => substr($user->fcm_token, 0, 20) . '...',
-                        'error'     => $e->getMessage(),
-                        'campaign_title' => $validated['title'],
-                    ]);
+                    $message = \Kreait\Firebase\Messaging\CloudMessage::new()
+                        ->withNotification(\Kreait\Firebase\Messaging\Notification::create(
+                            $validated['title'],
+                            $validated['body']
+                        ))
+                        ->withData($data);
+
+                    $sendReport = $messaging->sendMulticast($message, $fcmTokens);
+
+                    $successCount = $sendReport->successes()->count();
+                    $failedCount = $sendReport->failures()->count();
+
+                    foreach ($sendReport->failures()->getItems() as $failure) {
+                        $errors[] = [
+                            'token' => substr($failure->target()->value(), 0, 20) . '...',
+                            'error' => $failure->error()->getMessage(),
+                        ];
+                    }
+
+                    // Clean up invalid tokens
+                    $invalidTokens = [];
+                    foreach ($sendReport->invalidTokens() as $token) {
+                        $invalidTokens[] = $token;
+                    }
+                    if (!empty($invalidTokens)) {
+                        User::whereIn('fcm_token', $invalidTokens)->update(['fcm_token' => null]);
+                        Log::info('Cleaned up invalid FCM tokens', ['count' => count($invalidTokens)]);
+                    }
                 }
+            } catch (\Throwable $e) {
+                $failedCount = count($usersWithFcm);
+                Log::error('FCM batch send failed entirely', [
+                    'error' => $e->getMessage(),
+                    'campaign_title' => $validated['title'],
+                ]);
+                $errors[] = ['error' => 'FCM service error: ' . $e->getMessage()];
             }
 
             // Log the campaign
@@ -339,13 +373,21 @@ class MarketingNotificationsApiController extends Controller
                 ], 422);
             }
 
-            $user->notify(new MarketingNotification(
-                $validated['title'],
-                $validated['body'],
-                $validated['image_url'] ?? null,
-                $validated['deep_link'] ?? null,
-                $user->fcm_token
-            ));
+            $messaging = app('firebase.messaging');
+
+            $message = \Kreait\Firebase\Messaging\CloudMessage::withTarget('token', $user->fcm_token)
+                ->withNotification(\Kreait\Firebase\Messaging\Notification::create(
+                    $validated['title'],
+                    $validated['body']
+                ))
+                ->withData([
+                    'type' => 'marketing',
+                    'title' => $validated['title'],
+                    'body' => $validated['body'],
+                    'logo_url' => 'https://talbna.cloud/img/logo.png',
+                ]);
+
+            $messaging->send($message);
 
             Log::info('Test notification sent', [
                 'user_id'   => $user->id,
