@@ -26,6 +26,7 @@ import PalServicePointsOverview from '../views/admin/PalServicePointsOverview.vu
 import SeoDashboard from '../views/admin/seo/SeoDashboard.vue'
 import LanguagesList from '../views/admin/languages/LanguagesList.vue'
 import TranslationsList from '../views/admin/translations/TranslationsList.vue'
+import CommandMonitor from '../views/admin/CommandMonitor.vue'
 
 const routes = [
   {
@@ -177,6 +178,12 @@ const routes = [
     name: 'translations.index',
     component: TranslationsList,
     meta: { title: 'Translations Management' }
+  },
+  {
+    path: '/admin/command-monitor',
+    name: 'command_monitor.index',
+    component: CommandMonitor,
+    meta: { title: 'Command Monitor' }
   }
 ]
 

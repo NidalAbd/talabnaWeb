@@ -195,6 +195,12 @@ const menuItems = [
     icon: 'mdi-google-analytics',
     to: { name: 'seo.index' },
     value: 'seo'
+  },
+  {
+    title: 'Command Monitor',
+    icon: 'mdi-console',
+    to: { name: 'command_monitor.index' },
+    value: 'command_monitor'
   }
 ]
 

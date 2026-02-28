@@ -8,12 +8,15 @@ use App\Models\ServicePost;
 use App\Models\User;
 use App\Notifications\BadgeExpirationNotification;
 use App\Services\BadgeService;
+use App\Traits\LogsCommandExecution;
 use Carbon\Carbon;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Log;
 
 class ExpireBadges extends Command
 {
+    use LogsCommandExecution;
+
     /**
      * The name and signature of the console command.
      *
@@ -43,6 +46,7 @@ class ExpireBadges extends Command
     {
         $this->info('Starting badge expiration check...');
         Log::info('Badge expiration check started');
+        $this->logStart();
 
         try {
             $defaultBadge = BadgeType::getDefault();
@@ -141,12 +145,14 @@ class ExpireBadges extends Command
 
             $this->info("Badge expiration completed. Expired {$count} badges.");
             Log::info("Badge expiration completed. Expired {$count} badges.");
+            $this->logFinish($count);
 
             return 0;
         } catch (\Exception $e) {
             $this->error("An error occurred during badge expiration: " . $e->getMessage());
             Log::error("Badge expiration error: " . $e->getMessage());
             Log::error($e->getTraceAsString());
+            $this->logError($e->getMessage());
 
             return 1;
         }

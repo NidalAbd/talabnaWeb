@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\AiImageController;
+use App\Http\Controllers\Admin\AiPostController;
 use App\Http\Controllers\Admin\BanController;
 use App\Http\Controllers\ApiController;
 use App\Http\Controllers\CategoriesController;
@@ -29,6 +30,7 @@ use App\Http\Controllers\SubcategoriesController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\UserRoleAssignmentController;
 use App\Http\Controllers\BadgeTypeController;
+use App\Http\Controllers\Admin\CommandMonitorController;
 use App\Http\Controllers\Admin\DashboardApiController;
 use App\Http\Controllers\Admin\AnalyticsApiController;
 use App\Http\Controllers\Admin\StatisticsApiController;
@@ -359,6 +361,16 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::get('ai-image/gallery/{type}/{id}', [AiImageController::class, 'galleryImages'])
         ->name('ai-image.gallery');
 
+    /*
+    |--------------------------------------------------------------------------
+    | AI Post Generation Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::post('ai-posts/generate', [AiPostController::class, 'generate'])
+        ->name('ai-posts.generate');
+    Route::get('ai-posts/status', [AiPostController::class, 'status'])
+        ->name('ai-posts.status');
+
     // Subcategories API
     Route::get('/sub-categories/{categoryId}', function($categoryId) {
         $subcategories = Sub_categories::where('categories_id', $categoryId)
@@ -582,6 +594,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
         ->name('languages.index');
     Route::get('/translations', [HomeController::class, 'index'])
         ->name('translations.index');
+
+    // Command Monitor - Vue SPA
+    Route::get('/command-monitor', [HomeController::class, 'index'])
+        ->name('command_monitor.index');
 
     // Unsuspend Routes
     Route::patch('/users/{id}/unsuspend', function($id) {
@@ -828,6 +844,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::post('/{id}/toggle', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'toggle'])->name('api.admin.languages.toggle');
                 Route::post('/{id}/set-default', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'setDefault'])->name('api.admin.languages.set-default');
             });
+
+            // Command Monitor
+            Route::get('/command-monitor', [CommandMonitorController::class, 'index'])->name('api.admin.command-monitor.index');
+            Route::get('/command-monitor/progress', [CommandMonitorController::class, 'progress'])->name('api.admin.command-monitor.progress');
 
             // Translations Management (using API controller for web admin)
             Route::prefix('translations')->group(function () {

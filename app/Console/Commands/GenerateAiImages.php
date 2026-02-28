@@ -5,13 +5,17 @@ namespace App\Console\Commands;
 use App\Models\Categories;
 use App\Models\Sub_categories;
 use App\Services\DalleImageService;
+use App\Traits\LogsCommandExecution;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
 
 class GenerateAiImages extends Command
 {
+    use LogsCommandExecution;
+
     protected $signature = 'ai:generate
         {type? : category or subcategory (omit to generate both)}
+        {--category= : Filter subcategories by parent category ID}
         {--auto : Run non-interactively, auto-continue from last progress (for cron/scheduler)}
         {--fresh : When used with --auto, start from beginning instead of continuing}';
     protected $description = 'Generate AI images for categories and/or subcategories with rate-limit-safe 65s delay';
@@ -33,39 +37,88 @@ class GenerateAiImages extends Command
             return Command::FAILURE;
         }
 
-        // If no type specified, run both sequentially
-        if (!$type) {
-            $this->renderHeader('AI Image Generator — Categories + Subcategories');
+        $this->logStart(['type' => $type ?? 'both']);
 
-            $catResult = $this->processType('category');
-            $subResult = $this->processType('subcategory');
+        try {
+            // If no type specified, run both sequentially
+            if (!$type) {
+                $this->renderHeader('AI Image Generator — Categories + Subcategories');
+
+                $catResult = $this->processType('category');
+                $subResult = $this->processType('subcategory');
+
+                $this->newLine();
+                $this->renderFinalSummary();
+
+                $totalCompleted = $this->countCompletedFromProgress();
+                $this->logFinish($totalCompleted);
+
+                return ($catResult === Command::SUCCESS && $subResult === Command::SUCCESS)
+                    ? Command::SUCCESS
+                    : Command::FAILURE;
+            }
+
+            $this->renderHeader('AI Image Generator — ' . ucfirst($type));
+            $result = $this->processType($type);
 
             $this->newLine();
             $this->renderFinalSummary();
 
-            return ($catResult === Command::SUCCESS && $subResult === Command::SUCCESS)
-                ? Command::SUCCESS
-                : Command::FAILURE;
+            $totalCompleted = $this->countCompletedFromProgress();
+            $this->logFinish($totalCompleted);
+
+            return $result;
+        } catch (\Exception $e) {
+            $this->logError($e->getMessage());
+            throw $e;
+        }
+    }
+
+    protected function countCompletedFromProgress(): int
+    {
+        $count = 0;
+        $catProgress = $this->loadProgress('ai_generate_progress_category.json');
+        $subProgress = $this->loadProgress('ai_generate_progress_subcategory.json');
+
+        if ($catProgress) {
+            $count += count($catProgress['completed'] ?? []);
+        }
+        if ($subProgress) {
+            $count += count($subProgress['completed'] ?? []);
         }
 
-        $this->renderHeader('AI Image Generator — ' . ucfirst($type));
-        $result = $this->processType($type);
-
-        $this->newLine();
-        $this->renderFinalSummary();
-
-        return $result;
+        return $count;
     }
 
     protected function processType(string $type): int
     {
-        $progressFile = "ai_generate_progress_{$type}.json";
+        $categoryId = $this->option('category');
+
+        // Use a separate progress file when filtering by category
+        if ($type === 'subcategory' && $categoryId) {
+            $progressFile = "ai_generate_progress_subcategory_cat{$categoryId}.json";
+        } else {
+            $progressFile = "ai_generate_progress_{$type}.json";
+        }
+
         $progress = $this->loadProgress($progressFile);
 
         $isAuto = $this->option('auto');
 
         $this->newLine();
-        $this->renderSectionHeader($type === 'category' ? '📁 CATEGORIES' : '📂 SUBCATEGORIES');
+
+        // Build section header with optional category name
+        if ($type === 'subcategory' && $categoryId) {
+            $parentCategory = Categories::find($categoryId);
+            if (!$parentCategory) {
+                $this->error("Category with ID {$categoryId} not found.");
+                return Command::FAILURE;
+            }
+            $catName = $parentCategory->name['en'] ?? $parentCategory->name['ar'] ?? "ID:{$categoryId}";
+            $this->renderSectionHeader("📂 SUBCATEGORIES (Category: {$catName})");
+        } else {
+            $this->renderSectionHeader($type === 'category' ? '📁 CATEGORIES' : '📂 SUBCATEGORIES');
+        }
 
         if ($isAuto) {
             // Non-interactive: auto-continue from last, or start fresh with --fresh
@@ -92,7 +145,11 @@ class GenerateAiImages extends Command
         if ($type === 'category') {
             $items = Categories::where('id', '>', $lastId)->orderBy('id', 'asc')->get();
         } else {
-            $items = Sub_categories::with('category')->where('id', '>', $lastId)->orderBy('id', 'asc')->get();
+            $query = Sub_categories::with('category')->where('id', '>', $lastId);
+            if ($categoryId) {
+                $query->where('categories_id', $categoryId);
+            }
+            $items = $query->orderBy('id', 'asc')->get();
         }
 
         if ($items->isEmpty()) {

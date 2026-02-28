@@ -2,11 +2,14 @@
 
 namespace App\Console\Commands;
 
+use App\Traits\LogsCommandExecution;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
 class CleanupApiRequestLogs extends Command
 {
+    use LogsCommandExecution;
+
     protected $signature = 'monitor:cleanup {--keep=3 : Days of raw logs to keep}';
     protected $description = 'Aggregate old API request logs into daily stats and delete raw data';
 
@@ -16,28 +19,36 @@ class CleanupApiRequestLogs extends Command
         $cutoffDate = now()->subDays($keepDays)->startOfDay();
 
         $this->info("Aggregating logs older than {$cutoffDate->toDateString()}...");
+        $this->logStart(['keep_days' => $keepDays]);
 
-        // Step 1: Aggregate per-endpoint stats for days not yet summarized
-        $this->aggregateEndpointStats($cutoffDate);
+        try {
+            // Step 1: Aggregate per-endpoint stats for days not yet summarized
+            $this->aggregateEndpointStats($cutoffDate);
 
-        // Step 2: Aggregate per-user stats for days not yet summarized
-        $this->aggregateUserStats($cutoffDate);
+            // Step 2: Aggregate per-user stats for days not yet summarized
+            $this->aggregateUserStats($cutoffDate);
 
-        // Step 3: Delete old raw logs
-        $deleted = DB::table('api_request_logs')
-            ->where('created_at', '<', $cutoffDate)
-            ->delete();
+            // Step 3: Delete old raw logs
+            $deleted = DB::table('api_request_logs')
+                ->where('created_at', '<', $cutoffDate)
+                ->delete();
 
-        $this->info("Deleted {$deleted} old raw log entries.");
+            $this->info("Deleted {$deleted} old raw log entries.");
 
-        // Step 4: Report current table size
-        $remaining = DB::table('api_request_logs')->count();
-        $summaryRows = DB::table('api_request_daily_stats')->count();
-        $userSummaryRows = DB::table('api_request_daily_user_stats')->count();
+            // Step 4: Report current table size
+            $remaining = DB::table('api_request_logs')->count();
+            $summaryRows = DB::table('api_request_daily_stats')->count();
+            $userSummaryRows = DB::table('api_request_daily_user_stats')->count();
 
-        $this->info("Remaining raw logs: {$remaining}");
-        $this->info("Daily endpoint summaries: {$summaryRows}");
-        $this->info("Daily user summaries: {$userSummaryRows}");
+            $this->info("Remaining raw logs: {$remaining}");
+            $this->info("Daily endpoint summaries: {$summaryRows}");
+            $this->info("Daily user summaries: {$userSummaryRows}");
+
+            $this->logFinish($deleted);
+        } catch (\Exception $e) {
+            $this->error('Cleanup failed: ' . $e->getMessage());
+            $this->logError($e->getMessage());
+        }
     }
 
     private function aggregateEndpointStats($cutoffDate)
