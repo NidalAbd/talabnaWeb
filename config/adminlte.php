@@ -493,6 +493,12 @@ return [
             'permission' => ['view_statistics']
         ],
         [
+            'text' => 'Command Monitor',
+            'url'  => 'admin/command-monitor',
+            'icon' => 'fas fa-terminal',
+            'permission' => ['view_statistics']
+        ],
+        [
             'text' => 'Reports',
             'url'  => 'reports',
             'icon' => 'fas fa-flag',
