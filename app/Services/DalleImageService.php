@@ -193,6 +193,46 @@ $prompt = "Single detailed 3D icon representing the specific subcategory '{$name
     }
 
     /**
+     * Generate a post photo from a DALL-E prompt and save it.
+     * Returns the storage path (e.g. "storage/posts/ai/uuid.png") or null on failure.
+     */
+    public function generatePostPhoto(string $prompt): ?string
+    {
+        try {
+            $this->lastError = null;
+
+            if (empty($this->apiKey)) {
+                $this->lastError = 'OpenAI API key is not configured. Add OPENAI_API_KEY to your .env file.';
+                Log::error("DALL-E: " . $this->lastError);
+                return null;
+            }
+
+            $imageUrl = $this->callDalleApi($prompt);
+            if (!$imageUrl) {
+                return null;
+            }
+
+            $imageContents = $this->client->get($imageUrl)->getBody()->getContents();
+            $fileName = Str::uuid() . '.png';
+            $storagePath = "posts/ai/{$fileName}";
+
+            Storage::disk('public')->put($storagePath, $imageContents);
+
+            return 'storage/' . $storagePath;
+        } catch (\GuzzleHttp\Exception\ClientException $e) {
+            $responseBody = $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response';
+            $errorData = json_decode($responseBody, true);
+            $this->lastError = $errorData['error']['message'] ?? $responseBody;
+            Log::error("DALL-E post photo error: " . $this->lastError);
+            return null;
+        } catch (\Exception $e) {
+            $this->lastError = $e->getMessage();
+            Log::error("DALL-E post photo generation failed: " . $e->getMessage());
+            return null;
+        }
+    }
+
+    /**
      * Call the DALL-E 3 API and return the generated image URL.
      */
     protected function callDalleApi(string $prompt): ?string
