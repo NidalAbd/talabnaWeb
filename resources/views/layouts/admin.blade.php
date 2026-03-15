@@ -87,6 +87,12 @@
                             <p>SEO Analytics</p>
                         </a>
                     </li>
+                    <li class="nav-item">
+                        <a href="/admin/ai-content" class="nav-link">
+                            <i class="nav-icon fas fa-robot"></i>
+                            <p>AI Content</p>
+                        </a>
+                    </li>
                     <!-- Add more menu items as needed -->
                 </ul>
             </nav>
