@@ -94,6 +94,7 @@ document.addEventListener('DOMContentLoaded', () => {
         href.includes('/admin/palservice-points') ||
         href.includes('/admin/seo') ||
         href.includes('/admin/command-monitor') ||
+        href.includes('/admin/ai-content') ||
         href.includes('/dashboard')
       )) {
         e.preventDefault()
