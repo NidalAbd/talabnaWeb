@@ -474,17 +474,16 @@ class BadgeService
      */
     protected function createBadgeNotification(ServicePost $post, BadgeType $badge, int $days): void
     {
+        $postTitle = $post->title ?? "#{$post->id}";
+        $message = json_encode([
+            'ar' => "تم تفعيل شارة {$badge->name_ar} على إعلانك \"{$postTitle}\" لمدة {$days} يوم [post_id:{$post->id}]",
+            'en' => "Badge {$badge->name_en} activated on your post \"{$postTitle}\" for {$days} days [post_id:{$post->id}]",
+        ], JSON_UNESCAPED_UNICODE);
+
         Notification::create([
             'user_id' => $post->user_id,
             'type' => 'badge_applied',
-            'title' => "تم تفعيل شارة {$badge->name_ar}",
-            'message' => "تم تفعيل شارة {$badge->name_ar} على إعلانك لمدة {$days} يوم",
-            'data' => json_encode([
-                'service_post_id' => $post->id,
-                'badge_type_id' => $badge->id,
-                'badge_name' => $badge->name,
-                'days' => $days,
-            ]),
+            'message' => $message,
         ]);
 
         try {
@@ -508,34 +507,25 @@ class BadgeService
         int $refundAmount,
         int $netAmount
     ): void {
-        $message = "تم ترقية الشارة من {$oldBadge->name_ar} إلى {$newBadge->name_ar}";
-        $message .= "\nالمدة المتبقية: {$remainingDays} يوم";
+        $postTitle = $post->title ?? "#{$post->id}";
+
+        $messageAr = "تم ترقية الشارة من {$oldBadge->name_ar} إلى {$newBadge->name_ar} على إعلانك \"{$postTitle}\"";
+        $messageEn = "Badge upgraded from {$oldBadge->name_en} to {$newBadge->name_en} on your post \"{$postTitle}\"";
 
         if ($refundAmount > 0) {
-            $message .= "\nتم استرجاع {$refundAmount} نقطة من الشارة السابقة";
+            $messageAr .= "\nتم استرجاع {$refundAmount} نقطة";
+            $messageEn .= "\n{$refundAmount} points refunded";
         }
 
-        if ($netAmount > 0) {
-            $message .= "\nتم خصم {$netAmount} نقطة إضافية";
-        } elseif ($netAmount < 0) {
-            $message .= "\nتم استرجاع " . abs($netAmount) . " نقطة إضافية";
-        }
+        $message = json_encode([
+            'ar' => "{$messageAr} [post_id:{$post->id}]",
+            'en' => "{$messageEn} [post_id:{$post->id}]",
+        ], JSON_UNESCAPED_UNICODE);
 
         Notification::create([
             'user_id' => $post->user_id,
             'type' => 'badge_upgraded',
-            'title' => "تمت ترقية شارة الإعلان",
             'message' => $message,
-            'data' => json_encode([
-                'service_post_id' => $post->id,
-                'old_badge_id' => $oldBadge->id,
-                'old_badge_name' => $oldBadge->name,
-                'new_badge_id' => $newBadge->id,
-                'new_badge_name' => $newBadge->name,
-                'remaining_days' => $remainingDays,
-                'refund_amount' => $refundAmount,
-                'net_amount' => $netAmount,
-            ]),
         ]);
 
         try {
@@ -559,35 +549,27 @@ class BadgeService
         int $refundAmount,
         int $netAmount
     ): void {
-        $oldBadgeName = $oldBadge ? $oldBadge->name_ar : 'عادي';
+        $oldBadgeNameAr = $oldBadge ? $oldBadge->name_ar : 'عادي';
+        $oldBadgeNameEn = $oldBadge ? $oldBadge->name_en : 'Normal';
+        $postTitle = $post->title ?? "#{$post->id}";
 
-        $message = "تم تغيير الشارة من {$oldBadgeName} إلى {$newBadge->name_ar} لمدة {$days} يوم";
+        $messageAr = "تم تغيير الشارة من {$oldBadgeNameAr} إلى {$newBadge->name_ar} على إعلانك \"{$postTitle}\" لمدة {$days} يوم";
+        $messageEn = "Badge changed from {$oldBadgeNameEn} to {$newBadge->name_en} on your post \"{$postTitle}\" for {$days} days";
 
         if ($refundAmount > 0) {
-            $message .= "\nتم استرجاع {$refundAmount} نقطة من الشارة السابقة";
+            $messageAr .= "\nتم استرجاع {$refundAmount} نقطة";
+            $messageEn .= "\n{$refundAmount} points refunded";
         }
 
-        if ($netAmount > 0) {
-            $message .= "\nتم خصم {$netAmount} نقطة";
-        } elseif ($netAmount < 0) {
-            $message .= "\nتم استرجاع " . abs($netAmount) . " نقطة إضافية";
-        }
+        $message = json_encode([
+            'ar' => "{$messageAr} [post_id:{$post->id}]",
+            'en' => "{$messageEn} [post_id:{$post->id}]",
+        ], JSON_UNESCAPED_UNICODE);
 
         Notification::create([
             'user_id' => $post->user_id,
             'type' => 'badge_switched',
-            'title' => "تم تغيير شارة الإعلان",
             'message' => $message,
-            'data' => json_encode([
-                'service_post_id' => $post->id,
-                'old_badge_id' => $oldBadge?->id,
-                'old_badge_name' => $oldBadgeName,
-                'new_badge_id' => $newBadge->id,
-                'new_badge_name' => $newBadge->name,
-                'days' => $days,
-                'refund_amount' => $refundAmount,
-                'net_amount' => $netAmount,
-            ]),
         ]);
 
         try {
@@ -605,14 +587,16 @@ class BadgeService
      */
     protected function createExpirationNotification(ServicePost $post): void
     {
+        $postTitle = $post->title ?? "#{$post->id}";
+        $message = json_encode([
+            'ar' => "انتهت صلاحية الشارة على إعلانك \"{$postTitle}\" [post_id:{$post->id}]",
+            'en' => "Badge expired on your post \"{$postTitle}\" [post_id:{$post->id}]",
+        ], JSON_UNESCAPED_UNICODE);
+
         Notification::create([
             'user_id' => $post->user_id,
             'type' => 'badge_expired',
-            'title' => 'انتهت صلاحية الشارة',
-            'message' => "انتهت صلاحية الشارة على إعلانك: {$post->title}",
-            'data' => json_encode([
-                'service_post_id' => $post->id,
-            ]),
+            'message' => $message,
         ]);
 
         try {
