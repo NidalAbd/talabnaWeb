@@ -1,252 +1,100 @@
 <template>
   <div class="home-page">
-    <!-- Hero Section - Modern Minimal Design -->
-    <section class="hero-section">
+    <!-- Hero Section -->
+    <section class="hero">
+      <div class="hero-bg-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
       <v-container>
-        <v-row align="center" class="hero-row">
-          <v-col cols="12" md="7" lg="6" class="hero-content-col">
-            <div class="hero-content">
-              <!-- Main Heading - SEO Optimized -->
-              <h1 class="hero-title">
-                {{ locale === 'ar' ? 'اعثر على أفضل الخدمات' : 'Find the Best Services' }}
-                <span class="hero-highlight">{{ locale === 'ar' ? 'بسهولة وأمان' : 'Easily & Safely' }}</span>
-              </h1>
-
-              <!-- Subtitle with semantic markup -->
-              <p class="hero-subtitle">
-                {{ locale === 'ar'
-                  ? 'منصة طلبنا الشاملة تربطك بآلاف مزودي الخدمات المحليين. ابحث، تواصل، واحصل على ما تحتاجه في دقائق.'
-                  : 'Talabna platform connects you with thousands of local service providers. Search, connect, and get what you need in minutes.'
-                }}
-              </p>
-
-              <!-- Search Box with Schema Markup -->
-              <div class="hero-search-wrapper">
-                <v-card class="search-card" elevation="4" rounded="xl">
-                  <v-card-text class="pa-2">
-                    <v-row dense align="center">
-                      <v-col cols="12" sm="8">
-                        <v-text-field
-                          v-model="searchQuery"
-                          :placeholder="locale === 'ar' ? 'ابحث عن خدمة...' : 'Search for services...'"
-                          prepend-inner-icon="mdi-magnify"
-                          variant="solo-filled"
-                          flat
-                          density="comfortable"
-                          hide-details
-                          single-line
-                          class="search-input"
-                          @keyup.enter="doSearch"
-                        />
-                      </v-col>
-                      <v-col cols="12" sm="4">
-                        <v-btn
-                          color="primary"
-                          size="large"
-                          block
-                          elevation="0"
-                          rounded="xl"
-                          class="search-btn"
-                          @click="doSearch"
-                        >
-                          <v-icon start>mdi-magnify</v-icon>
-                          {{ locale === 'ar' ? 'بحث' : 'Search' }}
-                        </v-btn>
-                      </v-col>
-                    </v-row>
-                  </v-card-text>
-                </v-card>
-              </div>
-
-              <!-- Trust Indicators -->
-              <div class="hero-trust-indicators">
-                <div class="trust-item">
-                  <v-icon size="20" color="success">mdi-shield-check</v-icon>
-                  <span>{{ locale === 'ar' ? 'آمن وموثوق' : 'Safe & Secure' }}</span>
-                </div>
-                <div class="trust-item">
-                  <v-icon size="20" color="success">mdi-check-circle</v-icon>
-                  <span>{{ locale === 'ar' ? 'مستخدمين مُوثّقين' : 'Verified Users' }}</span>
-                </div>
-                <div class="trust-item">
-                  <v-icon size="20" color="success">mdi-lightning-bolt</v-icon>
-                  <span>{{ locale === 'ar' ? 'استجابة سريعة' : 'Fast Response' }}</span>
-                </div>
-              </div>
+        <div class="hero-content">
+          <div class="hero-badge">
+            <v-icon size="16" class="mr-1">mdi-shield-check</v-icon>
+            {{ locale === 'ar' ? 'منصة موثوقة للإعلانات المبوبة' : 'Trusted Classified Ads Platform' }}
+          </div>
+          <h1 class="hero-title">
+            {{ locale === 'ar' ? 'اعثر على ما تحتاجه' : 'Find What You Need' }}
+            <br><span class="text-gradient">{{ locale === 'ar' ? 'بسهولة وأمان' : 'Easily & Safely' }}</span>
+          </h1>
+          <p class="hero-subtitle">
+            {{ locale === 'ar'
+              ? 'وظائف، سيارات، عقارات، أجهزة وخدمات متنوعة. تواصل مع آلاف المستخدمين في أكثر من 22 دولة عربية.'
+              : 'Jobs, cars, real estate, electronics and services. Connect with thousands of users across 22+ Arab countries.'
+            }}
+          </p>
+          <div class="hero-search">
+            <div class="search-box">
+              <v-icon class="search-icon">mdi-magnify</v-icon>
+              <input
+                v-model="searchQuery"
+                :placeholder="locale === 'ar' ? 'ابحث عن سيارة، شقة، وظيفة...' : 'Search for car, apartment, job...'"
+                @keyup.enter="doSearch"
+              >
+              <button class="search-btn" @click="doSearch">
+                {{ locale === 'ar' ? 'بحث' : 'Search' }}
+              </button>
             </div>
-          </v-col>
-
-          <!-- Hero Visual - Modern Illustration -->
-          <v-col cols="12" md="5" lg="6" class="d-none d-md-flex hero-visual-col">
-            <div class="hero-visual">
-              <div class="visual-card visual-card-1">
-                <v-icon size="40" color="primary">mdi-account-group</v-icon>
-                <div class="visual-text">
-                  <div class="visual-number">{{ formatNumber(stats.total_users || 15000) }}+</div>
-                  <div class="visual-label">{{ locale === 'ar' ? 'مستخدم نشط' : 'Active Users' }}</div>
-                </div>
-              </div>
-              <div class="visual-card visual-card-2">
-                <v-icon size="40" color="success">mdi-clipboard-check</v-icon>
-                <div class="visual-text">
-                  <div class="visual-number">{{ formatNumber(stats.total_listings || 8500) }}+</div>
-                  <div class="visual-label">{{ locale === 'ar' ? 'خدمة متاحة' : 'Services' }}</div>
-                </div>
-              </div>
-              <div class="visual-card visual-card-3">
-                <v-icon size="40" color="warning">mdi-star</v-icon>
-                <div class="visual-text">
-                  <div class="visual-number">4.8</div>
-                  <div class="visual-label">{{ locale === 'ar' ? 'تقييم المستخدمين' : 'User Rating' }}</div>
-                </div>
-              </div>
-              <div class="hero-graphic">
-                <v-icon size="200" color="primary" class="graphic-icon">mdi-handshake-outline</v-icon>
-              </div>
-            </div>
-          </v-col>
-        </v-row>
+          </div>
+          <div class="hero-buttons">
+            <router-link to="/browse" class="btn-hero-primary">
+              <v-icon size="20" class="mr-2">mdi-view-grid</v-icon>
+              {{ locale === 'ar' ? 'تصفح الإعلانات' : 'Browse Listings' }}
+            </router-link>
+            <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn-hero-secondary">
+              <v-icon size="20" class="mr-2">mdi-google-play</v-icon>
+              {{ locale === 'ar' ? 'حمل التطبيق' : 'Get the App' }}
+            </a>
+          </div>
+        </div>
+        <div class="hero-stats">
+          <div class="stat-item" v-for="stat in statsItems" :key="stat.key">
+            <div class="stat-icon"><v-icon>{{ stat.icon }}</v-icon></div>
+            <h3>{{ formatNumber(stats[stat.key] || 0) }}+</h3>
+            <p>{{ stat.label }}</p>
+          </div>
+        </div>
       </v-container>
-    </section>
-
-    <!-- Stats Section -->
-    <section class="stats-section py-10">
-      <v-container>
-        <v-row>
-          <v-col v-for="stat in statsItems" :key="stat.key" cols="6" md="3">
-            <v-card class="stat-card text-center pa-6" variant="flat">
-              <div class="text-h3 font-weight-bold text-primary mb-2">{{ formatNumber(stats[stat.key] || 0) }}</div>
-              <div class="text-body-1 text-medium-emphasis">{{ stat.label }}</div>
-            </v-card>
-          </v-col>
-        </v-row>
-      </v-container>
+      <div class="hero-wave">
+        <svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path d="M0 40C240 80 480 0 720 40C960 80 1200 0 1440 40V80H0Z" fill="rgb(var(--v-theme-background))"/></svg>
+      </div>
     </section>
 
     <!-- Categories Section -->
-    <section class="categories-section py-12" id="categories">
+    <section class="section-categories py-12" id="categories">
       <v-container>
-        <div class="section-header mb-8">
-          <h2 class="text-h4 font-weight-bold mb-2">
-            {{ locale === 'ar' ? 'تصفح تصنيفات الخدمات' : 'Browse Service Categories' }}
-          </h2>
-          <p class="text-body-1 text-medium-emphasis">
-            {{ locale === 'ar' ? 'استكشف مجموعتنا الواسعة من تصنيفات الخدمات واعثر على ما تبحث عنه بالضبط.' : 'Explore our wide range of service categories and find exactly what you\'re looking for.' }}
-          </p>
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">{{ locale === 'ar' ? 'تصفح التصنيفات' : 'Browse Categories' }}</h2>
+            <p class="section-subtitle">{{ locale === 'ar' ? 'اكتشف ما تبحث عنه بالضبط' : 'Find exactly what you\'re looking for' }}</p>
+          </div>
         </div>
-
         <v-row>
-          <v-col v-for="cat in categories" :key="cat.id" cols="6" sm="4" md="2">
-            <v-card
-              class="category-card text-center pa-4 h-100"
-              variant="outlined"
-              :to="`/category/${cat.id}/${cat.slug}`"
-            >
-              <v-avatar :color="getCategoryColor(cat.id)" size="70" class="mb-3">
-                <v-icon size="35" color="white">{{ getCategoryIcon(cat.id) }}</v-icon>
-              </v-avatar>
-              <h3 class="text-subtitle-1 font-weight-bold mb-1">
-                {{ locale === 'ar' ? cat.name : cat.name_en }}
-              </h3>
-              <p class="text-caption text-medium-emphasis">
-                {{ formatNumber(cat.posts_count) }} {{ locale === 'ar' ? 'خدمة' : 'Services' }}
-              </p>
-            </v-card>
+          <v-col v-for="cat in categories" :key="cat.id" cols="6" sm="4" md="3" lg="2">
+            <router-link :to="`/category/${cat.id}/${cat.slug || ''}`" class="category-card-home text-decoration-none">
+              <div class="cat-icon" :style="{ background: getCategoryColor(cat.id) + '18', color: getCategoryColor(cat.id) }">
+                <v-icon :color="getCategoryColor(cat.id)">{{ getCategoryIcon(cat.id) }}</v-icon>
+              </div>
+              <h5>{{ locale === 'ar' ? cat.name : cat.name_en }}</h5>
+              <span class="cat-count">{{ formatNumber(cat.posts_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
+            </router-link>
           </v-col>
         </v-row>
-      </v-container>
-    </section>
-
-    <!-- Browse by Location Section -->
-    <section class="locations-section py-12" id="locations">
-      <v-container>
-        <div class="section-header mb-8">
-          <h2 class="text-h4 font-weight-bold mb-2">
-            {{ locale === 'ar' ? 'تصفح حسب الموقع' : 'Browse by Location' }}
-          </h2>
-          <p class="text-body-1 text-medium-emphasis">
-            {{ locale === 'ar' ? 'اعثر على الخدمات المتاحة في منطقتك' : 'Find services available in your area' }}
-          </p>
-        </div>
-
-        <v-row v-if="!loadingLocations">
-          <v-col v-for="country in countries" :key="country.id" cols="12" sm="6" md="4" lg="3">
-            <v-card
-              class="location-card h-100"
-              variant="outlined"
-              :to="`/services/${country.id}/${country.slug}`"
-            >
-              <v-img
-                :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'"
-                height="120"
-                cover
-                class="location-flag"
-              >
-                <template v-slot:error>
-                  <div class="d-flex align-center justify-center h-100 bg-grey-lighten-3">
-                    <v-icon size="48" color="grey">mdi-earth</v-icon>
-                  </div>
-                </template>
-              </v-img>
-              <v-card-text class="text-center">
-                <h3 class="text-subtitle-1 font-weight-bold mb-1">
-                  {{ locale === 'ar' ? country.name : country.name_en }}
-                </h3>
-                <!-- Show listings count or friendly message -->
-                <template v-if="country.listings_count > 0">
-                  <p class="text-caption text-medium-emphasis mb-2">
-                    {{ formatNumber(country.listings_count) }} {{ locale === 'ar' ? 'إعلان' : 'Listings' }}
-                  </p>
-                  <div class="d-flex flex-wrap justify-center gap-1">
-                    <v-chip
-                      v-for="city in (country.top_cities || []).slice(0, 3)"
-                      :key="city.id"
-                      size="x-small"
-                      :to="`/services/${country.id}/${country.slug}/${city.id}/${city.slug}`"
-                      class="city-chip"
-                    >
-                      {{ locale === 'ar' ? city.name : city.name_en }}
-                    </v-chip>
-                  </div>
-                </template>
-                <template v-else>
-                  <p class="text-caption text-primary mb-2">
-                    {{ locale === 'ar' ? 'كن أول من يضيف إعلان!' : 'Be the first to add a listing!' }}
-                  </p>
-                  <v-icon color="primary" size="24">mdi-plus-circle-outline</v-icon>
-                </template>
-              </v-card-text>
-            </v-card>
-          </v-col>
-        </v-row>
-        <v-row v-else>
-          <v-col v-for="n in 4" :key="n" cols="12" sm="6" md="4" lg="3">
-            <v-skeleton-loader type="card" />
-          </v-col>
-        </v-row>
-
-        <!-- View All Locations Button -->
-        <div class="text-center mt-6">
-          <v-btn color="primary" variant="outlined" size="large" to="/browse">
-            {{ locale === 'ar' ? 'عرض جميع المواقع' : 'View All Locations' }}
-            <v-icon end>mdi-arrow-left</v-icon>
-          </v-btn>
-        </div>
       </v-container>
     </section>
 
     <!-- Featured Services -->
-    <section class="featured-section py-12">
+    <section class="section-featured py-12">
       <v-container>
-        <div class="section-header mb-8">
-          <h2 class="text-h4 font-weight-bold text-center mb-2">
-            {{ locale === 'ar' ? 'الخدمات المميزة' : 'Featured Services' }}
-          </h2>
-          <p class="text-body-1 text-medium-emphasis text-center">
-            {{ locale === 'ar' ? 'اكتشف أفضل الخدمات المميزة من مستخدمينا' : 'Discover our top-rated premium services with excellent reviews' }}
-          </p>
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">{{ locale === 'ar' ? 'الإعلانات المميزة' : 'Featured Listings' }}</h2>
+            <p class="section-subtitle">{{ locale === 'ar' ? 'إعلانات مختارة من مستخدمينا' : 'Handpicked listings from our users' }}</p>
+          </div>
+          <router-link to="/browse" class="btn-view-all">
+            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }} <v-icon size="18">mdi-arrow-right</v-icon>
+          </router-link>
         </div>
-
         <v-row v-if="!loadingFeatured">
           <v-col v-for="listing in featured" :key="listing.id" cols="12" sm="6" md="4" lg="3">
             <listing-card :listing="listing" :locale="locale" />
@@ -261,25 +109,20 @@
     </section>
 
     <!-- Latest Services by Category -->
-    <section class="latest-section py-12">
+    <section class="section-latest py-12 bg-section">
       <v-container>
-        <div class="section-header mb-8">
-          <h2 class="text-h4 font-weight-bold text-center mb-2">
-            {{ locale === 'ar' ? 'أحدث الخدمات' : 'Latest Services' }}
-          </h2>
-          <p class="text-body-1 text-medium-emphasis text-center">
-            {{ locale === 'ar' ? 'تحقق من أحدث الخدمات المضافة إلى منصتنا' : 'Check out the newest services added to our platform' }}
-          </p>
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">{{ locale === 'ar' ? 'أحدث الإعلانات' : 'Latest Listings' }}</h2>
+            <p class="section-subtitle">{{ locale === 'ar' ? 'أحدث ما أُضيف إلى المنصة' : 'Recently added to the platform' }}</p>
+          </div>
         </div>
-
-        <!-- Category Tabs -->
         <v-tabs v-model="activeTab" color="primary" class="mb-6">
           <v-tab value="all">{{ locale === 'ar' ? 'الكل' : 'All' }}</v-tab>
           <v-tab v-for="cat in categories.slice(0, 5)" :key="cat.id" :value="cat.id">
             {{ locale === 'ar' ? cat.name : cat.name_en }}
           </v-tab>
         </v-tabs>
-
         <v-row v-if="!loadingLatest">
           <v-col v-for="listing in latest" :key="listing.id" cols="12" sm="6" md="4" lg="3">
             <listing-card :listing="listing" :locale="locale" />
@@ -293,54 +136,81 @@
       </v-container>
     </section>
 
-    <!-- Popular Services -->
-    <section class="popular-section py-12">
+    <!-- Browse by Location -->
+    <section class="section-locations py-12" id="locations">
       <v-container>
-        <div class="section-header mb-8">
-          <h2 class="text-h4 font-weight-bold text-center mb-2">
-            {{ locale === 'ar' ? 'الخدمات الأكثر مشاهدة' : 'Popular Services' }}
-          </h2>
-          <p class="text-body-1 text-medium-emphasis text-center">
-            {{ locale === 'ar' ? 'اكتشف الخدمات الأكثر مشاهدة على منصتنا' : 'Discover the most viewed services on our platform' }}
-          </p>
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">{{ locale === 'ar' ? 'تصفح حسب الموقع' : 'Browse by Location' }}</h2>
+            <p class="section-subtitle">{{ locale === 'ar' ? 'اعثر على الخدمات في منطقتك' : 'Find services in your area' }}</p>
+          </div>
         </div>
-
-        <v-row v-if="!loadingPopular">
-          <v-col v-for="listing in popular" :key="listing.id" cols="12" sm="6" md="4" lg="3">
-            <listing-card :listing="listing" :locale="locale" />
-          </v-col>
-        </v-row>
-        <v-row v-else>
-          <v-col v-for="n in 4" :key="n" cols="12" sm="6" md="4" lg="3">
-            <v-skeleton-loader type="card" />
+        <v-row v-if="!loadingLocations">
+          <v-col v-for="country in countries" :key="country.id" cols="6" sm="4" md="3" lg="2">
+            <router-link :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
+              <v-img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" height="80" cover class="location-flag-img">
+                <template v-slot:error>
+                  <div class="d-flex align-center justify-center h-100" style="background:#f0f4f8">
+                    <v-icon size="32" color="grey">mdi-earth</v-icon>
+                  </div>
+                </template>
+              </v-img>
+              <div class="location-info">
+                <h5>{{ locale === 'ar' ? country.name : country.name_en }}</h5>
+                <span>{{ formatNumber(country.listings_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
+              </div>
+            </router-link>
           </v-col>
         </v-row>
       </v-container>
     </section>
 
-    <!-- App Download Banner -->
-    <section class="app-banner py-16">
+    <!-- Popular Services -->
+    <section class="section-popular py-12 bg-section">
       <v-container>
-        <v-card class="app-download-card pa-12 text-center" elevation="0">
-          <v-row align="center" justify="center">
-            <v-col cols="12" md="10" lg="8">
-              <v-icon size="80" color="primary" class="mb-6">mdi-cellphone-download</v-icon>
-              <h2 class="text-h3 font-weight-bold mb-4">
-                {{ locale === 'ar' ? 'حمل تطبيق طلبنا' : 'Download Talabna App' }}
-              </h2>
-              <p class="text-h6 text-medium-emphasis mb-8">
-                {{ locale === 'ar'
-                  ? 'احصل على التجربة الكاملة مع تطبيقنا. انشر الخدمات، أدر إعلاناتك، استقبل الإشعارات، وتواصل مع مزودي الخدمات أينما كنت.'
-                  : 'Get the full experience with our mobile app. Post services, manage your listings, receive notifications, and connect with service providers on the go.'
-                }}
-              </p>
-              <v-btn color="primary" size="x-large" href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank">
-                <v-icon start size="28">mdi-google-play</v-icon>
-                {{ locale === 'ar' ? 'حمل من Google Play' : 'Download on Google Play' }}
-              </v-btn>
+        <div class="section-header">
+          <div>
+            <h2 class="section-title">{{ locale === 'ar' ? 'الأكثر مشاهدة' : 'Most Viewed' }}</h2>
+            <p class="section-subtitle">{{ locale === 'ar' ? 'الإعلانات الأكثر شعبية' : 'The most popular listings' }}</p>
+          </div>
+          <router-link to="/browse?sort_by=view_count" class="btn-view-all">
+            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }} <v-icon size="18">mdi-arrow-right</v-icon>
+          </router-link>
+        </div>
+        <v-row v-if="!loadingPopular">
+          <v-col v-for="listing in popular" :key="listing.id" cols="12" sm="6" md="4" lg="3">
+            <listing-card :listing="listing" :locale="locale" />
+          </v-col>
+        </v-row>
+      </v-container>
+    </section>
+
+    <!-- Download App CTA -->
+    <section class="download-cta py-12">
+      <v-container>
+        <div class="cta-card">
+          <v-row align="center">
+            <v-col cols="12" md="7">
+              <h2>{{ locale === 'ar' ? 'حمل تطبيق طلبنا' : 'Download Talabna App' }}</h2>
+              <p>{{ locale === 'ar'
+                ? 'انشر إعلاناتك، تواصل مع المستخدمين، واستقبل الإشعارات أينما كنت.'
+                : 'Post listings, connect with users, and receive notifications on the go.'
+              }}</p>
+              <div class="cta-features">
+                <span><v-icon size="16" class="mr-1">mdi-check-circle</v-icon>{{ locale === 'ar' ? 'مجاني' : 'Free' }}</span>
+                <span><v-icon size="16" class="mr-1">mdi-check-circle</v-icon>{{ locale === 'ar' ? 'سهل الاستخدام' : 'Easy to use' }}</span>
+                <span><v-icon size="16" class="mr-1">mdi-check-circle</v-icon>{{ locale === 'ar' ? 'إشعارات فورية' : 'Instant notifications' }}</span>
+              </div>
+              <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn-download">
+                <v-icon class="mr-2">mdi-google-play</v-icon>
+                Google Play
+              </a>
+            </v-col>
+            <v-col cols="12" md="5" class="text-center d-none d-md-block">
+              <v-icon size="140" style="opacity:0.2;color:#fff">mdi-cellphone-arrow-down</v-icon>
             </v-col>
           </v-row>
-        </v-card>
+        </div>
       </v-container>
     </section>
   </div>
@@ -509,300 +379,155 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Modern Hero Section - No Gradient, Clean Design */
-.hero-section {
-  background: rgb(var(--v-theme-background));
-  padding: 80px 0 60px;
-  min-height: 500px;
+/* Hero - Dark gradient with shapes */
+.hero {
+  background: linear-gradient(160deg, #0a1628 0%, #1a3a5c 40%, #1565c0 100%);
+  color: #fff;
   position: relative;
   overflow: hidden;
+  padding: 6rem 0 5rem;
 }
 
-.hero-row {
-  min-height: 500px;
-}
+.hero-bg-shapes { position: absolute; inset: 0; pointer-events: none; }
+.shape { position: absolute; border-radius: 50%; }
+.shape-1 { width: 500px; height: 500px; top: -200px; right: -100px; background: rgba(96,165,250,0.06); }
+.shape-2 { width: 350px; height: 350px; bottom: -100px; left: -80px; background: rgba(167,139,250,0.05); }
+.shape-3 { width: 200px; height: 200px; top: 40%; left: 60%; background: rgba(96,165,250,0.04); }
 
-.hero-content-col {
-  display: flex;
-  align-items: center;
-}
+.hero-content { text-align: center; max-width: 720px; margin: 0 auto 3rem; position: relative; z-index: 1; }
 
-.hero-content {
-  width: 100%;
-  padding: 20px 0;
-}
-
-/* Typography - SEO Optimized */
-.hero-title {
-  font-size: clamp(2rem, 5vw, 3.5rem);
-  font-weight: 800;
-  line-height: 1.2;
-  margin-bottom: 1.5rem;
-  color: rgb(var(--v-theme-on-background));
-  letter-spacing: -0.02em;
-}
-
-.hero-highlight {
-  display: block;
-  color: rgb(var(--v-theme-primary));
-  margin-top: 0.25rem;
-}
-
-.hero-subtitle {
-  font-size: 1.125rem;
-  line-height: 1.7;
-  color: rgba(var(--v-theme-on-background), 0.7);
-  margin-bottom: 2.5rem;
-  max-width: 560px;
-}
-
-/* Search Card - Modern Clean Style */
-.hero-search-wrapper {
+.hero-badge {
+  display: inline-flex; align-items: center; padding: 0.5rem 1.25rem;
+  background: rgba(96,165,250,0.15); border: 1px solid rgba(96,165,250,0.25);
+  border-radius: 100px; font-size: 0.85rem; font-weight: 500; color: #93c5fd;
   margin-bottom: 2rem;
 }
 
-.search-card {
-  background: rgb(var(--v-theme-surface)) !important;
-  border: 2px solid rgba(var(--v-theme-primary), 0.1);
-  box-shadow: 0 8px 32px rgba(var(--v-theme-primary), 0.08) !important;
-  transition: all 0.3s ease;
+.hero-title { font-size: 3.5rem; font-weight: 800; line-height: 1.15; margin-bottom: 1.5rem; letter-spacing: -0.03em; }
+.text-gradient { background: linear-gradient(135deg, #60a5fa, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-subtitle { font-size: 1.15rem; opacity: 0.75; margin-bottom: 2.5rem; max-width: 560px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+
+.hero-search {
+  max-width: 600px; margin: 0 auto 2rem;
 }
 
-.search-card:hover {
-  border-color: rgba(var(--v-theme-primary), 0.3);
-  box-shadow: 0 12px 48px rgba(var(--v-theme-primary), 0.12) !important;
+.search-box {
+  display: flex; align-items: center; background: rgba(255,255,255,0.1);
+  backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.15);
+  border-radius: 16px; padding: 0.35rem 0.35rem 0.35rem 1.25rem; transition: all 0.3s;
 }
-
-.search-input :deep(.v-field) {
-  background: transparent !important;
-  box-shadow: none !important;
+.search-box:focus-within { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.3); }
+.search-icon { color: rgba(255,255,255,0.5); margin-right: 0.75rem; }
+.search-box input {
+  flex: 1; background: none; border: none; outline: none; color: #fff; font-size: 1rem;
+  padding: 0.75rem 0; min-width: 0;
 }
-
+.search-box input::placeholder { color: rgba(255,255,255,0.45); }
 .search-btn {
-  height: 48px !important;
-  font-weight: 600;
+  background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff;
+  border: none; border-radius: 12px; padding: 0.75rem 1.75rem; font-weight: 600;
+  font-size: 0.95rem; cursor: pointer; white-space: nowrap; transition: all 0.2s;
 }
+.search-btn:hover { box-shadow: 0 4px 20px rgba(37,99,235,0.4); transform: translateY(-1px); }
 
-/* Trust Indicators */
-.hero-trust-indicators {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.5rem;
-  margin-top: 1.5rem;
+.hero-buttons { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+
+.btn-hero-primary {
+  display: inline-flex; align-items: center; padding: 0.85rem 2rem;
+  background: linear-gradient(135deg, #2563eb, #3b82f6); color: #fff !important;
+  border-radius: 12px; font-weight: 600; font-size: 1rem; text-decoration: none;
+  transition: all 0.2s; box-shadow: 0 4px 20px rgba(37,99,235,0.4);
 }
+.btn-hero-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(37,99,235,0.5); }
 
-.trust-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  color: rgba(var(--v-theme-on-background), 0.7);
-  font-size: 0.875rem;
-  font-weight: 500;
+.btn-hero-secondary {
+  display: inline-flex; align-items: center; padding: 0.85rem 2rem;
+  background: rgba(255,255,255,0.08); border: 1.5px solid rgba(255,255,255,0.2);
+  color: #fff !important; border-radius: 12px; font-weight: 600; font-size: 1rem;
+  text-decoration: none; transition: all 0.2s;
 }
+.btn-hero-secondary:hover { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.35); transform: translateY(-2px); }
 
-/* Hero Visual Cards - Floating Stats */
-.hero-visual-col {
-  align-items: center;
-  justify-content: center;
+.hero-stats { display: flex; gap: 1.25rem; justify-content: center; position: relative; z-index: 1; flex-wrap: wrap; }
+
+.stat-item {
+  background: rgba(255,255,255,0.08); backdrop-filter: blur(12px);
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 16px;
+  padding: 1.25rem 1.75rem; text-align: center; min-width: 120px;
+  transition: transform 0.2s, background 0.2s;
 }
+.stat-item:hover { background: rgba(255,255,255,0.15); transform: translateY(-3px); }
+.stat-icon { color: #60a5fa; margin-bottom: 0.5rem; }
+.stat-item h3 { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.15rem; color: #fff; }
+.stat-item p { opacity: 0.7; margin: 0; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 500; }
 
-.hero-visual {
-  position: relative;
-  width: 100%;
-  height: 500px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.hero-wave { position: absolute; bottom: -1px; left: 0; right: 0; line-height: 0; }
+.hero-wave svg { width: 100%; height: 80px; }
+
+/* Section Headers */
+.section-header { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem; }
+.section-title { font-size: 1.75rem; font-weight: 700; margin-bottom: 0.25rem; }
+.section-subtitle { color: rgba(var(--v-theme-on-background), 0.6); font-size: 1rem; margin: 0; }
+.bg-section { background: rgba(var(--v-theme-on-background), 0.02); }
+
+.btn-view-all {
+  display: inline-flex; align-items: center; gap: 0.5rem; color: rgb(var(--v-theme-primary));
+  font-weight: 600; text-decoration: none; font-size: 0.95rem; transition: gap 0.2s;
 }
+.btn-view-all:hover { gap: 0.75rem; }
 
-.visual-card {
-  position: absolute;
-  background: rgb(var(--v-theme-surface));
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-  border-radius: 20px;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
-  animation: float-card 6s ease-in-out infinite;
+/* Category Cards */
+.category-card-home {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  background: rgb(var(--v-theme-surface)); border-radius: 16px; padding: 1.5rem 1rem;
+  transition: all 0.3s; box-shadow: 0 2px 12px rgba(0,0,0,0.04); height: 100%;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.06);
 }
+.category-card-home:hover { transform: translateY(-6px); box-shadow: 0 12px 32px rgba(0,0,0,0.1); }
 
-.visual-card:hover {
-  transform: translateY(-8px) !important;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.12);
-}
-
-.visual-card-1 {
-  top: 10%;
-  left: 10%;
-  z-index: 3;
-  animation-delay: 0s;
-}
-
-.visual-card-2 {
-  top: 45%;
-  right: 5%;
-  z-index: 2;
-  animation-delay: 1s;
-}
-
-.visual-card-3 {
-  bottom: 15%;
-  left: 15%;
-  z-index: 3;
-  animation-delay: 2s;
-}
-
-@keyframes float-card {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
-}
-
-.visual-text {
-  display: flex;
-  flex-direction: column;
-}
-
-.visual-number {
-  font-size: 1.75rem;
-  font-weight: 800;
-  color: rgb(var(--v-theme-on-background));
-  line-height: 1;
-}
-
-.visual-label {
-  font-size: 0.75rem;
-  color: rgba(var(--v-theme-on-background), 0.6);
-  margin-top: 0.25rem;
-  font-weight: 500;
-}
-
-.hero-graphic {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 1;
-  opacity: 0.06;
-}
-
-.graphic-icon {
-  filter: blur(2px);
-}
-
-/* Responsive Design */
-@media (max-width: 960px) {
-  .hero-section {
-    padding: 60px 0 40px;
-  }
-
-  .hero-row {
-    min-height: auto;
-  }
-
-  .hero-title {
-    font-size: 2rem;
-  }
-
-  .hero-subtitle {
-    font-size: 1rem;
-  }
-
-  .trust-item {
-    font-size: 0.8rem;
-  }
-}
-
-.stats-section {
-  background: transparent;
-}
-
-.stat-card {
-  border-radius: 16px !important;
-  background: rgb(var(--v-theme-surface));
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-  transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08) !important;
-  border-color: rgb(var(--v-theme-primary));
-}
-
-.category-card {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 16px !important;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-  background: rgb(var(--v-theme-surface));
-}
-
-.category-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1) !important;
-  border-color: rgb(var(--v-theme-primary)) !important;
-}
-
-.app-banner {
-  background: transparent;
-}
-
-.app-download-card {
-  background: rgb(var(--v-theme-surface)) !important;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-  border-radius: 24px !important;
-  transition: all 0.3s ease;
-}
-
-.app-download-card:hover {
-  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.1) !important;
-  border-color: rgb(var(--v-theme-primary));
-}
-
-.section-header {
-  text-align: center;
-  max-width: 700px;
-  margin: 0 auto;
-}
-
-.home-page {
-  background: rgb(var(--v-theme-background));
-}
+.cat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
+.category-card-home h5 { font-size: 0.9rem; font-weight: 600; margin: 0 0 0.25rem; color: rgb(var(--v-theme-on-surface)); }
+.cat-count { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.5); }
 
 /* Location Cards */
-.locations-section {
-  background: rgba(var(--v-theme-primary), 0.02);
+.location-card-home {
+  display: block; background: rgb(var(--v-theme-surface)); border-radius: 14px;
+  overflow: hidden; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.06); height: 100%;
 }
+.location-card-home:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
+.location-flag-img { border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06); }
+.location-info { padding: 0.75rem; text-align: center; }
+.location-info h5 { font-size: 0.85rem; font-weight: 600; margin: 0 0 0.2rem; color: rgb(var(--v-theme-on-surface)); }
+.location-info span { font-size: 0.7rem; color: rgba(var(--v-theme-on-surface), 0.5); }
 
-.location-card {
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border-radius: 16px !important;
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-  background: rgb(var(--v-theme-surface));
-  overflow: hidden;
+/* Download CTA */
+.cta-card {
+  background: linear-gradient(135deg, #1565c0, #0d47a1); border-radius: 24px;
+  padding: 3rem; color: #fff;
 }
-
-.location-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 15px 40px rgba(0, 0, 0, 0.1) !important;
-  border-color: rgb(var(--v-theme-primary)) !important;
+.cta-card h2 { font-size: 2rem; font-weight: 700; margin-bottom: 0.75rem; }
+.cta-card p { opacity: 0.85; font-size: 1.05rem; line-height: 1.7; margin-bottom: 0.5rem; }
+.cta-features { display: flex; flex-wrap: wrap; gap: 1.25rem; font-size: 0.9rem; opacity: 0.9; margin-bottom: 1.5rem; }
+.btn-download {
+  display: inline-flex; align-items: center; background: #fff; color: #1565c0;
+  padding: 0.75rem 1.5rem; border-radius: 12px; text-decoration: none;
+  font-weight: 600; transition: transform 0.3s;
 }
+.btn-download:hover { transform: translateY(-3px); color: #1565c0; }
 
-.location-flag {
-  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-}
-
-.city-chip {
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.city-chip:hover {
-  background: rgb(var(--v-theme-primary)) !important;
-  color: white !important;
+/* Responsive */
+@media (max-width: 768px) {
+  .hero { padding: 4rem 0 4rem; }
+  .hero-title { font-size: 2.25rem; }
+  .hero-badge { font-size: 0.75rem; padding: 0.4rem 1rem; }
+  .hero-stats { gap: 0.75rem; }
+  .stat-item { min-width: 42%; padding: 1rem; }
+  .stat-item h3 { font-size: 1.35rem; }
+  .section-title { font-size: 1.35rem; }
+  .section-header { flex-direction: column; align-items: flex-start; }
+  .cta-card { padding: 2rem; }
+  .cta-card h2 { font-size: 1.5rem; }
+  .search-btn { padding: 0.75rem 1.25rem; font-size: 0.85rem; }
 }
 </style>
