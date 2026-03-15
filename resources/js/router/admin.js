@@ -30,168 +30,33 @@ import CommandMonitor from '../views/admin/CommandMonitor.vue'
 import AiContentDashboard from '../views/admin/AiContentDashboard.vue'
 
 const routes = [
-  {
-    path: '/dashboard',
-    name: 'admin.dashboard',
-    component: ModernDashboard,
-    meta: { title: 'Dashboard' }
-  },
-  {
-    path: '/users',
-    name: 'users.index',
-    component: UsersList,
-    meta: { title: 'Users Management' }
-  },
-  {
-    path: '/roles',
-    name: 'roles.index',
-    component: RolesList,
-    meta: { title: 'Roles Management' }
-  },
-  {
-    path: '/permissions',
-    name: 'permissions.index',
-    component: PermissionsList,
-    meta: { title: 'Permissions Management' }
-  },
-  {
-    path: '/categories',
-    name: 'categories.index',
-    component: CategoriesList,
-    meta: { title: 'Categories Management' }
-  },
-  {
-    path: '/subcategories',
-    name: 'subcategories.index',
-    component: SubCategoriesList,
-    meta: { title: 'Sub-Categories Management' }
-  },
-  {
-    path: '/countries',
-    name: 'countries.index',
-    component: CountriesList,
-    meta: { title: 'Countries Management' }
-  },
-  {
-    path: '/cities',
-    name: 'cities.index',
-    component: CitiesList,
-    meta: { title: 'Cities Management' }
-  },
-  {
-    path: '/badge-types',
-    name: 'badge-types.index',
-    component: BadgeTypesList,
-    meta: { title: 'Badge Types Management' }
-  },
-  {
-    path: '/service_posts',
-    name: 'service_posts.index',
-    component: ServicePostsList,
-    meta: { title: 'Service Posts Management' }
-  },
-  {
-    path: '/reports',
-    name: 'reports.index',
-    component: ReportsList,
-    meta: { title: 'Reports Management' }
-  },
-  {
-    path: '/admin/users/banned',
-    name: 'users.banned',
-    component: BannedUsersList,
-    meta: { title: 'Banned Users Management' }
-  },
-  {
-    path: '/admin/devices/banned',
-    name: 'devices.banned',
-    component: BannedDevicesList,
-    meta: { title: 'Banned Devices Management' }
-  },
-  {
-    path: '/admin/point-packages',
-    name: 'point_packages.index',
-    component: PointPackagesList,
-    meta: { title: 'Point Packages Management' }
-  },
-  {
-    path: '/admin/country-pricing',
-    name: 'country_pricing.index',
-    component: CountryPricingList,
-    meta: { title: 'Country Pricing' }
-  },
-  {
-    path: '/admin/point-purchase-requests',
-    name: 'point_purchase_requests.index',
-    component: PointPurchaseRequestsList,
-    meta: { title: 'Point Purchase Requests Management' }
-  },
-  {
-    path: '/admin/point-transactions',
-    name: 'point_transactions.index',
-    component: PointTransactionsList,
-    meta: { title: 'Point Transactions Management' }
-  },
-  {
-    path: '/admin/marketing-notifications',
-    name: 'marketing_notifications.index',
-    component: MarketingNotificationsList,
-    meta: { title: 'Marketing Notifications' }
-  },
-  {
-    path: '/admin/analytics',
-    name: 'analytics.index',
-    component: Analytics,
-    meta: { title: 'Analytics Dashboard' }
-  },
-  {
-    path: '/admin/statistics',
-    name: 'statistics.index',
-    component: StatisticsDashboard,
-    meta: { title: 'Statistics Dashboard' }
-  },
-  {
-    path: '/admin/role-assignments',
-    name: 'role_assignments.index',
-    component: RoleAssignmentsList,
-    meta: { title: 'Role Assignments' }
-  },
-  {
-    path: '/admin/palservice-points',
-    name: 'palservice_points.index',
-    component: PalServicePointsOverview,
-    meta: { title: 'Points Overview' }
-  },
-  {
-    path: '/admin/seo',
-    name: 'seo.index',
-    component: SeoDashboard,
-    meta: { title: 'SEO Analytics' }
-  },
-  {
-    path: '/admin/languages',
-    name: 'languages.index',
-    component: LanguagesList,
-    meta: { title: 'Languages Management' }
-  },
-  {
-    path: '/admin/translations',
-    name: 'translations.index',
-    component: TranslationsList,
-    meta: { title: 'Translations Management' }
-  },
-  {
-    path: '/admin/command-monitor',
-    name: 'command_monitor.index',
-    component: CommandMonitor,
-    meta: { title: 'Command Monitor' }
-  },
-  {
-    path: '/admin/ai-content',
-    name: 'ai_content.index',
-    component: AiContentDashboard,
-    meta: { title: 'AI Content Generator' }
-  }
+  { path: '/dashboard', name: 'admin.dashboard', component: ModernDashboard, meta: { title: 'Dashboard' } },
+  { path: '/users', name: 'users.index', component: UsersList, meta: { title: 'Users Management' } },
+  { path: '/roles', name: 'roles.index', component: RolesList, meta: { title: 'Roles Management' } },
+  { path: '/permissions', name: 'permissions.index', component: PermissionsList, meta: { title: 'Permissions Management' } },
+  { path: '/categories', name: 'categories.index', component: CategoriesList, meta: { title: 'Categories Management' } },
+  { path: '/subcategories', name: 'subcategories.index', component: SubCategoriesList, meta: { title: 'Sub-Categories Management' } },
+  { path: '/countries', name: 'countries.index', component: CountriesList, meta: { title: 'Countries Management' } },
+  { path: '/cities', name: 'cities.index', component: CitiesList, meta: { title: 'Cities Management' } },
+  { path: '/badge-types', name: 'badge-types.index', component: BadgeTypesList, meta: { title: 'Badge Types Management' } },
+  { path: '/service_posts', name: 'service_posts.index', component: ServicePostsList, meta: { title: 'Service Posts Management' } },
+  { path: '/reports', name: 'reports.index', component: ReportsList, meta: { title: 'Reports Management' } },
+  { path: '/banned-users', name: 'users.banned', component: BannedUsersList, meta: { title: 'Banned Users' } },
+  { path: '/banned-devices', name: 'devices.banned', component: BannedDevicesList, meta: { title: 'Banned Devices' } },
+  { path: '/point-packages', name: 'point_packages.index', component: PointPackagesList, meta: { title: 'Point Packages' } },
+  { path: '/country-pricing', name: 'country_pricing.index', component: CountryPricingList, meta: { title: 'Country Pricing' } },
+  { path: '/point-purchase-requests', name: 'point_purchase_requests.index', component: PointPurchaseRequestsList, meta: { title: 'Purchase Requests' } },
+  { path: '/point-transactions', name: 'point_transactions.index', component: PointTransactionsList, meta: { title: 'Point Transactions' } },
+  { path: '/marketing-notifications', name: 'marketing_notifications.index', component: MarketingNotificationsList, meta: { title: 'Marketing Notifications' } },
+  { path: '/analytics', name: 'analytics.index', component: Analytics, meta: { title: 'Analytics' } },
+  { path: '/statistics', name: 'statistics.index', component: StatisticsDashboard, meta: { title: 'Statistics' } },
+  { path: '/role-assignments', name: 'role_assignments.index', component: RoleAssignmentsList, meta: { title: 'Role Assignments' } },
+  { path: '/palservice-points', name: 'palservice_points.index', component: PalServicePointsOverview, meta: { title: 'Points Overview' } },
+  { path: '/seo', name: 'seo.index', component: SeoDashboard, meta: { title: 'SEO Analytics' } },
+  { path: '/languages', name: 'languages.index', component: LanguagesList, meta: { title: 'Languages' } },
+  { path: '/translations', name: 'translations.index', component: TranslationsList, meta: { title: 'Translations' } },
+  { path: '/command-monitor', name: 'command_monitor.index', component: CommandMonitor, meta: { title: 'Command Monitor' } },
+  { path: '/ai-content', name: 'ai_content.index', component: AiContentDashboard, meta: { title: 'AI Content Generator' } },
 ]
 
 const router = createRouter({

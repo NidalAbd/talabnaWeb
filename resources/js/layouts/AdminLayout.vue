@@ -136,78 +136,33 @@ const userName = computed(() => {
 const currentYear = computed(() => new Date().getFullYear())
 
 const menuItems = [
-  {
-    title: 'Dashboard',
-    icon: 'mdi-view-dashboard',
-    to: { name: 'admin.dashboard' },
-    value: 'dashboard'
-  },
-  {
-    title: 'Users',
-    icon: 'mdi-account-group',
-    to: { name: 'users.index' },
-    value: 'users'
-  },
-  {
-    title: 'Categories',
-    icon: 'mdi-shape',
-    to: { name: 'categories.index' },
-    value: 'categories'
-  },
-  {
-    title: 'Subcategories',
-    icon: 'mdi-sitemap',
-    to: { name: 'subcategories.index' },
-    value: 'subcategories'
-  },
-  {
-    title: 'Badge Types',
-    icon: 'mdi-certificate',
-    to: { name: 'badge-types.index' },
-    value: 'badge-types'
-  },
-  {
-    title: 'Service Posts',
-    icon: 'mdi-briefcase',
-    to: { name: 'service_posts.index' },
-    value: 'service-posts'
-  },
-  {
-    title: 'Reports',
-    icon: 'mdi-flag',
-    to: { name: 'reports.index' },
-    value: 'reports'
-  },
-  {
-    title: 'Point Packages',
-    icon: 'mdi-diamond-stone',
-    to: { name: 'point_packages.index' },
-    value: 'point_packages'
-  },
-  {
-    title: 'Country Pricing',
-    icon: 'mdi-currency-usd',
-    to: { name: 'country_pricing.index' },
-    value: 'country_pricing'
-  },
-  {
-    title: 'SEO Analytics',
-    icon: 'mdi-google-analytics',
-    to: { name: 'seo.index' },
-    value: 'seo'
-  },
-  {
-    title: 'Command Monitor',
-    icon: 'mdi-console',
-    to: { name: 'command_monitor.index' },
-    value: 'command_monitor'
-  },
-  {
-    title: 'AI Content',
-    icon: 'mdi-robot',
-    to: { name: 'ai_content.index' },
-    value: 'ai_content'
-  }
+  { title: 'Dashboard', icon: 'mdi-view-dashboard', to: { name: 'admin.dashboard' }, value: 'dashboard' },
+  { title: 'Users', icon: 'mdi-account-group', to: { name: 'users.index' }, value: 'users' },
+  { title: 'Categories', icon: 'mdi-shape', to: { name: 'categories.index' }, value: 'categories' },
+  { title: 'Subcategories', icon: 'mdi-sitemap', to: { name: 'subcategories.index' }, value: 'subcategories' },
+  { title: 'Countries', icon: 'mdi-earth', to: { name: 'countries.index' }, value: 'countries' },
+  { title: 'Cities', icon: 'mdi-city', to: { name: 'cities.index' }, value: 'cities' },
+  { title: 'Badge Types', icon: 'mdi-certificate', to: { name: 'badge-types.index' }, value: 'badge-types' },
+  { title: 'Service Posts', icon: 'mdi-briefcase', to: { name: 'service_posts.index' }, value: 'service-posts' },
+  { title: 'Reports', icon: 'mdi-flag', to: { name: 'reports.index' }, value: 'reports' },
+  { title: 'Banned Users', icon: 'mdi-account-cancel', to: { name: 'users.banned' }, value: 'banned-users' },
+  { title: 'Banned Devices', icon: 'mdi-cellphone-off', to: { name: 'devices.banned' }, value: 'banned-devices' },
+  { title: 'Point Packages', icon: 'mdi-diamond-stone', to: { name: 'point_packages.index' }, value: 'point_packages' },
+  { title: 'Country Pricing', icon: 'mdi-currency-usd', to: { name: 'country_pricing.index' }, value: 'country_pricing' },
+  { title: 'Purchase Requests', icon: 'mdi-cart', to: { name: 'point_purchase_requests.index' }, value: 'purchase_requests' },
+  { title: 'Point Transactions', icon: 'mdi-swap-horizontal', to: { name: 'point_transactions.index' }, value: 'point_transactions' },
+  { title: 'Points Overview', icon: 'mdi-star-circle', to: { name: 'palservice_points.index' }, value: 'palservice_points' },
+  { title: 'Marketing', icon: 'mdi-bullhorn', to: { name: 'marketing_notifications.index' }, value: 'marketing' },
+  { title: 'Analytics', icon: 'mdi-chart-bar', to: { name: 'analytics.index' }, value: 'analytics' },
+  { title: 'Statistics', icon: 'mdi-chart-pie', to: { name: 'statistics.index' }, value: 'statistics' },
+  { title: 'Roles', icon: 'mdi-shield-account', to: { name: 'roles.index' }, value: 'roles' },
+  { title: 'Permissions', icon: 'mdi-key', to: { name: 'permissions.index' }, value: 'permissions' },
+  { title: 'Role Assignments', icon: 'mdi-account-key', to: { name: 'role_assignments.index' }, value: 'role_assignments' },
+  { title: 'SEO Analytics', icon: 'mdi-google-analytics', to: { name: 'seo.index' }, value: 'seo' },
+  { title: 'Languages', icon: 'mdi-translate', to: { name: 'languages.index' }, value: 'languages' },
+  { title: 'Translations', icon: 'mdi-file-document-edit', to: { name: 'translations.index' }, value: 'translations' },
+  { title: 'Command Monitor', icon: 'mdi-console', to: { name: 'command_monitor.index' }, value: 'command_monitor' },
+  { title: 'AI Content', icon: 'mdi-robot', to: { name: 'ai_content.index' }, value: 'ai_content' },
 ]
 
 const logout = async () => {

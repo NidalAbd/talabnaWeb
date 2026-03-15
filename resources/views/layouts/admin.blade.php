@@ -57,43 +57,107 @@
             <!-- Sidebar Menu -->
             <nav class="mt-2">
                 <ul class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+                    {{-- Main --}}
+                    <li class="nav-header">MAIN</li>
                     <li class="nav-item">
-                        <a href="{{ route('users.index') }}" class="nav-link">
-                            <i class="nav-icon fas fa-users"></i>
-                            <p>{{('layouts\admin.users') }}</p>
-                        </a>
+                        <a href="/dashboard" class="nav-link"><i class="nav-icon fas fa-tachometer-alt"></i><p>Dashboard</p></a>
+                    </li>
+
+                    {{-- Content --}}
+                    <li class="nav-header">CONTENT</li>
+                    <li class="nav-item">
+                        <a href="/categories" class="nav-link"><i class="nav-icon fas fa-th-large"></i><p>Categories</p></a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('categories.index') }}" class="nav-link">
-                            <i class="nav-icon fas fa-list"></i>
-                            <p>{{('layouts\admin.categories') }}</p>
-                        </a>
+                        <a href="/subcategories" class="nav-link"><i class="nav-icon fas fa-sitemap"></i><p>Subcategories</p></a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('subcategories.index') }}" class="nav-link">
-                            <i class="nav-icon fas fa-sitemap"></i>
-                            <p>{{('layouts\admin.subcategories') }}</p>
-                        </a>
+                        <a href="/service_posts" class="nav-link"><i class="nav-icon fas fa-briefcase"></i><p>Service Posts</p></a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('service_posts.index') }}" class="nav-link">
-                            <i class="nav-icon fas fa-briefcase"></i>
-                            <p>{{('layouts\admin.service_posts') }}</p>
-                        </a>
+                        <a href="/badge-types" class="nav-link"><i class="nav-icon fas fa-certificate"></i><p>Badge Types</p></a>
                     </li>
                     <li class="nav-item">
-                        <a href="{{ route('seo.index') }}" class="nav-link">
-                            <i class="nav-icon fas fa-chart-line"></i>
-                            <p>SEO Analytics</p>
-                        </a>
+                        <a href="/ai-content" class="nav-link"><i class="nav-icon fas fa-robot"></i><p>AI Content</p></a>
+                    </li>
+
+                    {{-- Users --}}
+                    <li class="nav-header">USERS</li>
+                    <li class="nav-item">
+                        <a href="/users" class="nav-link"><i class="nav-icon fas fa-users"></i><p>Users</p></a>
                     </li>
                     <li class="nav-item">
-                        <a href="/admin/ai-content" class="nav-link">
-                            <i class="nav-icon fas fa-robot"></i>
-                            <p>AI Content</p>
-                        </a>
+                        <a href="/banned-users" class="nav-link"><i class="nav-icon fas fa-user-slash"></i><p>Banned Users</p></a>
                     </li>
-                    <!-- Add more menu items as needed -->
+                    <li class="nav-item">
+                        <a href="/banned-devices" class="nav-link"><i class="nav-icon fas fa-mobile-alt"></i><p>Banned Devices</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/reports" class="nav-link"><i class="nav-icon fas fa-flag"></i><p>Reports</p></a>
+                    </li>
+
+                    {{-- Points & Payments --}}
+                    <li class="nav-header">POINTS & PAYMENTS</li>
+                    <li class="nav-item">
+                        <a href="/palservice-points" class="nav-link"><i class="nav-icon fas fa-star"></i><p>Points Overview</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/point-packages" class="nav-link"><i class="nav-icon fas fa-gem"></i><p>Point Packages</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/country-pricing" class="nav-link"><i class="nav-icon fas fa-dollar-sign"></i><p>Country Pricing</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/point-purchase-requests" class="nav-link"><i class="nav-icon fas fa-shopping-cart"></i><p>Purchase Requests</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/point-transactions" class="nav-link"><i class="nav-icon fas fa-exchange-alt"></i><p>Transactions</p></a>
+                    </li>
+
+                    {{-- Location --}}
+                    <li class="nav-header">LOCATION</li>
+                    <li class="nav-item">
+                        <a href="/countries" class="nav-link"><i class="nav-icon fas fa-globe"></i><p>Countries</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/cities" class="nav-link"><i class="nav-icon fas fa-city"></i><p>Cities</p></a>
+                    </li>
+
+                    {{-- Marketing & Analytics --}}
+                    <li class="nav-header">MARKETING & ANALYTICS</li>
+                    <li class="nav-item">
+                        <a href="/marketing-notifications" class="nav-link"><i class="nav-icon fas fa-bullhorn"></i><p>Marketing</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/analytics" class="nav-link"><i class="nav-icon fas fa-chart-bar"></i><p>Analytics</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/statistics" class="nav-link"><i class="nav-icon fas fa-chart-pie"></i><p>Statistics</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/seo" class="nav-link"><i class="nav-icon fas fa-search"></i><p>SEO Analytics</p></a>
+                    </li>
+
+                    {{-- Settings --}}
+                    <li class="nav-header">SETTINGS</li>
+                    <li class="nav-item">
+                        <a href="/roles" class="nav-link"><i class="nav-icon fas fa-shield-alt"></i><p>Roles</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/permissions" class="nav-link"><i class="nav-icon fas fa-key"></i><p>Permissions</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/role-assignments" class="nav-link"><i class="nav-icon fas fa-user-tag"></i><p>Role Assignments</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/languages" class="nav-link"><i class="nav-icon fas fa-language"></i><p>Languages</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/translations" class="nav-link"><i class="nav-icon fas fa-file-alt"></i><p>Translations</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/command-monitor" class="nav-link"><i class="nav-icon fas fa-terminal"></i><p>Command Monitor</p></a>
+                    </li>
                 </ul>
             </nav>
             <!-- /.sidebar-menu -->
