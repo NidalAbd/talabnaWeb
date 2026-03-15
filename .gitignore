@@ -2,3 +2,4 @@
 *.log
 hot
 /public/storage
+public/build/
