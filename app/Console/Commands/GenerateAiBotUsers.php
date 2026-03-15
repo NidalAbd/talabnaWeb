@@ -113,8 +113,13 @@ class GenerateAiBotUsers extends Command
 
         $this->info("Batch: creating {$thisBatch} users ({$progress['created_users']}/{$progress['target_users']} done)");
 
+        // Round-robin: distribute users evenly across countries
+        $countryCount = $allCountries->count();
+
         for ($u = 0; $u < $thisBatch; $u++) {
-            $country = $allCountries->random();
+            // Pick country based on total created so far (round-robin)
+            $countryIndex = $progress['created_users'] % $countryCount;
+            $country = $allCountries->values()[$countryIndex];
             $countryCities = cities::where('country_id', $country->id)->get();
             $city = $countryCities->isNotEmpty() ? $countryCities->random() : null;
             $countryName = $country->name['en'] ?? $country->name['ar'] ?? '';
