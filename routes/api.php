@@ -105,10 +105,10 @@ Route::middleware('auth:api')->get('/user/status', function (Request $request) {
 Route::post('login', [App\Http\Controllers\Api\UserController::class,'login']);
 Route::post('/facebook/login', [App\Http\Controllers\Api\UserController::class, 'FaceBookSignIn']);
 Route::post('register', [App\Http\Controllers\Api\UserController::class,'register']);
-Route::get('password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class,'showLinkRequestForm'])->name('password.request');
-Route::post('password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class,'sendResetLinkEmail'])->name('password.email');
-Route::get('password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class,'showResetForm'])->name('password.reset');
-Route::post('password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class,'reset'])->name('password.update');
+Route::get('password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class,'showLinkRequestForm'])->name('api.password.request');
+Route::post('password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class,'sendResetLinkEmail'])->name('api.password.email');
+Route::get('password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class,'showResetForm'])->name('api.password.reset');
+Route::post('password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class,'reset'])->name('api.password.update');
 
 Route::get('check-ban-status', [BanCheckController::class, 'checkBanStatus'])->name('api.check-ban-status');
 Route::post('register-device', [BanCheckController::class, 'registerDevice'])->name('api.register-device');
@@ -176,6 +176,7 @@ Route::middleware(['auth:api'])->group(function () {
     // Purchase endpoint - matches Flutter's /api/points/purchase call (uses purchases throttle)
     Route::middleware(['throttle:purchases'])->prefix('points')->group(function () {
         Route::post('/purchase', [App\Http\Controllers\Api\PointsController::class, 'purchase']);
+        Route::post('/google-verify', [App\Http\Controllers\Api\PointsController::class, 'verifyGooglePurchase']);
     });
 
     // PIN Management Routes (with rate limiting)

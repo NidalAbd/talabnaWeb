@@ -21,6 +21,9 @@ class point_purchase_requests extends Model
         'point_package_id',
         'discount_applied',
         'client_secret',
+        'google_order_id',
+        'google_product_id',
+        'google_purchase_token',
     ];
 
     protected $casts = [

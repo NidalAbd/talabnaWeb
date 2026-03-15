@@ -512,6 +512,72 @@ class PointsService
     }
 
     /**
+     * Credit points from a verified Google Play purchase
+     */
+    public function creditGooglePlayPurchase(
+        int $userId,
+        int $pointsAmount,
+        string $productId,
+        string $orderId,
+        string $purchaseToken
+    ): void {
+        DB::transaction(function () use ($userId, $pointsAmount, $productId, $orderId, $purchaseToken) {
+            // Create purchase request record for tracking
+            $purchaseRequest = point_purchase_requests::create([
+                'user_id' => $userId,
+                'points_requested' => $pointsAmount,
+                'price_per_point' => 0, // Price handled by Google Play
+                'total_price' => 0,
+                'status' => 'approved',
+                'auto_approved' => true,
+                'approval_type' => 'google_play',
+                'google_order_id' => $orderId,
+                'google_product_id' => $productId,
+                'google_purchase_token' => $purchaseToken,
+            ]);
+
+            // Credit points
+            $userBalance = palservice_points::where('user_id', $userId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($userBalance) {
+                $userBalance->increment('point', $pointsAmount);
+            } else {
+                palservice_points::create([
+                    'user_id' => $userId,
+                    'point' => $pointsAmount,
+                ]);
+            }
+
+            // Create transaction record
+            point_transactions::create([
+                'from_user_id' => null,
+                'to_user_id' => $userId,
+                'type' => 'purchase',
+                'point' => $pointsAmount,
+                'status' => 'completed',
+                'metadata' => json_encode([
+                    'purchase_request_id' => $purchaseRequest->id,
+                    'payment_method' => 'google_play',
+                    'product_id' => $productId,
+                    'order_id' => $orderId,
+                ]),
+            ]);
+
+            // Log audit
+            $this->auditService->logPurchase(
+                User::find($userId),
+                $pointsAmount,
+                $purchaseRequest
+            );
+
+            // Send notification
+            $this->sendPurchaseNotification(User::find($userId), $pointsAmount);
+        });
+    }
+
+    /**
      * Validate that both users are in the same country for transfers
      */
     private function validateSameCountry(User $fromUser, User $toUser): void

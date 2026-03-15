@@ -46,4 +46,9 @@ return [
         'key' => env('OPENAI_API_KEY'),
     ],
 
+    'google_play' => [
+        'package_name' => env('GOOGLE_PLAY_PACKAGE_NAME'),
+        'credentials_path' => env('GOOGLE_PLAY_CREDENTIALS_PATH'),
+    ],
+
 ];

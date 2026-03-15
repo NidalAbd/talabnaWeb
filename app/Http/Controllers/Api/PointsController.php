@@ -11,6 +11,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\PurchasePointsRequest;
 use App\Http\Requests\SetTransferPinRequest;
 use App\Http\Requests\TransferPointsRequest;
+use App\Services\GooglePlayVerificationService;
 use App\Services\PointsService;
 use App\Services\TransferPinService;
 use Illuminate\Http\JsonResponse;
@@ -22,11 +23,16 @@ class PointsController extends Controller
 {
     protected PointsService $pointsService;
     protected TransferPinService $pinService;
+    protected GooglePlayVerificationService $googlePlayService;
 
-    public function __construct(PointsService $pointsService, TransferPinService $pinService)
-    {
+    public function __construct(
+        PointsService $pointsService,
+        TransferPinService $pinService,
+        GooglePlayVerificationService $googlePlayService
+    ) {
         $this->pointsService = $pointsService;
         $this->pinService = $pinService;
+        $this->googlePlayService = $googlePlayService;
     }
 
     /**
@@ -357,5 +363,92 @@ class PointsController extends Controller
             'country_id' => $pricing['country_id'],
             'country_name' => $pricing['country_name'],
         ]);
+    }
+
+    /**
+     * Verify Google Play purchase and credit points (POST /api/points/google-verify)
+     */
+    public function verifyGooglePurchase(Request $request): JsonResponse
+    {
+        $request->validate([
+            'product_id' => 'required|string',
+            'purchase_token' => 'required|string',
+            'order_id' => 'nullable|string',
+        ]);
+
+        $user = $request->user();
+        $productId = $request->input('product_id');
+        $purchaseToken = $request->input('purchase_token');
+        $orderId = $request->input('order_id', '');
+
+        // Check points amount for this product
+        $pointsAmount = $this->googlePlayService->getPointsForProduct($productId);
+        if ($pointsAmount === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid product ID',
+            ], 400);
+        }
+
+        // Prevent duplicate processing using order_id
+        if ($orderId) {
+            $existing = \App\Models\point_purchase_requests::where('google_order_id', $orderId)->first();
+            if ($existing) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Purchase already processed',
+                    'points' => $pointsAmount,
+                    'duplicate' => true,
+                ]);
+            }
+        }
+
+        // Verify with Google Play
+        $verification = $this->googlePlayService->verifyPurchase($productId, $purchaseToken);
+
+        if (!$verification['verified']) {
+            Log::warning('Google Play purchase verification failed', [
+                'user_id' => $user->id,
+                'product_id' => $productId,
+                'error' => $verification['error'] ?? 'unknown',
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => $verification['error'] ?? 'Purchase verification failed',
+            ], 422);
+        }
+
+        try {
+            // Credit points via the existing service
+            $this->pointsService->creditGooglePlayPurchase(
+                userId: $user->id,
+                pointsAmount: $pointsAmount,
+                productId: $productId,
+                orderId: $orderId ?: ($verification['order_id'] ?? ''),
+                purchaseToken: $purchaseToken
+            );
+
+            // Acknowledge the purchase with Google
+            $this->googlePlayService->acknowledgePurchase($productId, $purchaseToken);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Points credited successfully',
+                'points' => $pointsAmount,
+                'duplicate' => false,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Failed to credit Google Play purchase', [
+                'user_id' => $user->id,
+                'product_id' => $productId,
+                'error' => $e->getMessage(),
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to credit points',
+            ], 500);
+        }
     }
 }
