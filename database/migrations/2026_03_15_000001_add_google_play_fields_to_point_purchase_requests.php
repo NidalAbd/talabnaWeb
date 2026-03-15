@@ -9,7 +9,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('point_purchase_requests', function (Blueprint $table) {
-            $table->string('google_order_id')->nullable()->unique()->after('client_secret');
+            $table->string('google_order_id')->nullable()->unique()->after('discount_applied');
             $table->string('google_product_id')->nullable()->after('google_order_id');
             $table->text('google_purchase_token')->nullable()->after('google_product_id');
         });
