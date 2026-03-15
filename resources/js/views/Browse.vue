@@ -14,8 +14,17 @@
 
     <v-container class="py-8">
       <v-row>
+        <!-- Mobile Filter Button -->
+        <v-col cols="12" class="d-md-none mb-4">
+          <v-btn color="primary" variant="outlined" block @click="showMobileFilters = !showMobileFilters">
+            <v-icon start>mdi-filter</v-icon>
+            {{ locale === 'ar' ? 'الفلاتر' : 'Filters' }}
+            <v-icon end>{{ showMobileFilters ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
+          </v-btn>
+        </v-col>
+
         <!-- Filters Sidebar -->
-        <v-col cols="12" md="3">
+        <v-col cols="12" md="3" :class="{ 'd-none d-md-block': !showMobileFilters }">
           <v-card class="filters-card sticky-filters" variant="outlined">
             <v-card-title class="d-flex align-center">
               <v-icon start>mdi-filter</v-icon>
@@ -284,6 +293,7 @@ const countries = ref([])
 const cities = ref([])
 const badgeTypes = ref([])
 const loading = ref(false)
+const showMobileFilters = ref(false)
 const loadingMore = ref(false)
 const loadingCategories = ref(false)
 const loadingSubcategories = ref(false)
@@ -399,6 +409,17 @@ const fetchListings = async (append = false) => {
     loading.value = true
     currentPage.value = 1
   }
+
+  // Sync filters to URL (for shareable links)
+  const queryParams = {}
+  if (filters.value.category_id) queryParams.category_id = filters.value.category_id
+  if (filters.value.country_id) queryParams.country_id = filters.value.country_id
+  if (filters.value.city_id) queryParams.city_id = filters.value.city_id
+  if (filters.value.badge) queryParams.badge = filters.value.badge
+  if (filters.value.min_price) queryParams.min_price = filters.value.min_price
+  if (filters.value.max_price) queryParams.max_price = filters.value.max_price
+  if (filters.value.sort_by !== 'created_at') queryParams.sort_by = filters.value.sort_by
+  router.replace({ query: queryParams }).catch(() => {})
 
   try {
     const params = new URLSearchParams({
@@ -580,13 +601,20 @@ const clearFilters = () => {
 
 onMounted(() => {
   updateMeta({
-    title: 'تصفح الإعلانات - طلبنا | Browse Listings',
-    description: 'تصفح جميع الإعلانات المبوبة. سيارات، عقارات، هواتف، وظائف والمزيد.',
+    title: locale.value === 'ar' ? 'تصفح الإعلانات - طلبنا' : 'Browse Listings - Talabna',
+    description: locale.value === 'ar'
+      ? 'تصفح جميع الإعلانات المبوبة. سيارات، عقارات، هواتف، وظائف والمزيد.'
+      : 'Browse all classified ads. Cars, real estate, phones, jobs and more.',
   })
 
-  // Parse query params
+  // Parse URL query params for shareable/bookmarkable filters
   if (route.query.category_id) filters.value.category_id = parseInt(route.query.category_id)
+  if (route.query.country_id) filters.value.country_id = parseInt(route.query.country_id)
+  if (route.query.city_id) filters.value.city_id = parseInt(route.query.city_id)
   if (route.query.badge) filters.value.badge = route.query.badge
+  if (route.query.min_price) filters.value.min_price = route.query.min_price
+  if (route.query.max_price) filters.value.max_price = route.query.max_price
+  if (route.query.sort_by) filters.value.sort_by = route.query.sort_by
 
   fetchCategories()
   fetchCountries()

@@ -496,13 +496,15 @@ onMounted(() => {
   setOrganizationSchema()
   setWebsiteSchema()
 
-  // Fetch data
-  fetchCategories()
-  fetchCountries()
-  fetchFeatured()
-  fetchLatest()
-  fetchPopular()
-  fetchStats()
+  // Fetch all data in parallel
+  Promise.all([
+    fetchCategories(),
+    fetchCountries(),
+    fetchFeatured(),
+    fetchLatest(),
+    fetchPopular(),
+    fetchStats(),
+  ])
 })
 </script>
 
