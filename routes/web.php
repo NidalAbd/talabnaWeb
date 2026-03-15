@@ -371,6 +371,16 @@ Route::group(['middleware' => ['auth', 'admin']], function() {
     Route::get('ai-posts/status', [AiPostController::class, 'status'])
         ->name('ai-posts.status');
 
+    /*
+    |--------------------------------------------------------------------------
+    | AI User Seed Routes
+    |--------------------------------------------------------------------------
+    */
+    Route::post('api/admin/ai/seed', [AiPostController::class, 'seed'])
+        ->name('ai-seed.generate');
+    Route::get('api/admin/ai/seed-status', [AiPostController::class, 'seedStatus'])
+        ->name('ai-seed.status');
+
     // Subcategories API
     Route::get('/sub-categories/{categoryId}', function($categoryId) {
         $subcategories = Sub_categories::where('categories_id', $categoryId)

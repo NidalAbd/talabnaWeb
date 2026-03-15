@@ -201,6 +201,12 @@ const menuItems = [
     icon: 'mdi-console',
     to: { name: 'command_monitor.index' },
     value: 'command_monitor'
+  },
+  {
+    title: 'AI Content',
+    icon: 'mdi-robot',
+    to: { name: 'ai_content.index' },
+    value: 'ai_content'
   }
 ]
 

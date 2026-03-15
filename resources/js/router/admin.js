@@ -27,6 +27,7 @@ import SeoDashboard from '../views/admin/seo/SeoDashboard.vue'
 import LanguagesList from '../views/admin/languages/LanguagesList.vue'
 import TranslationsList from '../views/admin/translations/TranslationsList.vue'
 import CommandMonitor from '../views/admin/CommandMonitor.vue'
+import AiContentDashboard from '../views/admin/AiContentDashboard.vue'
 
 const routes = [
   {
@@ -184,6 +185,12 @@ const routes = [
     name: 'command_monitor.index',
     component: CommandMonitor,
     meta: { title: 'Command Monitor' }
+  },
+  {
+    path: '/admin/ai-content',
+    name: 'ai_content.index',
+    component: AiContentDashboard,
+    meta: { title: 'AI Content Generator' }
   }
 ]
 

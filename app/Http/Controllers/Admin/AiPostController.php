@@ -81,6 +81,74 @@ class AiPostController extends Controller
     }
 
     /**
+     * Trigger AI user seed as a background process.
+     */
+    public function seed(Request $request): JsonResponse
+    {
+        $request->validate([
+            'users' => 'nullable|integer|min:1|max:500',
+            'posts_per_user' => 'nullable|integer|min:1|max:20',
+            'photos' => 'nullable|integer|min:1|max:3',
+            'country_id' => 'nullable|integer|exists:countries,id',
+        ]);
+
+        // Check if already running
+        $progressFile = 'ai_seed_progress.json';
+        if (Storage::disk('local')->exists($progressFile)) {
+            $existing = json_decode(Storage::disk('local')->get($progressFile), true);
+            if (($existing['status'] ?? '') === 'running') {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'User seeding is already running. Check progress.',
+                ], 409);
+            }
+        }
+
+        $command = 'php ' . base_path('artisan') . ' ai:seed'
+            . ' --users=' . escapeshellarg($request->input('users', 10))
+            . ' --posts-per-user=' . escapeshellarg($request->input('posts_per_user', 5))
+            . ' --photos=' . escapeshellarg($request->input('photos', 1))
+            . ' --auto';
+
+        if ($request->filled('country_id')) {
+            $command .= ' --country=' . escapeshellarg($request->input('country_id'));
+        }
+
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
+            pclose(popen('start /B ' . $command . ' > NUL 2>&1', 'r'));
+        } else {
+            exec($command . ' > /dev/null 2>&1 &');
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'User seeding started in background.',
+        ]);
+    }
+
+    /**
+     * Get the seed progress status.
+     */
+    public function seedStatus(): JsonResponse
+    {
+        $progressFile = 'ai_seed_progress.json';
+
+        if (Storage::disk('local')->exists($progressFile)) {
+            $content = Storage::disk('local')->get($progressFile);
+            return response()->json([
+                'success' => true,
+                'progress' => json_decode($content, true),
+            ]);
+        }
+
+        return response()->json([
+            'success' => true,
+            'progress' => null,
+            'message' => 'No seed progress found.',
+        ]);
+    }
+
+    /**
      * Get the current progress status.
      */
     public function status(Request $request): JsonResponse
