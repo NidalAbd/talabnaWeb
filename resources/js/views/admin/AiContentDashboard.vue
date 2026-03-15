@@ -30,13 +30,13 @@
       <div class="card-body">
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label>Category *</label>
+            <label>Category</label>
             <select v-model="postForm.category_id" class="form-control" @change="loadSubcategories">
-              <option :value="null">-- Select Category --</option>
+              <option :value="0">-- All Categories (Random) --</option>
               <option v-for="c in categories" :key="c.id" :value="c.id">{{ c.name }}</option>
             </select>
           </div>
-          <div class="col-md-6 mb-3">
+          <div class="col-md-6 mb-3" v-if="postForm.category_id">
             <label>Subcategory <small class="text-muted">(optional - leave empty for random)</small></label>
             <select v-model="postForm.subcategory_id" class="form-control">
               <option :value="null">-- Random Subcategories --</option>
@@ -67,7 +67,7 @@
         </div>
       </div>
       <div class="card-footer">
-        <button class="btn btn-purple" :disabled="!postForm.category_id || postLoading" @click="generatePosts">
+        <button class="btn btn-purple" :disabled="postLoading" @click="generatePosts">
           <i class="fas fa-play mr-1"></i> {{ postLoading ? 'Starting...' : 'Generate Posts' }}
         </button>
       </div>
@@ -200,7 +200,7 @@ const allSubcategories = ref([])
 const countries = ref([])
 const botUsers = ref([])
 
-const postForm = ref({ category_id: null, subcategory_id: null, count: 5, photos_count: 1, bot_user_id: null, random: true })
+const postForm = ref({ category_id: 0, subcategory_id: null, count: 5, photos_count: 1, bot_user_id: null, random: true })
 const postLoading = ref(false)
 const postProgress = ref(null)
 
@@ -291,12 +291,33 @@ async function loadBotUsers() {
 async function generatePosts() {
   postLoading.value = true
   try {
-    const res = await fetch('/ai-posts/generate', {
+    let url, body
+
+    if (!postForm.value.category_id) {
+      // Random categories — use seed endpoint with 1 bot user
+      url = '/api/admin/ai/seed'
+      body = {
+        users: 1,
+        posts_per_user: postForm.value.count,
+        photos: postForm.value.photos_count,
+      }
+    } else {
+      url = '/ai-posts/generate'
+      body = postForm.value
+    }
+
+    const res = await fetch(url, {
       method: 'POST', headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrf(), 'Accept': 'application/json' },
-      body: JSON.stringify(postForm.value),
+      body: JSON.stringify(body),
     })
     const data = await res.json()
-    if (data.success) { startPollingPostProgress() } else { alert(data.message || 'Failed') }
+    if (data.success) {
+      if (!postForm.value.category_id) {
+        startPollingSeedProgress()
+      } else {
+        startPollingPostProgress()
+      }
+    } else { alert(data.message || 'Failed') }
   } catch (e) { alert('Error: ' + e.message) }
   postLoading.value = false
 }
