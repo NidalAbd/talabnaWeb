@@ -13,6 +13,9 @@
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="BSAla0i5_oynIREw-fChMYZ9zCMyA95qqYxILO8xBpE" />
 
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9161194210267129" crossorigin="anonymous"></script>
+
     <!-- Google Analytics (deferred for performance) -->
     <script async defer src="https://www.googletagmanager.com/gtag/js?id=G-E68NQJJES2"></script>
     <script>
