@@ -138,67 +138,26 @@
 
 <script setup>
 import { computed, ref } from 'vue'
+import { getLocalizedName, ensureAbsoluteUrl, isVideo, formatPrice as fmtPrice, formatNumber, slugify, timeAgo as calcTimeAgo } from '@/utils/helpers'
 
 const props = defineProps({
-  listing: {
-    type: Object,
-    required: true,
-  },
-  locale: {
-    type: String,
-    default: 'ar',
-  },
+  listing: { type: Object, required: true },
+  locale: { type: String, default: 'ar' },
 })
 
 const isFavorite = ref(false)
 
-// Get localized name from category/subcategory object
 const getCategoryName = (item) => {
   if (!item) return ''
-  // If name is an object with ar/en keys
   if (item.name && typeof item.name === 'object') {
-    return props.locale === 'ar' ? (item.name.ar || item.name.en || '') : (item.name.en || item.name.ar || '')
+    return getLocalizedName(item.name, props.locale)
   }
-  // If name is a string directly
-  if (typeof item.name === 'string') {
-    return props.locale === 'ar' ? item.name : (item.name_en || item.name)
-  }
-  return ''
+  return props.locale === 'ar' ? item.name : (item.name_en || item.name || '')
 }
 
-// Get localized location name
-const getLocationName = (item) => {
-  if (!item) return ''
-  if (item.name && typeof item.name === 'object') {
-    return props.locale === 'ar' ? (item.name.ar || item.name.en || '') : (item.name.en || item.name.ar || '')
-  }
-  if (typeof item.name === 'string') {
-    return props.locale === 'ar' ? item.name : (item.name_en || item.name)
-  }
-  return ''
-}
+const getLocationName = (item) => getCategoryName(item)
 
-// Ensure URL starts with / for absolute path
-const ensureAbsoluteUrl = (url) => {
-  if (!url) return null
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
-    return url
-  }
-  // Handle paths stored as 'photos/posts/...' (from public disk) - need /storage prefix
-  if (url.startsWith('photos/')) {
-    return '/storage/' + url
-  }
-  // Handle paths stored as 'storage/photos/...' - just add leading slash
-  return '/' + url
-}
-
-// Check if file is a video by extension
-const isVideoFile = (src) => {
-  if (!src) return false
-  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']
-  const lowerSrc = src.toLowerCase()
-  return videoExtensions.some(ext => lowerSrc.endsWith(ext))
-}
+const isVideoFile = (src) => isVideo(src)
 
 const mainPhoto = computed(() => {
   if (props.listing.photos && props.listing.photos.length > 0) {
@@ -282,58 +241,26 @@ const locationText = computed(() => {
   return parts.filter(p => p).join(', ')
 })
 
-const timeAgo = computed(() => {
-  if (!props.listing.created_at) return ''
+const timeAgo = computed(() => calcTimeAgo(props.listing.created_at, props.locale))
 
-  const now = new Date()
-  const created = new Date(props.listing.created_at)
-  const diffMs = now - created
-  const diffMins = Math.floor(diffMs / 60000)
-  const diffHours = Math.floor(diffMs / 3600000)
-  const diffDays = Math.floor(diffMs / 86400000)
+const formatPrice = (price) => fmtPrice(price, props.locale, 'ILS')
 
-  if (props.locale === 'ar') {
-    if (diffMins < 60) return `منذ ${diffMins} دقيقة`
-    if (diffHours < 24) return `منذ ${diffHours} ساعة`
-    if (diffDays < 30) return `منذ ${diffDays} يوم`
-    return created.toLocaleDateString('ar-SA')
-  } else {
-    if (diffMins < 60) return `${diffMins}m ago`
-    if (diffHours < 24) return `${diffHours}h ago`
-    if (diffDays < 30) return `${diffDays}d ago`
-    return created.toLocaleDateString('en-US')
-  }
-})
-
-const slugify = (text) => {
-  if (!text) return ''
-  return text
-    .toString()
-    .toLowerCase()
-    .trim()
-    .replace(/\s+/g, '-')
-    .replace(/[^\w\-]+/g, '')
-    .replace(/\-\-+/g, '-')
-    .substring(0, 50)
-}
-
-const formatPrice = (price) => {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    minimumFractionDigits: 0,
-  }).format(price)
-}
-
-const formatNumber = (num) => {
-  if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M'
-  if (num >= 1000) return (num / 1000).toFixed(1) + 'K'
-  return num.toString()
-}
-
-const toggleFavorite = () => {
+const toggleFavorite = async () => {
   isFavorite.value = !isFavorite.value
-  // TODO: Call API to toggle favorite
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+    await fetch(`/api/doFavourite/${props.listing.id}`, {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      credentials: 'same-origin',
+    })
+  } catch (e) {
+    isFavorite.value = !isFavorite.value
+  }
 }
 </script>
 

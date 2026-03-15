@@ -352,10 +352,11 @@ import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
 import ListingCard from '@/components/ListingCard.vue'
+import { getCategoryIcon, getCategoryColor, formatNumber } from '@/utils/helpers'
 
 const router = useRouter()
 const appStore = useAppStore()
-const { updateMeta, setOrganizationSchema } = useSeo()
+const { updateMeta, setOrganizationSchema, setWebsiteSchema } = useSeo()
 
 // State
 const searchQuery = ref('')
@@ -374,38 +375,11 @@ const loadingLocations = ref(true)
 const locale = computed(() => appStore.locale)
 
 const statsItems = computed(() => [
-  { key: 'total_listings', label: locale.value === 'ar' ? 'خدمات نشطة' : 'Active Services' },
-  { key: 'total_users', label: locale.value === 'ar' ? 'مستخدمين مسجلين' : 'Registered Users' },
-  { key: 'total_categories', label: locale.value === 'ar' ? 'خدمات مميزة' : 'Premium Services' },
-  { key: 'listings_today', label: locale.value === 'ar' ? 'معاملات' : 'Transactions' },
+  { key: 'total_listings', icon: 'mdi-clipboard-list', label: locale.value === 'ar' ? 'خدمات نشطة' : 'Active Services' },
+  { key: 'total_users', icon: 'mdi-account-group', label: locale.value === 'ar' ? 'مستخدمين مسجلين' : 'Registered Users' },
+  { key: 'total_categories', icon: 'mdi-star-circle', label: locale.value === 'ar' ? 'خدمات مميزة' : 'Premium Services' },
+  { key: 'listings_today', icon: 'mdi-trending-up', label: locale.value === 'ar' ? 'معاملات' : 'Transactions' },
 ])
-
-const categoryIcons = {
-  1: 'mdi-briefcase',      // Jobs (وظائف)
-  2: 'mdi-cellphone',      // Devices (اجهزة)
-  3: 'mdi-home-city',      // Houses (عقارات)
-  4: 'mdi-car',            // Cars (سيارات)
-  5: 'mdi-tools',          // Services (خدمات)
-  6: 'mdi-map-marker-radius', // Near (قربي)
-  7: 'mdi-video',          // Reels (فيديو)
-  8: 'mdi-alert-circle',   // Emergency (طوارئ)
-}
-
-const categoryColors = {
-  1: 'green',              // Jobs
-  2: 'blue',               // Devices
-  3: 'purple',             // Houses
-  4: 'red',                // Cars
-  5: 'orange',             // Services
-  6: 'teal',               // Near
-  7: 'pink',               // Reels
-  8: 'deep-orange',        // Emergency
-}
-
-const getCategoryIcon = (id) => categoryIcons[id] || 'mdi-folder'
-const getCategoryColor = (id) => categoryColors[id] || 'grey'
-
-const formatNumber = (num) => new Intl.NumberFormat().format(num)
 
 const doSearch = () => {
   if (searchQuery.value.trim()) {
@@ -512,11 +486,14 @@ watch(activeTab, (newTab) => {
 onMounted(() => {
   // Set SEO
   updateMeta({
-    title: 'طلبنا - Talabna | منصة الخدمات الشاملة',
-    description: 'طلبنا - منصتك الشاملة للعثور على الخدمات وتقديمها. تواصل مع مزودي الخدمات أو قدم خدماتك لآلاف المستخدمين.',
-    keywords: 'خدمات, إعلانات مبوبة, هواتف, سيارات, عقارات, وظائف, طلبنا, talabna, services',
+    title: 'طلبنا - Talabna | سوق الإعلانات المبوبة',
+    description: 'طلبنا - منصتك الشاملة للعثور على الخدمات وتقديمها. وظائف، سيارات، عقارات، أجهزة وخدمات متنوعة. تواصل مع مزودي الخدمات أو قدم خدماتك لآلاف المستخدمين.',
+    keywords: 'طلبنا, talabna, إعلانات مبوبة, وظائف, سيارات, عقارات, أجهزة, خدمات, classified ads, jobs, cars, real estate',
+    url: 'https://talbna.cloud',
+    type: 'website',
   })
   setOrganizationSchema()
+  setWebsiteSchema()
 
   // Fetch data
   fetchCategories()

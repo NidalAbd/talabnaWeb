@@ -48,6 +48,9 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+// Contact form (public, no auth required)
+Route::post('/api/contact', [\App\Http\Controllers\Api\ContactController::class, 'submit'])->middleware('throttle:5,1');
+
 // Facebook Data Deletion (keep these before SPA routes)
 Route::post('/facebook/data-deletion', [App\Http\Controllers\FacebookController::class, 'handleDataDeletion']);
 Route::get('/facebook/deletion-status', [App\Http\Controllers\FacebookController::class, 'getDeletionStatus']);
