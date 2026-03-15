@@ -122,7 +122,8 @@ class GenerateAiBotUsers extends Command
                         $categoryName = $category->name['en'] ?? $category->name['ar'] ?? '';
                         $subcategoryName = $subcategory->name['en'] ?? $subcategory->name['ar'] ?? '';
 
-                        $progress['current_item'] = "Post {$p+1}/{$postsPerUser} for {$user->name}: {$subcategoryName}";
+                        $postNum = $p + 1;
+                        $progress['current_item'] = "Post {$postNum}/{$postsPerUser} for {$user->name}: {$subcategoryName}";
                         $this->saveProgress($progressFile, $progress);
 
                         // Generate content
@@ -162,10 +163,10 @@ class GenerateAiBotUsers extends Command
                         }
 
                         $progress['created_posts']++;
-                        $this->line("    Post {$p+1}: {$content['title']['en']} (ID: {$post->id})");
+                        $this->line("    Post {$postNum}: {$content['title']['en']} (ID: {$post->id})");
 
                     } catch (\Exception $e) {
-                        $this->error("    Post {$p+1} failed: {$e->getMessage()}");
+                        $this->error("    Post {$postNum} failed: {$e->getMessage()}");
                         $progress['errors'][] = "Post failed for user {$user->id}: {$e->getMessage()}";
                     }
 
