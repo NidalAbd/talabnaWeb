@@ -13,13 +13,15 @@
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="BSAla0i5_oynIREw-fChMYZ9zCMyA95qqYxILO8xBpE" />
 
-    <!-- Google Analytics (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-E68NQJJES2"></script>
+    <!-- Google Analytics (deferred for performance) -->
+    <script async defer src="https://www.googletagmanager.com/gtag/js?id=G-E68NQJJES2"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
         gtag('js', new Date());
-        gtag('config', 'G-E68NQJJES2');
+        gtag('config', 'G-E68NQJJES2', { send_page_view: false });
+        // Send page view after load for better performance
+        window.addEventListener('load', function() { gtag('event', 'page_view'); });
     </script>
 
     <!-- Dynamic SEO Meta Tags -->
@@ -116,37 +118,28 @@
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
     <link rel="preconnect" href="https://talbna.cloud" crossorigin>
 
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Fonts (preload + swap for performance) -->
+    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
 
     <!-- Vite Assets -->
     @vite(['resources/js/app.js'])
 
     <style>
-        body {
-            font-family: 'Cairo', sans-serif;
-        }
-        /* Initial loading state */
+        body { font-family: 'Cairo', sans-serif; margin: 0; min-height: 100vh; }
+        /* Prevent CLS - reserve full viewport */
+        #app { min-height: 100vh; }
         #app-loader {
-            position: fixed;
-            inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #f8f9fc;
-            z-index: 9999;
+            position: fixed; inset: 0; display: flex; align-items: center;
+            justify-content: center; background: #0a1628; z-index: 9999;
         }
         .loader-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid #e0e0e0;
-            border-top-color: #5035FF;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
+            width: 44px; height: 44px; border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.8s linear infinite;
         }
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        /* Preload hero to prevent CLS */
+        .v-application { min-height: 100vh; }
     </style>
 </head>
 <body>
