@@ -144,6 +144,21 @@
           </v-list-item>
         </template>
 
+        <!-- Mobile Search -->
+        <v-list-item class="px-4 py-2">
+          <v-text-field
+            v-model="searchQuery"
+            :placeholder="appStore.locale === 'ar' ? 'ابحث...' : 'Search...'"
+            prepend-inner-icon="mdi-magnify"
+            variant="outlined"
+            density="compact"
+            hide-details
+            single-line
+            @keyup.enter="doSearch(); mobileDrawer = false"
+          />
+        </v-list-item>
+        <v-divider class="my-2" />
+
         <v-list-item to="/" @click="mobileDrawer = false">
           <template v-slot:prepend><v-icon>mdi-home</v-icon></template>
           <v-list-item-title>{{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}</v-list-item-title>
@@ -272,9 +287,8 @@
             © {{ new Date().getFullYear() }} Talabna. {{ appStore.locale === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved' }}.
           </p>
           <div class="d-flex gap-2">
-            <v-btn icon variant="text" size="small" href="#"><v-icon>mdi-facebook</v-icon></v-btn>
-            <v-btn icon variant="text" size="small" href="#"><v-icon>mdi-twitter</v-icon></v-btn>
-            <v-btn icon variant="text" size="small" href="#"><v-icon>mdi-instagram</v-icon></v-btn>
+            <v-btn icon variant="text" size="small" href="https://www.facebook.com/talabna" target="_blank"><v-icon>mdi-facebook</v-icon></v-btn>
+            <v-btn icon variant="text" size="small" href="https://www.instagram.com/talabna" target="_blank"><v-icon>mdi-instagram</v-icon></v-btn>
           </div>
         </div>
       </v-container>
@@ -312,24 +326,7 @@ const userAvatar = computed(() => {
   return null
 })
 
-const categoryIcons = {
-  1: 'mdi-cellphone',      // Phones
-  2: 'mdi-car',            // Cars
-  3: 'mdi-briefcase',      // Jobs
-  4: 'mdi-home-city',      // Real Estate
-  5: 'mdi-shape',          // General
-}
-
-const categoryColors = {
-  1: 'blue',
-  2: 'red',
-  3: 'green',
-  4: 'purple',
-  5: 'orange',
-}
-
-const getCategoryIcon = (id) => categoryIcons[id] || 'mdi-folder'
-const getCategoryColor = (id) => categoryColors[id] || 'grey'
+import { getCategoryIcon, getCategoryColor } from '@/utils/helpers'
 
 const toggleLocale = () => {
   appStore.setLocale(appStore.locale === 'ar' ? 'en' : 'ar')
