@@ -149,8 +149,9 @@ class AiPostController extends Controller
 
         $args = [
             'users' => $request->input('users', 10),
-            'posts-per-user' => $request->input('posts_per_user', 5),
+            'posts-per-user' => $request->input('posts_per_user', 2),
             'photos' => $request->input('photos', 1),
+            'batch' => 3,
             'auto' => true,
         ];
 

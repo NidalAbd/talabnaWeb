@@ -42,6 +42,22 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping(1440) // 24h lock expiry
             ->runInBackground()
             ->appendOutputTo(storage_path('logs/ai-generate.log'));
+
+        // AI Bot User Seed: run every 10 min, processes 3 users per batch
+        // Only runs if there's an active (paused/running) seed progress file
+        $schedule->command('ai:seed --batch=3 --auto')
+            ->everyTenMinutes()
+            ->withoutOverlapping(15) // 15 min lock
+            ->runInBackground()
+            ->when(function () {
+                $file = 'ai_seed_progress.json';
+                if (\Illuminate\Support\Facades\Storage::disk('local')->exists($file)) {
+                    $progress = json_decode(\Illuminate\Support\Facades\Storage::disk('local')->get($file), true);
+                    return in_array($progress['status'] ?? '', ['running', 'paused']);
+                }
+                return false;
+            })
+            ->appendOutputTo(storage_path('logs/ai-seed.log'));
     }
 
     /**
