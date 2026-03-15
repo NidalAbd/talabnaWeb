@@ -1,0 +1,25 @@
+{
+  "name": "طلبنا - Talabna",
+  "short_name": "Talabna",
+  "description": "سوق الإعلانات المبوبة - Classified Ads Marketplace",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a1628",
+  "theme_color": "#0a1628",
+  "orientation": "portrait-primary",
+  "lang": "ar",
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "/storage/photos/favicon.ico",
+      "sizes": "48x48",
+      "type": "image/x-icon"
+    },
+    {
+      "src": "/storage/photos/apple-touch-icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["shopping", "business"]
+}
