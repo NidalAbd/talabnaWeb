@@ -408,17 +408,36 @@ onUnmounted(() => {
   if (pollInterval) clearInterval(pollInterval)
 })
 
+function toArray(data) {
+  if (Array.isArray(data)) return data
+  if (data?.data && Array.isArray(data.data)) return data.data
+  if (data?.items && Array.isArray(data.items)) return data.items
+  if (typeof data === 'object' && data !== null) {
+    const vals = Object.values(data)
+    if (vals.length && Array.isArray(vals[0])) return vals[0]
+  }
+  return []
+}
+
+function parseName(name) {
+  if (!name) return ''
+  if (typeof name === 'string') {
+    try { const p = JSON.parse(name); return p.en || p.ar || name } catch { return name }
+  }
+  return name.en || name.ar || ''
+}
+
 async function loadCategories() {
   try {
     const res = await fetch('/api/admin/categories', { headers: { 'Accept': 'application/json' } })
     if (res.ok) {
       const data = await res.json()
-      categories.value = (data.data || data).map(c => ({
+      categories.value = toArray(data).map(c => ({
         id: c.id,
-        name: c.name?.en || c.name?.ar || `Category ${c.id}`,
+        name: parseName(c.name) || `Category ${c.id}`,
       }))
     }
-  } catch (e) { console.error(e) }
+  } catch (e) { console.error('loadCategories:', e) }
 }
 
 async function loadSubcategories() {
@@ -427,12 +446,12 @@ async function loadSubcategories() {
     const res = await fetch(`/api/admin/subcategories?category_id=${postForm.value.category_id}`, { headers: { 'Accept': 'application/json' } })
     if (res.ok) {
       const data = await res.json()
-      subcategories.value = (data.data || data).map(s => ({
+      subcategories.value = toArray(data).map(s => ({
         id: s.id,
-        name: s.name?.en || s.name?.ar || `Subcategory ${s.id}`,
+        name: parseName(s.name) || `Subcategory ${s.id}`,
       }))
     }
-  } catch (e) { console.error(e) }
+  } catch (e) { console.error('loadSubcategories:', e) }
 }
 
 async function loadAllSubcategories() {
@@ -440,12 +459,12 @@ async function loadAllSubcategories() {
     const res = await fetch('/api/admin/subcategories', { headers: { 'Accept': 'application/json' } })
     if (res.ok) {
       const data = await res.json()
-      allSubcategories.value = (data.data || data).map(s => ({
+      allSubcategories.value = toArray(data).map(s => ({
         id: s.id,
-        name: s.name?.en || s.name?.ar || `Subcategory ${s.id}`,
+        name: parseName(s.name) || `Subcategory ${s.id}`,
       }))
     }
-  } catch (e) { console.error(e) }
+  } catch (e) { console.error('loadAllSubcategories:', e) }
 }
 
 async function loadCountries() {
@@ -453,12 +472,12 @@ async function loadCountries() {
     const res = await fetch('/api/admin/countries', { headers: { 'Accept': 'application/json' } })
     if (res.ok) {
       const data = await res.json()
-      countries.value = (data.data || data).map(c => ({
+      countries.value = toArray(data).map(c => ({
         id: c.id,
-        name: c.name?.en || c.name?.ar || `Country ${c.id}`,
+        name: parseName(c.name) || `Country ${c.id}`,
       }))
     }
-  } catch (e) { console.error(e) }
+  } catch (e) { console.error('loadCountries:', e) }
 }
 
 async function loadBotUsers() {
@@ -466,12 +485,12 @@ async function loadBotUsers() {
     const res = await fetch('/api/admin/users?search=bot&per_page=50', { headers: { 'Accept': 'application/json' } })
     if (res.ok) {
       const data = await res.json()
-      botUsers.value = (data.data || data).map(u => ({
+      botUsers.value = toArray(data).map(u => ({
         id: u.id,
         name: `${u.name || u.user_name} (ID: ${u.id})`,
       }))
     }
-  } catch (e) { console.error(e) }
+  } catch (e) { console.error('loadBotUsers:', e) }
 }
 
 // Generate Posts
