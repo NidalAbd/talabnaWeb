@@ -115,7 +115,7 @@
             <v-card-text class="pa-6">
               <div class="text-center mb-6">
                 <div v-if="listing.price" class="text-h3 font-weight-bold text-primary">
-                  ${{ formatNumber(listing.price) }}
+                  {{ listing.price?.toLocaleString() }} ₪
                 </div>
                 <div v-else class="text-h5 text-medium-emphasis">
                   {{ locale === 'ar' ? 'السعر عند الاتصال' : 'Contact for price' }}
@@ -232,31 +232,9 @@ const snackbarText = ref('')
 
 const locale = computed(() => appStore.locale)
 
-// Ensure URL starts with / for absolute path
-const ensureAbsoluteUrl = (url) => {
-  if (!url) return null
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
-    return url
-  }
-  // Handle paths stored as 'photos/posts/...' (from public disk) - need /storage prefix
-  if (url.startsWith('photos/')) {
-    return '/storage/' + url
-  }
-  // Handle paths stored as 'storage/photos/...' - just add leading slash
-  return '/' + url
-}
+import { ensureAbsoluteUrl, isVideo as isVideoFile, getLocalizedName as _gln, formatNumber as _fn } from '@/utils/helpers'
 
-const getPhotoUrl = (photo) => {
-  return ensureAbsoluteUrl(photo?.src || photo?.url)
-}
-
-// Check if file is a video by extension
-const isVideoFile = (src) => {
-  if (!src) return false
-  const videoExtensions = ['.mp4', '.webm', '.ogg', '.mov', '.avi', '.mkv']
-  const lowerSrc = src.toLowerCase()
-  return videoExtensions.some(ext => lowerSrc.endsWith(ext))
-}
+const getPhotoUrl = (photo) => ensureAbsoluteUrl(photo?.src || photo?.url)
 
 const userPhotoUrl = computed(() => {
   if (listing.value?.user?.photos?.[0]) {
@@ -265,18 +243,10 @@ const userPhotoUrl = computed(() => {
   return null
 })
 
-// Get localized name from category/subcategory/city/country object
 const getLocalizedName = (item) => {
   if (!item) return ''
-  // If name is an object with ar/en keys
-  if (item.name && typeof item.name === 'object') {
-    return locale.value === 'ar' ? (item.name.ar || item.name.en || '') : (item.name.en || item.name.ar || '')
-  }
-  // If name is a string directly
-  if (typeof item.name === 'string') {
-    return locale.value === 'ar' ? item.name : (item.name_en || item.name)
-  }
-  return ''
+  if (item.name && typeof item.name === 'object') return _gln(item.name, locale.value)
+  return locale.value === 'ar' ? item.name : (item.name_en || item.name || '')
 }
 
 const shareUrl = computed(() => window.location.href)
@@ -339,7 +309,7 @@ const breadcrumbs = computed(() => {
   ]
 })
 
-const formatNumber = (num) => new Intl.NumberFormat().format(num || 0)
+const formatNumber = (num) => _fn(num || 0)
 
 const formatDate = (date, yearOnly = false) => {
   if (!date) return ''

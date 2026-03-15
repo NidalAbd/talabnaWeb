@@ -181,29 +181,7 @@ const isSpecialCategory = computed(() => isNearCategory.value || isReelsCategory
 const isSubcategoryRoute = computed(() => route.name === 'subcategory' && route.params.subcategoryId)
 const subcategoryIdFromRoute = computed(() => route.params.subcategoryId ? parseInt(route.params.subcategoryId) : null)
 
-// Updated icons and colors for all 8 categories
-const categoryIcons = {
-  1: 'mdi-briefcase',      // Jobs (وظائف)
-  2: 'mdi-cellphone',      // Devices (اجهزة)
-  3: 'mdi-home-city',      // Houses (عقارات)
-  4: 'mdi-car',            // Cars (سيارات)
-  5: 'mdi-tools',          // Services (خدمات)
-  6: 'mdi-map-marker-radius', // Near (قربي)
-  7: 'mdi-video',          // Reels (فيديو)
-  8: 'mdi-alert-circle',   // Emergency (طوارئ)
-}
-const categoryColors = {
-  1: 'green',              // Jobs
-  2: 'blue',               // Devices
-  3: 'purple',             // Houses
-  4: 'red',                // Cars
-  5: 'orange',             // Services
-  6: 'teal',               // Near
-  7: 'pink',               // Reels
-  8: 'deep-orange',        // Emergency
-}
-const getCategoryIcon = (id) => categoryIcons[id] || 'mdi-folder'
-const getCategoryColor = (id) => categoryColors[id] || 'grey'
+import { getCategoryIcon, getCategoryColor } from '@/utils/helpers'
 
 // Request user's location
 const requestLocation = () => {

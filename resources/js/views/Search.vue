@@ -94,7 +94,14 @@ const fetchResults = async () => {
 onMounted(() => {
   query.value = route.query.q || ''
   searchQuery.value = query.value
-  updateMeta({ title: `البحث: ${query.value} - طلبنا` })
+  updateMeta({
+    title: query.value
+      ? (locale.value === 'ar' ? `نتائج البحث: ${query.value} - طلبنا` : `Search: ${query.value} - Talabna`)
+      : (locale.value === 'ar' ? 'بحث - طلبنا' : 'Search - Talabna'),
+    description: locale.value === 'ar'
+      ? `نتائج البحث عن "${query.value}" في طلبنا - منصة الإعلانات المبوبة`
+      : `Search results for "${query.value}" on Talabna - Classified Ads Platform`,
+  })
   fetchResults()
 })
 

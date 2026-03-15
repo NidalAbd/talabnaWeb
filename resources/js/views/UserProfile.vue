@@ -81,7 +81,14 @@ const fetchUser = async () => {
     pagination.value = data.pagination || pagination.value
 
     if (user.value) {
-      updateMeta({ title: `${user.value.name} - طلبنا` })
+      updateMeta({
+        title: locale.value === 'ar'
+          ? `${user.value.name} - طلبنا`
+          : `${user.value.name} - Talabna`,
+        description: locale.value === 'ar'
+          ? `عرض ملف ${user.value.name} و${pagination.value.total} إعلان على طلبنا`
+          : `View ${user.value.name}'s profile and ${pagination.value.total} listings on Talabna`,
+      })
     }
   } catch (error) {
     console.error('Error:', error)

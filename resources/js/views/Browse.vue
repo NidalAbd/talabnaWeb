@@ -314,32 +314,12 @@ const filters = ref({
 
 const locale = computed(() => appStore.locale)
 
-// Get localized name from category/subcategory/city/country object
+import { getLocalizedName as _getLocalizedName, ensureAbsoluteUrl } from '@/utils/helpers'
+
 const getLocalizedName = (item) => {
   if (!item) return ''
-  // If name is an object with ar/en keys
-  if (item.name && typeof item.name === 'object') {
-    return locale.value === 'ar' ? (item.name.ar || item.name.en || '') : (item.name.en || item.name.ar || '')
-  }
-  // If name is a string directly
-  if (typeof item.name === 'string') {
-    return locale.value === 'ar' ? item.name : (item.name_en || item.name)
-  }
-  return ''
-}
-
-// Ensure URL starts with / for absolute path
-const ensureAbsoluteUrl = (url) => {
-  if (!url) return null
-  if (url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/')) {
-    return url
-  }
-  // Handle paths stored as 'photos/posts/...' (from public disk) - need /storage prefix
-  if (url.startsWith('photos/')) {
-    return '/storage/' + url
-  }
-  // Handle paths stored as 'storage/photos/...' - just add leading slash
-  return '/' + url
+  if (item.name && typeof item.name === 'object') return _getLocalizedName(item.name, locale.value)
+  return locale.value === 'ar' ? item.name : (item.name_en || item.name || '')
 }
 
 const getPhotoUrl = (listing) => {

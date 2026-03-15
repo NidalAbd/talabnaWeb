@@ -29,5 +29,10 @@ const appStore = useAppStore()
 const { updateMeta } = useSeo()
 const locale = computed(() => appStore.locale)
 
-onMounted(() => { updateMeta({ title: '404 - الصفحة غير موجودة' }) })
+onMounted(() => {
+  updateMeta({
+    title: locale.value === 'ar' ? '404 - الصفحة غير موجودة | طلبنا' : '404 - Page Not Found | Talabna',
+    description: locale.value === 'ar' ? 'الصفحة المطلوبة غير موجودة' : 'The requested page was not found',
+  })
+})
 </script>
