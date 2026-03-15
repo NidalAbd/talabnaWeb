@@ -15,11 +15,15 @@ class AiPostController extends Controller
      */
     private function runInBackground(string $command, array $arguments): bool
     {
-        // Try proc_open first (usually not disabled)
+        // Try proc_open first (usually not disabled on shared hosting)
         if (function_exists('proc_open')) {
             $fullCommand = 'php ' . base_path('artisan') . ' ' . $command;
             foreach ($arguments as $key => $value) {
-                $fullCommand .= ' --' . $key . '=' . escapeshellarg($value);
+                if ($value === true) {
+                    $fullCommand .= ' --' . $key;
+                } else {
+                    $fullCommand .= ' --' . $key . '=' . escapeshellarg($value);
+                }
             }
             $fullCommand .= ' > /dev/null 2>&1 &';
 
