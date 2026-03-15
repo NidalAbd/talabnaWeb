@@ -129,20 +129,13 @@
     @vite(['resources/js/app.js'])
 
     <style>
-        body { font-family: 'Cairo', sans-serif; margin: 0; min-height: 100vh; }
-        /* Prevent CLS - reserve full viewport */
-        #app { min-height: 100vh; }
-        #app-loader {
-            position: fixed; inset: 0; display: flex; align-items: center;
-            justify-content: center; background: #0a1628; z-index: 9999;
-        }
-        .loader-spinner {
-            width: 44px; height: 44px; border: 3px solid rgba(255,255,255,0.1);
-            border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.8s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        /* Preload hero to prevent CLS */
-        .v-application { min-height: 100vh; }
+        *{margin:0;padding:0;box-sizing:border-box}
+        body{font-family:'Cairo',sans-serif;min-height:100vh;background:#0a1628;color:#fff}
+        #app{min-height:100vh;contain:layout style paint}
+        #app-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a1628;z-index:9999}
+        .loader-spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.1);border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite}
+        @keyframes spin{to{transform:rotate(360deg)}}
+        .v-application{min-height:100vh}
     </style>
 </head>
 <body>
@@ -151,8 +144,8 @@
         <div class="loader-spinner"></div>
     </div>
 
-    <!-- Vue App Mount Point with CLS prevention placeholder -->
-    <div id="app" style="min-height:100vh;background:#0a1628;overflow:hidden"></div>
+    <!-- Vue App Mount Point with CLS prevention -->
+    <div id="app" style="min-height:100vh;background:#0a1628;overflow:hidden;contain:layout style paint"></div>
 
     <script>
         // Remove loader when Vue app is ready
