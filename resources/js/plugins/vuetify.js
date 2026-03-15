@@ -1,6 +1,15 @@
 import 'vuetify/styles'
-import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
+
+// Load MDI icons asynchronously to prevent render blocking
+if (typeof window !== 'undefined') {
+  const link = document.createElement('link')
+  link.rel = 'stylesheet'
+  link.href = 'https://cdn.jsdelivr.net/npm/@mdi/font@7/css/materialdesignicons.min.css'
+  link.media = 'print'
+  link.onload = function() { this.media = 'all' }
+  document.head.appendChild(link)
+}
 
 // Tree-shaking: components auto-imported by vite-plugin-vuetify
 // No need for: import * as components from 'vuetify/components'
