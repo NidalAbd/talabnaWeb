@@ -19,10 +19,11 @@ class GenerateAiPosts extends Command
 
     protected $signature = 'ai:posts
         {--category= : Category ID (required)}
-        {--subcategory= : Specific subcategory ID (optional, otherwise all in category)}
-        {--count=3 : Posts per subcategory}
+        {--subcategory= : Specific subcategory ID (optional)}
+        {--count=3 : Total posts to generate}
         {--photos=1 : Photos per post (1-3)}
         {--bot-user= : Bot user ID (required)}
+        {--random : Distribute posts across random subcategories}
         {--auto : Non-interactive for cron}';
 
     protected $description = 'Generate AI service posts with GPT-4 text content and DALL-E realistic photos';
@@ -45,6 +46,7 @@ class GenerateAiPosts extends Command
         $photosCount = min(3, max(1, (int) $this->option('photos')));
         $botUserId = $this->option('bot-user');
         $isAuto = $this->option('auto');
+        $isRandom = $this->option('random');
 
         // Validate required options
         if (!$categoryId) {
@@ -85,6 +87,30 @@ class GenerateAiPosts extends Command
             return Command::FAILURE;
         }
 
+        // Build the post generation plan
+        // If --random or specific subcategory: total = $count posts
+        // If no subcategory and no --random: $count posts per subcategory (legacy)
+        $postPlan = []; // Array of ['subcategory' => Sub_categories, 'post_num' => int]
+
+        if ($subcategoryId || $isRandom) {
+            // Total $count posts, distributed across subcategories
+            for ($i = 0; $i < $count; $i++) {
+                $sub = $subcategoryId
+                    ? $subcategories->first()
+                    : $subcategories->random();
+                $postPlan[] = ['subcategory' => $sub, 'post_num' => $i + 1];
+            }
+        } else {
+            // Legacy: $count posts per each subcategory
+            foreach ($subcategories as $sub) {
+                for ($i = 0; $i < $count; $i++) {
+                    $postPlan[] = ['subcategory' => $sub, 'post_num' => $i + 1];
+                }
+            }
+        }
+
+        $totalPosts = count($postPlan);
+
         // Progress file
         $progressFile = "ai_generate_progress_posts_cat{$categoryId}.json";
         $progress = $this->loadProgress($progressFile);
@@ -99,8 +125,6 @@ class GenerateAiPosts extends Command
             $choice = $progress ? 'continue' : 'start';
         }
 
-        $totalPosts = $subcategories->count() * $count;
-
         $this->logStart(['category_id' => $categoryId, 'total_posts' => $totalPosts]);
 
         if ($choice === 'start') {
@@ -110,8 +134,7 @@ class GenerateAiPosts extends Command
                 'total_posts' => $totalPosts,
                 'total_photos_per_post' => $photosCount,
                 'errors' => [],
-                'last_subcategory_id' => 0,
-                'last_post_index' => 0,
+                'last_post_global_index' => 0,
                 'current_item' => null,
                 'started_at' => now()->toISOString(),
             ];
@@ -124,8 +147,7 @@ class GenerateAiPosts extends Command
             'total_posts' => $totalPosts,
             'total_photos_per_post' => $photosCount,
             'errors' => [],
-            'last_subcategory_id' => 0,
-            'last_post_index' => 0,
+            'last_post_global_index' => 0,
             'current_item' => null,
             'started_at' => now()->toISOString(),
         ], $progress ?? []);
@@ -138,120 +160,105 @@ class GenerateAiPosts extends Command
         // Header
         $this->renderHeader("AI Post Generator — {$categoryName}");
         $this->info("  Bot User: {$botUser->name} (ID: {$botUserId})");
-        $this->info("  Subcategories: {$subcategories->count()} | Posts each: {$count} | Photos each: {$photosCount}");
-        $this->info("  Total posts to generate: {$totalPosts}");
+        $mode = $isRandom ? 'Random subcategories' : ($subcategoryId ? 'Specific subcategory' : 'All subcategories');
+        $this->info("  Mode: {$mode} | Total posts: {$totalPosts} | Photos each: {$photosCount}");
         $this->newLine();
 
-        $globalPostIndex = 0;
+        $startIndex = $progress['last_post_global_index'] ?? 0;
 
-        foreach ($subcategories as $subcategory) {
+        for ($idx = $startIndex; $idx < $totalPosts; $idx++) {
+            $plan = $postPlan[$idx];
+            $subcategory = $plan['subcategory'];
             $subcategoryName = $subcategory->name['en'] ?? $subcategory->name['ar'] ?? "Subcategory {$subcategory->id}";
+            $postNum = $idx + 1;
 
-            // Skip already processed subcategories
-            if ($subcategory->id < $progress['last_subcategory_id']) {
-                $globalPostIndex += $count;
-                continue;
-            }
+            $this->line("  <fg=cyan>┌──────────────────────────────────────────────────┐</>");
+            $this->line("  <fg=cyan>│</> 📝 <fg=white;options=bold>Post {$postNum}/{$totalPosts}</> for <fg=yellow>{$subcategoryName}</>");
+            $this->line("  <fg=cyan>└──────────────────────────────────────────────────┘</>");
 
-            $startPostIndex = ($subcategory->id == $progress['last_subcategory_id'])
-                ? $progress['last_post_index']
-                : 0;
-
-            $this->renderSectionHeader("📂 {$subcategoryName} (ID: {$subcategory->id})");
-
-            for ($i = $startPostIndex; $i < $count; $i++) {
-                $globalPostIndex++;
-                $postNum = $i + 1;
-
-                $this->line("  <fg=cyan>┌──────────────────────────────────────────────────┐</>");
-                $this->line("  <fg=cyan>│</> 📝 <fg=white;options=bold>Post {$postNum}/{$count}</> for <fg=yellow>{$subcategoryName}</>");
-                $this->line("  <fg=cyan>└──────────────────────────────────────────────────┘</>");
-
-                try {
-                    // Update current item in progress
-                    $progress['current_item'] = "Generating text for {$subcategoryName} (post {$postNum}/{$count})";
-                    $this->saveProgress($progressFile, $progress);
-
-                    // Step 1: Generate text content with GPT
-                    $this->line("  <fg=gray>  → Generating text content with GPT...</>");
-                    $content = $this->contentService->generatePostContent($categoryName, $subcategoryName, 'عرض');
-
-                    $this->line("  <fg=green>  ✓ Title:</> {$content['title']['en']}");
-                    $this->line("  <fg=green>  ✓ Price:</> \${$content['price']}");
-
-                    // Step 2: Create ServicePost record
-                    $post = ServicePost::create([
-                        'user_id' => $botUserId,
-                        'categories_id' => $categoryId,
-                        'sub_categories_id' => $subcategory->id,
-                        'title' => json_encode($content['title']),
-                        'description' => json_encode($content['description']),
-                        'price' => $content['price'],
-                        'type' => 'عرض',
-                        'state' => 'published',
-                        'country_id' => 1,
-                        'city_id' => 1,
-                    ]);
-
-                    $this->line("  <fg=green>  ✓ Post created</> (ID: {$post->id})");
-
-                    // Step 3: Generate photos
-                    for ($p = 0; $p < $photosCount; $p++) {
-                        $photoNum = $p + 1;
-
-                        $progress['current_item'] = "Generating photo {$photoNum}/{$photosCount} for \"{$content['title']['en']}\"";
-                        $this->saveProgress($progressFile, $progress);
-
-                        $this->line("  <fg=gray>  → Generating photo {$photoNum}/{$photosCount}...</>");
-
-                        $imagePrompt = $this->contentService->generateImagePrompt($categoryName, $subcategoryName, $content['title']['en']);
-                        $imagePath = $this->dalleService->generatePostPhoto($imagePrompt);
-
-                        if ($imagePath) {
-                            $photo = new Photos(['src' => $imagePath]);
-                            $post->photos()->save($photo);
-                            $this->line("  <fg=green>  ✓ Photo {$photoNum} saved</>");
-                        } else {
-                            $error = $this->dalleService->getLastError() ?: 'Unknown error';
-                            $this->line("  <fg=red>  ✗ Photo {$photoNum} failed:</> {$error}");
-                            $progress['errors'][] = ['post_id' => $post->id, 'photo' => $photoNum, 'error' => $error];
-                        }
-
-                        // Wait between DALL-E calls (skip after last photo of last post)
-                        $isLastPhoto = ($p === $photosCount - 1);
-                        $isLastPost = ($i === $count - 1) && ($subcategory->id === $subcategories->last()->id);
-                        if (!($isLastPhoto && $isLastPost)) {
-                            if ($isAuto) {
-                                $this->info("  Waiting 65s for rate limit...");
-                                sleep(65);
-                            } else {
-                                $this->renderCountdown(65);
-                            }
-                        }
-                    }
-
-                    $progress['completed_posts']++;
-
-                } catch (\Exception $e) {
-                    $this->line("  <fg=red>  ✗ ERROR:</> {$e->getMessage()}");
-                    $progress['errors'][] = [
-                        'subcategory_id' => $subcategory->id,
-                        'post_index' => $i,
-                        'error' => $e->getMessage(),
-                    ];
-                }
-
-                // Save progress after each post
-                $progress['last_subcategory_id'] = $subcategory->id;
-                $progress['last_post_index'] = $i + 1;
+            try {
+                // Update current item in progress
+                $progress['current_item'] = "Generating text for {$subcategoryName} (post {$postNum}/{$totalPosts})";
                 $this->saveProgress($progressFile, $progress);
 
-                // Running stats
-                $completed = $progress['completed_posts'];
-                $errors = count($progress['errors']);
-                $this->line("  <fg=gray>  Stats: {$completed} posts done, {$errors} errors</>");
-                $this->newLine();
+                // Step 1: Generate text content with GPT
+                $this->line("  <fg=gray>  → Generating text content with GPT...</>");
+                $content = $this->contentService->generatePostContent($categoryName, $subcategoryName, 'عرض');
+
+                $this->line("  <fg=green>  ✓ Title:</> {$content['title']['en']}");
+                $this->line("  <fg=green>  ✓ Price:</> \${$content['price']}");
+
+                // Step 2: Create ServicePost record
+                $post = ServicePost::create([
+                    'user_id' => $botUserId,
+                    'categories_id' => $categoryId,
+                    'sub_categories_id' => $subcategory->id,
+                    'title' => json_encode($content['title']),
+                    'description' => json_encode($content['description']),
+                    'price' => $content['price'],
+                    'type' => 'عرض',
+                    'state' => 'published',
+                    'country_id' => $botUser->country_id ?? 1,
+                    'city_id' => $botUser->city_id ?? 1,
+                ]);
+
+                $this->line("  <fg=green>  ✓ Post created</> (ID: {$post->id})");
+
+                // Step 3: Generate photos
+                for ($p = 0; $p < $photosCount; $p++) {
+                    $photoNum = $p + 1;
+
+                    $progress['current_item'] = "Generating photo {$photoNum}/{$photosCount} for \"{$content['title']['en']}\"";
+                    $this->saveProgress($progressFile, $progress);
+
+                    $this->line("  <fg=gray>  → Generating photo {$photoNum}/{$photosCount}...</>");
+
+                    $imagePrompt = $this->contentService->generateImagePrompt($categoryName, $subcategoryName, $content['title']['en']);
+                    $imagePath = $this->dalleService->generatePostPhoto($imagePrompt);
+
+                    if ($imagePath) {
+                        $photo = new Photos(['src' => $imagePath]);
+                        $post->photos()->save($photo);
+                        $this->line("  <fg=green>  ✓ Photo {$photoNum} saved</>");
+                    } else {
+                        $error = $this->dalleService->getLastError() ?: 'Unknown error';
+                        $this->line("  <fg=red>  ✗ Photo {$photoNum} failed:</> {$error}");
+                        $progress['errors'][] = ['post_id' => $post->id, 'photo' => $photoNum, 'error' => $error];
+                    }
+
+                    // Wait between DALL-E calls (skip after last photo of last post)
+                    $isLastPhoto = ($p === $photosCount - 1);
+                    $isLastPost = ($idx === $totalPosts - 1);
+                    if (!($isLastPhoto && $isLastPost)) {
+                        if ($isAuto) {
+                            $this->info("  Waiting 65s for rate limit...");
+                            sleep(65);
+                        } else {
+                            $this->renderCountdown(65);
+                        }
+                    }
+                }
+
+                $progress['completed_posts']++;
+
+            } catch (\Exception $e) {
+                $this->line("  <fg=red>  ✗ ERROR:</> {$e->getMessage()}");
+                $progress['errors'][] = [
+                    'subcategory_id' => $subcategory->id,
+                    'post_index' => $idx,
+                    'error' => $e->getMessage(),
+                ];
             }
+
+            // Save progress after each post
+            $progress['last_post_global_index'] = $idx + 1;
+            $this->saveProgress($progressFile, $progress);
+
+            // Running stats
+            $completed = $progress['completed_posts'];
+            $errors = count($progress['errors']);
+            $this->line("  <fg=gray>  Stats: {$completed}/{$totalPosts} posts done, {$errors} errors</>");
+            $this->newLine();
         }
 
         // Mark as finished

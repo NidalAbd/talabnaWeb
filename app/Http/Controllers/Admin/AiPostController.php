@@ -17,9 +17,10 @@ class AiPostController extends Controller
         $request->validate([
             'category_id' => 'required|integer|exists:categories,id',
             'subcategory_id' => 'nullable|integer|exists:sub_categories,id',
-            'count' => 'nullable|integer|min:1|max:10',
+            'count' => 'nullable|integer|min:1|max:50',
             'photos_count' => 'nullable|integer|min:1|max:3',
-            'bot_user_id' => 'required|integer|exists:users,id',
+            'bot_user_id' => 'nullable|integer|exists:users,id',
+            'random' => 'nullable|boolean',
         ]);
 
         $categoryId = $request->input('category_id');
@@ -36,16 +37,33 @@ class AiPostController extends Controller
             }
         }
 
+        // Use provided bot user or find/create a default bot
+        $botUserId = $request->input('bot_user_id');
+        if (!$botUserId) {
+            $botUser = \App\Models\User::where('name', 'Talabna Bot')->first();
+            if (!$botUser) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No bot user found. Please provide bot_user_id or create a user named "Talabna Bot".',
+                ], 422);
+            }
+            $botUserId = $botUser->id;
+        }
+
         // Build artisan command
         $command = 'php ' . base_path('artisan') . ' ai:posts'
             . ' --category=' . escapeshellarg($categoryId)
             . ' --count=' . escapeshellarg($request->input('count', 3))
             . ' --photos=' . escapeshellarg($request->input('photos_count', 1))
-            . ' --bot-user=' . escapeshellarg($request->input('bot_user_id'))
+            . ' --bot-user=' . escapeshellarg($botUserId)
             . ' --auto';
 
         if ($request->filled('subcategory_id')) {
             $command .= ' --subcategory=' . escapeshellarg($request->input('subcategory_id'));
+        }
+
+        if ($request->input('random', false)) {
+            $command .= ' --random';
         }
 
         // Run in background (cross-platform)
