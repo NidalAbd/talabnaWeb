@@ -207,7 +207,8 @@ class GenerateAiBotUsers extends Command
                     }
 
                     $progress['created_posts']++;
-                    $this->line("    Post {$postNum}: {$content['title']['ar'] ?? ''} (ID: {$post->id})");
+                    $postTitle = $content['title']['ar'] ?? $content['title']['en'] ?? '';
+                    $this->line("    Post {$postNum}: {$postTitle} (ID: {$post->id})");
 
                 } catch (\Exception $e) {
                     $this->error("    Post {$postNum} failed: {$e->getMessage()}");
