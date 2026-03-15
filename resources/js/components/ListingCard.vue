@@ -138,7 +138,7 @@
 
 <script setup>
 import { computed, ref } from 'vue'
-import { getLocalizedName, ensureAbsoluteUrl, isVideo, formatPrice as fmtPrice, formatNumber, slugify, timeAgo as calcTimeAgo } from '@/utils/helpers'
+import { getLocalizedName, ensureAbsoluteUrl, isVideo, formatPrice as fmtPrice, formatNumber, slugify, timeAgo as calcTimeAgo, getCurrencyFromListing } from '@/utils/helpers'
 
 const props = defineProps({
   listing: { type: Object, required: true },
@@ -243,7 +243,7 @@ const locationText = computed(() => {
 
 const timeAgo = computed(() => calcTimeAgo(props.listing.created_at, props.locale))
 
-const formatPrice = (price) => fmtPrice(price, props.locale, 'ILS')
+const formatPrice = (price) => fmtPrice(price, props.locale, getCurrencyFromListing(props.listing))
 
 const toggleFavorite = async () => {
   isFavorite.value = !isFavorite.value

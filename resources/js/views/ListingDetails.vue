@@ -115,7 +115,7 @@
             <v-card-text class="pa-6">
               <div class="text-center mb-6">
                 <div v-if="listing.price" class="text-h3 font-weight-bold text-primary">
-                  {{ listing.price?.toLocaleString() }} ₪
+                  {{ formatPrice(listing.price, locale, getCurrencyFromListing(listing)) }}
                 </div>
                 <div v-else class="text-h5 text-medium-emphasis">
                   {{ locale === 'ar' ? 'السعر عند الاتصال' : 'Contact for price' }}
@@ -232,7 +232,7 @@ const snackbarText = ref('')
 
 const locale = computed(() => appStore.locale)
 
-import { ensureAbsoluteUrl, isVideo as isVideoFile, getLocalizedName as _gln, formatNumber as _fn } from '@/utils/helpers'
+import { ensureAbsoluteUrl, isVideo as isVideoFile, getLocalizedName as _gln, formatNumber as _fn, formatPrice, getCurrencyFromListing } from '@/utils/helpers'
 
 const getPhotoUrl = (photo) => ensureAbsoluteUrl(photo?.src || photo?.url)
 

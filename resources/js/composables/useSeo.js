@@ -86,7 +86,7 @@ export function useSeo() {
     if (!listing) return
 
     const countryCode = listing.country?.code || 'PS'
-    const currency = listing.price_currency_code || 'ILS'
+    const currency = listing.country?.currency_code || listing.price_currency_code || 'ILS'
 
     // Calculate price valid until (1 year from now)
     const priceValidUntil = new Date()

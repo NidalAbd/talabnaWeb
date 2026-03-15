@@ -35,16 +35,33 @@ export function getLocalizedName(nameObj, locale = 'ar') {
 }
 
 /**
- * Format price with currency
+ * Currency symbols mapping
+ */
+const currencySymbols = {
+  ILS: '₪', USD: '$', EUR: '€',
+  SAR: 'ر.س', EGP: 'ج.م', JOD: 'د.أ', AED: 'د.إ',
+  IQD: 'د.ع', BHD: 'د.ب', YER: 'ر.ي', QAR: 'ر.ق',
+  DZD: 'د.ج', MAD: 'د.م', TND: 'د.ت', LYD: 'د.ل',
+  SYP: 'ل.س', SDG: 'ج.س', KWD: 'د.ك', LBP: 'ل.ل',
+  OMR: 'ر.ع', MRU: 'أ.م', SOS: 'ش.ص', DJF: 'ف.ج', KMF: 'ف.ق',
+}
+
+/**
+ * Get currency code from listing's country
+ */
+export function getCurrencyFromListing(listing) {
+  return listing?.country?.currency_code || listing?.currency_code || 'ILS'
+}
+
+/**
+ * Format price with dynamic currency from listing country
  */
 export function formatPrice(price, locale = 'ar', currency = 'ILS') {
   if (!price && price !== 0) return locale === 'ar' ? 'اتصل للسعر' : 'Contact for price'
   const num = Number(price)
   if (isNaN(num)) return price
 
-  const symbols = { ILS: '₪', USD: '$', EUR: '€', SAR: 'ر.س', EGP: 'ج.م', JOD: 'د.أ' }
-  const symbol = symbols[currency] || currency
-
+  const symbol = currencySymbols[currency] || currency
   const formatted = num.toLocaleString(locale === 'ar' ? 'ar-SA' : 'en-US')
   return locale === 'ar' ? `${formatted} ${symbol}` : `${symbol}${formatted}`
 }
