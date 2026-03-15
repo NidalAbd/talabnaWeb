@@ -390,13 +390,13 @@ return [
                 ],
                 [
                     'text' => 'Banned Users',
-                    'url'  => 'banned-users',
+                    'url'  => 'admin/users/banned',
                     'icon' => 'fas fa-user-slash',
                     'permission' => ['user_index']
                 ],
                 [
                     'text' => 'Banned Devices',
-                    'url'  => 'banned-devices',
+                    'url'  => 'admin/devices/banned',
                     'icon' => 'fas fa-mobile-alt',
                     'permission' => ['user_index']
                 ]
@@ -423,7 +423,7 @@ return [
                 ],
                 [
                     'text' => 'Role Assignments',
-                    'url'  => 'role-assignments',
+                    'url'  => 'admin/role-assignments',
                     'icon' => 'fas fa-user-cog',
                     'permission' => ['edit_role']
                 ],
@@ -445,27 +445,27 @@ return [
                 ],
                 [
                     'text' => 'Point Packages',
-                    'url'  => 'point-packages',
+                    'url'  => 'admin/point-packages',
                     'icon' => 'fas fa-box-open',
                 ],
                 [
                     'text' => 'Purchase Requests',
-                    'url'  => 'point-purchase-requests',
+                    'url'  => 'admin/point-purchase-requests',
                     'icon' => 'fas fa-shopping-cart',
                 ],
                 [
                     'text' => 'Point Transactions',
-                    'url'  => 'point-transactions',
+                    'url'  => 'admin/point-transactions',
                     'icon' => 'fas fa-exchange-alt',
                 ],
                 [
                     'text' => 'Points Overview',
-                    'url'  => 'palservice-points',
+                    'url'  => 'admin/palservice-points',
                     'icon' => 'fas fa-chart-bar',
                 ],
                 [
                     'text' => 'Country Pricing',
-                    'url'  => 'country-pricing',
+                    'url'  => 'admin/country-pricing',
                     'icon' => 'fas fa-money-bill-wave',
                 ],
             ]
@@ -484,25 +484,25 @@ return [
 
         [
             'text' => 'Analytics',
-            'url'  => 'analytics',
+            'url'  => 'admin/analytics',
             'icon' => 'fas fa-chart-line',
             'permission' => ['view_statistics']
         ],
         [
             'text' => 'Statistics',
-            'url'  => 'statistics',
+            'url'  => 'admin/statistics',
             'icon' => 'fas fa-chart-pie',
             'permission' => ['view_statistics']
         ],
         [
             'text' => 'SEO Analytics',
-            'url'  => 'seo',
+            'url'  => 'admin/seo',
             'icon' => 'fas fa-search',
             'permission' => ['view_statistics']
         ],
         [
             'text' => 'Command Monitor',
-            'url'  => 'command-monitor',
+            'url'  => 'admin/command-monitor',
             'icon' => 'fas fa-terminal',
             'permission' => ['view_statistics']
         ],
@@ -517,7 +517,7 @@ return [
 
         [
             'text' => 'Marketing Notifications',
-            'url'  => 'marketing-notifications',
+            'url'  => 'admin/marketing-notifications',
             'icon' => 'fas fa-bullhorn',
             'permission' => ['view_statistics']
         ],
@@ -531,13 +531,13 @@ return [
             'submenu' => [
                 [
                     'text' => 'Languages',
-                    'url'  => 'languages',
+                    'url'  => 'admin/languages',
                     'icon' => 'fas fa-language',
                     'permission' => ['view_statistics']
                 ],
                 [
                     'text' => 'Translations',
-                    'url'  => 'translations',
+                    'url'  => 'admin/translations',
                     'icon' => 'fas fa-book',
                     'permission' => ['view_statistics']
                 ],
