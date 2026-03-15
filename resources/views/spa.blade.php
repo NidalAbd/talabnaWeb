@@ -13,18 +13,18 @@
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="BSAla0i5_oynIREw-fChMYZ9zCMyA95qqYxILO8xBpE" />
 
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9161194210267129" crossorigin="anonymous"></script>
-
-    <!-- Google Analytics (deferred for performance) -->
-    <script async defer src="https://www.googletagmanager.com/gtag/js?id=G-E68NQJJES2"></script>
+    <!-- Google Analytics (loaded after page ready) -->
     <script>
         window.dataLayer = window.dataLayer || [];
         function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'G-E68NQJJES2', { send_page_view: false });
-        // Send page view after load for better performance
-        window.addEventListener('load', function() { gtag('event', 'page_view'); });
+        window.addEventListener('load', function() {
+            var g = document.createElement('script');
+            g.src = 'https://www.googletagmanager.com/gtag/js?id=G-E68NQJJES2';
+            g.async = true;
+            document.head.appendChild(g);
+            gtag('js', new Date());
+            gtag('config', 'G-E68NQJJES2');
+        });
     </script>
 
     <!-- Dynamic SEO Meta Tags -->
@@ -161,6 +161,14 @@
                 var loader = document.getElementById('app-loader');
                 if (loader) loader.style.display = 'none';
             }, 100);
+            // Load AdSense after page is ready (non-blocking)
+            setTimeout(function() {
+                var s = document.createElement('script');
+                s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9161194210267129';
+                s.crossOrigin = 'anonymous';
+                s.async = true;
+                document.head.appendChild(s);
+            }, 3000);
         });
     </script>
 </body>
