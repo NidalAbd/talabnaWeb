@@ -475,7 +475,7 @@ return [
 
         [
             'text' => 'AI Content',
-            'url'  => 'ai-content',
+            'url'  => 'admin/ai-content',
             'icon' => 'fas fa-robot',
             'permission' => ['view_statistics']
         ],

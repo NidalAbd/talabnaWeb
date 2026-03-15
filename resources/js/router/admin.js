@@ -56,7 +56,7 @@ const routes = [
   { path: '/languages', name: 'languages.index', component: LanguagesList, meta: { title: 'Languages' } },
   { path: '/translations', name: 'translations.index', component: TranslationsList, meta: { title: 'Translations' } },
   { path: '/command-monitor', name: 'command_monitor.index', component: CommandMonitor, meta: { title: 'Command Monitor' } },
-  { path: '/ai-content', name: 'ai_content.index', component: AiContentDashboard, meta: { title: 'AI Content Generator' } },
+  { path: '/admin/ai-content', name: 'ai_content.index', component: AiContentDashboard, meta: { title: 'AI Content Generator' } },
 ]
 
 const router = createRouter({
