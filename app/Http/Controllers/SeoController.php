@@ -41,7 +41,7 @@ class SeoController extends Controller
         // Cache SEO data for 5 minutes to improve performance
         $cacheKey = 'seo_' . md5($path . $locale);
 
-        return Cache::remember($cacheKey, 300, function () use ($path, $locale) {
+        return Cache::remember($cacheKey, 1800, function () use ($path, $locale) {
             return $this->generateSeoData($path, $locale);
         });
     }

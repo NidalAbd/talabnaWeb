@@ -151,8 +151,8 @@
         <div class="loader-spinner"></div>
     </div>
 
-    <!-- Vue App Mount Point -->
-    <div id="app"></div>
+    <!-- Vue App Mount Point with CLS prevention placeholder -->
+    <div id="app" style="min-height:100vh;background:#0a1628;overflow:hidden"></div>
 
     <script>
         // Remove loader when Vue app is ready
