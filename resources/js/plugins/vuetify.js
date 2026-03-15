@@ -1,8 +1,9 @@
 import 'vuetify/styles'
 import '@mdi/font/css/materialdesignicons.css'
 import { createVuetify } from 'vuetify'
-import * as components from 'vuetify/components'
-import * as directives from 'vuetify/directives'
+
+// Tree-shaking: components auto-imported by vite-plugin-vuetify
+// No need for: import * as components from 'vuetify/components'
 
 const lightTheme = {
   dark: false,
@@ -47,8 +48,6 @@ const darkTheme = {
 }
 
 export default createVuetify({
-  components,
-  directives,
   theme: {
     defaultTheme: 'light',
     themes: {
@@ -57,19 +56,9 @@ export default createVuetify({
     },
   },
   defaults: {
-    VBtn: {
-      rounded: 'lg',
-    },
-    VCard: {
-      rounded: 'lg',
-    },
-    VTextField: {
-      variant: 'outlined',
-      density: 'comfortable',
-    },
-    VSelect: {
-      variant: 'outlined',
-      density: 'comfortable',
-    },
+    VBtn: { rounded: 'lg' },
+    VCard: { rounded: 'lg' },
+    VTextField: { variant: 'outlined', density: 'comfortable' },
+    VSelect: { variant: 'outlined', density: 'comfortable' },
   },
 })
