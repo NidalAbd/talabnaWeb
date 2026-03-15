@@ -634,7 +634,7 @@ onUnmounted(() => {
 }
 
 .hero-gradient {
-  background: linear-gradient(135deg, rgb(var(--v-theme-primary)) 0%, rgb(var(--v-theme-primary-darken-1)) 100%);
+  background: linear-gradient(160deg, #0a1628 0%, #1a3a5c 40%, #1565c0 100%);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 

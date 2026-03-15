@@ -117,7 +117,7 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.hero-gradient { background: linear-gradient(135deg, #5035FF 0%, #7C6AFF 100%); }
+.hero-gradient { background: linear-gradient(160deg, #0a1628 0%, #1a3a5c 40%, #1565c0 100%); }
 .terms-content h2 { font-size: 1.5rem; font-weight: 600; margin: 2rem 0 1rem; }
 .terms-content p { line-height: 1.8; margin-bottom: 1rem; color: rgba(var(--v-theme-on-surface), 0.7); }
 .terms-content ul { margin-bottom: 1rem; padding-left: 1.5rem; }

@@ -410,6 +410,6 @@ watch(() => route.query.subcategory, (newVal) => {
 
 <style scoped>
 .hero-gradient {
-  background: linear-gradient(135deg, #5035FF 0%, #7C6AFF 100%);
+  background: linear-gradient(160deg, #0a1628 0%, #1a3a5c 40%, #1565c0 100%);
 }
 </style>
