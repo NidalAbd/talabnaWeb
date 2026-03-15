@@ -12,6 +12,7 @@ use App\Models\cities;
 use App\Services\DalleImageService;
 use App\Services\OpenAiContentService;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
@@ -94,19 +95,35 @@ class GenerateAiBotUsers extends Command
             for ($u = 0; $u < $usersPerCountry; $u++) {
                 $city = $countryCities->isNotEmpty() ? $countryCities->random() : null;
 
-                // Create bot user
+                // Create bot user via DB::table to avoid model issues
                 $userName = 'bot_' . Str::random(8);
-                $user = User::create([
+                $userId = DB::table('users')->insertGetId([
                     'name' => $this->generateArabicName(),
-                    'userName' => $userName,
+                    'user_name' => $userName,
                     'email' => $userName . '@bot.talabna.com',
                     'password' => Hash::make(Str::random(16)),
-                    'gender' => collect(['male', 'female'])->random(),
+                    'gender' => collect(['ذكر', 'انثى'])->random(),
                     'country_id' => $country->id,
                     'city_id' => $city?->id,
                     'is_active' => 'active',
                     'dateOfBirth' => now()->subYears(rand(20, 45))->format('Y-m-d'),
+                    'created_at' => now(),
+                    'updated_at' => now(),
                 ]);
+                $user = User::find($userId);
+
+                // Generate profile photo
+                try {
+                    $gender = $user->gender === 'ذكر' ? 'male' : 'female';
+                    $photoPrompt = "Professional profile photo of a {$gender} person, natural look, plain background, headshot portrait, photorealistic";
+                    $imagePath = $this->dalleService->generatePostPhoto($photoPrompt);
+                    if ($imagePath) {
+                        $photo = new Photos(['src' => $imagePath]);
+                        $user->photos()->save($photo);
+                    }
+                } catch (\Exception $e) {
+                    $this->line("    Profile photo failed: {$e->getMessage()}");
+                }
 
                 $progress['created_users']++;
                 $progress['current_item'] = "User: {$user->name} ({$countryName})";

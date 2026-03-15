@@ -10,13 +10,13 @@ class GooglePlayVerificationService
 {
     // Product ID -> points mapping
     public const PRODUCT_POINTS = [
-        'points_1' => 1,
-        'points_3' => 3,
-        'points_5' => 5,
-        'points_10' => 10,
-        'points_25' => 25,
-        'points_50' => 50,
-        'points_100' => 100,
+        'points-1' => 1,
+        'points-3' => 3,
+        'points-5' => 5,
+        'points-10' => 10,
+        'points-25' => 25,
+        'points-50' => 50,
+        'points-100' => 100,
     ];
 
     /**
