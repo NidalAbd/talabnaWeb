@@ -140,37 +140,7 @@
       <!-- Grid View -->
       <v-row v-else-if="viewMode === 'grid'">
         <v-col v-for="listing in listings" :key="listing.id" cols="12" sm="6" md="4" lg="3">
-          <v-card
-            :to="`/listing/${listing.id}/${slugify(listing.title)}`"
-            class="listing-card h-100"
-            hover
-          >
-            <v-img
-              :src="listing.image || placeholderImage"
-              height="180"
-              cover
-              class="bg-grey-lighten-3"
-            >
-              <template v-slot:error>
-                <v-img :src="placeholderImage" height="180" cover />
-              </template>
-              <div v-if="listing.badge" class="listing-badge">
-                <v-chip :color="getBadgeColor(listing.badge)" size="small" label>
-                  {{ listing.badge }}
-                </v-chip>
-              </div>
-            </v-img>
-            <v-card-text>
-              <h3 class="text-body-1 font-weight-medium text-truncate-2 mb-2">{{ listing.title }}</h3>
-              <div class="d-flex align-center justify-space-between">
-                <span class="text-primary font-weight-bold">{{ formatPrice(listing.price, listing.currency) }}</span>
-                <span class="text-caption text-medium-emphasis">
-                  <v-icon size="12">mdi-map-marker</v-icon>
-                  {{ listing.city_name }}
-                </span>
-              </div>
-            </v-card-text>
-          </v-card>
+          <listing-card :listing="listing" :locale="isArabic ? 'ar' : 'en'" />
         </v-col>
       </v-row>
 
@@ -235,6 +205,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useAdvancedSeo } from '@/composables/useAdvancedSeo'
+import ListingCard from '@/components/ListingCard.vue'
 
 const route = useRoute()
 const appStore = useAppStore()

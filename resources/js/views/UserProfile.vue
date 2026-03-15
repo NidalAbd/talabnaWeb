@@ -58,7 +58,7 @@ import ListingCard from '@/components/ListingCard.vue'
 
 const route = useRoute()
 const appStore = useAppStore()
-const { updateMeta } = useSeo()
+const { updateMeta, setProfileSchema, setItemListSchema } = useSeo()
 
 const user = ref(null)
 const listings = ref([])
@@ -89,6 +89,10 @@ const fetchUser = async () => {
           ? `عرض ملف ${user.value.name} و${pagination.value.total} إعلان على طلبنا`
           : `View ${user.value.name}'s profile and ${pagination.value.total} listings on Talabna`,
       })
+      setProfileSchema(user.value)
+      if (listings.value.length > 0) {
+        setItemListSchema(listings.value, `${user.value.name}'s Listings`)
+      }
     }
   } catch (error) {
     console.error('Error:', error)

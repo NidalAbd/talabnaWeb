@@ -356,7 +356,7 @@ import { getCategoryIcon, getCategoryColor, formatNumber } from '@/utils/helpers
 
 const router = useRouter()
 const appStore = useAppStore()
-const { updateMeta, setOrganizationSchema, setWebsiteSchema } = useSeo()
+const { updateMeta, setOrganizationSchema, setWebsiteSchema, setItemListSchema } = useSeo()
 
 // State
 const searchQuery = ref('')
@@ -408,6 +408,7 @@ const fetchFeatured = async () => {
     if (!response.ok) return
     const data = await response.json()
     featured.value = Array.isArray(data.featured) ? data.featured : []
+    if (featured.value.length > 0) setItemListSchema(featured.value, 'Featured Services')
   } catch (error) {
     console.error('Error fetching featured:', error)
     featured.value = []

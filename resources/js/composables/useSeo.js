@@ -86,7 +86,7 @@ export function useSeo() {
     if (!listing) return
 
     const countryCode = listing.country?.code || 'PS'
-    const currency = listing.price_currency_code || 'USD'
+    const currency = listing.price_currency_code || 'ILS'
 
     // Calculate price valid until (1 year from now)
     const priceValidUntil = new Date()
@@ -296,11 +296,115 @@ export function useSeo() {
     setWebsiteSchema()
   })
 
+  /**
+   * Add JSON-LD FAQ schema (for category/about pages)
+   */
+  function setFaqSchema(faqs) {
+    const existingSchema = document.querySelector('#faq-schema')
+    if (existingSchema) existingSchema.remove()
+
+    if (!faqs || faqs.length === 0) return
+
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'FAQPage',
+      mainEntity: faqs.map(faq => ({
+        '@type': 'Question',
+        name: faq.question,
+        acceptedAnswer: {
+          '@type': 'Answer',
+          text: faq.answer,
+        },
+      })),
+    }
+
+    const script = document.createElement('script')
+    script.id = 'faq-schema'
+    script.type = 'application/ld+json'
+    script.textContent = JSON.stringify(schema)
+    document.head.appendChild(script)
+  }
+
+  /**
+   * Add JSON-LD ProfilePage schema (for user profiles)
+   */
+  function setProfileSchema(user) {
+    const existingSchema = document.querySelector('#profile-schema')
+    if (existingSchema) existingSchema.remove()
+
+    if (!user) return
+
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'ProfilePage',
+      mainEntity: {
+        '@type': 'Person',
+        name: user.name || user.user_name,
+        url: siteUrl + '/user/' + user.id,
+        image: user.photos?.[0]?.src ? siteUrl + '/' + user.photos[0].src : undefined,
+        memberOf: {
+          '@type': 'Organization',
+          name: 'Talabna',
+          url: siteUrl,
+        },
+      },
+      dateCreated: user.created_at,
+    }
+
+    const script = document.createElement('script')
+    script.id = 'profile-schema'
+    script.type = 'application/ld+json'
+    script.textContent = JSON.stringify(schema)
+    document.head.appendChild(script)
+  }
+
+  /**
+   * Add JSON-LD ItemList schema (for category/browse pages)
+   */
+  function setItemListSchema(listings, listName) {
+    const existingSchema = document.querySelector('#itemlist-schema')
+    if (existingSchema) existingSchema.remove()
+
+    if (!listings || listings.length === 0) return
+
+    const schema = {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: listName || 'Listings',
+      numberOfItems: listings.length,
+      itemListElement: listings.slice(0, 10).map((listing, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        item: {
+          '@type': 'Product',
+          name: listing.title,
+          url: siteUrl + '/listing/' + listing.id,
+          image: listing.photos?.[0]?.src ? siteUrl + '/' + listing.photos[0].src : undefined,
+          offers: {
+            '@type': 'Offer',
+            price: listing.price || 0,
+            priceCurrency: 'ILS',
+            availability: 'https://schema.org/InStock',
+          },
+        },
+      })),
+    }
+
+    const script = document.createElement('script')
+    script.id = 'itemlist-schema'
+    script.type = 'application/ld+json'
+    script.textContent = JSON.stringify(schema)
+    document.head.appendChild(script)
+  }
+
   return {
     updateMeta,
     setListingSchema,
     setOrganizationSchema,
     setBreadcrumbSchema,
     setWebsiteSchema,
+    setFaqSchema,
+    setProfileSchema,
+    setItemListSchema,
   }
 }

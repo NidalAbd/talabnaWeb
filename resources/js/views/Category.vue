@@ -154,7 +154,7 @@ const CATEGORY_REELS = 7  // فيديو - Reels
 const route = useRoute()
 const router = useRouter()
 const appStore = useAppStore()
-const { updateMeta, setBreadcrumbSchema } = useSeo()
+const { updateMeta, setBreadcrumbSchema, setItemListSchema } = useSeo()
 
 const category = ref(null)
 const subcategories = ref([])
@@ -314,6 +314,9 @@ const fetchListings = async () => {
     const data = await response.json()
     listings.value = Array.isArray(data.listings) ? data.listings : []
     pagination.value = data.pagination || pagination.value
+    if (listings.value.length > 0) {
+      setItemListSchema(listings.value, category.value?.name || 'Category')
+    }
   } catch (error) {
     console.error('Error:', error)
   } finally {

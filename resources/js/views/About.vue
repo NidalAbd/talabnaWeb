@@ -83,7 +83,7 @@ import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
 
 const appStore = useAppStore()
-const { updateMeta, setOrganizationSchema } = useSeo()
+const { updateMeta, setOrganizationSchema, setFaqSchema } = useSeo()
 const locale = computed(() => appStore.locale)
 
 const values = [
@@ -108,6 +108,12 @@ onMounted(() => {
       : 'Learn about Talabna, the leading classified ads platform in the Arab region. We connect sellers and buyers safely and easily.',
   })
   setOrganizationSchema()
+  setFaqSchema([
+    { question: locale.value === 'ar' ? 'ما هي طلبنا؟' : 'What is Talabna?', answer: locale.value === 'ar' ? 'طلبنا هي منصة إعلانات مبوبة رائدة تخدم المنطقة العربية، تتيح نشر إعلانات في فئات الوظائف والعقارات والسيارات والأجهزة والخدمات.' : 'Talabna is a leading classified ads platform serving the Arab region, allowing posting in jobs, real estate, cars, electronics, and services categories.' },
+    { question: locale.value === 'ar' ? 'هل طلبنا مجانية؟' : 'Is Talabna free?', answer: locale.value === 'ar' ? 'نعم، إنشاء الحساب ونشر الإعلانات مجاني. يمكنك شراء شارات مميزة لتعزيز ظهور إعلاناتك.' : 'Yes, creating an account and posting ads is free. You can purchase premium badges to boost your listing visibility.' },
+    { question: locale.value === 'ar' ? 'كيف أتواصل مع البائع؟' : 'How do I contact a seller?', answer: locale.value === 'ar' ? 'يمكنك التواصل مع البائع عبر الاتصال المباشر أو واتساب من صفحة الإعلان.' : 'You can contact the seller via direct call or WhatsApp from the listing page.' },
+    { question: locale.value === 'ar' ? 'ما هي الدول المدعومة؟' : 'What countries are supported?', answer: locale.value === 'ar' ? 'نخدم أكثر من 22 دولة عربية تشمل فلسطين، مصر، السعودية، الأردن، العراق، الإمارات وغيرها.' : 'We serve over 22 Arab countries including Palestine, Egypt, Saudi Arabia, Jordan, Iraq, UAE and more.' },
+  ])
 })
 </script>
 
