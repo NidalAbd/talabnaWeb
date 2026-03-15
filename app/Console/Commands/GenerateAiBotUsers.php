@@ -106,7 +106,7 @@ class GenerateAiBotUsers extends Command
                     'country_id' => $country->id,
                     'city_id' => $city?->id,
                     'is_active' => 'active',
-                    'dateOfBirth' => now()->subYears(rand(20, 45))->format('Y-m-d'),
+                    'date_of_birth' => now()->subYears(rand(20, 45))->format('Y-m-d'),
                     'created_at' => now(),
                     'updated_at' => now(),
                 ]);
