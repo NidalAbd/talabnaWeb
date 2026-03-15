@@ -25,7 +25,7 @@
           <v-card variant="outlined" class="pa-6 mb-4">
             <v-icon color="primary" size="32" class="mb-3">mdi-email</v-icon>
             <h3 class="text-subtitle-1 font-weight-bold">{{ locale === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</h3>
-            <p class="text-body-2">support@talabna.com</p>
+            <p class="text-body-2">support@talbna.cloud</p>
           </v-card>
           <v-card variant="outlined" class="pa-6">
             <v-icon color="primary" size="32" class="mb-3">mdi-phone</v-icon>

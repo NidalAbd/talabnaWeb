@@ -259,7 +259,7 @@
             <div class="mt-4">
               <h4 class="text-subtitle-2 font-weight-bold mb-2">{{ appStore.locale === 'ar' ? 'تواصل معنا' : 'Contact Us' }}</h4>
               <p class="text-caption text-medium-emphasis mb-1">
-                <v-icon size="small" class="mr-1">mdi-email</v-icon> info@talabna.com
+                <v-icon size="small" class="mr-1">mdi-email</v-icon> support@talbna.cloud
               </p>
             </div>
           </v-col>
