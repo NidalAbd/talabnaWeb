@@ -609,6 +609,16 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/command-monitor', [HomeController::class, 'index'])
         ->name('command_monitor.index');
 
+    // AI Content - Vue SPA
+    Route::get('/ai-content', [HomeController::class, 'index'])
+        ->name('ai_content.index');
+
+    // Banned Users/Devices without /admin prefix
+    Route::get('/banned-users', [HomeController::class, 'index'])
+        ->name('banned_users.index');
+    Route::get('/banned-devices', [HomeController::class, 'index'])
+        ->name('banned_devices.index');
+
     // Unsuspend Routes
     Route::patch('/users/{id}/unsuspend', function($id) {
         $user = User::findOrFail($id);
