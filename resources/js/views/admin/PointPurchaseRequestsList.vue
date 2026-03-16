@@ -552,7 +552,7 @@ onMounted(async () => {
 }
 
 .section-title i {
-    color: #27ae60;
+    color: #3498db;
 }
 
 .section-subtitle {
@@ -599,8 +599,8 @@ onMounted(async () => {
 
 .search-input:focus {
     outline: none;
-    border-color: #27ae60;
-    box-shadow: 0 0 0 3px rgba(39, 174, 96, 0.1);
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .filter-group {
@@ -621,7 +621,7 @@ onMounted(async () => {
 
 .filter-select:focus {
     outline: none;
-    border-color: #27ae60;
+    border-color: #3498db;
 }
 
 /* Loading & Error States */
@@ -639,7 +639,7 @@ onMounted(async () => {
     height: 50px;
     margin: 0 auto 1rem;
     border: 4px solid #f3f4f6;
-    border-top: 4px solid #27ae60;
+    border-top: 4px solid #3498db;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -740,7 +740,7 @@ onMounted(async () => {
 }
 
 .price-text {
-    color: #27ae60;
+    color: #3498db;
     font-size: 1rem;
 }
 
@@ -887,13 +887,13 @@ onMounted(async () => {
 }
 
 .pagination-btn:hover:not(:disabled):not(.dots) {
-    border-color: #27ae60;
-    color: #27ae60;
+    border-color: #3498db;
+    color: #3498db;
 }
 
 .pagination-btn.active {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-    border-color: #27ae60;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    border-color: #3498db;
     color: white;
 }
 
@@ -941,34 +941,27 @@ onMounted(async () => {
 }
 
 .modal-header.success {
-    background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
-    color: white;
+    border-bottom: 1px solid #e8ecef;
 }
 
 .modal-header.warning {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-    color: white;
+    border-bottom: 1px solid #e8ecef;
 }
 
 .modal-header.danger {
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: white;
+    border-bottom: none;
 }
 
-.modal-header.success h3,
-.modal-header.warning h3,
 .modal-header.danger h3 {
     color: white;
 }
 
-.modal-header.success .close-btn,
-.modal-header.warning .close-btn,
 .modal-header.danger .close-btn {
     color: white;
 }
 
-.modal-header.success .close-btn:hover,
-.modal-header.warning .close-btn:hover,
 .modal-header.danger .close-btn:hover {
     background: rgba(255, 255, 255, 0.2);
     color: white;

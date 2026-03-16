@@ -323,7 +323,7 @@ onMounted(() => {
 }
 
 .stat-card.blue .stat-icon {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 }
 
 .stat-card.green .stat-icon {
@@ -487,18 +487,17 @@ onMounted(() => {
 }
 
 .modern-table thead {
-    background: #f8f9fa;
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
 }
 
 .modern-table th {
     padding: 16px;
     text-align: left;
     font-weight: 600;
-    font-size: 13px;
-    color: #2c3e50;
+    font-size: 0.85rem;
+    color: white;
     text-transform: uppercase;
     letter-spacing: 0.5px;
-    border-bottom: 2px solid #ecf0f1;
 }
 
 .modern-table th.sortable {
@@ -508,11 +507,11 @@ onMounted(() => {
 }
 
 .modern-table th.sortable:hover {
-    color: #3498db;
+    color: rgba(255, 255, 255, 0.7);
 }
 
 .modern-table tbody tr {
-    border-bottom: 1px solid #ecf0f1;
+    border-bottom: 1px solid #f0f0f0;
     transition: background-color 0.2s;
 }
 
@@ -522,14 +521,17 @@ onMounted(() => {
 
 .modern-table td {
     padding: 16px;
-    font-size: 14px;
-    color: #2c3e50;
+    font-size: 0.9rem;
+    color: #333;
 }
 
 .user-id {
+    background: #e8ecef;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
     font-family: monospace;
     font-weight: 600;
-    color: #7f8c8d;
+    font-size: 0.85rem;
 }
 
 .user-name {
@@ -544,7 +546,7 @@ onMounted(() => {
 .points-badge {
     display: inline-block;
     padding: 6px 12px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
     border-radius: 6px;
     font-weight: 600;
@@ -585,7 +587,7 @@ onMounted(() => {
 .pagination-btn {
     padding: 10px 16px;
     background: white;
-    border: 2px solid #ecf0f1;
+    border: 2px solid #e8ecef;
     border-radius: 8px;
     color: #2c3e50;
     font-size: 14px;
@@ -614,7 +616,7 @@ onMounted(() => {
 .page-number {
     width: 40px;
     height: 40px;
-    border: 2px solid #ecf0f1;
+    border: 2px solid #e8ecef;
     background: white;
     border-radius: 8px;
     color: #2c3e50;
@@ -629,8 +631,8 @@ onMounted(() => {
 }
 
 .page-number.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-color: transparent;
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    border-color: #3498db;
     color: white;
 }
 

@@ -654,7 +654,7 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     padding: 25px 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
     flex-wrap: wrap;
     gap: 15px;
@@ -710,7 +710,7 @@ onMounted(() => {
 .base-price-header i {
     width: 40px;
     height: 40px;
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
     border-radius: 10px;
     display: flex;
@@ -740,7 +740,7 @@ onMounted(() => {
 .input-prefix {
     font-size: 1.3rem;
     font-weight: 600;
-    color: #667eea;
+    color: #3498db;
 }
 
 .base-price-input {
@@ -754,7 +754,7 @@ onMounted(() => {
 
 .base-price-input:focus {
     outline: none;
-    border-color: #667eea;
+    border-color: #3498db;
 }
 
 .input-suffix {
@@ -793,12 +793,12 @@ onMounted(() => {
     align-items: center;
     gap: 8px;
     transition: all 0.3s ease;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
 }
 
 .apply-btn.secondary {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    background: linear-gradient(135deg, #28a745 0%, #218838 100%);
 }
 
 .apply-btn:hover:not(:disabled) {
@@ -831,7 +831,7 @@ onMounted(() => {
     height: 50px;
     margin: 0 auto 20px;
     border: 4px solid #f3f4f6;
-    border-top-color: #667eea;
+    border-top-color: #3498db;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -852,7 +852,7 @@ onMounted(() => {
 .retry-btn {
     margin-top: 15px;
     padding: 10px 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
     border: none;
     border-radius: 8px;
@@ -870,7 +870,7 @@ onMounted(() => {
 }
 
 .modern-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
 }
 
@@ -878,7 +878,7 @@ onMounted(() => {
     padding: 15px;
     text-align: left;
     font-weight: 600;
-    font-size: 14px;
+    font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -904,6 +904,8 @@ onMounted(() => {
 .modern-table tbody td {
     padding: 15px;
     vertical-align: middle;
+    font-size: 0.9rem;
+    color: #333;
 }
 
 .empty-state {
@@ -913,8 +915,7 @@ onMounted(() => {
 }
 
 .id-badge {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: #e8ecef;
     padding: 5px 12px;
     border-radius: 20px;
     font-weight: 600;
@@ -955,7 +956,7 @@ onMounted(() => {
 .currency-symbol {
     font-size: 1rem;
     font-weight: 600;
-    color: #667eea;
+    color: #3498db;
 }
 
 .exchange-rate {
@@ -981,7 +982,7 @@ onMounted(() => {
 }
 
 .price-badge {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
     padding: 5px 12px;
     border-radius: 20px;
@@ -990,12 +991,12 @@ onMounted(() => {
 }
 
 .price-badge.custom {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
 }
 
 .custom-badge {
     font-size: 11px;
-    color: #f5576c;
+    color: #f39c12;
     display: flex;
     align-items: center;
     gap: 4px;
@@ -1015,12 +1016,12 @@ onMounted(() => {
 }
 
 .transfer-toggle.allowed {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    color: white;
+    background: #d4edda;
+    color: #28a745;
 }
 
 .transfer-toggle.blocked {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: white;
 }
 
@@ -1044,11 +1045,11 @@ onMounted(() => {
 }
 
 .action-btn.edit {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
 }
 
 .action-btn.rate {
-    background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 }
 
 .action-btn:hover {
@@ -1086,26 +1087,26 @@ onMounted(() => {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
     padding: 20px 25px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    border-bottom: 1px solid #e8ecef;
     border-radius: 15px 15px 0 0;
 }
 
 .modal-header h3 {
     margin: 0;
+    color: #1a1a1a;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
 .close-btn {
-    background: rgba(255, 255, 255, 0.2);
+    background: none;
     border: none;
-    color: white;
+    color: #999;
     width: 35px;
     height: 35px;
     border-radius: 50%;
@@ -1117,7 +1118,8 @@ onMounted(() => {
 }
 
 .close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
+    background: #f8f9fa;
+    color: #333;
 }
 
 .modal-body {
@@ -1136,7 +1138,7 @@ onMounted(() => {
 
 .country-info i {
     font-size: 2rem;
-    color: #667eea;
+    color: #3498db;
 }
 
 .country-title {
@@ -1173,8 +1175,8 @@ onMounted(() => {
 
 .form-group input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .form-group small {
@@ -1250,7 +1252,7 @@ onMounted(() => {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
 }
 

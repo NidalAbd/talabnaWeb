@@ -723,7 +723,7 @@ onMounted(async () => {
     justify-content: space-between;
     align-items: center;
     padding: 25px 30px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
 }
 
@@ -745,7 +745,7 @@ onMounted(async () => {
 
 .create-btn {
     background: white;
-    color: #667eea;
+    color: #3498db;
     border: none;
     padding: 10px 20px;
     border-radius: 8px;
@@ -798,8 +798,8 @@ onMounted(async () => {
 
 .search-box input:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .filter-select {
@@ -818,8 +818,8 @@ onMounted(async () => {
 
 .filter-select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .bulk-actions {
@@ -841,7 +841,7 @@ onMounted(async () => {
 }
 
 .bulk-btn.deactivate {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
 }
 
 .bulk-btn:hover {
@@ -861,7 +861,7 @@ onMounted(async () => {
     height: 50px;
     margin: 0 auto 20px;
     border: 4px solid #f3f4f6;
-    border-top-color: #667eea;
+    border-top-color: #3498db;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -891,7 +891,7 @@ onMounted(async () => {
 }
 
 .modern-table thead {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
     color: white;
 }
 
@@ -899,7 +899,8 @@ onMounted(async () => {
     padding: 15px;
     text-align: left;
     font-weight: 600;
-    font-size: 14px;
+    color: white;
+    font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -916,6 +917,8 @@ onMounted(async () => {
 .modern-table tbody td {
     padding: 15px;
     vertical-align: middle;
+    font-size: 0.9rem;
+    color: #333;
 }
 
 .empty-state {
@@ -931,8 +934,7 @@ onMounted(async () => {
 }
 
 .id-badge {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
+    background: #e8ecef;
     padding: 5px 12px;
     border-radius: 20px;
     font-weight: 600;
@@ -956,7 +958,7 @@ onMounted(async () => {
 }
 
 .points-badge {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
     padding: 5px 12px;
     border-radius: 20px;
@@ -981,8 +983,8 @@ onMounted(async () => {
 }
 
 .discount-badge {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-    color: white;
+    background: #fff3cd;
+    color: #f39c12;
     padding: 5px 12px;
     border-radius: 20px;
     font-weight: 600;
@@ -1004,8 +1006,8 @@ onMounted(async () => {
 }
 
 .status-toggle.active {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-    color: white;
+    background: #d4edda;
+    color: #28a745;
 }
 
 .status-toggle.inactive {
@@ -1014,7 +1016,7 @@ onMounted(async () => {
 }
 
 .popular-toggle.popular {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
     color: white;
 }
 
@@ -1054,15 +1056,15 @@ onMounted(async () => {
 }
 
 .action-btn.edit {
-    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
 }
 
 .action-btn.duplicate {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
 }
 
 .action-btn.delete {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
 }
 
 .action-btn:hover {
@@ -1093,7 +1095,7 @@ onMounted(async () => {
 
 .page-btn {
     padding: 8px 12px;
-    border: 1px solid #e9ecef;
+    border: 2px solid #e8ecef;
     background: white;
     border-radius: 6px;
     cursor: pointer;
@@ -1104,13 +1106,13 @@ onMounted(async () => {
 
 .page-btn:hover:not(:disabled) {
     background: #f8f9fa;
-    border-color: #667eea;
+    border-color: #3498db;
 }
 
 .page-btn.active {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
-    border-color: transparent;
+    border-color: #3498db;
 }
 
 .page-btn:disabled {
@@ -1151,31 +1153,37 @@ onMounted(async () => {
 }
 
 .modal-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 20px 25px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 20px 25px;
+    border-bottom: 1px solid #e8ecef;
     border-radius: 15px 15px 0 0;
 }
 
 .modal-header.danger {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
+    border-bottom: none;
 }
 
 .modal-header h3 {
     margin: 0;
     font-size: 1.3rem;
+    color: #1a1a1a;
     display: flex;
     align-items: center;
     gap: 10px;
 }
 
-.close-btn {
-    background: rgba(255, 255, 255, 0.2);
-    border: none;
+.modal-header.danger h3 {
     color: white;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    color: #999;
     width: 35px;
     height: 35px;
     border-radius: 50%;
@@ -1187,8 +1195,17 @@ onMounted(async () => {
 }
 
 .close-btn:hover {
-    background: rgba(255, 255, 255, 0.3);
-    transform: rotate(90deg);
+    background: #f8f9fa;
+    color: #333;
+}
+
+.modal-header.danger .close-btn {
+    color: white;
+}
+
+.modal-header.danger .close-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
 }
 
 .modal-body {
@@ -1217,7 +1234,7 @@ onMounted(async () => {
 
 .form-section h4 {
     font-size: 1.1rem;
-    color: #667eea;
+    color: #3498db;
     margin-bottom: 15px;
     display: flex;
     align-items: center;
@@ -1258,8 +1275,8 @@ onMounted(async () => {
 .form-group textarea:focus,
 .form-group select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
 .form-group small {
@@ -1328,12 +1345,12 @@ onMounted(async () => {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
 }
 
 .btn-danger {
-    background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
     color: white;
 }
 
