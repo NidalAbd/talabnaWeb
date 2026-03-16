@@ -174,9 +174,23 @@
                                             <td><span class="badge badge-secondary">{{ $pointTransaction->id }}</span></td>
                                             <td>
                                                 <div class="user-info">
-                                                    <span class="user-name">{{ $pointTransaction->fromUser?->name ?? 'System' }}</span>
-                                                    @if($pointTransaction->fromUser)
+                                                    @php
+                                                        $isGooglePlay = false;
+                                                        if ($pointTransaction->metadata) {
+                                                            $meta = is_string($pointTransaction->metadata) ? json_decode($pointTransaction->metadata, true) : $pointTransaction->metadata;
+                                                            $isGooglePlay = isset($meta['payment_method']) && $meta['payment_method'] === 'google_play';
+                                                        }
+                                                        if (!$isGooglePlay && $pointTransaction->type === 'purchase' && $pointTransaction->from_user_id === null) {
+                                                            $isGooglePlay = true;
+                                                        }
+                                                    @endphp
+                                                    @if($isGooglePlay)
+                                                        <span class="user-name text-success"><i class="fab fa-google-play mr-1"></i>Google Play</span>
+                                                    @elseif($pointTransaction->fromUser)
+                                                        <span class="user-name">{{ $pointTransaction->fromUser->name }}</span>
                                                         <small class="d-block text-muted">ID: {{ $pointTransaction->fromUser->id }}</small>
+                                                    @else
+                                                        <span class="text-muted">System</span>
                                                     @endif
                                                 </div>
                                             </td>
