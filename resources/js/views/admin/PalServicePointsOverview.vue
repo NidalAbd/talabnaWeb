@@ -2,41 +2,35 @@
     <div class="palservice-points-advanced">
 
         <!-- Stats Cards -->
-        <div class="stats-grid" v-if="stats">
-            <div class="stat-card blue">
-                <div class="stat-icon">
-                    <i class="fas fa-coins"></i>
+        <div class="stats-dashboard" v-if="stats">
+            <div class="stats-grid">
+                <div class="stat-card-compact primary">
+                    <div class="stat-icon"><i class="fas fa-coins"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ stats.total_points.toLocaleString() }}</div>
+                        <div class="stat-label-compact">Total Points</div>
+                    </div>
                 </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stats.total_points.toLocaleString() }}</h3>
-                    <p class="stat-label">Total Points in System</p>
+                <div class="stat-card-compact success">
+                    <div class="stat-icon"><i class="fas fa-user-check"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ stats.users_with_points }}</div>
+                        <div class="stat-label-compact">Users with Points</div>
+                    </div>
                 </div>
-            </div>
-            <div class="stat-card green">
-                <div class="stat-icon">
-                    <i class="fas fa-user-check"></i>
+                <div class="stat-card-compact warning">
+                    <div class="stat-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ stats.average_points }}</div>
+                        <div class="stat-label-compact">Average Points</div>
+                    </div>
                 </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stats.users_with_points }}</h3>
-                    <p class="stat-label">Users with Points</p>
-                </div>
-            </div>
-            <div class="stat-card orange">
-                <div class="stat-icon">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stats.average_points }}</h3>
-                    <p class="stat-label">Average Points</p>
-                </div>
-            </div>
-            <div class="stat-card red">
-                <div class="stat-icon">
-                    <i class="fas fa-trophy"></i>
-                </div>
-                <div class="stat-content">
-                    <h3 class="stat-value">{{ stats.max_points.toLocaleString() }}</h3>
-                    <p class="stat-label">Maximum Points</p>
+                <div class="stat-card-compact info">
+                    <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                    <div class="stat-info">
+                        <div class="stat-value-compact">{{ stats.max_points.toLocaleString() }}</div>
+                        <div class="stat-label-compact">Maximum Points</div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -253,142 +247,43 @@ onMounted(() => {
 
 <style scoped>
 .palservice-points-advanced {
-    padding: 20px;
-}
-
-/* Header Section */
-.section-header {
-    margin-bottom: 30px;
-}
-
-.header-content {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.section-title {
-    font-size: 28px;
-    font-weight: 600;
-    color: #2c3e50;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 0;
-}
-
-.section-title i {
-    color: #3498db;
-}
-
-.section-subtitle {
-    font-size: 14px;
-    color: #7f8c8d;
-    margin: 0;
-}
-
-/* Stats Grid */
-.stats-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 20px;
-    margin-bottom: 30px;
-}
-
-.stat-card {
-    background: white;
-    border-radius: 12px;
-    padding: 24px;
-    display: flex;
-    align-items: center;
-    gap: 20px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    transition: all 0.3s ease;
-}
-
-.stat-card:hover {
-    transform: translateY(-4px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
-}
-
-.stat-icon {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    color: white;
-}
-
-.stat-card.blue .stat-icon {
-    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-}
-
-.stat-card.green .stat-icon {
-    background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
-}
-
-.stat-card.orange .stat-icon {
-    background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-}
-
-.stat-card.red .stat-icon {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.stat-content {
-    flex: 1;
-}
-
-.stat-value {
-    font-size: 28px;
-    font-weight: 700;
-    color: #2c3e50;
-    margin: 0 0 4px 0;
-}
-
-.stat-label {
-    font-size: 13px;
-    color: #7f8c8d;
-    margin: 0;
+    padding: 0;
 }
 
 /* Search & Filter Bar */
 .search-filter-bar {
     background: white;
+    padding: 1.5rem;
     border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 20px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
     display: flex;
-    gap: 16px;
+    gap: 1rem;
     flex-wrap: wrap;
 }
 
 .search-box {
-    flex: 1;
-    min-width: 300px;
     position: relative;
+    flex: 1;
+    min-width: 280px;
 }
 
 .search-icon {
     position: absolute;
-    left: 16px;
+    left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #95a5a6;
-    font-size: 14px;
+    color: #999;
+    font-size: 1rem;
 }
 
 .search-input {
     width: 100%;
-    padding: 12px 40px 12px 44px;
-    border: 2px solid #ecf0f1;
+    padding: 0.75rem 2.5rem 0.75rem 2.75rem;
+    border: 2px solid #e8ecef;
     border-radius: 8px;
-    font-size: 14px;
-    transition: all 0.3s;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
 }
 
 .search-input:focus {
@@ -399,11 +294,11 @@ onMounted(() => {
 
 .clear-search {
     position: absolute;
-    right: 16px;
+    right: 1rem;
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
-    color: #95a5a6;
+    color: #999;
     transition: color 0.3s;
 }
 
@@ -413,20 +308,20 @@ onMounted(() => {
 
 .filter-controls {
     display: flex;
-    gap: 12px;
+    gap: 0.75rem;
     flex-wrap: wrap;
 }
 
 .filter-group {
     display: flex;
-    gap: 12px;
+    gap: 0.75rem;
 }
 
 .filter-input {
-    padding: 12px 16px;
-    border: 2px solid #ecf0f1;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e8ecef;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 0.9rem;
     width: 150px;
     transition: all 0.3s;
 }
@@ -442,18 +337,17 @@ onMounted(() => {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
 }
 
 .results-info {
-    font-size: 14px;
-    color: #7f8c8d;
+    font-size: 0.9rem;
+    color: #666;
 }
 
-/* Loading State */
+/* Loading & Error States */
 .loading-state {
     text-align: center;
-    padding: 60px 20px;
+    padding: 4rem 2rem;
     background: white;
     border-radius: 12px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
@@ -462,23 +356,24 @@ onMounted(() => {
 .loader-advanced {
     width: 50px;
     height: 50px;
-    border: 4px solid #ecf0f1;
-    border-top-color: #3498db;
+    border: 4px solid #f3f4f6;
+    border-top: 4px solid #3498db;
     border-radius: 50%;
     animation: spin 1s linear infinite;
-    margin: 0 auto 16px;
+    margin: 0 auto 1rem;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* Data Table */
 .data-table-container {
     background: white;
     border-radius: 12px;
-    overflow: hidden;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
 }
 
 .modern-table {
@@ -491,11 +386,11 @@ onMounted(() => {
 }
 
 .modern-table th {
-    padding: 16px;
+    padding: 1rem;
     text-align: left;
     font-weight: 600;
-    font-size: 0.85rem;
     color: white;
+    font-size: 0.85rem;
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -503,7 +398,6 @@ onMounted(() => {
 .modern-table th.sortable {
     cursor: pointer;
     user-select: none;
-    transition: color 0.3s;
 }
 
 .modern-table th.sortable:hover {
@@ -512,7 +406,7 @@ onMounted(() => {
 
 .modern-table tbody tr {
     border-bottom: 1px solid #f0f0f0;
-    transition: background-color 0.2s;
+    transition: background-color 0.2s ease;
 }
 
 .modern-table tbody tr:hover {
@@ -520,7 +414,7 @@ onMounted(() => {
 }
 
 .modern-table td {
-    padding: 16px;
+    padding: 1rem;
     font-size: 0.9rem;
     color: #333;
 }
@@ -529,73 +423,72 @@ onMounted(() => {
     background: #e8ecef;
     padding: 0.25rem 0.75rem;
     border-radius: 6px;
-    font-family: monospace;
     font-weight: 600;
     font-size: 0.85rem;
 }
 
 .user-name {
-    font-weight: 500;
+    font-weight: 600;
 }
 
 .user-email {
-    color: #7f8c8d;
-    font-size: 13px;
+    font-size: 0.8rem;
+    color: #999;
 }
 
 .points-badge {
-    display: inline-block;
-    padding: 6px 12px;
     background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
     color: white;
+    padding: 0.5rem 0.75rem;
     border-radius: 6px;
     font-weight: 600;
-    font-size: 13px;
+    font-size: 0.9rem;
+    display: inline-block;
 }
 
 .date-text {
-    color: #7f8c8d;
-    font-size: 13px;
+    font-size: 0.85rem;
+    color: #666;
 }
 
 .empty-state {
-    text-align: center !important;
-    padding: 60px 20px !important;
-    color: #95a5a6;
+    text-align: center;
+    padding: 3rem !important;
+    color: #999;
 }
 
 .empty-state i {
-    font-size: 48px;
-    margin-bottom: 16px;
+    font-size: 3rem;
+    margin-bottom: 1rem;
     display: block;
-}
-
-.empty-state p {
-    margin: 0;
-    font-size: 16px;
+    opacity: 0.5;
 }
 
 /* Pagination */
 .pagination-container {
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
     align-items: center;
-    gap: 8px;
-    margin-top: 24px;
+    margin-top: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .pagination-btn {
-    padding: 10px 16px;
-    background: white;
+    padding: 0.5rem 0.75rem;
     border: 2px solid #e8ecef;
-    border-radius: 8px;
-    color: #2c3e50;
-    font-size: 14px;
+    background: white;
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s;
-    display: flex;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
     align-items: center;
-    gap: 8px;
+    gap: 0.5rem;
 }
 
 .pagination-btn:hover:not(.disabled) {
@@ -604,25 +497,23 @@ onMounted(() => {
 }
 
 .pagination-btn.disabled {
-    opacity: 0.5;
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
 .pagination-numbers {
     display: flex;
-    gap: 4px;
+    gap: 0.5rem;
 }
 
 .page-number {
-    width: 40px;
-    height: 40px;
+    padding: 0.5rem 0.75rem;
     border: 2px solid #e8ecef;
     background: white;
-    border-radius: 8px;
-    color: #2c3e50;
-    font-size: 14px;
+    border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
 }
 
 .page-number:hover {
@@ -636,11 +527,12 @@ onMounted(() => {
     color: white;
 }
 
-@media (max-width: 768px) {
-    .stats-grid {
-        grid-template-columns: 1fr;
-    }
+.text-muted {
+    color: #999;
+}
 
+/* Responsive */
+@media (max-width: 768px) {
     .search-filter-bar {
         flex-direction: column;
     }
@@ -650,20 +542,24 @@ onMounted(() => {
     }
 
     .filter-group {
-        flex-direction: column;
-    }
-
-    .filter-input {
         width: 100%;
     }
 
-    .modern-table {
-        font-size: 12px;
+    .filter-input {
+        flex: 1;
     }
 
-    .modern-table th,
-    .modern-table td {
-        padding: 12px 8px;
+    .data-table-container {
+        overflow-x: auto;
+    }
+
+    .modern-table {
+        min-width: 800px;
+    }
+
+    .pagination-container {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }
 </style>

@@ -1,21 +1,6 @@
 <template>
     <div class="modern-pricing-container">
-        <!-- Header Card -->
-        <div class="modern-card">
-            <div class="card-header">
-                <div class="header-left">
-                    <i class="fas fa-globe-americas"></i>
-                    <h2>Country Pricing Settings</h2>
-                </div>
-                <div class="header-info">
-                    <span class="info-badge">
-                        <i class="fas fa-info-circle"></i>
-                        Set price per point and currency for each country
-                    </span>
-                </div>
-            </div>
-
-            <!-- Base Price Section -->
+        <!-- Base Price Section -->
             <div class="base-price-section">
                 <div class="base-price-card">
                     <div class="base-price-header">
@@ -84,7 +69,7 @@
             </div>
 
             <!-- Table -->
-            <div v-else class="table-container">
+            <div v-else class="data-table-container">
                 <table class="modern-table">
                     <thead>
                         <tr>
@@ -173,7 +158,6 @@
                     </tbody>
                 </table>
             </div>
-        </div>
 
         <!-- Edit Modal -->
         <div class="modal-overlay" v-if="showEditModal" @click="closeEditModal">
