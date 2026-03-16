@@ -52,13 +52,39 @@ class GoogleAuthController extends Controller
         try {
             Log::info('Received Google auth request from: ' . $request->email);
 
-            // Verify Google ID token - UNCOMMENT THIS FOR PRODUCTION!
-            // This is critical for security to verify that the token is valid
+            // Verify Google ID token with retry (first call may be slow due to key fetch)
+            $payload = null;
             $client = new GoogleClient(['client_id' => config('services.google.client_id')]);
-            $payload = $client->verifyIdToken($request->id_token);
+
+            // Set HTTP client timeout to prevent hanging
+            $httpClient = new \GuzzleHttp\Client([
+                'timeout' => 10,
+                'connect_timeout' => 5,
+            ]);
+            $client->setHttpClient($httpClient);
+
+            // Cache Google's public keys to avoid re-fetching on every request
+            $cacheDir = storage_path('app/google-cache');
+            if (!is_dir($cacheDir)) {
+                mkdir($cacheDir, 0755, true);
+            }
+            $client->setCache(new \Google\Auth\Cache\FileSystemCacheItemPool($cacheDir));
+
+            // Try verification with retry
+            for ($attempt = 1; $attempt <= 2; $attempt++) {
+                try {
+                    $payload = $client->verifyIdToken($request->id_token);
+                    if ($payload) break;
+                } catch (\Exception $verifyEx) {
+                    Log::warning("Google token verification attempt {$attempt} failed: " . $verifyEx->getMessage());
+                    if ($attempt < 2) {
+                        usleep(500000); // 500ms delay before retry
+                    }
+                }
+            }
 
             if (!$payload) {
-                Log::error('Invalid Google ID token');
+                Log::error('Invalid Google ID token after retries');
                 return response()->json(['error' => 'Invalid Google ID token'], 401);
             }
 
