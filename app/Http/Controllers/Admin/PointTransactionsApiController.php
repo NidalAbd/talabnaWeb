@@ -58,13 +58,34 @@ class PointTransactionsApiController extends Controller
 
             // Transform data
             $transformedTransactions = $transactions->getCollection()->map(function ($transaction) {
-                return [
-                    'id' => $transaction->id,
-                    'from_user' => $transaction->fromUser ? [
+                // Detect Google Play purchase
+                $isGooglePlay = false;
+                if ($transaction->metadata) {
+                    $meta = is_string($transaction->metadata) ? json_decode($transaction->metadata, true) : $transaction->metadata;
+                    $isGooglePlay = isset($meta['payment_method']) && $meta['payment_method'] === 'google_play';
+                }
+                if (!$isGooglePlay && $transaction->type === 'purchase' && $transaction->from_user_id === null) {
+                    $isGooglePlay = true;
+                }
+
+                $fromUser = null;
+                if ($isGooglePlay) {
+                    $fromUser = [
+                        'id' => 0,
+                        'name' => 'Google Play',
+                        'email' => 'google-play@system',
+                    ];
+                } elseif ($transaction->fromUser) {
+                    $fromUser = [
                         'id' => $transaction->fromUser->id,
                         'name' => $transaction->fromUser->user_name,
                         'email' => $transaction->fromUser->email,
-                    ] : null,
+                    ];
+                }
+
+                return [
+                    'id' => $transaction->id,
+                    'from_user' => $fromUser,
                     'to_user' => $transaction->toUser ? [
                         'id' => $transaction->toUser->id,
                         'name' => $transaction->toUser->user_name,
