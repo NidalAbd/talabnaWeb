@@ -129,13 +129,10 @@
     @vite(['resources/js/app.js'])
 
     <style>
-        *{margin:0;padding:0;box-sizing:border-box}
-        body{font-family:'Cairo',sans-serif;min-height:100vh;background:#0a1628;color:#fff}
-        #app{min-height:100vh;contain:layout style paint}
+        body{margin:0;font-family:'Cairo',sans-serif;background:#0a1628}
         #app-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a1628;z-index:9999}
         .loader-spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.1);border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite}
         @keyframes spin{to{transform:rotate(360deg)}}
-        .v-application{min-height:100vh}
     </style>
 </head>
 <body>
@@ -144,8 +141,8 @@
         <div class="loader-spinner"></div>
     </div>
 
-    <!-- Vue App Mount Point with CLS prevention -->
-    <div id="app" style="min-height:100vh;background:#0a1628;overflow:hidden;contain:layout style paint"></div>
+    <!-- Vue App Mount Point -->
+    <div id="app"></div>
 
     <script>
         // Remove loader when Vue app is ready
