@@ -14,6 +14,8 @@ class point_transactions extends Model
         'to_user_id',
         'type',
         'point',
+        'status',
+        'metadata',
     ];
 
     public function user()

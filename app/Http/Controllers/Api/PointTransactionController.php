@@ -27,6 +27,8 @@ class PointTransactionController extends Controller
                 ->orderBy('created_at', 'desc')
                 ->get();
 
+            $this->tagGooglePlayTransactions($transactions);
+
             return response()->json($transactions);
         } catch (\Exception $e) {
             Log::error('Error fetching user transactions: ' . $e->getMessage(), [
@@ -91,6 +93,8 @@ class PointTransactionController extends Controller
                 ->limit($limit)
                 ->get();
 
+            $this->tagGooglePlayTransactions($transactions);
+
             return response()->json($transactions);
         } catch (\Exception $e) {
             Log::error('Error fetching last transactions: ' . $e->getMessage(), [
@@ -100,6 +104,41 @@ class PointTransactionController extends Controller
             ]);
 
             return response()->json(['error' => 'Failed to fetch transactions'], 500);
+        }
+    }
+
+    /**
+     * Tag Google Play purchases with a virtual from_user so the client
+     * can display "Google Play" instead of an empty from field.
+     */
+    private function tagGooglePlayTransactions($transactions): void
+    {
+        foreach ($transactions as $transaction) {
+            $isGooglePlay = false;
+
+            // Check metadata for google_play payment_method
+            if ($transaction->metadata) {
+                $meta = is_string($transaction->metadata)
+                    ? json_decode($transaction->metadata, true)
+                    : $transaction->metadata;
+                if (isset($meta['payment_method']) && $meta['payment_method'] === 'google_play') {
+                    $isGooglePlay = true;
+                }
+            }
+
+            // Also detect: type=purchase with no from_user_id
+            if (!$isGooglePlay && $transaction->type === 'purchase' && $transaction->from_user_id === null) {
+                $isGooglePlay = true;
+            }
+
+            if ($isGooglePlay && !$transaction->fromUser) {
+                $transaction->setRelation('fromUser', new \App\Models\User([
+                    'id' => 0,
+                    'name' => 'Google Play',
+                    'user_name' => 'Google Play',
+                    'email' => 'google-play@system',
+                ]));
+            }
         }
     }
 }
