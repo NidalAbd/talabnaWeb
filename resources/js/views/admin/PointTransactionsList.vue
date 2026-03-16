@@ -82,7 +82,10 @@
                     <tr v-for="transaction in transactions.data" :key="transaction.id">
                         <td><span class="id-badge">{{ transaction.id }}</span></td>
                         <td>
-                            <div v-if="transaction.from_user" class="user-cell">
+                            <div v-if="transaction.from_user && transaction.from_user.id === 0" class="user-cell google-play">
+                                <strong><i class="fab fa-google-play" style="color: #34a853; margin-right: 4px;"></i>{{ transaction.from_user.name }}</strong>
+                            </div>
+                            <div v-else-if="transaction.from_user" class="user-cell">
                                 <strong>{{ transaction.from_user.name }}</strong>
                                 <span class="user-email">{{ transaction.from_user.email }}</span>
                             </div>
@@ -200,7 +203,10 @@
                         <div class="detail-row">
                             <span class="detail-label">From User</span>
                             <span class="detail-value">
-                                <div v-if="selectedTransaction.from_user">
+                                <div v-if="selectedTransaction.from_user && selectedTransaction.from_user.id === 0">
+                                    <i class="fab fa-google-play" style="color: #34a853; margin-right: 4px;"></i>{{ selectedTransaction.from_user.name }}
+                                </div>
+                                <div v-else-if="selectedTransaction.from_user">
                                     {{ selectedTransaction.from_user.name }}<br>
                                     <small class="text-muted">{{ selectedTransaction.from_user.email }}</small>
                                 </div>
