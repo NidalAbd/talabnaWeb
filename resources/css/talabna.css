@@ -104,17 +104,8 @@
    1b. Font Display Override (ensure swap for all icon/web fonts)
    ======================================================================== */
 
-@font-face {
-  font-family: 'Material Design Icons';
-  font-display: swap;
-  src: local('Material Design Icons');
-}
-
-@font-face {
-  font-family: 'Cairo';
-  font-display: swap;
-  src: local('Cairo');
-}
+/* MDI icons: font-display swap is set in app.js @font-face injection */
+/* Cairo: loaded via Google Fonts with display=swap in spa.blade.php */
 
 
 /* ========================================================================

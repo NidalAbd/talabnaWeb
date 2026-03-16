@@ -75,7 +75,7 @@
           <div v-if="isLoggedIn" class="dropdown d-none d-sm-block">
             <button class="nav-link d-flex align-center gap-2" @click="userMenuOpen = !userMenuOpen">
               <div class="avatar avatar-32" :class="{ 'avatar-primary': !userAvatar }">
-                <img v-if="userAvatar" :src="userAvatar" :alt="userName" />
+                <img v-if="userAvatar" :src="userAvatar" :alt="userName" width="32" height="32" loading="lazy" decoding="async" />
                 <i v-else class="mdi mdi-account" style="font-size: 18px; color: #fff;"></i>
               </div>
               <span class="text-body-2 font-weight-medium">{{ userName }}</span>
@@ -119,7 +119,7 @@
       <template v-if="isLoggedIn">
         <div class="d-flex align-center gap-3 pa-4">
           <div class="avatar avatar-40" :class="{ 'avatar-primary': !userAvatar }">
-            <img v-if="userAvatar" :src="userAvatar" :alt="userName" />
+            <img v-if="userAvatar" :src="userAvatar" :alt="userName" width="40" height="40" loading="lazy" decoding="async" />
             <i v-else class="mdi mdi-account" style="color: #fff;"></i>
           </div>
           <div>

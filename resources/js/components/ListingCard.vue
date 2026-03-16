@@ -106,7 +106,7 @@
     <!-- Footer -->
     <div class="card-footer pa-4 pt-3 pb-3">
       <div class="avatar avatar-28 mr-2">
-        <img v-if="userPhoto" :src="userPhoto" />
+        <img v-if="userPhoto" :src="userPhoto" width="28" height="28" loading="lazy" decoding="async" />
         <i v-else class="mdi mdi-account" style="font-size: 16px;"></i>
       </div>
       <span class="text-caption text-muted">{{ listing.user?.name || 'User' }}</span>

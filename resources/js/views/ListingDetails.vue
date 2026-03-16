@@ -44,7 +44,11 @@
                   <img
                     v-else
                     :src="getPhotoUrl(photo)"
-                    loading="lazy"
+                    :loading="i === 0 ? 'eager' : 'lazy'"
+                    :fetchpriority="i === 0 ? 'high' : 'auto'"
+                    decoding="async"
+                    width="800"
+                    height="450"
                     class="img-cover"
                     style="width: 100%; height: 450px; object-fit: cover;"
                   />
@@ -153,7 +157,7 @@
               <!-- Seller Info -->
               <div class="d-flex align-center mb-6">
                 <div class="avatar mr-4" style="width: 56px; height: 56px;">
-                  <img v-if="userPhotoUrl" :src="userPhotoUrl" loading="lazy" class="img-cover" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+                  <img v-if="userPhotoUrl" :src="userPhotoUrl" loading="lazy" decoding="async" width="56" height="56" class="img-cover" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
                   <i v-else class="mdi mdi-account" style="font-size: 32px;"></i>
                 </div>
                 <div>

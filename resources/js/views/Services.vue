@@ -150,6 +150,9 @@
             <img
               :src="listing.image || placeholderImage"
               loading="lazy"
+              decoding="async"
+              width="150"
+              height="120"
               style="width: 150px; height: 120px; object-fit: cover; flex-shrink: 0;"
               class="lazy-img"
               @error="$event.target.src = placeholderImage"

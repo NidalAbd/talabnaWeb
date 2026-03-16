@@ -174,7 +174,7 @@
             <router-link v-for="listing in listings" :key="listing.id" :to="`/listing/${listing.id}`" class="card mb-4 listing-list-card">
               <div class="row no-gutters">
                 <div class="col-4 col-md-3">
-                  <img :src="getPhotoUrl(listing)" loading="lazy" class="img-cover" style="height: 180px; width: 100%; object-fit: cover;">
+                  <img :src="getPhotoUrl(listing)" loading="lazy" decoding="async" width="300" height="180" class="img-cover" style="height: 180px; width: 100%; object-fit: cover;">
                   <div v-if="!getPhotoUrl(listing)" class="fill-height bg-grey-lighten-3 d-flex align-center justify-center" style="height: 180px;">
                     <i class="mdi mdi-image-off" style="font-size: 48px; color: grey;"></i>
                   </div>

@@ -9,8 +9,14 @@ import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
 
-// Load MDI icons asynchronously
+// Load MDI icons: inject @font-face with font-display:swap, then load CSS classes
 if (typeof window !== 'undefined') {
+  // 1. Inject font-face with swap BEFORE loading the CSS
+  const style = document.createElement('style')
+  style.textContent = `@font-face{font-family:"Material Design Icons";src:url("https://cdn.jsdelivr.net/npm/@mdi/font@7/fonts/materialdesignicons-webfont.woff2?v=7.4.47") format("woff2");font-display:swap;font-weight:400;font-style:normal}`
+  document.head.appendChild(style)
+
+  // 2. Load the icon class definitions (non-render-blocking)
   const link = document.createElement('link')
   link.rel = 'stylesheet'
   link.href = 'https://cdn.jsdelivr.net/npm/@mdi/font@7/css/materialdesignicons.min.css'

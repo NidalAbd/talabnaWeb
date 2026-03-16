@@ -148,7 +148,7 @@
         <div class="row" v-if="!loadingLocations">
           <div v-for="country in countries" :key="country.id" class="col-6 col-sm-4 col-md-3 col-lg-2">
             <router-link :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
-              <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" class="img-cover location-flag-img" style="height: 80px;" @error="handleImgError($event)">
+              <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="80" class="img-cover location-flag-img" style="height: 80px; width: 100%;" @error="handleImgError($event)">
               <div class="location-info">
                 <h5>{{ locale === 'ar' ? country.name : country.name_en }}</h5>
                 <span>{{ formatNumber(country.listings_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>

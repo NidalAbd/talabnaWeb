@@ -6,7 +6,7 @@
         <div class="card-body pa-6">
           <div class="d-flex flex-wrap align-center gap-4">
             <div class="avatar avatar-100">
-              <img v-if="user.photo" :src="user.photo.src" />
+              <img v-if="user.photo" :src="user.photo.src" width="100" height="100" loading="lazy" decoding="async" />
               <i v-else class="mdi mdi-account" style="font-size: 60px;"></i>
             </div>
             <div>
