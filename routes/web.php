@@ -218,7 +218,7 @@ Route::get('/api/user', function () {
                 'avatar' => $user->photos && $user->photos->count() > 0
                     ? ($user->photos->first()->is_external
                         ? $user->photos->first()->src
-                        : '/storage/' . $user->photos->first()->src)
+                        : '/' . ltrim($user->photos->first()->src, '/'))
                     : null,
                 'roles' => $user->roles->map(function ($role) {
                     return [
