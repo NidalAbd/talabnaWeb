@@ -307,7 +307,9 @@ const userAvatar = computed(() => {
   if (appStore.user.avatar) return appStore.user.avatar
   if (appStore.user.photos && appStore.user.photos.length > 0) {
     const photo = appStore.user.photos[0]
-    return photo.is_external ? photo.src : `/storage/${photo.src}`
+    if (photo.is_external) return photo.src
+    const src = photo.src
+    return src.startsWith('/') || src.startsWith('http') ? src : (src.startsWith('storage/') ? `/${src}` : `/storage/${src}`)
   }
   return null
 })
