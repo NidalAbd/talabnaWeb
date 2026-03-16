@@ -13,31 +13,19 @@
             </div>
         </div>
 
-        <!-- Main Content -->
-        <div class="modern-card">
-            <!-- Header -->
-            <div class="card-header">
-                <div class="header-left">
-                    <i class="fas fa-box"></i>
-                    <h2>Point Packages Management</h2>
-                </div>
-                <button class="create-btn" @click="openCreateModal">
-                    <i class="fas fa-plus"></i>
-                    Create Package
-                </button>
+        <!-- Search & Filters -->
+        <div class="search-filter-bar">
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input
+                    type="text"
+                    v-model="filters.search"
+                    @input="debouncedSearch"
+                    class="search-input"
+                    placeholder="Search packages..."
+                >
             </div>
-
-            <!-- Filters -->
-            <div class="filters-section">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input
-                        type="text"
-                        v-model="filters.search"
-                        @input="debouncedSearch"
-                        placeholder="Search packages..."
-                    >
-                </div>
+            <div class="filter-group">
                 <select class="filter-select" v-model="filters.status" @change="loadPackages">
                     <option value="">All Statuses</option>
                     <option value="active">Active</option>
@@ -54,35 +42,37 @@
                     <option value="price">Sort by Price</option>
                     <option value="display_order">Sort by Order</option>
                 </select>
-                <select class="filter-select small" v-model="filters.sort_direction" @change="loadPackages">
-                    <option value="desc">↓</option>
-                    <option value="asc">↑</option>
+                <select class="filter-select" v-model="filters.sort_direction" @change="loadPackages">
+                    <option value="desc">Descending</option>
+                    <option value="asc">Ascending</option>
                 </select>
-                <div class="bulk-actions">
-                    <button @click="handleBulkActivate" class="bulk-btn activate" title="Activate All">
-                        <i class="fas fa-check"></i>
-                    </button>
-                    <button @click="handleBulkDeactivate" class="bulk-btn deactivate" title="Deactivate All">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </div>
+                <button class="action-btn info small" @click="openCreateModal" title="Create Package">
+                    <i class="fas fa-plus"></i> Create
+                </button>
+                <button class="action-btn small" style="background: #28a745; color: white;" @click="handleBulkActivate" title="Activate All">
+                    <i class="fas fa-check"></i>
+                </button>
+                <button class="action-btn danger small" @click="handleBulkDeactivate" title="Deactivate All">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
+        </div>
 
-            <!-- Loading State -->
-            <div v-if="loading" class="loading-state">
-                <div class="spinner"></div>
-                <p>Loading packages...</p>
-            </div>
+        <!-- Loading State -->
+        <div v-if="loading" class="loading-state">
+            <div class="spinner"></div>
+            <p>Loading packages...</p>
+        </div>
 
-            <!-- Error State -->
-            <div v-else-if="error" class="error-state">
-                <i class="fas fa-exclamation-circle"></i>
-                <p>{{ error }}</p>
-            </div>
+        <!-- Error State -->
+        <div v-else-if="error" class="error-state">
+            <i class="fas fa-exclamation-circle"></i>
+            <p>{{ error }}</p>
+        </div>
 
-            <!-- Table -->
-            <div v-else class="table-container">
-                <table class="modern-table">
+        <!-- Table -->
+        <div v-else class="data-table-container">
+            <table class="modern-table">
                     <thead>
                         <tr>
                             <th>ID</th>
@@ -177,7 +167,7 @@
                     <button
                         @click="changePage(packages.current_page - 1)"
                         :disabled="packages.current_page === 1"
-                        class="page-btn"
+                        class="pagination-btn"
                     >
                         <i class="fas fa-chevron-left"></i>
                     </button>
@@ -185,20 +175,19 @@
                         v-for="page in displayPages"
                         :key="page"
                         @click="changePage(page)"
-                        :class="['page-btn', { active: page === packages.current_page }]"
+                        :class="['pagination-btn', { active: page === packages.current_page }]"
                     >
                         {{ page }}
                     </button>
                     <button
                         @click="changePage(packages.current_page + 1)"
                         :disabled="packages.current_page === packages.last_page"
-                        class="page-btn"
+                        class="pagination-btn"
                     >
                         <i class="fas fa-chevron-right"></i>
                     </button>
                 </div>
             </div>
-        </div>
 
         <!-- Create/Edit Modal -->
         <div class="modal-overlay" v-if="showFormModal" @click="closeFormModal">
@@ -707,182 +696,110 @@ onMounted(async () => {
 
 <style scoped>
 .modern-packages-container {
-    padding: 20px;
+    padding: 0;
 }
 
-/* Modern Card */
-.modern-card {
+/* Search & Filters */
+.search-filter-bar {
     background: white;
-    border-radius: 15px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-}
-
-.card-header {
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    margin-bottom: 1.5rem;
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 25px 30px;
-    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    color: white;
-}
-
-.header-left {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-}
-
-.header-left i {
-    font-size: 1.8rem;
-}
-
-.header-left h2 {
-    margin: 0;
-    font-size: 1.5rem;
-    font-weight: 600;
-}
-
-.create-btn {
-    background: white;
-    color: #3498db;
-    border: none;
-    padding: 10px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    transition: all 0.3s ease;
-}
-
-.create-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Filters Section */
-.filters-section {
-    padding: 25px 30px;
-    display: flex;
-    gap: 15px;
+    gap: 1rem;
     flex-wrap: wrap;
-    background: #f8f9fa;
-    border-bottom: 1px solid #e9ecef;
-    align-items: center;
 }
 
 .search-box {
-    flex: 1;
-    min-width: 250px;
     position: relative;
+    flex: 1;
+    min-width: 280px;
 }
 
-.search-box i {
+.search-icon {
     position: absolute;
-    left: 15px;
+    left: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    color: #6c757d;
+    color: #999;
+    font-size: 1rem;
 }
 
-.search-box input {
+.search-input {
     width: 100%;
-    padding: 10px 15px 10px 45px;
-    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem 0.75rem 2.75rem;
+    border: 2px solid #e8ecef;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 0.95rem;
     transition: all 0.3s ease;
 }
 
-.search-box input:focus {
+.search-input:focus {
     outline: none;
     border-color: #3498db;
     box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
+.filter-group {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
 .filter-select {
-    padding: 10px 15px;
-    border: 2px solid #e9ecef;
+    padding: 0.75rem 1rem;
+    border: 2px solid #e8ecef;
     border-radius: 8px;
-    font-size: 14px;
+    font-size: 0.9rem;
     background: white;
     cursor: pointer;
     transition: all 0.3s ease;
-}
-
-.filter-select.small {
-    width: 60px;
 }
 
 .filter-select:focus {
     outline: none;
     border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
-}
-
-.bulk-actions {
-    display: flex;
-    gap: 8px;
-}
-
-.bulk-btn {
-    padding: 10px 14px;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    color: white;
-}
-
-.bulk-btn.activate {
-    background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-}
-
-.bulk-btn.deactivate {
-    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
-}
-
-.bulk-btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
 /* Loading & Error States */
 .loading-state,
 .error-state {
-    padding: 60px;
     text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
 .spinner {
     width: 50px;
     height: 50px;
-    margin: 0 auto 20px;
+    margin: 0 auto 1rem;
     border: 4px solid #f3f4f6;
-    border-top-color: #3498db;
+    border-top: 4px solid #3498db;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
 
 @keyframes spin {
-    to { transform: rotate(360deg); }
-}
-
-.error-state {
-    color: #dc3545;
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 .error-state i {
     font-size: 3rem;
-    margin-bottom: 15px;
+    color: #e74c3c;
+    margin-bottom: 1rem;
 }
 
-/* Table Container */
-.table-container {
-    padding: 30px;
-    overflow-x: auto;
+/* Data Table */
+.data-table-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
 }
 
 .modern-table {
@@ -892,11 +809,10 @@ onMounted(async () => {
 
 .modern-table thead {
     background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-    color: white;
 }
 
-.modern-table thead th {
-    padding: 15px;
+.modern-table th {
+    padding: 1rem;
     text-align: left;
     font-weight: 600;
     color: white;
@@ -906,17 +822,16 @@ onMounted(async () => {
 }
 
 .modern-table tbody tr {
-    border-bottom: 1px solid #e9ecef;
-    transition: all 0.3s ease;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s ease;
 }
 
 .modern-table tbody tr:hover {
-    background: #f8f9fa;
+    background-color: #f8f9fa;
 }
 
-.modern-table tbody td {
-    padding: 15px;
-    vertical-align: middle;
+.modern-table td {
+    padding: 1rem;
     font-size: 0.9rem;
     color: #333;
 }
@@ -1046,25 +961,54 @@ onMounted(async () => {
     gap: 8px;
 }
 
+/* Action Buttons */
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
 .action-btn {
-    padding: 8px 12px;
+    padding: 0.5rem 1rem;
     border: none;
-    border-radius: 6px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 600;
     cursor: pointer;
     transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.action-btn.small {
+    padding: 0.4rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.action-btn.info {
+    background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
     color: white;
+}
+
+.action-btn.info:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(23, 162, 184, 0.3);
 }
 
 .action-btn.edit {
     background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
+    color: white;
 }
 
 .action-btn.duplicate {
     background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+    color: white;
 }
 
-.action-btn.delete {
+.action-btn.delete,
+.action-btn.danger {
     background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    color: white;
 }
 
 .action-btn:hover {
@@ -1072,55 +1016,71 @@ onMounted(async () => {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
+.action-btn.secondary {
+    background: #6c757d;
+    color: white;
+}
+
+.action-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
 /* Pagination */
 .pagination-container {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 20px 30px;
-    border-top: 1px solid #e9ecef;
+    margin-top: 1.5rem;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
     flex-wrap: wrap;
-    gap: 15px;
+    gap: 1rem;
 }
 
 .pagination-info {
-    color: #6c757d;
-    font-size: 14px;
+    color: #666;
+    font-size: 0.9rem;
 }
 
 .pagination-controls {
     display: flex;
-    gap: 5px;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
-.page-btn {
-    padding: 8px 12px;
+.pagination-btn {
+    padding: 0.5rem 0.75rem;
     border: 2px solid #e8ecef;
     background: white;
     border-radius: 6px;
     cursor: pointer;
-    transition: all 0.3s ease;
-    color: #495057;
-    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
 }
 
-.page-btn:hover:not(:disabled) {
-    background: #f8f9fa;
+.pagination-btn:hover:not(:disabled) {
     border-color: #3498db;
+    color: #3498db;
 }
 
-.page-btn.active {
+.pagination-btn.active {
     background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
-    color: white;
     border-color: #3498db;
+    color: white;
 }
 
-.page-btn:disabled {
-    opacity: 0.5;
+.pagination-btn:disabled {
+    opacity: 0.4;
     cursor: not-allowed;
 }
 
-/* Modal Overlay */
+/* Modal */
 .modal-overlay {
     position: fixed;
     top: 0;
@@ -1131,17 +1091,17 @@ onMounted(async () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 9999;
-    padding: 20px;
+    z-index: 1050;
+    padding: 1rem;
 }
 
 .modern-modal {
     background: white;
-    border-radius: 15px;
+    border-radius: 12px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
     width: 100%;
     max-height: 90vh;
-    overflow-y: auto;
-    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
 }
 
 .modern-modal.small {
