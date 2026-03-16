@@ -7,10 +7,10 @@
         <div class="shape shape-2"></div>
         <div class="shape shape-3"></div>
       </div>
-      <v-container>
+      <div class="container">
         <div class="hero-content">
           <div class="hero-badge">
-            <v-icon size="16" class="mr-1">mdi-shield-check</v-icon>
+            <i class="mdi mdi-shield-check" :style="{ fontSize: '16px' }"></i>
             {{ locale === 'ar' ? 'منصة موثوقة للإعلانات المبوبة' : 'Trusted Classified Ads Platform' }}
           </div>
           <h1 class="hero-title">
@@ -25,7 +25,7 @@
           </p>
           <div class="hero-search">
             <div class="search-box">
-              <v-icon class="search-icon">mdi-magnify</v-icon>
+              <i class="mdi mdi-magnify search-icon"></i>
               <input
                 v-model="searchQuery"
                 :placeholder="locale === 'ar' ? 'ابحث عن سيارة، شقة، وظيفة...' : 'Search for car, apartment, job...'"
@@ -38,23 +38,23 @@
           </div>
           <div class="hero-buttons">
             <router-link to="/browse" class="btn-hero-primary">
-              <v-icon size="20" class="mr-2">mdi-view-grid</v-icon>
+              <i class="mdi mdi-view-grid mr-2" :style="{ fontSize: '20px' }"></i>
               {{ locale === 'ar' ? 'تصفح الإعلانات' : 'Browse Listings' }}
             </router-link>
             <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn-hero-secondary">
-              <v-icon size="20" class="mr-2">mdi-google-play</v-icon>
+              <i class="mdi mdi-google-play mr-2" :style="{ fontSize: '20px' }"></i>
               {{ locale === 'ar' ? 'حمل التطبيق' : 'Get the App' }}
             </a>
           </div>
         </div>
         <div class="hero-stats">
           <div class="stat-item" v-for="stat in statsItems" :key="stat.key">
-            <div class="stat-icon"><v-icon>{{ stat.icon }}</v-icon></div>
+            <div class="stat-icon"><i class="mdi" :class="stat.icon"></i></div>
             <h3>{{ formatNumber(stats[stat.key] || 0) }}+</h3>
             <p>{{ stat.label }}</p>
           </div>
         </div>
-      </v-container>
+      </div>
       <div class="hero-wave">
         <svg viewBox="0 0 1440 80" preserveAspectRatio="none"><path d="M0 40C240 80 480 0 720 40C960 80 1200 0 1440 40V80H0Z" fill="rgb(var(--v-theme-background))"/></svg>
       </div>
@@ -62,156 +62,150 @@
 
     <!-- Categories Section -->
     <section class="section-categories py-12" id="categories">
-      <v-container>
+      <div class="container">
         <div class="section-header">
           <div>
             <h2 class="section-title">{{ locale === 'ar' ? 'تصفح التصنيفات' : 'Browse Categories' }}</h2>
             <p class="section-subtitle">{{ locale === 'ar' ? 'اكتشف ما تبحث عنه بالضبط' : 'Find exactly what you\'re looking for' }}</p>
           </div>
         </div>
-        <v-row>
-          <v-col v-for="cat in categories" :key="cat.id" cols="6" sm="4" md="3" lg="2">
+        <div class="row">
+          <div v-for="cat in categories" :key="cat.id" class="col-6 col-sm-4 col-md-3 col-lg-2">
             <router-link :to="`/category/${cat.id}/${cat.slug || ''}`" class="category-card-home text-decoration-none">
               <div class="cat-icon" :style="{ background: getCategoryColor(cat.id) + '18', color: getCategoryColor(cat.id) }">
-                <v-icon :color="getCategoryColor(cat.id)">{{ getCategoryIcon(cat.id) }}</v-icon>
+                <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
               </div>
               <h5>{{ locale === 'ar' ? cat.name : cat.name_en }}</h5>
               <span class="cat-count">{{ formatNumber(cat.posts_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
             </router-link>
-          </v-col>
-        </v-row>
-      </v-container>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Featured Services -->
     <section class="section-featured py-12">
-      <v-container>
+      <div class="container">
         <div class="section-header">
           <div>
             <h2 class="section-title">{{ locale === 'ar' ? 'الإعلانات المميزة' : 'Featured Listings' }}</h2>
             <p class="section-subtitle">{{ locale === 'ar' ? 'إعلانات مختارة من مستخدمينا' : 'Handpicked listings from our users' }}</p>
           </div>
           <router-link to="/browse" class="btn-view-all">
-            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }} <v-icon size="18">mdi-arrow-right</v-icon>
+            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }} <i class="mdi mdi-arrow-right" :style="{ fontSize: '18px' }"></i>
           </router-link>
         </div>
-        <v-row v-if="!loadingFeatured">
-          <v-col v-for="listing in featured" :key="listing.id" cols="12" sm="6" md="4" lg="3">
+        <div class="row" v-if="!loadingFeatured">
+          <div v-for="listing in featured" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
             <listing-card :listing="listing" :locale="locale" />
-          </v-col>
-        </v-row>
-        <v-row v-else>
-          <v-col v-for="n in 4" :key="n" cols="12" sm="6" md="4" lg="3">
-            <v-skeleton-loader type="card" />
-          </v-col>
-        </v-row>
-      </v-container>
+          </div>
+        </div>
+        <div class="row" v-else>
+          <div v-for="n in 4" :key="n" class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="skeleton skeleton-card"></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Latest Services by Category -->
     <section class="section-latest py-12 bg-section">
-      <v-container>
+      <div class="container">
         <div class="section-header">
           <div>
             <h2 class="section-title">{{ locale === 'ar' ? 'أحدث الإعلانات' : 'Latest Listings' }}</h2>
             <p class="section-subtitle">{{ locale === 'ar' ? 'أحدث ما أُضيف إلى المنصة' : 'Recently added to the platform' }}</p>
           </div>
         </div>
-        <v-tabs v-model="activeTab" color="primary" class="mb-6">
-          <v-tab value="all">{{ locale === 'ar' ? 'الكل' : 'All' }}</v-tab>
-          <v-tab v-for="cat in categories.slice(0, 5)" :key="cat.id" :value="cat.id">
+        <div class="tabs mb-6">
+          <button class="tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">{{ locale === 'ar' ? 'الكل' : 'All' }}</button>
+          <button v-for="cat in categories.slice(0, 5)" :key="cat.id" class="tab" :class="{ active: activeTab === cat.id }" @click="activeTab = cat.id">
             {{ locale === 'ar' ? cat.name : cat.name_en }}
-          </v-tab>
-        </v-tabs>
-        <v-row v-if="!loadingLatest">
-          <v-col v-for="listing in latest" :key="listing.id" cols="12" sm="6" md="4" lg="3">
+          </button>
+        </div>
+        <div class="row" v-if="!loadingLatest">
+          <div v-for="listing in latest" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
             <listing-card :listing="listing" :locale="locale" />
-          </v-col>
-        </v-row>
-        <v-row v-else>
-          <v-col v-for="n in 8" :key="n" cols="12" sm="6" md="4" lg="3">
-            <v-skeleton-loader type="card" />
-          </v-col>
-        </v-row>
-      </v-container>
+          </div>
+        </div>
+        <div class="row" v-else>
+          <div v-for="n in 8" :key="n" class="col-12 col-sm-6 col-md-4 col-lg-3">
+            <div class="skeleton skeleton-card"></div>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Browse by Location -->
     <section class="section-locations py-12" id="locations">
-      <v-container>
+      <div class="container">
         <div class="section-header">
           <div>
             <h2 class="section-title">{{ locale === 'ar' ? 'تصفح حسب الموقع' : 'Browse by Location' }}</h2>
             <p class="section-subtitle">{{ locale === 'ar' ? 'اعثر على الخدمات في منطقتك' : 'Find services in your area' }}</p>
           </div>
         </div>
-        <v-row v-if="!loadingLocations">
-          <v-col v-for="country in countries" :key="country.id" cols="6" sm="4" md="3" lg="2">
+        <div class="row" v-if="!loadingLocations">
+          <div v-for="country in countries" :key="country.id" class="col-6 col-sm-4 col-md-3 col-lg-2">
             <router-link :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
-              <v-img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" height="80" cover class="location-flag-img">
-                <template v-slot:error>
-                  <div class="d-flex align-center justify-center h-100" style="background:#f0f4f8">
-                    <v-icon size="32" color="grey">mdi-earth</v-icon>
-                  </div>
-                </template>
-              </v-img>
+              <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" class="img-cover location-flag-img" style="height: 80px;" @error="handleImgError($event)">
               <div class="location-info">
                 <h5>{{ locale === 'ar' ? country.name : country.name_en }}</h5>
                 <span>{{ formatNumber(country.listings_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
               </div>
             </router-link>
-          </v-col>
-        </v-row>
-      </v-container>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Popular Services -->
     <section class="section-popular py-12 bg-section">
-      <v-container>
+      <div class="container">
         <div class="section-header">
           <div>
             <h2 class="section-title">{{ locale === 'ar' ? 'الأكثر مشاهدة' : 'Most Viewed' }}</h2>
             <p class="section-subtitle">{{ locale === 'ar' ? 'الإعلانات الأكثر شعبية' : 'The most popular listings' }}</p>
           </div>
           <router-link to="/browse?sort_by=view_count" class="btn-view-all">
-            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }} <v-icon size="18">mdi-arrow-right</v-icon>
+            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }} <i class="mdi mdi-arrow-right" :style="{ fontSize: '18px' }"></i>
           </router-link>
         </div>
-        <v-row v-if="!loadingPopular">
-          <v-col v-for="listing in popular" :key="listing.id" cols="12" sm="6" md="4" lg="3">
+        <div class="row" v-if="!loadingPopular">
+          <div v-for="listing in popular" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
             <listing-card :listing="listing" :locale="locale" />
-          </v-col>
-        </v-row>
-      </v-container>
+          </div>
+        </div>
+      </div>
     </section>
 
     <!-- Download App CTA -->
     <section class="download-cta py-12">
-      <v-container>
+      <div class="container">
         <div class="cta-card">
-          <v-row align="center">
-            <v-col cols="12" md="7">
+          <div class="row align-center">
+            <div class="col-12 col-md-7">
               <h2>{{ locale === 'ar' ? 'حمل تطبيق طلبنا' : 'Download Talabna App' }}</h2>
               <p>{{ locale === 'ar'
                 ? 'انشر إعلاناتك، تواصل مع المستخدمين، واستقبل الإشعارات أينما كنت.'
                 : 'Post listings, connect with users, and receive notifications on the go.'
               }}</p>
               <div class="cta-features">
-                <span><v-icon size="16" class="mr-1">mdi-check-circle</v-icon>{{ locale === 'ar' ? 'مجاني' : 'Free' }}</span>
-                <span><v-icon size="16" class="mr-1">mdi-check-circle</v-icon>{{ locale === 'ar' ? 'سهل الاستخدام' : 'Easy to use' }}</span>
-                <span><v-icon size="16" class="mr-1">mdi-check-circle</v-icon>{{ locale === 'ar' ? 'إشعارات فورية' : 'Instant notifications' }}</span>
+                <span><i class="mdi mdi-check-circle mr-1" :style="{ fontSize: '16px' }"></i>{{ locale === 'ar' ? 'مجاني' : 'Free' }}</span>
+                <span><i class="mdi mdi-check-circle mr-1" :style="{ fontSize: '16px' }"></i>{{ locale === 'ar' ? 'سهل الاستخدام' : 'Easy to use' }}</span>
+                <span><i class="mdi mdi-check-circle mr-1" :style="{ fontSize: '16px' }"></i>{{ locale === 'ar' ? 'إشعارات فورية' : 'Instant notifications' }}</span>
               </div>
               <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn-download">
-                <v-icon class="mr-2">mdi-google-play</v-icon>
+                <i class="mdi mdi-google-play mr-2"></i>
                 Google Play
               </a>
-            </v-col>
-            <v-col cols="12" md="5" class="text-center d-none d-md-block">
-              <v-icon size="140" style="opacity:0.2;color:#fff">mdi-cellphone-arrow-down</v-icon>
-            </v-col>
-          </v-row>
+            </div>
+            <div class="col-12 col-md-5 text-center d-none d-md-block">
+              <i class="mdi mdi-cellphone-arrow-down" :style="{ fontSize: '140px', opacity: 0.2, color: '#fff' }"></i>
+            </div>
+          </div>
         </div>
-      </v-container>
+      </div>
     </section>
   </div>
 </template>
@@ -255,6 +249,10 @@ const doSearch = () => {
   if (searchQuery.value.trim()) {
     router.push({ name: 'search', query: { q: searchQuery.value } })
   }
+}
+
+const handleImgError = (event) => {
+  event.target.src = '/storage/countryFlag/placeholder-flag.jpg'
 }
 
 // Fetch functions with defensive coding
@@ -500,6 +498,22 @@ onMounted(() => {
 .location-info { padding: 0.75rem; text-align: center; }
 .location-info h5 { font-size: 0.85rem; font-weight: 600; margin: 0 0 0.2rem; color: rgb(var(--v-theme-on-surface)); }
 .location-info span { font-size: 0.7rem; color: rgba(var(--v-theme-on-surface), 0.5); }
+
+/* Tabs */
+.tabs {
+  display: flex; gap: 0.5rem; flex-wrap: wrap; border-bottom: 2px solid rgba(var(--v-theme-on-background), 0.08);
+  padding-bottom: 0;
+}
+.tab {
+  padding: 0.6rem 1.25rem; border: none; background: none; cursor: pointer;
+  font-size: 0.95rem; font-weight: 500; color: rgba(var(--v-theme-on-background), 0.6);
+  border-bottom: 2px solid transparent; margin-bottom: -2px; transition: all 0.2s;
+  border-radius: 0;
+}
+.tab:hover { color: rgba(var(--v-theme-on-background), 0.85); }
+.tab.active {
+  color: rgb(var(--v-theme-primary)); border-bottom-color: rgb(var(--v-theme-primary)); font-weight: 600;
+}
 
 /* Download CTA */
 .cta-card {

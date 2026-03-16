@@ -2,25 +2,25 @@
   <div class="category-page">
     <!-- Hero -->
     <section class="hero-gradient py-12">
-      <v-container>
+      <div class="container">
         <!-- Breadcrumb for subcategory -->
-        <v-breadcrumbs v-if="isSubcategoryRoute && category" class="pa-0 mb-2" density="compact">
-          <v-breadcrumbs-item :to="{ name: 'home' }" class="text-white-darken-2">
+        <nav v-if="isSubcategoryRoute && category" class="breadcrumbs mb-2">
+          <router-link :to="{ name: 'home' }" class="breadcrumb-link text-white-darken-2">
             {{ locale === 'ar' ? 'الرئيسية' : 'Home' }}
-          </v-breadcrumbs-item>
-          <v-breadcrumbs-divider class="text-white-darken-2">/</v-breadcrumbs-divider>
-          <v-breadcrumbs-item :to="{ name: 'category', params: { id: category.id, slug: category.slug } }" class="text-white-darken-2">
+          </router-link>
+          <span class="breadcrumb-separator text-white-darken-2">/</span>
+          <router-link :to="{ name: 'category', params: { id: category.id, slug: category.slug } }" class="breadcrumb-link text-white-darken-2">
             {{ locale === 'ar' ? category.name : category.name_en }}
-          </v-breadcrumbs-item>
-          <v-breadcrumbs-divider class="text-white-darken-2">/</v-breadcrumbs-divider>
-          <v-breadcrumbs-item class="text-white">
+          </router-link>
+          <span class="breadcrumb-separator text-white-darken-2">/</span>
+          <span class="breadcrumb-current text-white">
             {{ locale === 'ar' ? currentSubcategory?.name : currentSubcategory?.name_en }}
-          </v-breadcrumbs-item>
-        </v-breadcrumbs>
+          </span>
+        </nav>
 
-        <v-avatar :color="getCategoryColor(category?.id)" size="80" class="mb-4">
-          <v-icon size="40" color="white">{{ getCategoryIcon(category?.id) }}</v-icon>
-        </v-avatar>
+        <div class="avatar avatar-80 mb-4" :style="{ background: getCategoryColor(category?.id) }">
+          <i class="mdi" :class="getCategoryIcon(category?.id)" style="font-size: 40px; color: #fff;"></i>
+        </div>
         <h1 class="text-h3 font-weight-bold text-white mb-2">
           <!-- Show subcategory name if on subcategory route -->
           {{ isSubcategoryRoute && currentSubcategory
@@ -37,88 +37,90 @@
 
         <!-- Location info for Near category -->
         <div v-if="isNearCategory && userLocation" class="mt-2">
-          <v-chip color="white" variant="flat" size="small">
-            <v-icon start size="16">mdi-crosshairs-gps</v-icon>
+          <span class="chip chip-flat-white">
+            <i class="mdi mdi-crosshairs-gps" style="font-size: 16px; margin-inline-end: 4px;"></i>
             {{ locale === 'ar' ? 'موقعك الحالي' : 'Your current location' }}
-          </v-chip>
+          </span>
         </div>
 
         <!-- Location permission needed for Near category -->
         <div v-if="isNearCategory && !userLocation && !locationError" class="mt-4">
-          <v-btn color="white" variant="flat" @click="requestLocation" :loading="requestingLocation">
-            <v-icon start>mdi-crosshairs-gps</v-icon>
+          <button class="btn btn-white" @click="requestLocation" :disabled="requestingLocation">
+            <i class="mdi mdi-crosshairs-gps" style="margin-inline-end: 6px;"></i>
             {{ locale === 'ar' ? 'تفعيل الموقع' : 'Enable Location' }}
-          </v-btn>
+          </button>
         </div>
 
         <!-- Location error -->
-        <v-alert v-if="locationError" type="warning" variant="tonal" class="mt-4" density="compact">
+        <div v-if="locationError" class="alert alert-warning mt-4">
           {{ locationError }}
-        </v-alert>
-      </v-container>
+        </div>
+      </div>
     </section>
 
-    <v-container class="py-8">
+    <div class="container py-8">
       <!-- Radius selector for Near category -->
       <div v-if="isNearCategory && userLocation" class="mb-6">
         <h2 class="text-h6 font-weight-bold mb-3">{{ locale === 'ar' ? 'نطاق البحث' : 'Search Radius' }}</h2>
-        <v-chip-group v-model="searchRadius" mandatory @update:model-value="fetchListings">
-          <v-chip filter :value="5">5 {{ locale === 'ar' ? 'كم' : 'km' }}</v-chip>
-          <v-chip filter :value="10">10 {{ locale === 'ar' ? 'كم' : 'km' }}</v-chip>
-          <v-chip filter :value="25">25 {{ locale === 'ar' ? 'كم' : 'km' }}</v-chip>
-          <v-chip filter :value="50">50 {{ locale === 'ar' ? 'كم' : 'km' }}</v-chip>
-          <v-chip filter :value="100">100 {{ locale === 'ar' ? 'كم' : 'km' }}</v-chip>
-        </v-chip-group>
+        <div class="d-flex flex-wrap gap-2">
+          <button class="chip chip-filter" :class="{ active: searchRadius === 5 }" @click="searchRadius = 5; fetchListings()">5 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
+          <button class="chip chip-filter" :class="{ active: searchRadius === 10 }" @click="searchRadius = 10; fetchListings()">10 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
+          <button class="chip chip-filter" :class="{ active: searchRadius === 25 }" @click="searchRadius = 25; fetchListings()">25 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
+          <button class="chip chip-filter" :class="{ active: searchRadius === 50 }" @click="searchRadius = 50; fetchListings()">50 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
+          <button class="chip chip-filter" :class="{ active: searchRadius === 100 }" @click="searchRadius = 100; fetchListings()">100 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
+        </div>
       </div>
 
       <!-- Subcategories (hidden for special categories and subcategory route) -->
       <div v-if="subcategories.length > 0 && !isSpecialCategory && !isSubcategoryRoute" class="mb-8">
         <h2 class="text-h6 font-weight-bold mb-4">{{ locale === 'ar' ? 'التصنيفات الفرعية' : 'Subcategories' }}</h2>
-        <v-chip-group v-model="selectedSubcategory" column @update:model-value="onSubcategoryChange">
-          <v-chip filter :value="null">{{ locale === 'ar' ? 'الكل' : 'All' }}</v-chip>
-          <v-chip v-for="sub in subcategories" :key="sub.id" filter :value="sub.id">
+        <div class="d-flex flex-wrap gap-2">
+          <button class="chip chip-filter" :class="{ active: selectedSubcategory === null }" @click="selectedSubcategory = null; onSubcategoryChange()">
+            {{ locale === 'ar' ? 'الكل' : 'All' }}
+          </button>
+          <button v-for="sub in subcategories" :key="sub.id" class="chip chip-filter" :class="{ active: selectedSubcategory === sub.id }" @click="selectedSubcategory = sub.id; onSubcategoryChange()">
             {{ locale === 'ar' ? sub.name : sub.name_en }} ({{ sub.posts_count }})
-          </v-chip>
-        </v-chip-group>
+          </button>
+        </div>
       </div>
 
       <!-- Back to category button when on subcategory route -->
       <div v-if="isSubcategoryRoute && category" class="mb-6">
-        <v-btn
-          variant="outlined"
+        <router-link
+          class="btn btn-outlined"
           :to="{ name: 'category', params: { id: category.id, slug: category.slug } }"
-          prepend-icon="mdi-arrow-left"
         >
+          <i class="mdi mdi-arrow-left" style="margin-inline-end: 6px;"></i>
           {{ locale === 'ar' ? 'عرض كل التصنيفات الفرعية' : 'View all subcategories' }}
-        </v-btn>
+        </router-link>
       </div>
 
       <!-- Listings -->
-      <v-row v-if="!loading && listings.length > 0">
-        <v-col v-for="listing in listings" :key="listing.id" cols="12" sm="6" md="4" lg="3">
+      <div v-if="!loading && listings.length > 0" class="row">
+        <div v-for="listing in listings" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
           <listing-card :listing="listing" :locale="locale">
             <!-- Show distance for Near category -->
             <template v-if="isNearCategory && listing.distance" #extra>
-              <v-chip size="x-small" color="teal" class="mt-1">
-                <v-icon start size="12">mdi-map-marker-distance</v-icon>
+              <span class="chip chip-xs chip-teal mt-1">
+                <i class="mdi mdi-map-marker-distance" style="font-size: 12px; margin-inline-end: 4px;"></i>
                 {{ listing.distance }} {{ locale === 'ar' ? 'كم' : 'km' }}
-              </v-chip>
+              </span>
             </template>
           </listing-card>
-        </v-col>
-      </v-row>
+        </div>
+      </div>
 
       <!-- Loading -->
       <div v-else-if="loading" class="text-center py-16">
-        <v-progress-circular indeterminate color="primary" size="64" />
+        <div class="spinner spinner-lg"></div>
         <p v-if="isNearCategory && requestingLocation" class="mt-4 text-medium-emphasis">
           {{ locale === 'ar' ? 'جاري تحديد موقعك...' : 'Getting your location...' }}
         </p>
       </div>
 
       <!-- No Results -->
-      <v-card v-else class="text-center py-16" variant="flat">
-        <v-icon size="80" color="grey">{{ isNearCategory ? 'mdi-map-marker-off' : (isReelsCategory ? 'mdi-video-off' : 'mdi-folder-open') }}</v-icon>
+      <div v-else class="card-flat text-center py-16">
+        <i class="mdi" :class="isNearCategory ? 'mdi-map-marker-off' : (isReelsCategory ? 'mdi-video-off' : 'mdi-folder-open')" style="font-size: 80px; color: grey;"></i>
         <h3 class="text-h5 mt-4">
           {{ isNearCategory
               ? (locale === 'ar' ? 'لا توجد إعلانات قريبة منك' : 'No listings near you')
@@ -130,13 +132,23 @@
         <p v-if="isNearCategory && !userLocation" class="text-medium-emphasis mt-2">
           {{ locale === 'ar' ? 'قم بتفعيل الموقع لعرض الإعلانات القريبة منك' : 'Enable location to see nearby listings' }}
         </p>
-      </v-card>
+      </div>
 
       <!-- Pagination -->
       <div v-if="pagination.last_page > 1" class="d-flex justify-center mt-8">
-        <v-pagination v-model="currentPage" :length="pagination.last_page" rounded="circle" @update:model-value="fetchListings" />
+        <div class="pagination">
+          <button class="pagination-btn" :disabled="currentPage <= 1" @click="currentPage--; fetchListings()">
+            <i class="mdi mdi-chevron-left"></i>
+          </button>
+          <button v-for="p in paginationPages" :key="p" class="pagination-btn" :class="{ active: currentPage === p }" @click="currentPage = p; fetchListings()">
+            {{ p }}
+          </button>
+          <button class="pagination-btn" :disabled="currentPage >= pagination.last_page" @click="currentPage++; fetchListings()">
+            <i class="mdi mdi-chevron-right"></i>
+          </button>
+        </div>
       </div>
-    </v-container>
+    </div>
   </div>
 </template>
 
@@ -182,6 +194,16 @@ const isSubcategoryRoute = computed(() => route.name === 'subcategory' && route.
 const subcategoryIdFromRoute = computed(() => route.params.subcategoryId ? parseInt(route.params.subcategoryId) : null)
 
 import { getCategoryIcon, getCategoryColor } from '@/utils/helpers'
+
+const paginationPages = computed(() => {
+  const pages = []
+  const total = pagination.value.last_page
+  const current = currentPage.value
+  const start = Math.max(1, current - 2)
+  const end = Math.min(total, current + 2)
+  for (let i = start; i <= end; i++) pages.push(i)
+  return pages
+})
 
 // Request user's location
 const requestLocation = () => {

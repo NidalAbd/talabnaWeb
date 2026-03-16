@@ -26,11 +26,13 @@ export const useAppStore = defineStore('app', () => {
   function toggleTheme() {
     theme.value = theme.value === 'light' ? 'dark' : 'light'
     localStorage.setItem('theme', theme.value)
+    document.documentElement.setAttribute('data-theme', theme.value)
   }
 
   function setTheme(newTheme) {
     theme.value = newTheme
     localStorage.setItem('theme', newTheme)
+    document.documentElement.setAttribute('data-theme', newTheme)
   }
 
   function setUser(userData) {

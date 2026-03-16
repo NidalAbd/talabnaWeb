@@ -1,299 +1,284 @@
 <template>
-  <v-app :theme="appStore.theme" :class="{ 'rtl': appStore.isRTL }">
+  <div :class="['app-root', { 'rtl': appStore.isRTL }]" :data-theme="appStore.theme">
     <!-- Navigation -->
-    <v-app-bar elevation="2" class="px-2">
-      <v-container class="d-flex align-center py-0">
+    <nav class="navbar">
+      <div class="navbar-inner">
         <!-- Logo -->
-        <router-link to="/" class="d-flex align-center text-decoration-none">
-          <v-avatar size="40" class="mr-2">
-            <v-img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" />
-          </v-avatar>
-          <span class="text-h5 font-weight-bold text-primary">{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</span>
+        <router-link to="/" class="navbar-brand">
+          <div class="avatar avatar-40">
+            <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" />
+          </div>
+          <span>{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</span>
         </router-link>
 
-        <v-spacer />
+        <div class="flex-1"></div>
 
         <!-- Desktop Navigation -->
-        <div class="d-none d-md-flex align-center gap-2">
-          <v-btn variant="text" to="/" :active="$route.name === 'home'">
-            <v-icon start>mdi-home</v-icon>
+        <div class="navbar-nav hide-mobile">
+          <router-link to="/" class="nav-link" :class="{ active: $route.name === 'home' }">
+            <i class="mdi mdi-home"></i>
             {{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}
-          </v-btn>
-          <v-btn variant="text" to="/browse" :active="$route.name === 'browse'">
-            <v-icon start>mdi-view-grid</v-icon>
+          </router-link>
+          <router-link to="/browse" class="nav-link" :class="{ active: $route.name === 'browse' }">
+            <i class="mdi mdi-view-grid"></i>
             {{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}
-          </v-btn>
+          </router-link>
 
-          <!-- Categories Menu -->
-          <v-menu open-on-hover>
-            <template v-slot:activator="{ props }">
-              <v-btn variant="text" v-bind="props">
-                <v-icon start>mdi-shape</v-icon>
-                {{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}
-                <v-icon end>mdi-chevron-down</v-icon>
-              </v-btn>
-            </template>
-            <v-list>
-              <v-list-item
+          <!-- Categories Dropdown -->
+          <div class="dropdown" @mouseenter="catMenuOpen = true" @mouseleave="catMenuOpen = false">
+            <button class="nav-link">
+              <i class="mdi mdi-shape"></i>
+              {{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}
+              <i class="mdi mdi-chevron-down" style="font-size: 18px;"></i>
+            </button>
+            <div class="dropdown-menu" :class="{ open: catMenuOpen }">
+              <router-link
                 v-for="cat in appStore.categories"
                 :key="cat.id"
                 :to="`/category/${cat.id}/${cat.slug || ''}`"
+                class="dropdown-item"
+                @click="catMenuOpen = false"
               >
-                <template v-slot:prepend>
-                  <v-icon :color="getCategoryColor(cat.id)">{{ getCategoryIcon(cat.id) }}</v-icon>
-                </template>
-                <v-list-item-title>{{ appStore.locale === 'ar' ? cat.name : cat.name_en }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
+                <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
+                {{ appStore.locale === 'ar' ? cat.name : cat.name_en }}
+              </router-link>
+            </div>
+          </div>
         </div>
 
-        <v-spacer />
+        <div class="flex-1"></div>
 
         <!-- Search -->
-        <v-text-field
-          v-model="searchQuery"
-          :placeholder="appStore.locale === 'ar' ? 'ابحث...' : 'Search...'"
-          prepend-inner-icon="mdi-magnify"
-          variant="solo-filled"
-          density="compact"
-          hide-details
-          single-line
-          class="search-field mx-4 d-none d-sm-flex"
-          style="max-width: 300px"
-          @keyup.enter="doSearch"
-        />
+        <div class="search-wrapper d-none d-sm-flex">
+          <i class="mdi mdi-magnify search-input-icon"></i>
+          <input
+            v-model="searchQuery"
+            :placeholder="appStore.locale === 'ar' ? 'ابحث...' : 'Search...'"
+            class="form-input form-input-search"
+            @keyup.enter="doSearch"
+          />
+        </div>
 
         <!-- Actions -->
         <div class="d-flex align-center gap-1">
           <!-- Theme Toggle -->
-          <v-btn icon variant="text" @click="appStore.toggleTheme">
-            <v-icon>{{ appStore.isDark ? 'mdi-weather-sunny' : 'mdi-weather-night' }}</v-icon>
-          </v-btn>
+          <button class="btn btn-icon btn-text" @click="appStore.toggleTheme" :title="appStore.isDark ? 'Light mode' : 'Dark mode'">
+            <i class="mdi" :class="appStore.isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'" style="font-size: 20px;"></i>
+          </button>
 
           <!-- Language Toggle -->
-          <v-btn icon variant="text" @click="toggleLocale">
-            <span class="text-body-2 font-weight-bold">{{ appStore.locale === 'ar' ? 'EN' : 'ع' }}</span>
-          </v-btn>
+          <button class="btn btn-icon btn-text" @click="toggleLocale">
+            <span style="font-weight: 700; font-size: 0.875rem;">{{ appStore.locale === 'ar' ? 'EN' : 'ع' }}</span>
+          </button>
 
           <!-- User Menu (when logged in) -->
-          <v-menu v-if="isLoggedIn" v-model="userMenuOpen" :close-on-content-click="true" location="bottom end">
-            <template v-slot:activator="{ props }">
-              <v-btn variant="text" v-bind="props" class="d-none d-sm-flex user-menu-btn">
-                <v-avatar size="32" class="mr-2" :color="userAvatar ? undefined : 'primary'">
-                  <v-img v-if="userAvatar" :src="userAvatar" :alt="userName" />
-                  <v-icon v-else size="20" color="white">mdi-account</v-icon>
-                </v-avatar>
-                <span class="text-body-2 font-weight-medium">{{ userName }}</span>
-                <v-icon end size="small">mdi-chevron-down</v-icon>
-              </v-btn>
-            </template>
-            <v-list density="compact" min-width="200">
+          <div v-if="isLoggedIn" class="dropdown d-none d-sm-block">
+            <button class="nav-link d-flex align-center gap-2" @click="userMenuOpen = !userMenuOpen">
+              <div class="avatar avatar-32" :class="{ 'avatar-primary': !userAvatar }">
+                <img v-if="userAvatar" :src="userAvatar" :alt="userName" />
+                <i v-else class="mdi mdi-account" style="font-size: 18px; color: #fff;"></i>
+              </div>
+              <span class="text-body-2 font-weight-medium">{{ userName }}</span>
+              <i class="mdi mdi-chevron-down" style="font-size: 16px;"></i>
+            </button>
+            <div class="dropdown-menu" :class="{ open: userMenuOpen }" @click="userMenuOpen = false">
               <!-- Dashboard (Admin Only) -->
-              <v-list-item v-if="isAdmin" href="/dashboard" color="primary">
-                <template v-slot:prepend>
-                  <v-icon color="primary">mdi-view-dashboard</v-icon>
-                </template>
-                <v-list-item-title>{{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}</v-list-item-title>
-              </v-list-item>
-              <v-divider v-if="isAdmin" class="my-1" />
+              <a v-if="isAdmin" href="/dashboard" class="dropdown-item">
+                <i class="mdi mdi-view-dashboard" style="color: var(--color-primary);"></i>
+                {{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}
+              </a>
+              <hr v-if="isAdmin" style="margin: 0.25rem 0;" />
               <!-- Logout -->
-              <v-list-item @click="logout" color="error">
-                <template v-slot:prepend>
-                  <v-icon color="error">mdi-logout</v-icon>
-                </template>
-                <v-list-item-title>{{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}</v-list-item-title>
-              </v-list-item>
-            </v-list>
-          </v-menu>
+              <button class="dropdown-item dropdown-item-error" @click="logout">
+                <i class="mdi mdi-logout"></i>
+                {{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}
+              </button>
+            </div>
+          </div>
 
           <!-- Login/Register (when not logged in) -->
-          <v-btn v-else color="primary" variant="flat" href="/login" class="d-none d-sm-flex">
-            <v-icon start>mdi-login</v-icon>
+          <a v-else href="/login" class="btn btn-primary btn-sm d-none d-sm-flex">
+            <i class="mdi mdi-login"></i>
             {{ appStore.locale === 'ar' ? 'تسجيل الدخول' : 'Login' }}
-          </v-btn>
+          </a>
 
-          <!-- Mobile Menu -->
-          <v-btn icon variant="text" class="d-md-none" @click="mobileDrawer = true">
-            <v-icon>mdi-menu</v-icon>
-          </v-btn>
+          <!-- Mobile Menu Button -->
+          <button class="btn btn-icon btn-text show-mobile" @click="mobileDrawer = true">
+            <i class="mdi mdi-menu" style="font-size: 24px;"></i>
+          </button>
         </div>
-      </v-container>
-    </v-app-bar>
+      </div>
+    </nav>
+
+    <!-- Mobile Drawer Overlay -->
+    <div class="drawer-overlay" :class="{ open: mobileDrawer }" @click="mobileDrawer = false"></div>
 
     <!-- Mobile Navigation Drawer -->
-    <v-navigation-drawer v-model="mobileDrawer" temporary location="right">
-      <v-list>
-        <!-- User Info (when logged in) -->
-        <template v-if="isLoggedIn">
-          <v-list-item class="py-3">
-            <template v-slot:prepend>
-              <v-avatar size="40" :color="userAvatar ? undefined : 'primary'">
-                <v-img v-if="userAvatar" :src="userAvatar" :alt="userName" />
-                <v-icon v-else color="white">mdi-account</v-icon>
-              </v-avatar>
-            </template>
-            <v-list-item-title class="font-weight-bold">{{ userName }}</v-list-item-title>
-            <v-list-item-subtitle>{{ appStore.user?.email }}</v-list-item-subtitle>
-          </v-list-item>
-          <v-divider class="my-2" />
-          <!-- Dashboard (Admin Only) -->
-          <v-list-item v-if="isAdmin" href="/dashboard" @click="mobileDrawer = false">
-            <template v-slot:prepend><v-icon color="primary">mdi-view-dashboard</v-icon></template>
-            <v-list-item-title>{{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}</v-list-item-title>
-          </v-list-item>
-        </template>
+    <div class="drawer" :class="{ open: mobileDrawer }">
+      <!-- User Info (when logged in) -->
+      <template v-if="isLoggedIn">
+        <div class="d-flex align-center gap-3 pa-4">
+          <div class="avatar avatar-40" :class="{ 'avatar-primary': !userAvatar }">
+            <img v-if="userAvatar" :src="userAvatar" :alt="userName" />
+            <i v-else class="mdi mdi-account" style="color: #fff;"></i>
+          </div>
+          <div>
+            <div class="font-weight-bold">{{ userName }}</div>
+            <div class="text-caption text-muted">{{ appStore.user?.email }}</div>
+          </div>
+        </div>
+        <div class="drawer-divider"></div>
+        <!-- Dashboard (Admin Only) -->
+        <a v-if="isAdmin" href="/dashboard" class="drawer-item" @click="mobileDrawer = false">
+          <i class="mdi mdi-view-dashboard" style="color: var(--color-primary);"></i>
+          {{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}
+        </a>
+      </template>
 
-        <!-- Mobile Search -->
-        <v-list-item class="px-4 py-2">
-          <v-text-field
+      <!-- Mobile Search -->
+      <div class="pa-4 py-2">
+        <div class="search-wrapper">
+          <i class="mdi mdi-magnify search-input-icon"></i>
+          <input
             v-model="searchQuery"
             :placeholder="appStore.locale === 'ar' ? 'ابحث...' : 'Search...'"
-            prepend-inner-icon="mdi-magnify"
-            variant="outlined"
-            density="compact"
-            hide-details
-            single-line
+            class="form-input form-input-search"
             @keyup.enter="doSearch(); mobileDrawer = false"
           />
-        </v-list-item>
-        <v-divider class="my-2" />
+        </div>
+      </div>
+      <div class="drawer-divider"></div>
 
-        <v-list-item to="/" @click="mobileDrawer = false">
-          <template v-slot:prepend><v-icon>mdi-home</v-icon></template>
-          <v-list-item-title>{{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}</v-list-item-title>
-        </v-list-item>
-        <v-list-item to="/browse" @click="mobileDrawer = false">
-          <template v-slot:prepend><v-icon>mdi-view-grid</v-icon></template>
-          <v-list-item-title>{{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}</v-list-item-title>
-        </v-list-item>
-        <v-divider class="my-2" />
-        <v-list-subheader>{{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}</v-list-subheader>
-        <v-list-item
-          v-for="cat in appStore.categories"
-          :key="cat.id"
-          :to="`/category/${cat.id}`"
-          @click="mobileDrawer = false"
-        >
-          <template v-slot:prepend>
-            <v-icon :color="getCategoryColor(cat.id)">{{ getCategoryIcon(cat.id) }}</v-icon>
-          </template>
-          <v-list-item-title>{{ appStore.locale === 'ar' ? cat.name : cat.name_en }}</v-list-item-title>
-        </v-list-item>
-        <v-divider class="my-2" />
-        <!-- Login (when not logged in) -->
-        <v-list-item v-if="!isLoggedIn" href="/login">
-          <template v-slot:prepend><v-icon>mdi-login</v-icon></template>
-          <v-list-item-title>{{ appStore.locale === 'ar' ? 'تسجيل الدخول' : 'Login' }}</v-list-item-title>
-        </v-list-item>
-        <!-- Logout (when logged in) -->
-        <v-list-item v-else @click="logout">
-          <template v-slot:prepend><v-icon color="error">mdi-logout</v-icon></template>
-          <v-list-item-title class="text-error">{{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
+      <router-link to="/" class="drawer-item" @click="mobileDrawer = false">
+        <i class="mdi mdi-home"></i>
+        {{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}
+      </router-link>
+      <router-link to="/browse" class="drawer-item" @click="mobileDrawer = false">
+        <i class="mdi mdi-view-grid"></i>
+        {{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}
+      </router-link>
+      <div class="drawer-divider"></div>
+      <div class="drawer-subheader">{{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}</div>
+      <router-link
+        v-for="cat in appStore.categories"
+        :key="cat.id"
+        :to="`/category/${cat.id}`"
+        class="drawer-item"
+        @click="mobileDrawer = false"
+      >
+        <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
+        {{ appStore.locale === 'ar' ? cat.name : cat.name_en }}
+      </router-link>
+      <div class="drawer-divider"></div>
+      <!-- Login (when not logged in) -->
+      <a v-if="!isLoggedIn" href="/login" class="drawer-item">
+        <i class="mdi mdi-login"></i>
+        {{ appStore.locale === 'ar' ? 'تسجيل الدخول' : 'Login' }}
+      </a>
+      <!-- Logout (when logged in) -->
+      <button v-else class="drawer-item" style="color: var(--color-error);" @click="logout">
+        <i class="mdi mdi-logout"></i>
+        {{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}
+      </button>
+    </div>
 
     <!-- Main Content -->
-    <v-main>
+    <main style="min-height: calc(100vh - 64px);">
       <router-view v-slot="{ Component }">
         <transition name="fade" mode="out-in">
           <component :is="Component" />
         </transition>
       </router-view>
-    </v-main>
+    </main>
 
     <!-- Footer -->
-    <v-footer class="bg-surface mt-12">
-      <v-container>
-        <v-row>
+    <footer class="site-footer">
+      <div class="container">
+        <div class="row">
           <!-- About -->
-          <v-col cols="12" md="4">
+          <div class="col-12 col-md-4">
             <div class="d-flex align-center mb-4">
-              <v-avatar size="48" class="mr-3">
-                <v-img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" />
-              </v-avatar>
+              <div class="avatar avatar-48 mr-3">
+                <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" />
+              </div>
               <div>
                 <h3 class="text-h6 font-weight-bold">{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</h3>
-                <p class="text-caption text-medium-emphasis">{{ appStore.locale === 'ar' ? 'منصة الإعلانات المبوبة' : 'Classified Ads Platform' }}</p>
+                <p class="text-caption text-muted" style="margin:0;">{{ appStore.locale === 'ar' ? 'منصة الإعلانات المبوبة' : 'Classified Ads Platform' }}</p>
               </div>
             </div>
-            <p class="text-body-2 text-medium-emphasis">
+            <p class="text-body-2 text-muted">
               {{ appStore.locale === 'ar'
                 ? 'أكبر منصة للإعلانات المبوبة. بيع واشتري بسهولة وأمان.'
                 : 'The largest classified ads marketplace. Buy and sell easily and safely.'
               }}
             </p>
-          </v-col>
+          </div>
 
           <!-- Quick Links -->
-          <v-col cols="6" md="2">
+          <div class="col-6 col-md-2">
             <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'روابط سريعة' : 'Quick Links' }}</h4>
-            <div class="d-flex flex-column gap-2">
-              <router-link to="/" class="text-decoration-none text-medium-emphasis">{{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}</router-link>
-              <router-link to="/browse" class="text-decoration-none text-medium-emphasis">{{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}</router-link>
-              <router-link to="/about" class="text-decoration-none text-medium-emphasis">{{ appStore.locale === 'ar' ? 'من نحن' : 'About' }}</router-link>
-              <router-link to="/contact" class="text-decoration-none text-medium-emphasis">{{ appStore.locale === 'ar' ? 'اتصل بنا' : 'Contact' }}</router-link>
+            <div class="footer-links">
+              <router-link to="/">{{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}</router-link>
+              <router-link to="/browse">{{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}</router-link>
+              <router-link to="/about">{{ appStore.locale === 'ar' ? 'من نحن' : 'About' }}</router-link>
+              <router-link to="/contact">{{ appStore.locale === 'ar' ? 'اتصل بنا' : 'Contact' }}</router-link>
             </div>
-          </v-col>
+          </div>
 
           <!-- Categories -->
-          <v-col cols="6" md="2">
+          <div class="col-6 col-md-2">
             <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}</h4>
-            <div class="d-flex flex-column gap-2">
+            <div class="footer-links">
               <router-link
                 v-for="cat in appStore.categories.slice(0, 5)"
                 :key="cat.id"
                 :to="`/category/${cat.id}`"
-                class="text-decoration-none text-medium-emphasis"
               >
                 {{ appStore.locale === 'ar' ? cat.name : cat.name_en }}
               </router-link>
             </div>
-          </v-col>
+          </div>
 
           <!-- Legal & SEO -->
-          <v-col cols="6" md="2">
+          <div class="col-6 col-md-2">
             <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'قانوني' : 'Legal' }}</h4>
-            <div class="d-flex flex-column gap-2">
-              <router-link to="/privacy" class="text-decoration-none text-medium-emphasis">{{ appStore.locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' }}</router-link>
-              <router-link to="/terms" class="text-decoration-none text-medium-emphasis">{{ appStore.locale === 'ar' ? 'شروط الاستخدام' : 'Terms of Service' }}</router-link>
-              <a href="/sitemap.xml" class="text-decoration-none text-medium-emphasis" target="_blank">{{ appStore.locale === 'ar' ? 'خريطة الموقع' : 'Sitemap' }}</a>
+            <div class="footer-links">
+              <router-link to="/privacy">{{ appStore.locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' }}</router-link>
+              <router-link to="/terms">{{ appStore.locale === 'ar' ? 'شروط الاستخدام' : 'Terms of Service' }}</router-link>
+              <a href="/sitemap.xml" target="_blank">{{ appStore.locale === 'ar' ? 'خريطة الموقع' : 'Sitemap' }}</a>
             </div>
-          </v-col>
+          </div>
 
           <!-- Download App -->
-          <v-col cols="6" md="2">
+          <div class="col-6 col-md-2">
             <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'حمل التطبيق' : 'Download App' }}</h4>
             <div class="d-flex flex-column gap-2">
-              <v-btn variant="outlined" size="small" href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="justify-start">
-                <v-icon start>mdi-google-play</v-icon>
+              <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn btn-outline btn-sm justify-start">
+                <i class="mdi mdi-google-play"></i>
                 Google Play
-              </v-btn>
+              </a>
             </div>
             <div class="mt-4">
               <h4 class="text-subtitle-2 font-weight-bold mb-2">{{ appStore.locale === 'ar' ? 'تواصل معنا' : 'Contact Us' }}</h4>
-              <p class="text-caption text-medium-emphasis mb-1">
-                <v-icon size="small" class="mr-1">mdi-email</v-icon> support@talbna.cloud
+              <p class="text-caption text-muted" style="margin:0;">
+                <i class="mdi mdi-email mr-1"></i> support@talbna.cloud
               </p>
             </div>
-          </v-col>
-        </v-row>
+          </div>
+        </div>
 
-        <v-divider class="my-6" />
-
-        <div class="d-flex flex-wrap justify-space-between align-center">
-          <p class="text-caption text-medium-emphasis">
+        <div class="footer-bottom">
+          <p class="text-caption text-muted" style="margin:0;">
             © {{ new Date().getFullYear() }} Talabna. {{ appStore.locale === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved' }}.
           </p>
           <div class="d-flex gap-2">
-            <v-btn icon variant="text" size="small" href="https://www.facebook.com/talabna" target="_blank"><v-icon>mdi-facebook</v-icon></v-btn>
-            <v-btn icon variant="text" size="small" href="https://www.instagram.com/talabna" target="_blank"><v-icon>mdi-instagram</v-icon></v-btn>
+            <a href="https://www.facebook.com/talabna" target="_blank" class="btn btn-icon-sm btn-text"><i class="mdi mdi-facebook" style="font-size: 20px;"></i></a>
+            <a href="https://www.instagram.com/talabna" target="_blank" class="btn btn-icon-sm btn-text"><i class="mdi mdi-instagram" style="font-size: 20px;"></i></a>
           </div>
         </div>
-      </v-container>
-    </v-footer>
-  </v-app>
+      </div>
+    </footer>
+  </div>
 </template>
 
 <script setup>
@@ -307,6 +292,7 @@ const appStore = useAppStore()
 const mobileDrawer = ref(false)
 const searchQuery = ref('')
 const userMenuOpen = ref(false)
+const catMenuOpen = ref(false)
 
 // Computed properties for user
 const isLoggedIn = computed(() => !!appStore.user)
@@ -390,28 +376,61 @@ const logout = async () => {
   }
 }
 
+// Close dropdown when clicking outside
+const handleClickOutside = (e) => {
+  if (userMenuOpen.value && !e.target.closest('.dropdown')) {
+    userMenuOpen.value = false
+  }
+}
+
 onMounted(() => {
   appStore.init()
+  // Apply theme to root element
+  document.documentElement.setAttribute('data-theme', appStore.theme)
   fetchCategories()
   fetchCurrentUser()
+  document.addEventListener('click', handleClickOutside)
 })
 </script>
 
 <style>
-/* RTL Support */
-.rtl {
-  direction: rtl;
-  text-align: right;
+/* Global styles for non-Vuetify app */
+
+/* Apply theme reactively */
+.app-root {
+  min-height: 100vh;
+  color: rgb(var(--v-theme-on-background));
+  background: rgb(var(--v-theme-background));
 }
 
-.rtl .v-btn .v-icon--start {
-  margin-left: 8px;
-  margin-right: 0;
+/* RTL icon flip */
+.rtl .mdi-chevron-right::before { content: "\F0141"; /* mdi-chevron-left */ }
+
+/* Search wrapper */
+.search-wrapper {
+  position: relative;
+  max-width: 300px;
+  width: 100%;
 }
 
-.rtl .v-btn .v-icon--end {
-  margin-right: 8px;
-  margin-left: 0;
+.search-input-icon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--color-text-muted);
+  font-size: 20px;
+  pointer-events: none;
+}
+
+.rtl .search-input-icon {
+  left: auto;
+  right: 12px;
+}
+
+.rtl .form-input-search {
+  padding-left: 0.875rem;
+  padding-right: 2.5rem;
 }
 
 /* Page transitions */
@@ -425,56 +444,9 @@ onMounted(() => {
   opacity: 0;
 }
 
-/* Search field */
-.search-field .v-field {
-  border-radius: 24px !important;
-  background: rgba(var(--v-theme-surface), 0.9) !important;
-}
-
-/* Custom scrollbar */
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-::-webkit-scrollbar-track {
-  background: rgb(var(--v-theme-surface-variant));
-}
-
-::-webkit-scrollbar-thumb {
-  background: rgb(var(--v-theme-secondary));
-  border-radius: 5px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: rgb(var(--v-theme-primary));
-}
-
-/* Global smooth transitions */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-/* App bar styling */
-.v-app-bar {
-  backdrop-filter: blur(10px);
-  background: rgba(var(--v-theme-surface), 0.95) !important;
-  border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-}
-
-/* Footer styling */
-.v-footer {
-  border-top: 1px solid rgba(var(--v-theme-on-surface), 0.08);
-}
-
-/* Card improvements */
-.v-card {
-  transition: all 0.3s ease !important;
-}
-
-/* Button improvements */
-.v-btn {
-  text-transform: none;
-  font-weight: 500;
-  letter-spacing: 0;
+/* Responsive mobile-only helpers */
+.show-mobile { display: flex !important; }
+@media (min-width: 960px) {
+  .show-mobile { display: none !important; }
 }
 </style>

@@ -1,51 +1,61 @@
 <template>
   <div class="user-profile-page">
-    <v-container class="py-8">
+    <div class="container py-8">
       <!-- User Header -->
-      <v-card v-if="user" class="mb-8" variant="outlined">
-        <v-card-text class="pa-6">
+      <div v-if="user" class="card mb-8">
+        <div class="card-body pa-6">
           <div class="d-flex flex-wrap align-center gap-4">
-            <v-avatar size="100">
-              <v-img v-if="user.photo" :src="user.photo.src" />
-              <v-icon v-else size="60">mdi-account</v-icon>
-            </v-avatar>
+            <div class="avatar avatar-100">
+              <img v-if="user.photo" :src="user.photo.src" />
+              <i v-else class="mdi mdi-account" style="font-size: 60px;"></i>
+            </div>
             <div>
               <h1 class="text-h4 font-weight-bold mb-2">{{ user.name }}</h1>
-              <p class="text-body-2 text-medium-emphasis">
-                <v-icon size="16" class="mr-1">mdi-calendar</v-icon>
+              <p class="text-body-2 text-muted">
+                <i class="mdi mdi-calendar mr-1" style="font-size: 16px;"></i>
                 {{ locale === 'ar' ? 'عضو منذ' : 'Member since' }} {{ formatYear(user.created_at) }}
               </p>
-              <p class="text-body-2 text-medium-emphasis">
-                <v-icon size="16" class="mr-1">mdi-bullhorn</v-icon>
+              <p class="text-body-2 text-muted">
+                <i class="mdi mdi-bullhorn mr-1" style="font-size: 16px;"></i>
                 {{ user.listings_count }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}
               </p>
             </div>
           </div>
-        </v-card-text>
-      </v-card>
+        </div>
+      </div>
 
       <!-- User Listings -->
       <h2 class="text-h5 font-weight-bold mb-4">{{ locale === 'ar' ? 'إعلانات المستخدم' : 'User Listings' }}</h2>
 
-      <v-row v-if="!loading && listings.length > 0">
-        <v-col v-for="listing in listings" :key="listing.id" cols="12" sm="6" md="4" lg="3">
+      <div v-if="!loading && listings.length > 0" class="row">
+        <div v-for="listing in listings" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
           <listing-card :listing="listing" :locale="locale" />
-        </v-col>
-      </v-row>
+        </div>
+      </div>
 
       <div v-else-if="loading" class="text-center py-16">
-        <v-progress-circular indeterminate color="primary" size="64" />
+        <div class="spinner spinner-lg"></div>
       </div>
 
-      <v-card v-else class="text-center py-16" variant="flat">
-        <v-icon size="80" color="grey">mdi-folder-open</v-icon>
+      <div v-else class="card-flat text-center py-16">
+        <i class="mdi mdi-folder-open" style="font-size: 80px; color: var(--color-text-muted);"></i>
         <h3 class="text-h5 mt-4">{{ locale === 'ar' ? 'لا توجد إعلانات' : 'No listings' }}</h3>
-      </v-card>
+      </div>
 
       <div v-if="pagination.last_page > 1" class="d-flex justify-center mt-8">
-        <v-pagination v-model="currentPage" :length="pagination.last_page" rounded="circle" @update:model-value="fetchUser" />
+        <div class="pagination">
+          <button class="pagination-btn" :disabled="currentPage <= 1" @click="currentPage--; fetchUser()">
+            <i class="mdi mdi-chevron-left"></i>
+          </button>
+          <button v-for="p in paginationPages" :key="p" class="pagination-btn" :class="{ active: currentPage === p }" @click="currentPage = p; fetchUser()">
+            {{ p }}
+          </button>
+          <button class="pagination-btn" :disabled="currentPage >= pagination.last_page" @click="currentPage++; fetchUser()">
+            <i class="mdi mdi-chevron-right"></i>
+          </button>
+        </div>
       </div>
-    </v-container>
+    </div>
   </div>
 </template>
 
@@ -67,6 +77,16 @@ const currentPage = ref(1)
 const pagination = ref({ total: 0, last_page: 1 })
 
 const locale = computed(() => appStore.locale)
+
+const paginationPages = computed(() => {
+  const pages = []
+  const total = pagination.value.last_page
+  const current = currentPage.value
+  const start = Math.max(1, current - 2)
+  const end = Math.min(total, current + 2)
+  for (let i = start; i <= end; i++) pages.push(i)
+  return pages
+})
 
 const formatYear = (date) => date ? new Date(date).getFullYear() : ''
 

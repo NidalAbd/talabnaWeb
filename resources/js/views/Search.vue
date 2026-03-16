@@ -1,50 +1,59 @@
 <template>
   <div class="search-page">
-    <v-container class="py-8">
+    <div class="container py-8">
       <!-- Search Header -->
       <div class="mb-8">
         <h1 class="text-h4 font-weight-bold mb-4">
           {{ locale === 'ar' ? 'نتائج البحث' : 'Search Results' }}
         </h1>
-        <v-text-field
-          v-model="searchQuery"
-          :placeholder="locale === 'ar' ? 'ابحث...' : 'Search...'"
-          prepend-inner-icon="mdi-magnify"
-          variant="outlined"
-          density="comfortable"
-          clearable
-          @keyup.enter="doSearch"
-          style="max-width: 600px"
-        />
-        <p v-if="query" class="text-body-1 text-medium-emphasis mt-4">
+        <div class="search-wrapper" style="max-width: 600px;">
+          <i class="mdi mdi-magnify search-input-icon"></i>
+          <input
+            v-model="searchQuery"
+            :placeholder="locale === 'ar' ? 'ابحث...' : 'Search...'"
+            class="form-input form-input-search"
+            @keyup.enter="doSearch"
+          />
+        </div>
+        <p v-if="query" class="text-body-1 text-muted mt-4">
           {{ pagination.total }} {{ locale === 'ar' ? 'نتيجة لـ' : 'results for' }} "{{ query }}"
         </p>
       </div>
 
       <!-- Results -->
-      <v-row v-if="!loading && listings.length > 0">
-        <v-col v-for="listing in listings" :key="listing.id" cols="12" sm="6" md="4" lg="3">
+      <div v-if="!loading && listings.length > 0" class="row">
+        <div v-for="listing in listings" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
           <listing-card :listing="listing" :locale="locale" />
-        </v-col>
-      </v-row>
+        </div>
+      </div>
 
       <!-- Loading -->
       <div v-else-if="loading" class="text-center py-16">
-        <v-progress-circular indeterminate color="primary" size="64" />
+        <div class="spinner spinner-lg"></div>
       </div>
 
       <!-- No Results -->
-      <v-card v-else class="text-center py-16" variant="flat">
-        <v-icon size="80" color="grey">mdi-magnify</v-icon>
+      <div v-else class="card-flat text-center py-16">
+        <i class="mdi mdi-magnify" style="font-size: 80px; color: var(--color-text-muted);"></i>
         <h3 class="text-h5 mt-4">{{ locale === 'ar' ? 'لا توجد نتائج' : 'No results found' }}</h3>
-        <p class="text-medium-emphasis">{{ locale === 'ar' ? 'جرب كلمات بحث مختلفة' : 'Try different search terms' }}</p>
-      </v-card>
+        <p class="text-muted">{{ locale === 'ar' ? 'جرب كلمات بحث مختلفة' : 'Try different search terms' }}</p>
+      </div>
 
       <!-- Pagination -->
       <div v-if="pagination.last_page > 1" class="d-flex justify-center mt-8">
-        <v-pagination v-model="currentPage" :length="pagination.last_page" rounded="circle" @update:model-value="fetchResults" />
+        <div class="pagination">
+          <button class="pagination-btn" :disabled="currentPage <= 1" @click="currentPage--; fetchResults()">
+            <i class="mdi mdi-chevron-left"></i>
+          </button>
+          <button v-for="p in paginationPages" :key="p" class="pagination-btn" :class="{ active: currentPage === p }" @click="currentPage = p; fetchResults()">
+            {{ p }}
+          </button>
+          <button class="pagination-btn" :disabled="currentPage >= pagination.last_page" @click="currentPage++; fetchResults()">
+            <i class="mdi mdi-chevron-right"></i>
+          </button>
+        </div>
       </div>
-    </v-container>
+    </div>
   </div>
 </template>
 
@@ -68,6 +77,16 @@ const currentPage = ref(1)
 const pagination = ref({ total: 0, last_page: 1 })
 
 const locale = computed(() => appStore.locale)
+
+const paginationPages = computed(() => {
+  const pages = []
+  const total = pagination.value.last_page
+  const current = currentPage.value
+  const start = Math.max(1, current - 2)
+  const end = Math.min(total, current + 2)
+  for (let i = start; i <= end; i++) pages.push(i)
+  return pages
+})
 
 const doSearch = () => {
   if (searchQuery.value.trim()) {

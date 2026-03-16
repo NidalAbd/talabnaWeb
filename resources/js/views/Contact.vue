@@ -1,79 +1,67 @@
 <template>
   <div class="contact-page">
     <section class="hero-gradient py-16">
-      <v-container class="text-center">
+      <div class="container text-center">
         <h1 class="text-h2 font-weight-bold text-white mb-4">{{ locale === 'ar' ? 'اتصل بنا' : 'Contact Us' }}</h1>
         <p class="text-h6 text-white-darken-1">{{ locale === 'ar' ? 'نحن هنا لمساعدتك' : 'We are here to help' }}</p>
-      </v-container>
+      </div>
     </section>
 
-    <v-container class="py-12">
-      <v-row justify="center">
-        <v-col cols="12" md="6">
-          <v-card variant="outlined" class="pa-8">
+    <div class="container py-12">
+      <div class="row" style="justify-content: center;">
+        <div class="col-12 col-md-6">
+          <div class="card pa-8">
             <h2 class="text-h5 font-weight-bold mb-6">{{ locale === 'ar' ? 'أرسل لنا رسالة' : 'Send us a message' }}</h2>
 
-            <v-alert v-if="submitSuccess" type="success" class="mb-4" closable @click:close="submitSuccess = false">
+            <div v-if="submitSuccess" class="alert alert-success mb-4">
               {{ locale === 'ar' ? 'تم إرسال رسالتك بنجاح! سنرد عليك في أقرب وقت.' : 'Message sent successfully! We will reply soon.' }}
-            </v-alert>
-            <v-alert v-if="submitError" type="error" class="mb-4" closable @click:close="submitError = ''">
+              <button class="alert-close" @click="submitSuccess = false">&times;</button>
+            </div>
+            <div v-if="submitError" class="alert alert-error mb-4">
               {{ submitError }}
-            </v-alert>
+              <button class="alert-close" @click="submitError = ''">&times;</button>
+            </div>
 
-            <v-form ref="formRef" @submit.prevent="submitForm" :disabled="submitting">
-              <v-text-field
-                v-model="form.name"
-                :label="locale === 'ar' ? 'الاسم' : 'Name'"
-                :rules="[v => !!v || (locale === 'ar' ? 'الاسم مطلوب' : 'Name is required')]"
-                required
-                class="mb-4"
-              />
-              <v-text-field
-                v-model="form.email"
-                :label="locale === 'ar' ? 'البريد الإلكتروني' : 'Email'"
-                type="email"
-                :rules="[
-                  v => !!v || (locale === 'ar' ? 'البريد الإلكتروني مطلوب' : 'Email is required'),
-                  v => /.+@.+\..+/.test(v) || (locale === 'ar' ? 'بريد إلكتروني غير صالح' : 'Invalid email')
-                ]"
-                required
-                class="mb-4"
-              />
-              <v-textarea
-                v-model="form.message"
-                :label="locale === 'ar' ? 'الرسالة' : 'Message'"
-                rows="5"
-                :rules="[v => !!v || (locale === 'ar' ? 'الرسالة مطلوبة' : 'Message is required')]"
-                required
-                class="mb-4"
-              />
-              <v-btn color="primary" type="submit" size="large" block :loading="submitting">
-                <v-icon start>mdi-send</v-icon>
+            <form @submit.prevent="submitForm">
+              <div class="form-group">
+                <label class="form-label">{{ locale === 'ar' ? 'الاسم' : 'Name' }} *</label>
+                <input v-model="form.name" class="form-input" required :disabled="submitting" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ locale === 'ar' ? 'البريد الإلكتروني' : 'Email' }} *</label>
+                <input v-model="form.email" type="email" class="form-input" required :disabled="submitting" />
+              </div>
+              <div class="form-group">
+                <label class="form-label">{{ locale === 'ar' ? 'الرسالة' : 'Message' }} *</label>
+                <textarea v-model="form.message" class="form-textarea" rows="5" required :disabled="submitting"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary btn-lg btn-block" :class="{ 'btn-loading': submitting }" :disabled="submitting">
+                <i class="mdi mdi-send"></i>
                 {{ locale === 'ar' ? 'إرسال' : 'Send' }}
-              </v-btn>
-            </v-form>
-          </v-card>
-        </v-col>
+              </button>
+            </form>
+          </div>
+        </div>
 
-        <v-col cols="12" md="4">
-          <v-card variant="outlined" class="pa-6 mb-4">
-            <v-icon color="primary" size="32" class="mb-3">mdi-email</v-icon>
+        <div class="col-12 col-md-4">
+          <div class="card pa-6 mb-4">
+            <i class="mdi mdi-email" style="font-size: 32px; color: var(--color-primary); margin-bottom: 0.75rem;"></i>
             <h3 class="text-subtitle-1 font-weight-bold">{{ locale === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</h3>
-            <a href="mailto:support@talbna.cloud" class="text-body-2 text-decoration-none">support@talbna.cloud</a>
-          </v-card>
-          <v-card variant="outlined" class="pa-6 mb-4">
-            <v-icon color="primary" size="32" class="mb-3">mdi-web</v-icon>
+            <a href="mailto:support@talbna.cloud" class="text-body-2">support@talbna.cloud</a>
+          </div>
+          <div class="card pa-6 mb-4">
+            <i class="mdi mdi-web" style="font-size: 32px; color: var(--color-primary); margin-bottom: 0.75rem;"></i>
             <h3 class="text-subtitle-1 font-weight-bold">{{ locale === 'ar' ? 'الموقع' : 'Website' }}</h3>
-            <a href="https://talbna.cloud" class="text-body-2 text-decoration-none">talbna.cloud</a>
-          </v-card>
-          <v-card variant="outlined" class="pa-6">
-            <v-icon color="primary" size="32" class="mb-3">mdi-google-play</v-icon>
+            <a href="https://talbna.cloud" class="text-body-2">talbna.cloud</a>
+          </div>
+          <div class="card pa-6">
+            <i class="mdi mdi-google-play" style="font-size: 32px; color: var(--color-primary); margin-bottom: 0.75rem;"></i>
             <h3 class="text-subtitle-1 font-weight-bold">{{ locale === 'ar' ? 'التطبيق' : 'App' }}</h3>
-            <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="text-body-2 text-decoration-none">Google Play</a>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
+            <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="text-body-2">Google Play</a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -87,14 +75,12 @@ const { updateMeta } = useSeo()
 const locale = computed(() => appStore.locale)
 
 const form = ref({ name: '', email: '', message: '' })
-const formRef = ref(null)
 const submitting = ref(false)
 const submitSuccess = ref(false)
 const submitError = ref('')
 
 const submitForm = async () => {
-  const { valid } = await formRef.value.validate()
-  if (!valid) return
+  if (!form.value.name || !form.value.email || !form.value.message) return
 
   submitting.value = true
   submitError.value = ''
@@ -115,7 +101,6 @@ const submitForm = async () => {
     if (response.ok) {
       submitSuccess.value = true
       form.value = { name: '', email: '', message: '' }
-      formRef.value.reset()
     } else {
       const data = await response.json()
       submitError.value = data.message || (locale.value === 'ar' ? 'حدث خطأ. حاول مرة أخرى.' : 'An error occurred. Please try again.')

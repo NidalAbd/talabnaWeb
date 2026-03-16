@@ -1,203 +1,196 @@
 <template>
-  <v-container class="py-8">
+  <div class="container py-8">
     <!-- SEO Breadcrumbs -->
-    <v-breadcrumbs :items="breadcrumbs" class="px-0 mb-4">
-      <template v-slot:divider>
-        <v-icon>mdi-chevron-right</v-icon>
-      </template>
-    </v-breadcrumbs>
+    <nav class="breadcrumbs px-0 mb-4">
+      <router-link v-for="(item, idx) in breadcrumbs" :key="idx" :to="item.to || '#'" :class="{ active: item.disabled }">
+        {{ item.title }}
+      </router-link>
+    </nav>
 
-    <!-- Page Header with SEO-friendly title -->
+    <!-- Page Header -->
     <div class="text-center mb-8">
-      <h1 class="text-h4 text-md-h3 font-weight-bold mb-3">
-        {{ pageTitle }}
-      </h1>
-      <p class="text-body-1 text-medium-emphasis max-width-600 mx-auto">
-        {{ pageDescription }}
-      </p>
+      <h1 class="text-h4 font-weight-bold mb-3">{{ pageTitle }}</h1>
+      <p class="text-body-1 text-muted" style="max-width: 600px; margin: 0 auto;">{{ pageDescription }}</p>
     </div>
 
     <!-- Location Info Cards -->
-    <v-row v-if="locationInfo" class="mb-6">
-      <v-col cols="12" md="4" v-if="locationInfo.country">
-        <v-card variant="outlined" class="pa-4">
+    <div v-if="locationInfo" class="row mb-6">
+      <div v-if="locationInfo.country" class="col-12 col-md-4">
+        <div class="card pa-4">
           <div class="d-flex align-center">
-            <v-avatar color="primary" size="48" class="mr-3">
-              <v-icon color="white">mdi-earth</v-icon>
-            </v-avatar>
+            <div class="avatar avatar-48 avatar-primary mr-3">
+              <i class="mdi mdi-earth" style="font-size: 24px; color: #fff;"></i>
+            </div>
             <div>
-              <div class="text-caption text-medium-emphasis">{{ isArabic ? 'الدولة' : 'Country' }}</div>
+              <div class="text-caption text-muted">{{ isArabic ? 'الدولة' : 'Country' }}</div>
               <div class="text-h6 font-weight-bold">{{ locationInfo.country.name }}</div>
             </div>
           </div>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="4" v-if="locationInfo.city">
-        <v-card variant="outlined" class="pa-4">
+        </div>
+      </div>
+      <div v-if="locationInfo.city" class="col-12 col-md-4">
+        <div class="card pa-4">
           <div class="d-flex align-center">
-            <v-avatar color="success" size="48" class="mr-3">
-              <v-icon color="white">mdi-city</v-icon>
-            </v-avatar>
+            <div class="avatar avatar-48 avatar-success mr-3">
+              <i class="mdi mdi-city" style="font-size: 24px; color: #fff;"></i>
+            </div>
             <div>
-              <div class="text-caption text-medium-emphasis">{{ isArabic ? 'المدينة' : 'City' }}</div>
+              <div class="text-caption text-muted">{{ isArabic ? 'المدينة' : 'City' }}</div>
               <div class="text-h6 font-weight-bold">{{ locationInfo.city.name }}</div>
             </div>
           </div>
-        </v-card>
-      </v-col>
-      <v-col cols="12" md="4" v-if="locationInfo.category">
-        <v-card variant="outlined" class="pa-4">
+        </div>
+      </div>
+      <div v-if="locationInfo.category" class="col-12 col-md-4">
+        <div class="card pa-4">
           <div class="d-flex align-center">
-            <v-avatar color="warning" size="48" class="mr-3">
-              <v-icon color="white">mdi-shape</v-icon>
-            </v-avatar>
+            <div class="avatar avatar-48 avatar-warning mr-3">
+              <i class="mdi mdi-shape" style="font-size: 24px; color: #fff;"></i>
+            </div>
             <div>
-              <div class="text-caption text-medium-emphasis">{{ isArabic ? 'التصنيف' : 'Category' }}</div>
+              <div class="text-caption text-muted">{{ isArabic ? 'التصنيف' : 'Category' }}</div>
               <div class="text-h6 font-weight-bold">{{ locationInfo.category.name }}</div>
             </div>
           </div>
-        </v-card>
-      </v-col>
-    </v-row>
+        </div>
+      </div>
+    </div>
 
     <!-- Stats -->
-    <v-row class="mb-6">
-      <v-col cols="6" md="3">
-        <v-card color="primary" variant="flat" class="pa-4 text-center text-white">
+    <div class="row mb-6">
+      <div class="col-6 col-md-3">
+        <div class="card card-color-primary pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalListings }}</div>
           <div class="text-body-2">{{ isArabic ? 'إعلان' : 'Listings' }}</div>
-        </v-card>
-      </v-col>
-      <v-col cols="6" md="3">
-        <v-card color="success" variant="flat" class="pa-4 text-center text-white">
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-color-success pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalCategories }}</div>
           <div class="text-body-2">{{ isArabic ? 'تصنيف' : 'Categories' }}</div>
-        </v-card>
-      </v-col>
-      <v-col cols="6" md="3">
-        <v-card color="info" variant="flat" class="pa-4 text-center text-white">
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-color-info pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalCities }}</div>
           <div class="text-body-2">{{ isArabic ? 'مدينة' : 'Cities' }}</div>
-        </v-card>
-      </v-col>
-      <v-col cols="6" md="3">
-        <v-card color="warning" variant="flat" class="pa-4 text-center text-white">
+        </div>
+      </div>
+      <div class="col-6 col-md-3">
+        <div class="card card-color-warning pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalUsers }}</div>
           <div class="text-body-2">{{ isArabic ? 'معلن' : 'Advertisers' }}</div>
-        </v-card>
-      </v-col>
-    </v-row>
+        </div>
+      </div>
+    </div>
 
-    <!-- Sub-locations (Cities if viewing country, Categories if viewing city) -->
+    <!-- Sub-locations -->
     <div v-if="subLocations.length > 0" class="mb-8">
-      <h2 class="text-h5 font-weight-bold mb-4">
-        {{ subLocationsTitle }}
-      </h2>
-      <v-row>
-        <v-col v-for="loc in subLocations" :key="loc.id" cols="6" sm="4" md="3" lg="2">
-          <v-card
-            :to="loc.route"
-            variant="outlined"
-            class="pa-3 text-center hover-card"
-            hover
-          >
-            <v-avatar :color="loc.color || 'primary'" size="40" class="mb-2">
-              <v-icon color="white" size="20">{{ loc.icon || 'mdi-folder' }}</v-icon>
-            </v-avatar>
+      <h2 class="text-h5 font-weight-bold mb-4">{{ subLocationsTitle }}</h2>
+      <div class="row">
+        <div v-for="loc in subLocations" :key="loc.id" class="col-6 col-sm-4 col-md-3 col-lg-2">
+          <router-link :to="loc.route" class="card card-hover pa-3 text-center h-100" style="text-decoration: none; display: block;">
+            <div class="avatar avatar-40 mx-auto mb-2" :style="{ background: loc.color || 'var(--color-primary)' }">
+              <i class="mdi" :class="loc.icon || 'mdi-folder'" style="font-size: 20px; color: #fff;"></i>
+            </div>
             <div class="text-body-2 font-weight-medium text-truncate">{{ loc.name }}</div>
-            <div class="text-caption text-medium-emphasis">{{ loc.count }} {{ isArabic ? 'إعلان' : 'ads' }}</div>
-          </v-card>
-        </v-col>
-      </v-row>
+            <div class="text-caption text-muted">{{ loc.count }} {{ isArabic ? 'إعلان' : 'ads' }}</div>
+          </router-link>
+        </div>
+      </div>
     </div>
 
     <!-- Listings -->
     <div class="mb-4">
-      <div class="d-flex align-center justify-space-between mb-4">
+      <div class="d-flex align-center justify-between mb-4">
         <h2 class="text-h5 font-weight-bold">
           {{ isArabic ? 'الإعلانات' : 'Listings' }}
-          <span class="text-body-2 text-medium-emphasis">({{ pagination.total }})</span>
+          <span class="text-body-2 text-muted">({{ pagination.total }})</span>
         </h2>
-        <v-btn-toggle v-model="viewMode" mandatory density="compact">
-          <v-btn value="grid" icon size="small"><v-icon>mdi-view-grid</v-icon></v-btn>
-          <v-btn value="list" icon size="small"><v-icon>mdi-view-list</v-icon></v-btn>
-        </v-btn-toggle>
+        <div class="btn-toggle">
+          <button class="btn btn-sm" :class="{ active: viewMode === 'grid' }" @click="viewMode = 'grid'">
+            <i class="mdi mdi-view-grid"></i>
+          </button>
+          <button class="btn btn-sm" :class="{ active: viewMode === 'list' }" @click="viewMode = 'list'">
+            <i class="mdi mdi-view-list"></i>
+          </button>
+        </div>
       </div>
 
       <!-- Loading -->
       <div v-if="loading" class="text-center py-8">
-        <v-progress-circular indeterminate color="primary" size="48" />
-        <p class="mt-4 text-medium-emphasis">{{ isArabic ? 'جاري التحميل...' : 'Loading...' }}</p>
+        <div class="spinner spinner-md"></div>
+        <p class="mt-4 text-muted">{{ isArabic ? 'جاري التحميل...' : 'Loading...' }}</p>
       </div>
 
       <!-- No Results -->
-      <v-card v-else-if="listings.length === 0" variant="outlined" class="pa-8 text-center">
-        <v-icon size="64" color="grey">mdi-magnify-close</v-icon>
+      <div v-else-if="listings.length === 0" class="card pa-8 text-center">
+        <i class="mdi mdi-magnify-close" style="font-size: 64px; color: var(--color-text-muted);"></i>
         <h3 class="text-h6 mt-4">{{ isArabic ? 'لا توجد إعلانات' : 'No listings found' }}</h3>
-        <p class="text-medium-emphasis">{{ isArabic ? 'جرب تغيير الموقع أو التصنيف' : 'Try changing location or category' }}</p>
-      </v-card>
+        <p class="text-muted">{{ isArabic ? 'جرب تغيير الموقع أو التصنيف' : 'Try changing location or category' }}</p>
+      </div>
 
       <!-- Grid View -->
-      <v-row v-else-if="viewMode === 'grid'">
-        <v-col v-for="listing in listings" :key="listing.id" cols="12" sm="6" md="4" lg="3">
+      <div v-else-if="viewMode === 'grid'" class="row">
+        <div v-for="listing in listings" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
           <listing-card :listing="listing" :locale="isArabic ? 'ar' : 'en'" />
-        </v-col>
-      </v-row>
+        </div>
+      </div>
 
       <!-- List View -->
       <div v-else>
-        <v-card
+        <router-link
           v-for="listing in listings"
           :key="listing.id"
           :to="`/listing/${listing.id}/${slugify(listing.title)}`"
-          class="mb-3 listing-card"
-          hover
+          class="card card-hover mb-3"
+          style="text-decoration: none; display: block;"
         >
           <div class="d-flex">
-            <v-img
+            <img
               :src="listing.image || placeholderImage"
-              width="150"
-              height="120"
-              cover
-              class="bg-grey-lighten-3 flex-shrink-0"
-            >
-              <template v-slot:error>
-                <v-img :src="placeholderImage" width="150" height="120" cover />
-              </template>
-            </v-img>
-            <v-card-text class="flex-grow-1">
+              loading="lazy"
+              style="width: 150px; height: 120px; object-fit: cover; flex-shrink: 0;"
+              class="lazy-img"
+              @error="$event.target.src = placeholderImage"
+            />
+            <div class="card-body flex-grow-1">
               <h3 class="text-body-1 font-weight-medium mb-2">{{ listing.title }}</h3>
-              <p class="text-caption text-medium-emphasis text-truncate-2 mb-2">{{ listing.description }}</p>
-              <div class="d-flex align-center justify-space-between">
+              <p class="text-caption text-muted text-clamp-2 mb-2">{{ listing.description }}</p>
+              <div class="d-flex align-center justify-between">
                 <span class="text-primary font-weight-bold">{{ formatPrice(listing.price, listing.currency) }}</span>
-                <span class="text-caption text-medium-emphasis">
-                  <v-icon size="12">mdi-map-marker</v-icon>
+                <span class="text-caption text-muted">
+                  <i class="mdi mdi-map-marker" style="font-size: 12px;"></i>
                   {{ listing.city_name }}
                 </span>
               </div>
-            </v-card-text>
+            </div>
           </div>
-        </v-card>
+        </router-link>
       </div>
 
       <!-- Pagination -->
       <div v-if="pagination.lastPage > 1" class="d-flex justify-center mt-6">
-        <v-pagination
-          v-model="pagination.currentPage"
-          :length="pagination.lastPage"
-          :total-visible="5"
-          rounded
-          @update:model-value="loadListings"
-        />
+        <div class="pagination">
+          <button class="pagination-btn" :disabled="pagination.currentPage <= 1" @click="pagination.currentPage--; loadListings()">
+            <i class="mdi mdi-chevron-left"></i>
+          </button>
+          <button v-for="p in paginationPages" :key="p" class="pagination-btn" :class="{ active: pagination.currentPage === p }" @click="pagination.currentPage = p; loadListings()">
+            {{ p }}
+          </button>
+          <button class="pagination-btn" :disabled="pagination.currentPage >= pagination.lastPage" @click="pagination.currentPage++; loadListings()">
+            <i class="mdi mdi-chevron-right"></i>
+          </button>
+        </div>
       </div>
     </div>
 
     <!-- SEO Content Section -->
-    <v-card variant="outlined" class="mt-8 pa-6">
+    <div class="card mt-8 pa-6">
       <h2 class="text-h5 font-weight-bold mb-4">{{ seoSection.title }}</h2>
-      <div class="text-body-2 text-medium-emphasis" v-html="seoSection.content"></div>
-    </v-card>
-  </v-container>
+      <div class="text-body-2 text-muted" v-html="seoSection.content"></div>
+    </div>
+  </div>
 </template>
 
 <script setup>
@@ -233,6 +226,16 @@ const pagination = ref({
 
 // Computed
 const isArabic = computed(() => appStore.locale === 'ar')
+
+const paginationPages = computed(() => {
+  const pages = []
+  const total = pagination.value.lastPage
+  const current = pagination.value.currentPage
+  const start = Math.max(1, current - 2)
+  const end = Math.min(total, current + 2)
+  for (let i = start; i <= end; i++) pages.push(i)
+  return pages
+})
 
 const pageTitle = computed(() => {
   if (!locationInfo.value) return isArabic.value ? 'خدمات' : 'Services'
@@ -360,15 +363,6 @@ function formatPrice(price, currency) {
   return `${price.toLocaleString()} ${currency || ''}`
 }
 
-function getBadgeColor(badge) {
-  const colors = {
-    'premium': 'amber',
-    'featured': 'primary',
-    'urgent': 'error',
-  }
-  return colors[badge?.toLowerCase()] || 'grey'
-}
-
 async function loadData() {
   loading.value = true
 
@@ -395,7 +389,6 @@ async function loadData() {
         total: data.listings?.total || 0
       }
 
-      // Update SEO data
       if (locationInfo.value) {
         setLocationSeo(locationInfo.value, stats.value.totalListings, appStore.locale)
       }
@@ -427,43 +420,17 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.max-width-600 {
-  max-width: 600px;
-}
-
-.text-truncate-2 {
+.text-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
 
-.listing-card {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.listing-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.12);
-}
-
-.hover-card {
-  transition: all 0.2s ease;
-}
-
-.hover-card:hover {
-  border-color: rgb(var(--v-theme-primary));
-  background: rgba(var(--v-theme-primary), 0.05);
-}
-
-.listing-badge {
-  position: absolute;
-  top: 8px;
-  left: 8px;
-}
-
-.rtl .listing-badge {
-  left: auto;
-  right: 8px;
+/* Breadcrumbs separator */
+.breadcrumbs a + a::before {
+  content: '/';
+  margin: 0 0.5rem;
+  opacity: 0.5;
 }
 </style>

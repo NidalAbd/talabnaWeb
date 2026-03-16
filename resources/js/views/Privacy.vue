@@ -1,16 +1,16 @@
 <template>
   <div class="privacy-page">
     <section class="hero-gradient py-12">
-      <v-container class="text-center">
+      <div class="container text-center">
         <h1 class="text-h3 font-weight-bold text-white">{{ locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' }}</h1>
         <p class="text-body-1 text-white mt-2" style="opacity:0.8">{{ locale === 'ar' ? 'آخر تحديث: مارس 2026' : 'Last updated: March 2026' }}</p>
-      </v-container>
+      </div>
     </section>
 
-    <v-container class="py-12">
-      <v-row justify="center">
-        <v-col cols="12" md="8">
-          <v-card variant="outlined" class="pa-8">
+    <div class="container py-12">
+      <div class="row" style="justify-content: center;">
+        <div class="col-12 col-md-8">
+          <div class="card pa-8">
             <div class="policy-content" v-if="locale === 'ar'">
               <h2>مقدمة</h2>
               <p>نحن في طلبنا نلتزم بحماية خصوصيتك وبياناتك الشخصية. توضح سياسة الخصوصية هذه كيفية جمع واستخدام وحماية معلوماتك عند استخدام منصتنا وتطبيقنا.</p>
@@ -90,10 +90,10 @@
               <h2>Contact Us</h2>
               <p>For any questions about this privacy policy, contact us at: support@talbna.cloud</p>
             </div>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -117,7 +117,7 @@ onMounted(() => {
 <style scoped>
 .hero-gradient { background: linear-gradient(160deg, #0a1628 0%, #1a3a5c 40%, #1565c0 100%); }
 .policy-content h2 { font-size: 1.5rem; font-weight: 600; margin: 2rem 0 1rem; }
-.policy-content p { line-height: 1.8; margin-bottom: 1rem; color: rgba(var(--v-theme-on-surface), 0.7); }
-.policy-content ul { margin-bottom: 1rem; padding-left: 1.5rem; }
-.policy-content li { line-height: 1.8; margin-bottom: 0.5rem; color: rgba(var(--v-theme-on-surface), 0.7); }
+.policy-content p { line-height: 1.8; margin-bottom: 1rem; color: var(--color-text-muted); }
+.policy-content ul { margin-bottom: 1rem; padding-left: 1.5rem; list-style: disc; }
+.policy-content li { line-height: 1.8; margin-bottom: 0.5rem; color: var(--color-text-muted); }
 </style>

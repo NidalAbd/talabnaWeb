@@ -1,67 +1,93 @@
 <template>
   <div class="listing-details-page">
     <!-- Breadcrumbs -->
-    <v-container class="py-4">
-      <v-breadcrumbs :items="breadcrumbs" class="px-0">
-        <template v-slot:divider>
-          <v-icon>mdi-chevron-left</v-icon>
+    <div class="container py-4">
+      <nav class="breadcrumbs px-0">
+        <template v-for="(item, index) in breadcrumbs" :key="index">
+          <router-link v-if="!item.disabled" :to="item.to" class="breadcrumb-link">{{ item.title }}</router-link>
+          <span v-else class="breadcrumb-current">{{ item.title }}</span>
+          <i v-if="index < breadcrumbs.length - 1" class="mdi mdi-chevron-left breadcrumb-divider"></i>
         </template>
-      </v-breadcrumbs>
-    </v-container>
+      </nav>
+    </div>
 
-    <v-container v-if="listing && !loading" class="pb-12">
-      <v-row>
+    <div v-if="listing && !loading" class="container pb-12">
+      <div class="row">
         <!-- Main Content -->
-        <v-col cols="12" lg="8">
+        <div class="col-12 col-lg-8">
           <!-- Image Gallery -->
-          <v-card class="mb-6" variant="outlined">
-            <v-carousel
+          <div class="card mb-6">
+            <div
               v-if="listing.photos && listing.photos.length > 0"
-              height="450"
-              show-arrows="hover"
-              hide-delimiter-background
+              class="carousel"
+              style="height: 450px; overflow: hidden; position: relative;"
             >
-              <v-carousel-item
-                v-for="(photo, i) in listing.photos"
-                :key="i"
+              <div
+                class="carousel-track"
+                :style="{ transform: `translateX(-${currentSlide * 100}%)`, display: 'flex', transition: 'transform 0.3s ease', height: '100%' }"
               >
-                <!-- Video -->
-                <video
-                  v-if="photo.isVideo || isVideoFile(photo.src)"
-                  :src="getPhotoUrl(photo)"
-                  controls
-                  class="w-100 h-100"
-                  style="object-fit: cover;"
-                />
-                <!-- Image -->
-                <v-img
-                  v-else
-                  :src="getPhotoUrl(photo)"
-                  height="450"
-                  cover
-                />
-              </v-carousel-item>
-            </v-carousel>
-            <div v-else class="d-flex align-center justify-center bg-grey-lighten-3" style="height: 450px;">
-              <v-icon size="100" color="grey">mdi-image-off</v-icon>
+                <div
+                  v-for="(photo, i) in listing.photos"
+                  :key="i"
+                  class="carousel-slide"
+                  style="min-width: 100%; height: 100%;"
+                >
+                  <!-- Video -->
+                  <video
+                    v-if="photo.isVideo || isVideoFile(photo.src)"
+                    :src="getPhotoUrl(photo)"
+                    controls
+                    class="w-100 h-100"
+                    style="object-fit: cover;"
+                  />
+                  <!-- Image -->
+                  <img
+                    v-else
+                    :src="getPhotoUrl(photo)"
+                    loading="lazy"
+                    class="img-cover"
+                    style="width: 100%; height: 450px; object-fit: cover;"
+                  />
+                </div>
+              </div>
+              <!-- Prev/Next buttons -->
+              <button v-if="currentSlide > 0" class="carousel-btn carousel-btn-prev" @click="prevSlide">
+                <i class="mdi mdi-chevron-left"></i>
+              </button>
+              <button v-if="currentSlide < totalSlides - 1" class="carousel-btn carousel-btn-next" @click="nextSlide">
+                <i class="mdi mdi-chevron-right"></i>
+              </button>
+              <!-- Dot indicators -->
+              <div class="carousel-dots">
+                <span
+                  v-for="(_, i) in listing.photos"
+                  :key="i"
+                  class="carousel-dot"
+                  :class="{ active: i === currentSlide }"
+                  @click="currentSlide = i"
+                ></span>
+              </div>
             </div>
-          </v-card>
+            <div v-else class="d-flex align-center justify-center bg-grey-lighten-3" style="height: 450px;">
+              <i class="mdi mdi-image-off" style="font-size: 100px; color: grey;"></i>
+            </div>
+          </div>
 
           <!-- Listing Info -->
-          <v-card class="mb-6" variant="outlined">
-            <v-card-text class="pa-6">
+          <div class="card mb-6">
+            <div class="card-body pa-6">
               <!-- Badges -->
               <div class="d-flex flex-wrap gap-2 mb-4">
-                <v-chip v-if="showBadge" :color="badgeColor" variant="flat">
-                  <v-icon start>{{ badgeIcon }}</v-icon>
+                <span v-if="showBadge" class="chip" :style="{ backgroundColor: badgeColor, color: '#fff' }">
+                  <i :class="badgeIcon" style="margin-inline-end: 4px;"></i>
                   {{ badgeName }}
-                </v-chip>
-                <v-chip color="primary" variant="tonal">
+                </span>
+                <span class="chip chip-primary-tonal">
                   {{ getLocalizedName(listing.category) }}
-                </v-chip>
-                <v-chip v-if="listing.sub_category" variant="tonal">
+                </span>
+                <span v-if="listing.sub_category" class="chip chip-tonal">
                   {{ getLocalizedName(listing.sub_category) }}
-                </v-chip>
+                </span>
               </div>
 
               <!-- Title -->
@@ -70,20 +96,20 @@
               <!-- Meta -->
               <div class="d-flex flex-wrap gap-4 text-body-2 text-medium-emphasis mb-6">
                 <span class="d-flex align-center">
-                  <v-icon start size="18">mdi-map-marker</v-icon>
+                  <i class="mdi mdi-map-marker" style="font-size: 18px; margin-inline-end: 4px;"></i>
                   {{ locationText }}
                 </span>
                 <span class="d-flex align-center">
-                  <v-icon start size="18">mdi-clock-outline</v-icon>
+                  <i class="mdi mdi-clock-outline" style="font-size: 18px; margin-inline-end: 4px;"></i>
                   {{ formatDate(listing.created_at) }}
                 </span>
                 <span class="d-flex align-center">
-                  <v-icon start size="18">mdi-eye</v-icon>
+                  <i class="mdi mdi-eye" style="font-size: 18px; margin-inline-end: 4px;"></i>
                   {{ formatNumber(listing.view_count) }} {{ locale === 'ar' ? 'مشاهدة' : 'views' }}
                 </span>
               </div>
 
-              <v-divider class="my-6" />
+              <hr class="my-6" />
 
               <!-- Description -->
               <h2 class="text-h6 font-weight-bold mb-4">
@@ -92,27 +118,27 @@
               <p class="text-body-1 listing-description" style="white-space: pre-line">
                 {{ listing.description }}
               </p>
-            </v-card-text>
-          </v-card>
+            </div>
+          </div>
 
           <!-- Related Listings -->
           <div v-if="related.length > 0">
             <h2 class="text-h5 font-weight-bold mb-4">
               {{ locale === 'ar' ? 'إعلانات مشابهة' : 'Related Listings' }}
             </h2>
-            <v-row>
-              <v-col v-for="item in related" :key="item.id" cols="12" sm="6">
+            <div class="row">
+              <div v-for="item in related" :key="item.id" class="col-12 col-sm-6">
                 <listing-card :listing="item" :locale="locale" />
-              </v-col>
-            </v-row>
+              </div>
+            </div>
           </div>
-        </v-col>
+        </div>
 
         <!-- Sidebar -->
-        <v-col cols="12" lg="4">
+        <div class="col-12 col-lg-4">
           <!-- Price Card -->
-          <v-card class="mb-6 sticky-sidebar" variant="outlined">
-            <v-card-text class="pa-6">
+          <div class="card mb-6 sticky-sidebar">
+            <div class="card-body pa-6">
               <div class="text-center mb-6">
                 <div v-if="listing.price" class="text-h3 font-weight-bold text-primary">
                   {{ formatPrice(listing.price, locale, getCurrencyFromListing(listing)) }}
@@ -122,14 +148,14 @@
                 </div>
               </div>
 
-              <v-divider class="mb-6" />
+              <hr class="mb-6" />
 
               <!-- Seller Info -->
               <div class="d-flex align-center mb-6">
-                <v-avatar size="56" class="mr-4">
-                  <v-img v-if="userPhotoUrl" :src="userPhotoUrl" />
-                  <v-icon v-else size="32">mdi-account</v-icon>
-                </v-avatar>
+                <div class="avatar mr-4" style="width: 56px; height: 56px;">
+                  <img v-if="userPhotoUrl" :src="userPhotoUrl" loading="lazy" class="img-cover" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
+                  <i v-else class="mdi mdi-account" style="font-size: 32px;"></i>
+                </div>
                 <div>
                   <h3 class="text-subtitle-1 font-weight-bold">{{ listing.user?.name }}</h3>
                   <p class="text-caption text-medium-emphasis">
@@ -140,75 +166,71 @@
               </div>
 
               <!-- Actions -->
-              <v-btn color="success" size="large" block class="mb-3" :href="`tel:${listing.phone}`">
-                <v-icon start>mdi-phone</v-icon>
+              <a class="btn btn-success btn-lg btn-block mb-3" :href="`tel:${listing.phone}`">
+                <i class="mdi mdi-phone" style="margin-inline-end: 4px;"></i>
                 {{ locale === 'ar' ? 'اتصل الآن' : 'Call Now' }}
-              </v-btn>
+              </a>
 
-              <v-btn color="primary" size="large" block variant="outlined" class="mb-3" :href="`https://wa.me/${listing.whatsapp || listing.phone}`" target="_blank">
-                <v-icon start>mdi-whatsapp</v-icon>
+              <a class="btn btn-outline-primary btn-lg btn-block mb-3" :href="`https://wa.me/${listing.whatsapp || listing.phone}`" target="_blank">
+                <i class="mdi mdi-whatsapp" style="margin-inline-end: 4px;"></i>
                 {{ locale === 'ar' ? 'واتساب' : 'WhatsApp' }}
-              </v-btn>
+              </a>
 
-              <v-btn variant="text" size="large" block @click="toggleFavorite">
-                <v-icon start :color="isFavorite ? 'red' : ''">
-                  {{ isFavorite ? 'mdi-heart' : 'mdi-heart-outline' }}
-                </v-icon>
+              <button class="btn btn-text btn-lg btn-block" @click="toggleFavorite">
+                <i class="mdi" :class="isFavorite ? 'mdi-heart' : 'mdi-heart-outline'" :style="{ color: isFavorite ? 'red' : '', marginInlineEnd: '4px' }"></i>
                 {{ locale === 'ar' ? 'حفظ الإعلان' : 'Save Listing' }}
-              </v-btn>
-            </v-card-text>
-          </v-card>
+              </button>
+            </div>
+          </div>
 
           <!-- Share -->
-          <v-card variant="outlined">
-            <v-card-text class="pa-4">
+          <div class="card">
+            <div class="card-body pa-4">
               <h3 class="text-subtitle-1 font-weight-bold mb-3">
                 {{ locale === 'ar' ? 'مشاركة الإعلان' : 'Share Listing' }}
               </h3>
               <div class="d-flex gap-2">
-                <v-btn icon variant="tonal" color="blue" :href="`https://facebook.com/sharer/sharer.php?u=${shareUrl}`" target="_blank">
-                  <v-icon>mdi-facebook</v-icon>
-                </v-btn>
-                <v-btn icon variant="tonal" color="info" :href="`https://twitter.com/intent/tweet?url=${shareUrl}&text=${listing.title}`" target="_blank">
-                  <v-icon>mdi-twitter</v-icon>
-                </v-btn>
-                <v-btn icon variant="tonal" color="success" :href="`https://wa.me/?text=${listing.title} ${shareUrl}`" target="_blank">
-                  <v-icon>mdi-whatsapp</v-icon>
-                </v-btn>
-                <v-btn icon variant="tonal" @click="copyLink">
-                  <v-icon>mdi-link</v-icon>
-                </v-btn>
+                <a class="btn btn-icon" style="background: rgba(59,130,246,0.1); color: #3b82f6;" :href="`https://facebook.com/sharer/sharer.php?u=${shareUrl}`" target="_blank">
+                  <i class="mdi mdi-facebook"></i>
+                </a>
+                <a class="btn btn-icon" style="background: rgba(14,165,233,0.1); color: #0ea5e9;" :href="`https://twitter.com/intent/tweet?url=${shareUrl}&text=${listing.title}`" target="_blank">
+                  <i class="mdi mdi-twitter"></i>
+                </a>
+                <a class="btn btn-icon" style="background: rgba(34,197,94,0.1); color: #22c55e;" :href="`https://wa.me/?text=${listing.title} ${shareUrl}`" target="_blank">
+                  <i class="mdi mdi-whatsapp"></i>
+                </a>
+                <button class="btn btn-icon" style="background: rgba(107,114,128,0.1); color: #6b7280;" @click="copyLink">
+                  <i class="mdi mdi-link"></i>
+                </button>
               </div>
-            </v-card-text>
-          </v-card>
-        </v-col>
-      </v-row>
-    </v-container>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <!-- Loading -->
-    <v-container v-else-if="loading" class="py-12">
-      <v-row>
-        <v-col cols="12" lg="8">
-          <v-skeleton-loader type="image" height="450" class="mb-6" />
-          <v-skeleton-loader type="article" />
-        </v-col>
-        <v-col cols="12" lg="4">
-          <v-skeleton-loader type="card" height="400" />
-        </v-col>
-      </v-row>
-    </v-container>
+    <div v-else-if="loading" class="container py-12">
+      <div class="row">
+        <div class="col-12 col-lg-8">
+          <div class="skeleton mb-6" style="height: 450px;"></div>
+          <div class="skeleton" style="height: 200px;"></div>
+        </div>
+        <div class="col-12 col-lg-4">
+          <div class="skeleton" style="height: 400px;"></div>
+        </div>
+      </div>
+    </div>
 
     <!-- Not Found -->
-    <v-container v-else class="py-16 text-center">
-      <v-icon size="100" color="error">mdi-alert-circle</v-icon>
+    <div v-else class="container py-16 text-center">
+      <i class="mdi mdi-alert-circle" style="font-size: 100px; color: var(--color-error, #ef4444);"></i>
       <h2 class="text-h4 mt-6 mb-4">{{ locale === 'ar' ? 'الإعلان غير موجود' : 'Listing Not Found' }}</h2>
-      <v-btn color="primary" to="/browse">{{ locale === 'ar' ? 'تصفح الإعلانات' : 'Browse Listings' }}</v-btn>
-    </v-container>
+      <router-link to="/browse" class="btn btn-primary">{{ locale === 'ar' ? 'تصفح الإعلانات' : 'Browse Listings' }}</router-link>
+    </div>
 
     <!-- Snackbar -->
-    <v-snackbar v-model="snackbar" :timeout="2000">
-      {{ snackbarText }}
-    </v-snackbar>
+    <div class="snackbar" :class="{ show: snackbar }">{{ snackbarText }}</div>
   </div>
 </template>
 
@@ -250,6 +272,19 @@ const getLocalizedName = (item) => {
 }
 
 const shareUrl = computed(() => window.location.href)
+
+// Carousel controls
+const currentSlide = ref(0)
+const totalSlides = computed(() => listing.value?.photos?.length || 0)
+const nextSlide = () => { if (currentSlide.value < totalSlides.value - 1) currentSlide.value++ }
+const prevSlide = () => { if (currentSlide.value > 0) currentSlide.value-- }
+
+// Snackbar helper
+const showSnackbar = (text) => {
+  snackbarText.value = text
+  snackbar.value = true
+  setTimeout(() => { snackbar.value = false }, 2000)
+}
 
 // Badge computed properties - supports both new badge object and legacy have_badge
 const showBadge = computed(() => {
@@ -324,16 +359,14 @@ const formatDate = (date, yearOnly = false) => {
 
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value
-  snackbarText.value = isFavorite.value
+  showSnackbar(isFavorite.value
     ? (locale.value === 'ar' ? 'تم حفظ الإعلان' : 'Listing saved')
-    : (locale.value === 'ar' ? 'تم إزالة الإعلان' : 'Listing removed')
-  snackbar.value = true
+    : (locale.value === 'ar' ? 'تم إزالة الإعلان' : 'Listing removed'))
 }
 
 const copyLink = () => {
   navigator.clipboard.writeText(window.location.href)
-  snackbarText.value = locale.value === 'ar' ? 'تم نسخ الرابط' : 'Link copied'
-  snackbar.value = true
+  showSnackbar(locale.value === 'ar' ? 'تم نسخ الرابط' : 'Link copied')
 }
 
 const fetchListing = async () => {
@@ -347,6 +380,9 @@ const fetchListing = async () => {
     const data = await response.json()
     listing.value = data.listing
     related.value = Array.isArray(data.related) ? data.related : []
+
+    // Reset carousel when listing changes
+    currentSlide.value = 0
 
     // Update SEO using advanced SEO composable
     if (listing.value) {
@@ -372,5 +408,120 @@ watch(() => route.params.id, fetchListing)
 
 .listing-description {
   line-height: 1.8;
+}
+
+/* Carousel */
+.carousel-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0, 0, 0, 0.5);
+  color: #fff;
+  border: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24px;
+  z-index: 2;
+  transition: background 0.2s;
+}
+.carousel-btn:hover {
+  background: rgba(0, 0, 0, 0.7);
+}
+.carousel-btn-prev {
+  left: 12px;
+}
+.carousel-btn-next {
+  right: 12px;
+}
+.carousel-dots {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 2;
+}
+.carousel-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.carousel-dot.active {
+  background: #fff;
+}
+
+/* Breadcrumbs */
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+.breadcrumb-link {
+  color: var(--color-primary, #1976d2);
+  text-decoration: none;
+}
+.breadcrumb-link:hover {
+  text-decoration: underline;
+}
+.breadcrumb-current {
+  color: var(--text-medium-emphasis, rgba(0, 0, 0, 0.6));
+}
+.breadcrumb-divider {
+  font-size: 18px;
+  color: var(--text-medium-emphasis, rgba(0, 0, 0, 0.6));
+}
+
+/* Snackbar */
+.snackbar {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: #323232;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
+  z-index: 9999;
+  opacity: 0;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  pointer-events: none;
+}
+.snackbar.show {
+  transform: translateX(-50%) translateY(0);
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Skeleton */
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: skeleton-loading 1.5s infinite;
+  border-radius: 8px;
+}
+@keyframes skeleton-loading {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* Avatar */
+.avatar {
+  border-radius: 50%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e0e0e0;
+  flex-shrink: 0;
 }
 </style>

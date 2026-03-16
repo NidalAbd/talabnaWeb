@@ -2,57 +2,49 @@
   <div class="browse-page">
     <!-- Hero -->
     <section class="hero-gradient py-12">
-      <v-container>
+      <div class="container">
         <h1 class="text-h3 font-weight-bold text-white mb-2">
           {{ locale === 'ar' ? 'تصفح الإعلانات' : 'Browse Listings' }}
         </h1>
         <p class="text-h6 text-white-darken-1">
           {{ pagination.total }} {{ locale === 'ar' ? 'إعلان متاح' : 'listings available' }}
         </p>
-      </v-container>
+      </div>
     </section>
 
-    <v-container class="py-8">
-      <v-row>
+    <div class="container py-8">
+      <div class="row">
         <!-- Mobile Filter Button -->
-        <v-col cols="12" class="d-md-none mb-4">
-          <v-btn color="primary" variant="outlined" block @click="showMobileFilters = !showMobileFilters">
-            <v-icon start>mdi-filter</v-icon>
+        <div class="col-12 d-md-none mb-4">
+          <button class="btn btn-outline btn-block" @click="showMobileFilters = !showMobileFilters">
+            <i class="mdi mdi-filter"></i>
             {{ locale === 'ar' ? 'الفلاتر' : 'Filters' }}
-            <v-icon end>{{ showMobileFilters ? 'mdi-chevron-up' : 'mdi-chevron-down' }}</v-icon>
-          </v-btn>
-        </v-col>
+            <i :class="showMobileFilters ? 'mdi mdi-chevron-up' : 'mdi mdi-chevron-down'"></i>
+          </button>
+        </div>
 
         <!-- Filters Sidebar -->
-        <v-col cols="12" md="3" :class="{ 'd-none d-md-block': !showMobileFilters }">
-          <v-card class="filters-card sticky-filters" variant="outlined">
-            <v-card-title class="d-flex align-center">
-              <v-icon start>mdi-filter</v-icon>
+        <div class="col-12 col-md-3" :class="{ 'd-none d-md-block': !showMobileFilters }">
+          <div class="card filters-card sticky-filters">
+            <div class="card-header d-flex align-center">
+              <i class="mdi mdi-filter"></i>
               {{ locale === 'ar' ? 'الفلاتر' : 'Filters' }}
-              <v-spacer />
-              <v-btn variant="text" size="small" @click="clearFilters">
+              <div class="flex-1"></div>
+              <button class="btn btn-text" @click="clearFilters">
                 {{ locale === 'ar' ? 'مسح' : 'Clear' }}
-              </v-btn>
-            </v-card-title>
-            <v-divider />
-            <v-card-text>
+              </button>
+            </div>
+            <hr>
+            <div class="card-body">
               <!-- Category -->
               <div class="mb-4">
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
                   {{ locale === 'ar' ? 'التصنيف' : 'Category' }}
                 </label>
-                <v-select
-                  v-model="filters.category_id"
-                  :items="categoryOptions"
-                  item-title="title"
-                  item-value="value"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                  clearable
-                  :loading="loadingCategories"
-                  @update:model-value="onCategoryChange"
-                />
+                <select class="form-select" v-model="filters.category_id" @change="onCategoryChange(filters.category_id)">
+                  <option value="">{{ locale === 'ar' ? 'الكل' : 'All' }}</option>
+                  <option v-for="opt in categoryOptions" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
+                </select>
               </div>
 
               <!-- Subcategory -->
@@ -60,19 +52,10 @@
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
                   {{ locale === 'ar' ? 'التصنيف الفرعي' : 'Subcategory' }}
                 </label>
-                <v-select
-                  v-model="filters.subcategory_id"
-                  :items="subcategoryOptions"
-                  item-title="title"
-                  item-value="value"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                  clearable
-                  :disabled="!filters.category_id"
-                  :loading="loadingSubcategories"
-                  @update:model-value="fetchListings"
-                />
+                <select class="form-select" v-model="filters.subcategory_id" :disabled="!filters.category_id" @change="fetchListings()">
+                  <option value="">{{ locale === 'ar' ? 'الكل' : 'All' }}</option>
+                  <option v-for="opt in subcategoryOptions" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
+                </select>
               </div>
 
               <!-- Country -->
@@ -80,18 +63,10 @@
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
                   {{ locale === 'ar' ? 'الدولة' : 'Country' }}
                 </label>
-                <v-select
-                  v-model="filters.country_id"
-                  :items="countryOptions"
-                  item-title="title"
-                  item-value="value"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                  clearable
-                  :loading="loadingCountries"
-                  @update:model-value="onCountryChange"
-                />
+                <select class="form-select" v-model="filters.country_id" @change="onCountryChange(filters.country_id)">
+                  <option value="">{{ locale === 'ar' ? 'الكل' : 'All' }}</option>
+                  <option v-for="opt in countryOptions" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
+                </select>
               </div>
 
               <!-- City -->
@@ -99,19 +74,10 @@
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
                   {{ locale === 'ar' ? 'المدينة' : 'City' }}
                 </label>
-                <v-select
-                  v-model="filters.city_id"
-                  :items="cityOptions"
-                  item-title="title"
-                  item-value="value"
-                  variant="outlined"
-                  density="compact"
-                  hide-details
-                  clearable
-                  :disabled="!filters.country_id"
-                  :loading="loadingCities"
-                  @update:model-value="fetchListings"
-                />
+                <select class="form-select" v-model="filters.city_id" :disabled="!filters.country_id" @change="fetchListings()">
+                  <option value="">{{ locale === 'ar' ? 'الكل' : 'All' }}</option>
+                  <option v-for="opt in cityOptions" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
+                </select>
               </div>
 
               <!-- Price Range -->
@@ -119,30 +85,26 @@
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
                   {{ locale === 'ar' ? 'نطاق السعر' : 'Price Range' }}
                 </label>
-                <v-row dense>
-                  <v-col cols="6">
-                    <v-text-field
+                <div class="row">
+                  <div class="col-6">
+                    <input
+                      class="form-input"
                       v-model="filters.min_price"
-                      :label="locale === 'ar' ? 'من' : 'Min'"
+                      :placeholder="locale === 'ar' ? 'من' : 'Min'"
                       type="number"
-                      variant="outlined"
-                      density="compact"
-                      hide-details
-                      @change="fetchListings"
+                      @change="fetchListings()"
                     />
-                  </v-col>
-                  <v-col cols="6">
-                    <v-text-field
+                  </div>
+                  <div class="col-6">
+                    <input
+                      class="form-input"
                       v-model="filters.max_price"
-                      :label="locale === 'ar' ? 'إلى' : 'Max'"
+                      :placeholder="locale === 'ar' ? 'إلى' : 'Max'"
                       type="number"
-                      variant="outlined"
-                      density="compact"
-                      hide-details
-                      @change="fetchListings"
+                      @change="fetchListings()"
                     />
-                  </v-col>
-                </v-row>
+                  </div>
+                </div>
               </div>
 
               <!-- Badge -->
@@ -150,86 +112,85 @@
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
                   {{ locale === 'ar' ? 'نوع الإعلان' : 'Listing Type' }}
                 </label>
-                <v-chip-group v-model="filters.badge" column @update:model-value="fetchListings">
-                  <v-chip
+                <div class="chip-group">
+                  <button
                     v-for="badge in badgeTypes.filter(b => !b.is_default)"
                     :key="badge.id"
-                    filter
-                    :value="badge.name_ar"
-                    :color="badge.color"
+                    class="chip chip-filter"
+                    :class="{ active: filters.badge === badge.name_ar }"
+                    @click="filters.badge = filters.badge === badge.name_ar ? null : badge.name_ar; fetchListings()"
                   >
-                    <v-icon start size="16">{{ badge.icon }}</v-icon>
+                    <i :class="badge.icon" style="font-size: 16px;"></i>
                     {{ locale === 'ar' ? badge.name_ar : badge.name_en }}
-                  </v-chip>
-                </v-chip-group>
+                  </button>
+                </div>
               </div>
 
-              <v-btn color="primary" block @click="fetchListings">
-                <v-icon start>mdi-filter</v-icon>
+              <button class="btn btn-primary btn-block" @click="fetchListings()">
+                <i class="mdi mdi-filter"></i>
                 {{ locale === 'ar' ? 'تطبيق' : 'Apply' }}
-              </v-btn>
-            </v-card-text>
-          </v-card>
-        </v-col>
+              </button>
+            </div>
+          </div>
+        </div>
 
         <!-- Listings -->
-        <v-col cols="12" md="9">
+        <div class="col-12 col-md-9">
           <!-- Sort & View -->
           <div class="d-flex flex-wrap justify-space-between align-center mb-6 gap-4">
-            <v-select
+            <select
+              class="form-select"
               v-model="filters.sort_by"
-              :items="sortOptions"
-              :label="locale === 'ar' ? 'ترتيب حسب' : 'Sort by'"
-              variant="outlined"
-              density="compact"
-              hide-details
               style="max-width: 200px"
-              @update:model-value="fetchListings"
-            />
-            <v-btn-toggle v-model="viewMode" mandatory variant="outlined" divided>
-              <v-btn value="grid" icon="mdi-view-grid" />
-              <v-btn value="list" icon="mdi-view-list" />
-            </v-btn-toggle>
+              @change="fetchListings()"
+            >
+              <option v-for="opt in sortOptions" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
+            </select>
+            <div class="btn-toggle">
+              <button :class="['btn', viewMode === 'grid' ? 'active' : '']" @click="viewMode = 'grid'">
+                <i class="mdi mdi-view-grid"></i>
+              </button>
+              <button :class="['btn', viewMode === 'list' ? 'active' : '']" @click="viewMode = 'list'">
+                <i class="mdi mdi-view-list"></i>
+              </button>
+            </div>
           </div>
 
           <!-- Loading -->
           <div v-if="loading" class="text-center py-16">
-            <v-progress-circular indeterminate color="primary" size="64" />
+            <div class="spinner spinner-lg"></div>
             <p class="mt-4 text-medium-emphasis">{{ locale === 'ar' ? 'جاري التحميل...' : 'Loading...' }}</p>
           </div>
 
           <!-- Grid View -->
-          <v-row v-else-if="viewMode === 'grid' && listings.length > 0">
-            <v-col v-for="listing in listings" :key="listing.id" cols="12" sm="6" lg="4">
+          <div v-else-if="viewMode === 'grid' && listings.length > 0" class="row">
+            <div v-for="listing in listings" :key="listing.id" class="col-12 col-sm-6 col-lg-4">
               <listing-card :listing="listing" :locale="locale" />
-            </v-col>
-          </v-row>
+            </div>
+          </div>
 
           <!-- List View -->
           <div v-else-if="viewMode === 'list' && listings.length > 0">
-            <v-card v-for="listing in listings" :key="listing.id" class="mb-4 listing-list-card" variant="outlined" :to="`/listing/${listing.id}`">
-              <v-row no-gutters>
-                <v-col cols="4" md="3">
-                  <v-img :src="getPhotoUrl(listing)" height="180" cover>
-                    <template v-slot:error>
-                      <v-row class="fill-height ma-0 bg-grey-lighten-3" align="center" justify="center">
-                        <v-icon size="48" color="grey">mdi-image-off</v-icon>
-                      </v-row>
-                    </template>
-                  </v-img>
-                </v-col>
-                <v-col cols="8" md="9">
-                  <v-card-text>
+            <router-link v-for="listing in listings" :key="listing.id" :to="`/listing/${listing.id}`" class="card mb-4 listing-list-card">
+              <div class="row no-gutters">
+                <div class="col-4 col-md-3">
+                  <img :src="getPhotoUrl(listing)" loading="lazy" class="img-cover" style="height: 180px; width: 100%; object-fit: cover;">
+                  <div v-if="!getPhotoUrl(listing)" class="fill-height bg-grey-lighten-3 d-flex align-center justify-center" style="height: 180px;">
+                    <i class="mdi mdi-image-off" style="font-size: 48px; color: grey;"></i>
+                  </div>
+                </div>
+                <div class="col-8 col-md-9">
+                  <div class="card-body">
                     <div class="d-flex align-center gap-2 mb-2">
-                      <v-chip
+                      <span
                         v-if="listing.badge && !listing.badge.is_default"
-                        :color="listing.badge.color"
-                        size="x-small"
+                        class="chip"
+                        :style="{ backgroundColor: listing.badge.color, color: '#fff' }"
                       >
-                        <v-icon start size="12">{{ listing.badge.icon }}</v-icon>
+                        <i :class="listing.badge.icon" style="font-size: 12px;"></i>
                         {{ locale === 'ar' ? listing.badge.name_ar : listing.badge.name_en }}
-                      </v-chip>
-                      <v-chip size="x-small" variant="tonal">{{ getLocalizedName(listing.category) }}</v-chip>
+                      </span>
+                      <span class="chip">{{ getLocalizedName(listing.category) }}</span>
                     </div>
                     <h3 class="text-h6 font-weight-bold mb-2">{{ listing.title }}</h3>
                     <p class="text-body-2 text-medium-emphasis mb-2 listing-description">{{ listing.description }}</p>
@@ -238,38 +199,38 @@
                       <span v-else class="text-body-2 text-medium-emphasis">{{ locale === 'ar' ? 'السعر عند الاتصال' : 'Contact for price' }}</span>
                       <span class="text-caption text-medium-emphasis">{{ getLocalizedName(listing.city) }}</span>
                     </div>
-                  </v-card-text>
-                </v-col>
-              </v-row>
-            </v-card>
+                  </div>
+                </div>
+              </div>
+            </router-link>
           </div>
 
           <!-- No Results -->
-          <v-card v-else-if="!loading && listings.length === 0" class="text-center py-16" variant="flat">
-            <v-icon size="80" color="grey">mdi-magnify</v-icon>
+          <div v-else-if="!loading && listings.length === 0" class="card text-center py-16">
+            <i class="mdi mdi-magnify" style="font-size: 80px; color: grey;"></i>
             <h3 class="text-h5 text-medium-emphasis mt-4">{{ locale === 'ar' ? 'لا توجد نتائج' : 'No results found' }}</h3>
             <p class="text-body-2 text-medium-emphasis">{{ locale === 'ar' ? 'جرب تعديل الفلاتر' : 'Try adjusting your filters' }}</p>
-            <v-btn color="primary" class="mt-4" @click="clearFilters">{{ locale === 'ar' ? 'مسح الفلاتر' : 'Clear Filters' }}</v-btn>
-          </v-card>
+            <button class="btn btn-primary mt-4" @click="clearFilters">{{ locale === 'ar' ? 'مسح الفلاتر' : 'Clear Filters' }}</button>
+          </div>
 
           <!-- Infinite Scroll Trigger -->
           <div v-if="listings.length > 0" ref="scrollTrigger" class="scroll-trigger">
             <div v-if="loadingMore" class="text-center py-8">
-              <v-progress-circular indeterminate color="primary" size="32" />
+              <div class="spinner spinner-lg"></div>
               <p class="mt-2 text-caption text-medium-emphasis">{{ locale === 'ar' ? 'جاري تحميل المزيد...' : 'Loading more...' }}</p>
             </div>
             <div v-else-if="hasMore" class="text-center py-4">
-              <v-btn variant="text" color="primary" @click="loadMore">
+              <button class="btn btn-text" @click="loadMore">
                 {{ locale === 'ar' ? 'تحميل المزيد' : 'Load More' }}
-              </v-btn>
+              </button>
             </div>
             <div v-else class="text-center py-4 text-caption text-medium-emphasis">
               {{ locale === 'ar' ? 'تم عرض جميع النتائج' : 'All results loaded' }}
             </div>
           </div>
-        </v-col>
-      </v-row>
-    </v-container>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -657,6 +618,9 @@ onUnmounted(() => {
   overflow: hidden;
   background: rgb(var(--v-theme-surface));
   border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  text-decoration: none;
+  color: inherit;
+  display: block;
 }
 
 .listing-list-card:hover {

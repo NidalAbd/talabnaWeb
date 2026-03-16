@@ -1,8 +1,7 @@
 <template>
-  <v-card
-    class="listing-card h-100"
-    variant="outlined"
+  <router-link
     :to="`/listing/${listing.id}/${slugify(listing.title)}`"
+    class="listing-card card card-hover h-100"
   >
     <!-- Image/Video Thumbnail -->
     <div class="listing-image-container">
@@ -21,71 +20,50 @@
         class="no-media-placeholder d-flex flex-column align-center justify-center"
         style="height: 200px;"
       >
-        <v-icon size="56" color="grey-lighten-1">mdi-image-multiple-outline</v-icon>
-        <span class="text-caption text-grey mt-2">{{ locale === 'ar' ? 'لا توجد صور' : 'No media' }}</span>
+        <i class="mdi mdi-image-multiple-outline" style="font-size: 56px; color: var(--color-text-muted); opacity: 0.4;"></i>
+        <span class="text-caption text-muted mt-2">{{ locale === 'ar' ? 'لا توجد صور' : 'No media' }}</span>
       </div>
       <!-- Image -->
-      <v-img
+      <img
         v-else
         :src="mainPhoto"
         :alt="listing.title"
-        height="200"
-        cover
-        class="listing-image"
-      >
-        <template v-slot:placeholder>
-          <v-row class="fill-height ma-0" align="center" justify="center">
-            <v-progress-circular indeterminate color="grey-lighten-3" />
-          </v-row>
-        </template>
-        <template v-slot:error>
-          <v-row class="fill-height ma-0 bg-grey-lighten-3" align="center" justify="center">
-            <v-icon size="48" color="grey">mdi-image-off</v-icon>
-          </v-row>
-        </template>
-      </v-img>
+        loading="lazy"
+        class="listing-image img-cover"
+        style="height: 200px;"
+        @error="$event.target.style.display='none'"
+      />
 
       <!-- Badge -->
-      <v-chip
-        v-if="showBadge"
-        :color="badgeColor"
-        size="small"
-        class="listing-badge"
-      >
-        <v-icon start size="14">{{ badgeIcon }}</v-icon>
+      <span v-if="showBadge" class="listing-badge chip chip-sm" :style="{ background: badgeColor, color: '#fff' }">
+        <i class="mdi" :class="badgeIcon" style="font-size: 14px;"></i>
         {{ badgeName }}
-      </v-chip>
+      </span>
 
       <!-- Video Play Icon -->
       <div v-if="isFirstMediaVideo" class="video-indicator">
-        <v-icon size="48" color="white">mdi-play-circle</v-icon>
+        <i class="mdi mdi-play-circle" style="font-size: 48px; color: #fff;"></i>
       </div>
 
       <!-- Favorite Button -->
-      <v-btn
-        icon
-        size="small"
-        variant="flat"
-        color="white"
+      <button
         class="favorite-btn"
         @click.prevent="toggleFavorite"
       >
-        <v-icon :color="isFavorite ? 'red' : 'grey'">
-          {{ isFavorite ? 'mdi-heart' : 'mdi-heart-outline' }}
-        </v-icon>
-      </v-btn>
+        <i class="mdi" :class="isFavorite ? 'mdi-heart' : 'mdi-heart-outline'" :style="{ color: isFavorite ? '#EF4444' : '#9CA3AF' }"></i>
+      </button>
     </div>
 
     <!-- Content -->
-    <v-card-text class="pa-4">
+    <div class="card-body pa-4">
       <!-- Category -->
       <div class="d-flex align-center gap-2 mb-2">
-        <v-chip size="x-small" variant="tonal" color="primary">
+        <span class="chip chip-xs chip-primary">
           {{ getCategoryName(listing.category) }}
-        </v-chip>
-        <v-chip v-if="listing.sub_category" size="x-small" variant="tonal">
+        </span>
+        <span v-if="listing.sub_category" class="chip chip-xs">
           {{ getCategoryName(listing.sub_category) }}
-        </v-chip>
+        </span>
       </div>
 
       <!-- Title -->
@@ -94,46 +72,45 @@
       </h3>
 
       <!-- Location -->
-      <div v-if="listing.city || listing.country" class="d-flex align-center text-caption text-medium-emphasis mb-2">
-        <v-icon size="14" class="mr-1">mdi-map-marker</v-icon>
+      <div v-if="listing.city || listing.country" class="d-flex align-center text-caption text-muted mb-2">
+        <i class="mdi mdi-map-marker mr-1" style="font-size: 14px;"></i>
         {{ locationText }}
       </div>
 
       <!-- Price -->
-      <div class="d-flex justify-space-between align-center">
+      <div class="d-flex justify-between align-center">
         <span v-if="listing.price" class="text-h6 font-weight-bold text-primary">
           {{ formatPrice(listing.price) }}
         </span>
-        <span v-else class="text-body-2 text-medium-emphasis">
+        <span v-else class="text-body-2 text-muted">
           {{ locale === 'ar' ? 'السعر عند الاتصال' : 'Contact for price' }}
         </span>
 
         <!-- Stats -->
-        <div class="d-flex align-center gap-2 text-caption text-medium-emphasis">
+        <div class="d-flex align-center gap-2 text-caption text-muted">
           <span class="d-flex align-center">
-            <v-icon size="14" class="mr-1">mdi-eye</v-icon>
+            <i class="mdi mdi-eye mr-1" style="font-size: 14px;"></i>
             {{ formatNumber(listing.view_count || 0) }}
           </span>
           <span class="d-flex align-center">
-            <v-icon size="14" class="mr-1">mdi-heart</v-icon>
+            <i class="mdi mdi-heart mr-1" style="font-size: 14px;"></i>
             {{ listing.favorites_count || 0 }}
           </span>
         </div>
       </div>
-    </v-card-text>
+    </div>
 
     <!-- Footer -->
-    <v-divider />
-    <v-card-actions class="pa-4 pt-3 pb-3">
-      <v-avatar size="28" class="mr-2">
-        <v-img v-if="userPhoto" :src="userPhoto" />
-        <v-icon v-else>mdi-account</v-icon>
-      </v-avatar>
-      <span class="text-caption text-medium-emphasis">{{ listing.user?.name || 'User' }}</span>
-      <v-spacer />
-      <span class="text-caption text-medium-emphasis">{{ timeAgo }}</span>
-    </v-card-actions>
-  </v-card>
+    <div class="card-footer pa-4 pt-3 pb-3">
+      <div class="avatar avatar-28 mr-2">
+        <img v-if="userPhoto" :src="userPhoto" />
+        <i v-else class="mdi mdi-account" style="font-size: 16px;"></i>
+      </div>
+      <span class="text-caption text-muted">{{ listing.user?.name || 'User' }}</span>
+      <div class="flex-1"></div>
+      <span class="text-caption text-muted">{{ timeAgo }}</span>
+    </div>
+  </router-link>
 </template>
 
 <script setup>
@@ -164,7 +141,6 @@ const mainPhoto = computed(() => {
     const src = props.listing.photos[0].src || props.listing.photos[0].url
     return ensureAbsoluteUrl(src)
   }
-  // Return empty - v-img will show error slot
   return ''
 })
 
@@ -184,48 +160,36 @@ const userPhoto = computed(() => {
 })
 
 // Badge computed properties - supports both new badge object and legacy have_badge
-const hasBadgeData = computed(() => {
-  return props.listing.badge && !props.listing.badge.is_default
-})
-
 const showBadge = computed(() => {
-  // Check new badge object first
   if (props.listing.badge) {
     return !props.listing.badge.is_default
   }
-  // Fallback to legacy have_badge
   return props.listing.have_badge && props.listing.have_badge !== 'عادي'
 })
 
 const badgeName = computed(() => {
-  // Use new badge object if available
   if (props.listing.badge) {
     return props.locale === 'ar' ? props.listing.badge.name_ar : props.listing.badge.name_en
   }
-  // Fallback to legacy
   return props.listing.have_badge
 })
 
 const badgeColor = computed(() => {
-  // Use new badge object color if available
   if (props.listing.badge && props.listing.badge.color) {
     return props.listing.badge.color
   }
-  // Fallback to legacy color mapping
   switch (props.listing.have_badge) {
-    case 'ماسي': return 'purple'
-    case 'ذهبي': return 'amber'
-    case 'فضي': return 'grey-lighten-1'
-    default: return 'grey'
+    case 'ماسي': return '#9333ea'
+    case 'ذهبي': return '#f59e0b'
+    case 'فضي': return '#9ca3af'
+    default: return '#6b7280'
   }
 })
 
 const badgeIcon = computed(() => {
-  // Use new badge object icon if available
   if (props.listing.badge && props.listing.badge.icon) {
     return props.listing.badge.icon
   }
-  // Fallback to legacy icon mapping
   switch (props.listing.have_badge) {
     case 'ماسي': return 'mdi-diamond-stone'
     case 'ذهبي': return 'mdi-star'
@@ -267,11 +231,15 @@ const toggleFavorite = async () => {
 <style scoped>
 .listing-card {
   cursor: pointer;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
   border-radius: 20px !important;
   overflow: hidden;
   background: rgb(var(--v-theme-surface));
   border: 1px solid rgba(var(--v-theme-on-surface), 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .listing-card:hover {
@@ -306,9 +274,18 @@ const toggleFavorite = async () => {
   top: 12px;
   right: 12px;
   z-index: 2;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   backdrop-filter: blur(10px);
   background: rgba(255, 255, 255, 0.9) !important;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  cursor: pointer;
+  font-size: 18px;
 }
 
 .video-indicator {
