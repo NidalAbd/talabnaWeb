@@ -95,6 +95,11 @@ export function slugify(text) {
 export function ensureAbsoluteUrl(url) {
   if (!url) return '/storage/photos/placeholder.jpg'
   if (url.startsWith('http://') || url.startsWith('https://')) return url
+  // Route storage images through WebP optimization proxy
+  const path = url.startsWith('/') ? url.substring(1) : url
+  if (path.startsWith('storage/')) {
+    return '/img/' + path.substring('storage/'.length)
+  }
   return url.startsWith('/') ? url : `/${url}`
 }
 

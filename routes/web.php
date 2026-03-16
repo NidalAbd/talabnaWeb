@@ -28,6 +28,7 @@ use App\Http\Controllers\RolesController;
 use App\Http\Controllers\ServicePostController;
 use App\Http\Controllers\SubcategoriesController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ImageController;
 use App\Http\Controllers\UserRoleAssignmentController;
 use App\Http\Controllers\BadgeTypeController;
 use App\Http\Controllers\Admin\CommandMonitorController;
@@ -68,6 +69,9 @@ Route::get('/sitemap-location-categories.xml', [SitemapController::class, 'locat
 Route::get('/sitemap-listings-{page}.xml', [SitemapController::class, 'listings'])->where('page', '[0-9]+');
 Route::get('/sitemap-users-{page}.xml', [SitemapController::class, 'users'])->where('page', '[0-9]+');
 Route::get('/robots.txt', [SitemapController::class, 'robots']);
+
+// Image optimization proxy (serves WebP for web frontend, originals untouched for Flutter)
+Route::get('/img/{path}', [ImageController::class, 'serve'])->where('path', '.*');
 
 // Legacy Policy Route (redirect to SPA)
 Route::get('/policy', function() {

@@ -106,6 +106,9 @@
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
 
+    <!-- Preload MDI icon font for instant display -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@mdi/font@7/fonts/materialdesignicons-webfont.woff2?v=7.4.47" as="font" type="font/woff2" crossorigin>
+
     <!-- Fonts: Cairo with font-display:swap (non-render-blocking) -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
