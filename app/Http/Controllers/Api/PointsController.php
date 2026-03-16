@@ -382,11 +382,18 @@ class PointsController extends Controller
         $orderId = $request->input('order_id', '');
 
         // Check points amount for this product
+        Log::info('Google Play purchase attempt', [
+            'user_id' => $user->id,
+            'product_id' => $productId,
+            'product_id_hex' => bin2hex($productId),
+            'known_products' => array_keys(GooglePlayVerificationService::PRODUCT_POINTS),
+        ]);
+
         $pointsAmount = $this->googlePlayService->getPointsForProduct($productId);
         if ($pointsAmount === null) {
             return response()->json([
                 'success' => false,
-                'message' => 'Invalid product ID',
+                'message' => "Invalid product ID: '$productId'",
             ], 400);
         }
 
