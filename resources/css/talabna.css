@@ -101,6 +101,23 @@
 
 
 /* ========================================================================
+   1b. Font Display Override (ensure swap for all icon/web fonts)
+   ======================================================================== */
+
+@font-face {
+  font-family: 'Material Design Icons';
+  font-display: swap;
+  src: local('Material Design Icons');
+}
+
+@font-face {
+  font-family: 'Cairo';
+  font-display: swap;
+  src: local('Cairo');
+}
+
+
+/* ========================================================================
    2. Reset & Base
    ======================================================================== */
 

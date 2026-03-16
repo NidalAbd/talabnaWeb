@@ -29,8 +29,11 @@
         :src="mainPhoto"
         :alt="listing.title"
         loading="lazy"
+        decoding="async"
+        width="400"
+        height="200"
         class="listing-image img-cover"
-        style="height: 200px;"
+        style="height: 200px; width: 100%;"
         @error="$event.target.style.display='none'"
       />
 

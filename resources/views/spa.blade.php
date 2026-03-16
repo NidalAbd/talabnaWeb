@@ -13,20 +13,6 @@
     <!-- Google Search Console Verification -->
     <meta name="google-site-verification" content="BSAla0i5_oynIREw-fChMYZ9zCMyA95qqYxILO8xBpE" />
 
-    <!-- Google Analytics (loaded after page ready) -->
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        window.addEventListener('load', function() {
-            var g = document.createElement('script');
-            g.src = 'https://www.googletagmanager.com/gtag/js?id=G-E68NQJJES2';
-            g.async = true;
-            document.head.appendChild(g);
-            gtag('js', new Date());
-            gtag('config', 'G-E68NQJJES2');
-        });
-    </script>
-
     <!-- Dynamic SEO Meta Tags -->
     <title>{{ $seoData['title'] ?? 'طلبنا - Talabna | أكبر سوق للإعلانات المبوبة' }}</title>
     <meta name="description" content="{{ $seoData['description'] ?? 'طلبنا - أكبر منصة للإعلانات المبوبة في الوطن العربي. بيع واشتري السيارات، العقارات، الهواتف، الوظائف والمزيد بسهولة وأمان.' }}">
@@ -117,22 +103,32 @@
     <!-- Preconnect for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <link rel="dns-prefetch" href="https://www.googletagmanager.com">
-    <link rel="preconnect" href="https://talbna.cloud" crossorigin>
 
-    <!-- Fonts (preload + swap for performance) -->
+    <!-- Fonts: Cairo with font-display:swap (non-render-blocking) -->
     <link rel="preload" href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
 
     <!-- Vite Assets -->
     @vite(['resources/js/app.js'])
 
+    <!-- Critical inline CSS -->
     <style>
-        body{margin:0;font-family:'Cairo',sans-serif;background:#0a1628}
-        #app-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a1628;z-index:9999}
+        /* Font fallback with swap */
+        body{margin:0;font-family:'Cairo',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F8F9FA;-webkit-font-smoothing:antialiased}
+        [data-theme="dark"] body{background:#0F172A}
+
+        /* Loader */
+        #app-loader{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#0a1628;z-index:9999;transition:opacity .3s}
         .loader-spinner{width:44px;height:44px;border:3px solid rgba(255,255,255,0.1);border-top-color:#60a5fa;border-radius:50%;animation:spin .8s linear infinite}
         @keyframes spin{to{transform:rotate(360deg)}}
+
+        /* Prevent layout shift from navbar */
+        .navbar{height:64px}
+
+        /* Below-fold sections: defer rendering */
+        .section-latest,.section-locations,.section-popular,.download-cta{content-visibility:auto;contain-intrinsic-size:0 600px}
     </style>
 </head>
 <body>
@@ -149,17 +145,39 @@
         window.addEventListener('load', function() {
             setTimeout(function() {
                 var loader = document.getElementById('app-loader');
-                if (loader) loader.style.display = 'none';
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(function() { loader.style.display = 'none'; }, 300);
+                }
             }, 100);
-            // Load AdSense after page is ready (non-blocking)
-            setTimeout(function() {
-                var s = document.createElement('script');
-                s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9161194210267129';
-                s.crossOrigin = 'anonymous';
-                s.async = true;
-                document.head.appendChild(s);
-            }, 3000);
         });
+        // Google Analytics (deferred - loaded after interaction or 5s)
+        function loadGA() {
+            if (window._gaLoaded) return;
+            window._gaLoaded = true;
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            window.gtag = gtag;
+            var g = document.createElement('script');
+            g.src = 'https://www.googletagmanager.com/gtag/js?id=G-E68NQJJES2';
+            g.async = true;
+            document.head.appendChild(g);
+            gtag('js', new Date());
+            gtag('config', 'G-E68NQJJES2');
+        }
+        // Load GA on first interaction or after 5s
+        ['scroll','click','touchstart','keydown'].forEach(function(evt) {
+            window.addEventListener(evt, loadGA, {once:true,passive:true});
+        });
+        setTimeout(loadGA, 5000);
+        // Load AdSense after 8s (non-blocking)
+        setTimeout(function() {
+            var s = document.createElement('script');
+            s.src = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-9161194210267129';
+            s.crossOrigin = 'anonymous';
+            s.async = true;
+            document.head.appendChild(s);
+        }, 8000);
     </script>
 </body>
 </html>

@@ -6,7 +6,7 @@
         <!-- Logo -->
         <router-link to="/" class="navbar-brand">
           <div class="avatar avatar-40">
-            <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" />
+            <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" width="40" height="40" fetchpriority="high" />
           </div>
           <span>{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</span>
         </router-link>
@@ -199,7 +199,7 @@
           <div class="col-12 col-md-4">
             <div class="d-flex align-center mb-4">
               <div class="avatar avatar-48 mr-3">
-                <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" />
+                <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" width="48" height="48" loading="lazy" />
               </div>
               <div>
                 <h3 class="text-h6 font-weight-bold">{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</h3>
