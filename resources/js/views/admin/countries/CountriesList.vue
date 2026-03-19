@@ -106,7 +106,7 @@
         <div class="card-header-custom">
           <div class="user-avatar-wrapper">
             <img
-              :src="country.flag_url ? `/storage/${country.flag_url}` : '/storage/countryFlag/placeholder-flag.jpg'"
+              :src="getFlagUrl(country)"
               :alt="country.name?.en || 'Country'"
               class="user-avatar"
               @error="handleImageError"
@@ -210,7 +210,7 @@
             <!-- Flag -->
             <td>
               <img
-                :src="country.flag_url ? `/storage/${country.flag_url}` : '/storage/countryFlag/placeholder-flag.jpg'"
+                :src="getFlagUrl(country)"
                 :alt="country.name?.en || 'Country'"
                 class="table-avatar"
                 style="border-radius: 4px;"
@@ -635,6 +635,17 @@ const handleDelete = async (country) => {
   } catch (error) {
     alert('Error deleting country: ' + (error.message || 'Unknown error'))
   }
+}
+
+const getFlagUrl = (country) => {
+  // 1. Check flag column (external URL from RestCountries)
+  if (country.flag && country.flag.startsWith('http')) return country.flag
+  // 2. Check Photos relationship
+  if (country.flag_url) return `/storage/${country.flag_url}`
+  // 3. Use ISO code to get flag from flagcdn
+  if (country.iso_code) return `https://flagcdn.com/w80/${country.iso_code.toLowerCase()}.png`
+  // 4. Fallback
+  return '/storage/countryFlag/placeholder-flag.jpg'
 }
 
 const handleImageError = (event) => {
