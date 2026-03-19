@@ -45,6 +45,17 @@ class PublicController extends Controller
     }
 
     /**
+     * Get localized name from a JSON name field.
+     * Returns the name in the current app locale with fallbacks.
+     */
+    private function localizedName($name): string
+    {
+        $locale = app()->getLocale();
+        $decoded = $this->decodeName($name);
+        return $decoded[$locale] ?? $decoded['en'] ?? $decoded['ar'] ?? array_values(array_filter($decoded))[0] ?? '';
+    }
+
+    /**
      * Transform listing data to fix JSON name fields
      */
     private function transformListing($listing)
@@ -52,28 +63,43 @@ class PublicController extends Controller
         if (!$listing) return null;
 
         $data = $listing->toArray();
+        $locale = app()->getLocale();
 
-        // Fix category name
+        // Resolve title/description to current locale
+        if (isset($data['title']) && is_array($data['title'])) {
+            $data['title'] = $data['title'][$locale] ?? $data['title']['en'] ?? $data['title']['ar'] ?? '';
+        }
+        if (isset($data['description']) && is_array($data['description'])) {
+            $data['description'] = $data['description'][$locale] ?? $data['description']['en'] ?? $data['description']['ar'] ?? '';
+        }
+
+        // Fix category name — resolve to current locale + keep all translations
         if (isset($data['category']['name'])) {
             $name = $this->decodeName($data['category']['name']);
-            $data['category']['name'] = $name;
+            $data['category']['name_localized'] = $name[$locale] ?? $name['en'] ?? $name['ar'] ?? '';
+            $data['category']['name'] = $name['ar'] ?? '';
+            $data['category']['name_en'] = $name['en'] ?? '';
         }
 
         // Fix sub_category name
         if (isset($data['sub_category']['name'])) {
             $name = $this->decodeName($data['sub_category']['name']);
-            $data['sub_category']['name'] = $name;
+            $data['sub_category']['name_localized'] = $name[$locale] ?? $name['en'] ?? $name['ar'] ?? '';
+            $data['sub_category']['name'] = $name['ar'] ?? '';
+            $data['sub_category']['name_en'] = $name['en'] ?? '';
         }
 
         // Fix city name
         if (isset($data['city']['name'])) {
             $name = $this->decodeName($data['city']['name']);
+            $data['city']['name_localized'] = $name[$locale] ?? $name['en'] ?? $name['ar'] ?? '';
             $data['city']['name'] = $name;
         }
 
         // Fix country name
         if (isset($data['country']['name'])) {
             $name = $this->decodeName($data['country']['name']);
+            $data['country']['name_localized'] = $name[$locale] ?? $name['en'] ?? $name['ar'] ?? '';
             $data['country']['name'] = $name;
         }
 
@@ -115,7 +141,8 @@ class PublicController extends Controller
      */
     public function categories(Request $request): JsonResponse
     {
-        $categories = Cache::remember('public_categories_v2', 3600, function () {
+        $locale = app()->getLocale();
+        $categories = Cache::remember("public_categories_v2_{$locale}", 3600, function () use ($locale) {
             // Get special counts for Near and Reels categories
             // Near: posts with valid location coordinates
             $nearCount = ServicePost::where('state', 'published')
@@ -144,12 +171,12 @@ class PublicController extends Controller
                 ->where('isSuspended', false)
                 ->orderBy('id')
                 ->get()
-                ->map(function ($cat) use ($nearCount, $reelsCount) {
-                    // Handle name as JSON object with ar/en keys
-                    $nameAr = is_array($cat->name) ? ($cat->name['ar'] ?? '') : $cat->name;
-                    $nameEn = is_array($cat->name) ? ($cat->name['en'] ?? $nameAr) : $cat->name;
+                ->map(function ($cat) use ($nearCount, $reelsCount, $locale) {
+                    $nameData = is_array($cat->name) ? $cat->name : json_decode($cat->name, true) ?? [];
+                    $nameLocalized = $nameData[$locale] ?? $nameData['en'] ?? $nameData['ar'] ?? '';
+                    $nameAr = $nameData['ar'] ?? '';
+                    $nameEn = $nameData['en'] ?? $nameAr;
 
-                    // Use special counts for Near (ID: 6) and Reels (ID: 7)
                     $postsCount = $cat->service_posts_count;
                     if ($cat->id == self::CATEGORY_NEAR) {
                         $postsCount = $nearCount;
@@ -161,6 +188,7 @@ class PublicController extends Controller
                         'id' => $cat->id,
                         'name' => $nameAr,
                         'name_en' => $nameEn,
+                        'name_localized' => $nameLocalized,
                         'icon' => $cat->icon ?? null,
                         'color' => $cat->color ?? null,
                         'slug' => \Str::slug($nameEn),
@@ -179,7 +207,8 @@ class PublicController extends Controller
      */
     public function subcategories(Request $request, $categoryId): JsonResponse
     {
-        $subcategories = Cache::remember("subcategories_{$categoryId}", 3600, function () use ($categoryId) {
+        $locale = app()->getLocale();
+        $subcategories = Cache::remember("subcategories_{$categoryId}_{$locale}", 3600, function () use ($categoryId, $locale) {
             return Sub_categories::withCount(['servicePosts' => function ($query) {
                 $query->where('state', 'published')
                       ->whereHas('user', function ($q) {
@@ -190,15 +219,13 @@ class PublicController extends Controller
                 ->where('isSuspended', false)
                 ->orderBy('id')
                 ->get()
-                ->map(function ($sub) {
-                    // Handle name as JSON object with ar/en keys
-                    $nameAr = is_array($sub->name) ? ($sub->name['ar'] ?? '') : $sub->name;
-                    $nameEn = is_array($sub->name) ? ($sub->name['en'] ?? $nameAr) : $sub->name;
-
+                ->map(function ($sub) use ($locale) {
+                    $nameData = is_array($sub->name) ? $sub->name : json_decode($sub->name, true) ?? [];
                     return [
                         'id' => $sub->id,
-                        'name' => $nameAr,
-                        'name_en' => $nameEn,
+                        'name' => $nameData['ar'] ?? '',
+                        'name_en' => $nameData['en'] ?? '',
+                        'name_localized' => $nameData[$locale] ?? $nameData['en'] ?? $nameData['ar'] ?? '',
                         'category_id' => $sub->categories_id,
                         'posts_count' => $sub->service_posts_count,
                     ];

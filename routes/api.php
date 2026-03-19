@@ -44,7 +44,7 @@ Route::get('/translations/{locale}/{group}', [LanguageApiController::class, 'tra
 | Public API Routes (No Authentication Required)
 |--------------------------------------------------------------------------
 */
-Route::prefix('public')->group(function () {
+Route::middleware([\App\Http\Middleware\SetLocale::class])->prefix('public')->group(function () {
     // Categories & Subcategories
     Route::get('/categories', [PublicController::class, 'categories']);
     Route::get('/categories/{categoryId}/subcategories', [PublicController::class, 'subcategories']);
