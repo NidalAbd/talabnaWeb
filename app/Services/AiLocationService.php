@@ -237,7 +237,7 @@ class AiLocationService
         'DR Congo' => 'Congo, The Democratic Republic of the',
     ];
 
-    protected function fetchCitiesFromApi(string $countryName): array
+    public function fetchCitiesFromApi(string $countryName): array
     {
         // Try the given name and known aliases
         $namesToTry = [$countryName];
@@ -275,7 +275,7 @@ class AiLocationService
      * Fallback: Generate city names via OpenAI when CountriesNow doesn't have the country.
      * Returns array of English city name strings.
      */
-    protected function generateCityNamesViaAi(string $countryName): array
+    public function generateCityNamesViaAi(string $countryName): array
     {
         $allCities = [];
 
