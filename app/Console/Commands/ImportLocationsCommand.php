@@ -62,23 +62,26 @@ class ImportLocationsCommand extends Command
         if (!$skipCities) {
             $this->info("Generating cities ({$citiesPerCountry} per country)...");
 
-            // Get countries that need cities (newly imported or specified)
+            // Get countries for city generation
             $query = countries::query();
             if ($countryCode) {
+                // Specific country — always regenerate (delete + recreate)
                 $query->where('iso_code', strtoupper($countryCode));
             } elseif ($region) {
-                // Get ISO codes from API data
                 $isoCodes = collect($apiData)->pluck('cca2')->filter()->toArray();
                 $query->whereIn('iso_code', $isoCodes);
             }
 
-            // Only countries with 0 cities
-            $countriesNeedingCities = $query->withCount('cities')
-                ->having('cities_count', '=', 0)
-                ->get();
+            // For bulk import: only countries with 0 cities
+            // For specific country: always regenerate
+            if (!$countryCode) {
+                $query->withCount('cities')->having('cities_count', '=', 0);
+            }
+
+            $countriesNeedingCities = $query->get();
 
             if ($countriesNeedingCities->isEmpty()) {
-                $this->info('All countries already have cities.');
+                $this->info('No countries need city generation.');
             } else {
                 $bar = $this->output->createProgressBar($countriesNeedingCities->count());
                 $bar->start();
