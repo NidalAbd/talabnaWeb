@@ -30,7 +30,7 @@ class new_servicepost_notification extends Notification
 
     public function toFcm($notifiable)
     {
-        $title = $this->servicePost->title;
+        $title = $this->servicePost->translate('title') ?? 'New Post';
         $type = ($this->servicePost->type === 'عرض') ? 'offer' : 'request';
         $body = "{$this->user->user_name} {$type} the following service";
         return FcmMessage::create()
