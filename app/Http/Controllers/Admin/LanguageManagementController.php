@@ -430,16 +430,17 @@ class LanguageManagementController extends Controller
                         ->whereRaw("value IS NOT NULL AND TRIM(value) != ''")
                         ->count();
                 } else {
-                    // JSON column models
-                    $total = DB::table($config['table'])->count() * count($config['fields']);
-                    $translated = 0;
-                    foreach ($config['fields'] as $field) {
-                        $translated += DB::table($config['table'])
-                            ->whereNotNull($field)
+                    // JSON column models — count by rows (items), not by fields
+                    $total = DB::table($config['table'])->count();
+                    // An item is "translated" if ALL its fields have the locale key
+                    $fields = $config['fields'];
+                    $query = DB::table($config['table']);
+                    foreach ($fields as $field) {
+                        $query->whereNotNull($field)
                             ->whereRaw("JSON_EXTRACT(`{$field}`, '$.{$lang->code}') IS NOT NULL")
-                            ->whereRaw("JSON_EXTRACT(`{$field}`, '$.{$lang->code}') != '\"\"'")
-                            ->count();
+                            ->whereRaw("JSON_EXTRACT(`{$field}`, '$.{$lang->code}') != '\"\"'");
                     }
+                    $translated = $query->count();
                 }
 
                 $percentage = $total > 0 ? round(($translated / $total) * 100) : 100;
