@@ -122,9 +122,11 @@ class AiLocationService
 
     /**
      * Generate ALL cities for a country using OpenAI.
-     * Makes multiple API calls if needed to get comprehensive coverage.
+     * Deletes existing cities first, then makes unlimited rounds until exhausted.
+     *
+     * @param bool $deleteExisting If true, deletes all existing cities first
      */
-    public function generateCitiesForCountry(countries $country, int $count = 0): array
+    public function generateCitiesForCountry(countries $country, int $count = 0, bool $deleteExisting = true): array
     {
         $countryName = $country->name['en'] ?? 'Unknown';
         $activeLocales = Language::getActiveOrdered()->pluck('code')->toArray();
@@ -132,64 +134,102 @@ class AiLocationService
         if (!in_array('ar', $activeLocales)) $activeLocales[] = 'ar';
 
         $localeList = implode(', ', $activeLocales);
+
+        // Delete all existing cities if requested
+        if ($deleteExisting) {
+            $deletedCount = cities::where('country_id', $country->id)->count();
+            cities::where('country_id', $country->id)->delete();
+            Log::info("Deleted {$deletedCount} existing cities for {$countryName}");
+        }
+
+        $allCityNames = []; // Track all generated names to exclude in next rounds
         $totalCreated = 0;
-        $totalSkipped = 0;
-
-        // Get existing city names to exclude
-        $existingNames = cities::where('country_id', $country->id)
-            ->get()
-            ->map(fn($c) => $c->name['en'] ?? '')
-            ->filter()
-            ->toArray();
-
-        $excludeList = !empty($existingNames) ? "\nDo NOT include these cities (already exist): " . implode(', ', array_slice($existingNames, 0, 100)) : '';
+        $round = 0;
+        $maxRounds = 10; // Safety limit
 
         try {
-            // Round 1: Get all major cities, towns, and districts
-            $prompt1 = "List ALL cities, towns, and significant populated places in {$countryName}.\n"
-                . "Include: the capital, all governorate/state/province capitals, all cities, major towns, and district centers.\n"
-                . "Be as comprehensive as possible — include every city and town that would appear on a detailed map.\n"
-                . "For each place, provide the name in these languages: {$localeList}\n"
-                . "Return ONLY a JSON array. Each element: {\"en\": \"Name\", \"ar\": \"الاسم\", ...}\n"
-                . "Return as many cities as you can (aim for 50-200+ depending on country size)."
-                . $excludeList
-                . "\nReturn ONLY the JSON array, no markdown.";
+            while ($round < $maxRounds) {
+                $round++;
 
-            $cities1 = $this->callOpenAiForCities($prompt1);
-            $result1 = $this->insertCities($cities1, $country->id, $existingNames);
-            $totalCreated += $result1['created'];
-            $totalSkipped += $result1['skipped'];
+                $excludeList = '';
+                if (!empty($allCityNames)) {
+                    // Split into chunks if too many (to fit in prompt)
+                    $excludeNames = array_slice($allCityNames, 0, 300);
+                    $excludeList = "\n\nDo NOT include these cities (already listed):\n" . implode(', ', $excludeNames);
+                }
 
-            // Update existing names list
-            $existingNames = array_merge($existingNames, collect($cities1)->pluck('en')->filter()->toArray());
+                if ($round === 1) {
+                    $prompt = "List ALL cities, towns, villages, refugee camps, and significant populated places in {$countryName}.\n"
+                        . "Include EVERY place that has a name and population — the capital, all governorate/state/province/district capitals, all cities, all towns, all villages, all camps, all neighborhoods if they are recognized places.\n"
+                        . "Be EXTREMELY comprehensive. For a small country list 50-100 places. For a medium country 100-300. For a large country like India, China, or Brazil list 200+ places.\n"
+                        . "For each place, provide the name in these languages: {$localeList}\n"
+                        . "Return ONLY a JSON array. Each element: {\"en\": \"Name\", \"ar\": \"الاسم\", ...}\n"
+                        . "Return ONLY the JSON array, no markdown.";
+                } else {
+                    $prompt = "List MORE cities, towns, and villages in {$countryName} that are NOT in the following list.\n"
+                        . "Focus on: smaller towns, rural villages, suburban areas, industrial zones, refugee camps, coastal villages, mountain villages, border towns, historical towns.\n"
+                        . "Include ANY populated place that exists on a map.\n"
+                        . "For each place, provide the name in these languages: {$localeList}\n"
+                        . "Return ONLY a JSON array. Each element: {\"en\": \"Name\", \"ar\": \"الاسم\", ...}\n"
+                        . "If there are no more places to add, return an empty array: []\n"
+                        . "Return ONLY the JSON array, no markdown."
+                        . $excludeList;
+                }
 
-            // Round 2: Get remaining smaller towns if the country is large
-            if ($totalCreated >= 40) {
-                $excludeList2 = "\nDo NOT include these cities (already added): " . implode(', ', array_slice($existingNames, 0, 200));
+                $cities = $this->callOpenAiForCities($prompt);
 
-                $prompt2 = "List MORE cities and towns in {$countryName} that were not in the previous list.\n"
-                    . "Focus on: smaller cities, rural towns, suburban areas, industrial towns, coastal towns, border towns.\n"
-                    . "For each place, provide the name in these languages: {$localeList}\n"
-                    . "Return ONLY a JSON array. Each element: {\"en\": \"Name\", \"ar\": \"الاسم\", ...}"
-                    . $excludeList2
-                    . "\nReturn ONLY the JSON array, no markdown.";
+                // Stop if no new cities returned
+                if (empty($cities)) {
+                    Log::info("Round {$round}: No more cities for {$countryName}. Stopping.");
+                    break;
+                }
 
-                $cities2 = $this->callOpenAiForCities($prompt2);
-                $result2 = $this->insertCities($cities2, $country->id, $existingNames);
-                $totalCreated += $result2['created'];
-                $totalSkipped += $result2['skipped'];
+                // Insert and track
+                $newNames = [];
+                foreach ($cities as $cityData) {
+                    if (!is_array($cityData)) continue;
+                    $enName = $cityData['en'] ?? array_values($cityData)[0] ?? null;
+                    if (!$enName) continue;
+
+                    // Skip if already generated in a previous round
+                    if (in_array($enName, $allCityNames)) continue;
+
+                    // Check DB duplicate
+                    $exists = cities::where('country_id', $country->id)
+                        ->whereRaw("JSON_EXTRACT(name, '$.en') = ?", [$enName])
+                        ->exists();
+                    if ($exists) continue;
+
+                    cities::create([
+                        'name' => $cityData,
+                        'country_id' => $country->id,
+                    ]);
+                    $totalCreated++;
+                    $newNames[] = $enName;
+                }
+
+                $allCityNames = array_merge($allCityNames, $newNames);
+
+                Log::info("Round {$round}: Added " . count($newNames) . " new cities for {$countryName} (total: {$totalCreated})");
+
+                // Stop if this round added very few new cities (diminishing returns)
+                if (count($newNames) < 5) {
+                    Log::info("Round {$round}: Only " . count($newNames) . " new cities. Stopping.");
+                    break;
+                }
             }
 
             return [
                 'success' => true,
                 'country' => $countryName,
                 'created' => $totalCreated,
-                'skipped' => $totalSkipped,
-                'total' => $totalCreated + $totalSkipped,
+                'rounds' => $round,
+                'skipped' => 0,
+                'total' => $totalCreated,
             ];
         } catch (\Exception $e) {
-            Log::error("Failed to generate cities for {$countryName}: " . $e->getMessage());
-            return ['success' => false, 'error' => $e->getMessage(), 'created' => $totalCreated];
+            Log::error("Failed to generate cities for {$countryName} at round {$round}: " . $e->getMessage());
+            return ['success' => false, 'error' => $e->getMessage(), 'created' => $totalCreated, 'rounds' => $round];
         }
     }
 
