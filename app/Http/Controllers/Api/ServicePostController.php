@@ -424,9 +424,11 @@ class ServicePostController extends Controller
                 $expiresAt = $badgeExpiresAt->format('Y-m-d H:i:s');
 
                 // Create localized message with benefits information
+                $titleAr = $servicePost->translate('title', 'ar') ?? '';
+                $titleEn = $servicePost->translate('title', 'en') ?? $titleAr;
                 $message = json_encode([
-                    'ar' => "تم تطبيق شارة {$badgeTypeModel->name_ar} على منشورك بعنوان: {$servicePost->title}. ستحصل على زيادة تقريبية بنسبة {$viewBoost}٪ في المشاهدات وسيتم عرض منشورك في مكان مميز. ستنتهي الشارة في {$expiresAt}. [post_id:{$servicePost->id}]",
-                    'en' => "Applied {$badgeTypeModel->name_en} badge to your post titled: {$servicePost->title}. You will get approximately {$viewBoost}% more views and your post will be displayed in premium positions. Badge will expire at {$expiresAt}. [post_id:{$servicePost->id}]"
+                    'ar' => "تم تطبيق شارة {$badgeTypeModel->name_ar} على منشورك بعنوان: {$titleAr}. ستحصل على زيادة تقريبية بنسبة {$viewBoost}٪ في المشاهدات وسيتم عرض منشورك في مكان مميز. ستنتهي الشارة في {$expiresAt}. [post_id:{$servicePost->id}]",
+                    'en' => "Applied {$badgeTypeModel->name_en} badge to your post titled: {$titleEn}. You will get approximately {$viewBoost}% more views and your post will be displayed in premium positions. Badge will expire at {$expiresAt}. [post_id:{$servicePost->id}]"
                 ]);
 
                 // Create new notification record directly
@@ -488,9 +490,11 @@ class ServicePostController extends Controller
             // Determine the notification type based on service post type
             $type = ($servicePost->type === 'عرض') ? 'offer' : 'request';
 
+            $titleAr = $servicePost->translate('title', 'ar') ?? '';
+            $titleEn = $servicePost->translate('title', 'en') ?? $titleAr;
             $message = json_encode([
-                'ar' => "{$user->user_name} نشر خدمة جديدة من نوع {$type} بعنوان: {$servicePost->title}. [post_id:{$servicePost->id}]",
-                'en' => "{$user->user_name} has posted a new {$type} service titled: {$servicePost->title}. [post_id:{$servicePost->id}]"
+                'ar' => "{$user->user_name} نشر خدمة جديدة من نوع {$type} بعنوان: {$titleAr}. [post_id:{$servicePost->id}]",
+                'en' => "{$user->user_name} has posted a new {$type} service titled: {$titleEn}. [post_id:{$servicePost->id}]"
             ]);
 
             // Loop through each follower and create/send a notification
@@ -642,8 +646,8 @@ class ServicePostController extends Controller
             $subCategoryNameEn = is_array($subCategory->name) ? $subCategory->name['en'] : $subCategory->name;
 
             $message = json_encode([
-                'ar' => "تم تغيير تصنيف منشورك بعنوان: {$servicePost->title} إلى: {$categoryNameAr} - {$subCategoryNameAr}. [post_id:{$servicePost->id}]",
-                'en' => "Your Post titled: {$servicePost->title} category is changed to: {$categoryNameEn} - {$subCategoryNameEn}. [post_id:{$servicePost->id}]"
+                'ar' => "تم تغيير تصنيف منشورك بعنوان: " . ($servicePost->translate('title') ?? '') . " إلى: {$categoryNameAr} - {$subCategoryNameAr}. [post_id:{$servicePost->id}]",
+                'en' => "Your Post titled: " . ($servicePost->translate('title') ?? '') . " category is changed to: {$categoryNameEn} - {$subCategoryNameEn}. [post_id:{$servicePost->id}]"
             ]);
 
             // Create a new notification record with the multilingual message
@@ -1189,8 +1193,8 @@ class ServicePostController extends Controller
 
             // Send notification
             $message = json_encode([
-                'ar' => "تم تحديث منشور الخدمة بعنوان: {$servicePost->title}. [post_id:{$servicePost->id}]",
-                'en' => "Service Post titled: {$servicePost->title} has been updated. [post_id:{$servicePost->id}]"
+                'ar' => "تم تحديث منشور الخدمة بعنوان: " . ($servicePost->translate('title') ?? '') . ". [post_id:{$servicePost->id}]",
+                'en' => "Service Post titled: " . ($servicePost->translate('title') ?? '') . " has been updated. [post_id:{$servicePost->id}]"
             ]);
 
             $notification = new Notification([
@@ -1254,8 +1258,8 @@ class ServicePostController extends Controller
 
         // Create expiration notification with post ID
         $message = json_encode([
-            'ar' => "تم تغيير شارة منشور الخدمة بعنوان: {$servicePost->title} إلى " . $this->translateBadgeType('عادي', 'ar') . " بسبب انتهاء المدة. [post_id:{$servicePost->id}]",
-            'en' => "Service Post titled: {$servicePost->title} badge changed to " . $this->translateBadgeType('عادي', 'en') . " due to duration expiration. [post_id:{$servicePost->id}]"
+            'ar' => "تم تغيير شارة منشور الخدمة بعنوان: " . ($servicePost->translate('title') ?? '') . " إلى " . $this->translateBadgeType('عادي', 'ar') . " بسبب انتهاء المدة. [post_id:{$servicePost->id}]",
+            'en' => "Service Post titled: " . ($servicePost->translate('title') ?? '') . " badge changed to " . $this->translateBadgeType('عادي', 'en') . " due to duration expiration. [post_id:{$servicePost->id}]"
         ]);
 
         Notification::create([
@@ -1335,8 +1339,8 @@ class ServicePostController extends Controller
 
         // Create notification with post ID embedded in message
         $message = json_encode([
-            'ar' => "تم تغيير شارة منشورك بعنوان: {$servicePost->title} إلى " . $this->translateBadgeType($badgeType, 'ar') . " لمدة $duration يوم. ستنتهي الشارة في $expirationTimeString. [post_id:{$servicePost->id}]",
-            'en' => "Your Post titled: {$servicePost->title} badge is changed to " . $this->translateBadgeType($badgeType, 'en') . " for $duration days. Badge will expire at $expirationTimeString. [post_id:{$servicePost->id}]"
+            'ar' => "تم تغيير شارة منشورك بعنوان: " . ($servicePost->translate('title') ?? '') . " إلى " . $this->translateBadgeType($badgeType, 'ar') . " لمدة $duration يوم. ستنتهي الشارة في $expirationTimeString. [post_id:{$servicePost->id}]",
+            'en' => "Your Post titled: " . ($servicePost->translate('title') ?? '') . " badge is changed to " . $this->translateBadgeType($badgeType, 'en') . " for $duration days. Badge will expire at $expirationTimeString. [post_id:{$servicePost->id}]"
         ]);
 
 
@@ -1412,8 +1416,8 @@ class ServicePostController extends Controller
 
         // Create notification with dynamic badge names
         $message = json_encode([
-            'ar' => "تم تغيير شارة منشورك بعنوان: {$servicePost->title} إلى {$badgeTypeModel->name_ar} لمدة $duration يوم. ستنتهي الشارة في $expirationTimeString. [post_id:{$servicePost->id}]",
-            'en' => "Your Post titled: {$servicePost->title} badge is changed to {$badgeTypeModel->name_en} for $duration days. Badge will expire at $expirationTimeString. [post_id:{$servicePost->id}]"
+            'ar' => "تم تغيير شارة منشورك بعنوان: " . ($servicePost->translate('title') ?? '') . " إلى {$badgeTypeModel->name_ar} لمدة $duration يوم. ستنتهي الشارة في $expirationTimeString. [post_id:{$servicePost->id}]",
+            'en' => "Your Post titled: " . ($servicePost->translate('title') ?? '') . " badge is changed to {$badgeTypeModel->name_en} for $duration days. Badge will expire at $expirationTimeString. [post_id:{$servicePost->id}]"
         ]);
 
         Notification::create([
