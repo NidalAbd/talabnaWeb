@@ -78,10 +78,16 @@
         Showing {{ countries.data.length }} of {{ countries.total }} countries
       </div>
 
-      <button class="action-btn success" @click="openCreateModal">
-        <i class="fas fa-plus-circle"></i>
-        Add Country
-      </button>
+      <div class="action-group">
+        <button class="action-btn primary" @click="showImportModal = true">
+          <i class="fas fa-globe"></i>
+          AI Import Countries
+        </button>
+        <button class="action-btn success" @click="openCreateModal">
+          <i class="fas fa-plus-circle"></i>
+          Add Country
+        </button>
+      </div>
     </div>
 
     <!-- Loading State -->
@@ -118,6 +124,14 @@
               <button @click="openCitiesModal(country)" class="menu-item">
                 <i class="fas fa-city"></i>
                 Manage Cities ({{ country.cities_count || 0 }})
+              </button>
+              <button @click="handleGenerateCities(country)" class="menu-item">
+                <i class="fas fa-magic"></i>
+                Generate Cities (AI)
+              </button>
+              <button @click="handleTranslateNames(country)" class="menu-item">
+                <i class="fas fa-language"></i>
+                Translate Names (AI)
               </button>
               <button @click="handleDelete(country)" class="menu-item danger">
                 <i class="fas fa-trash"></i>
@@ -329,16 +343,55 @@
       @close="closeCitiesModal"
       @saved="handleCitiesSaved"
     />
+
+    <!-- AI Import Countries Modal -->
+    <div v-if="showImportModal" class="modal-overlay" @click.self="showImportModal = false">
+      <div class="modal-dialog-advanced" style="max-width: 500px;">
+        <div class="modal-header">
+          <h3><i class="fas fa-globe mr-2"></i> AI Import Countries</h3>
+          <button class="close-btn" @click="showImportModal = false">&times;</button>
+        </div>
+        <div class="modal-body">
+          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
+            Import countries from RestCountries API. Existing countries (by ISO code) will be skipped.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Region (optional)</label>
+            <select v-model="importRegion" class="form-control-modern">
+              <option value="">All Countries (~250)</option>
+              <option value="africa">Africa (~60)</option>
+              <option value="americas">Americas (~55)</option>
+              <option value="asia">Asia (~50)</option>
+              <option value="europe">Europe (~50)</option>
+              <option value="oceania">Oceania (~25)</option>
+            </select>
+          </div>
+          <div v-if="importMessage" class="import-message" :class="importMessageType">
+            <i :class="importMessageType === 'success' ? 'fas fa-check-circle' : 'fas fa-info-circle'"></i>
+            {{ importMessage }}
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button class="action-btn secondary" @click="showImportModal = false">Cancel</button>
+          <button class="action-btn primary" :disabled="importLoading" @click="handleImportCountries">
+            <i :class="importLoading ? 'fas fa-spinner fa-spin' : 'fas fa-download'"></i>
+            {{ importLoading ? 'Importing...' : 'Start Import' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted, watch, onBeforeUnmount } from 'vue'
 import { useCountries } from '../../../composables/useCountries'
+import { useLocationImport } from '../../../composables/useLocationImport'
 import CountryFormModal from '../../../components/admin/countries/CountryFormModal.vue'
 import CitiesModal from '../../../components/admin/countries/CitiesModal.vue'
 
 const { countries, loading, fetchCountries, deleteCountry } = useCountries()
+const { importCountries: aiImportCountries, generateCities: aiGenerateCities, translateNames: aiTranslateNames } = useLocationImport()
 
 const formatNumber = (value) => {
   if (value === null || value === undefined) return '0'
@@ -362,6 +415,59 @@ const showModal = ref(false)
 const modalMode = ref('create')
 const selectedCountry = ref(null)
 const showCitiesModal = ref(false)
+
+// AI Import state
+const showImportModal = ref(false)
+const importRegion = ref('')
+const importLoading = ref(false)
+const importMessage = ref('')
+const importMessageType = ref('info')
+
+const handleImportCountries = async () => {
+  importLoading.value = true
+  importMessage.value = ''
+  try {
+    const result = await aiImportCountries(importRegion.value || null)
+    importMessage.value = result.message || 'Import started!'
+    importMessageType.value = 'success'
+    // Refresh after a delay
+    setTimeout(async () => {
+      await loadCountries(1)
+      showImportModal.value = false
+      importMessage.value = ''
+    }, 3000)
+  } catch (err) {
+    importMessage.value = 'Error: ' + err.message
+    importMessageType.value = 'error'
+  } finally {
+    importLoading.value = false
+  }
+}
+
+const handleGenerateCities = async (country) => {
+  const name = country.name?.en || country.name?.ar || 'this country'
+  if (!confirm(`Generate ~30 cities for "${name}" using AI?`)) return
+  activeMenu.value = null
+  try {
+    const result = await aiGenerateCities(country.id, 30)
+    alert(result.message || `Cities generated for ${name}`)
+    await loadCountries(countries.value.current_page)
+  } catch (err) {
+    alert('Error: ' + err.message)
+  }
+}
+
+const handleTranslateNames = async (country) => {
+  const name = country.name?.en || country.name?.ar || 'this country'
+  activeMenu.value = null
+  try {
+    const result = await aiTranslateNames(country.id)
+    alert(result.message || `Names translated for ${name}`)
+    await loadCountries(countries.value.current_page)
+  } catch (err) {
+    alert('Error: ' + err.message)
+  }
+}
 
 const visiblePages = computed(() => {
   const pages = []
@@ -479,6 +585,39 @@ const handleCitiesSaved = () => {
 </script>
 
 <style scoped>
+.action-group {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.import-message {
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.75rem;
+}
+
+.import-message.success {
+  background: #ecfdf5;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.import-message.error {
+  background: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.import-message.info {
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+
 .countries-management-advanced {
   padding: 0;
   background: #f5f7fa;

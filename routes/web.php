@@ -890,6 +890,15 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'destroy'])->name('api.admin.translations.destroy');
             });
 
+            // Location Import (AI)
+            Route::prefix('location-import')->group(function () {
+                Route::get('/regions', [\App\Http\Controllers\Admin\LocationImportController::class, 'regions'])->name('api.admin.location-import.regions');
+                Route::post('/countries', [\App\Http\Controllers\Admin\LocationImportController::class, 'importCountries'])->name('api.admin.location-import.countries');
+                Route::post('/countries/{id}/generate-cities', [\App\Http\Controllers\Admin\LocationImportController::class, 'generateCities'])->name('api.admin.location-import.generate-cities');
+                Route::post('/countries/{id}/translate', [\App\Http\Controllers\Admin\LocationImportController::class, 'translateNames'])->name('api.admin.location-import.translate');
+                Route::get('/progress', [\App\Http\Controllers\Admin\LocationImportController::class, 'progress'])->name('api.admin.location-import.progress');
+            });
+
             // Content Translations (per-language editor)
             Route::get('/languages/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'index'])->name('api.admin.content-translations.index');
             Route::post('/languages/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'store'])->name('api.admin.content-translations.store');
