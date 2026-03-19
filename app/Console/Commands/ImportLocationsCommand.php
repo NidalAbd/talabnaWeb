@@ -11,7 +11,7 @@ class ImportLocationsCommand extends Command
     protected $signature = 'location:import
         {--region= : Region to import (africa, americas, asia, europe, oceania)}
         {--country= : Specific country ISO code (e.g. FR, DE, TR)}
-        {--cities-per-country=30 : Number of cities to generate per country}
+        {--cities-per-country=0 : Number of cities (0 = all cities)}
         {--skip-cities : Import countries only, no city generation}
         {--translate : Translate all names to active languages after import}';
 

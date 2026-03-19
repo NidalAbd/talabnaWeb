@@ -59,20 +59,18 @@ class LocationImportController extends Controller
     public function generateCities(Request $request, int $id): JsonResponse
     {
         $country = countries::findOrFail($id);
-        $count = (int) $request->input('count', 30);
         $countryName = $country->name['en'] ?? 'Unknown';
 
-        // Spawn background process
-        $artisan = base_path('artisan');
-        $logFile = storage_path("logs/cities-{$country->iso_code}.log");
-        $isoCode = escapeshellarg($country->iso_code);
-
-        $command = "nohup php {$artisan} location:import --country={$isoCode} --cities-per-country={$count} > {$logFile} 2>&1 &";
-        exec($command);
+        // Run city generation directly (not background) since it's per-country
+        $service = app(AiLocationService::class);
+        $result = $service->generateCitiesForCountry($country);
 
         return response()->json([
-            'success' => true,
-            'message' => "City generation started for {$countryName} ({$count} cities)",
+            'success' => $result['success'] ?? false,
+            'message' => $result['success']
+                ? "Generated {$result['created']} cities for {$countryName} (skipped {$result['skipped']} duplicates)"
+                : "Failed: " . ($result['error'] ?? 'Unknown error'),
+            'data' => $result,
         ]);
     }
 

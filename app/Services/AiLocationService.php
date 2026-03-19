@@ -121,94 +121,155 @@ class AiLocationService
     }
 
     /**
-     * Generate cities for a country using OpenAI.
+     * Generate ALL cities for a country using OpenAI.
+     * Makes multiple API calls if needed to get comprehensive coverage.
      */
-    public function generateCitiesForCountry(countries $country, int $count = 30): array
+    public function generateCitiesForCountry(countries $country, int $count = 0): array
     {
         $countryName = $country->name['en'] ?? 'Unknown';
         $activeLocales = Language::getActiveOrdered()->pluck('code')->toArray();
-        // Always include en and ar
         if (!in_array('en', $activeLocales)) array_unshift($activeLocales, 'en');
         if (!in_array('ar', $activeLocales)) $activeLocales[] = 'ar';
 
         $localeList = implode(', ', $activeLocales);
+        $totalCreated = 0;
+        $totalSkipped = 0;
 
-        $prompt = "Generate the top {$count} most important cities and towns in {$countryName}.\n"
-            . "Include the capital, major cities, and important regional centers.\n"
-            . "For each city, provide the name translated into these languages: {$localeList}\n"
-            . "Return ONLY a JSON array. Each element should be an object with language codes as keys.\n"
-            . "Example format: [{\"en\": \"Cairo\", \"ar\": \"القاهرة\", \"tr\": \"Kahire\"}, ...]\n"
-            . "Return ONLY the JSON array, no markdown formatting.";
+        // Get existing city names to exclude
+        $existingNames = cities::where('country_id', $country->id)
+            ->get()
+            ->map(fn($c) => $c->name['en'] ?? '')
+            ->filter()
+            ->toArray();
+
+        $excludeList = !empty($existingNames) ? "\nDo NOT include these cities (already exist): " . implode(', ', array_slice($existingNames, 0, 100)) : '';
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ])
-                ->timeout(120)
-                ->post('https://api.openai.com/v1/chat/completions', [
-                    'model' => $this->model,
-                    'messages' => [
-                        [
-                            'role' => 'system',
-                            'content' => "You are a geography expert. Provide accurate city data with correct translations. Return only valid JSON.",
-                        ],
-                        ['role' => 'user', 'content' => $prompt],
-                    ],
-                    'temperature' => 0.3,
-                    'max_tokens' => 4096,
-                ]);
+            // Round 1: Get all major cities, towns, and districts
+            $prompt1 = "List ALL cities, towns, and significant populated places in {$countryName}.\n"
+                . "Include: the capital, all governorate/state/province capitals, all cities, major towns, and district centers.\n"
+                . "Be as comprehensive as possible — include every city and town that would appear on a detailed map.\n"
+                . "For each place, provide the name in these languages: {$localeList}\n"
+                . "Return ONLY a JSON array. Each element: {\"en\": \"Name\", \"ar\": \"الاسم\", ...}\n"
+                . "Return as many cities as you can (aim for 50-200+ depending on country size)."
+                . $excludeList
+                . "\nReturn ONLY the JSON array, no markdown.";
 
-            if (!$response->successful()) {
-                throw new \Exception("OpenAI API error: HTTP {$response->status()}");
-            }
+            $cities1 = $this->callOpenAiForCities($prompt1);
+            $result1 = $this->insertCities($cities1, $country->id, $existingNames);
+            $totalCreated += $result1['created'];
+            $totalSkipped += $result1['skipped'];
 
-            $content = $response->json('choices.0.message.content', '');
-            $content = preg_replace('/^```(?:json)?\s*\n?/m', '', $content);
-            $content = preg_replace('/\n?```\s*$/m', '', $content);
-            $content = trim($content);
+            // Update existing names list
+            $existingNames = array_merge($existingNames, collect($cities1)->pluck('en')->filter()->toArray());
 
-            $citiesData = json_decode($content, true);
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new \Exception("Failed to parse city data: " . json_last_error_msg());
-            }
+            // Round 2: Get remaining smaller towns if the country is large
+            if ($totalCreated >= 40) {
+                $excludeList2 = "\nDo NOT include these cities (already added): " . implode(', ', array_slice($existingNames, 0, 200));
 
-            // Insert cities, skip duplicates
-            $created = 0;
-            $skipped = 0;
+                $prompt2 = "List MORE cities and towns in {$countryName} that were not in the previous list.\n"
+                    . "Focus on: smaller cities, rural towns, suburban areas, industrial towns, coastal towns, border towns.\n"
+                    . "For each place, provide the name in these languages: {$localeList}\n"
+                    . "Return ONLY a JSON array. Each element: {\"en\": \"Name\", \"ar\": \"الاسم\", ...}"
+                    . $excludeList2
+                    . "\nReturn ONLY the JSON array, no markdown.";
 
-            foreach ($citiesData as $cityData) {
-                $englishName = $cityData['en'] ?? array_values($cityData)[0] ?? null;
-                if (!$englishName) continue;
-
-                // Check duplicate
-                $exists = cities::where('country_id', $country->id)
-                    ->whereRaw("JSON_EXTRACT(name, '$.en') = ?", [$englishName])
-                    ->exists();
-
-                if ($exists) {
-                    $skipped++;
-                    continue;
-                }
-
-                cities::create([
-                    'name' => $cityData, // Already a map with all locales
-                    'country_id' => $country->id,
-                ]);
-                $created++;
+                $cities2 = $this->callOpenAiForCities($prompt2);
+                $result2 = $this->insertCities($cities2, $country->id, $existingNames);
+                $totalCreated += $result2['created'];
+                $totalSkipped += $result2['skipped'];
             }
 
             return [
                 'success' => true,
                 'country' => $countryName,
-                'created' => $created,
-                'skipped' => $skipped,
-                'total' => count($citiesData),
+                'created' => $totalCreated,
+                'skipped' => $totalSkipped,
+                'total' => $totalCreated + $totalSkipped,
             ];
         } catch (\Exception $e) {
             Log::error("Failed to generate cities for {$countryName}: " . $e->getMessage());
-            return ['success' => false, 'error' => $e->getMessage()];
+            return ['success' => false, 'error' => $e->getMessage(), 'created' => $totalCreated];
         }
+    }
+
+    /**
+     * Call OpenAI to get cities list.
+     */
+    protected function callOpenAiForCities(string $prompt): array
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+        ])
+            ->timeout(180)
+            ->post('https://api.openai.com/v1/chat/completions', [
+                'model' => $this->model,
+                'messages' => [
+                    [
+                        'role' => 'system',
+                        'content' => "You are a geography expert with comprehensive knowledge of world cities. Provide accurate, complete city data with correct official translations. Return only valid JSON arrays.",
+                    ],
+                    ['role' => 'user', 'content' => $prompt],
+                ],
+                'temperature' => 0.3,
+                'max_tokens' => 16384,
+            ]);
+
+        if (!$response->successful()) {
+            throw new \Exception("OpenAI API error: HTTP {$response->status()}");
+        }
+
+        $content = $response->json('choices.0.message.content', '');
+        $content = preg_replace('/^```(?:json)?\s*\n?/m', '', $content);
+        $content = preg_replace('/\n?```\s*$/m', '', $content);
+        $content = trim($content);
+
+        $data = json_decode($content, true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new \Exception("JSON parse error: " . json_last_error_msg());
+        }
+
+        return is_array($data) ? $data : [];
+    }
+
+    /**
+     * Insert cities into DB, skipping duplicates.
+     */
+    protected function insertCities(array $citiesData, int $countryId, array $existingNames): array
+    {
+        $created = 0;
+        $skipped = 0;
+
+        foreach ($citiesData as $cityData) {
+            if (!is_array($cityData)) continue;
+            $englishName = $cityData['en'] ?? array_values($cityData)[0] ?? null;
+            if (!$englishName) continue;
+
+            // Skip duplicate
+            if (in_array($englishName, $existingNames)) {
+                $skipped++;
+                continue;
+            }
+
+            // Also check DB
+            $exists = cities::where('country_id', $countryId)
+                ->whereRaw("JSON_EXTRACT(name, '$.en') = ?", [$englishName])
+                ->exists();
+
+            if ($exists) {
+                $skipped++;
+                continue;
+            }
+
+            cities::create([
+                'name' => $cityData,
+                'country_id' => $countryId,
+            ]);
+            $created++;
+        }
+
+        return ['created' => $created, 'skipped' => $skipped];
     }
 
     /**
