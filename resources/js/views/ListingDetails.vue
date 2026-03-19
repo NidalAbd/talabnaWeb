@@ -239,6 +239,7 @@
 </template>
 
 <script setup>
+import { apiFetch } from "@/utils/api"
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
@@ -376,7 +377,7 @@ const copyLink = () => {
 const fetchListing = async () => {
   loading.value = true
   try {
-    const response = await fetch(`/api/public/listings/${route.params.id}`)
+    const response = await apiFetch(`/api/public/listings/${route.params.id}`)
     if (!response.ok) {
       listing.value = null
       return

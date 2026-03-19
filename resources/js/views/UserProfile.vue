@@ -60,6 +60,7 @@
 </template>
 
 <script setup>
+import { apiFetch } from "@/utils/api"
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
@@ -94,7 +95,7 @@ const formatYear = (date) => date ? new Date(date).getFullYear() : ''
 const fetchUser = async () => {
   loading.value = true
   try {
-    const response = await fetch(`/api/public/users/${route.params.id}?page=${currentPage.value}`)
+    const response = await apiFetch(`/api/public/users/${route.params.id}?page=${currentPage.value}`)
     if (!response.ok) return
     const data = await response.json()
     user.value = data.user

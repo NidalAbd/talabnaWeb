@@ -235,6 +235,7 @@
 </template>
 
 <script setup>
+import { apiFetch } from "@/utils/api"
 import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
@@ -404,7 +405,7 @@ const fetchListings = async (append = false) => {
       params.append('sort_by', filters.value.sort_by)
     }
 
-    const response = await fetch(`/api/public/listings?${params}`)
+    const response = await apiFetch(`/api/public/listings?${params}`)
     if (!response.ok) throw new Error('Failed to fetch')
     const data = await response.json()
 
@@ -457,7 +458,7 @@ watch(scrollTrigger, (newVal) => {
 const fetchCategories = async () => {
   loadingCategories.value = true
   try {
-    const response = await fetch('/api/public/categories')
+    const response = await apiFetch('/api/public/categories')
     if (!response.ok) return
     const data = await response.json()
     categories.value = Array.isArray(data.categories) ? data.categories : []
@@ -475,7 +476,7 @@ const fetchSubcategories = async (categoryId) => {
   }
   loadingSubcategories.value = true
   try {
-    const response = await fetch(`/api/public/categories/${categoryId}/subcategories`)
+    const response = await apiFetch(`/api/public/categories/${categoryId}/subcategories`)
     if (!response.ok) return
     const data = await response.json()
     subcategories.value = Array.isArray(data.subcategories) ? data.subcategories : []
@@ -489,7 +490,7 @@ const fetchSubcategories = async (categoryId) => {
 const fetchCountries = async () => {
   loadingCountries.value = true
   try {
-    const response = await fetch('/api/public/countries')
+    const response = await apiFetch('/api/public/countries')
     if (!response.ok) return
     const data = await response.json()
     countries.value = Array.isArray(data.countries) ? data.countries : []
@@ -502,7 +503,7 @@ const fetchCountries = async () => {
 
 const fetchBadgeTypes = async () => {
   try {
-    const response = await fetch('/api/public/badge-types')
+    const response = await apiFetch('/api/public/badge-types')
     if (!response.ok) return
     const data = await response.json()
     badgeTypes.value = Array.isArray(data.badges) ? data.badges : []
@@ -518,7 +519,7 @@ const fetchCities = async (countryId) => {
   }
   loadingCities.value = true
   try {
-    const response = await fetch(`/api/public/countries/${countryId}/cities`)
+    const response = await apiFetch(`/api/public/countries/${countryId}/cities`)
     if (!response.ok) return
     const data = await response.json()
     cities.value = Array.isArray(data.cities) ? data.cities : []

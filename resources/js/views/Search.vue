@@ -58,6 +58,7 @@
 </template>
 
 <script setup>
+import { apiFetch } from "@/utils/api"
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
@@ -99,7 +100,7 @@ const fetchResults = async () => {
   if (!query.value) return
   loading.value = true
   try {
-    const response = await fetch(`/api/public/search?q=${encodeURIComponent(query.value)}&page=${currentPage.value}`)
+    const response = await apiFetch(`/api/public/search?q=${encodeURIComponent(query.value)}&page=${currentPage.value}`)
     if (!response.ok) return
     const data = await response.json()
     listings.value = Array.isArray(data.listings) ? data.listings : []

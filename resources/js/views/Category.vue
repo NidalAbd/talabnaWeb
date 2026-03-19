@@ -153,6 +153,7 @@
 </template>
 
 <script setup>
+import { apiFetch } from "@/utils/api"
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
@@ -251,7 +252,7 @@ const requestLocation = () => {
 
 const fetchCategory = async () => {
   try {
-    const response = await fetch('/api/public/categories')
+    const response = await apiFetch('/api/public/categories')
     if (!response.ok) return
     const data = await response.json()
     const cats = Array.isArray(data.categories) ? data.categories : []
@@ -285,7 +286,7 @@ const fetchSubcategories = async () => {
   }
 
   try {
-    const response = await fetch(`/api/public/categories/${route.params.id}/subcategories`)
+    const response = await apiFetch(`/api/public/categories/${route.params.id}/subcategories`)
     if (!response.ok) return
     const data = await response.json()
     subcategories.value = Array.isArray(data.subcategories) ? data.subcategories : []
@@ -326,7 +327,7 @@ const fetchListings = async () => {
       params.append('subcategory_id', subcatId)
     }
 
-    const response = await fetch(`/api/public/listings?${params}`)
+    const response = await apiFetch(`/api/public/listings?${params}`)
     if (!response.ok) return
     const data = await response.json()
     listings.value = Array.isArray(data.listings) ? data.listings : []

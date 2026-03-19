@@ -197,6 +197,7 @@
 </template>
 
 <script setup>
+import { apiFetch } from "@/utils/api"
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
@@ -378,7 +379,7 @@ async function loadData() {
     if (route.params.cityId) params.append('city_id', route.params.cityId)
     if (route.params.categoryId) params.append('category_id', route.params.categoryId)
 
-    const response = await fetch(`/api/public/services?${params.toString()}`)
+    const response = await apiFetch(`/api/public/services?${params.toString()}`)
 
     if (response.ok) {
       const data = await response.json()
