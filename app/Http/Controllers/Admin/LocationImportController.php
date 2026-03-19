@@ -20,40 +20,35 @@ class LocationImportController extends Controller
 
     /**
      * Import countries from RestCountries API.
+     * Runs inline — RestCountries is fast (no OpenAI needed for countries).
+     *
      * POST /api/admin/location-import/countries
      */
     public function importCountries(Request $request): JsonResponse
     {
-        $region = $request->input('region'); // africa, americas, asia, europe, oceania
+        $region = $request->input('region');
 
-        $progressKey = 'location_import_progress';
+        try {
+            set_time_limit(120);
 
-        Cache::put($progressKey, [
-            'status' => 'running',
-            'current_task' => 'Fetching countries from API...',
-            'total' => 0,
-            'current' => 0,
-            'percentage' => 0,
-            'created' => 0,
-            'skipped' => 0,
-        ], 7200);
+            $apiData = $this->service->fetchCountriesFromApi($region);
+            $result = $this->service->importCountries($apiData);
 
-        // Spawn background process
-        $artisan = base_path('artisan');
-        $logFile = storage_path('logs/location-import.log');
-        $regionArg = $region ? "--region=" . escapeshellarg($region) : '';
-
-        $command = "nohup php {$artisan} location:import {$regionArg} --skip-cities > {$logFile} 2>&1 &";
-        exec($command);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Country import started' . ($region ? " for region: {$region}" : ' (all countries)'),
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => "Imported {$result['created']} countries, skipped {$result['skipped']} (already exist), {$result['errors']} errors",
+                'data' => $result,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**
-     * Generate cities for a specific country.
+     * Generate ALL cities for a specific country using OpenAI.
      * POST /api/admin/location-import/countries/{id}/generate-cities
      */
     public function generateCities(Request $request, int $id): JsonResponse
@@ -61,17 +56,24 @@ class LocationImportController extends Controller
         $country = countries::findOrFail($id);
         $countryName = $country->name['en'] ?? 'Unknown';
 
-        // Run city generation directly (not background) since it's per-country
-        $service = app(AiLocationService::class);
-        $result = $service->generateCitiesForCountry($country);
+        try {
+            set_time_limit(300); // 5 min for OpenAI calls
 
-        return response()->json([
-            'success' => $result['success'] ?? false,
-            'message' => $result['success']
-                ? "Generated {$result['created']} cities for {$countryName} (skipped {$result['skipped']} duplicates)"
-                : "Failed: " . ($result['error'] ?? 'Unknown error'),
-            'data' => $result,
-        ]);
+            $result = $this->service->generateCitiesForCountry($country);
+
+            return response()->json([
+                'success' => $result['success'] ?? false,
+                'message' => $result['success']
+                    ? "Generated {$result['created']} cities for {$countryName} (skipped {$result['skipped']} duplicates)"
+                    : "Failed: " . ($result['error'] ?? 'Unknown error'),
+                'data' => $result,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed: ' . $e->getMessage(),
+            ], 500);
+        }
     }
 
     /**

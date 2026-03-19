@@ -56,21 +56,28 @@ class AutoTranslateController extends Controller
             'percentage' => 0,
             'current_task' => 'Starting...',
             'errors' => 0,
-        ], 7200); // 2 hour TTL
+        ], 7200);
 
-        // Spawn a background artisan process that runs independently
-        // This won't be killed when the web request ends
-        $artisan = base_path('artisan');
-        $logFile = storage_path("logs/translate-{$locale}.log");
-        $langNameEscaped = escapeshellarg($languageName);
-        $tierArg = escapeshellarg($tier === 'all' ? 'all' : $tier);
+        // Run translation after response is sent to avoid timeout
+        // Uses ignore_user_abort + set_time_limit for long-running tasks
+        dispatch(function () use ($locale, $languageName, $tier) {
+            ignore_user_abort(true);
+            set_time_limit(3600); // 1 hour max
 
-        $command = "php {$artisan} translate:auto {$locale} --language-name={$langNameEscaped} --tier={$tierArg}";
-        $fullCommand = "nohup {$command} > {$logFile} 2>&1 &";
+            $service = app(AutoTranslationService::class);
 
-        exec($fullCommand);
+            if ($tier === 'all' || $tier === '1') {
+                $service->translateTier1($locale, $languageName);
+            }
+            if ($tier === 'all' || $tier === '2') {
+                $service->translateTier2($locale, $languageName);
+            }
+            if ($tier === 'all' || $tier === '3') {
+                $service->translateTier3($locale, $languageName);
+            }
+        })->afterResponse();
 
-        Log::info("Auto-translate spawned for {$locale}: {$command}");
+        Log::info("Auto-translate dispatched for {$locale}, tier: {$tier}");
 
         return response()->json([
             'success' => true,

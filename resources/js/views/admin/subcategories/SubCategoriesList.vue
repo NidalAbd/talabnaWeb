@@ -90,6 +90,9 @@
         <button class="action-btn ai-generate" @click="generateAllSubcategories">
           <i class="fas fa-magic"></i> AI Generate All
         </button>
+        <button class="action-btn ai-posts" @click="openAiPostsModal">
+          <i class="fas fa-robot"></i> AI Generate Posts
+        </button>
         <button class="action-btn primary" @click="openCreateModal">
           <i class="fas fa-plus"></i> Add Subcategory
         </button>
@@ -634,6 +637,242 @@ const getImageUrl = (url) => {
 const handleImageError = (event) => {
   event.target.src = placeholderImage
 }
+
+const openAiPostsModal = async () => {
+  // Build category options
+  const categoryOptions = parentCategories.value.reduce((acc, cat) => {
+    acc[cat.id] = cat.name.en || cat.name.ar || `Category ${cat.id}`
+    return acc
+  }, {})
+
+  const { value: formValues } = await Swal.fire({
+    title: 'AI Generate Posts',
+    html: `
+      <div style="text-align:left; margin-bottom: 10px;">
+        <label style="display:block; font-weight:600; margin-bottom:4px;">Category *</label>
+        <select id="swal-category" class="swal2-select" style="width:100%; padding:8px; border:1px solid #d9d9d9; border-radius:6px;">
+          <option value="">Select a category</option>
+          ${parentCategories.value.map(c => `<option value="${c.id}">${c.name.en || c.name.ar}</option>`).join('')}
+        </select>
+      </div>
+      <div style="text-align:left; margin-bottom: 10px;">
+        <label style="display:block; font-weight:600; margin-bottom:4px;">Subcategory (optional)</label>
+        <select id="swal-subcategory" class="swal2-select" style="width:100%; padding:8px; border:1px solid #d9d9d9; border-radius:6px;">
+          <option value="">All subcategories in category</option>
+        </select>
+      </div>
+      <div style="text-align:left; margin-bottom: 10px;">
+        <label style="display:block; font-weight:600; margin-bottom:4px;">Posts per subcategory (1-10)</label>
+        <input id="swal-count" type="number" min="1" max="10" value="3" class="swal2-input" style="margin:0; width:100%;">
+      </div>
+      <div style="text-align:left; margin-bottom: 10px;">
+        <label style="display:block; font-weight:600; margin-bottom:4px;">Photos per post (1-3)</label>
+        <input id="swal-photos" type="number" min="1" max="3" value="1" class="swal2-input" style="margin:0; width:100%;">
+      </div>
+      <div style="text-align:left; margin-bottom: 10px;">
+        <label style="display:block; font-weight:600; margin-bottom:4px;">Bot User ID *</label>
+        <input id="swal-bot-user" type="number" min="1" class="swal2-input" placeholder="Enter bot user ID" style="margin:0; width:100%;">
+      </div>
+    `,
+    focusConfirm: false,
+    showCancelButton: true,
+    confirmButtonText: 'Generate Posts',
+    confirmButtonColor: '#667eea',
+    didOpen: () => {
+      const categorySelect = document.getElementById('swal-category')
+      const subcategorySelect = document.getElementById('swal-subcategory')
+
+      categorySelect.addEventListener('change', async () => {
+        const catId = categorySelect.value
+        subcategorySelect.innerHTML = '<option value="">All subcategories in category</option>'
+        if (!catId) return
+
+        try {
+          const resp = await fetch(`/api/admin/sub-categories?category_id=${catId}&per_page=1000`)
+          const data = await resp.json()
+          const subs = data.data || []
+          subs.forEach(sub => {
+            const opt = document.createElement('option')
+            opt.value = sub.id
+            opt.textContent = sub.name?.en || sub.name?.ar || `Sub ${sub.id}`
+            subcategorySelect.appendChild(opt)
+          })
+        } catch (e) {
+          console.error('Failed to load subcategories:', e)
+        }
+      })
+    },
+    preConfirm: () => {
+      const categoryId = document.getElementById('swal-category').value
+      const subcategoryId = document.getElementById('swal-subcategory').value
+      const count = document.getElementById('swal-count').value
+      const photos = document.getElementById('swal-photos').value
+      const botUserId = document.getElementById('swal-bot-user').value
+
+      if (!categoryId) {
+        Swal.showValidationMessage('Please select a category')
+        return false
+      }
+      if (!botUserId) {
+        Swal.showValidationMessage('Please enter a bot user ID')
+        return false
+      }
+
+      return { categoryId, subcategoryId, count, photos, botUserId }
+    }
+  })
+
+  if (!formValues) return
+
+  // Submit the generation request
+  const token = document.querySelector('meta[name="csrf-token"]')?.content
+  const body = {
+    category_id: formValues.categoryId,
+    count: parseInt(formValues.count) || 3,
+    photos_count: parseInt(formValues.photos) || 1,
+    bot_user_id: formValues.botUserId,
+  }
+  if (formValues.subcategoryId) {
+    body.subcategory_id = formValues.subcategoryId
+  }
+
+  try {
+    const response = await fetch('/ai-posts/generate', {
+      method: 'POST',
+      headers: {
+        'X-CSRF-TOKEN': token,
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    })
+
+    const data = await response.json()
+
+    if (!data.success) {
+      Swal.fire({ icon: 'error', title: 'Generation Failed', text: data.message || 'Failed to start' })
+      return
+    }
+
+    // Show progress modal and start polling
+    showAiPostsProgress(formValues.categoryId)
+
+  } catch (error) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Error starting post generation: ' + (error.message || 'Unknown error'),
+    })
+  }
+}
+
+let progressPollTimer = null
+
+const showAiPostsProgress = (categoryId) => {
+  Swal.fire({
+    title: 'AI Post Generation',
+    html: `
+      <div id="ai-progress-container" style="text-align:left;">
+        <div style="margin-bottom:12px;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:4px;">
+            <span id="ai-progress-label" style="font-weight:600; font-size:0.9rem;">Starting...</span>
+            <span id="ai-progress-percent" style="font-weight:600; color:#667eea;">0%</span>
+          </div>
+          <div style="background:#eef2f7; border-radius:8px; height:12px; overflow:hidden;">
+            <div id="ai-progress-bar" style="background:linear-gradient(135deg,#667eea,#764ba2); height:100%; width:0%; border-radius:8px; transition:width 0.5s ease;"></div>
+          </div>
+        </div>
+        <div id="ai-progress-stats" style="font-size:0.85rem; color:#666; margin-bottom:8px;"></div>
+        <div id="ai-progress-current" style="font-size:0.82rem; color:#999; font-style:italic;"></div>
+        <div id="ai-progress-errors" style="font-size:0.82rem; color:#c62828; margin-top:8px;"></div>
+      </div>
+    `,
+    showConfirmButton: false,
+    showCancelButton: true,
+    cancelButtonText: 'Close',
+    allowOutsideClick: false,
+    didOpen: () => {
+      pollProgress(categoryId)
+    },
+    willClose: () => {
+      if (progressPollTimer) {
+        clearInterval(progressPollTimer)
+        progressPollTimer = null
+      }
+    }
+  })
+}
+
+const pollProgress = (categoryId) => {
+  const doFetch = async () => {
+    try {
+      const resp = await fetch(`/ai-posts/status?category_id=${categoryId}`)
+      const data = await resp.json()
+      const progress = data.progress
+
+      if (!progress) return
+
+      const completed = progress.completed_posts || 0
+      const total = progress.total_posts || 1
+      const errors = progress.errors || []
+      const percent = Math.round((completed / total) * 100)
+      const status = progress.status || 'running'
+      const currentItem = progress.current_item || ''
+
+      const barEl = document.getElementById('ai-progress-bar')
+      const percentEl = document.getElementById('ai-progress-percent')
+      const labelEl = document.getElementById('ai-progress-label')
+      const statsEl = document.getElementById('ai-progress-stats')
+      const currentEl = document.getElementById('ai-progress-current')
+      const errorsEl = document.getElementById('ai-progress-errors')
+
+      if (barEl) barEl.style.width = percent + '%'
+      if (percentEl) percentEl.textContent = percent + '%'
+      if (labelEl) labelEl.textContent = status === 'finished' ? 'Completed!' : 'Generating posts...'
+      if (statsEl) statsEl.textContent = `${completed} / ${total} posts created  |  ${errors.length} errors`
+      if (currentEl) currentEl.textContent = status === 'running' ? currentItem : ''
+
+      if (errors.length > 0 && errorsEl) {
+        errorsEl.innerHTML = '<strong>Errors:</strong><br>' + errors.slice(-3).map(e => '- ' + (e.error || '')).join('<br>')
+      }
+
+      if (status === 'finished') {
+        if (progressPollTimer) {
+          clearInterval(progressPollTimer)
+          progressPollTimer = null
+        }
+        // Update the Swal to show completion
+        if (labelEl) labelEl.textContent = 'Generation Complete!'
+        if (percentEl) {
+          percentEl.textContent = '100%'
+          percentEl.style.color = '#27ae60'
+        }
+        if (barEl) {
+          barEl.style.width = '100%'
+          barEl.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)'
+        }
+        if (currentEl) currentEl.textContent = ''
+
+        // Show confirm button
+        const confirmBtn = Swal.getConfirmButton()
+        if (confirmBtn) {
+          confirmBtn.style.display = ''
+          confirmBtn.textContent = 'Done'
+        }
+
+        // Reload subcategories list
+        await loadSubCategories()
+      }
+    } catch (e) {
+      console.error('Progress poll error:', e)
+    }
+  }
+
+  // First fetch immediately
+  doFetch()
+  // Then poll every 5 seconds
+  progressPollTimer = setInterval(doFetch, 5000)
+}
 </script>
 
 <style scoped>
@@ -784,6 +1023,11 @@ const handleImageError = (event) => {
 
 .action-btn.ai-generate {
   background: linear-gradient(135deg, #2d3436 0%, #636e72 100%);
+  color: white;
+}
+
+.action-btn.ai-posts {
+  background: linear-gradient(135deg, #6c5ce7 0%, #a29bfe 100%);
   color: white;
 }
 
