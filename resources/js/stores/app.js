@@ -10,8 +10,14 @@ export const useAppStore = defineStore('app', () => {
   const countries = ref([])
   const loading = ref(false)
 
+  // Available languages (loaded from API)
+  const languages = ref(JSON.parse(localStorage.getItem('languages') || '[]'))
+
+  // RTL language codes
+  const rtlCodes = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'yi', 'sd']
+
   // Getters
-  const isRTL = computed(() => locale.value === 'ar')
+  const isRTL = computed(() => rtlCodes.includes(locale.value))
   const isAuthenticated = computed(() => !!user.value)
   const isDark = computed(() => theme.value === 'dark')
 
@@ -20,7 +26,19 @@ export const useAppStore = defineStore('app', () => {
     locale.value = newLocale
     localStorage.setItem('locale', newLocale)
     document.documentElement.lang = newLocale
-    document.documentElement.dir = newLocale === 'ar' ? 'rtl' : 'ltr'
+    document.documentElement.dir = rtlCodes.includes(newLocale) ? 'rtl' : 'ltr'
+  }
+
+  async function fetchLanguages() {
+    try {
+      const response = await fetch('/api/languages')
+      if (response.ok) {
+        const data = await response.json()
+        const langs = data.languages || []
+        languages.value = langs
+        localStorage.setItem('languages', JSON.stringify(langs))
+      }
+    } catch (_) {}
   }
 
   function toggleTheme() {
@@ -66,6 +84,7 @@ export const useAppStore = defineStore('app', () => {
     user,
     categories,
     countries,
+    languages,
     loading,
     // Getters
     isRTL,
@@ -73,6 +92,7 @@ export const useAppStore = defineStore('app', () => {
     isDark,
     // Actions
     setLocale,
+    fetchLanguages,
     toggleTheme,
     setTheme,
     setUser,

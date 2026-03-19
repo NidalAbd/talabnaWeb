@@ -66,10 +66,25 @@
             <i class="mdi" :class="appStore.isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'" style="font-size: 20px;"></i>
           </button>
 
-          <!-- Language Toggle -->
-          <button class="btn btn-icon btn-text" @click="toggleLocale">
-            <span style="font-weight: 700; font-size: 0.875rem;">{{ appStore.locale === 'ar' ? 'EN' : 'ع' }}</span>
-          </button>
+          <!-- Language Selector -->
+          <div class="dropdown" style="position: relative;">
+            <button class="btn btn-icon btn-text" @click.stop="langMenuOpen = !langMenuOpen" title="Language">
+              <span style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">{{ appStore.locale }}</span>
+            </button>
+            <div v-if="langMenuOpen" class="lang-dropdown" @click.stop>
+              <div
+                v-for="lang in appStore.languages"
+                :key="lang.code"
+                class="lang-option"
+                :class="{ active: appStore.locale === lang.code }"
+                @click="selectLanguage(lang.code)"
+              >
+                <span class="lang-code">{{ lang.code.toUpperCase() }}</span>
+                <span class="lang-native">{{ lang.native_name }}</span>
+                <i v-if="appStore.locale === lang.code" class="mdi mdi-check" style="color: #10b981;"></i>
+              </div>
+            </div>
+          </div>
 
           <!-- User Menu (when logged in) -->
           <div v-if="isLoggedIn" class="dropdown d-none d-sm-block">
@@ -282,7 +297,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 
@@ -316,9 +331,28 @@ const userAvatar = computed(() => {
 
 import { getCategoryIcon, getCategoryColor } from '@/utils/helpers'
 
-const toggleLocale = () => {
-  appStore.setLocale(appStore.locale === 'ar' ? 'en' : 'ar')
+const langMenuOpen = ref(false)
+
+const selectLanguage = (code) => {
+  appStore.setLocale(code)
+  langMenuOpen.value = false
+  // Reload page to apply new language
+  window.location.reload()
 }
+
+// Close lang menu when clicking outside
+const closeLangMenu = (e) => {
+  if (!e.target.closest('.lang-dropdown') && !e.target.closest('.btn-text')) {
+    langMenuOpen.value = false
+  }
+}
+onMounted(() => {
+  document.addEventListener('click', closeLangMenu)
+  appStore.fetchLanguages()
+})
+onUnmounted(() => {
+  document.removeEventListener('click', closeLangMenu)
+})
 
 const doSearch = () => {
   if (searchQuery.value.trim()) {
@@ -396,6 +430,79 @@ onMounted(() => {
 </script>
 
 <style>
+/* Language Dropdown */
+.lang-dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  min-width: 200px;
+  max-height: 400px;
+  overflow-y: auto;
+  z-index: 9999;
+  padding: 0.5rem 0;
+  margin-top: 0.5rem;
+}
+
+[data-theme="dark"] .lang-dropdown {
+  background: #1e293b;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
+}
+
+.lang-option {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.6rem 1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.lang-option:hover {
+  background: #f3f4f6;
+}
+
+[data-theme="dark"] .lang-option:hover {
+  background: #334155;
+}
+
+.lang-option.active {
+  background: #eff6ff;
+}
+
+[data-theme="dark"] .lang-option.active {
+  background: #1e3a5f;
+}
+
+.lang-code {
+  font-weight: 800;
+  font-size: 0.7rem;
+  color: #667eea;
+  background: #eff3ff;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  min-width: 26px;
+  text-align: center;
+}
+
+[data-theme="dark"] .lang-code {
+  background: #2d3748;
+  color: #93b4ff;
+}
+
+.lang-native {
+  flex: 1;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+[data-theme="dark"] .lang-native {
+  color: #e2e8f0;
+}
+
 /* Global styles for non-Vuetify app */
 
 /* Apply theme reactively */
