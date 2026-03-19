@@ -346,36 +346,54 @@
 
     <!-- AI Import Countries Modal -->
     <div v-if="showImportModal" class="modal-overlay" @click.self="showImportModal = false">
-      <div class="modal-dialog-advanced" style="max-width: 500px;">
+      <div class="modal-dialog-advanced" style="max-width: 600px;">
         <div class="modal-header">
-          <h3><i class="fas fa-globe mr-2"></i> AI Import Countries</h3>
+          <h3><i class="fas fa-globe mr-2"></i> Import Countries by Language</h3>
           <button class="close-btn" @click="showImportModal = false">&times;</button>
         </div>
         <div class="modal-body">
-          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 1rem;">
-            Import countries from RestCountries API. Existing countries (by ISO code) will be skipped.
+          <p style="color: #6b7280; font-size: 0.85rem; margin-bottom: 1rem;">
+            Import countries that speak your active languages. Existing countries will be skipped.
           </p>
-          <div class="form-group">
-            <label class="form-label">Region (optional)</label>
-            <select v-model="importRegion" class="form-control-modern">
-              <option value="">All Countries (~250)</option>
-              <option value="africa">Africa (~60)</option>
-              <option value="americas">Americas (~55)</option>
-              <option value="asia">Asia (~50)</option>
-              <option value="europe">Europe (~50)</option>
-              <option value="oceania">Oceania (~25)</option>
-            </select>
+          <div v-if="importOptions.length === 0" style="text-align: center; padding: 1rem; color: #9ca3af;">
+            <i class="fas fa-spinner fa-spin"></i> Loading...
           </div>
-          <div v-if="importMessage" class="import-message" :class="importMessageType">
-            <i :class="importMessageType === 'success' ? 'fas fa-check-circle' : 'fas fa-info-circle'"></i>
+          <div v-else class="import-lang-list">
+            <div
+              v-for="opt in importOptions"
+              :key="opt.key"
+              class="import-lang-item"
+              :class="{ selected: selectedImportLangs.includes(opt.key), disabled: opt.new_count === 0 }"
+              @click="toggleImportLang(opt)"
+            >
+              <div class="import-lang-check">
+                <i :class="selectedImportLangs.includes(opt.key) ? 'fas fa-check-square' : 'far fa-square'"></i>
+              </div>
+              <div class="import-lang-info">
+                <span class="import-lang-name">{{ opt.label }}</span>
+                <span class="import-lang-native">{{ opt.native }}</span>
+              </div>
+              <div class="import-lang-count">
+                <span v-if="opt.new_count > 0" class="count-new">+{{ opt.new_count }} new</span>
+                <span v-else class="count-done"><i class="fas fa-check"></i> all imported</span>
+                <span class="count-total">{{ opt.countries_count }} total</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="importMessage" class="import-message" :class="importMessageType" style="margin-top: 1rem;">
+            <i :class="importMessageType === 'success' ? 'fas fa-check-circle' : importMessageType === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-info-circle'"></i>
             {{ importMessage }}
           </div>
         </div>
         <div class="modal-footer">
           <button class="action-btn secondary" @click="showImportModal = false">Cancel</button>
-          <button class="action-btn primary" :disabled="importLoading" @click="handleImportCountries">
+          <button
+            class="action-btn primary"
+            :disabled="importLoading || selectedImportLangs.length === 0"
+            @click="handleImportCountries"
+          >
             <i :class="importLoading ? 'fas fa-spinner fa-spin' : 'fas fa-download'"></i>
-            {{ importLoading ? 'Importing...' : 'Start Import' }}
+            {{ importLoading ? 'Importing...' : `Import (${selectedImportCount} countries)` }}
           </button>
         </div>
       </div>
@@ -418,24 +436,78 @@ const showCitiesModal = ref(false)
 
 // AI Import state
 const showImportModal = ref(false)
-const importRegion = ref('')
 const importLoading = ref(false)
 const importMessage = ref('')
 const importMessageType = ref('info')
+const importOptions = ref([])
+const selectedImportLangs = ref([])
+
+const selectedImportCount = computed(() => {
+  return importOptions.value
+    .filter(o => selectedImportLangs.value.includes(o.key))
+    .reduce((sum, o) => sum + o.new_count, 0)
+})
+
+const toggleImportLang = (opt) => {
+  if (opt.new_count === 0) return
+  const idx = selectedImportLangs.value.indexOf(opt.key)
+  if (idx >= 0) {
+    selectedImportLangs.value.splice(idx, 1)
+  } else {
+    selectedImportLangs.value.push(opt.key)
+  }
+}
+
+const loadImportOptions = async () => {
+  try {
+    const response = await fetch('/api/admin/location-import/regions', { credentials: 'same-origin' })
+    if (response.ok) {
+      const data = await response.json()
+      importOptions.value = data.options || []
+    }
+  } catch (_) {}
+}
+
+watch(showImportModal, (val) => {
+  if (val && importOptions.value.length === 0) loadImportOptions()
+})
 
 const handleImportCountries = async () => {
   importLoading.value = true
   importMessage.value = ''
   try {
-    const result = await aiImportCountries(importRegion.value || null)
-    importMessage.value = result.message || 'Import started!'
-    importMessageType.value = 'success'
-    // Refresh after a delay
-    setTimeout(async () => {
-      await loadCountries(1)
-      showImportModal.value = false
-      importMessage.value = ''
-    }, 3000)
+    // Collect all ISO codes from selected languages
+    const isoCodes = []
+    importOptions.value
+      .filter(o => selectedImportLangs.value.includes(o.key))
+      .forEach(o => isoCodes.push(...o.iso_codes))
+    // Deduplicate
+    const uniqueCodes = [...new Set(isoCodes)]
+
+    const response = await fetch('/api/admin/location-import/countries', {
+      method: 'POST', credentials: 'same-origin',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ iso_codes: uniqueCodes })
+    })
+    const result = await response.json()
+
+    if (result.success) {
+      importMessage.value = result.message
+      importMessageType.value = 'success'
+      setTimeout(async () => {
+        await loadCountries(1)
+        showImportModal.value = false
+        importMessage.value = ''
+        selectedImportLangs.value = []
+      }, 2000)
+    } else {
+      importMessage.value = result.message || 'Import failed'
+      importMessageType.value = 'error'
+    }
   } catch (err) {
     importMessage.value = 'Error: ' + err.message
     importMessageType.value = 'error'
@@ -616,6 +688,91 @@ const handleCitiesSaved = () => {
   background: #eff6ff;
   color: #1e40af;
   border: 1px solid #bfdbfe;
+}
+
+.import-lang-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.import-lang-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.75rem 1rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.import-lang-item:hover:not(.disabled) {
+  border-color: #667eea;
+  background: #f8f9ff;
+}
+
+.import-lang-item.selected {
+  border-color: #667eea;
+  background: #eff3ff;
+}
+
+.import-lang-item.disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.import-lang-check {
+  font-size: 1.1rem;
+  color: #667eea;
+  width: 24px;
+}
+
+.import-lang-item.disabled .import-lang-check {
+  color: #10b981;
+}
+
+.import-lang-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.import-lang-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: #1a1a2e;
+}
+
+.import-lang-native {
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.import-lang-count {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.15rem;
+}
+
+.count-new {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: #667eea;
+}
+
+.count-done {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #10b981;
+}
+
+.count-total {
+  font-size: 0.7rem;
+  color: #9ca3af;
 }
 
 .countries-management-advanced {

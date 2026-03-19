@@ -26,12 +26,27 @@ class LocationImportController extends Controller
      */
     public function importCountries(Request $request): JsonResponse
     {
-        $region = $request->input('region');
+        $isoCodes = $request->input('iso_codes', []);
+        $language = $request->input('language', '');
 
         try {
             set_time_limit(120);
 
-            $apiData = $this->service->fetchCountriesFromApi($region);
+            if (!empty($isoCodes)) {
+                // Fetch specific countries by ISO code
+                $apiData = [];
+                foreach (array_chunk($isoCodes, 10) as $chunk) {
+                    $codes = implode(',', $chunk);
+                    $response = \Illuminate\Support\Facades\Http::timeout(30)
+                        ->get("https://restcountries.com/v3.1/alpha?codes={$codes}");
+                    if ($response->successful()) {
+                        $apiData = array_merge($apiData, $response->json());
+                    }
+                }
+            } else {
+                $apiData = $this->service->fetchCountriesFromApi(null);
+            }
+
             $result = $this->service->importCountries($apiData);
 
             return response()->json([
@@ -104,19 +119,55 @@ class LocationImportController extends Controller
     }
 
     /**
-     * Get available regions for import.
+     * Get import options based on active languages.
      */
     public function regions(): JsonResponse
     {
+        // Map each active language to the countries that speak it
+        $languageCountries = [
+            'ar' => ['SA', 'AE', 'EG', 'IQ', 'JO', 'KW', 'BH', 'QA', 'OM', 'YE', 'SY', 'LB', 'PS', 'LY', 'TN', 'DZ', 'MA', 'SD', 'MR', 'SO', 'DJ', 'KM'],
+            'en' => ['US', 'GB', 'CA', 'AU', 'NZ', 'IE', 'ZA', 'KE', 'NG', 'GH', 'PH', 'SG', 'JM', 'TT'],
+            'hi' => ['IN'],
+            'tr' => ['TR', 'CY'],
+            'fr' => ['FR', 'BE', 'CH', 'CA', 'SN', 'CI', 'ML', 'BF', 'NE', 'TD', 'GN', 'CM', 'MG', 'CD', 'CG', 'GA', 'TG', 'BJ', 'HT'],
+            'es' => ['ES', 'MX', 'CO', 'AR', 'PE', 'VE', 'CL', 'EC', 'GT', 'CU', 'BO', 'DO', 'HN', 'PY', 'SV', 'NI', 'CR', 'PA', 'UY'],
+            'ur' => ['PK'],
+            'bn' => ['BD'],
+            'pt' => ['BR', 'PT', 'AO', 'MZ'],
+            'ru' => ['RU', 'BY', 'KZ', 'KG', 'UZ'],
+            'id' => ['ID'],
+            'de' => ['DE', 'AT', 'CH'],
+            'zh' => ['CN', 'TW', 'HK', 'MO'],
+            'ku' => ['IQ', 'TR', 'SY', 'IR'],
+            'fa' => ['IR', 'AF', 'TJ'],
+            'sw' => ['TZ', 'KE', 'UG', 'RW', 'CD'],
+            'ms' => ['MY', 'BN', 'SG'],
+        ];
+
+        $activeLanguages = \App\Models\Language::getActiveOrdered();
+        $options = [];
+
+        foreach ($activeLanguages as $lang) {
+            $codes = $languageCountries[$lang->code] ?? [];
+            if (empty($codes)) continue;
+
+            // Count how many are already imported
+            $existingCount = \App\Models\countries::whereIn('iso_code', $codes)->count();
+
+            $options[] = [
+                'key' => $lang->code,
+                'label' => $lang->name,
+                'native' => $lang->native_name,
+                'countries_count' => count($codes),
+                'existing_count' => $existingCount,
+                'new_count' => count($codes) - $existingCount,
+                'iso_codes' => $codes,
+            ];
+        }
+
         return response()->json([
             'success' => true,
-            'regions' => [
-                ['key' => 'africa', 'label' => 'Africa', 'icon' => 'fas fa-globe-africa'],
-                ['key' => 'americas', 'label' => 'Americas', 'icon' => 'fas fa-globe-americas'],
-                ['key' => 'asia', 'label' => 'Asia', 'icon' => 'fas fa-globe-asia'],
-                ['key' => 'europe', 'label' => 'Europe', 'icon' => 'fas fa-globe-europe'],
-                ['key' => 'oceania', 'label' => 'Oceania', 'icon' => 'fas fa-globe'],
-            ],
+            'options' => $options,
         ]);
     }
 }
