@@ -56,6 +56,81 @@ class PublicController extends Controller
     }
 
     /**
+     * Map language codes to their primary countries (ISO codes → country IDs).
+     */
+    private static array $languageCountryMap = [
+        'ar' => ['PS','EG','SA','AE','IQ','JO','KW','BH','QA','YE','SY','LB','LY','TN','DZ','MA','SD','OM','MR','SO','DJ','KM'],
+        'en' => ['US','GB','CA','AU','NZ','IE','ZA','KE','NG','GH','PH','SG'],
+        'hi' => ['IN'],
+        'tr' => ['TR','CY'],
+        'fr' => ['FR','BE','SN','CI','CM','CD','MG'],
+        'es' => ['ES','MX','CO','AR','PE','VE','CL'],
+        'ur' => ['PK'],
+        'bn' => ['BD'],
+        'pt' => ['BR','PT'],
+        'ru' => ['RU','KZ','BY'],
+        'id' => ['ID'],
+        'de' => ['DE','AT','CH'],
+        'zh' => ['CN','TW','HK'],
+        'ku' => ['IQ','TR','SY','IR'],
+        'fa' => ['IR','AF','TJ'],
+        'sw' => ['TZ','KE','UG'],
+        'ms' => ['MY','BN','SG'],
+    ];
+
+    /**
+     * Get country IDs that share the same language as the current locale.
+     */
+    private function getSameLanguageCountryIds(): array
+    {
+        $locale = app()->getLocale();
+        $isoCodes = self::$languageCountryMap[$locale] ?? [];
+        if (empty($isoCodes)) return [];
+
+        return countries::whereIn('iso_code', $isoCodes)->pluck('id')->toArray();
+    }
+
+    /**
+     * Apply location-aware sorting to a query.
+     * Priority: 1) User's city  2) User's country  3) Same language countries  4) Rest
+     */
+    private function applyLocationSort($query, Request $request)
+    {
+        $userCountryId = $request->query('user_country_id');
+        $userCityId = $request->query('user_city_id');
+        $sameLanguageIds = $this->getSameLanguageCountryIds();
+
+        if ($userCountryId || !empty($sameLanguageIds)) {
+            $orderParts = [];
+            $bindings = [];
+
+            if ($userCountryId && $userCityId) {
+                $orderParts[] = "WHEN country_id = ? AND city_id = ? THEN 1";
+                $bindings[] = $userCountryId;
+                $bindings[] = $userCityId;
+            }
+
+            if ($userCountryId) {
+                $orderParts[] = "WHEN country_id = ? THEN 2";
+                $bindings[] = $userCountryId;
+            }
+
+            if (!empty($sameLanguageIds)) {
+                $placeholders = implode(',', array_fill(0, count($sameLanguageIds), '?'));
+                $orderParts[] = "WHEN country_id IN ({$placeholders}) THEN 3";
+                $bindings = array_merge($bindings, $sameLanguageIds);
+            }
+
+            if (!empty($orderParts)) {
+                $caseStatement = "CASE " . implode(' ', $orderParts) . " ELSE 4 END";
+                $query->orderByRaw($caseStatement, $bindings);
+            }
+        }
+
+        return $query;
+    }
+
+    /**
      * Transform listing data to fix JSON name fields
      */
     private function transformListing($listing)
@@ -433,20 +508,24 @@ class PublicController extends Controller
      */
     public function featured(Request $request): JsonResponse
     {
-        $featured = Cache::remember('featured_listings_v2', 900, function () {
-            $listings = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
-                ->withCount(['favorites', 'comments'])
-                ->where('state', 'published')
-                ->whereIn('have_badge', ['ماسي', 'ذهبي'])
-                ->whereHas('photos')
-                ->orderByRaw(BadgeType::getLegacyOrderByClause())
-                ->orderBy('view_count', 'desc')
-                ->limit(8)
-                ->get();
+        $locale = app()->getLocale();
+        $userCountryId = $request->query('user_country_id');
 
-            return $listings->map(function ($listing) {
-                return $this->transformListing($listing);
-            });
+        $query = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
+            ->withCount(['favorites', 'comments'])
+            ->where('state', 'published')
+            ->whereIn('have_badge', ['ماسي', 'ذهبي'])
+            ->whereHas('photos');
+
+        // Apply location-aware sorting
+        $this->applyLocationSort($query, $request);
+        $query->orderByRaw(BadgeType::getLegacyOrderByClause());
+        $query->orderBy('view_count', 'desc');
+
+        $listings = $query->limit(12)->get();
+
+        $featured = $listings->map(function ($listing) {
+            return $this->transformListing($listing);
         });
 
         return response()->json([
@@ -461,25 +540,22 @@ class PublicController extends Controller
     {
         $categoryId = $request->get('category_id');
 
-        $cacheKey = $categoryId ? "latest_listings_v2_{$categoryId}" : 'latest_listings_v2';
+        $query = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
+            ->withCount(['favorites', 'comments'])
+            ->where('state', 'published')
+            ->whereHas('photos');
 
-        $latest = Cache::remember($cacheKey, 600, function () use ($categoryId) {
-            $query = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
-                ->withCount(['favorites', 'comments'])
-                ->where('state', 'published')
-                ->whereHas('photos');
+        if ($categoryId) {
+            $query->where('categories_id', $categoryId);
+        }
 
-            if ($categoryId) {
-                $query->where('categories_id', $categoryId);
-            }
+        $this->applyLocationSort($query, $request);
+        $query->orderBy('created_at', 'desc');
 
-            $listings = $query->orderBy('created_at', 'desc')
-                ->limit(12)
-                ->get();
+        $listings = $query->limit(12)->get();
 
-            return $listings->map(function ($listing) {
-                return $this->transformListing($listing);
-            });
+        $latest = $listings->map(function ($listing) {
+            return $this->transformListing($listing);
         });
 
         return response()->json([
@@ -492,18 +568,18 @@ class PublicController extends Controller
      */
     public function popular(Request $request): JsonResponse
     {
-        $popular = Cache::remember('popular_listings_v2', 1800, function () {
-            $listings = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
-                ->withCount(['favorites', 'comments'])
-                ->where('state', 'published')
-                ->whereHas('photos')
-                ->orderBy('view_count', 'desc')
-                ->limit(8)
-                ->get();
+        $query = ServicePost::with(['photos', 'user.photos', 'category', 'subCategory', 'city', 'country', 'badgeType'])
+            ->withCount(['favorites', 'comments'])
+            ->where('state', 'published')
+            ->whereHas('photos');
 
-            return $listings->map(function ($listing) {
-                return $this->transformListing($listing);
-            });
+        $this->applyLocationSort($query, $request);
+        $query->orderBy('view_count', 'desc');
+
+        $listings = $query->limit(12)->get();
+
+        $popular = $listings->map(function ($listing) {
+            return $this->transformListing($listing);
         });
 
         return response()->json([

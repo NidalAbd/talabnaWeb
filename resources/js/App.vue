@@ -348,6 +348,7 @@ const closeLangMenu = (e) => {
 onMounted(() => {
   document.addEventListener('click', closeLangMenu)
   appStore.fetchLanguages()
+  appStore.detectLocation()
   initTranslations()
 })
 onUnmounted(() => {

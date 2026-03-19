@@ -10,6 +10,12 @@ export const useAppStore = defineStore('app', () => {
   const countries = ref([])
   const loading = ref(false)
 
+  // User's detected/saved location
+  const userCountry = ref(localStorage.getItem('user_country') || null) // ISO code e.g. 'PS'
+  const userCity = ref(localStorage.getItem('user_city') || null)
+  const userCountryId = ref(localStorage.getItem('user_country_id') || null)
+  const userCityId = ref(localStorage.getItem('user_city_id') || null)
+
   // Available languages (loaded from API)
   const languages = ref(JSON.parse(localStorage.getItem('languages') || '[]'))
 
@@ -69,6 +75,46 @@ export const useAppStore = defineStore('app', () => {
     loading.value = state
   }
 
+  // Detect user's country from IP (for guests)
+  async function detectLocation() {
+    // Skip if already detected or user is logged in with country
+    if (userCountryId.value && userCountryId.value !== 'null') return
+
+    try {
+      const response = await fetch('https://ip-api.com/json/?fields=countryCode,city')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.countryCode) {
+          userCountry.value = data.countryCode
+          userCity.value = data.city || null
+          localStorage.setItem('user_country', data.countryCode)
+          localStorage.setItem('user_city', data.city || '')
+
+          // Resolve to our DB country ID
+          const countryResponse = await fetch(`/api/public/countries`)
+          if (countryResponse.ok) {
+            const countryData = await countryResponse.json()
+            const countriesList = countryData.countries || countryData || []
+            const matched = countriesList.find(c =>
+              c.iso_code === data.countryCode || c.country_code === data.countryCode
+            )
+            if (matched) {
+              userCountryId.value = matched.id
+              localStorage.setItem('user_country_id', matched.id)
+            }
+          }
+        }
+      }
+    } catch (_) {}
+  }
+
+  function setUserLocation(countryId, cityId) {
+    userCountryId.value = countryId
+    userCityId.value = cityId
+    localStorage.setItem('user_country_id', countryId || '')
+    localStorage.setItem('user_city_id', cityId || '')
+  }
+
   // Initialize
   function init() {
     const savedLocale = localStorage.getItem('locale') || 'ar'
@@ -86,6 +132,10 @@ export const useAppStore = defineStore('app', () => {
     countries,
     languages,
     loading,
+    userCountry,
+    userCity,
+    userCountryId,
+    userCityId,
     // Getters
     isRTL,
     isAuthenticated,
@@ -93,6 +143,8 @@ export const useAppStore = defineStore('app', () => {
     // Actions
     setLocale,
     fetchLanguages,
+    detectLocation,
+    setUserLocation,
     toggleTheme,
     setTheme,
     setUser,
