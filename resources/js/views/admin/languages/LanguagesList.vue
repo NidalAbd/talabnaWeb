@@ -414,6 +414,7 @@
 import { ref, computed, onMounted, watch, reactive, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLanguages } from '../../../composables/useLanguages'
+import { useAutoTranslate } from '../../../composables/useAutoTranslate'
 import LanguageFormModal from '../../../components/admin/languages/LanguageFormModal.vue'
 
 const router = useRouter()
@@ -653,20 +654,37 @@ const closeModal = () => {
   selectedLanguage.value = null
 }
 
-const handleLanguageSaved = (eventData) => {
-  closeModal()
-  loadLanguages(languages.value.current_page)
+const { startTranslation: aiStart, checkProgress: aiCheck } = useAutoTranslate()
 
-  // If it's a new language, redirect to translations page to fill in translations
+const handleLanguageSaved = async (eventData) => {
+  closeModal()
+  await loadLanguages(languages.value.current_page)
+
+  // If it's a new language, offer to auto-translate UI strings via OpenAI
   if (eventData && eventData.isNew && eventData.language) {
     const langCode = eventData.language.code
-    // Show notification and redirect
+    const langName = eventData.language.name || langCode
+
+    const doTranslate = confirm(
+      `Language "${langName}" created!\n\nDo you want to auto-translate all UI strings using OpenAI?\n(This will translate Tier 1 - UI labels, buttons, messages)`
+    )
+
+    if (doTranslate) {
+      try {
+        await aiStart(langCode, '1') // Tier 1 = UI strings
+        alert(`Auto-translation started for ${langName}.\nGo to Auto-Translate dashboard to monitor progress.`)
+      } catch (e) {
+        alert('Failed to start auto-translation: ' + e.message)
+      }
+    }
+
+    // Redirect to translations page
     setTimeout(() => {
       router.push({
         path: '/admin/translations',
         query: {
           locale: langCode,
-          new_language: '1' // Flag to show help message
+          new_language: '1'
         }
       })
     }, 500)

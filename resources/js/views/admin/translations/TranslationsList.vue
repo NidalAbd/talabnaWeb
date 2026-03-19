@@ -133,12 +133,33 @@
           <span v-if="!loadingMissing" class="missing-badge">{{ missingTranslations.length }}</span>
         </div>
         <div class="missing-actions">
+          <button
+            class="action-btn primary small"
+            @click="startAiTranslateAll"
+            :disabled="aiTranslating || missingTranslations.length === 0"
+            title="Auto-translate all missing using OpenAI"
+          >
+            <i :class="aiTranslating ? 'fas fa-spinner fa-spin' : 'fas fa-robot'"></i>
+            {{ aiTranslating ? 'Translating...' : 'AI Translate All' }}
+          </button>
           <button class="action-btn-small" @click="refreshMissingTranslations" :disabled="loadingMissing">
             <i :class="loadingMissing ? 'fas fa-spinner fa-spin' : 'fas fa-sync'"></i>
           </button>
           <button class="action-btn-small" @click="closeMissingSection">
             <i class="fas fa-times"></i>
           </button>
+        </div>
+      </div>
+
+      <!-- AI Translation Progress -->
+      <div v-if="aiTranslating && aiProgress" class="ai-progress-bar">
+        <div class="ai-progress-info">
+          <i class="fas fa-robot"></i>
+          <span>{{ aiProgress.current_task || 'Translating...' }}</span>
+          <span class="ai-progress-pct">{{ aiProgress.percentage || 0 }}%</span>
+        </div>
+        <div class="ai-progress-track">
+          <div class="ai-progress-fill" :style="{ width: (aiProgress.percentage || 0) + '%' }"></div>
         </div>
       </div>
 
@@ -459,16 +480,52 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, reactive, nextTick } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount, watch, reactive, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useTranslations } from '../../../composables/useTranslations'
 import { useLanguages } from '../../../composables/useLanguages'
+import { useAutoTranslate } from '../../../composables/useAutoTranslate'
 import TranslationFormModal from '../../../components/admin/translations/TranslationFormModal.vue'
 
 const route = useRoute()
 const router = useRouter()
 const { translations, groups, loading, fetchTranslations, fetchGroups, deleteTranslation, exportTranslations, importTranslations, updateTranslation, createTranslation } = useTranslations()
 const { languages: languagesData, fetchLanguages } = useLanguages()
+const { progress: aiProgress, loading: aiLoading, error: aiError, startTranslation: aiStartTranslation, checkProgress: aiCheckProgress } = useAutoTranslate()
+
+// AI Translation polling
+let aiPollInterval = null
+const aiTranslating = ref(false)
+
+async function startAiTranslateAll() {
+  if (!filters.locale) return
+  if (!confirm(`Auto-translate all missing UI strings to ${getLanguageName(filters.locale)} using OpenAI?`)) return
+
+  aiTranslating.value = true
+  try {
+    await aiStartTranslation(filters.locale, '1') // Tier 1 = UI strings
+    // Start polling
+    if (aiPollInterval) clearInterval(aiPollInterval)
+    aiPollInterval = setInterval(async () => {
+      const prog = await aiCheckProgress(filters.locale)
+      if (prog && (prog.status === 'completed' || prog.status === 'failed')) {
+        clearInterval(aiPollInterval)
+        aiPollInterval = null
+        aiTranslating.value = false
+        if (prog.status === 'completed') {
+          alert(`Translation completed! ${prog.completed || 0} strings translated.`)
+          await refreshMissingTranslations()
+          await loadTranslations(1)
+        } else {
+          alert('Translation failed. Check the Auto-Translate dashboard for details.')
+        }
+      }
+    }, 3000)
+  } catch (e) {
+    aiTranslating.value = false
+    alert('Failed to start AI translation: ' + e.message)
+  }
+}
 
 const formatNumber = (value) => {
   if (value === null || value === undefined) return '0'
@@ -562,6 +619,10 @@ onMounted(async () => {
   await fetchGroups()
   await loadTranslations()
   await fetchUniqueKeysCount()
+})
+
+onBeforeUnmount(() => {
+  if (aiPollInterval) clearInterval(aiPollInterval)
 })
 
 let searchTimeout = null
@@ -1690,6 +1751,49 @@ const refreshMissingTranslations = async () => {
 
 .check-missing-btn:hover {
   background: rgba(255, 255, 255, 0.3);
+}
+
+/* AI Translation Progress */
+.ai-progress-bar {
+  padding: 0.75rem 1.25rem;
+  background: linear-gradient(135deg, #eff6ff, #f0f4ff);
+  border-bottom: 1px solid #dbeafe;
+}
+
+.ai-progress-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #1d4ed8;
+  margin-bottom: 0.4rem;
+}
+
+.ai-progress-info .fas { font-size: 0.9rem; }
+
+.ai-progress-pct {
+  margin-left: auto;
+  font-weight: 700;
+}
+
+.ai-progress-track {
+  height: 6px;
+  background: #dbeafe;
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.ai-progress-fill {
+  height: 100%;
+  background: linear-gradient(135deg, #3b82f6, #2563eb);
+  border-radius: 3px;
+  transition: width 0.5s ease;
+  animation: ai-pulse 2s infinite;
+}
+
+@keyframes ai-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
 }
 
 .missing-section {

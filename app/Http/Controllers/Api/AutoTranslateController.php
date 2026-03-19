@@ -23,8 +23,12 @@ class AutoTranslateController extends Controller
      */
     public function start(Request $request, string $locale): JsonResponse
     {
-        $tier = $request->query('tier', 'all');
+        $tierRaw = $request->query('tier', 'all');
         $limit = $request->query('limit') ? (int) $request->query('limit') : null;
+
+        // Normalize tier names: accept both "1"/"2"/"3" and "ui"/"core"/"posts"
+        $tierMap = ['ui' => '1', 'core' => '2', 'posts' => '3'];
+        $tier = $tierMap[$tierRaw] ?? $tierRaw;
 
         $language = Language::getByCode($locale);
         $languageName = $language?->name ?? config("languages.supported.{$locale}.name", $locale);
