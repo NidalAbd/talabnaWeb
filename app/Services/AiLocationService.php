@@ -138,15 +138,28 @@ class AiLocationService
         }
 
         try {
-            // Step 1: Fetch ALL city names from CountriesNow API (English only, free)
-            $cityNames = $this->fetchCitiesFromApi($countryName);
+            // Step 1: Fetch ALL city names — try CountriesNow API first, fallback to OpenAI
+            $cityNames = [];
+            $source = 'unknown';
 
-            if (empty($cityNames)) {
-                Log::warning("No cities found for {$countryName} from CountriesNow API");
-                return ['success' => false, 'error' => 'No cities found from API', 'created' => 0];
+            try {
+                $cityNames = $this->fetchCitiesFromApi($countryName);
+                $source = 'CountriesNow';
+            } catch (\Exception $e) {
+                Log::info("CountriesNow failed for {$countryName}: {$e->getMessage()}. Falling back to OpenAI.");
             }
 
-            Log::info("Fetched " . count($cityNames) . " cities for {$countryName} from CountriesNow API");
+            if (empty($cityNames)) {
+                // Fallback: use OpenAI to generate city list (English only)
+                $cityNames = $this->generateCityNamesViaAi($countryName);
+                $source = 'OpenAI';
+            }
+
+            if (empty($cityNames)) {
+                return ['success' => false, 'error' => 'No cities found from any source', 'created' => 0];
+            }
+
+            Log::info("Fetched " . count($cityNames) . " cities for {$countryName} from {$source}");
 
             // Step 2: Translate city names to all active languages via OpenAI (in batches)
             $activeLocales = Language::getActiveOrdered()->pluck('code')->toArray();
@@ -221,6 +234,58 @@ class AiLocationService
         }
 
         return $data['data'] ?? [];
+    }
+
+    /**
+     * Fallback: Generate city names via OpenAI when CountriesNow doesn't have the country.
+     * Returns array of English city name strings.
+     */
+    protected function generateCityNamesViaAi(string $countryName): array
+    {
+        $allCities = [];
+
+        // Multiple rounds to get comprehensive list
+        for ($round = 1; $round <= 5; $round++) {
+            $excludeList = !empty($allCities) ? "\nDo NOT include: " . implode(', ', array_slice($allCities, 0, 300)) : '';
+
+            $prompt = $round === 1
+                ? "List ALL cities, towns, villages, and populated places in {$countryName}. Return ONLY a JSON array of English names. Example: [\"Gaza City\", \"Ramallah\", ...]. Be extremely comprehensive. Return ONLY the JSON array, no markdown."
+                : "List MORE cities and towns in {$countryName} not already listed. Return ONLY a JSON array of English names. If no more, return []. No markdown." . $excludeList;
+
+            try {
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $this->apiKey,
+                    'Content-Type' => 'application/json',
+                ])->timeout(120)->post('https://api.openai.com/v1/chat/completions', [
+                    'model' => $this->model,
+                    'messages' => [
+                        ['role' => 'system', 'content' => 'You are a geography expert. Return only valid JSON arrays.'],
+                        ['role' => 'user', 'content' => $prompt],
+                    ],
+                    'temperature' => 0.3,
+                    'max_tokens' => 16384,
+                ]);
+
+                $content = $response->json('choices.0.message.content', '');
+                $content = preg_replace('/^```(?:json)?\s*\n?/m', '', $content);
+                $content = preg_replace('/\n?```\s*$/m', '', $content);
+                $names = json_decode(trim($content), true);
+
+                if (!is_array($names) || empty($names)) break;
+
+                $newNames = array_diff($names, $allCities);
+                $allCities = array_merge($allCities, array_values($newNames));
+
+                Log::info("OpenAI round {$round}: Got " . count($newNames) . " new cities for {$countryName} (total: " . count($allCities) . ")");
+
+                if (count($newNames) < 5) break; // Diminishing returns
+            } catch (\Exception $e) {
+                Log::error("OpenAI city generation round {$round} failed: " . $e->getMessage());
+                break;
+            }
+        }
+
+        return $allCities;
     }
 
     /**
