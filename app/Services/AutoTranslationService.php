@@ -17,6 +17,8 @@ class AutoTranslationService
 {
     protected string $apiKey;
     protected string $model = 'gpt-4o-mini';
+    protected string $defaultLocale;
+    protected string $defaultLanguageName;
 
     protected int $uiBatchSize = 50;
     protected int $modelBatchSize = 20;
@@ -36,6 +38,11 @@ class AutoTranslationService
     public function __construct()
     {
         $this->apiKey = config('services.openai.key', '');
+
+        // Detect source/default language
+        $defaultLang = \App\Models\Language::getDefault();
+        $this->defaultLocale = $defaultLang?->code ?? 'ar';
+        $this->defaultLanguageName = $defaultLang?->name ?? 'Arabic';
     }
 
     /**
@@ -73,7 +80,7 @@ class AutoTranslationService
         $errors = 0;
 
         // Get all UI translation keys for the default locale
-        $defaultLocale = 'ar'; // Talabna default
+        $defaultLocale = $this->defaultLocale;
         $defaultTranslations = Translation::where('locale', $defaultLocale)->get();
         $total = $defaultTranslations->count();
 
@@ -303,7 +310,7 @@ class AutoTranslationService
 
                 // Get source text
                 $sourceText = is_array($value)
-                    ? ($value['ar'] ?? array_values(array_filter($value))[0] ?? '')
+                    ? ($value[$this->defaultLocale] ?? array_values(array_filter($value))[0] ?? '')
                     : ($value ?? '');
 
                 if (empty($sourceText)) {
@@ -417,11 +424,12 @@ class AutoTranslationService
         }
     }
 
-    protected function buildPayload(array $batch, string $targetLanguage): array
+    protected function buildPayload(array $batch, string $targetLanguage, ?string $sourceLanguage = null): array
     {
+        $sourceLang = $sourceLanguage ?? $this->defaultLanguageName;
         $jsonInput = json_encode($batch, JSON_UNESCAPED_UNICODE);
 
-        $prompt = "Translate the following JSON object values to {$targetLanguage}.\n"
+        $prompt = "Translate the following JSON object values from {$sourceLang} to {$targetLanguage}.\n"
             . "Keep the JSON keys exactly the same. Only translate the values.\n"
             . "Maintain the same tone, formatting, and any special characters.\n"
             . "For technical terms, keep them as-is or use the commonly accepted translation.\n"
@@ -433,7 +441,7 @@ class AutoTranslationService
             'messages' => [
                 [
                     'role' => 'system',
-                    'content' => "You are a professional translator. Translate text for a marketplace/classifieds app called 'Talabna'. Return only valid JSON.",
+                    'content' => "You are a professional translator. Translate text for a marketplace/classifieds app called 'Talabna' (a services and classifieds platform). The source language is {$sourceLang}. Return only valid JSON.",
                 ],
                 ['role' => 'user', 'content' => $prompt],
             ],
