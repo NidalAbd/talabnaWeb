@@ -161,41 +161,57 @@ class AiLocationService
 
             Log::info("Fetched " . count($cityNames) . " cities for {$countryName} from {$source}");
 
-            // Step 2: Translate city names to all active languages via OpenAI (in batches)
+            // Step 2: Insert ALL cities immediately with English names
+            $totalCreated = 0;
+            foreach ($cityNames as $name) {
+                if (empty(trim($name))) continue;
+                cities::create([
+                    'name' => ['en' => $name],
+                    'country_id' => $country->id,
+                ]);
+                $totalCreated++;
+            }
+
+            Log::info("Inserted {$totalCreated} cities for {$countryName} (English only)");
+
+            // Step 3: Translate city names to all active languages via OpenAI (in batches)
             $activeLocales = Language::getActiveOrdered()->pluck('code')->toArray();
             $needsTranslation = array_filter($activeLocales, fn($l) => $l !== 'en');
+            $translatedCount = 0;
 
-            $totalCreated = 0;
-            $batches = array_chunk($cityNames, 40); // 40 cities per OpenAI batch
+            if (!empty($needsTranslation)) {
+                $allCities = cities::where('country_id', $country->id)->get();
+                $batches = $allCities->chunk(50);
 
-            foreach ($batches as $batchIndex => $batch) {
-                if (!empty($needsTranslation)) {
-                    // Ask OpenAI to translate this batch
-                    $translatedBatch = $this->translateCityBatch($batch, $countryName, $needsTranslation);
-                } else {
-                    $translatedBatch = array_map(fn($name) => ['en' => $name], $batch);
+                foreach ($batches as $batchIndex => $batch) {
+                    $cityNamesForTranslation = $batch->map(fn($c) => $c->name['en'] ?? '')->filter()->values()->toArray();
+                    if (empty($cityNamesForTranslation)) continue;
+
+                    $translated = $this->translateCityBatch($cityNamesForTranslation, $countryName, $needsTranslation);
+
+                    // Update each city with translations
+                    foreach ($batch as $city) {
+                        $enName = $city->name['en'] ?? '';
+                        // Find matching translation
+                        foreach ($translated as $tData) {
+                            if (($tData['en'] ?? '') === $enName) {
+                                $city->name = $tData;
+                                $city->save();
+                                $translatedCount++;
+                                break;
+                            }
+                        }
+                    }
+
+                    Log::info("Translated batch " . ($batchIndex + 1) . "/" . $batches->count() . " for {$countryName} ({$translatedCount} done)");
                 }
-
-                // Insert into DB
-                foreach ($translatedBatch as $cityData) {
-                    if (!is_array($cityData)) continue;
-                    $enName = $cityData['en'] ?? null;
-                    if (!$enName) continue;
-
-                    cities::create([
-                        'name' => $cityData,
-                        'country_id' => $country->id,
-                    ]);
-                    $totalCreated++;
-                }
-
-                Log::info("Batch " . ($batchIndex + 1) . "/" . count($batches) . ": Inserted " . count($batch) . " cities for {$countryName} (total: {$totalCreated})");
             }
 
             return [
                 'success' => true,
                 'country' => $countryName,
                 'created' => $totalCreated,
+                'translated' => $translatedCount,
                 'fetched_from_api' => count($cityNames),
                 'total' => $totalCreated,
             ];
