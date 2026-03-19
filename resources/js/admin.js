@@ -95,6 +95,8 @@ document.addEventListener('DOMContentLoaded', () => {
         href.includes('/admin/seo') ||
         href.includes('/admin/command-monitor') ||
         href.includes('/admin/ai-content') ||
+        href.includes('/admin/subscription-plans') ||
+        href.includes('/admin/auto-translate') ||
         href.includes('/dashboard')
       )) {
         e.preventDefault()

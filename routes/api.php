@@ -323,6 +323,17 @@ Route::middleware(['auth:api'])->group(function () {
         Route::delete('/cleanup', [App\Http\Controllers\Api\RequestMonitorController::class, 'cleanup']);
     });
 
+    // Subscription Plan Management Routes (Admin)
+    Route::prefix('admin/subscription-plans')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store']);
+        Route::get('/stats', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'stats']);
+        Route::get('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'show']);
+        Route::put('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update']);
+        Route::delete('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'destroy']);
+        Route::post('/{id}/toggle', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'toggle']);
+    });
+
     // Auto-Translation Routes (Admin)
     Route::prefix('admin/auto-translate')->group(function () {
         Route::post('/{locale}', [App\Http\Controllers\Api\AutoTranslateController::class, 'start']);

@@ -28,6 +28,8 @@ import LanguagesList from '../views/admin/languages/LanguagesList.vue'
 import TranslationsList from '../views/admin/translations/TranslationsList.vue'
 import CommandMonitor from '../views/admin/CommandMonitor.vue'
 import AiContentDashboard from '../views/admin/AiContentDashboard.vue'
+import SubscriptionPlansList from '../views/admin/SubscriptionPlansList.vue'
+import AutoTranslateDashboard from '../views/admin/AutoTranslateDashboard.vue'
 
 const routes = [
   { path: '/dashboard', name: 'admin.dashboard', component: ModernDashboard, meta: { title: 'Dashboard' } },
@@ -57,6 +59,8 @@ const routes = [
   { path: '/admin/translations', name: 'translations.index', component: TranslationsList, meta: { title: 'Translations' } },
   { path: '/admin/command-monitor', name: 'command_monitor.index', component: CommandMonitor, meta: { title: 'Command Monitor' } },
   { path: '/admin/ai-content', name: 'ai_content.index', component: AiContentDashboard, meta: { title: 'AI Content Generator' } },
+  { path: '/admin/subscription-plans', name: 'subscription_plans.index', component: SubscriptionPlansList, meta: { title: 'Subscription Plans' } },
+  { path: '/admin/auto-translate', name: 'auto_translate.index', component: AutoTranslateDashboard, meta: { title: 'Auto-Translation' } },
 ]
 
 const router = createRouter({

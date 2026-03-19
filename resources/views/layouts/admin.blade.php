@@ -156,6 +156,12 @@
                         <a href="/translations" class="nav-link"><i class="nav-icon fas fa-file-alt"></i><p>Translations</p></a>
                     </li>
                     <li class="nav-item">
+                        <a href="/admin/auto-translate" class="nav-link"><i class="nav-icon fas fa-robot"></i><p>Auto-Translate (AI)</p></a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="/admin/subscription-plans" class="nav-link"><i class="nav-icon fas fa-crown"></i><p>Subscription Plans</p></a>
+                    </li>
+                    <li class="nav-item">
                         <a href="/command-monitor" class="nav-link"><i class="nav-icon fas fa-terminal"></i><p>Command Monitor</p></a>
                     </li>
                 </ul>
