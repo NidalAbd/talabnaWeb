@@ -358,16 +358,23 @@ const handleAiTranslate = async (lang) => {
 
     // Start polling progress
     pollInterval = setInterval(async () => {
-      const progress = await checkProgress(lang.code)
-      if (progress !== null) {
-        translatingProgress.value = progress.percentage || progress
+      const prog = await checkProgress(lang.code)
+      if (prog !== null && typeof prog === 'object') {
+        // Calculate real percentage from completed/total
+        const completed = prog.completed || 0
+        const total = prog.total || 0
+        const pct = total > 0 && total < 999999 ? Math.round((completed / total) * 100) : (prog.percentage || 0)
+        translatingProgress.value = pct > 0 ? pct : (completed > 0 ? `${completed} done` : 0)
 
         // Check if complete
-        if (progress.percentage >= 100 || progress.status === 'completed' || progress === 100) {
+        if (prog.status === 'completed' || prog.status === 'failed') {
           clearInterval(pollInterval)
           pollInterval = null
           translatingLocale.value = null
           translatingProgress.value = null
+          if (prog.status === 'completed') {
+            alert(`Translation completed! ${completed} items translated.`)
+          }
           await loadStats()
         }
       }
@@ -452,9 +459,47 @@ const handleLanguageSaved = async (eventData) => {
   }
 }
 
+// Check if any language has a running translation and resume polling
+const checkRunningTranslations = async () => {
+  if (!stats.value?.languages) return
+  for (const lang of stats.value.languages) {
+    if (lang.is_source) continue
+    try {
+      const prog = await checkProgress(lang.code)
+      if (prog && typeof prog === 'object' && prog.status === 'running') {
+        translatingLocale.value = lang.code
+        const completed = prog.completed || 0
+        const total = prog.total || 0
+        translatingProgress.value = total > 0 && total < 999999
+          ? Math.round((completed / total) * 100)
+          : (completed > 0 ? `${completed} done` : 0)
+        // Resume polling
+        pollInterval = setInterval(async () => {
+          const p = await checkProgress(lang.code)
+          if (p && typeof p === 'object') {
+            const c = p.completed || 0
+            const t = p.total || 0
+            translatingProgress.value = t > 0 && t < 999999 ? Math.round((c / t) * 100) : (c > 0 ? `${c} done` : 0)
+            if (p.status === 'completed' || p.status === 'failed') {
+              clearInterval(pollInterval)
+              pollInterval = null
+              translatingLocale.value = null
+              translatingProgress.value = null
+              if (p.status === 'completed') alert(`Translation completed! ${c} items translated.`)
+              await loadStats()
+            }
+          }
+        }, 3000)
+        break // Only one translation at a time
+      }
+    } catch (_) {}
+  }
+}
+
 // Lifecycle
-onMounted(() => {
-  loadStats()
+onMounted(async () => {
+  await loadStats()
+  await checkRunningTranslations()
 })
 
 onBeforeUnmount(() => {

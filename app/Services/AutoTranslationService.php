@@ -214,10 +214,28 @@ class AutoTranslationService
         ], 3600);
 
         try {
+            // Calculate actual total for accurate progress
+            $actualTotal = 0;
+            foreach ($this->tier3Tables as $table) {
+                $modelClass = $this->modelMap[$table] ?? null;
+                if (!$modelClass) continue;
+                $fields = config("languages.required_fields.{$table}", []);
+                $actualTotal += $modelClass::count() * count($fields);
+            }
+            if ($limit !== null) {
+                $actualTotal = min($actualTotal, $limit * count(config("languages.required_fields.service_posts", ['title', 'description'])));
+            }
+
+            Cache::put($progressKey, [
+                'status' => 'running', 'tier' => 3, 'total' => $actualTotal,
+                'completed' => 0, 'percentage' => 0,
+                'current_task' => 'Translating service posts...', 'errors' => 0,
+            ], 3600);
+
             foreach ($this->tier3Tables as $table) {
                 $result = $this->translateModelContent(
                     $table, $targetLocale, $targetLanguageName,
-                    $progressKey, $completed, $limit ?? 999999, $errors,
+                    $progressKey, $completed, $actualTotal, $errors,
                     $limit
                 );
                 $completed = $result['completed'];
