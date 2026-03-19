@@ -7,6 +7,8 @@ use App\Models\Language;
 use App\Services\AutoTranslationService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class AutoTranslateController extends Controller
 {
@@ -19,34 +21,56 @@ class AutoTranslateController extends Controller
 
     /**
      * Start auto-translation for a locale.
-     * POST /api/admin/auto-translate/{locale}?tier=1|2|3|all&limit=50
+     * Spawns a background artisan process so it doesn't time out.
+     * Multiple languages can run in parallel.
+     *
+     * POST /api/admin/auto-translate/{locale}?tier=all
      */
     public function start(Request $request, string $locale): JsonResponse
     {
         $tierRaw = $request->query('tier', 'all');
-        $limit = $request->query('limit') ? (int) $request->query('limit') : null;
 
-        // Normalize tier names: accept both "1"/"2"/"3" and "ui"/"core"/"posts"
+        // Normalize tier names
         $tierMap = ['ui' => '1', 'core' => '2', 'posts' => '3'];
         $tier = $tierMap[$tierRaw] ?? $tierRaw;
 
         $language = Language::getByCode($locale);
         $languageName = $language?->name ?? config("languages.supported.{$locale}.name", $locale);
 
-        // Dispatch as background job
-        dispatch(function () use ($locale, $languageName, $tier, $limit) {
-            $service = app(AutoTranslationService::class);
+        // Check if already running for this locale
+        $existing = Cache::get("auto_translate_progress_{$locale}");
+        if ($existing && $existing['status'] === 'running') {
+            return response()->json([
+                'success' => true,
+                'message' => "Translation already running for {$languageName} ({$locale})",
+                'already_running' => true,
+            ]);
+        }
 
-            if ($tier === 'all' || $tier === '1') {
-                $service->translateTier1($locale, $languageName);
-            }
-            if ($tier === 'all' || $tier === '2') {
-                $service->translateTier2($locale, $languageName);
-            }
-            if ($tier === 'all' || $tier === '3') {
-                $service->translateTier3($locale, $languageName, $limit);
-            }
-        })->afterResponse();
+        // Set initial progress immediately
+        Cache::put("auto_translate_progress_{$locale}", [
+            'status' => 'running',
+            'tier' => $tier === 'all' ? 1 : (int) $tier,
+            'total' => 0,
+            'completed' => 0,
+            'percentage' => 0,
+            'current_task' => 'Starting...',
+            'errors' => 0,
+        ], 7200); // 2 hour TTL
+
+        // Spawn a background artisan process that runs independently
+        // This won't be killed when the web request ends
+        $artisan = base_path('artisan');
+        $logFile = storage_path("logs/translate-{$locale}.log");
+        $langNameEscaped = escapeshellarg($languageName);
+        $tierArg = escapeshellarg($tier === 'all' ? 'all' : $tier);
+
+        $command = "php {$artisan} translate:auto {$locale} --language-name={$langNameEscaped} --tier={$tierArg}";
+        $fullCommand = "nohup {$command} > {$logFile} 2>&1 &";
+
+        exec($fullCommand);
+
+        Log::info("Auto-translate spawned for {$locale}: {$command}");
 
         return response()->json([
             'success' => true,
@@ -69,7 +93,6 @@ class AutoTranslateController extends Controller
 
     /**
      * On-demand translation for a single post.
-     * POST /api/admin/auto-translate/on-demand
      */
     public function onDemand(Request $request): JsonResponse
     {

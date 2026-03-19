@@ -111,7 +111,7 @@ class AutoTranslationService
             'status' => 'running', 'tier' => 1, 'total' => $total,
             'completed' => $completed, 'percentage' => 0,
             'current_task' => 'Translating UI strings...', 'errors' => 0,
-        ], 3600);
+        ], 7200);
 
         try {
             $batches = array_chunk($toTranslate, $this->uiBatchSize, true);
@@ -140,7 +140,7 @@ class AutoTranslationService
                 'status' => 'completed', 'tier' => 1, 'total' => $total,
                 'completed' => $completed, 'percentage' => 100,
                 'current_task' => 'Tier 1 completed!', 'errors' => $errors,
-            ], 3600);
+            ], 7200);
 
             Translation::clearCache($targetLocale);
 
@@ -173,7 +173,7 @@ class AutoTranslationService
             'status' => 'running', 'tier' => 2, 'total' => $total,
             'completed' => 0, 'percentage' => 0,
             'current_task' => 'Translating core content...', 'errors' => 0,
-        ], 3600);
+        ], 7200);
 
         try {
             foreach ($this->tier2Tables as $table) {
@@ -189,7 +189,7 @@ class AutoTranslationService
                 'status' => 'completed', 'tier' => 2, 'total' => $total,
                 'completed' => $completed, 'percentage' => 100,
                 'current_task' => 'Tier 2 completed!', 'errors' => $errors,
-            ], 3600);
+            ], 7200);
 
             return ['success' => true, 'tier' => 2, 'total' => $total, 'completed' => $completed, 'errors' => $errors];
         } catch (\Exception $e) {
@@ -211,7 +211,7 @@ class AutoTranslationService
             'status' => 'running', 'tier' => 3, 'total' => 0,
             'completed' => 0, 'percentage' => 0,
             'current_task' => 'Translating service posts...', 'errors' => 0,
-        ], 3600);
+        ], 7200);
 
         try {
             // Calculate actual total for accurate progress
@@ -230,7 +230,7 @@ class AutoTranslationService
                 'status' => 'running', 'tier' => 3, 'total' => $actualTotal,
                 'completed' => 0, 'percentage' => 0,
                 'current_task' => 'Translating service posts...', 'errors' => 0,
-            ], 3600);
+            ], 7200);
 
             foreach ($this->tier3Tables as $table) {
                 $result = $this->translateModelContent(
@@ -247,7 +247,7 @@ class AutoTranslationService
                 'total' => $completed + $errors, 'completed' => $completed,
                 'percentage' => 100, 'current_task' => 'Tier 3 batch completed!',
                 'errors' => $errors,
-            ], 3600);
+            ], 7200);
 
             return ['success' => true, 'tier' => 3, 'translated' => $completed, 'errors' => $errors];
         } catch (\Exception $e) {
