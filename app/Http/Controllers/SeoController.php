@@ -64,16 +64,13 @@ class SeoController extends Controller
             'keywords' => $locale === 'ar'
                 ? 'إعلانات مبوبة, سيارات للبيع, عقارات, وظائف, هواتف, بيع وشراء, فلسطين, غزة'
                 : 'classified ads, cars for sale, real estate, jobs, phones, buy and sell, Palestine, Gaza',
-            'canonical' => $baseUrl . $path,
-            'alternates' => [
-                ['hreflang' => 'ar', 'href' => $baseUrl . $path],
-                ['hreflang' => 'en', 'href' => $baseUrl . $path . '?lang=en'],
-                ['hreflang' => 'x-default', 'href' => $baseUrl . $path],
-            ],
+            'locale' => $locale,
+            'canonical' => $baseUrl . $path . ($locale !== 'ar' ? '?lang=' . $locale : ''),
+            'alternates' => $this->generateHreflangAlternates($baseUrl, $path),
             'og' => [
                 'type' => 'website',
                 'site_name' => 'Talabna - طلبنا',
-                'locale' => $locale === 'ar' ? 'ar_SA' : 'en_US',
+                'locale' => $this->getOgLocale($locale),
                 'image' => $baseUrl . '/storage/photos/og-image.jpg',
                 'image_width' => 1200,
                 'image_height' => 630,
@@ -683,5 +680,41 @@ class SeoController extends Controller
         $text = preg_replace('/[\s-]+/', '-', $text);
         $text = trim($text, '-');
         return urlencode($text) ?: 'item';
+    }
+
+    /**
+     * Generate hreflang alternates for all active languages.
+     */
+    private function generateHreflangAlternates(string $baseUrl, string $path): array
+    {
+        $languages = \App\Models\Language::getActiveOrdered();
+        $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
+
+        $alternates = [];
+        foreach ($languages as $lang) {
+            $href = $baseUrl . $path;
+            if ($lang->code !== $defaultLocale) {
+                $href .= (str_contains($path, '?') ? '&' : '?') . 'lang=' . $lang->code;
+            }
+            $alternates[] = ['hreflang' => $lang->code, 'href' => $href];
+        }
+        $alternates[] = ['hreflang' => 'x-default', 'href' => $baseUrl . $path];
+
+        return $alternates;
+    }
+
+    /**
+     * Get OpenGraph locale code.
+     */
+    private function getOgLocale(string $locale): string
+    {
+        $map = [
+            'ar' => 'ar_SA', 'en' => 'en_US', 'tr' => 'tr_TR', 'fr' => 'fr_FR',
+            'es' => 'es_ES', 'ur' => 'ur_PK', 'bn' => 'bn_BD', 'pt' => 'pt_BR',
+            'ru' => 'ru_RU', 'id' => 'id_ID', 'de' => 'de_DE', 'zh' => 'zh_CN',
+            'ku' => 'ku_TR', 'fa' => 'fa_IR', 'sw' => 'sw_KE', 'ms' => 'ms_MY',
+            'hi' => 'hi_IN',
+        ];
+        return $map[$locale] ?? $locale . '_' . strtoupper($locale);
     }
 }

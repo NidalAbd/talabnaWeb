@@ -338,16 +338,31 @@ class SitemapController extends Controller
                 ->take($perPage)
                 ->get(['id', 'title', 'updated_at']);
 
+            $activeLanguages = \App\Models\Language::getActiveOrdered();
+
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
             foreach ($listings as $listing) {
-                $slug = $this->slugify($listing->title);
+                // Get title for slug - handle JSON array
+                $titleData = $listing->title;
+                $titleForSlug = is_array($titleData)
+                    ? ($titleData['ar'] ?? $titleData['en'] ?? array_values(array_filter($titleData))[0] ?? '')
+                    : ($titleData ?? '');
+                $slug = $this->slugify($titleForSlug);
+                $baseUrl = url("/listing/{$listing->id}/{$slug}");
+
                 $xml .= '<url>';
-                $xml .= '<loc>' . url("/listing/{$listing->id}/{$slug}") . '</loc>';
+                $xml .= '<loc>' . $baseUrl . '</loc>';
                 $xml .= '<lastmod>' . ($listing->updated_at ?? now())->toIso8601String() . '</lastmod>';
                 $xml .= '<changefreq>weekly</changefreq>';
                 $xml .= '<priority>0.6</priority>';
+                // Add hreflang alternates for each active language
+                foreach ($activeLanguages as $lang) {
+                    $langUrl = $baseUrl . '?lang=' . $lang->code;
+                    $xml .= '<xhtml:link rel="alternate" hreflang="' . $lang->code . '" href="' . $langUrl . '"/>';
+                }
+                $xml .= '<xhtml:link rel="alternate" hreflang="x-default" href="' . $baseUrl . '"/>';
                 $xml .= '</url>';
             }
 
