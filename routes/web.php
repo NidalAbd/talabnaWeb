@@ -889,6 +889,24 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::put('/{id}', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'update'])->name('api.admin.translations.update');
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'destroy'])->name('api.admin.translations.destroy');
             });
+
+            // Auto-Translation (OpenAI)
+            Route::prefix('auto-translate')->group(function () {
+                Route::post('/{locale}', [\App\Http\Controllers\Api\AutoTranslateController::class, 'start'])->name('api.admin.auto-translate.start');
+                Route::get('/{locale}/progress', [\App\Http\Controllers\Api\AutoTranslateController::class, 'progress'])->name('api.admin.auto-translate.progress');
+                Route::post('/on-demand', [\App\Http\Controllers\Api\AutoTranslateController::class, 'onDemand'])->name('api.admin.auto-translate.on-demand');
+            });
+
+            // Subscription Plans Management
+            Route::prefix('subscription-plans')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index'])->name('api.admin.subscription-plans.index');
+                Route::post('/', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store'])->name('api.admin.subscription-plans.store');
+                Route::get('/stats', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'stats'])->name('api.admin.subscription-plans.stats');
+                Route::get('/{id}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'show'])->name('api.admin.subscription-plans.show');
+                Route::put('/{id}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update'])->name('api.admin.subscription-plans.update');
+                Route::delete('/{id}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'destroy'])->name('api.admin.subscription-plans.destroy');
+                Route::post('/{id}/toggle', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'toggle'])->name('api.admin.subscription-plans.toggle');
+            });
         });
     });
 });
