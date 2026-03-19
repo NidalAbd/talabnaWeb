@@ -385,6 +385,15 @@
             <i :class="importMessageType === 'success' ? 'fas fa-check-circle' : importMessageType === 'error' ? 'fas fa-exclamation-circle' : 'fas fa-info-circle'"></i>
             {{ importMessage }}
           </div>
+          <div v-if="showGenerateAllBtn" style="margin-top: 1rem; text-align: center;">
+            <button class="action-btn success" :disabled="generatingAllCities" @click="handleGenerateAllCities">
+              <i :class="generatingAllCities ? 'fas fa-spinner fa-spin' : 'fas fa-city'"></i>
+              {{ generatingAllCities ? 'Generating cities...' : 'Generate Cities for All Imported Countries' }}
+            </button>
+            <p style="font-size: 0.78rem; color: #6b7280; margin-top: 0.5rem;">
+              This may take several minutes. Each country gets cities from API + translated to all languages.
+            </p>
+          </div>
         </div>
         <div class="modal-footer">
           <button class="action-btn secondary" @click="showImportModal = false">Cancel</button>
@@ -443,6 +452,8 @@ const importMessage = ref('')
 const importMessageType = ref('info')
 const importOptions = ref([])
 const selectedImportLangs = ref([])
+const showGenerateAllBtn = ref(false)
+const generatingAllCities = ref(false)
 
 const selectedImportCount = computed(() => {
   return importOptions.value
@@ -500,12 +511,15 @@ const handleImportCountries = async () => {
     if (result.success) {
       importMessage.value = result.message
       importMessageType.value = 'success'
-      setTimeout(async () => {
-        await loadCountries(1)
-        showImportModal.value = false
-        importMessage.value = ''
-        selectedImportLangs.value = []
-      }, 2000)
+      showGenerateAllBtn.value = (result.needs_cities || 0) > 0
+      await loadCountries(1)
+      if (!showGenerateAllBtn.value) {
+        setTimeout(() => {
+          showImportModal.value = false
+          importMessage.value = ''
+          selectedImportLangs.value = []
+        }, 2000)
+      }
     } else {
       importMessage.value = result.message || 'Import failed'
       importMessageType.value = 'error'
@@ -515,6 +529,36 @@ const handleImportCountries = async () => {
     importMessageType.value = 'error'
   } finally {
     importLoading.value = false
+  }
+}
+
+const handleGenerateAllCities = async () => {
+  generatingAllCities.value = true
+  importMessage.value = 'Generating cities for all countries... This may take several minutes.'
+  importMessageType.value = 'info'
+  try {
+    const response = await fetch('/api/admin/location-import/generate-all-cities', {
+      method: 'POST', credentials: 'same-origin',
+      headers: {
+        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+        'Accept': 'application/json'
+      }
+    })
+    const result = await response.json()
+    if (result.success) {
+      importMessage.value = result.message
+      importMessageType.value = 'success'
+      showGenerateAllBtn.value = false
+      await loadCountries(1)
+    } else {
+      importMessage.value = result.message || 'Failed'
+      importMessageType.value = 'error'
+    }
+  } catch (err) {
+    importMessage.value = 'Error: ' + err.message
+    importMessageType.value = 'error'
+  } finally {
+    generatingAllCities.value = false
   }
 }
 

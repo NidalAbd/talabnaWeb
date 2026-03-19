@@ -895,6 +895,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::get('/regions', [\App\Http\Controllers\Admin\LocationImportController::class, 'regions'])->name('api.admin.location-import.regions');
                 Route::post('/countries', [\App\Http\Controllers\Admin\LocationImportController::class, 'importCountries'])->name('api.admin.location-import.countries');
                 Route::post('/countries/{id}/generate-cities', [\App\Http\Controllers\Admin\LocationImportController::class, 'generateCities'])->name('api.admin.location-import.generate-cities');
+                Route::post('/generate-all-cities', [\App\Http\Controllers\Admin\LocationImportController::class, 'generateAllCities'])->name('api.admin.location-import.generate-all-cities');
                 Route::post('/countries/{id}/translate', [\App\Http\Controllers\Admin\LocationImportController::class, 'translateNames'])->name('api.admin.location-import.translate');
                 Route::get('/progress', [\App\Http\Controllers\Admin\LocationImportController::class, 'progress'])->name('api.admin.location-import.progress');
             });

@@ -50,28 +50,19 @@ class LocationImportController extends Controller
 
             $result = $this->service->importCountries($apiData);
 
-            // Auto-generate cities for all newly imported countries + existing ones missing cities
+            // Count how many need cities
             $allIsoCodes = collect($apiData)->pluck('cca2')->filter()->toArray();
             $countriesNeedingCities = \App\Models\countries::whereIn('iso_code', $allIsoCodes)
                 ->withCount('cities')
                 ->get()
-                ->filter(fn($c) => $c->cities_count === 0);
-
-            $citiesCreated = 0;
-            $citiesErrors = 0;
-            foreach ($countriesNeedingCities as $country) {
-                $cityResult = $this->service->generateCitiesForCountry($country);
-                if ($cityResult['success'] ?? false) {
-                    $citiesCreated += $cityResult['created'];
-                } else {
-                    $citiesErrors++;
-                }
-            }
+                ->filter(fn($c) => $c->cities_count === 0)
+                ->count();
 
             return response()->json([
                 'success' => true,
-                'message' => "Imported {$result['created']} countries (skipped {$result['skipped']}). Generated {$citiesCreated} cities for {$countriesNeedingCities->count()} countries.",
-                'data' => array_merge($result, ['cities_created' => $citiesCreated, 'cities_errors' => $citiesErrors]),
+                'message' => "Imported {$result['created']} countries (skipped {$result['skipped']}). {$countriesNeedingCities} countries need cities — use 'Generate Cities' per country.",
+                'data' => $result,
+                'needs_cities' => $countriesNeedingCities,
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -137,6 +128,45 @@ class LocationImportController extends Controller
     {
         $progress = AiLocationService::getProgress('location_import_progress');
         return response()->json(['success' => true, 'progress' => $progress]);
+    }
+
+    /**
+     * Generate cities for ALL countries that have 0 cities.
+     * Processes one at a time, returns results.
+     * POST /api/admin/location-import/generate-all-cities
+     */
+    public function generateAllCities(Request $request): JsonResponse
+    {
+        ignore_user_abort(true);
+        set_time_limit(3600);
+
+        $countriesNeedingCities = countries::withCount('cities')
+            ->having('cities_count', '=', 0)
+            ->get();
+
+        if ($countriesNeedingCities->isEmpty()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'All countries already have cities.',
+            ]);
+        }
+
+        $results = [];
+        $totalCities = 0;
+
+        foreach ($countriesNeedingCities as $country) {
+            $countryName = $country->name['en'] ?? 'Unknown';
+            $result = $this->service->generateCitiesForCountry($country);
+            $created = $result['created'] ?? 0;
+            $totalCities += $created;
+            $results[] = "{$countryName}: {$created} cities";
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => "Generated {$totalCities} cities for {$countriesNeedingCities->count()} countries",
+            'details' => $results,
+        ]);
     }
 
     /**
