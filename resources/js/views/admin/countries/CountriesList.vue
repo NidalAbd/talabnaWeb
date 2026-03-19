@@ -345,6 +345,7 @@
     />
 
     <!-- AI Import Countries Modal -->
+    <Teleport to="body">
     <div v-if="showImportModal" class="modal-overlay" @click.self="showImportModal = false">
       <div class="modal-dialog-advanced" style="max-width: 600px;">
         <div class="modal-header">
@@ -398,6 +399,7 @@
         </div>
       </div>
     </div>
+    </Teleport>
   </div>
 </template>
 
