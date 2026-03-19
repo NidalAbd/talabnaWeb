@@ -2,4 +2,4 @@
 *.log
 hot
 /public/storage
-public/build/
+# public/build/ is tracked so FTP deploy includes built assets
