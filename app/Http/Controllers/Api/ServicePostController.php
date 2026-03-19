@@ -218,8 +218,8 @@ class ServicePostController extends Controller
         $validator = Validator::make($request->all(), [
             'categories_id' => 'required',
             'sub_categories_id' => 'required|exists:sub_categories,id',
-            'title' => 'required|max:255',
-            'description' => 'required',
+            'title' => 'required',         // accepts string or JSON object {"ar":"...","en":"..."}
+            'description' => 'required',   // accepts string or JSON object {"ar":"...","en":"..."}
             'price' => 'nullable|numeric',
             'priceCurrency' => 'nullable', // Optional override
             'locationLatitudes' => 'required|numeric',
@@ -343,6 +343,19 @@ class ServicePostController extends Controller
                 $badgeExpiresAt = Carbon::now()->addDays($badgeDuration);
             }
 
+            // Normalize title and description to JSON locale format
+            $userLang = $request->header('Accept-Language', 'ar');
+            $title = $request->title;
+            $description = $request->description;
+
+            // If sent as plain string, wrap in locale JSON
+            if (is_string($title)) {
+                $title = [$userLang => $title];
+            }
+            if (is_string($description)) {
+                $description = [$userLang => $description];
+            }
+
             // Create service post
             Log::info('Creating service post');
             $servicePost = ServicePost::create([
@@ -351,8 +364,8 @@ class ServicePostController extends Controller
                 'city_id' => $user->city_id,
                 'categories_id' => $request->categories_id,
                 'sub_categories_id' => $request->sub_categories_id,
-                'title' => $request->title,
-                'description' => $request->description,
+                'title' => $title,
+                'description' => $description,
                 'price' => $request->price ?? 0,
                 'price_currency_code' => $currencyCode,
                 'price_currency_name' => $currencyName,
@@ -735,6 +748,15 @@ class ServicePostController extends Controller
             $servicePosts->where('city_id', (int)$request->city_id);
         }
 
+        // Filter by language: only show posts that have content in the user's language
+        if ($request->has('lang') && !empty($request->lang)) {
+            $lang = $request->lang;
+            $servicePosts->where(function ($q) use ($lang) {
+                $q->whereRaw("JSON_EXTRACT(title, '$.{$lang}') IS NOT NULL")
+                  ->whereRaw("JSON_EXTRACT(title, '$.{$lang}') != '\"\"'");
+            });
+        }
+
         if ($category == 6) {
             $userLatitude = $currentUser->location_latitudes;
             $userLongitude = $currentUser->location_longitudes;
@@ -1026,8 +1048,8 @@ class ServicePostController extends Controller
         $defaultLongitude = 35.2376;
 
         $validator = Validator::make($request->all(), [
-            'title' => 'required|max:255',
-            'description' => 'required',
+            'title' => 'required',         // accepts string or JSON object {"ar":"...","en":"..."}
+            'description' => 'required',   // accepts string or JSON object {"ar":"...","en":"..."}
             'categories_id' => 'required',
             'sub_categories_id' => 'required|exists:sub_categories,id',
             'price' => 'nullable|numeric',
@@ -1035,8 +1057,8 @@ class ServicePostController extends Controller
             'locationLatitudes' => 'required|numeric',
             'locationLongitudes' => 'required|numeric',
             'type' => 'required',
-            'badge_type_id' => 'nullable|integer|exists:badge_types,id', // New dynamic badge system
-            'haveBadge' => 'nullable|string', // Legacy support - now accepts any badge name
+            'badge_type_id' => 'nullable|integer|exists:badge_types,id',
+            'haveBadge' => 'nullable|string',
             'badgeDuration' => 'nullable|integer|min:0',
             'images.*' => 'nullable|file|mimes:jpeg,jpg,png,mp4',
         ]);
@@ -1104,10 +1126,31 @@ class ServicePostController extends Controller
                 }
             }
 
+            // Normalize title and description to JSON locale format
+            $userLang = $request->header('Accept-Language', 'ar');
+            $title = $validatedData['title'];
+            $description = $validatedData['description'];
+
+            if (is_string($title)) {
+                // Merge with existing translations instead of replacing
+                $existing = is_array($servicePost->getAttributes()['title'] ?? null)
+                    ? $servicePost->getAttributes()['title']
+                    : (json_decode($servicePost->getAttributes()['title'] ?? '{}', true) ?: []);
+                $existing[$userLang] = $title;
+                $title = $existing;
+            }
+            if (is_string($description)) {
+                $existing = is_array($servicePost->getAttributes()['description'] ?? null)
+                    ? $servicePost->getAttributes()['description']
+                    : (json_decode($servicePost->getAttributes()['description'] ?? '{}', true) ?: []);
+                $existing[$userLang] = $description;
+                $description = $existing;
+            }
+
             // Update service post details
             $updateData = [
-                'title' => $validatedData['title'],
-                'description' => $validatedData['description'],
+                'title' => $title,
+                'description' => $description,
                 'categories_id' => $validatedData['categories_id'],
                 'sub_categories_id' => $validatedData['sub_categories_id'],
                 'price' => $validatedData['price'] ?? $servicePost->price,

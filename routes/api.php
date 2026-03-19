@@ -283,6 +283,17 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/migrate-old-badges', [BadgeTypeController::class, 'migrateOldBadges']);
     });
 
+    // Subscription Routes
+    Route::prefix('subscriptions')->group(function () {
+        Route::get('/plans', [App\Http\Controllers\Api\SubscriptionController::class, 'plans']);
+        Route::get('/status', [App\Http\Controllers\Api\SubscriptionController::class, 'status']);
+        Route::post('/subscribe', [App\Http\Controllers\Api\SubscriptionController::class, 'subscribe']);
+        Route::post('/cancel', [App\Http\Controllers\Api\SubscriptionController::class, 'cancel']);
+        Route::post('/toggle-auto-renew', [App\Http\Controllers\Api\SubscriptionController::class, 'toggleAutoRenew']);
+        Route::post('/check-feature', [App\Http\Controllers\Api\SubscriptionController::class, 'checkFeature']);
+        Route::post('/use-feature', [App\Http\Controllers\Api\SubscriptionController::class, 'useFeature']);
+    });
+
     // Badge application routes for service posts
     Route::post('service_posts/{servicePost}/apply-badge', [BadgeTypeController::class, 'applyBadgeToPost']);
     Route::post('service_posts/{servicePost}/remove-badge', [BadgeTypeController::class, 'removeBadgeFromPost']);
@@ -310,6 +321,13 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/live', [App\Http\Controllers\Api\RequestMonitorController::class, 'liveActivity']);
         Route::get('/history', [App\Http\Controllers\Api\RequestMonitorController::class, 'history']);
         Route::delete('/cleanup', [App\Http\Controllers\Api\RequestMonitorController::class, 'cleanup']);
+    });
+
+    // Auto-Translation Routes (Admin)
+    Route::prefix('admin/auto-translate')->group(function () {
+        Route::post('/{locale}', [App\Http\Controllers\Api\AutoTranslateController::class, 'start']);
+        Route::get('/{locale}/progress', [App\Http\Controllers\Api\AutoTranslateController::class, 'progress']);
+        Route::post('/on-demand', [App\Http\Controllers\Api\AutoTranslateController::class, 'onDemand']);
     });
 
     // Translation Management Routes (Admin)

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Traits\HasTranslations;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -12,7 +13,12 @@ use Carbon\Carbon;
 
 class ServicePost extends Model
 {
-    use HasFactory;
+    use HasFactory, HasTranslations;
+
+    /**
+     * Fields that support multi-language JSON storage.
+     */
+    protected $translatable = ['title', 'description'];
 
     protected $fillable = [
         'user_id',
@@ -39,7 +45,9 @@ class ServicePost extends Model
     ];
 
     protected $casts = [
-        'price_currency_name' => 'array', // This will automatically handle JSON encoding/decoding
+        'title' => 'array',
+        'description' => 'array',
+        'price_currency_name' => 'array',
         'badge_expires_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
