@@ -68,5 +68,20 @@ export function useAutoTranslate() {
     }
   }
 
-  return { progress, loading, error, startTranslation, checkProgress, translateOnDemand }
+  const stopTranslation = async (locale) => {
+    try {
+      const response = await fetch(`/api/admin/auto-translate/${locale}/stop`, {
+        method: 'POST', credentials: 'same-origin',
+        headers: csrfHeaders()
+      })
+      if (!response.ok) throw new Error('Failed to stop translation')
+      progress.value = null
+      return await response.json()
+    } catch (err) {
+      error.value = err.message
+      throw err
+    }
+  }
+
+  return { progress, loading, error, startTranslation, checkProgress, translateOnDemand, stopTranslation }
 }

@@ -907,6 +907,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::prefix('auto-translate')->group(function () {
                 Route::post('/{locale}', [\App\Http\Controllers\Api\AutoTranslateController::class, 'start'])->name('api.admin.auto-translate.start');
                 Route::get('/{locale}/progress', [\App\Http\Controllers\Api\AutoTranslateController::class, 'progress'])->name('api.admin.auto-translate.progress');
+                Route::post('/{locale}/stop', [\App\Http\Controllers\Api\AutoTranslateController::class, 'stop'])->name('api.admin.auto-translate.stop');
                 Route::post('/on-demand', [\App\Http\Controllers\Api\AutoTranslateController::class, 'onDemand'])->name('api.admin.auto-translate.on-demand');
             });
 

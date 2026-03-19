@@ -202,19 +202,21 @@
             <i class="fas fa-edit"></i> Edit
           </button>
           <button
-            v-if="!lang.is_source"
+            v-if="!lang.is_source && translatingLocale !== lang.code"
             class="btn-ai-translate"
-            :disabled="translatingLocale === lang.code"
             @click="handleAiTranslate(lang)"
           >
-            <template v-if="translatingLocale === lang.code">
-              <i class="fas fa-spinner fa-spin"></i>
-              {{ translatingProgress !== null ? translatingProgress + '%' : 'Translating...' }}
-            </template>
-            <template v-else>
-              <i class="fas fa-magic"></i> AI Translate
-            </template>
+            <i class="fas fa-magic"></i> AI Translate
           </button>
+          <template v-if="!lang.is_source && translatingLocale === lang.code">
+            <button class="btn-ai-translate translating" disabled>
+              <i class="fas fa-spinner fa-spin"></i>
+              {{ translatingProgress !== null ? translatingProgress : '...' }}
+            </button>
+            <button class="btn-stop" @click="handleStopTranslate(lang)" title="Stop translation">
+              <i class="fas fa-stop"></i>
+            </button>
+          </template>
           <button
             v-if="!lang.is_source && !lang.is_default"
             class="btn-delete"
@@ -257,7 +259,7 @@ import LanguageFormModal from '../../../components/admin/languages/LanguageFormM
 
 const router = useRouter()
 const { deleteLanguage, toggleActive } = useLanguages()
-const { startTranslation, checkProgress } = useAutoTranslate()
+const { startTranslation, checkProgress, stopTranslation } = useAutoTranslate()
 
 // State
 const stats = ref(null)
@@ -384,6 +386,21 @@ const handleAiTranslate = async (lang) => {
     alert('Failed to start AI translation: ' + err.message)
     translatingLocale.value = null
     translatingProgress.value = null
+  }
+}
+
+const handleStopTranslate = async (lang) => {
+  try {
+    await stopTranslation(lang.code)
+    if (pollInterval) {
+      clearInterval(pollInterval)
+      pollInterval = null
+    }
+    translatingLocale.value = null
+    translatingProgress.value = null
+    await loadStats()
+  } catch (err) {
+    alert('Failed to stop: ' + err.message)
   }
 }
 
@@ -1158,6 +1175,30 @@ onBeforeUnmount(() => {
 .btn-ai-translate:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+}
+
+.btn-ai-translate.translating {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  opacity: 0.9;
+}
+
+.btn-stop {
+  padding: 0.55rem 0.65rem;
+  border: 2px solid #fecaca;
+  background: white;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-stop:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
 }
 
 .btn-ai-translate:disabled {

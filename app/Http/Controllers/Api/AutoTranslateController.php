@@ -99,6 +99,33 @@ class AutoTranslateController extends Controller
     }
 
     /**
+     * Stop/cancel a running translation for a locale.
+     * POST /api/admin/auto-translate/{locale}/stop
+     */
+    public function stop(string $locale): JsonResponse
+    {
+        $progress = Cache::get("auto_translate_progress_{$locale}");
+
+        // Mark as cancelled in cache — the running process checks this
+        Cache::put("auto_translate_progress_{$locale}", [
+            'status' => 'cancelled',
+            'tier' => $progress['tier'] ?? 0,
+            'total' => $progress['total'] ?? 0,
+            'completed' => $progress['completed'] ?? 0,
+            'percentage' => $progress['percentage'] ?? 0,
+            'current_task' => 'Cancelled by admin',
+            'errors' => $progress['errors'] ?? 0,
+        ], 300);
+
+        Log::info("Auto-translate cancelled for {$locale}");
+
+        return response()->json([
+            'success' => true,
+            'message' => "Translation cancelled for {$locale}",
+        ]);
+    }
+
+    /**
      * On-demand translation for a single post.
      */
     public function onDemand(Request $request): JsonResponse
