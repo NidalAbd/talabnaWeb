@@ -55,14 +55,14 @@
     "src": "node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2"
   },
   "resources/js/admin.css": {
-    "file": "assets/admin-57feff96.css",
+    "file": "assets/admin-a7d21f15.css",
     "src": "resources/js/admin.css"
   },
   "resources/js/admin.js": {
     "css": [
-      "assets/admin-57feff96.css"
+      "assets/admin-a7d21f15.css"
     ],
-    "file": "assets/admin-4d045d9b.js",
+    "file": "assets/admin-41f075eb.js",
     "imports": [
       "_bootstrap-ac5f4471.js",
       "_vendor-493911fe.js",
