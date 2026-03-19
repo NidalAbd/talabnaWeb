@@ -85,9 +85,13 @@ class AutoTranslationService
         $total = $defaultTranslations->count();
 
         // Check which already exist for target
-        $existingKeys = Translation::where('locale', $targetLocale)
-            ->pluck('value', DB::raw("CONCAT(`group`, '.', `key`)"))
-            ->toArray();
+        $existingTargetTranslations = Translation::where('locale', $targetLocale)
+            ->select('group', 'key', 'value')
+            ->get();
+        $existingKeys = [];
+        foreach ($existingTargetTranslations as $t) {
+            $existingKeys["{$t->group}.{$t->key}"] = $t->value;
+        }
 
         $toTranslate = [];
         foreach ($defaultTranslations as $trans) {
