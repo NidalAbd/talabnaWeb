@@ -30,7 +30,8 @@ class LocationImportController extends Controller
         $language = $request->input('language', '');
 
         try {
-            set_time_limit(120);
+            ignore_user_abort(true);
+            set_time_limit(1800); // 30 min for countries + cities generation
 
             if (!empty($isoCodes)) {
                 // Fetch specific countries by ISO code
@@ -49,10 +50,28 @@ class LocationImportController extends Controller
 
             $result = $this->service->importCountries($apiData);
 
+            // Auto-generate cities for all newly imported countries + existing ones missing cities
+            $allIsoCodes = collect($apiData)->pluck('cca2')->filter()->toArray();
+            $countriesNeedingCities = \App\Models\countries::whereIn('iso_code', $allIsoCodes)
+                ->withCount('cities')
+                ->get()
+                ->filter(fn($c) => $c->cities_count === 0);
+
+            $citiesCreated = 0;
+            $citiesErrors = 0;
+            foreach ($countriesNeedingCities as $country) {
+                $cityResult = $this->service->generateCitiesForCountry($country);
+                if ($cityResult['success'] ?? false) {
+                    $citiesCreated += $cityResult['created'];
+                } else {
+                    $citiesErrors++;
+                }
+            }
+
             return response()->json([
                 'success' => true,
-                'message' => "Imported {$result['created']} countries, skipped {$result['skipped']} (already exist), {$result['errors']} errors",
-                'data' => $result,
+                'message' => "Imported {$result['created']} countries (skipped {$result['skipped']}). Generated {$citiesCreated} cities for {$countriesNeedingCities->count()} countries.",
+                'data' => array_merge($result, ['cities_created' => $citiesCreated, 'cities_errors' => $citiesErrors]),
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -70,16 +89,18 @@ class LocationImportController extends Controller
     {
         $country = countries::findOrFail($id);
         $countryName = $country->name['en'] ?? 'Unknown';
+        $existingCount = $country->cities()->count();
 
         try {
-            set_time_limit(300); // 5 min for OpenAI calls
+            ignore_user_abort(true);
+            set_time_limit(600);
 
             $result = $this->service->generateCitiesForCountry($country);
 
             return response()->json([
                 'success' => $result['success'] ?? false,
                 'message' => $result['success']
-                    ? "Generated {$result['created']} cities for {$countryName} (skipped {$result['skipped']} duplicates)"
+                    ? "Generated {$result['created']} new cities for {$countryName} (had {$existingCount}, skipped {$result['skipped']} duplicates)"
                     : "Failed: " . ($result['error'] ?? 'Unknown error'),
                 'data' => $result,
             ]);
