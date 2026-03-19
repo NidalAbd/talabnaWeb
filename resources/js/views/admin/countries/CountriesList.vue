@@ -268,6 +268,20 @@
                   <i class="fas fa-city"></i>
                 </button>
                 <button
+                  @click="handleGenerateCities(country)"
+                  class="table-action-btn btn-success"
+                  title="Generate Cities (AI)"
+                >
+                  <i class="fas fa-magic"></i>
+                </button>
+                <button
+                  @click="handleTranslateNames(country)"
+                  class="table-action-btn btn-primary"
+                  title="Translate Names (AI)"
+                >
+                  <i class="fas fa-language"></i>
+                </button>
+                <button
                   @click="handleDelete(country)"
                   class="table-action-btn btn-delete"
                   title="Delete"
@@ -1001,6 +1015,22 @@ const handleCitiesSaved = () => {
 .action-btn.info {
   background: linear-gradient(135deg, #17a2b8 0%, #117a8b 100%);
   color: white;
+}
+
+.table-action-btn.btn-success {
+  color: #10b981;
+}
+
+.table-action-btn.btn-success:hover {
+  background: #ecfdf5;
+}
+
+.table-action-btn.btn-primary {
+  color: #667eea;
+}
+
+.table-action-btn.btn-primary:hover {
+  background: #eff3ff;
 }
 
 .table-action-btn.btn-info {
