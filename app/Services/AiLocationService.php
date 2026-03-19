@@ -224,32 +224,51 @@ class AiLocationService
     /**
      * Fetch city names from CountriesNow API (free, no key needed).
      */
+    /**
+     * Common name aliases for countries that CountriesNow uses differently.
+     */
+    protected array $countryNameAliases = [
+        'UAE' => 'United Arab Emirates',
+        'USA' => 'United States',
+        'UK' => 'United Kingdom',
+        'South Korea' => 'Korea, South',
+        'North Korea' => 'Korea, North',
+        'Czech Republic' => 'Czechia',
+        'DR Congo' => 'Congo, The Democratic Republic of the',
+    ];
+
     protected function fetchCitiesFromApi(string $countryName): array
     {
-        $response = Http::timeout(30)
-            ->get("https://countriesnow.space/api/v0.1/countries/cities/q", [
-                'country' => $countryName,
-            ]);
-
-        if (!$response->successful()) {
-            // Try POST method as fallback
-            $response = Http::timeout(30)
-                ->post("https://countriesnow.space/api/v0.1/countries/cities", [
-                    'country' => $countryName,
-                ]);
+        // Try the given name and known aliases
+        $namesToTry = [$countryName];
+        if (isset($this->countryNameAliases[$countryName])) {
+            $namesToTry[] = $this->countryNameAliases[$countryName];
+        }
+        // Also try reverse alias
+        $reverseAlias = array_search($countryName, $this->countryNameAliases);
+        if ($reverseAlias) {
+            $namesToTry[] = $reverseAlias;
         }
 
-        if (!$response->successful()) {
-            throw new \Exception("CountriesNow API failed: HTTP {$response->status()}");
+        foreach ($namesToTry as $name) {
+            try {
+                $response = Http::timeout(30)
+                    ->get("https://countriesnow.space/api/v0.1/countries/cities/q", [
+                        'country' => $name,
+                    ]);
+
+                if ($response->successful()) {
+                    $data = $response->json();
+                    if (!($data['error'] ?? true) && !empty($data['data'])) {
+                        return $data['data'];
+                    }
+                }
+            } catch (\Exception $e) {
+                continue;
+            }
         }
 
-        $data = $response->json();
-
-        if ($data['error'] ?? true) {
-            throw new \Exception("CountriesNow API error: " . ($data['msg'] ?? 'Unknown'));
-        }
-
-        return $data['data'] ?? [];
+        throw new \Exception("CountriesNow API: No data for {$countryName}");
     }
 
     /**
