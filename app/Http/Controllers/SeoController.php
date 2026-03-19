@@ -8,6 +8,7 @@ use App\Models\Sub_categories;
 use App\Models\User;
 use App\Models\countries;
 use App\Models\cities;
+use App\Services\SlugResolver;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 
@@ -84,7 +85,24 @@ class SeoController extends Controller
         ];
 
         // Parse path and generate specific SEO data
-        if (preg_match('/^\/listing\/(\d+)/', $path, $matches)) {
+
+        // NEW: Slug-based SEO URLs (e.g., /services/turkey/istanbul/jobs/administration/senior-manager-1234)
+        if (preg_match('#^/services/([a-z0-9-]+)/([a-z0-9-]+)/([a-z0-9-]+)/([a-z0-9-]+)/([a-z0-9-]+-(\d+))$#', $path, $m)) {
+            // Post level
+            $seo = $this->getSlugPostSeo($m[1], $m[2], $m[3], $m[4], (int)$m[6], $locale, $seo, $baseUrl, $path);
+        } elseif (preg_match('#^/services/([a-z0-9-]+)/([a-z0-9-]+)/([a-z0-9-]+)/([a-z0-9-]+)$#', $path, $m)) {
+            // Subcategory level
+            $seo = $this->getSlugSubcategorySeo($m[1], $m[2], $m[3], $m[4], $locale, $seo, $baseUrl, $path);
+        } elseif (preg_match('#^/services/([a-z0-9-]+)/([a-z0-9-]+)/([a-z0-9-]+)$#', $path, $m)) {
+            // Category level (slug)
+            $seo = $this->getSlugCategorySeo($m[1], $m[2], $m[3], $locale, $seo, $baseUrl, $path);
+        } elseif (preg_match('#^/services/([a-z0-9-]+)/([a-z0-9-]+)$#', $path, $m) && !preg_match('/^\d+$/', $m[1])) {
+            // City level (slug, not ID)
+            $seo = $this->getSlugCitySeo($m[1], $m[2], $locale, $seo, $baseUrl, $path);
+        } elseif (preg_match('#^/services/([a-z0-9-]+)$#', $path, $m) && !preg_match('/^\d+$/', $m[1])) {
+            // Country level (slug, not ID)
+            $seo = $this->getSlugCountrySeo($m[1], $locale, $seo, $baseUrl, $path);
+        } elseif (preg_match('/^\/listing\/(\d+)/', $path, $matches)) {
             $seo = $this->getListingSeo($matches[1], $locale, $seo, $baseUrl);
         } elseif (preg_match('/^\/category\/(\d+)/', $path, $matches)) {
             $subcategoryId = null;
@@ -681,6 +699,237 @@ class SeoController extends Controller
         $text = trim($text, '-');
         return urlencode($text) ?: 'item';
     }
+
+    // ==================== SLUG-BASED SEO METHODS ====================
+
+    private function getSlugCountrySeo(string $countrySlug, string $locale, array $seo, string $baseUrl, string $path): array
+    {
+        $country = SlugResolver::resolveCountry($countrySlug);
+        if (!$country) return $seo;
+
+        $name = $this->getLocalizedName($country->name, $locale);
+        $seo['title'] = "{$name} | Talabna";
+        $seo['description'] = $locale === 'ar'
+            ? "تصفح جميع الإعلانات والخدمات في {$name} على طلبنا"
+            : "Browse all ads and services in {$name} on Talabna";
+        $seo['canonical'] = $baseUrl . $path;
+        $seo['og']['type'] = 'website';
+
+        return $seo;
+    }
+
+    private function getSlugCitySeo(string $countrySlug, string $citySlug, string $locale, array $seo, string $baseUrl, string $path): array
+    {
+        $country = SlugResolver::resolveCountry($countrySlug);
+        if (!$country) return $seo;
+        $city = SlugResolver::resolveCity($citySlug, $country->id);
+        if (!$city) return $seo;
+
+        $cityName = $this->getLocalizedName($city->name, $locale);
+        $countryName = $this->getLocalizedName($country->name, $locale);
+
+        $seo['title'] = "{$cityName}, {$countryName} | Talabna";
+        $seo['description'] = $locale === 'ar'
+            ? "إعلانات وخدمات في {$cityName}، {$countryName} - بيع واشتري على طلبنا"
+            : "Ads and services in {$cityName}, {$countryName} - Buy and sell on Talabna";
+        $seo['canonical'] = $baseUrl . $path;
+        $seo['breadcrumbs'] = [
+            ['name' => 'Talabna', 'url' => $baseUrl],
+            ['name' => $countryName, 'url' => $baseUrl . '/services/' . $countrySlug],
+            ['name' => $cityName, 'url' => $baseUrl . $path],
+        ];
+
+        return $seo;
+    }
+
+    private function getSlugCategorySeo(string $countrySlug, string $citySlug, string $catSlug, string $locale, array $seo, string $baseUrl, string $path): array
+    {
+        $country = SlugResolver::resolveCountry($countrySlug);
+        if (!$country) return $seo;
+        $city = SlugResolver::resolveCity($citySlug, $country->id);
+        if (!$city) return $seo;
+        $category = SlugResolver::resolveCategory($catSlug);
+        if (!$category) return $seo;
+
+        $cityName = $this->getLocalizedName($city->name, $locale);
+        $countryName = $this->getLocalizedName($country->name, $locale);
+        $catName = $this->getLocalizedName($category->name, $locale);
+
+        $seo['title'] = "{$catName} - {$cityName}, {$countryName} | Talabna";
+        $seo['description'] = $locale === 'ar'
+            ? "إعلانات {$catName} في {$cityName}، {$countryName} - أفضل العروض على طلبنا"
+            : "{$catName} in {$cityName}, {$countryName} - Best deals on Talabna";
+        $seo['canonical'] = $baseUrl . $path;
+        $seo['breadcrumbs'] = [
+            ['name' => 'Talabna', 'url' => $baseUrl],
+            ['name' => $countryName, 'url' => $baseUrl . '/services/' . $countrySlug],
+            ['name' => $cityName, 'url' => $baseUrl . '/services/' . $countrySlug . '/' . $citySlug],
+            ['name' => $catName, 'url' => $baseUrl . $path],
+        ];
+
+        // Count posts
+        $postCount = ServicePost::where('country_id', $country->id)
+            ->where('city_id', $city->id)
+            ->where('categories_id', $category->id)
+            ->where('state', 'published')
+            ->count();
+
+        $seo['jsonLd'] = [$this->buildCollectionSchema($seo['title'], $seo['description'], $baseUrl . $path, $postCount)];
+
+        return $seo;
+    }
+
+    private function getSlugSubcategorySeo(string $countrySlug, string $citySlug, string $catSlug, string $subSlug, string $locale, array $seo, string $baseUrl, string $path): array
+    {
+        $country = SlugResolver::resolveCountry($countrySlug);
+        if (!$country) return $seo;
+        $city = SlugResolver::resolveCity($citySlug, $country->id);
+        if (!$city) return $seo;
+        $category = SlugResolver::resolveCategory($catSlug);
+        if (!$category) return $seo;
+        $subcategory = SlugResolver::resolveSubcategory($subSlug, $category->id);
+        if (!$subcategory) return $seo;
+
+        $cityName = $this->getLocalizedName($city->name, $locale);
+        $countryName = $this->getLocalizedName($country->name, $locale);
+        $catName = $this->getLocalizedName($category->name, $locale);
+        $subName = $this->getLocalizedName($subcategory->name, $locale);
+
+        $seo['title'] = "{$subName} - {$catName} - {$cityName}, {$countryName} | Talabna";
+        $seo['description'] = $locale === 'ar'
+            ? "تصفح إعلانات {$subName} ({$catName}) في {$cityName}، {$countryName} على طلبنا"
+            : "Browse {$subName} ({$catName}) in {$cityName}, {$countryName} on Talabna";
+        $seo['canonical'] = $baseUrl . $path;
+        $seo['breadcrumbs'] = [
+            ['name' => 'Talabna', 'url' => $baseUrl],
+            ['name' => $countryName, 'url' => $baseUrl . '/services/' . $countrySlug],
+            ['name' => $cityName, 'url' => $baseUrl . '/services/' . $countrySlug . '/' . $citySlug],
+            ['name' => $catName, 'url' => $baseUrl . '/services/' . $countrySlug . '/' . $citySlug . '/' . $catSlug],
+            ['name' => $subName, 'url' => $baseUrl . $path],
+        ];
+
+        $postCount = ServicePost::where('country_id', $country->id)
+            ->where('city_id', $city->id)
+            ->where('categories_id', $category->id)
+            ->where('sub_categories_id', $subcategory->id)
+            ->where('state', 'published')
+            ->count();
+
+        $seo['jsonLd'] = [$this->buildCollectionSchema($seo['title'], $seo['description'], $baseUrl . $path, $postCount)];
+
+        return $seo;
+    }
+
+    private function getSlugPostSeo(string $countrySlug, string $citySlug, string $catSlug, string $subSlug, int $postId, string $locale, array $seo, string $baseUrl, string $path): array
+    {
+        $post = ServicePost::with(['photos', 'category', 'subCategory', 'user'])->find($postId);
+        if (!$post) return $seo;
+
+        $title = $post->translate('title', $locale) ?? $post->translate('title', 'ar') ?? '';
+        $description = $post->translate('description', $locale) ?? $post->translate('description', 'ar') ?? '';
+
+        $country = countries::find($post->country_id);
+        $city = cities::find($post->city_id);
+        $countryName = $country ? $this->getLocalizedName($country->name, $locale) : '';
+        $cityName = $city ? $this->getLocalizedName($city->name, $locale) : '';
+        $catName = $post->category ? $this->getLocalizedName($post->category->name, $locale) : '';
+        $subName = $post->subCategory ? $this->getLocalizedName($post->subCategory->name, $locale) : '';
+
+        $seo['title'] = "{$title} - {$cityName}, {$countryName} | Talabna";
+        $seo['description'] = mb_substr(strip_tags($description), 0, 160);
+        $seo['canonical'] = $baseUrl . $path;
+
+        // OpenGraph
+        $seo['og']['type'] = 'article';
+        if ($post->photos && $post->photos->count() > 0) {
+            $photo = $post->photos->first();
+            $seo['og']['image'] = ($photo->is_external ?? false)
+                ? $photo->src
+                : $baseUrl . '/storage/' . $photo->src;
+        }
+
+        // Breadcrumbs
+        $seo['breadcrumbs'] = [
+            ['name' => 'Talabna', 'url' => $baseUrl],
+            ['name' => $countryName, 'url' => $baseUrl . '/services/' . $countrySlug],
+            ['name' => $cityName, 'url' => $baseUrl . '/services/' . $countrySlug . '/' . $citySlug],
+            ['name' => $catName, 'url' => $baseUrl . '/services/' . $countrySlug . '/' . $citySlug . '/' . $catSlug],
+            ['name' => $subName, 'url' => $baseUrl . '/services/' . $countrySlug . '/' . $citySlug . '/' . $catSlug . '/' . $subSlug],
+            ['name' => $title, 'url' => $baseUrl . $path],
+        ];
+
+        // JSON-LD Product schema
+        $seo['jsonLd'] = [[
+            '@context' => 'https://schema.org',
+            '@type' => $post->price > 0 ? 'Product' : 'Service',
+            'name' => $title,
+            'description' => mb_substr($description, 0, 500),
+            'url' => $baseUrl . $path,
+            'image' => $seo['og']['image'] ?? $baseUrl . '/storage/photos/og-image.jpg',
+            'category' => "{$catName} > {$subName}",
+            'offers' => $post->price > 0 ? [
+                '@type' => 'Offer',
+                'price' => $post->price,
+                'priceCurrency' => $post->price_currency_code ?? 'USD',
+                'availability' => 'https://schema.org/InStock',
+                'areaServed' => [
+                    '@type' => 'City',
+                    'name' => $cityName,
+                    'containedIn' => ['@type' => 'Country', 'name' => $countryName],
+                ],
+            ] : null,
+            'aggregateRating' => $post->view_count > 0 ? [
+                '@type' => 'AggregateRating',
+                'ratingValue' => min(5, max(3, round(($post->favorites_count ?? 0) / max(1, $post->view_count) * 50, 1))),
+                'reviewCount' => max(1, $post->favorites_count ?? 0),
+            ] : null,
+        ]];
+
+        // Server-side content preview for crawlers
+        $seo['content_preview'] = [
+            'title' => $title,
+            'description' => $description,
+            'price' => $post->price,
+            'currency' => $post->price_currency_code,
+            'city' => $cityName,
+            'country' => $countryName,
+            'category' => $catName,
+            'subcategory' => $subName,
+            'user' => $post->user?->user_name ?? '',
+            'date' => $post->created_at?->toIso8601String(),
+        ];
+
+        return $seo;
+    }
+
+    private function buildCollectionSchema(string $name, string $description, string $url, int $count): array
+    {
+        return [
+            '@context' => 'https://schema.org',
+            '@type' => 'CollectionPage',
+            'name' => $name,
+            'description' => $description,
+            'url' => $url,
+            'numberOfItems' => $count,
+        ];
+    }
+
+    private function getLocalizedName($name, string $locale): string
+    {
+        if (is_array($name)) {
+            return $name[$locale] ?? $name['en'] ?? $name['ar'] ?? array_values(array_filter($name))[0] ?? '';
+        }
+        if (is_string($name)) {
+            $decoded = json_decode($name, true);
+            if (is_array($decoded)) {
+                return $decoded[$locale] ?? $decoded['en'] ?? $decoded['ar'] ?? '';
+            }
+            return $name;
+        }
+        return '';
+    }
+
+    // ==================== END SLUG-BASED SEO METHODS ====================
 
     /**
      * Generate hreflang alternates for all active languages.

@@ -154,6 +154,39 @@
         <div class="loader-spinner"></div>
     </div>
 
+    <!-- Server-side content preview for search engine crawlers -->
+    @if(!empty($seoData['content_preview']))
+    <div id="seo-content" style="display:none" aria-hidden="true">
+        <article itemscope itemtype="https://schema.org/Product">
+            <h1 itemprop="name">{{ $seoData['content_preview']['title'] ?? '' }}</h1>
+            <div itemprop="description">{{ $seoData['content_preview']['description'] ?? '' }}</div>
+            @if(!empty($seoData['content_preview']['price']))
+            <div itemprop="offers" itemscope itemtype="https://schema.org/Offer">
+                <span itemprop="price">{{ $seoData['content_preview']['price'] }}</span>
+                <span itemprop="priceCurrency">{{ $seoData['content_preview']['currency'] ?? 'USD' }}</span>
+            </div>
+            @endif
+            <div>{{ $seoData['content_preview']['category'] ?? '' }} &gt; {{ $seoData['content_preview']['subcategory'] ?? '' }}</div>
+            <div>{{ $seoData['content_preview']['city'] ?? '' }}, {{ $seoData['content_preview']['country'] ?? '' }}</div>
+            <span itemprop="author">{{ $seoData['content_preview']['user'] ?? '' }}</span>
+            <time itemprop="datePublished">{{ $seoData['content_preview']['date'] ?? '' }}</time>
+        </article>
+    </div>
+    @endif
+
+    @if(!empty($seoData['breadcrumbs']))
+    <nav id="seo-breadcrumbs" style="display:none" aria-hidden="true">
+        <ol itemscope itemtype="https://schema.org/BreadcrumbList">
+            @foreach($seoData['breadcrumbs'] as $i => $crumb)
+            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+                <a itemprop="item" href="{{ $crumb['url'] ?? '#' }}"><span itemprop="name">{{ $crumb['name'] }}</span></a>
+                <meta itemprop="position" content="{{ $i + 1 }}" />
+            </li>
+            @endforeach
+        </ol>
+    </nav>
+    @endif
+
     <!-- Vue App Mount Point -->
     <div id="app"></div>
 

@@ -196,10 +196,41 @@ Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug?}', function(
     return view('spa');
 })->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+'])->name('services.city');
 
-// Services by country, city, and category
+// Services by country, city, and category (old ID-based — kept for backward compat)
 Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug}/{categoryId}/{categorySlug?}', function() {
     return view('spa');
 })->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+', 'categoryId' => '[0-9]+'])->name('services.category');
+
+/*
+|--------------------------------------------------------------------------
+| SEO Slug Routes (pure slug URLs — best for Google ranking)
+| /services/turkey/istanbul/jobs/administration/senior-manager-1234
+|--------------------------------------------------------------------------
+*/
+// Post level: /services/{country}/{city}/{category}/{subcategory}/{post-slug-id}
+Route::get('/services/{country}/{city}/{category}/{subcategory}/{post}', function() {
+    return view('spa');
+})->where(['country' => '[a-z0-9-]+', 'city' => '[a-z0-9-]+', 'category' => '[a-z0-9-]+', 'subcategory' => '[a-z0-9-]+', 'post' => '[a-z0-9-]+-\d+'])->name('seo.post');
+
+// Subcategory level: /services/{country}/{city}/{category}/{subcategory}
+Route::get('/services/{country}/{city}/{category}/{subcategory}', function() {
+    return view('spa');
+})->where(['country' => '[a-z0-9-]+', 'city' => '[a-z0-9-]+', 'category' => '[a-z0-9-]+', 'subcategory' => '[a-z0-9-]+'])->name('seo.subcategory');
+
+// Category level: /services/{country}/{city}/{category}
+Route::get('/services/{country}/{city}/{category}', function() {
+    return view('spa');
+})->where(['country' => '[a-z0-9-]+', 'city' => '[a-z0-9-]+', 'category' => '[a-z0-9-]+'])->name('seo.category');
+
+// City level: /services/{country}/{city}
+Route::get('/services/{country}/{city}', function() {
+    return view('spa');
+})->where(['country' => '[a-z0-9-]+', 'city' => '[a-z0-9-]+'])->name('seo.city');
+
+// Country level: /services/{country}
+Route::get('/services/{country}', function() {
+    return view('spa');
+})->where('country', '[a-z0-9-]+')->name('seo.country');
 
 // Deep Link Routes
 Route::get('api/deep-link/{route}/{id?}', [DeepLinkController::class, 'redirect'])->name('deep.link');
