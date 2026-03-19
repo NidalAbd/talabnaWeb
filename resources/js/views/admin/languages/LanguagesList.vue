@@ -1,330 +1,238 @@
 <template>
-  <div class="languages-modern">
-    <!-- Stats Cards -->
-    <div class="stats-dashboard">
-      <div class="stats-grid">
-        <div class="stat-card-compact stat-blue">
-          <div class="stat-icon"><i class="fas fa-globe"></i></div>
-          <div class="stat-info">
-            <div class="stat-value-compact">{{ formatNumber(languages.total) }}</div>
-            <div class="stat-label-compact">Total Languages</div>
-          </div>
+  <div class="languages-page">
+    <!-- Page Header -->
+    <div class="page-header">
+      <div class="page-header-left">
+        <h1 class="page-title">
+          <i class="fas fa-globe"></i>
+          Languages
+        </h1>
+        <p class="page-subtitle">
+          Manage translations and localization across {{ stats?.total || 0 }} languages
+        </p>
+      </div>
+      <div class="page-header-right">
+        <button class="btn-refresh" @click="loadStats" :disabled="loading">
+          <i class="fas fa-sync-alt" :class="{ 'fa-spin': loading }"></i>
+          Refresh
+        </button>
+        <button class="btn-add" @click="showCreateModal = true">
+          <i class="fas fa-plus"></i>
+          Add Language
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats Row -->
+    <div class="stats-container" v-if="stats">
+      <div class="stat-card">
+        <div class="stat-icon-circle stat-blue">
+          <i class="fas fa-globe"></i>
         </div>
-        <div class="stat-card-compact stat-green">
-          <div class="stat-icon"><i class="fas fa-check-circle"></i></div>
-          <div class="stat-info">
-            <div class="stat-value-compact">{{ formatNumber(activeCount) }}</div>
-            <div class="stat-label-compact">Active</div>
-          </div>
+        <div class="stat-info">
+          <div class="stat-label">TOTAL</div>
+          <div class="stat-value">{{ stats.total }}</div>
         </div>
-        <div class="stat-card-compact stat-orange">
-          <div class="stat-icon"><i class="fas fa-arrow-right"></i></div>
-          <div class="stat-info">
-            <div class="stat-value-compact">{{ formatNumber(ltrCount) }}</div>
-            <div class="stat-label-compact">LTR Languages</div>
-          </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-circle stat-green">
+          <i class="fas fa-check"></i>
         </div>
-        <div class="stat-card-compact stat-purple">
-          <div class="stat-icon"><i class="fas fa-arrow-left"></i></div>
-          <div class="stat-info">
-            <div class="stat-value-compact">{{ formatNumber(rtlCount) }}</div>
-            <div class="stat-label-compact">RTL Languages</div>
-          </div>
+        <div class="stat-info">
+          <div class="stat-label">ACTIVE</div>
+          <div class="stat-value">{{ stats.active }}</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-circle stat-purple">
+          <i class="fas fa-percentage"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-label">AVG. COMPLETION</div>
+          <div class="stat-value">{{ stats.avg_completion }}%</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon-circle stat-orange">
+          <i class="fas fa-exchange-alt"></i>
+        </div>
+        <div class="stat-info">
+          <div class="stat-label">RTL</div>
+          <div class="stat-value">{{ stats.rtl_count }}</div>
         </div>
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="search-filter-bar">
+    <!-- Filter Bar -->
+    <div class="filter-bar">
       <div class="search-box">
         <i class="fas fa-search search-icon"></i>
         <input
           type="text"
-          v-model="filters.search"
+          v-model="searchQuery"
           class="search-input"
-          placeholder="Search languages by name or code..."
+          placeholder="Search languages..."
         >
-        <span v-if="filters.search" class="clear-search" @click="filters.search = ''">
+        <span v-if="searchQuery" class="clear-search" @click="searchQuery = ''">
           <i class="fas fa-times"></i>
         </span>
       </div>
-
-      <div class="filter-group">
-        <select v-model="filters.status" class="filter-select">
-          <option value="">All Status</option>
-          <option value="active">Active</option>
-          <option value="inactive">Inactive</option>
-        </select>
-
-        <select v-model="filters.direction" class="filter-select">
-          <option value="">All Directions</option>
-          <option value="ltr">LTR Only</option>
-          <option value="rtl">RTL Only</option>
-        </select>
-      </div>
-
-      <div class="action-buttons">
-        <button class="action-btn secondary" @click="resetFilters">
-          <i class="fas fa-redo"></i>
-        </button>
-        <button class="action-btn primary" @click="showCreateModal = true">
-          <i class="fas fa-plus"></i> Add Language
-        </button>
-      </div>
-    </div>
-
-    <!-- View Toggle -->
-    <div class="view-controls mb-4">
-      <div class="view-toggle">
+      <div class="filter-tabs">
         <button
-          class="toggle-btn"
-          :class="{ active: viewMode === 'grid' }"
-          @click="viewMode = 'grid'"
+          class="filter-tab"
+          :class="{ active: filter === 'all' }"
+          @click="filter = 'all'"
         >
-          <i class="fas fa-th"></i> Grid
+          All <span class="tab-count">{{ allCount }}</span>
         </button>
         <button
-          class="toggle-btn"
-          :class="{ active: viewMode === 'list' }"
-          @click="viewMode = 'list'"
+          class="filter-tab"
+          :class="{ active: filter === 'active' }"
+          @click="filter = 'active'"
         >
-          <i class="fas fa-list"></i> List
+          Active <span class="tab-count">{{ activeCount }}</span>
         </button>
-      </div>
-
-      <div class="results-info">
-        Showing {{ languages.data.length }} of {{ languages.total }} languages
+        <button
+          class="filter-tab"
+          :class="{ active: filter === 'incomplete' }"
+          @click="filter = 'incomplete'"
+        >
+          Incomplete <span class="tab-count">{{ incompleteCount }}</span>
+        </button>
       </div>
     </div>
 
     <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
+    <div v-if="loading && !stats" class="loading-state">
       <div class="spinner"></div>
       <p>Loading languages...</p>
     </div>
 
-    <!-- Grid View -->
-    <div v-else-if="viewMode === 'grid'" class="languages-grid">
+    <!-- Languages Grid -->
+    <div v-else class="languages-grid">
       <div
-        v-for="lang in languages.data"
+        v-for="lang in filteredLanguages"
         :key="lang.id"
         class="language-card"
-        :class="{ 'card-inactive': !lang.is_active, 'card-default': lang.is_default }"
+        :class="{
+          'card-source': lang.is_source,
+          'card-inactive': !lang.is_active
+        }"
       >
-        <div class="card-header-custom">
-          <div class="language-code-badge" :class="lang.direction">
-            {{ lang.code.toUpperCase() }}
+        <!-- Card Top -->
+        <div class="card-top">
+          <div class="card-top-left">
+            <div class="lang-code">{{ lang.code.toUpperCase() }}</div>
+            <div class="lang-names">
+              <div class="lang-name">{{ lang.name }}</div>
+              <div class="lang-native">{{ lang.native_name }} &middot; {{ lang.code }}</div>
+            </div>
           </div>
-          <div class="card-menu">
-            <button class="menu-btn" @click.stop="toggleMenu(lang.id)">
-              <i class="fas fa-ellipsis-v"></i>
-            </button>
-            <div v-if="activeMenu === lang.id" class="dropdown-menu" @click.stop>
-              <button @click="editLanguage(lang)" class="menu-item">
-                <i class="fas fa-edit"></i> Edit Language
-              </button>
-              <button @click="handleToggleActive(lang)" class="menu-item">
-                <i :class="lang.is_active ? 'fas fa-ban' : 'fas fa-check'"></i>
-                {{ lang.is_active ? 'Deactivate' : 'Activate' }}
-              </button>
-              <button v-if="!lang.is_default" @click="handleSetDefault(lang)" class="menu-item">
-                <i class="fas fa-star"></i> Set as Default
-              </button>
-              <button @click="viewTranslations(lang)" class="menu-item">
-                <i class="fas fa-language"></i> View Translations
-              </button>
-              <button v-if="!lang.is_default" @click="handleDelete(lang)" class="menu-item danger">
-                <i class="fas fa-trash"></i> Delete
-              </button>
+          <div class="card-top-right">
+            <span v-if="lang.direction === 'rtl'" class="rtl-badge">RTL</span>
+            <div class="active-toggle" @click.stop="handleToggleActive(lang)">
+              <div class="toggle-track" :class="{ on: lang.is_active }">
+                <div class="toggle-thumb"></div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="card-body-custom">
-          <h3 class="language-name">{{ lang.name }}</h3>
-          <p class="language-native">{{ lang.native_name }}</p>
+        <!-- Source Language Info -->
+        <div v-if="lang.is_source" class="source-info">
+          <span class="source-badge">
+            <i class="fas fa-star"></i> Source Language
+          </span>
+          <p class="source-description">
+            All content is authored in {{ lang.name }} and translated to other languages.
+          </p>
+        </div>
 
-          <div class="language-badges">
-            <span class="badge" :class="lang.is_active ? 'success' : 'danger'">
-              <i :class="lang.is_active ? 'fas fa-check-circle' : 'fas fa-ban'"></i>
-              {{ lang.is_active ? 'Active' : 'Inactive' }}
-            </span>
-            <span v-if="lang.is_default" class="badge warning">
-              <i class="fas fa-star"></i> Default
-            </span>
-            <span class="badge" :class="lang.direction === 'rtl' ? 'fire' : 'info'">
-              <i :class="lang.direction === 'rtl' ? 'fas fa-arrow-left' : 'fas fa-arrow-right'"></i>
-              {{ lang.direction.toUpperCase() }}
-            </span>
+        <!-- Translation Progress (non-source only) -->
+        <div v-else class="card-progress">
+          <!-- Overall Progress -->
+          <div class="overall-progress">
+            <div class="progress-header">
+              <span class="progress-label">Translation Progress</span>
+              <span class="progress-pct" :class="progressColor(lang.overall?.percentage)">
+                {{ lang.overall?.percentage || 0 }}%
+              </span>
+            </div>
+            <div class="progress-bar-track">
+              <div
+                class="progress-bar-fill"
+                :class="progressColor(lang.overall?.percentage)"
+                :style="{ width: (lang.overall?.percentage || 0) + '%' }"
+              ></div>
+            </div>
+            <div class="progress-counts">
+              <span>{{ lang.overall?.translated || 0 }} translated</span>
+              <span>{{ lang.overall?.remaining || 0 }} remaining</span>
+            </div>
           </div>
 
-          <div class="spacer"></div>
-
-          <div class="language-stats">
-            <div class="stat-item">
-              <i class="fas fa-language"></i>
-              <span>{{ lang.translations_count || 0 }} Translations</span>
-            </div>
-            <div class="stat-item">
-              <i class="fas fa-sort"></i>
-              <span>Order: {{ lang.sort_order }}</span>
+          <!-- Per-Model Breakdown -->
+          <div class="model-breakdown" v-if="lang.models">
+            <div
+              v-for="(model, key) in lang.models"
+              :key="key"
+              class="model-row"
+            >
+              <div class="model-label">
+                <i :class="modelIcon(key)"></i>
+                <span>{{ model.label || formatModelKey(key) }}</span>
+              </div>
+              <div class="model-progress">
+                <div class="model-bar-track">
+                  <div
+                    class="model-bar-fill"
+                    :class="progressColor(model.percentage)"
+                    :style="{ width: (model.percentage || 0) + '%' }"
+                  ></div>
+                </div>
+                <span class="model-count">{{ model.translated }}/{{ model.total }}</span>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="card-footer-custom">
-          <button @click="editLanguage(lang)" class="action-btn primary">
+        <!-- Card Footer -->
+        <div class="card-footer">
+          <button class="btn-edit" @click="handleEdit(lang)">
             <i class="fas fa-edit"></i> Edit
           </button>
-          <button @click="viewTranslations(lang)" class="action-btn info">
-            <i class="fas fa-language"></i> Translations
+          <button
+            v-if="!lang.is_source"
+            class="btn-ai-translate"
+            :disabled="translatingLocale === lang.code"
+            @click="handleAiTranslate(lang)"
+          >
+            <template v-if="translatingLocale === lang.code">
+              <i class="fas fa-spinner fa-spin"></i>
+              {{ translatingProgress !== null ? translatingProgress + '%' : 'Translating...' }}
+            </template>
+            <template v-else>
+              <i class="fas fa-magic"></i> AI Translate
+            </template>
+          </button>
+          <button
+            v-if="!lang.is_source && !lang.is_default"
+            class="btn-delete"
+            @click="handleDelete(lang)"
+            title="Delete language"
+          >
+            <i class="fas fa-trash"></i>
           </button>
         </div>
       </div>
 
       <!-- Empty State -->
-      <div v-if="languages.data.length === 0" class="empty-state-grid">
+      <div v-if="filteredLanguages.length === 0" class="empty-state">
         <i class="fas fa-globe"></i>
         <h3>No Languages Found</h3>
-        <p>Try adjusting your filters or create a new language</p>
-        <button @click="resetFilters" class="action-btn primary">
+        <p>Try adjusting your search or filters</p>
+        <button class="btn-add" @click="searchQuery = ''; filter = 'all'">
           <i class="fas fa-redo"></i> Reset Filters
-        </button>
-      </div>
-    </div>
-
-    <!-- Table View -->
-    <div v-else class="data-table-container">
-      <table class="modern-table">
-        <thead>
-          <tr>
-            <th style="width: 80px;">Code</th>
-            <th>Language Name</th>
-            <th>Direction</th>
-            <th>Status</th>
-            <th>Translations</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody v-if="languages.data.length > 0">
-          <tr v-for="lang in languages.data" :key="lang.id" :class="{ 'row-inactive': !lang.is_active, 'row-default': lang.is_default }">
-            <td>
-              <div class="code-cell">
-                <span class="language-code-badge small" :class="lang.direction">
-                  {{ lang.code.toUpperCase() }}
-                </span>
-              </div>
-            </td>
-            <td>
-              <div class="name-cell">
-                <strong>{{ lang.name }}</strong>
-                <span class="name-native">{{ lang.native_name }}</span>
-              </div>
-            </td>
-            <td>
-              <span class="badge" :class="lang.direction === 'rtl' ? 'fire' : 'info'">
-                <i :class="lang.direction === 'rtl' ? 'fas fa-arrow-left' : 'fas fa-arrow-right'"></i>
-                {{ lang.direction.toUpperCase() }}
-              </span>
-            </td>
-            <td>
-              <div class="status-badges">
-                <span class="badge" :class="lang.is_active ? 'success' : 'danger'">
-                  <i :class="lang.is_active ? 'fas fa-check-circle' : 'fas fa-ban'"></i>
-                  {{ lang.is_active ? 'Active' : 'Inactive' }}
-                </span>
-                <span v-if="lang.is_default" class="badge warning">
-                  <i class="fas fa-star"></i>
-                </span>
-              </div>
-            </td>
-            <td>
-              <span class="badge secondary">
-                <i class="fas fa-language"></i> {{ lang.translations_count || 0 }}
-              </span>
-            </td>
-            <td>
-              <div class="table-actions">
-                <button @click="editLanguage(lang)" class="action-btn-small edit" title="Edit">
-                  <i class="fas fa-edit"></i>
-                </button>
-                <button
-                  @click="handleToggleActive(lang)"
-                  class="action-btn-small"
-                  :class="lang.is_active ? 'ban' : 'unban'"
-                  :title="lang.is_active ? 'Deactivate' : 'Activate'"
-                >
-                  <i :class="lang.is_active ? 'fas fa-ban' : 'fas fa-check'"></i>
-                </button>
-                <button
-                  v-if="!lang.is_default"
-                  @click="handleSetDefault(lang)"
-                  class="action-btn-small featured"
-                  title="Set as Default"
-                >
-                  <i class="fas fa-star"></i>
-                </button>
-                <button
-                  @click="viewTranslations(lang)"
-                  class="action-btn-small info-btn"
-                  title="View Translations"
-                >
-                  <i class="fas fa-language"></i>
-                </button>
-                <button
-                  v-if="!lang.is_default"
-                  @click="handleDelete(lang)"
-                  class="action-btn-small delete"
-                  title="Delete"
-                >
-                  <i class="fas fa-trash"></i>
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-        <tbody v-else>
-          <tr>
-            <td colspan="6" class="empty-state">
-              <i class="fas fa-globe"></i>
-              <p>No languages found</p>
-              <button @click="resetFilters" class="action-btn primary">
-                <i class="fas fa-redo"></i> Reset Filters
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination-container" v-if="languages.last_page > 1">
-      <div class="pagination-info">
-        Showing {{ languages.data.length }} of {{ languages.total }} languages
-      </div>
-      <div class="pagination-controls">
-        <button
-          class="pagination-btn"
-          :disabled="languages.current_page === 1"
-          @click="loadLanguages(languages.current_page - 1)"
-        >
-          <i class="fas fa-chevron-left"></i> Previous
-        </button>
-        <button
-          v-for="page in visiblePages"
-          :key="page"
-          class="pagination-btn"
-          :class="{ active: page === languages.current_page }"
-          @click="loadLanguages(page)"
-        >
-          {{ page }}
-        </button>
-        <button
-          class="pagination-btn"
-          :disabled="languages.current_page === languages.last_page"
-          @click="loadLanguages(languages.current_page + 1)"
-        >
-          Next <i class="fas fa-chevron-right"></i>
         </button>
       </div>
     </div>
@@ -337,304 +245,163 @@
       @close="closeModal"
       @saved="handleLanguageSaved"
     />
-
-    <!-- Missing Translations Warning Modal -->
-    <div v-if="showMissingModal" class="modal-overlay" @click.self="closeMissingModal">
-      <div class="modal-dialog-advanced missing-modal">
-        <div class="modal-header warning-header">
-          <h3 class="modal-title">
-            <i class="fas fa-exclamation-triangle"></i>
-            Missing Translations
-          </h3>
-          <button class="close-btn" @click="closeMissingModal">
-            <i class="fas fa-times"></i>
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="warning-message">
-            <p>
-              <strong>{{ missingLanguage?.name }}</strong> is missing
-              <span class="missing-count">{{ missingTranslations.length }}</span> translation keys
-              that exist in the default language.
-            </p>
-            <p class="warning-hint">
-              You can still activate this language, but some text may not display correctly for users.
-            </p>
-          </div>
-
-          <div class="missing-list-container">
-            <div class="missing-list-header">
-              <span>Missing Keys ({{ missingTranslations.length }})</span>
-              <button class="action-btn-small info-btn" @click="goToAddTranslations" title="Add Translations">
-                <i class="fas fa-plus"></i> Add All
-              </button>
-            </div>
-            <div class="missing-list">
-              <div
-                v-for="(item, index) in missingTranslations.slice(0, showAllMissing ? missingTranslations.length : 10)"
-                :key="index"
-                class="missing-item"
-              >
-                <div class="missing-key">
-                  <code>{{ item.full_key }}</code>
-                </div>
-                <div class="missing-default-value">
-                  {{ truncateValue(item.default_value) }}
-                </div>
-              </div>
-              <div v-if="missingTranslations.length > 10 && !showAllMissing" class="show-more">
-                <button @click="showAllMissing = true" class="show-more-btn">
-                  <i class="fas fa-chevron-down"></i>
-                  Show {{ missingTranslations.length - 10 }} more
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="button" class="action-btn secondary" @click="closeMissingModal">
-            <i class="fas fa-times"></i>
-            Cancel
-          </button>
-          <button type="button" class="action-btn info" @click="goToAddTranslations">
-            <i class="fas fa-language"></i>
-            Add Translations
-          </button>
-          <button type="button" class="action-btn warning" @click="confirmActivateAnyway">
-            <i class="fas fa-check"></i>
-            Activate Anyway
-          </button>
-        </div>
-      </div>
-    </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch, reactive, onBeforeUnmount } from 'vue'
+import { ref, computed, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { useLanguages } from '../../../composables/useLanguages'
 import { useAutoTranslate } from '../../../composables/useAutoTranslate'
 import LanguageFormModal from '../../../components/admin/languages/LanguageFormModal.vue'
 
 const router = useRouter()
-const { languages, loading, fetchLanguages, deleteLanguage, toggleActive, setDefault } = useLanguages()
+const { deleteLanguage, toggleActive } = useLanguages()
+const { startTranslation, checkProgress } = useAutoTranslate()
 
-const formatNumber = (value) => {
-  if (value === null || value === undefined) return '0'
-  return new Intl.NumberFormat().format(value)
-}
-
-const viewMode = ref('list')
-const activeMenu = ref(null)
+// State
+const stats = ref(null)
+const loading = ref(false)
+const filter = ref('all')
+const searchQuery = ref('')
+const translatingLocale = ref(null)
+const translatingProgress = ref(null)
 const showCreateModal = ref(false)
 const showEditModal = ref(false)
 const selectedLanguage = ref(null)
 
-// Missing translations modal
-const showMissingModal = ref(false)
-const missingTranslations = ref([])
-const missingLanguage = ref(null)
-const showAllMissing = ref(false)
-const pendingActivation = ref(null)
+let pollInterval = null
 
-const filters = reactive({
-  search: '',
-  status: '',
-  direction: '',
-  sort_by: 'sort_order',
-  sort_direction: 'asc',
-  per_page: 15
-})
+// Computed
+const languages = computed(() => stats.value?.languages || [])
 
-const activeCount = computed(() => {
-  return languages.value.data.filter(l => l.is_active).length
-})
+const allCount = computed(() => languages.value.length)
 
-const ltrCount = computed(() => {
-  return languages.value.data.filter(l => l.direction === 'ltr').length
-})
+const activeCount = computed(() => languages.value.filter(l => l.is_active).length)
 
-const rtlCount = computed(() => {
-  return languages.value.data.filter(l => l.direction === 'rtl').length
-})
+const incompleteCount = computed(() =>
+  languages.value.filter(l => !l.is_source && l.overall && l.overall.percentage < 100).length
+)
 
-const visiblePages = computed(() => {
-  const pages = []
-  const current = languages.value.current_page
-  const last = languages.value.last_page
+const filteredLanguages = computed(() => {
+  let result = languages.value
 
-  let start = Math.max(1, current - 2)
-  let end = Math.min(last, current + 2)
-
-  for (let i = start; i <= end; i++) {
-    pages.push(i)
+  // Search filter
+  if (searchQuery.value) {
+    const q = searchQuery.value.toLowerCase()
+    result = result.filter(l =>
+      l.name.toLowerCase().includes(q) ||
+      l.native_name.toLowerCase().includes(q) ||
+      l.code.toLowerCase().includes(q)
+    )
   }
 
-  return pages
+  // Tab filter
+  if (filter.value === 'active') {
+    result = result.filter(l => l.is_active)
+  } else if (filter.value === 'incomplete') {
+    result = result.filter(l => !l.is_source && l.overall && l.overall.percentage < 100)
+  }
+
+  return result
 })
 
-onMounted(async () => {
-  await loadLanguages()
-  document.addEventListener('click', closeMenus)
-})
-
-onBeforeUnmount(() => {
-  document.removeEventListener('click', closeMenus)
-})
-
-let searchTimeout = null
-watch(() => filters.search, () => {
-  clearTimeout(searchTimeout)
-  searchTimeout = setTimeout(() => loadLanguages(1), 300)
-})
-
-watch(() => [filters.status, filters.direction], () => {
-  loadLanguages(1)
-})
-
-const loadLanguages = async (page = 1) => {
-  await fetchLanguages({ ...filters, page })
+// Functions
+const loadStats = async () => {
+  loading.value = true
+  try {
+    const response = await fetch('/api/admin/languages/stats', {
+      credentials: 'same-origin'
+    })
+    if (!response.ok) throw new Error('Failed to load stats')
+    const data = await response.json()
+    stats.value = data
+  } catch (err) {
+    console.error('Error loading language stats:', err)
+  } finally {
+    loading.value = false
+  }
 }
 
-const resetFilters = () => {
-  filters.search = ''
-  filters.status = ''
-  filters.direction = ''
-  loadLanguages(1)
+const progressColor = (pct) => {
+  if (pct === undefined || pct === null) return 'progress-red'
+  if (pct >= 100) return 'progress-green'
+  if (pct >= 50) return 'progress-orange'
+  return 'progress-red'
 }
 
-const toggleMenu = (langId) => {
-  activeMenu.value = activeMenu.value === langId ? null : langId
+const modelIcon = (key) => {
+  const icons = {
+    ui_strings: 'fas fa-font',
+    categories: 'fas fa-folder',
+    subcategories: 'fas fa-folder-open',
+    badge_types: 'fas fa-certificate',
+    service_posts: 'fas fa-file-alt'
+  }
+  return icons[key] || 'fas fa-cube'
 }
 
-const closeMenus = () => {
-  activeMenu.value = null
+const formatModelKey = (key) => {
+  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())
 }
 
-const editLanguage = (lang) => {
-  closeMenus()
-  selectedLanguage.value = lang
-  showEditModal.value = true
-}
+const handleAiTranslate = async (lang) => {
+  if (!confirm(`Start AI translation for "${lang.name}"? This will translate all untranslated content.`)) {
+    return
+  }
 
-const viewTranslations = (lang) => {
-  closeMenus()
-  router.push({ path: '/admin/translations', query: { locale: lang.code } })
+  translatingLocale.value = lang.code
+  translatingProgress.value = 0
+
+  try {
+    await startTranslation(lang.code, 'all')
+
+    // Start polling progress
+    pollInterval = setInterval(async () => {
+      const progress = await checkProgress(lang.code)
+      if (progress !== null) {
+        translatingProgress.value = progress.percentage || progress
+
+        // Check if complete
+        if (progress.percentage >= 100 || progress.status === 'completed' || progress === 100) {
+          clearInterval(pollInterval)
+          pollInterval = null
+          translatingLocale.value = null
+          translatingProgress.value = null
+          await loadStats()
+        }
+      }
+    }, 3000)
+  } catch (err) {
+    console.error('Error starting AI translation:', err)
+    alert('Failed to start AI translation: ' + err.message)
+    translatingLocale.value = null
+    translatingProgress.value = null
+  }
 }
 
 const handleToggleActive = async (lang) => {
-  closeMenus()
   if (lang.is_default && lang.is_active) {
     alert('Cannot deactivate the default language')
     return
   }
 
-  // If activating, check for missing translations first
-  if (!lang.is_active) {
-    try {
-      const missing = await fetchMissingTranslations(lang.code)
-      if (missing.length > 0) {
-        // Show warning modal
-        missingLanguage.value = lang
-        missingTranslations.value = missing
-        pendingActivation.value = lang
-        showAllMissing.value = false
-        showMissingModal.value = true
-        return
-      }
-    } catch (error) {
-      console.error('Error checking missing translations:', error)
-      // Continue with activation even if check fails
-    }
-  }
-
-  // Proceed with toggle
-  await performToggle(lang)
-}
-
-const performToggle = async (lang) => {
-  if (!confirm(`Are you sure you want to ${lang.is_active ? 'deactivate' : 'activate'} "${lang.name}"?`)) {
-    return
-  }
   try {
     await toggleActive(lang.id)
-    await loadLanguages(languages.value.current_page)
-  } catch (error) {
-    alert(error.message || 'Failed to toggle status')
+    await loadStats()
+  } catch (err) {
+    alert(err.message || 'Failed to toggle status')
   }
 }
 
-const fetchMissingTranslations = async (localeCode) => {
-  try {
-    const response = await fetch(`/api/admin/translations/missing/${localeCode}`, {
-      credentials: 'same-origin'
-    })
-    if (!response.ok) {
-      throw new Error('Failed to fetch missing translations')
-    }
-    const data = await response.json()
-    return data.missing || []
-  } catch (error) {
-    console.error('Error fetching missing translations:', error)
-    return []
-  }
-}
-
-const closeMissingModal = () => {
-  showMissingModal.value = false
-  missingTranslations.value = []
-  missingLanguage.value = null
-  pendingActivation.value = null
-  showAllMissing.value = false
-}
-
-const goToAddTranslations = () => {
-  const lang = missingLanguage.value
-  closeMissingModal()
-  if (lang) {
-    router.push({
-      path: '/admin/translations',
-      query: { locale: lang.code, show_missing: '1' }
-    })
-  }
-}
-
-const confirmActivateAnyway = async () => {
-  const lang = pendingActivation.value
-  closeMissingModal()
-  if (lang) {
-    try {
-      await toggleActive(lang.id)
-      await loadLanguages(languages.value.current_page)
-    } catch (error) {
-      alert(error.message || 'Failed to activate language')
-    }
-  }
-}
-
-const truncateValue = (value) => {
-  if (!value) return ''
-  return value.length > 50 ? value.substring(0, 50) + '...' : value
-}
-
-const handleSetDefault = async (lang) => {
-  closeMenus()
-  if (!confirm(`Are you sure you want to set "${lang.name}" as the default language?`)) {
-    return
-  }
-  try {
-    await setDefault(lang.id)
-    await loadLanguages(languages.value.current_page)
-  } catch (error) {
-    alert(error.message || 'Failed to set default language')
-  }
+const handleEdit = (lang) => {
+  selectedLanguage.value = lang
+  showEditModal.value = true
 }
 
 const handleDelete = async (lang) => {
-  closeMenus()
-  if (lang.is_default) {
-    alert('Cannot delete the default language')
+  if (lang.is_default || lang.is_source) {
+    alert('Cannot delete the source/default language')
     return
   }
   if (!confirm(`Are you sure you want to delete "${lang.name}"? This will also delete all translations for this language. This action cannot be undone.`)) {
@@ -642,9 +409,9 @@ const handleDelete = async (lang) => {
   }
   try {
     await deleteLanguage(lang.id)
-    await loadLanguages(languages.value.current_page)
-  } catch (error) {
-    alert('Error deleting language: ' + (error.message || 'Unknown error'))
+    await loadStats()
+  } catch (err) {
+    alert('Error deleting language: ' + (err.message || 'Unknown error'))
   }
 }
 
@@ -654,66 +421,241 @@ const closeModal = () => {
   selectedLanguage.value = null
 }
 
-const { startTranslation: aiStart, checkProgress: aiCheck } = useAutoTranslate()
-
 const handleLanguageSaved = async (eventData) => {
   closeModal()
-  await loadLanguages(languages.value.current_page)
+  await loadStats()
 
-  // If it's a new language, offer to auto-translate UI strings via OpenAI
+  // If new language, offer immediate AI translate
   if (eventData && eventData.isNew && eventData.language) {
     const langCode = eventData.language.code
     const langName = eventData.language.name || langCode
 
     const doTranslate = confirm(
-      `Language "${langName}" created!\n\nDo you want to auto-translate all UI strings using OpenAI?\n(This will translate Tier 1 - UI labels, buttons, messages)`
+      `Language "${langName}" created!\n\nDo you want to auto-translate all content using AI?`
     )
 
     if (doTranslate) {
-      try {
-        await aiStart(langCode, '1') // Tier 1 = UI strings
-        alert(`Auto-translation started for ${langName}.\nGo to Auto-Translate dashboard to monitor progress.`)
-      } catch (e) {
-        alert('Failed to start auto-translation: ' + e.message)
+      // Find the lang in the refreshed stats
+      const newLang = languages.value.find(l => l.code === langCode)
+      if (newLang) {
+        await handleAiTranslate(newLang)
+      } else {
+        try {
+          await startTranslation(langCode, 'all')
+          alert(`Auto-translation started for ${langName}.`)
+          await loadStats()
+        } catch (e) {
+          alert('Failed to start auto-translation: ' + e.message)
+        }
       }
     }
-
-    // Redirect to translations page
-    setTimeout(() => {
-      router.push({
-        path: '/admin/translations',
-        query: {
-          locale: langCode,
-          new_language: '1'
-        }
-      })
-    }, 500)
   }
 }
+
+// Lifecycle
+onMounted(() => {
+  loadStats()
+})
+
+onBeforeUnmount(() => {
+  if (pollInterval) {
+    clearInterval(pollInterval)
+    pollInterval = null
+  }
+})
 </script>
 
 <style scoped>
-.languages-modern {
+.languages-page {
   padding: 0;
 }
 
-/* Search & Filters */
-.search-filter-bar {
+/* ========== Page Header ========== */
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.page-header-left {
+  flex: 1;
+  min-width: 250px;
+}
+
+.page-title {
+  font-size: 1.75rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0 0 0.25rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.page-title i {
+  color: #667eea;
+  font-size: 1.5rem;
+}
+
+.page-subtitle {
+  color: #6b7280;
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.page-header-right {
+  display: flex;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.btn-refresh {
+  padding: 0.65rem 1.25rem;
+  border: 2px solid #e5e7eb;
   background: white;
-  padding: 1.25rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-refresh:hover:not(:disabled) {
+  border-color: #667eea;
+  color: #667eea;
+  background: #f0f4ff;
+}
+
+.btn-refresh:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-add {
+  padding: 0.65rem 1.25rem;
+  border: none;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.btn-add:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+}
+
+/* ========== Stats Container ========== */
+.stats-container {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0;
+  background: white;
   border-radius: 16px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+  margin-bottom: 1.5rem;
+  overflow: hidden;
+}
+
+.stat-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1.25rem 1.5rem;
+  position: relative;
+}
+
+.stat-card:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 20%;
+  height: 60%;
+  width: 1px;
+  background: #eef2f7;
+}
+
+.stat-icon-circle {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  flex-shrink: 0;
+}
+
+.stat-icon-circle.stat-blue {
+  background: #eff3ff;
+  color: #667eea;
+}
+
+.stat-icon-circle.stat-green {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.stat-icon-circle.stat-purple {
+  background: #f3e8ff;
+  color: #7c3aed;
+}
+
+.stat-icon-circle.stat-orange {
+  background: #fff4e6;
+  color: #e67e22;
+}
+
+.stat-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: #9ca3af;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.stat-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  line-height: 1.2;
+}
+
+/* ========== Filter Bar ========== */
+.filter-bar {
+  background: white;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
   margin-bottom: 1.5rem;
   display: flex;
   gap: 1rem;
-  flex-wrap: wrap;
   align-items: center;
+  flex-wrap: wrap;
 }
 
 .search-box {
   position: relative;
   flex: 1;
-  min-width: 280px;
+  min-width: 240px;
 }
 
 .search-icon {
@@ -721,153 +663,107 @@ const handleLanguageSaved = async (eventData) => {
   left: 1rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #999;
+  color: #9ca3af;
+  font-size: 0.9rem;
 }
 
 .search-input {
   width: 100%;
-  padding: 0.875rem 2.5rem 0.875rem 2.75rem;
+  padding: 0.7rem 2.5rem 0.7rem 2.75rem;
   border: 2px solid #eef2f7;
-  border-radius: 12px;
-  font-size: 0.95rem;
-  transition: all 0.3s ease;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  transition: all 0.25s ease;
+  background: #f9fafb;
 }
 
 .search-input:focus {
   outline: none;
   border-color: #667eea;
   box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+  background: white;
 }
 
 .clear-search {
   position: absolute;
-  right: 1rem;
+  right: 0.75rem;
   top: 50%;
   transform: translateY(-50%);
-  color: #999;
+  color: #9ca3af;
   cursor: pointer;
+  padding: 0.25rem;
 }
 
-.filter-group {
+.clear-search:hover {
+  color: #ef4444;
+}
+
+.filter-tabs {
   display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.filter-select {
-  padding: 0.875rem 1rem;
-  border: 2px solid #eef2f7;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  background: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #667eea;
-}
-
-.action-buttons {
-  display: flex;
-  gap: 0.75rem;
-}
-
-.action-btn {
-  padding: 0.75rem 1.25rem;
-  border: none;
-  border-radius: 12px;
-  font-size: 0.9rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  text-decoration: none;
-}
-
-.action-btn.primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.action-btn.info {
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-  color: white;
-}
-
-.action-btn.secondary {
-  background: #6c757d;
-  color: white;
-}
-
-.action-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-}
-
-/* View Controls */
-.view-controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.view-toggle {
-  display: flex;
-  gap: 0.25rem;
-  background: white;
+  gap: 0.35rem;
+  background: #f3f4f6;
   padding: 0.25rem;
   border-radius: 10px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
-.toggle-btn {
-  padding: 0.6rem 1rem;
+.filter-tab {
+  padding: 0.55rem 1rem;
   border: none;
   background: transparent;
   border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #6b7280;
   cursor: pointer;
-  font-weight: 500;
-  color: #6c757d;
   transition: all 0.2s ease;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   gap: 0.4rem;
-  font-size: 0.85rem;
 }
 
-.toggle-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+.filter-tab:hover {
+  color: #374151;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.filter-tab.active {
+  background: #10b981;
   color: white;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
 }
 
-.results-info {
-  color: #666;
-  font-size: 0.9rem;
+.tab-count {
+  background: rgba(0, 0, 0, 0.1);
+  padding: 0.1rem 0.45rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  min-width: 20px;
+  text-align: center;
 }
 
-/* Loading State */
+.filter-tab.active .tab-count {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+/* ========== Loading State ========== */
 .loading-state {
   text-align: center;
   padding: 4rem 2rem;
   background: white;
   border-radius: 16px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
+  color: #6b7280;
 }
 
 .spinner {
-  width: 50px;
-  height: 50px;
+  width: 48px;
+  height: 48px;
   margin: 0 auto 1rem;
   border: 4px solid #f3f4f6;
   border-top: 4px solid #667eea;
   border-radius: 50%;
-  animation: spin 1s linear infinite;
+  animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin {
@@ -875,679 +771,481 @@ const handleLanguageSaved = async (eventData) => {
   100% { transform: rotate(360deg); }
 }
 
-/* Languages Grid */
+/* ========== Languages Grid ========== */
 .languages-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+  gap: 1.25rem;
 }
 
+/* ========== Language Card ========== */
 .language-card {
   background: white;
   border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
-  min-height: 320px;
-}
-
-.language-card.card-inactive {
-  opacity: 0.7;
-  border-left: 4px solid #dc3545;
-}
-
-.language-card.card-default {
-  border-left: 4px solid #ffc107;
-}
-
-.language-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
-}
-
-.card-header-custom {
-  padding: 1.25rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  background: linear-gradient(135deg, #f8f9ff 0%, #eef2f7 100%);
-}
-
-.language-code-badge {
-  padding: 0.75rem 1.25rem;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 1.25rem;
-  color: white;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.language-code-badge.ltr {
-  background: linear-gradient(135deg, #17a2b8 0%, #138496 100%);
-}
-
-.language-code-badge.rtl {
-  background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-}
-
-.language-code-badge.small {
-  padding: 0.4rem 0.75rem;
-  font-size: 0.9rem;
-}
-
-.card-menu {
-  position: relative;
-}
-
-.menu-btn {
-  background: white;
-  border: none;
-  width: 36px;
-  height: 36px;
-  border-radius: 50%;
-  cursor: pointer;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-}
-
-.menu-btn:hover {
-  background: #f8f9fa;
-  transform: scale(1.1);
-}
-
-.dropdown-menu {
-  position: absolute;
-  right: 0;
-  top: 42px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
-  min-width: 180px;
-  z-index: 100;
   overflow: hidden;
 }
 
-.menu-item {
+.language-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+}
+
+.language-card.card-source {
+  background: linear-gradient(135deg, #f0f7ff 0%, #e8f0fe 100%);
+  border: 1px solid #c3d9f7;
+}
+
+.language-card.card-inactive {
+  opacity: 0.65;
+}
+
+/* Card Top */
+.card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  padding: 1.25rem 1.25rem 0.75rem;
+}
+
+.card-top-left {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: transparent;
-  width: 100%;
-  text-align: left;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  color: #495057;
-  font-size: 0.9rem;
+  gap: 0.85rem;
 }
 
-.menu-item:hover {
-  background: #f8f9fa;
+.lang-code {
+  font-size: 1.5rem;
+  font-weight: 900;
+  color: #1a1a2e;
+  letter-spacing: 1px;
+  background: #f3f4f6;
+  padding: 0.5rem 0.75rem;
+  border-radius: 10px;
+  line-height: 1;
+  min-width: 52px;
+  text-align: center;
 }
 
-.menu-item.danger {
-  color: #dc3545;
+.card-source .lang-code {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
-.menu-item.danger:hover {
-  background: #fee;
-}
-
-.card-body-custom {
-  padding: 1.25rem;
-  flex: 1;
+.lang-names {
   display: flex;
   flex-direction: column;
+  gap: 0.15rem;
 }
 
-.language-name {
-  font-size: 1.15rem;
+.lang-name {
+  font-size: 1.05rem;
   font-weight: 700;
-  margin: 0 0 0.25rem 0;
-  color: #2c3e50;
+  color: #1a1a2e;
 }
 
-.language-native {
-  color: #888;
-  font-size: 1rem;
-  margin: 0 0 0.75rem 0;
+.lang-native {
+  font-size: 0.82rem;
+  color: #6b7280;
 }
 
-.language-badges {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.75rem;
-}
-
-.spacer {
-  flex: 1;
-}
-
-.language-stats {
-  display: flex;
-  gap: 0.75rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid #eef2f7;
-  flex-wrap: wrap;
-}
-
-.stat-item {
+.card-top-right {
   display: flex;
   align-items: center;
-  gap: 0.4rem;
-  color: #666;
-  font-size: 0.8rem;
+  gap: 0.6rem;
 }
 
-.stat-item i {
-  color: #667eea;
+/* RTL Badge */
+.rtl-badge {
+  background: #fef3c7;
+  color: #d97706;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
 }
 
-.card-footer-custom {
-  padding: 1rem 1.25rem;
-  background: #f8f9ff;
-  display: flex;
-  gap: 0.75rem;
-  border-top: 1px solid #eef2f7;
+/* Active Toggle */
+.active-toggle {
+  cursor: pointer;
 }
 
-.card-footer-custom .action-btn {
-  flex: 1;
-  justify-content: center;
-  padding: 0.65rem 1rem;
-  font-size: 0.85rem;
+.toggle-track {
+  width: 40px;
+  height: 22px;
+  border-radius: 11px;
+  background: #d1d5db;
+  position: relative;
+  transition: background 0.25s ease;
 }
 
-/* Badges */
-.badge {
+.toggle-track.on {
+  background: #10b981;
+}
+
+.toggle-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  transition: transform 0.25s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggle-track.on .toggle-thumb {
+  transform: translateX(18px);
+}
+
+/* Source Language Info */
+.source-info {
+  padding: 0 1.25rem 1rem;
+}
+
+.source-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
-  padding: 0.35rem 0.7rem;
-  border-radius: 8px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  background: #dbeafe;
+  color: #1d4ed8;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.3rem 0.75rem;
+  border-radius: 20px;
+  margin-bottom: 0.5rem;
 }
 
-.badge.success { background: #e8f5e9; color: #2e7d32; }
-.badge.danger { background: #ffebee; color: #c62828; }
-.badge.warning { background: #fff8e1; color: #ff8f00; }
-.badge.fire { background: #fce4ec; color: #c2185b; }
-.badge.info { background: #e0f7fa; color: #00838f; }
-.badge.secondary { background: #f5f5f5; color: #616161; }
+.source-badge i {
+  color: #f59e0b;
+  font-size: 0.7rem;
+}
 
-/* Empty State Grid */
-.empty-state-grid {
+.source-description {
+  font-size: 0.85rem;
+  color: #6b7280;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* Card Progress */
+.card-progress {
+  padding: 0 1.25rem 0.75rem;
+  flex: 1;
+}
+
+/* Overall Progress */
+.overall-progress {
+  margin-bottom: 0.75rem;
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.35rem;
+}
+
+.progress-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.progress-pct {
+  font-size: 0.85rem;
+  font-weight: 800;
+}
+
+.progress-pct.progress-green { color: #10b981; }
+.progress-pct.progress-orange { color: #f59e0b; }
+.progress-pct.progress-red { color: #ef4444; }
+
+.progress-bar-track {
+  width: 100%;
+  height: 8px;
+  background: #f3f4f6;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.progress-bar-fill.progress-green { background: #10b981; }
+.progress-bar-fill.progress-orange { background: #f59e0b; }
+.progress-bar-fill.progress-red { background: #ef4444; }
+
+.progress-counts {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.3rem;
+  font-size: 0.75rem;
+  color: #9ca3af;
+}
+
+/* Model Breakdown */
+.model-breakdown {
+  border-top: 1px solid #f3f4f6;
+  padding-top: 0.6rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.model-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: space-between;
+}
+
+.model-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  color: #6b7280;
+  min-width: 130px;
+  flex-shrink: 0;
+}
+
+.model-label i {
+  width: 16px;
+  text-align: center;
+  color: #9ca3af;
+  font-size: 0.72rem;
+}
+
+.model-progress {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.model-bar-track {
+  flex: 1;
+  height: 5px;
+  background: #f3f4f6;
+  border-radius: 3px;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.model-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.model-bar-fill.progress-green { background: #10b981; }
+.model-bar-fill.progress-orange { background: #f59e0b; }
+.model-bar-fill.progress-red { background: #ef4444; }
+
+.model-count {
+  font-size: 0.72rem;
+  color: #9ca3af;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+/* Card Footer */
+.card-footer {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid #f3f4f6;
+  display: flex;
+  gap: 0.6rem;
+  margin-top: auto;
+  background: #fafbfc;
+}
+
+.btn-edit {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  border: 2px solid #e5e7eb;
+  background: white;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #4b5563;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-edit:hover {
+  border-color: #667eea;
+  color: #667eea;
+  background: #f0f4ff;
+}
+
+.btn-ai-translate {
+  flex: 1;
+  padding: 0.55rem 0.75rem;
+  border: none;
+  background: linear-gradient(135deg, #7c3aed 0%, #10b981 100%);
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.btn-ai-translate:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
+}
+
+.btn-ai-translate:disabled {
+  opacity: 0.8;
+  cursor: not-allowed;
+}
+
+.btn-delete {
+  padding: 0.55rem 0.65rem;
+  border: 2px solid #fecaca;
+  background: white;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  color: #ef4444;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-delete:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
+}
+
+/* ========== Empty State ========== */
+.empty-state {
   grid-column: 1 / -1;
   text-align: center;
   padding: 4rem 2rem;
   background: white;
   border-radius: 16px;
-}
-
-.empty-state-grid i {
-  font-size: 4rem;
-  color: #ddd;
-  margin-bottom: 1rem;
-}
-
-/* Data Table */
-.data-table-container {
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-}
-
-.modern-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.modern-table thead {
-  background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-}
-
-.modern-table th {
-  padding: 1.125rem 1rem;
-  text-align: left;
-  font-weight: 600;
-  color: white;
-  font-size: 0.85rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.modern-table tbody tr {
-  border-bottom: 1px solid #f0f4f8;
-  transition: all 0.2s ease;
-}
-
-.modern-table tbody tr:hover {
-  background: linear-gradient(135deg, #f8f9ff 0%, #f0f4ff 100%);
-}
-
-.modern-table tbody tr.row-inactive {
-  background: #fff5f5;
-}
-
-.modern-table tbody tr.row-default {
-  background: #fffbf0;
-}
-
-.modern-table td {
-  padding: 1rem;
-  font-size: 0.9rem;
-  color: #333;
-  vertical-align: middle;
-}
-
-.empty-state {
-  text-align: center;
-  padding: 4rem !important;
-  color: #999;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.06);
 }
 
 .empty-state i {
   font-size: 3.5rem;
+  color: #d1d5db;
   margin-bottom: 1rem;
-  display: block;
-  opacity: 0.3;
+}
+
+.empty-state h3 {
+  color: #374151;
+  margin: 0 0 0.5rem 0;
 }
 
 .empty-state p {
-  margin-bottom: 1.5rem;
+  color: #9ca3af;
+  margin: 0 0 1.25rem 0;
 }
 
-/* Table Cells */
-.code-cell {
-  display: inline-block;
+/* ========== Responsive ========== */
+@media (max-width: 1024px) {
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stat-card:nth-child(2)::after {
+    display: none;
+  }
+
+  .stat-card:nth-child(2) {
+    border-right: none;
+  }
+
+  .stat-card:nth-child(1),
+  .stat-card:nth-child(2) {
+    border-bottom: 1px solid #eef2f7;
+  }
 }
 
-.name-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 0.2rem;
-}
-
-.name-native {
-  font-size: 0.85rem;
-  color: #888;
-}
-
-.status-badges {
-  display: flex;
-  gap: 0.4rem;
-  flex-wrap: wrap;
-}
-
-/* Table Actions */
-.table-actions {
-  display: flex;
-  gap: 0.4rem;
-}
-
-.action-btn-small {
-  width: 32px;
-  height: 32px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 0.85rem;
-}
-
-.action-btn-small.edit {
-  background: #e3f2fd;
-  color: #1976d2;
-}
-
-.action-btn-small.ban {
-  background: #ffebee;
-  color: #c62828;
-}
-
-.action-btn-small.unban {
-  background: #e8f5e9;
-  color: #2e7d32;
-}
-
-.action-btn-small.featured {
-  background: #fff8e1;
-  color: #ff8f00;
-}
-
-.action-btn-small.info-btn {
-  background: #e0f7fa;
-  color: #00838f;
-}
-
-.action-btn-small.delete {
-  background: #ffebee;
-  color: #c62828;
-}
-
-.action-btn-small:hover {
-  transform: scale(1.1);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-}
-
-/* Pagination */
-.pagination-container {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 1.5rem;
-  padding: 1.25rem;
-  background: white;
-  border-radius: 16px;
-  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
-  flex-wrap: wrap;
-  gap: 1rem;
-}
-
-.pagination-info {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.pagination-controls {
-  display: flex;
-  gap: 0.5rem;
-}
-
-.pagination-btn {
-  padding: 0.6rem 1rem;
-  border: 2px solid #eef2f7;
-  background: white;
-  border-radius: 10px;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.pagination-btn:hover:not(:disabled) {
-  border-color: #667eea;
-  color: #667eea;
-}
-
-.pagination-btn.active {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-color: transparent;
-  color: white;
-}
-
-.pagination-btn:disabled {
-  opacity: 0.4;
-  cursor: not-allowed;
-}
-
-/* Responsive */
 @media (max-width: 768px) {
-  .search-filter-bar {
+  .page-header {
     flex-direction: column;
   }
 
-  .search-box, .filter-group, .action-buttons {
+  .page-header-right {
     width: 100%;
   }
 
-  .filter-group {
-    flex-direction: column;
-  }
-
-  .filter-select {
-    width: 100%;
-  }
-
-  .action-buttons {
-    justify-content: stretch;
-  }
-
-  .action-btn {
+  .btn-refresh, .btn-add {
     flex: 1;
+    justify-content: center;
+  }
+
+  .stats-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    min-width: unset;
+  }
+
+  .filter-tabs {
     justify-content: center;
   }
 
   .languages-grid {
     grid-template-columns: 1fr;
   }
+}
 
-  .data-table-container {
-    overflow-x: auto;
+@media (max-width: 480px) {
+  .stats-container {
+    grid-template-columns: 1fr;
   }
 
-  .modern-table {
-    min-width: 700px;
+  .stat-card::after {
+    display: none !important;
   }
 
-  .pagination-container {
+  .stat-card {
+    border-bottom: 1px solid #eef2f7;
+  }
+
+  .stat-card:last-child {
+    border-bottom: none;
+  }
+
+  .card-top {
     flex-direction: column;
+    gap: 0.75rem;
   }
-}
 
-/* Missing Translations Modal */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-  padding: 1rem;
-}
-
-.modal-dialog-advanced {
-  background: white;
-  border-radius: 16px;
-  width: 100%;
-  max-width: 600px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  animation: modalSlideIn 0.3s ease;
-}
-
-.missing-modal {
-  max-width: 700px;
-}
-
-@keyframes modalSlideIn {
-  from {
-    opacity: 0;
-    transform: translateY(-30px);
+  .card-top-right {
+    align-self: flex-end;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.modal-header {
-  padding: 1.25rem 1.5rem;
-  border-bottom: 1px solid #e9ecef;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header.warning-header {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-  border-bottom: 2px solid #f39c12;
-}
-
-.modal-header.warning-header .modal-title {
-  color: #856404;
-}
-
-.modal-header.warning-header .modal-title i {
-  color: #f39c12;
-}
-
-.modal-title {
-  margin: 0;
-  font-size: 1.2rem;
-  font-weight: 700;
-  color: #2c3e50;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.close-btn {
-  background: none;
-  border: none;
-  font-size: 1.25rem;
-  color: #6c757d;
-  cursor: pointer;
-  padding: 0.25rem;
-  transition: all 0.2s ease;
-  border-radius: 6px;
-}
-
-.close-btn:hover {
-  color: #dc3545;
-  background: rgba(220, 53, 69, 0.1);
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.modal-footer {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #e9ecef;
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.75rem;
-  flex-wrap: wrap;
-}
-
-.warning-message {
-  background: #fff8e1;
-  border: 1px solid #ffe082;
-  border-radius: 10px;
-  padding: 1rem 1.25rem;
-  margin-bottom: 1.25rem;
-}
-
-.warning-message p {
-  margin: 0 0 0.5rem 0;
-  color: #5d4e37;
-}
-
-.warning-message p:last-child {
-  margin-bottom: 0;
-}
-
-.warning-hint {
-  font-size: 0.9rem;
-  color: #7c6a54 !important;
-}
-
-.missing-count {
-  display: inline-block;
-  background: #f39c12;
-  color: white;
-  padding: 0.15rem 0.5rem;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.missing-list-container {
-  border: 1px solid #e9ecef;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-.missing-list-header {
-  background: #f8f9fa;
-  padding: 0.75rem 1rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-weight: 600;
-  font-size: 0.9rem;
-  color: #495057;
-  border-bottom: 1px solid #e9ecef;
-}
-
-.missing-list {
-  max-height: 300px;
-  overflow-y: auto;
-}
-
-.missing-item {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid #f0f0f0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
-}
-
-.missing-item:last-child {
-  border-bottom: none;
-}
-
-.missing-item:hover {
-  background: #f8f9ff;
-}
-
-.missing-key code {
-  background: #f5f5f5;
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-size: 0.85rem;
-  color: #c7254e;
-}
-
-.missing-default-value {
-  font-size: 0.85rem;
-  color: #666;
-  padding-left: 0.25rem;
-}
-
-.show-more {
-  padding: 0.75rem 1rem;
-  text-align: center;
-  background: #f8f9fa;
-}
-
-.show-more-btn {
-  background: none;
-  border: none;
-  color: #667eea;
-  cursor: pointer;
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.35rem;
-  padding: 0.5rem 1rem;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.show-more-btn:hover {
-  background: rgba(102, 126, 234, 0.1);
-}
-
-.action-btn.warning {
-  background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
-  color: white;
 }
 </style>
