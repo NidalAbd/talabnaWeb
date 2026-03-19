@@ -109,7 +109,7 @@
                 </span>
                 <span class="d-flex align-center">
                   <i class="mdi mdi-eye" style="font-size: 18px; margin-inline-end: 4px;"></i>
-                  {{ formatNumber(listing.view_count) }} {{ locale === 'ar' ? 'مشاهدة' : 'views' }}
+                  {{ formatNumber(listing.view_count) }} {{ t('listing.views') }}
                 </span>
               </div>
 
@@ -117,7 +117,7 @@
 
               <!-- Description -->
               <h2 class="text-h6 font-weight-bold mb-4">
-                {{ locale === 'ar' ? 'الوصف' : 'Description' }}
+                {{ t('listing.description') }}
               </h2>
               <p class="text-body-1 listing-description" style="white-space: pre-line">
                 {{ listing.description }}
@@ -128,7 +128,7 @@
           <!-- Related Listings -->
           <div v-if="related.length > 0">
             <h2 class="text-h5 font-weight-bold mb-4">
-              {{ locale === 'ar' ? 'إعلانات مشابهة' : 'Related Listings' }}
+              {{ t('listing.related') }}
             </h2>
             <div class="row">
               <div v-for="item in related" :key="item.id" class="col-12 col-sm-6">
@@ -148,7 +148,7 @@
                   {{ formatPrice(listing.price, locale, getCurrencyFromListing(listing)) }}
                 </div>
                 <div v-else class="text-h5 text-medium-emphasis">
-                  {{ locale === 'ar' ? 'السعر عند الاتصال' : 'Contact for price' }}
+                  {{ t('listing.price_contact') }}
                 </div>
               </div>
 
@@ -163,7 +163,7 @@
                 <div>
                   <h3 class="text-subtitle-1 font-weight-bold">{{ listing.user?.name }}</h3>
                   <p class="text-caption text-medium-emphasis">
-                    {{ locale === 'ar' ? 'عضو منذ' : 'Member since' }}
+                    {{ t('listing.member_since') }}
                     {{ formatDate(listing.user?.created_at, true) }}
                   </p>
                 </div>
@@ -172,17 +172,17 @@
               <!-- Actions -->
               <a class="btn btn-success btn-lg btn-block mb-3" :href="`tel:${listing.phone}`">
                 <i class="mdi mdi-phone" style="margin-inline-end: 4px;"></i>
-                {{ locale === 'ar' ? 'اتصل الآن' : 'Call Now' }}
+                {{ t('listing.call_now') }}
               </a>
 
               <a class="btn btn-outline-primary btn-lg btn-block mb-3" :href="`https://wa.me/${listing.whatsapp || listing.phone}`" target="_blank">
                 <i class="mdi mdi-whatsapp" style="margin-inline-end: 4px;"></i>
-                {{ locale === 'ar' ? 'واتساب' : 'WhatsApp' }}
+                {{ t('listing.whatsapp') }}
               </a>
 
               <button class="btn btn-text btn-lg btn-block" @click="toggleFavorite">
                 <i class="mdi" :class="isFavorite ? 'mdi-heart' : 'mdi-heart-outline'" :style="{ color: isFavorite ? 'red' : '', marginInlineEnd: '4px' }"></i>
-                {{ locale === 'ar' ? 'حفظ الإعلان' : 'Save Listing' }}
+                {{ t('listing.save') }}
               </button>
             </div>
           </div>
@@ -191,7 +191,7 @@
           <div class="card">
             <div class="card-body pa-4">
               <h3 class="text-subtitle-1 font-weight-bold mb-3">
-                {{ locale === 'ar' ? 'مشاركة الإعلان' : 'Share Listing' }}
+                {{ t('listing.share_listing') }}
               </h3>
               <div class="d-flex gap-2">
                 <a class="btn btn-icon" style="background: rgba(59,130,246,0.1); color: #3b82f6;" :href="`https://facebook.com/sharer/sharer.php?u=${shareUrl}`" target="_blank">
@@ -229,8 +229,8 @@
     <!-- Not Found -->
     <div v-else class="container py-16 text-center">
       <i class="mdi mdi-alert-circle" style="font-size: 100px; color: var(--color-error, #ef4444);"></i>
-      <h2 class="text-h4 mt-6 mb-4">{{ locale === 'ar' ? 'الإعلان غير موجود' : 'Listing Not Found' }}</h2>
-      <router-link to="/browse" class="btn btn-primary">{{ locale === 'ar' ? 'تصفح الإعلانات' : 'Browse Listings' }}</router-link>
+      <h2 class="text-h4 mt-6 mb-4">{{ t('listing.not_found') }}</h2>
+      <router-link to="/browse" class="btn btn-primary">{{ t('browse.title') }}</router-link>
     </div>
 
     <!-- Snackbar -->
@@ -244,6 +244,7 @@ import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useAdvancedSeo } from '@/composables/useAdvancedSeo'
 import ListingCard from '@/components/ListingCard.vue'
+import { t } from '@/utils/translate'
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -271,8 +272,9 @@ const userPhotoUrl = computed(() => {
 
 const getLocalizedName = (item) => {
   if (!item) return ''
+  if (item.name_localized) return item.name_localized
   if (item.name && typeof item.name === 'object') return _gln(item.name, locale.value)
-  return locale.value === 'ar' ? item.name : (item.name_en || item.name || '')
+  return item.name_en || item.name || ''
 }
 
 const shareUrl = computed(() => window.location.href)
@@ -305,7 +307,7 @@ const badgeName = computed(() => {
   if (!listing.value) return ''
   // Use new badge object if available
   if (listing.value.badge) {
-    return locale.value === 'ar' ? listing.value.badge.name_ar : listing.value.badge.name_en
+    return listing.value.badge.name_localized || listing.value.badge.name_en || listing.value.badge.name_ar
   }
   // Fallback to legacy
   return listing.value.have_badge
@@ -342,7 +344,7 @@ const locationText = computed(() => {
 const breadcrumbs = computed(() => {
   if (!listing.value) return []
   return [
-    { title: locale.value === 'ar' ? 'الرئيسية' : 'Home', to: '/' },
+    { title: t('nav.home'), to: '/' },
     { title: getLocalizedName(listing.value.category), to: `/category/${listing.value.category?.id}` },
     { title: listing.value.title, disabled: true },
   ]
@@ -363,14 +365,12 @@ const formatDate = (date, yearOnly = false) => {
 
 const toggleFavorite = () => {
   isFavorite.value = !isFavorite.value
-  showSnackbar(isFavorite.value
-    ? (locale.value === 'ar' ? 'تم حفظ الإعلان' : 'Listing saved')
-    : (locale.value === 'ar' ? 'تم إزالة الإعلان' : 'Listing removed'))
+  showSnackbar(isFavorite.value ? t('listing.saved') : t('listing.removed'))
 }
 
 const copyLink = () => {
   navigator.clipboard.writeText(window.location.href)
-  showSnackbar(locale.value === 'ar' ? 'تم نسخ الرابط' : 'Link copied')
+  showSnackbar(t('listing.link_copied'))
 }
 
 const fetchListing = async () => {

@@ -2,8 +2,8 @@
   <div class="about-page">
     <section class="hero-gradient py-16">
       <div class="container text-center">
-        <h1 class="text-h2 font-weight-bold text-white mb-4">{{ locale === 'ar' ? 'من نحن' : 'About Us' }}</h1>
-        <p class="text-h6 text-white-darken-1">{{ locale === 'ar' ? 'تعرف على قصة طلبنا' : 'Learn about Talabna story' }}</p>
+        <h1 class="text-h2 font-weight-bold text-white mb-4">{{ t('about.title') }}</h1>
+        <p class="text-h6 text-white-darken-1">{{ t('about.subtitle') }}</p>
       </div>
     </section>
 
@@ -14,18 +14,12 @@
           <div class="card pa-8 mb-8">
             <div class="row" style="align-items: center;">
               <div class="col-12 col-md-6">
-                <h2 class="text-h4 font-weight-bold mb-4">{{ locale === 'ar' ? 'مهمتنا' : 'Our Mission' }}</h2>
+                <h2 class="text-h4 font-weight-bold mb-4">{{ t('about.mission') }}</h2>
                 <p class="text-body-1 text-muted mb-4">
-                  {{ locale === 'ar'
-                    ? 'طلبنا هي منصة رائدة للإعلانات المبوبة تخدم المنطقة العربية. نربط بين البائعين والمشترين بطريقة سهلة وآمنة وسريعة. من الوظائف إلى العقارات، ومن السيارات إلى الأجهزة الإلكترونية — نوفر لك كل ما تحتاجه في مكان واحد.'
-                    : 'Talabna is a leading classified ads platform serving the Arab region. We connect sellers and buyers in an easy, secure, and fast way. From jobs to real estate, cars to electronics — we provide everything you need in one place.'
-                  }}
+                  {{ t('about.mission_p1') }}
                 </p>
                 <p class="text-body-1 text-muted">
-                  {{ locale === 'ar'
-                    ? 'نسعى لبناء مجتمع رقمي موثوق يُمكّن الجميع من البيع والشراء والتواصل بثقة وأمان.'
-                    : 'We strive to build a trusted digital community that empowers everyone to buy, sell, and connect with confidence and security.'
-                  }}
+                  {{ t('about.mission_p2') }}
                 </p>
               </div>
               <div class="col-12 col-md-6 text-center">
@@ -35,7 +29,7 @@
           </div>
 
           <!-- Values -->
-          <h2 class="text-h4 font-weight-bold mb-6 text-center">{{ locale === 'ar' ? 'قيمنا' : 'Our Values' }}</h2>
+          <h2 class="text-h4 font-weight-bold mb-6 text-center">{{ t('about.values') }}</h2>
           <div class="row mb-8">
             <div v-for="value in values" :key="value.icon" class="col-12 col-sm-6 col-md-3">
               <div class="card pa-6 text-center h-100">
@@ -50,9 +44,9 @@
 
           <!-- Stats -->
           <div class="card-flat pa-8 text-center" style="background: var(--color-primary); border-radius: var(--radius-xl);">
-            <h2 class="text-h4 font-weight-bold mb-6 text-white">{{ locale === 'ar' ? 'بالأرقام' : 'By the Numbers' }}</h2>
+            <h2 class="text-h4 font-weight-bold mb-6 text-white">{{ t('about.by_numbers') }}</h2>
             <div class="row">
-              <div v-for="stat in aboutStats" :key="stat.label" class="col-6 col-md-3">
+              <div v-for="stat in aboutStats" :key="stat.labelEn" class="col-6 col-md-3">
                 <div class="text-h3 font-weight-bold text-white">{{ stat.value }}</div>
                 <div class="text-body-2 text-white" style="opacity: 0.8">{{ locale === 'ar' ? stat.labelAr : stat.labelEn }}</div>
               </div>
@@ -61,14 +55,14 @@
 
           <!-- CTA -->
           <div class="text-center mt-12">
-            <h2 class="text-h5 font-weight-bold mb-4">{{ locale === 'ar' ? 'جاهز للبدء؟' : 'Ready to get started?' }}</h2>
+            <h2 class="text-h5 font-weight-bold mb-4">{{ t('about.ready') }}</h2>
             <router-link to="/browse" class="btn btn-primary btn-xl mr-4">
               <i class="mdi mdi-magnify"></i>
-              {{ locale === 'ar' ? 'تصفح الإعلانات' : 'Browse Listings' }}
+              {{ t('browse.title') }}
             </router-link>
             <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn btn-outline btn-xl">
               <i class="mdi mdi-google-play"></i>
-              {{ locale === 'ar' ? 'حمل التطبيق' : 'Download App' }}
+              {{ t('about.download_app') }}
             </a>
           </div>
         </div>
@@ -81,6 +75,7 @@
 import { computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
+import { t } from '@/utils/translate'
 
 const appStore = useAppStore()
 const { updateMeta, setOrganizationSchema, setFaqSchema } = useSeo()

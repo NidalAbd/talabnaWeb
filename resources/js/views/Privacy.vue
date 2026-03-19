@@ -2,8 +2,8 @@
   <div class="privacy-page">
     <section class="hero-gradient py-12">
       <div class="container text-center">
-        <h1 class="text-h3 font-weight-bold text-white">{{ locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' }}</h1>
-        <p class="text-body-1 text-white mt-2" style="opacity:0.8">{{ locale === 'ar' ? 'آخر تحديث: مارس 2026' : 'Last updated: March 2026' }}</p>
+        <h1 class="text-h3 font-weight-bold text-white">{{ t('privacy.title') }}</h1>
+        <p class="text-body-1 text-white mt-2" style="opacity:0.8">{{ t('privacy.updated') }}</p>
       </div>
     </section>
 
@@ -101,6 +101,7 @@
 import { computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
+import { t } from '@/utils/translate'
 
 const appStore = useAppStore()
 const { updateMeta } = useSeo()

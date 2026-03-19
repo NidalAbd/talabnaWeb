@@ -2,8 +2,8 @@
   <div class="contact-page">
     <section class="hero-gradient py-16">
       <div class="container text-center">
-        <h1 class="text-h2 font-weight-bold text-white mb-4">{{ locale === 'ar' ? 'اتصل بنا' : 'Contact Us' }}</h1>
-        <p class="text-h6 text-white-darken-1">{{ locale === 'ar' ? 'نحن هنا لمساعدتك' : 'We are here to help' }}</p>
+        <h1 class="text-h2 font-weight-bold text-white mb-4">{{ t('contact.title') }}</h1>
+        <p class="text-h6 text-white-darken-1">{{ t('contact.subtitle') }}</p>
       </div>
     </section>
 
@@ -11,10 +11,10 @@
       <div class="row" style="justify-content: center;">
         <div class="col-12 col-md-6">
           <div class="card pa-8">
-            <h2 class="text-h5 font-weight-bold mb-6">{{ locale === 'ar' ? 'أرسل لنا رسالة' : 'Send us a message' }}</h2>
+            <h2 class="text-h5 font-weight-bold mb-6">{{ t('contact.send_message') }}</h2>
 
             <div v-if="submitSuccess" class="alert alert-success mb-4">
-              {{ locale === 'ar' ? 'تم إرسال رسالتك بنجاح! سنرد عليك في أقرب وقت.' : 'Message sent successfully! We will reply soon.' }}
+              {{ t('contact.success') }}
               <button class="alert-close" @click="submitSuccess = false">&times;</button>
             </div>
             <div v-if="submitError" class="alert alert-error mb-4">
@@ -24,20 +24,20 @@
 
             <form @submit.prevent="submitForm">
               <div class="form-group">
-                <label class="form-label">{{ locale === 'ar' ? 'الاسم' : 'Name' }} *</label>
+                <label class="form-label">{{ t('contact.name') }} *</label>
                 <input v-model="form.name" class="form-input" required :disabled="submitting" />
               </div>
               <div class="form-group">
-                <label class="form-label">{{ locale === 'ar' ? 'البريد الإلكتروني' : 'Email' }} *</label>
+                <label class="form-label">{{ t('contact.email') }} *</label>
                 <input v-model="form.email" type="email" class="form-input" required :disabled="submitting" />
               </div>
               <div class="form-group">
-                <label class="form-label">{{ locale === 'ar' ? 'الرسالة' : 'Message' }} *</label>
+                <label class="form-label">{{ t('contact.message') }} *</label>
                 <textarea v-model="form.message" class="form-textarea" rows="5" required :disabled="submitting"></textarea>
               </div>
               <button type="submit" class="btn btn-primary btn-lg btn-block" :class="{ 'btn-loading': submitting }" :disabled="submitting">
                 <i class="mdi mdi-send"></i>
-                {{ locale === 'ar' ? 'إرسال' : 'Send' }}
+                {{ t('contact.send') }}
               </button>
             </form>
           </div>
@@ -46,17 +46,17 @@
         <div class="col-12 col-md-4">
           <div class="card pa-6 mb-4">
             <i class="mdi mdi-email" style="font-size: 32px; color: var(--color-primary); margin-bottom: 0.75rem;"></i>
-            <h3 class="text-subtitle-1 font-weight-bold">{{ locale === 'ar' ? 'البريد الإلكتروني' : 'Email' }}</h3>
+            <h3 class="text-subtitle-1 font-weight-bold">{{ t('contact.email') }}</h3>
             <a href="mailto:support@talbna.cloud" class="text-body-2">support@talbna.cloud</a>
           </div>
           <div class="card pa-6 mb-4">
             <i class="mdi mdi-web" style="font-size: 32px; color: var(--color-primary); margin-bottom: 0.75rem;"></i>
-            <h3 class="text-subtitle-1 font-weight-bold">{{ locale === 'ar' ? 'الموقع' : 'Website' }}</h3>
+            <h3 class="text-subtitle-1 font-weight-bold">{{ t('contact.website') }}</h3>
             <a href="https://talbna.cloud" class="text-body-2">talbna.cloud</a>
           </div>
           <div class="card pa-6">
             <i class="mdi mdi-google-play" style="font-size: 32px; color: var(--color-primary); margin-bottom: 0.75rem;"></i>
-            <h3 class="text-subtitle-1 font-weight-bold">{{ locale === 'ar' ? 'التطبيق' : 'App' }}</h3>
+            <h3 class="text-subtitle-1 font-weight-bold">{{ t('contact.app') }}</h3>
             <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="text-body-2">Google Play</a>
           </div>
         </div>
@@ -69,6 +69,7 @@
 import { ref, computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
+import { t } from '@/utils/translate'
 
 const appStore = useAppStore()
 const { updateMeta } = useSeo()
@@ -103,10 +104,10 @@ const submitForm = async () => {
       form.value = { name: '', email: '', message: '' }
     } else {
       const data = await response.json()
-      submitError.value = data.message || (locale.value === 'ar' ? 'حدث خطأ. حاول مرة أخرى.' : 'An error occurred. Please try again.')
+      submitError.value = data.message || t('contact.error')
     }
   } catch (e) {
-    submitError.value = locale.value === 'ar' ? 'فشل الاتصال بالخادم.' : 'Failed to connect to server.'
+    submitError.value = t('contact.connection_error')
   } finally {
     submitting.value = false
   }

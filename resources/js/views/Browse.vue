@@ -4,10 +4,10 @@
     <section class="hero-gradient py-12">
       <div class="container">
         <h1 class="text-h3 font-weight-bold text-white mb-2">
-          {{ locale === 'ar' ? 'تصفح الإعلانات' : 'Browse Listings' }}
+          {{ t('browse.title') }}
         </h1>
         <p class="text-h6 text-white-darken-1">
-          {{ pagination.total }} {{ locale === 'ar' ? 'إعلان متاح' : 'listings available' }}
+          {{ pagination.total }} {{ t('browse.available') }}
         </p>
       </div>
     </section>
@@ -18,7 +18,7 @@
         <div class="col-12 d-md-none mb-4">
           <button class="btn btn-outline btn-block" @click="showMobileFilters = !showMobileFilters">
             <i class="mdi mdi-filter"></i>
-            {{ locale === 'ar' ? 'الفلاتر' : 'Filters' }}
+            {{ t('browse.filters') }}
             <i :class="showMobileFilters ? 'mdi mdi-chevron-up' : 'mdi mdi-chevron-down'"></i>
           </button>
         </div>
@@ -28,10 +28,10 @@
           <div class="card filters-card sticky-filters">
             <div class="card-header d-flex align-center">
               <i class="mdi mdi-filter"></i>
-              {{ locale === 'ar' ? 'الفلاتر' : 'Filters' }}
+              {{ t('browse.filters') }}
               <div class="flex-1"></div>
               <button class="btn btn-text" @click="clearFilters">
-                {{ locale === 'ar' ? 'مسح' : 'Clear' }}
+                {{ t('browse.clear') }}
               </button>
             </div>
             <hr>
@@ -39,10 +39,10 @@
               <!-- Category -->
               <div class="mb-4">
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
-                  {{ locale === 'ar' ? 'التصنيف' : 'Category' }}
+                  {{ t('browse.category') }}
                 </label>
                 <select class="form-select" v-model="filters.category_id" @change="onCategoryChange(filters.category_id)">
-                  <option value="">{{ locale === 'ar' ? 'الكل' : 'All' }}</option>
+                  <option value="">{{ t('browse.all') }}</option>
                   <option v-for="opt in categoryOptions" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
                 </select>
               </div>
@@ -50,10 +50,10 @@
               <!-- Subcategory -->
               <div class="mb-4">
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
-                  {{ locale === 'ar' ? 'التصنيف الفرعي' : 'Subcategory' }}
+                  {{ t('browse.subcategory') }}
                 </label>
                 <select class="form-select" v-model="filters.subcategory_id" :disabled="!filters.category_id" @change="fetchListings()">
-                  <option value="">{{ locale === 'ar' ? 'الكل' : 'All' }}</option>
+                  <option value="">{{ t('browse.all') }}</option>
                   <option v-for="opt in subcategoryOptions" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
                 </select>
               </div>
@@ -61,10 +61,10 @@
               <!-- Country -->
               <div class="mb-4">
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
-                  {{ locale === 'ar' ? 'الدولة' : 'Country' }}
+                  {{ t('browse.country') }}
                 </label>
                 <select class="form-select" v-model="filters.country_id" @change="onCountryChange(filters.country_id)">
-                  <option value="">{{ locale === 'ar' ? 'الكل' : 'All' }}</option>
+                  <option value="">{{ t('browse.all') }}</option>
                   <option v-for="opt in countryOptions" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
                 </select>
               </div>
@@ -72,10 +72,10 @@
               <!-- City -->
               <div class="mb-4">
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
-                  {{ locale === 'ar' ? 'المدينة' : 'City' }}
+                  {{ t('browse.city') }}
                 </label>
                 <select class="form-select" v-model="filters.city_id" :disabled="!filters.country_id" @change="fetchListings()">
-                  <option value="">{{ locale === 'ar' ? 'الكل' : 'All' }}</option>
+                  <option value="">{{ t('browse.all') }}</option>
                   <option v-for="opt in cityOptions" :key="opt.value" :value="opt.value">{{ opt.title }}</option>
                 </select>
               </div>
@@ -83,14 +83,14 @@
               <!-- Price Range -->
               <div class="mb-4">
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
-                  {{ locale === 'ar' ? 'نطاق السعر' : 'Price Range' }}
+                  {{ t('browse.price_range') }}
                 </label>
                 <div class="row">
                   <div class="col-6">
                     <input
                       class="form-input"
                       v-model="filters.min_price"
-                      :placeholder="locale === 'ar' ? 'من' : 'Min'"
+                      :placeholder="t('browse.price_min')"
                       type="number"
                       @change="fetchListings()"
                     />
@@ -99,7 +99,7 @@
                     <input
                       class="form-input"
                       v-model="filters.max_price"
-                      :placeholder="locale === 'ar' ? 'إلى' : 'Max'"
+                      :placeholder="t('browse.price_max')"
                       type="number"
                       @change="fetchListings()"
                     />
@@ -110,7 +110,7 @@
               <!-- Badge -->
               <div class="mb-4">
                 <label class="text-subtitle-2 font-weight-bold mb-2 d-block">
-                  {{ locale === 'ar' ? 'نوع الإعلان' : 'Listing Type' }}
+                  {{ t('browse.listing_type') }}
                 </label>
                 <div class="chip-group">
                   <button
@@ -121,14 +121,14 @@
                     @click="filters.badge = filters.badge === badge.name_ar ? null : badge.name_ar; fetchListings()"
                   >
                     <i :class="badge.icon" style="font-size: 16px;"></i>
-                    {{ locale === 'ar' ? badge.name_ar : badge.name_en }}
+                    {{ badge.name_localized || badge.name_en || badge.name_ar }}
                   </button>
                 </div>
               </div>
 
               <button class="btn btn-primary btn-block" @click="fetchListings()">
                 <i class="mdi mdi-filter"></i>
-                {{ locale === 'ar' ? 'تطبيق' : 'Apply' }}
+                {{ t('browse.apply') }}
               </button>
             </div>
           </div>
@@ -159,7 +159,7 @@
           <!-- Loading -->
           <div v-if="loading" class="text-center py-16">
             <div class="spinner spinner-lg"></div>
-            <p class="mt-4 text-medium-emphasis">{{ locale === 'ar' ? 'جاري التحميل...' : 'Loading...' }}</p>
+            <p class="mt-4 text-medium-emphasis">{{ t('browse.loading') }}</p>
           </div>
 
           <!-- Grid View -->
@@ -188,7 +188,7 @@
                         :style="{ backgroundColor: listing.badge.color, color: '#fff' }"
                       >
                         <i :class="listing.badge.icon" style="font-size: 12px;"></i>
-                        {{ locale === 'ar' ? listing.badge.name_ar : listing.badge.name_en }}
+                        {{ listing.badge.name_localized || listing.badge.name_en || listing.badge.name_ar }}
                       </span>
                       <span class="chip">{{ getLocalizedName(listing.category) }}</span>
                     </div>
@@ -196,7 +196,7 @@
                     <p class="text-body-2 text-medium-emphasis mb-2 listing-description">{{ listing.description }}</p>
                     <div class="d-flex justify-space-between align-center">
                       <span v-if="listing.price" class="text-h6 font-weight-bold text-primary">${{ listing.price }}</span>
-                      <span v-else class="text-body-2 text-medium-emphasis">{{ locale === 'ar' ? 'السعر عند الاتصال' : 'Contact for price' }}</span>
+                      <span v-else class="text-body-2 text-medium-emphasis">{{ t('listing.price_contact') }}</span>
                       <span class="text-caption text-medium-emphasis">{{ getLocalizedName(listing.city) }}</span>
                     </div>
                   </div>
@@ -208,24 +208,24 @@
           <!-- No Results -->
           <div v-else-if="!loading && listings.length === 0" class="card text-center py-16">
             <i class="mdi mdi-magnify" style="font-size: 80px; color: grey;"></i>
-            <h3 class="text-h5 text-medium-emphasis mt-4">{{ locale === 'ar' ? 'لا توجد نتائج' : 'No results found' }}</h3>
-            <p class="text-body-2 text-medium-emphasis">{{ locale === 'ar' ? 'جرب تعديل الفلاتر' : 'Try adjusting your filters' }}</p>
-            <button class="btn btn-primary mt-4" @click="clearFilters">{{ locale === 'ar' ? 'مسح الفلاتر' : 'Clear Filters' }}</button>
+            <h3 class="text-h5 text-medium-emphasis mt-4">{{ t('browse.no_results') }}</h3>
+            <p class="text-body-2 text-medium-emphasis">{{ t('browse.adjust_filters') }}</p>
+            <button class="btn btn-primary mt-4" @click="clearFilters">{{ t('browse.clear_filters') }}</button>
           </div>
 
           <!-- Infinite Scroll Trigger -->
           <div v-if="listings.length > 0" ref="scrollTrigger" class="scroll-trigger">
             <div v-if="loadingMore" class="text-center py-8">
               <div class="spinner spinner-lg"></div>
-              <p class="mt-2 text-caption text-medium-emphasis">{{ locale === 'ar' ? 'جاري تحميل المزيد...' : 'Loading more...' }}</p>
+              <p class="mt-2 text-caption text-medium-emphasis">{{ t('browse.loading_more') }}</p>
             </div>
             <div v-else-if="hasMore" class="text-center py-4">
               <button class="btn btn-text" @click="loadMore">
-                {{ locale === 'ar' ? 'تحميل المزيد' : 'Load More' }}
+                {{ t('browse.load_more') }}
               </button>
             </div>
             <div v-else class="text-center py-4 text-caption text-medium-emphasis">
-              {{ locale === 'ar' ? 'تم عرض جميع النتائج' : 'All results loaded' }}
+              {{ t('browse.all_loaded') }}
             </div>
           </div>
         </div>
@@ -240,6 +240,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
 import ListingCard from '@/components/ListingCard.vue'
+import { t } from '@/utils/translate'
 
 const route = useRoute()
 const router = useRouter()
@@ -289,8 +290,9 @@ import { getLocalizedName as _getLocalizedName, ensureAbsoluteUrl } from '@/util
 
 const getLocalizedName = (item) => {
   if (!item) return ''
+  if (item.name_localized) return item.name_localized
   if (item.name && typeof item.name === 'object') return _getLocalizedName(item.name, locale.value)
-  return locale.value === 'ar' ? item.name : (item.name_en || item.name || '')
+  return item.name_en || item.name || ''
 }
 
 const getPhotoUrl = (listing) => {
@@ -308,7 +310,7 @@ const hasMore = computed(() => {
 const categoryOptions = computed(() => {
   if (!Array.isArray(categories.value)) return []
   return categories.value.map(c => ({
-    title: `${locale.value === 'ar' ? c.name : c.name_en} (${c.posts_count})`,
+    title: `${c.name_localized || c.name_en || c.name} (${c.posts_count})`,
     value: c.id,
   }))
 })
@@ -316,7 +318,7 @@ const categoryOptions = computed(() => {
 const subcategoryOptions = computed(() => {
   if (!Array.isArray(subcategories.value)) return []
   return subcategories.value.map(s => ({
-    title: `${locale.value === 'ar' ? s.name : s.name_en} (${s.posts_count})`,
+    title: `${s.name_localized || s.name_en || s.name} (${s.posts_count})`,
     value: s.id,
   }))
 })
@@ -325,14 +327,12 @@ const countryOptions = computed(() => {
   if (!Array.isArray(countries.value)) return []
   return countries.value.map(c => {
     // Handle both string and object name formats
-    let nameAr = c.name
-    let nameEn = c.name_en || c.name
+    let name = c.name_localized || c.name_en || c.name
     if (c.name && typeof c.name === 'object') {
-      nameAr = c.name.ar || c.name.en || ''
-      nameEn = c.name.en || c.name.ar || ''
+      name = c.name.en || c.name.ar || ''
     }
     return {
-      title: locale.value === 'ar' ? nameAr : nameEn,
+      title: name,
       value: c.id,
     }
   })
@@ -342,24 +342,22 @@ const cityOptions = computed(() => {
   if (!Array.isArray(cities.value)) return []
   return cities.value.map(c => {
     // Handle both string and object name formats
-    let nameAr = c.name
-    let nameEn = c.name_en || c.name
+    let name = c.name_localized || c.name_en || c.name
     if (c.name && typeof c.name === 'object') {
-      nameAr = c.name.ar || c.name.en || ''
-      nameEn = c.name.en || c.name.ar || ''
+      name = c.name.en || c.name.ar || ''
     }
     return {
-      title: locale.value === 'ar' ? nameAr : nameEn,
+      title: name,
       value: c.id,
     }
   })
 })
 
 const sortOptions = computed(() => [
-  { title: locale.value === 'ar' ? 'الأحدث' : 'Newest', value: 'created_at' },
-  { title: locale.value === 'ar' ? 'السعر: من الأقل' : 'Price: Low to High', value: 'price_asc' },
-  { title: locale.value === 'ar' ? 'السعر: من الأعلى' : 'Price: High to Low', value: 'price_desc' },
-  { title: locale.value === 'ar' ? 'الأكثر مشاهدة' : 'Most Viewed', value: 'view_count' },
+  { title: t('browse.sort_newest'), value: 'created_at' },
+  { title: t('browse.sort_price_low'), value: 'price_asc' },
+  { title: t('browse.sort_price_high'), value: 'price_desc' },
+  { title: t('browse.sort_most_viewed'), value: 'view_count' },
 ])
 
 // Fetch functions

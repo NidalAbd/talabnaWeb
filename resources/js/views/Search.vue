@@ -4,19 +4,19 @@
       <!-- Search Header -->
       <div class="mb-8">
         <h1 class="text-h4 font-weight-bold mb-4">
-          {{ locale === 'ar' ? 'نتائج البحث' : 'Search Results' }}
+          {{ t('search.title') }}
         </h1>
         <div class="search-wrapper" style="max-width: 600px;">
           <i class="mdi mdi-magnify search-input-icon"></i>
           <input
             v-model="searchQuery"
-            :placeholder="locale === 'ar' ? 'ابحث...' : 'Search...'"
+            :placeholder="t('search.placeholder')"
             class="form-input form-input-search"
             @keyup.enter="doSearch"
           />
         </div>
         <p v-if="query" class="text-body-1 text-muted mt-4">
-          {{ pagination.total }} {{ locale === 'ar' ? 'نتيجة لـ' : 'results for' }} "{{ query }}"
+          {{ pagination.total }} {{ t('search.results_for') }} "{{ query }}"
         </p>
       </div>
 
@@ -35,8 +35,8 @@
       <!-- No Results -->
       <div v-else class="card-flat text-center py-16">
         <i class="mdi mdi-magnify" style="font-size: 80px; color: var(--color-text-muted);"></i>
-        <h3 class="text-h5 mt-4">{{ locale === 'ar' ? 'لا توجد نتائج' : 'No results found' }}</h3>
-        <p class="text-muted">{{ locale === 'ar' ? 'جرب كلمات بحث مختلفة' : 'Try different search terms' }}</p>
+        <h3 class="text-h5 mt-4">{{ t('search.no_results') }}</h3>
+        <p class="text-muted">{{ t('search.try_different') }}</p>
       </div>
 
       <!-- Pagination -->
@@ -63,6 +63,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
 import ListingCard from '@/components/ListingCard.vue'
+import { t } from '@/utils/translate'
 
 const route = useRoute()
 const router = useRouter()

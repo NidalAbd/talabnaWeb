@@ -6,15 +6,15 @@
         <!-- Breadcrumb for subcategory -->
         <nav v-if="isSubcategoryRoute && category" class="breadcrumbs mb-2">
           <router-link :to="{ name: 'home' }" class="breadcrumb-link text-white-darken-2">
-            {{ locale === 'ar' ? 'الرئيسية' : 'Home' }}
+            {{ t('nav.home') }}
           </router-link>
           <span class="breadcrumb-separator text-white-darken-2">/</span>
           <router-link :to="{ name: 'category', params: { id: category.id, slug: category.slug } }" class="breadcrumb-link text-white-darken-2">
-            {{ locale === 'ar' ? category.name : category.name_en }}
+            {{ category.name_localized || category.name_en || category.name }}
           </router-link>
           <span class="breadcrumb-separator text-white-darken-2">/</span>
           <span class="breadcrumb-current text-white">
-            {{ locale === 'ar' ? currentSubcategory?.name : currentSubcategory?.name_en }}
+            {{ currentSubcategory?.name_localized || currentSubcategory?.name_en || currentSubcategory?.name }}
           </span>
         </nav>
 
@@ -24,22 +24,22 @@
         <h1 class="text-h3 font-weight-bold text-white mb-2">
           <!-- Show subcategory name if on subcategory route -->
           {{ isSubcategoryRoute && currentSubcategory
-              ? (locale === 'ar' ? currentSubcategory.name : currentSubcategory.name_en)
-              : (locale === 'ar' ? category?.name : category?.name_en)
+              ? (currentSubcategory.name_localized || currentSubcategory.name_en || currentSubcategory.name)
+              : (category?.name_localized || category?.name_en || category?.name)
           }}
         </h1>
         <p v-if="isSubcategoryRoute && category" class="text-subtitle-1 text-white-darken-2 mb-2">
-          {{ locale === 'ar' ? 'في' : 'in' }} {{ locale === 'ar' ? category.name : category.name_en }}
+          {{ t('category.in') }} {{ category.name_localized || category.name_en || category.name }}
         </p>
         <p class="text-h6 text-white-darken-1">
-          {{ pagination.total }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}
+          {{ pagination.total }} {{ t('listing.listings') }}
         </p>
 
         <!-- Location info for Near category -->
         <div v-if="isNearCategory && userLocation" class="mt-2">
           <span class="chip chip-flat-white">
             <i class="mdi mdi-crosshairs-gps" style="font-size: 16px; margin-inline-end: 4px;"></i>
-            {{ locale === 'ar' ? 'موقعك الحالي' : 'Your current location' }}
+            {{ t('category.your_location') }}
           </span>
         </div>
 
@@ -47,7 +47,7 @@
         <div v-if="isNearCategory && !userLocation && !locationError" class="mt-4">
           <button class="btn btn-white" @click="requestLocation" :disabled="requestingLocation">
             <i class="mdi mdi-crosshairs-gps" style="margin-inline-end: 6px;"></i>
-            {{ locale === 'ar' ? 'تفعيل الموقع' : 'Enable Location' }}
+            {{ t('category.enable_location') }}
           </button>
         </div>
 
@@ -61,25 +61,25 @@
     <div class="container py-8">
       <!-- Radius selector for Near category -->
       <div v-if="isNearCategory && userLocation" class="mb-6">
-        <h2 class="text-h6 font-weight-bold mb-3">{{ locale === 'ar' ? 'نطاق البحث' : 'Search Radius' }}</h2>
+        <h2 class="text-h6 font-weight-bold mb-3">{{ t('category.search_radius') }}</h2>
         <div class="d-flex flex-wrap gap-2">
-          <button class="chip chip-filter" :class="{ active: searchRadius === 5 }" @click="searchRadius = 5; fetchListings()">5 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
-          <button class="chip chip-filter" :class="{ active: searchRadius === 10 }" @click="searchRadius = 10; fetchListings()">10 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
-          <button class="chip chip-filter" :class="{ active: searchRadius === 25 }" @click="searchRadius = 25; fetchListings()">25 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
-          <button class="chip chip-filter" :class="{ active: searchRadius === 50 }" @click="searchRadius = 50; fetchListings()">50 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
-          <button class="chip chip-filter" :class="{ active: searchRadius === 100 }" @click="searchRadius = 100; fetchListings()">100 {{ locale === 'ar' ? 'كم' : 'km' }}</button>
+          <button class="chip chip-filter" :class="{ active: searchRadius === 5 }" @click="searchRadius = 5; fetchListings()">5 {{ t('category.km') }}</button>
+          <button class="chip chip-filter" :class="{ active: searchRadius === 10 }" @click="searchRadius = 10; fetchListings()">10 {{ t('category.km') }}</button>
+          <button class="chip chip-filter" :class="{ active: searchRadius === 25 }" @click="searchRadius = 25; fetchListings()">25 {{ t('category.km') }}</button>
+          <button class="chip chip-filter" :class="{ active: searchRadius === 50 }" @click="searchRadius = 50; fetchListings()">50 {{ t('category.km') }}</button>
+          <button class="chip chip-filter" :class="{ active: searchRadius === 100 }" @click="searchRadius = 100; fetchListings()">100 {{ t('category.km') }}</button>
         </div>
       </div>
 
       <!-- Subcategories (hidden for special categories and subcategory route) -->
       <div v-if="subcategories.length > 0 && !isSpecialCategory && !isSubcategoryRoute" class="mb-8">
-        <h2 class="text-h6 font-weight-bold mb-4">{{ locale === 'ar' ? 'التصنيفات الفرعية' : 'Subcategories' }}</h2>
+        <h2 class="text-h6 font-weight-bold mb-4">{{ t('category.subcategories') }}</h2>
         <div class="d-flex flex-wrap gap-2">
           <button class="chip chip-filter" :class="{ active: selectedSubcategory === null }" @click="selectedSubcategory = null; onSubcategoryChange()">
-            {{ locale === 'ar' ? 'الكل' : 'All' }}
+            {{ t('browse.all') }}
           </button>
           <button v-for="sub in subcategories" :key="sub.id" class="chip chip-filter" :class="{ active: selectedSubcategory === sub.id }" @click="selectedSubcategory = sub.id; onSubcategoryChange()">
-            {{ locale === 'ar' ? sub.name : sub.name_en }} ({{ sub.posts_count }})
+            {{ sub.name_localized || sub.name_en || sub.name }} ({{ sub.posts_count }})
           </button>
         </div>
       </div>
@@ -91,7 +91,7 @@
           :to="{ name: 'category', params: { id: category.id, slug: category.slug } }"
         >
           <i class="mdi mdi-arrow-left" style="margin-inline-end: 6px;"></i>
-          {{ locale === 'ar' ? 'عرض كل التصنيفات الفرعية' : 'View all subcategories' }}
+          {{ t('category.view_all_sub') }}
         </router-link>
       </div>
 
@@ -103,7 +103,7 @@
             <template v-if="isNearCategory && listing.distance" #extra>
               <span class="chip chip-xs chip-teal mt-1">
                 <i class="mdi mdi-map-marker-distance" style="font-size: 12px; margin-inline-end: 4px;"></i>
-                {{ listing.distance }} {{ locale === 'ar' ? 'كم' : 'km' }}
+                {{ listing.distance }} {{ t('category.km') }}
               </span>
             </template>
           </listing-card>
@@ -114,7 +114,7 @@
       <div v-else-if="loading" class="text-center py-16">
         <div class="spinner spinner-lg"></div>
         <p v-if="isNearCategory && requestingLocation" class="mt-4 text-medium-emphasis">
-          {{ locale === 'ar' ? 'جاري تحديد موقعك...' : 'Getting your location...' }}
+          {{ t('category.getting_location') }}
         </p>
       </div>
 
@@ -123,14 +123,14 @@
         <i class="mdi" :class="isNearCategory ? 'mdi-map-marker-off' : (isReelsCategory ? 'mdi-video-off' : 'mdi-folder-open')" style="font-size: 80px; color: grey;"></i>
         <h3 class="text-h5 mt-4">
           {{ isNearCategory
-              ? (locale === 'ar' ? 'لا توجد إعلانات قريبة منك' : 'No listings near you')
+              ? t('category.no_near')
               : isReelsCategory
-                ? (locale === 'ar' ? 'لا توجد فيديوهات' : 'No video listings')
-                : (locale === 'ar' ? 'لا توجد إعلانات' : 'No listings found')
+                ? t('category.no_videos')
+                : t('category.no_listings')
           }}
         </h3>
         <p v-if="isNearCategory && !userLocation" class="text-medium-emphasis mt-2">
-          {{ locale === 'ar' ? 'قم بتفعيل الموقع لعرض الإعلانات القريبة منك' : 'Enable location to see nearby listings' }}
+          {{ t('category.enable_for_near') }}
         </p>
       </div>
 
@@ -158,6 +158,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
 import ListingCard from '@/components/ListingCard.vue'
+import { t } from '@/utils/translate'
 
 // Special category IDs
 const CATEGORY_NEAR = 6   // قربي - Near me
@@ -208,9 +209,7 @@ const paginationPages = computed(() => {
 // Request user's location
 const requestLocation = () => {
   if (!navigator.geolocation) {
-    locationError.value = locale.value === 'ar'
-      ? 'المتصفح لا يدعم تحديد الموقع'
-      : 'Geolocation is not supported by your browser'
+    locationError.value = t('category.geo_unsupported')
     return
   }
 
@@ -230,24 +229,16 @@ const requestLocation = () => {
       requestingLocation.value = false
       switch (error.code) {
         case error.PERMISSION_DENIED:
-          locationError.value = locale.value === 'ar'
-            ? 'تم رفض إذن الموقع. يرجى السماح بالوصول إلى موقعك.'
-            : 'Location permission denied. Please allow access to your location.'
+          locationError.value = t('category.geo_denied')
           break
         case error.POSITION_UNAVAILABLE:
-          locationError.value = locale.value === 'ar'
-            ? 'معلومات الموقع غير متوفرة.'
-            : 'Location information is unavailable.'
+          locationError.value = t('category.geo_unavailable')
           break
         case error.TIMEOUT:
-          locationError.value = locale.value === 'ar'
-            ? 'انتهت مهلة طلب الموقع.'
-            : 'Location request timed out.'
+          locationError.value = t('category.geo_timeout')
           break
         default:
-          locationError.value = locale.value === 'ar'
-            ? 'حدث خطأ غير معروف.'
-            : 'An unknown error occurred.'
+          locationError.value = t('category.geo_error')
       }
     },
     {
@@ -267,10 +258,14 @@ const fetchCategory = async () => {
     category.value = cats.find(c => c.id === parseInt(route.params.id))
 
     if (category.value) {
+      const catName = category.value.name_localized || category.value.name_en || category.value.name
+      const subName = currentSubcategory.value
+        ? (currentSubcategory.value.name_localized || currentSubcategory.value.name_en || currentSubcategory.value.name)
+        : null
       // Update SEO meta
-      const title = isSubcategoryRoute.value && currentSubcategory.value
-        ? `${locale.value === 'ar' ? currentSubcategory.value.name : currentSubcategory.value.name_en} - ${locale.value === 'ar' ? category.value.name : category.value.name_en} - طلبنا`
-        : `${locale.value === 'ar' ? category.value.name : category.value.name_en} - طلبنا`
+      const title = isSubcategoryRoute.value && subName
+        ? `${subName} - ${catName} - طلبنا`
+        : `${catName} - طلبنا`
 
       updateMeta({
         title,
@@ -353,13 +348,15 @@ const onSubcategoryChange = () => {
     // Navigate to SEO-friendly subcategory URL
     const subcat = subcategories.value.find(s => s.id === selectedSubcategory.value)
     if (subcat && category.value) {
+      const catName = category.value.name_localized || category.value.name_en || category.value.name
+      const subName = subcat.name_localized || subcat.name_en || subcat.name
       router.push({
         name: 'subcategory',
         params: {
           id: category.value.id,
-          slug: category.value.slug || encodeURIComponent(locale.value === 'ar' ? category.value.name : category.value.name_en),
+          slug: category.value.slug || encodeURIComponent(catName),
           subcategoryId: subcat.id,
-          subcategorySlug: subcat.slug || encodeURIComponent(locale.value === 'ar' ? subcat.name : subcat.name_en)
+          subcategorySlug: subcat.slug || encodeURIComponent(subName)
         }
       })
       return

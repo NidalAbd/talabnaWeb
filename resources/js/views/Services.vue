@@ -22,7 +22,7 @@
               <i class="mdi mdi-earth" style="font-size: 24px; color: #fff;"></i>
             </div>
             <div>
-              <div class="text-caption text-muted">{{ isArabic ? 'الدولة' : 'Country' }}</div>
+              <div class="text-caption text-muted">{{ t('browse.country') }}</div>
               <div class="text-h6 font-weight-bold">{{ locationInfo.country.name }}</div>
             </div>
           </div>
@@ -35,7 +35,7 @@
               <i class="mdi mdi-city" style="font-size: 24px; color: #fff;"></i>
             </div>
             <div>
-              <div class="text-caption text-muted">{{ isArabic ? 'المدينة' : 'City' }}</div>
+              <div class="text-caption text-muted">{{ t('browse.city') }}</div>
               <div class="text-h6 font-weight-bold">{{ locationInfo.city.name }}</div>
             </div>
           </div>
@@ -48,7 +48,7 @@
               <i class="mdi mdi-shape" style="font-size: 24px; color: #fff;"></i>
             </div>
             <div>
-              <div class="text-caption text-muted">{{ isArabic ? 'التصنيف' : 'Category' }}</div>
+              <div class="text-caption text-muted">{{ t('browse.category') }}</div>
               <div class="text-h6 font-weight-bold">{{ locationInfo.category.name }}</div>
             </div>
           </div>
@@ -61,25 +61,25 @@
       <div class="col-6 col-md-3">
         <div class="card card-color-primary pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalListings }}</div>
-          <div class="text-body-2">{{ isArabic ? 'إعلان' : 'Listings' }}</div>
+          <div class="text-body-2">{{ t('listing.listings') }}</div>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card card-color-success pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalCategories }}</div>
-          <div class="text-body-2">{{ isArabic ? 'تصنيف' : 'Categories' }}</div>
+          <div class="text-body-2">{{ t('nav.categories') }}</div>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card card-color-info pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalCities }}</div>
-          <div class="text-body-2">{{ isArabic ? 'مدينة' : 'Cities' }}</div>
+          <div class="text-body-2">{{ t('browse.city') }}</div>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card card-color-warning pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalUsers }}</div>
-          <div class="text-body-2">{{ isArabic ? 'معلن' : 'Advertisers' }}</div>
+          <div class="text-body-2">{{ t('services.advertisers') }}</div>
         </div>
       </div>
     </div>
@@ -94,7 +94,7 @@
               <i class="mdi" :class="loc.icon || 'mdi-folder'" style="font-size: 20px; color: #fff;"></i>
             </div>
             <div class="text-body-2 font-weight-medium text-truncate">{{ loc.name }}</div>
-            <div class="text-caption text-muted">{{ loc.count }} {{ isArabic ? 'إعلان' : 'ads' }}</div>
+            <div class="text-caption text-muted">{{ loc.count }} {{ t('services.ads') }}</div>
           </router-link>
         </div>
       </div>
@@ -104,7 +104,7 @@
     <div class="mb-4">
       <div class="d-flex align-center justify-between mb-4">
         <h2 class="text-h5 font-weight-bold">
-          {{ isArabic ? 'الإعلانات' : 'Listings' }}
+          {{ t('listing.listings') }}
           <span class="text-body-2 text-muted">({{ pagination.total }})</span>
         </h2>
         <div class="btn-toggle">
@@ -120,14 +120,14 @@
       <!-- Loading -->
       <div v-if="loading" class="text-center py-8">
         <div class="spinner spinner-md"></div>
-        <p class="mt-4 text-muted">{{ isArabic ? 'جاري التحميل...' : 'Loading...' }}</p>
+        <p class="mt-4 text-muted">{{ t('services.loading') }}</p>
       </div>
 
       <!-- No Results -->
       <div v-else-if="listings.length === 0" class="card pa-8 text-center">
         <i class="mdi mdi-magnify-close" style="font-size: 64px; color: var(--color-text-muted);"></i>
-        <h3 class="text-h6 mt-4">{{ isArabic ? 'لا توجد إعلانات' : 'No listings found' }}</h3>
-        <p class="text-muted">{{ isArabic ? 'جرب تغيير الموقع أو التصنيف' : 'Try changing location or category' }}</p>
+        <h3 class="text-h6 mt-4">{{ t('services.no_listings') }}</h3>
+        <p class="text-muted">{{ t('services.try_change') }}</p>
       </div>
 
       <!-- Grid View -->
@@ -202,6 +202,7 @@ import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useAdvancedSeo } from '@/composables/useAdvancedSeo'
 import ListingCard from '@/components/ListingCard.vue'
+import { t } from '@/utils/translate'
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -241,7 +242,7 @@ const paginationPages = computed(() => {
 })
 
 const pageTitle = computed(() => {
-  if (!locationInfo.value) return isArabic.value ? 'خدمات' : 'Services'
+  if (!locationInfo.value) return t('services.title')
 
   const parts = []
   if (locationInfo.value.category) {
@@ -255,7 +256,7 @@ const pageTitle = computed(() => {
   }
 
   if (parts.length === 0) {
-    return isArabic.value ? 'خدمات وإعلانات' : 'Services & Listings'
+    return t('services.title_full')
   }
 
   return parts.join(' ')
@@ -297,7 +298,7 @@ const subLocationsTitle = computed(() => {
 
 const breadcrumbs = computed(() => {
   const items = [
-    { title: isArabic.value ? 'الرئيسية' : 'Home', to: '/', disabled: false }
+    { title: t('nav.home'), to: '/', disabled: false }
   ]
 
   if (locationInfo.value?.country) {
@@ -362,7 +363,7 @@ function slugify(text) {
 }
 
 function formatPrice(price, currency) {
-  if (!price) return isArabic.value ? 'اتصل للسعر' : 'Contact for price'
+  if (!price) return t('services.contact_price')
   return `${price.toLocaleString()} ${currency || ''}`
 }
 

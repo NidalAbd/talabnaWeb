@@ -13,11 +13,11 @@
               <h1 class="text-h4 font-weight-bold mb-2">{{ user.name }}</h1>
               <p class="text-body-2 text-muted">
                 <i class="mdi mdi-calendar mr-1" style="font-size: 16px;"></i>
-                {{ locale === 'ar' ? 'عضو منذ' : 'Member since' }} {{ formatYear(user.created_at) }}
+                {{ t('listing.member_since') }} {{ formatYear(user.created_at) }}
               </p>
               <p class="text-body-2 text-muted">
                 <i class="mdi mdi-bullhorn mr-1" style="font-size: 16px;"></i>
-                {{ user.listings_count }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}
+                {{ user.listings_count }} {{ t('listing.listings') }}
               </p>
             </div>
           </div>
@@ -25,7 +25,7 @@
       </div>
 
       <!-- User Listings -->
-      <h2 class="text-h5 font-weight-bold mb-4">{{ locale === 'ar' ? 'إعلانات المستخدم' : 'User Listings' }}</h2>
+      <h2 class="text-h5 font-weight-bold mb-4">{{ t('listing.user_listings') }}</h2>
 
       <div v-if="!loading && listings.length > 0" class="row">
         <div v-for="listing in listings" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
@@ -39,7 +39,7 @@
 
       <div v-else class="card-flat text-center py-16">
         <i class="mdi mdi-folder-open" style="font-size: 80px; color: var(--color-text-muted);"></i>
-        <h3 class="text-h5 mt-4">{{ locale === 'ar' ? 'لا توجد إعلانات' : 'No listings' }}</h3>
+        <h3 class="text-h5 mt-4">{{ t('listing.no_listings') }}</h3>
       </div>
 
       <div v-if="pagination.last_page > 1" class="d-flex justify-center mt-8">
@@ -65,6 +65,7 @@ import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
 import ListingCard from '@/components/ListingCard.vue'
+import { t } from '@/utils/translate'
 
 const route = useRoute()
 const appStore = useAppStore()

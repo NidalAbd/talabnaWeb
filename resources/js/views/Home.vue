@@ -11,39 +11,36 @@
         <div class="hero-content">
           <div class="hero-badge">
             <i class="mdi mdi-shield-check" :style="{ fontSize: '16px' }"></i>
-            {{ locale === 'ar' ? 'منصة موثوقة للإعلانات المبوبة' : 'Trusted Classified Ads Platform' }}
+            {{ t('home.trusted') }}
           </div>
           <h1 class="hero-title">
-            {{ locale === 'ar' ? 'اعثر على ما تحتاجه' : 'Find What You Need' }}
-            <br><span class="text-gradient">{{ locale === 'ar' ? 'بسهولة وأمان' : 'Easily & Safely' }}</span>
+            {{ t('home.find') }}
+            <br><span class="text-gradient">{{ t('home.easily') }}</span>
           </h1>
           <p class="hero-subtitle">
-            {{ locale === 'ar'
-              ? 'وظائف، سيارات، عقارات، أجهزة وخدمات متنوعة. تواصل مع آلاف المستخدمين في أكثر من 22 دولة عربية.'
-              : 'Jobs, cars, real estate, electronics and services. Connect with thousands of users across 22+ Arab countries.'
-            }}
+            {{ t('home.hero_desc') }}
           </p>
           <div class="hero-search">
             <div class="search-box">
               <i class="mdi mdi-magnify search-icon"></i>
               <input
                 v-model="searchQuery"
-                :placeholder="locale === 'ar' ? 'ابحث عن سيارة، شقة، وظيفة...' : 'Search for car, apartment, job...'"
+                :placeholder="t('home.search_placeholder')"
                 @keyup.enter="doSearch"
               >
               <button class="search-btn" @click="doSearch">
-                {{ locale === 'ar' ? 'بحث' : 'Search' }}
+                {{ t('home.search_btn') }}
               </button>
             </div>
           </div>
           <div class="hero-buttons">
             <router-link to="/browse" class="btn-hero-primary">
               <i class="mdi mdi-view-grid mr-2" :style="{ fontSize: '20px' }"></i>
-              {{ locale === 'ar' ? 'تصفح الإعلانات' : 'Browse Listings' }}
+              {{ t('browse.title') }}
             </router-link>
             <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn-hero-secondary">
               <i class="mdi mdi-google-play mr-2" :style="{ fontSize: '20px' }"></i>
-              {{ locale === 'ar' ? 'حمل التطبيق' : 'Get the App' }}
+              {{ t('home.get_app') }}
             </a>
           </div>
         </div>
@@ -65,8 +62,8 @@
       <div class="container">
         <div class="section-header">
           <div>
-            <h2 class="section-title">{{ locale === 'ar' ? 'تصفح التصنيفات' : 'Browse Categories' }}</h2>
-            <p class="section-subtitle">{{ locale === 'ar' ? 'اكتشف ما تبحث عنه بالضبط' : 'Find exactly what you\'re looking for' }}</p>
+            <h2 class="section-title">{{ t('home.browse_categories') }}</h2>
+            <p class="section-subtitle">{{ t('home.find_exactly') }}</p>
           </div>
         </div>
         <div class="row">
@@ -75,8 +72,8 @@
               <div class="cat-icon" :style="{ background: getCategoryColor(cat.id) + '18', color: getCategoryColor(cat.id) }">
                 <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
               </div>
-              <h5>{{ locale === 'ar' ? cat.name : cat.name_en }}</h5>
-              <span class="cat-count">{{ formatNumber(cat.posts_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
+              <h5>{{ cat.name_localized || cat.name_en || cat.name }}</h5>
+              <span class="cat-count">{{ formatNumber(cat.posts_count || 0) }} {{ t('listing.listings') }}</span>
             </router-link>
           </div>
         </div>
@@ -88,11 +85,11 @@
       <div class="container">
         <div class="section-header">
           <div>
-            <h2 class="section-title">{{ locale === 'ar' ? 'الإعلانات المميزة' : 'Featured Listings' }}</h2>
-            <p class="section-subtitle">{{ locale === 'ar' ? 'إعلانات مختارة من مستخدمينا' : 'Handpicked listings from our users' }}</p>
+            <h2 class="section-title">{{ t('home.featured_listings') }}</h2>
+            <p class="section-subtitle">{{ t('home.handpicked') }}</p>
           </div>
           <router-link to="/browse" class="btn-view-all">
-            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }} <i class="mdi mdi-arrow-right" :style="{ fontSize: '18px' }"></i>
+            {{ t('home.view_all') }} <i class="mdi mdi-arrow-right" :style="{ fontSize: '18px' }"></i>
           </router-link>
         </div>
         <div class="row" v-if="!loadingFeatured">
@@ -113,14 +110,14 @@
       <div class="container">
         <div class="section-header">
           <div>
-            <h2 class="section-title">{{ locale === 'ar' ? 'أحدث الإعلانات' : 'Latest Listings' }}</h2>
-            <p class="section-subtitle">{{ locale === 'ar' ? 'أحدث ما أُضيف إلى المنصة' : 'Recently added to the platform' }}</p>
+            <h2 class="section-title">{{ t('home.latest_listings') }}</h2>
+            <p class="section-subtitle">{{ t('home.recently_added') }}</p>
           </div>
         </div>
         <div class="tabs mb-6">
-          <button class="tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">{{ locale === 'ar' ? 'الكل' : 'All' }}</button>
+          <button class="tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">{{ t('browse.all') }}</button>
           <button v-for="cat in categories.slice(0, 5)" :key="cat.id" class="tab" :class="{ active: activeTab === cat.id }" @click="activeTab = cat.id">
-            {{ locale === 'ar' ? cat.name : cat.name_en }}
+            {{ cat.name_localized || cat.name_en || cat.name }}
           </button>
         </div>
         <div class="row" v-if="!loadingLatest">
@@ -141,8 +138,8 @@
       <div class="container">
         <div class="section-header">
           <div>
-            <h2 class="section-title">{{ locale === 'ar' ? 'تصفح حسب الموقع' : 'Browse by Location' }}</h2>
-            <p class="section-subtitle">{{ locale === 'ar' ? 'اعثر على الخدمات في منطقتك' : 'Find services in your area' }}</p>
+            <h2 class="section-title">{{ t('home.browse_location') }}</h2>
+            <p class="section-subtitle">{{ t('home.find_area') }}</p>
           </div>
         </div>
         <div class="row" v-if="!loadingLocations">
@@ -150,8 +147,8 @@
             <router-link :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
               <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="80" class="img-cover location-flag-img" style="height: 80px; width: 100%;" @error="handleImgError($event)">
               <div class="location-info">
-                <h5>{{ locale === 'ar' ? country.name : country.name_en }}</h5>
-                <span>{{ formatNumber(country.listings_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
+                <h5>{{ country.name_localized || country.name_en || country.name }}</h5>
+                <span>{{ formatNumber(country.listings_count || 0) }} {{ t('listing.listings') }}</span>
               </div>
             </router-link>
           </div>
@@ -164,11 +161,11 @@
       <div class="container">
         <div class="section-header">
           <div>
-            <h2 class="section-title">{{ locale === 'ar' ? 'الأكثر مشاهدة' : 'Most Viewed' }}</h2>
-            <p class="section-subtitle">{{ locale === 'ar' ? 'الإعلانات الأكثر شعبية' : 'The most popular listings' }}</p>
+            <h2 class="section-title">{{ t('home.most_viewed') }}</h2>
+            <p class="section-subtitle">{{ t('home.most_popular') }}</p>
           </div>
           <router-link to="/browse?sort_by=view_count" class="btn-view-all">
-            {{ locale === 'ar' ? 'عرض الكل' : 'View All' }} <i class="mdi mdi-arrow-right" :style="{ fontSize: '18px' }"></i>
+            {{ t('home.view_all') }} <i class="mdi mdi-arrow-right" :style="{ fontSize: '18px' }"></i>
           </router-link>
         </div>
         <div class="row" v-if="!loadingPopular">
@@ -185,15 +182,12 @@
         <div class="cta-card">
           <div class="row align-center">
             <div class="col-12 col-md-7">
-              <h2>{{ locale === 'ar' ? 'حمل تطبيق طلبنا' : 'Download Talabna App' }}</h2>
-              <p>{{ locale === 'ar'
-                ? 'انشر إعلاناتك، تواصل مع المستخدمين، واستقبل الإشعارات أينما كنت.'
-                : 'Post listings, connect with users, and receive notifications on the go.'
-              }}</p>
+              <h2>{{ t('home.download_app') }}</h2>
+              <p>{{ t('home.download_desc') }}</p>
               <div class="cta-features">
-                <span><i class="mdi mdi-check-circle mr-1" :style="{ fontSize: '16px' }"></i>{{ locale === 'ar' ? 'مجاني' : 'Free' }}</span>
-                <span><i class="mdi mdi-check-circle mr-1" :style="{ fontSize: '16px' }"></i>{{ locale === 'ar' ? 'سهل الاستخدام' : 'Easy to use' }}</span>
-                <span><i class="mdi mdi-check-circle mr-1" :style="{ fontSize: '16px' }"></i>{{ locale === 'ar' ? 'إشعارات فورية' : 'Instant notifications' }}</span>
+                <span><i class="mdi mdi-check-circle mr-1" :style="{ fontSize: '16px' }"></i>{{ t('home.free') }}</span>
+                <span><i class="mdi mdi-check-circle mr-1" :style="{ fontSize: '16px' }"></i>{{ t('home.easy_use') }}</span>
+                <span><i class="mdi mdi-check-circle mr-1" :style="{ fontSize: '16px' }"></i>{{ t('home.instant_notif') }}</span>
               </div>
               <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn-download">
                 <i class="mdi mdi-google-play mr-2"></i>
@@ -217,6 +211,7 @@ import { useAppStore } from '@/stores/app'
 import { useSeo } from '@/composables/useSeo'
 import ListingCard from '@/components/ListingCard.vue'
 import { getCategoryIcon, getCategoryColor, formatNumber } from '@/utils/helpers'
+import { t } from '@/utils/translate'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -239,10 +234,10 @@ const loadingLocations = ref(true)
 const locale = computed(() => appStore.locale)
 
 const statsItems = computed(() => [
-  { key: 'total_listings', icon: 'mdi-clipboard-list', label: locale.value === 'ar' ? 'خدمات نشطة' : 'Active Services' },
-  { key: 'total_users', icon: 'mdi-account-group', label: locale.value === 'ar' ? 'مستخدمين مسجلين' : 'Registered Users' },
-  { key: 'total_categories', icon: 'mdi-star-circle', label: locale.value === 'ar' ? 'خدمات مميزة' : 'Premium Services' },
-  { key: 'listings_today', icon: 'mdi-trending-up', label: locale.value === 'ar' ? 'معاملات' : 'Transactions' },
+  { key: 'total_listings', icon: 'mdi-clipboard-list', label: t('home.active_services') },
+  { key: 'total_users', icon: 'mdi-account-group', label: t('home.registered_users') },
+  { key: 'total_categories', icon: 'mdi-star-circle', label: t('home.premium_services') },
+  { key: 'listings_today', icon: 'mdi-trending-up', label: t('home.transactions') },
 ])
 
 const doSearch = () => {
