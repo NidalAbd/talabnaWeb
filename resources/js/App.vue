@@ -8,7 +8,7 @@
           <div class="avatar avatar-40">
             <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" width="40" height="40" fetchpriority="high" />
           </div>
-          <span>{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</span>
+          <span>{{ t('app.name') }}</span>
         </router-link>
 
         <div class="flex-1"></div>
@@ -17,18 +17,18 @@
         <div class="navbar-nav hide-mobile">
           <router-link to="/" class="nav-link" :class="{ active: $route.name === 'home' }">
             <i class="mdi mdi-home"></i>
-            {{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}
+            {{ t('nav.home') }}
           </router-link>
           <router-link to="/browse" class="nav-link" :class="{ active: $route.name === 'browse' }">
             <i class="mdi mdi-view-grid"></i>
-            {{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}
+            {{ t('nav.browse') }}
           </router-link>
 
           <!-- Categories Dropdown -->
           <div class="dropdown" @mouseenter="catMenuOpen = true" @mouseleave="catMenuOpen = false">
             <button class="nav-link">
               <i class="mdi mdi-shape"></i>
-              {{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}
+              {{ t('nav.categories') }}
               <i class="mdi mdi-chevron-down" style="font-size: 18px;"></i>
             </button>
             <div class="dropdown-menu" :class="{ open: catMenuOpen }">
@@ -40,7 +40,7 @@
                 @click="catMenuOpen = false"
               >
                 <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
-                {{ appStore.locale === 'ar' ? cat.name : cat.name_en }}
+                {{ cat.name_localized || cat.name_en || cat.name }}
               </router-link>
             </div>
           </div>
@@ -53,7 +53,7 @@
           <i class="mdi mdi-magnify search-input-icon"></i>
           <input
             v-model="searchQuery"
-            :placeholder="appStore.locale === 'ar' ? 'ابحث...' : 'Search...'"
+            :placeholder="t('nav.search')"
             class="form-input form-input-search"
             @keyup.enter="doSearch"
           />
@@ -100,13 +100,13 @@
               <!-- Dashboard (Admin Only) -->
               <a v-if="isAdmin" href="/dashboard" class="dropdown-item">
                 <i class="mdi mdi-view-dashboard" style="color: var(--color-primary);"></i>
-                {{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}
+                {{ t('nav.dashboard') }}
               </a>
               <hr v-if="isAdmin" style="margin: 0.25rem 0;" />
               <!-- Logout -->
               <button class="dropdown-item dropdown-item-error" @click="logout">
                 <i class="mdi mdi-logout"></i>
-                {{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}
+                {{ t('nav.logout') }}
               </button>
             </div>
           </div>
@@ -114,7 +114,7 @@
           <!-- Login/Register (when not logged in) -->
           <a v-else href="/login" class="btn btn-primary btn-sm d-none d-sm-flex">
             <i class="mdi mdi-login"></i>
-            {{ appStore.locale === 'ar' ? 'تسجيل الدخول' : 'Login' }}
+            {{ t('nav.login') }}
           </a>
 
           <!-- Mobile Menu Button -->
@@ -146,7 +146,7 @@
         <!-- Dashboard (Admin Only) -->
         <a v-if="isAdmin" href="/dashboard" class="drawer-item" @click="mobileDrawer = false">
           <i class="mdi mdi-view-dashboard" style="color: var(--color-primary);"></i>
-          {{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}
+          {{ t('nav.dashboard') }}
         </a>
       </template>
 
@@ -156,7 +156,7 @@
           <i class="mdi mdi-magnify search-input-icon"></i>
           <input
             v-model="searchQuery"
-            :placeholder="appStore.locale === 'ar' ? 'ابحث...' : 'Search...'"
+            :placeholder="t('nav.search')"
             class="form-input form-input-search"
             @keyup.enter="doSearch(); mobileDrawer = false"
           />
@@ -166,14 +166,14 @@
 
       <router-link to="/" class="drawer-item" @click="mobileDrawer = false">
         <i class="mdi mdi-home"></i>
-        {{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}
+        {{ t('nav.home') }}
       </router-link>
       <router-link to="/browse" class="drawer-item" @click="mobileDrawer = false">
         <i class="mdi mdi-view-grid"></i>
-        {{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}
+        {{ t('nav.browse') }}
       </router-link>
       <div class="drawer-divider"></div>
-      <div class="drawer-subheader">{{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}</div>
+      <div class="drawer-subheader">{{ t('nav.categories') }}</div>
       <router-link
         v-for="cat in appStore.categories"
         :key="cat.id"
@@ -182,18 +182,18 @@
         @click="mobileDrawer = false"
       >
         <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
-        {{ appStore.locale === 'ar' ? cat.name : cat.name_en }}
+        {{ cat.name_localized || cat.name_en || cat.name }}
       </router-link>
       <div class="drawer-divider"></div>
       <!-- Login (when not logged in) -->
       <a v-if="!isLoggedIn" href="/login" class="drawer-item">
         <i class="mdi mdi-login"></i>
-        {{ appStore.locale === 'ar' ? 'تسجيل الدخول' : 'Login' }}
+        {{ t('nav.login') }}
       </a>
       <!-- Logout (when logged in) -->
       <button v-else class="drawer-item" style="color: var(--color-error);" @click="logout">
         <i class="mdi mdi-logout"></i>
-        {{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}
+        {{ t('nav.logout') }}
       </button>
     </div>
 
@@ -217,56 +217,53 @@
                 <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" width="48" height="48" loading="lazy" />
               </div>
               <div>
-                <h3 class="text-h6 font-weight-bold">{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</h3>
-                <p class="text-caption text-muted" style="margin:0;">{{ appStore.locale === 'ar' ? 'منصة الإعلانات المبوبة' : 'Classified Ads Platform' }}</p>
+                <h3 class="text-h6 font-weight-bold">{{ t('app.name') }}</h3>
+                <p class="text-caption text-muted" style="margin:0;">{{ t('app.tagline') }}</p>
               </div>
             </div>
             <p class="text-body-2 text-muted">
-              {{ appStore.locale === 'ar'
-                ? 'أكبر منصة للإعلانات المبوبة. بيع واشتري بسهولة وأمان.'
-                : 'The largest classified ads marketplace. Buy and sell easily and safely.'
-              }}
+              {{ t('app.tagline') }}
             </p>
           </div>
 
           <!-- Quick Links -->
           <div class="col-6 col-md-2">
-            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'روابط سريعة' : 'Quick Links' }}</h4>
+            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ t('nav.quick_links') }}</h4>
             <div class="footer-links">
-              <router-link to="/">{{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}</router-link>
-              <router-link to="/browse">{{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}</router-link>
-              <router-link to="/about">{{ appStore.locale === 'ar' ? 'من نحن' : 'About' }}</router-link>
-              <router-link to="/contact">{{ appStore.locale === 'ar' ? 'اتصل بنا' : 'Contact' }}</router-link>
+              <router-link to="/">{{ t('nav.home') }}</router-link>
+              <router-link to="/browse">{{ t('nav.browse') }}</router-link>
+              <router-link to="/about">{{ t('nav.about') }}</router-link>
+              <router-link to="/contact">{{ t('nav.contact') }}</router-link>
             </div>
           </div>
 
           <!-- Categories -->
           <div class="col-6 col-md-2">
-            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}</h4>
+            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ t('nav.categories') }}</h4>
             <div class="footer-links">
               <router-link
                 v-for="cat in appStore.categories.slice(0, 5)"
                 :key="cat.id"
                 :to="`/category/${cat.id}`"
               >
-                {{ appStore.locale === 'ar' ? cat.name : cat.name_en }}
+                {{ cat.name_localized || cat.name_en || cat.name }}
               </router-link>
             </div>
           </div>
 
           <!-- Legal & SEO -->
           <div class="col-6 col-md-2">
-            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'قانوني' : 'Legal' }}</h4>
+            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ t('nav.terms') }}</h4>
             <div class="footer-links">
-              <router-link to="/privacy">{{ appStore.locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' }}</router-link>
-              <router-link to="/terms">{{ appStore.locale === 'ar' ? 'شروط الاستخدام' : 'Terms of Service' }}</router-link>
-              <a href="/sitemap.xml" target="_blank">{{ appStore.locale === 'ar' ? 'خريطة الموقع' : 'Sitemap' }}</a>
+              <router-link to="/privacy">{{ t('nav.privacy') }}</router-link>
+              <router-link to="/terms">{{ t('nav.terms') }}</router-link>
+              <a href="/sitemap.xml" target="_blank">Sitemap</a>
             </div>
           </div>
 
           <!-- Download App -->
           <div class="col-6 col-md-2">
-            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'حمل التطبيق' : 'Download App' }}</h4>
+            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ t('footer.download') }}</h4>
             <div class="d-flex flex-column gap-2">
               <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn btn-outline btn-sm justify-start">
                 <i class="mdi mdi-google-play"></i>
@@ -274,7 +271,7 @@
               </a>
             </div>
             <div class="mt-4">
-              <h4 class="text-subtitle-2 font-weight-bold mb-2">{{ appStore.locale === 'ar' ? 'تواصل معنا' : 'Contact Us' }}</h4>
+              <h4 class="text-subtitle-2 font-weight-bold mb-2">{{ t('nav.contact') }}</h4>
               <p class="text-caption text-muted" style="margin:0;">
                 <i class="mdi mdi-email mr-1"></i> support@talbna.cloud
               </p>
@@ -284,7 +281,7 @@
 
         <div class="footer-bottom">
           <p class="text-caption text-muted" style="margin:0;">
-            © {{ new Date().getFullYear() }} Talabna. {{ appStore.locale === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved' }}.
+            © {{ new Date().getFullYear() }} Talabna. {{ t('footer.rights') }}.
           </p>
           <div class="d-flex gap-2">
             <a href="https://www.facebook.com/talabna" target="_blank" class="btn btn-icon-sm btn-text"><i class="mdi mdi-facebook" style="font-size: 20px;"></i></a>
@@ -300,6 +297,7 @@
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
+import { t, initTranslations, loadTranslations } from '@/utils/translate'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -333,10 +331,11 @@ import { getCategoryIcon, getCategoryColor } from '@/utils/helpers'
 
 const langMenuOpen = ref(false)
 
-const selectLanguage = (code) => {
+const selectLanguage = async (code) => {
   appStore.setLocale(code)
   langMenuOpen.value = false
-  // Reload page to apply new language
+  await loadTranslations(code)
+  // Reload page to apply new language fully
   window.location.reload()
 }
 
@@ -349,6 +348,7 @@ const closeLangMenu = (e) => {
 onMounted(() => {
   document.addEventListener('click', closeLangMenu)
   appStore.fetchLanguages()
+  initTranslations()
 })
 onUnmounted(() => {
   document.removeEventListener('click', closeLangMenu)
