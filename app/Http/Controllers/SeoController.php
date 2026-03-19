@@ -914,21 +914,6 @@ class SeoController extends Controller
         ];
     }
 
-    private function getLocalizedName($name, string $locale): string
-    {
-        if (is_array($name)) {
-            return $name[$locale] ?? $name['en'] ?? $name['ar'] ?? array_values(array_filter($name))[0] ?? '';
-        }
-        if (is_string($name)) {
-            $decoded = json_decode($name, true);
-            if (is_array($decoded)) {
-                return $decoded[$locale] ?? $decoded['en'] ?? $decoded['ar'] ?? '';
-            }
-            return $name;
-        }
-        return '';
-    }
-
     // ==================== END SLUG-BASED SEO METHODS ====================
 
     /**
