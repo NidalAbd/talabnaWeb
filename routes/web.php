@@ -890,6 +890,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'destroy'])->name('api.admin.translations.destroy');
             });
 
+            // Content Translations (per-language editor)
+            Route::get('/languages/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'index'])->name('api.admin.content-translations.index');
+            Route::post('/languages/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'store'])->name('api.admin.content-translations.store');
+
             // Auto-Translation (OpenAI)
             Route::prefix('auto-translate')->group(function () {
                 Route::post('/{locale}', [\App\Http\Controllers\Api\AutoTranslateController::class, 'start'])->name('api.admin.auto-translate.start');

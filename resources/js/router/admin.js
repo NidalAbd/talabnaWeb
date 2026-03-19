@@ -25,6 +25,7 @@ import RoleAssignmentsList from '../views/admin/RoleAssignmentsList.vue'
 import PalServicePointsOverview from '../views/admin/PalServicePointsOverview.vue'
 import SeoDashboard from '../views/admin/seo/SeoDashboard.vue'
 import LanguagesList from '../views/admin/languages/LanguagesList.vue'
+import LanguageTranslations from '../views/admin/languages/LanguageTranslations.vue'
 import TranslationsList from '../views/admin/translations/TranslationsList.vue'
 import CommandMonitor from '../views/admin/CommandMonitor.vue'
 import AiContentDashboard from '../views/admin/AiContentDashboard.vue'
@@ -56,6 +57,7 @@ const routes = [
   { path: '/admin/palservice-points', name: 'palservice_points.index', component: PalServicePointsOverview, meta: { title: 'Points Overview' } },
   { path: '/admin/seo', name: 'seo.index', component: SeoDashboard, meta: { title: 'SEO Analytics' } },
   { path: '/admin/languages', name: 'languages.index', component: LanguagesList, meta: { title: 'Languages' } },
+  { path: '/admin/languages/:code/translations', name: 'languages.translations', component: LanguageTranslations, meta: { title: 'Language Translations' } },
   { path: '/admin/translations', name: 'translations.index', component: TranslationsList, meta: { title: 'Translations' } },
   { path: '/admin/command-monitor', name: 'command_monitor.index', component: CommandMonitor, meta: { title: 'Command Monitor' } },
   { path: '/admin/ai-content', name: 'ai_content.index', component: AiContentDashboard, meta: { title: 'AI Content Generator' } },

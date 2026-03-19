@@ -402,8 +402,7 @@ const handleToggleActive = async (lang) => {
 }
 
 const handleEdit = (lang) => {
-  selectedLanguage.value = lang
-  showEditModal.value = true
+  router.push({ name: 'languages.translations', params: { code: lang.code } })
 }
 
 const handleDelete = async (lang) => {

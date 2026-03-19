@@ -153,9 +153,6 @@
                         <a href="/languages" class="nav-link"><i class="nav-icon fas fa-language"></i><p>Languages</p></a>
                     </li>
                     <li class="nav-item">
-                        <a href="/translations" class="nav-link"><i class="nav-icon fas fa-file-alt"></i><p>Translations</p></a>
-                    </li>
-                    <li class="nav-item">
                         <a href="/admin/auto-translate" class="nav-link"><i class="nav-icon fas fa-robot"></i><p>Auto-Translate (AI)</p></a>
                     </li>
                     <li class="nav-item">
