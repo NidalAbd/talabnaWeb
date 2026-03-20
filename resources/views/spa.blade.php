@@ -178,10 +178,12 @@
     <nav id="seo-breadcrumbs" style="display:none" aria-hidden="true">
         <ol itemscope itemtype="https://schema.org/BreadcrumbList">
             @foreach($seoData['breadcrumbs'] as $i => $crumb)
+            @if(!empty($crumb['name']))
             <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
                 <a itemprop="item" href="{{ $crumb['url'] ?? '#' }}"><span itemprop="name">{{ $crumb['name'] }}</span></a>
                 <meta itemprop="position" content="{{ $i + 1 }}" />
             </li>
+            @endif
             @endforeach
         </ol>
     </nav>

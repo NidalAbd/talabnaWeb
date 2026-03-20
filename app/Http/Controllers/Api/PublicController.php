@@ -398,12 +398,19 @@ class PublicController extends Controller
             $query->where('city_id', $request->city_id);
         }
 
-        // Apply search filter
+        // Apply search filter (search across all language versions)
         if ($request->filled('search')) {
             $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('title', 'like', "%{$search}%")
-                    ->orWhere('description', 'like', "%{$search}%");
+            $locale = app()->getLocale();
+            $query->where(function ($q) use ($search, $locale) {
+                // Search in current locale
+                $q->whereRaw("JSON_EXTRACT(title, '$.{$locale}') LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("JSON_EXTRACT(description, '$.{$locale}') LIKE ?", ["%{$search}%"])
+                    // Also search in Arabic and English as fallback
+                    ->orWhereRaw("JSON_EXTRACT(title, '$.ar') LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("JSON_EXTRACT(title, '$.en') LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("JSON_EXTRACT(description, '$.ar') LIKE ?", ["%{$search}%"])
+                    ->orWhereRaw("JSON_EXTRACT(description, '$.en') LIKE ?", ["%{$search}%"]);
             });
         }
 
@@ -422,16 +429,16 @@ class PublicController extends Controller
 
         // Apply sorting (skip for Near category which sorts by distance)
         if (!$isNearCategory || !$request->filled('lat')) {
+            // Location-aware sorting first
+            $this->applyLocationSort($query, $request);
+
             $sortBy = $request->get('sort_by', 'created_at');
             $sortOrder = $request->get('sort_order', 'desc');
             $allowedSortFields = ['created_at', 'price', 'view_count', 'favorites_count'];
 
             if (in_array($sortBy, $allowedSortFields)) {
-                // Premium listings first
-                $query->orderByRaw(BadgeType::getLegacyOrderByClause());
                 $query->orderBy($sortBy, $sortOrder);
             } else {
-                $query->orderByRaw(BadgeType::getLegacyOrderByClause());
                 $query->orderBy('created_at', 'desc');
             }
         }
