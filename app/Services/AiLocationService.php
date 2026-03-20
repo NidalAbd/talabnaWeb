@@ -407,101 +407,94 @@ class AiLocationService
     {
         $activeLocales = Language::getActiveOrdered()->pluck('code', 'name')->toArray();
         $translated = 0;
-
-        // Collect all names that need translation
-        $toTranslate = [];
-
-        // Country name
         $countryName = $country->name;
-        foreach ($activeLocales as $langName => $locale) {
-            if (empty($countryName[$locale])) {
-                $sourceText = $countryName['en'] ?? array_values(array_filter($countryName))[0] ?? '';
-                if ($sourceText) {
-                    $toTranslate["country_{$country->id}_{$locale}"] = $sourceText;
-                }
-            }
-        }
+        $countryEnName = $countryName['en'] ?? array_values(array_filter(is_array($countryName) ? $countryName : []))[0] ?? 'Unknown';
 
-        // Currency name
+        // Step 1: Translate country name + currency name (small, do all locales at once)
+        $countryTranslations = [];
         $currName = $country->currency_name;
         foreach ($activeLocales as $langName => $locale) {
-            if (empty($currName[$locale])) {
-                $sourceText = $currName['en'] ?? array_values(array_filter($currName))[0] ?? '';
-                if ($sourceText) {
-                    $toTranslate["currency_{$country->id}_{$locale}"] = $sourceText;
-                }
+            if (empty($countryName[$locale])) {
+                $countryTranslations["country_{$locale}"] = $countryEnName;
+            }
+            if (is_array($currName) && empty($currName[$locale])) {
+                $src = $currName['en'] ?? '';
+                if ($src) $countryTranslations["currency_{$locale}"] = $src;
             }
         }
 
-        // City names
-        $countryCities = $country->cities;
-        foreach ($countryCities as $city) {
-            $cityName = $city->name;
+        if (!empty($countryTranslations)) {
             foreach ($activeLocales as $langName => $locale) {
-                if (empty($cityName[$locale])) {
-                    $sourceText = $cityName['en'] ?? array_values(array_filter($cityName))[0] ?? '';
-                    if ($sourceText) {
-                        $toTranslate["city_{$city->id}_{$locale}"] = $sourceText;
+                $batch = [];
+                foreach ($countryTranslations as $key => $text) {
+                    if (str_ends_with($key, "_{$locale}")) {
+                        $batch[$key] = $text;
+                    }
+                }
+                if (!empty($batch)) {
+                    $result = $this->translateBatch($batch, $langName);
+                    if ($result) {
+                        foreach ($result as $key => $value) {
+                            if (str_starts_with($key, 'country_')) {
+                                $name = $country->name;
+                                $name[$locale] = $value;
+                                $country->name = $name;
+                                $translated++;
+                            } elseif (str_starts_with($key, 'currency_')) {
+                                $cn = $country->currency_name;
+                                $cn[$locale] = $value;
+                                $country->currency_name = $cn;
+                                $translated++;
+                            }
+                        }
                     }
                 }
             }
+            $country->save();
         }
 
-        if (empty($toTranslate)) {
-            return ['success' => true, 'translated' => 0, 'message' => 'All names already translated'];
+        // Step 2: Translate city names in batches of 50 cities per locale
+        $countryCities = cities::where('country_id', $country->id)->get();
+        $needsTranslation = [];
+
+        foreach ($activeLocales as $langName => $locale) {
+            if ($locale === 'en') continue; // English is source
+            $needsTranslation[$locale] = $langName;
         }
 
-        // Group by target locale for batch translation
-        $localeGroups = [];
-        foreach ($toTranslate as $key => $text) {
-            $parts = explode('_', $key);
-            $locale = end($parts);
-            $localeGroups[$locale][$key] = $text;
-        }
+        foreach ($needsTranslation as $locale => $langName) {
+            // Find cities missing this locale
+            $citiesNeedingTranslation = $countryCities->filter(function ($city) use ($locale) {
+                $name = $city->name;
+                return is_array($name) && empty($name[$locale]) && !empty($name['en']);
+            });
 
-        foreach ($localeGroups as $locale => $batch) {
-            $langName = array_search($locale, $activeLocales) ?: $locale;
+            if ($citiesNeedingTranslation->isEmpty()) continue;
 
-            // Send to OpenAI
-            $result = $this->translateBatch($batch, $langName);
-            if (!$result) continue;
+            // Process in batches of 50
+            $batches = $citiesNeedingTranslation->chunk(50);
+            foreach ($batches as $batch) {
+                $toTranslate = [];
+                foreach ($batch as $city) {
+                    $toTranslate["city_{$city->id}"] = $city->name['en'];
+                }
 
-            // Apply translations
-            foreach ($result as $key => $translatedText) {
-                $parts = explode('_', $key, 3);
-                $type = $parts[0]; // country, currency, city
-                $id = (int) $parts[1];
-                $targetLocale = $parts[2];
+                $result = $this->translateBatch($toTranslate, $langName);
+                if (!$result) continue;
 
-                if ($type === 'country') {
-                    $c = countries::find($id);
-                    if ($c) {
-                        $name = $c->name;
-                        $name[$targetLocale] = $translatedText;
-                        $c->name = $name;
-                        $c->save();
-                        $translated++;
-                    }
-                } elseif ($type === 'currency') {
-                    $c = countries::find($id);
-                    if ($c) {
-                        $cn = $c->currency_name;
-                        $cn[$targetLocale] = $translatedText;
-                        $c->currency_name = $cn;
-                        $c->save();
-                        $translated++;
-                    }
-                } elseif ($type === 'city') {
-                    $city = cities::find($id);
-                    if ($city) {
+                foreach ($batch as $city) {
+                    $key = "city_{$city->id}";
+                    if (isset($result[$key]) && !empty($result[$key])) {
                         $name = $city->name;
-                        $name[$targetLocale] = $translatedText;
+                        $name[$locale] = $result[$key];
                         $city->name = $name;
                         $city->save();
                         $translated++;
                     }
                 }
             }
+
+            Log::info("Translated {$citiesNeedingTranslation->count()} cities to {$langName} for {$countryEnName}");
         }
 
         return ['success' => true, 'translated' => $translated];
