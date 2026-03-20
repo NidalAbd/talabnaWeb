@@ -127,6 +127,9 @@ class PublicController extends Controller
             }
         }
 
+        // Always sort by badge priority within each location group
+        $query->orderByRaw(BadgeType::getLegacyOrderByClause());
+
         return $query;
     }
 
