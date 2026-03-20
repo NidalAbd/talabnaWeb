@@ -148,6 +148,13 @@ const fallbacks = {
   'services.contact_price': { ar: 'اتصل للسعر', en: 'Contact for price' },
   'services.ads': { ar: 'إعلان', en: 'ads' },
   'services.advertisers': { ar: 'معلن', en: 'Advertisers' },
+  'services.be_first_title': { ar: 'كن أول من ينشر هنا!', en: 'Be the first to post here!' },
+  'services.be_first_desc': { ar: 'لا توجد إعلانات في هذه المنطقة بعد. انشر إعلانك الآن وكن أول من يصل إلى العملاء المحتملين.', en: 'No listings in this area yet. Post your ad now and be the first to reach potential customers.' },
+  'services.be_first_free': { ar: 'مجاني تماماً', en: 'Completely free' },
+  'services.be_first_reach': { ar: 'الوصول لآلاف المستخدمين', en: 'Reach thousands of users' },
+  'services.be_first_easy': { ar: 'نشر سهل وسريع', en: 'Quick and easy posting' },
+  'services.be_first_download': { ar: 'حمّل التطبيق وانشر الآن', en: 'Download the app & post now' },
+  'services.be_first_hint': { ar: 'حمّل تطبيق طلبنا من Google Play وابدأ النشر في ثوانٍ', en: 'Download Talabna app from Google Play and start posting in seconds' },
 
   // About page
   'about.title': { ar: 'من نحن', en: 'About Us' },

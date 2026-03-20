@@ -123,11 +123,36 @@
         <p class="mt-4 text-muted">{{ t('services.loading') }}</p>
       </div>
 
-      <!-- No Results -->
-      <div v-else-if="listings.length === 0" class="card pa-8 text-center">
-        <i class="mdi mdi-magnify-close" style="font-size: 64px; color: var(--color-text-muted);"></i>
-        <h3 class="text-h6 mt-4">{{ t('services.no_listings') }}</h3>
-        <p class="text-muted">{{ t('services.try_change') }}</p>
+      <!-- No Results — Be the First CTA -->
+      <div v-else-if="listings.length === 0" class="be-first-section">
+        <div class="be-first-card">
+          <div class="be-first-icon">
+            <i class="mdi mdi-rocket-launch"></i>
+          </div>
+          <h2 class="be-first-title">{{ t('services.be_first_title') }}</h2>
+          <p class="be-first-desc">{{ t('services.be_first_desc') }}</p>
+          <div class="be-first-features">
+            <div class="be-first-feature">
+              <i class="mdi mdi-check-circle"></i>
+              <span>{{ t('services.be_first_free') }}</span>
+            </div>
+            <div class="be-first-feature">
+              <i class="mdi mdi-check-circle"></i>
+              <span>{{ t('services.be_first_reach') }}</span>
+            </div>
+            <div class="be-first-feature">
+              <i class="mdi mdi-check-circle"></i>
+              <span>{{ t('services.be_first_easy') }}</span>
+            </div>
+          </div>
+          <div class="be-first-actions">
+            <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn btn-primary btn-lg">
+              <i class="mdi mdi-cellphone-arrow-down"></i>
+              {{ t('services.be_first_download') }}
+            </a>
+          </div>
+          <p class="be-first-hint">{{ t('services.be_first_hint') }}</p>
+        </div>
       </div>
 
       <!-- Grid View -->
@@ -425,6 +450,111 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Be the First CTA */
+.be-first-section {
+  display: flex;
+  justify-content: center;
+  padding: 2rem 0;
+}
+
+.be-first-card {
+  background: white;
+  border-radius: 20px;
+  padding: 3rem 2.5rem;
+  text-align: center;
+  max-width: 520px;
+  width: 100%;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+  border: 1px solid #f0f0f0;
+}
+
+[data-theme="dark"] .be-first-card {
+  background: #1e293b;
+  border-color: #334155;
+}
+
+.be-first-icon {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.5rem;
+}
+
+.be-first-icon i {
+  font-size: 36px;
+  color: white;
+}
+
+.be-first-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #1a1a2e;
+  margin: 0 0 0.75rem;
+}
+
+[data-theme="dark"] .be-first-title {
+  color: #f1f5f9;
+}
+
+.be-first-desc {
+  color: #6b7280;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  margin: 0 0 1.5rem;
+}
+
+.be-first-features {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  margin-bottom: 2rem;
+  text-align: start;
+  max-width: 300px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.be-first-feature {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: #374151;
+}
+
+[data-theme="dark"] .be-first-feature {
+  color: #cbd5e1;
+}
+
+.be-first-feature i {
+  color: #10b981;
+  font-size: 1.1rem;
+}
+
+.be-first-actions {
+  margin-bottom: 1.25rem;
+}
+
+.be-first-actions .btn {
+  padding: 0.85rem 2rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.be-first-hint {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  margin: 0;
+}
+
 .text-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
