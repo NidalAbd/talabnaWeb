@@ -890,10 +890,13 @@ class PublicController extends Controller
         $transformedListings = $listings->getCollection()->map(function ($listing) use ($locale) {
             $cityName = $listing->city ? $this->decodeName($listing->city->name) : null;
 
+            $title = $listing->translate('title', $locale) ?? $listing->translate('title') ?? '';
+            $desc = $listing->translate('description', $locale) ?? $listing->translate('description') ?? '';
+
             return [
                 'id' => $listing->id,
-                'title' => $listing->title,
-                'description' => \Str::limit($listing->description, 100),
+                'title' => $title,
+                'description' => \Str::limit($desc, 100),
                 'price' => $listing->price,
                 'currency' => $listing->price_currency_code,
                 'image' => $listing->photos->first()
