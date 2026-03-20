@@ -137,6 +137,7 @@ class SeoController extends Controller
         $description = $listing->translate('description', $locale) ?? $listing->translate('description') ?? '';
         $cityName = $this->getLocalizedName($listing->city?->name, $locale);
         $countryName = $this->getLocalizedName($listing->country?->name, $locale);
+        $countryIso = $listing->country?->iso_code ?? 'PS';
         $categoryName = $this->getLocalizedName($listing->category?->name, $locale);
         $location = $cityName ? "$cityName, $countryName" : $countryName;
 
@@ -186,7 +187,7 @@ class SeoController extends Controller
             '@type' => 'Product',
             'name' => $title,
             'description' => mb_substr(strip_tags($description), 0, 500),
-            'image' => $seo['og']['image'],
+            'image' => $seo['og']['image'] ?? $baseUrl . '/storage/photos/og-image.jpg',
             'sku' => 'TLB-' . $listing->id,
             'mpn' => 'TLB' . str_pad($listing->id, 8, '0', STR_PAD_LEFT),
             'brand' => [
@@ -233,7 +234,7 @@ class SeoController extends Controller
                 // Merchant return policy (required by Google)
                 'hasMerchantReturnPolicy' => [
                     '@type' => 'MerchantReturnPolicy',
-                    'applicableCountry' => $countryName ?: 'PS',
+                    'applicableCountry' => $countryIso,
                     'returnPolicyCategory' => 'https://schema.org/MerchantReturnNotPermitted',
                     'merchantReturnDays' => 0,
                 ],
@@ -247,7 +248,7 @@ class SeoController extends Controller
                     ],
                     'shippingDestination' => [
                         '@type' => 'DefinedRegion',
-                        'addressCountry' => $countryName ?: 'PS',
+                        'addressCountry' => $countryIso,
                     ],
                     'deliveryTime' => [
                         '@type' => 'ShippingDeliveryTime',
@@ -273,7 +274,7 @@ class SeoController extends Controller
                 'address' => [
                     '@type' => 'PostalAddress',
                     'addressLocality' => $cityName,
-                    'addressCountry' => $countryName,
+                    'addressCountry' => $countryIso,
                 ],
             ],
         ];
@@ -463,7 +464,7 @@ class SeoController extends Controller
                 'address' => [
                     '@type' => 'PostalAddress',
                     'addressLocality' => $cityName ?: null,
-                    'addressCountry' => $countryName,
+                    'addressCountry' => $country->iso_code ?? 'PS',
                 ],
             ],
             'mainEntity' => [
