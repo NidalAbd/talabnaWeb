@@ -621,7 +621,8 @@ class PublicController extends Controller
      */
     public function countries(): JsonResponse
     {
-        $countries = Cache::remember('countries_list_v4', 3600, function () {
+        $locale = app()->getLocale();
+        $countries = Cache::remember("countries_list_v5_{$locale}", 3600, function () use ($locale) {
             return countries::withCount(['cities'])
                 ->with(['photos', 'cities' => function ($query) {
                     $query->withCount(['servicePosts' => function ($q) {
@@ -636,11 +637,11 @@ class PublicController extends Controller
                 }])
                 ->orderBy('id')
                 ->get()
-                ->map(function ($country) {
-                    // The model's accessor already returns name as array
+                ->map(function ($country) use ($locale) {
                     $name = $country->name;
                     $nameAr = is_array($name) ? ($name['ar'] ?? '') : (string)$name;
                     $nameEn = is_array($name) ? ($name['en'] ?? $nameAr) : (string)$name;
+                    $nameLocalized = is_array($name) ? ($name[$locale] ?? $nameEn) : (string)$name;
 
                     // Count total listings in this country
                     $listingsCount = ServicePost::where('state', 'published')
@@ -663,14 +664,23 @@ class PublicController extends Controller
                         ];
                     });
 
-                    // Get flag from photos relationship (same as admin controller)
-                    $flagSrc = $country->photos->first()?->src ?? null;
-                    $flagUrl = $flagSrc ? '/storage/' . preg_replace('#^storage/#', '', $flagSrc) : null;
+                    // Flag: check column (external URL) → Photos → flagcdn fallback
+                    $flagUrl = null;
+                    if ($country->flag && str_starts_with($country->flag, 'http')) {
+                        $flagUrl = $country->flag;
+                    } elseif ($country->photos->isNotEmpty()) {
+                        $src = $country->photos->first()->src;
+                        $flagUrl = '/storage/' . preg_replace('#^storage/#', '', $src);
+                    } elseif ($country->iso_code) {
+                        $flagUrl = 'https://flagcdn.com/w80/' . strtolower($country->iso_code) . '.png';
+                    }
 
                     return [
                         'id' => $country->id,
                         'name' => $nameAr,
                         'name_en' => $nameEn,
+                        'name_localized' => $nameLocalized,
+                        'iso_code' => $country->iso_code,
                         'slug' => \Str::slug($nameEn ?: $nameAr) ?: rawurlencode($nameAr),
                         'code' => $country->code ?? $country->country_code,
                         'flag' => $flagUrl,

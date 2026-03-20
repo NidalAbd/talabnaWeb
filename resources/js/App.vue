@@ -69,15 +69,6 @@
                 <i v-else class="mdi mdi-flag" style="font-size: 16px;"></i>
                 {{ country.name_localized || country.name_en || country.name }}
               </router-link>
-              <router-link
-                v-if="allCountries.length > 10"
-                to="/browse"
-                class="dropdown-item dropdown-item-more"
-                @click="countryMenuOpen = false"
-              >
-                <i class="mdi mdi-dots-horizontal"></i>
-                {{ t('home.view_all') }} ({{ allCountries.length }})
-              </router-link>
             </div>
           </div>
         </div>
@@ -362,7 +353,7 @@ const userMenuOpen = ref(false)
 const catMenuOpen = ref(false)
 const countryMenuOpen = ref(false)
 const allCountries = ref([])
-const topCountries = computed(() => allCountries.value.slice(0, 10))
+const topCountries = computed(() => allCountries.value)
 
 // Computed properties for user
 const isLoggedIn = computed(() => !!appStore.user)
@@ -438,8 +429,7 @@ const fetchCountries = async () => {
       const list = data.countries || data || []
       allCountries.value = list.map(c => ({
         ...c,
-        flag_url: c.iso_code ? `https://flagcdn.com/w40/${c.iso_code.toLowerCase()}.png` : null,
-        slug: (c.name_en || c.name || '').toLowerCase().replace(/\s+/g, '-'),
+        flag_url: c.flag || (c.iso_code ? `https://flagcdn.com/w40/${c.iso_code.toLowerCase()}.png` : null),
       }))
     }
   } catch (_) {}
