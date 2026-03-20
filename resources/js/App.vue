@@ -8,7 +8,7 @@
           <div class="avatar avatar-40">
             <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" width="40" height="40" fetchpriority="high" />
           </div>
-          <span>{{ t('app.name') }}</span>
+          <span>{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</span>
         </router-link>
 
         <div class="flex-1"></div>
@@ -17,18 +17,18 @@
         <div class="navbar-nav hide-mobile">
           <router-link to="/" class="nav-link" :class="{ active: $route.name === 'home' }">
             <i class="mdi mdi-home"></i>
-            {{ t('nav.home') }}
+            {{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}
           </router-link>
           <router-link to="/browse" class="nav-link" :class="{ active: $route.name === 'browse' }">
             <i class="mdi mdi-view-grid"></i>
-            {{ t('nav.browse') }}
+            {{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}
           </router-link>
 
           <!-- Categories Dropdown -->
           <div class="dropdown" @mouseenter="catMenuOpen = true" @mouseleave="catMenuOpen = false">
             <button class="nav-link">
               <i class="mdi mdi-shape"></i>
-              {{ t('nav.categories') }}
+              {{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}
               <i class="mdi mdi-chevron-down" style="font-size: 18px;"></i>
             </button>
             <div class="dropdown-menu" :class="{ open: catMenuOpen }">
@@ -40,34 +40,7 @@
                 @click="catMenuOpen = false"
               >
                 <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
-                {{ cat.name_localized || cat.name_en || cat.name }}
-              </router-link>
-            </div>
-          </div>
-
-          <!-- Countries Dropdown -->
-          <div class="dropdown" @mouseenter="countryMenuOpen = true" @mouseleave="countryMenuOpen = false">
-            <button class="nav-link">
-              <i class="mdi mdi-earth"></i>
-              {{ t('nav.countries') }}
-              <i class="mdi mdi-chevron-down" style="font-size: 18px;"></i>
-            </button>
-            <div class="dropdown-menu dropdown-menu-countries" :class="{ open: countryMenuOpen }">
-              <router-link
-                v-for="country in topCountries"
-                :key="country.id"
-                :to="`/services/${country.id}/${country.slug || ''}`"
-                class="dropdown-item"
-                @click="countryMenuOpen = false"
-              >
-                <img
-                  v-if="country.flag_url"
-                  :src="country.flag_url"
-                  :alt="country.name_localized || country.name_en"
-                  style="width: 20px; height: 14px; object-fit: cover; border-radius: 2px;"
-                />
-                <i v-else class="mdi mdi-flag" style="font-size: 16px;"></i>
-                {{ country.name_localized || country.name_en || country.name }}
+                {{ appStore.locale === 'ar' ? cat.name : cat.name_en }}
               </router-link>
             </div>
           </div>
@@ -80,7 +53,7 @@
           <i class="mdi mdi-magnify search-input-icon"></i>
           <input
             v-model="searchQuery"
-            :placeholder="t('nav.search')"
+            :placeholder="appStore.locale === 'ar' ? 'ابحث...' : 'Search...'"
             class="form-input form-input-search"
             @keyup.enter="doSearch"
           />
@@ -93,25 +66,10 @@
             <i class="mdi" :class="appStore.isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'" style="font-size: 20px;"></i>
           </button>
 
-          <!-- Language Selector -->
-          <div class="dropdown" style="position: relative;">
-            <button class="btn btn-icon btn-text" @click.stop="langMenuOpen = !langMenuOpen" title="Language">
-              <span style="font-weight: 700; font-size: 0.8rem; text-transform: uppercase;">{{ appStore.locale }}</span>
-            </button>
-            <div v-if="langMenuOpen" class="lang-dropdown" @click.stop>
-              <div
-                v-for="lang in appStore.languages"
-                :key="lang.code"
-                class="lang-option"
-                :class="{ active: appStore.locale === lang.code }"
-                @click="selectLanguage(lang.code)"
-              >
-                <span class="lang-code">{{ lang.code.toUpperCase() }}</span>
-                <span class="lang-native">{{ lang.native_name }}</span>
-                <i v-if="appStore.locale === lang.code" class="mdi mdi-check" style="color: #10b981;"></i>
-              </div>
-            </div>
-          </div>
+          <!-- Language Toggle -->
+          <button class="btn btn-icon btn-text" @click="toggleLocale">
+            <span style="font-weight: 700; font-size: 0.875rem;">{{ appStore.locale === 'ar' ? 'EN' : 'ع' }}</span>
+          </button>
 
           <!-- User Menu (when logged in) -->
           <div v-if="isLoggedIn" class="dropdown d-none d-sm-block">
@@ -127,22 +85,40 @@
               <!-- Dashboard (Admin Only) -->
               <a v-if="isAdmin" href="/dashboard" class="dropdown-item">
                 <i class="mdi mdi-view-dashboard" style="color: var(--color-primary);"></i>
-                {{ t('nav.dashboard') }}
+                {{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}
               </a>
               <hr v-if="isAdmin" style="margin: 0.25rem 0;" />
               <!-- Logout -->
               <button class="dropdown-item dropdown-item-error" @click="logout">
                 <i class="mdi mdi-logout"></i>
-                {{ t('nav.logout') }}
+                {{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}
               </button>
             </div>
           </div>
 
-          <!-- Login/Register (when not logged in) -->
-          <a v-else href="/login" class="btn btn-primary btn-sm d-none d-sm-flex">
-            <i class="mdi mdi-login"></i>
-            {{ t('nav.login') }}
-          </a>
+          <!-- Google Sign In (when not logged in) -->
+          <div v-else class="d-none d-sm-flex align-items-center gap-2">
+            <div id="g_id_onload"
+              :data-client_id="googleClientId"
+              data-callback="handleGoogleCredential"
+              data-auto_prompt="true"
+              data-context="signin"
+              data-ux_mode="popup"
+              data-auto_select="true"
+              data-itp_support="true">
+            </div>
+            <div class="g_id_signin"
+              data-type="standard"
+              data-shape="pill"
+              data-theme="outline"
+              data-text="signin_with"
+              data-size="medium"
+              data-logo_alignment="left">
+            </div>
+            <button v-if="googleLoading" class="btn btn-primary btn-sm" disabled>
+              <i class="mdi mdi-loading mdi-spin"></i>
+            </button>
+          </div>
 
           <!-- Mobile Menu Button -->
           <button class="btn btn-icon btn-text show-mobile" @click="mobileDrawer = true">
@@ -173,7 +149,7 @@
         <!-- Dashboard (Admin Only) -->
         <a v-if="isAdmin" href="/dashboard" class="drawer-item" @click="mobileDrawer = false">
           <i class="mdi mdi-view-dashboard" style="color: var(--color-primary);"></i>
-          {{ t('nav.dashboard') }}
+          {{ appStore.locale === 'ar' ? 'لوحة التحكم' : 'Dashboard' }}
         </a>
       </template>
 
@@ -183,7 +159,7 @@
           <i class="mdi mdi-magnify search-input-icon"></i>
           <input
             v-model="searchQuery"
-            :placeholder="t('nav.search')"
+            :placeholder="appStore.locale === 'ar' ? 'ابحث...' : 'Search...'"
             class="form-input form-input-search"
             @keyup.enter="doSearch(); mobileDrawer = false"
           />
@@ -193,14 +169,14 @@
 
       <router-link to="/" class="drawer-item" @click="mobileDrawer = false">
         <i class="mdi mdi-home"></i>
-        {{ t('nav.home') }}
+        {{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}
       </router-link>
       <router-link to="/browse" class="drawer-item" @click="mobileDrawer = false">
         <i class="mdi mdi-view-grid"></i>
-        {{ t('nav.browse') }}
+        {{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}
       </router-link>
       <div class="drawer-divider"></div>
-      <div class="drawer-subheader">{{ t('nav.categories') }}</div>
+      <div class="drawer-subheader">{{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}</div>
       <router-link
         v-for="cat in appStore.categories"
         :key="cat.id"
@@ -209,36 +185,25 @@
         @click="mobileDrawer = false"
       >
         <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
-        {{ cat.name_localized || cat.name_en || cat.name }}
+        {{ appStore.locale === 'ar' ? cat.name : cat.name_en }}
       </router-link>
       <div class="drawer-divider"></div>
-      <div class="drawer-subheader">{{ t('nav.countries') }}</div>
-      <router-link
-        v-for="country in topCountries"
-        :key="'mob-' + country.id"
-        :to="`/services/${country.id}/${country.slug || ''}`"
-        class="drawer-item"
-        @click="mobileDrawer = false"
-      >
-        <img
-          v-if="country.flag_url"
-          :src="country.flag_url"
-          :alt="country.name_localized || country.name_en"
-          style="width: 20px; height: 14px; object-fit: cover; border-radius: 2px;"
-        />
-        <i v-else class="mdi mdi-flag"></i>
-        {{ country.name_localized || country.name_en || country.name }}
-      </router-link>
-      <div class="drawer-divider"></div>
-      <!-- Login (when not logged in) -->
-      <a v-if="!isLoggedIn" href="/login" class="drawer-item">
-        <i class="mdi mdi-login"></i>
-        {{ t('nav.login') }}
-      </a>
+      <!-- Google Sign In (when not logged in) -->
+      <div v-if="!isLoggedIn" class="drawer-item" style="padding: 0.5rem 1rem;">
+        <div class="g_id_signin"
+          data-type="standard"
+          data-shape="rectangular"
+          data-theme="outline"
+          data-text="signin_with"
+          data-size="large"
+          data-width="250"
+          data-logo_alignment="left">
+        </div>
+      </div>
       <!-- Logout (when logged in) -->
       <button v-else class="drawer-item" style="color: var(--color-error);" @click="logout">
         <i class="mdi mdi-logout"></i>
-        {{ t('nav.logout') }}
+        {{ appStore.locale === 'ar' ? 'تسجيل الخروج' : 'Logout' }}
       </button>
     </div>
 
@@ -262,53 +227,56 @@
                 <img src="/storage/photos/profiles/45LcdzxednC495FtKeue7eUTRpyFN2YYK1Ij58U0.png" alt="Talabna" width="48" height="48" loading="lazy" />
               </div>
               <div>
-                <h3 class="text-h6 font-weight-bold">{{ t('app.name') }}</h3>
-                <p class="text-caption text-muted" style="margin:0;">{{ t('app.tagline') }}</p>
+                <h3 class="text-h6 font-weight-bold">{{ appStore.locale === 'ar' ? 'طلبنا' : 'Talabna' }}</h3>
+                <p class="text-caption text-muted" style="margin:0;">{{ appStore.locale === 'ar' ? 'منصة الإعلانات المبوبة' : 'Classified Ads Platform' }}</p>
               </div>
             </div>
             <p class="text-body-2 text-muted">
-              {{ t('app.tagline') }}
+              {{ appStore.locale === 'ar'
+                ? 'أكبر منصة للإعلانات المبوبة. بيع واشتري بسهولة وأمان.'
+                : 'The largest classified ads marketplace. Buy and sell easily and safely.'
+              }}
             </p>
           </div>
 
           <!-- Quick Links -->
           <div class="col-6 col-md-2">
-            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ t('nav.quick_links') }}</h4>
+            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'روابط سريعة' : 'Quick Links' }}</h4>
             <div class="footer-links">
-              <router-link to="/">{{ t('nav.home') }}</router-link>
-              <router-link to="/browse">{{ t('nav.browse') }}</router-link>
-              <router-link to="/about">{{ t('nav.about') }}</router-link>
-              <router-link to="/contact">{{ t('nav.contact') }}</router-link>
+              <router-link to="/">{{ appStore.locale === 'ar' ? 'الرئيسية' : 'Home' }}</router-link>
+              <router-link to="/browse">{{ appStore.locale === 'ar' ? 'تصفح' : 'Browse' }}</router-link>
+              <router-link to="/about">{{ appStore.locale === 'ar' ? 'من نحن' : 'About' }}</router-link>
+              <router-link to="/contact">{{ appStore.locale === 'ar' ? 'اتصل بنا' : 'Contact' }}</router-link>
             </div>
           </div>
 
           <!-- Categories -->
           <div class="col-6 col-md-2">
-            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ t('nav.categories') }}</h4>
+            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'التصنيفات' : 'Categories' }}</h4>
             <div class="footer-links">
               <router-link
                 v-for="cat in appStore.categories.slice(0, 5)"
                 :key="cat.id"
                 :to="`/category/${cat.id}`"
               >
-                {{ cat.name_localized || cat.name_en || cat.name }}
+                {{ appStore.locale === 'ar' ? cat.name : cat.name_en }}
               </router-link>
             </div>
           </div>
 
           <!-- Legal & SEO -->
           <div class="col-6 col-md-2">
-            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ t('nav.terms') }}</h4>
+            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'قانوني' : 'Legal' }}</h4>
             <div class="footer-links">
-              <router-link to="/privacy">{{ t('nav.privacy') }}</router-link>
-              <router-link to="/terms">{{ t('nav.terms') }}</router-link>
-              <a href="/sitemap.xml" target="_blank">Sitemap</a>
+              <router-link to="/privacy">{{ appStore.locale === 'ar' ? 'سياسة الخصوصية' : 'Privacy Policy' }}</router-link>
+              <router-link to="/terms">{{ appStore.locale === 'ar' ? 'شروط الاستخدام' : 'Terms of Service' }}</router-link>
+              <a href="/sitemap.xml" target="_blank">{{ appStore.locale === 'ar' ? 'خريطة الموقع' : 'Sitemap' }}</a>
             </div>
           </div>
 
           <!-- Download App -->
           <div class="col-6 col-md-2">
-            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ t('footer.download') }}</h4>
+            <h4 class="text-subtitle-1 font-weight-bold mb-3">{{ appStore.locale === 'ar' ? 'حمل التطبيق' : 'Download App' }}</h4>
             <div class="d-flex flex-column gap-2">
               <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn btn-outline btn-sm justify-start">
                 <i class="mdi mdi-google-play"></i>
@@ -316,7 +284,7 @@
               </a>
             </div>
             <div class="mt-4">
-              <h4 class="text-subtitle-2 font-weight-bold mb-2">{{ t('nav.contact') }}</h4>
+              <h4 class="text-subtitle-2 font-weight-bold mb-2">{{ appStore.locale === 'ar' ? 'تواصل معنا' : 'Contact Us' }}</h4>
               <p class="text-caption text-muted" style="margin:0;">
                 <i class="mdi mdi-email mr-1"></i> support@talbna.cloud
               </p>
@@ -326,7 +294,7 @@
 
         <div class="footer-bottom">
           <p class="text-caption text-muted" style="margin:0;">
-            © {{ new Date().getFullYear() }} Talabna. {{ t('footer.rights') }}.
+            © {{ new Date().getFullYear() }} Talabna. {{ appStore.locale === 'ar' ? 'جميع الحقوق محفوظة' : 'All rights reserved' }}.
           </p>
           <div class="d-flex gap-2">
             <a href="https://www.facebook.com/talabna" target="_blank" class="btn btn-icon-sm btn-text"><i class="mdi mdi-facebook" style="font-size: 20px;"></i></a>
@@ -339,11 +307,9 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, onUnmounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
-import { t, initTranslations, loadTranslations } from '@/utils/translate'
-import { apiFetch } from '@/utils/api'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -351,10 +317,9 @@ const appStore = useAppStore()
 const mobileDrawer = ref(false)
 const searchQuery = ref('')
 const userMenuOpen = ref(false)
+const googleLoading = ref(false)
+const googleClientId = document.querySelector('meta[name="google-client-id"]')?.content || ''
 const catMenuOpen = ref(false)
-const countryMenuOpen = ref(false)
-const allCountries = ref([])
-const topCountries = computed(() => allCountries.value)
 
 // Computed properties for user
 const isLoggedIn = computed(() => !!appStore.user)
@@ -378,31 +343,9 @@ const userAvatar = computed(() => {
 
 import { getCategoryIcon, getCategoryColor } from '@/utils/helpers'
 
-const langMenuOpen = ref(false)
-
-const selectLanguage = async (code) => {
-  appStore.setLocale(code)
-  langMenuOpen.value = false
-  await loadTranslations(code)
-  // Reload page to apply new language fully
-  window.location.reload()
+const toggleLocale = () => {
+  appStore.setLocale(appStore.locale === 'ar' ? 'en' : 'ar')
 }
-
-// Close lang menu when clicking outside
-const closeLangMenu = (e) => {
-  if (!e.target.closest('.lang-dropdown') && !e.target.closest('.btn-text')) {
-    langMenuOpen.value = false
-  }
-}
-onMounted(() => {
-  document.addEventListener('click', closeLangMenu)
-  appStore.fetchLanguages()
-  appStore.detectLocation()
-  initTranslations()
-})
-onUnmounted(() => {
-  document.removeEventListener('click', closeLangMenu)
-})
 
 const doSearch = () => {
   if (searchQuery.value.trim()) {
@@ -420,20 +363,6 @@ const fetchCategories = async () => {
   } catch (error) {
     console.error('Error fetching categories:', error)
   }
-}
-
-const fetchCountries = async () => {
-  try {
-    const response = await apiFetch('/api/public/countries')
-    if (response.ok) {
-      const data = await response.json()
-      const list = data.countries || data || []
-      allCountries.value = list.map(c => ({
-        ...c,
-        flag_url: c.flag || (c.iso_code ? `https://flagcdn.com/w40/${c.iso_code.toLowerCase()}.png` : null),
-      }))
-    }
-  } catch (_) {}
 }
 
 const fetchCurrentUser = async () => {
@@ -483,110 +412,91 @@ const handleClickOutside = (e) => {
   }
 }
 
+// Google One Tap callback
+const handleGoogleCredential = async (response) => {
+  googleLoading.value = true
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+    const res = await fetch('/auth/google/one-tap', {
+      method: 'POST',
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': csrfToken,
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+      credentials: 'same-origin',
+      body: JSON.stringify({ credential: response.credential }),
+    })
+    const data = await res.json()
+    if (data.success && data.user) {
+      appStore.setUser(data.user)
+      // Reload to refresh session state
+      window.location.reload()
+    } else {
+      console.error('Google auth failed:', data.error)
+      alert(data.error || 'Login failed')
+    }
+  } catch (error) {
+    console.error('Google auth error:', error)
+    alert('Login failed. Please try again.')
+  } finally {
+    googleLoading.value = false
+  }
+}
+
+// Expose callback globally for Google One Tap
+window.handleGoogleCredential = handleGoogleCredential
+
+const initGoogleOneTap = () => {
+  if (window.google && googleClientId && !isLoggedIn.value) {
+    try {
+      window.google.accounts.id.initialize({
+        client_id: googleClientId,
+        callback: handleGoogleCredential,
+        auto_select: true,
+        cancel_on_tap_outside: false,
+      })
+      // Render buttons
+      const containers = document.querySelectorAll('.g_id_signin')
+      containers.forEach(el => {
+        window.google.accounts.id.renderButton(el, {
+          theme: 'outline',
+          size: el.dataset.size || 'medium',
+          shape: el.dataset.shape || 'pill',
+          text: 'signin_with',
+          width: el.dataset.width ? parseInt(el.dataset.width) : undefined,
+        })
+      })
+      // Show One Tap prompt
+      window.google.accounts.id.prompt()
+    } catch (e) {
+      console.error('Google One Tap init error:', e)
+    }
+  }
+}
+
 onMounted(() => {
   appStore.init()
   // Apply theme to root element
   document.documentElement.setAttribute('data-theme', appStore.theme)
   fetchCategories()
-  fetchCountries()
   fetchCurrentUser()
   document.addEventListener('click', handleClickOutside)
+
+  // Initialize Google One Tap after a short delay (wait for script to load)
+  const checkGoogle = setInterval(() => {
+    if (window.google) {
+      clearInterval(checkGoogle)
+      initGoogleOneTap()
+    }
+  }, 500)
+  // Stop checking after 10s
+  setTimeout(() => clearInterval(checkGoogle), 10000)
 })
 </script>
 
 <style>
-/* Countries Dropdown */
-.dropdown-menu-countries {
-  max-height: 400px;
-  overflow-y: auto;
-  min-width: 220px;
-}
-
-.dropdown-menu-countries .dropdown-item {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.dropdown-item-more {
-  border-top: 1px solid var(--color-border, #e5e7eb);
-  color: var(--color-primary, #667eea) !important;
-  font-weight: 600;
-}
-
-/* Language Dropdown */
-.lang-dropdown {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
-  min-width: 200px;
-  max-height: 400px;
-  overflow-y: auto;
-  z-index: 9999;
-  padding: 0.5rem 0;
-  margin-top: 0.5rem;
-}
-
-[data-theme="dark"] .lang-dropdown {
-  background: #1e293b;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.4);
-}
-
-.lang-option {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.6rem 1rem;
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.lang-option:hover {
-  background: #f3f4f6;
-}
-
-[data-theme="dark"] .lang-option:hover {
-  background: #334155;
-}
-
-.lang-option.active {
-  background: #eff6ff;
-}
-
-[data-theme="dark"] .lang-option.active {
-  background: #1e3a5f;
-}
-
-.lang-code {
-  font-weight: 800;
-  font-size: 0.7rem;
-  color: #667eea;
-  background: #eff3ff;
-  padding: 0.15rem 0.4rem;
-  border-radius: 4px;
-  min-width: 26px;
-  text-align: center;
-}
-
-[data-theme="dark"] .lang-code {
-  background: #2d3748;
-  color: #93b4ff;
-}
-
-.lang-native {
-  flex: 1;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #374151;
-}
-
-[data-theme="dark"] .lang-native {
-  color: #e2e8f0;
-}
-
 /* Global styles for non-Vuetify app */
 
 /* Apply theme reactively */

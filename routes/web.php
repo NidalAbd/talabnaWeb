@@ -196,41 +196,10 @@ Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug?}', function(
     return view('spa');
 })->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+'])->name('services.city');
 
-// Services by country, city, and category (old ID-based — kept for backward compat)
+// Services by country, city, and category
 Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug}/{categoryId}/{categorySlug?}', function() {
     return view('spa');
 })->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+', 'categoryId' => '[0-9]+'])->name('services.category');
-
-/*
-|--------------------------------------------------------------------------
-| SEO Slug Routes (pure slug URLs — best for Google ranking)
-| /services/turkey/istanbul/jobs/administration/senior-manager-1234
-|--------------------------------------------------------------------------
-*/
-// Post level: /services/{country}/{city}/{category}/{subcategory}/{post-slug-id}
-Route::get('/services/{country}/{city}/{category}/{subcategory}/{post}', function() {
-    return view('spa');
-})->where(['country' => '[a-z0-9-]+', 'city' => '[a-z0-9-]+', 'category' => '[a-z0-9-]+', 'subcategory' => '[a-z0-9-]+', 'post' => '[a-z0-9-]+-\d+'])->name('seo.post');
-
-// Subcategory level: /services/{country}/{city}/{category}/{subcategory}
-Route::get('/services/{country}/{city}/{category}/{subcategory}', function() {
-    return view('spa');
-})->where(['country' => '[a-z0-9-]+', 'city' => '[a-z0-9-]+', 'category' => '[a-z0-9-]+', 'subcategory' => '[a-z0-9-]+'])->name('seo.subcategory');
-
-// Category level: /services/{country}/{city}/{category}
-Route::get('/services/{country}/{city}/{category}', function() {
-    return view('spa');
-})->where(['country' => '[a-z0-9-]+', 'city' => '[a-z0-9-]+', 'category' => '[a-z0-9-]+'])->name('seo.category');
-
-// City level: /services/{country}/{city}
-Route::get('/services/{country}/{city}', function() {
-    return view('spa');
-})->where(['country' => '[a-z0-9-]+', 'city' => '[a-z0-9-]+'])->name('seo.city');
-
-// Country level: /services/{country}
-Route::get('/services/{country}', function() {
-    return view('spa');
-})->where('country', '[a-z0-9-]+')->name('seo.country');
 
 // Deep Link Routes
 Route::get('api/deep-link/{route}/{id?}', [DeepLinkController::class, 'redirect'])->name('deep.link');
@@ -920,39 +889,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::put('/{id}', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'update'])->name('api.admin.translations.update');
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'destroy'])->name('api.admin.translations.destroy');
             });
-
-            // Location Import (AI)
-            Route::prefix('location-import')->group(function () {
-                Route::get('/regions', [\App\Http\Controllers\Admin\LocationImportController::class, 'regions'])->name('api.admin.location-import.regions');
-                Route::post('/countries', [\App\Http\Controllers\Admin\LocationImportController::class, 'importCountries'])->name('api.admin.location-import.countries');
-                Route::post('/countries/{id}/generate-cities', [\App\Http\Controllers\Admin\LocationImportController::class, 'generateCities'])->name('api.admin.location-import.generate-cities');
-                Route::post('/generate-all-cities', [\App\Http\Controllers\Admin\LocationImportController::class, 'generateAllCities'])->name('api.admin.location-import.generate-all-cities');
-                Route::post('/countries/{id}/translate', [\App\Http\Controllers\Admin\LocationImportController::class, 'translateNames'])->name('api.admin.location-import.translate');
-                Route::get('/progress', [\App\Http\Controllers\Admin\LocationImportController::class, 'progress'])->name('api.admin.location-import.progress');
-            });
-
-            // Content Translations (per-language editor)
-            Route::get('/languages/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'index'])->name('api.admin.content-translations.index');
-            Route::post('/languages/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'store'])->name('api.admin.content-translations.store');
-
-            // Auto-Translation (OpenAI)
-            Route::prefix('auto-translate')->group(function () {
-                Route::post('/{locale}', [\App\Http\Controllers\Api\AutoTranslateController::class, 'start'])->name('api.admin.auto-translate.start');
-                Route::get('/{locale}/progress', [\App\Http\Controllers\Api\AutoTranslateController::class, 'progress'])->name('api.admin.auto-translate.progress');
-                Route::post('/{locale}/stop', [\App\Http\Controllers\Api\AutoTranslateController::class, 'stop'])->name('api.admin.auto-translate.stop');
-                Route::post('/on-demand', [\App\Http\Controllers\Api\AutoTranslateController::class, 'onDemand'])->name('api.admin.auto-translate.on-demand');
-            });
-
-            // Subscription Plans Management
-            Route::prefix('subscription-plans')->group(function () {
-                Route::get('/', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index'])->name('api.admin.subscription-plans.index');
-                Route::post('/', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store'])->name('api.admin.subscription-plans.store');
-                Route::get('/stats', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'stats'])->name('api.admin.subscription-plans.stats');
-                Route::get('/{id}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'show'])->name('api.admin.subscription-plans.show');
-                Route::put('/{id}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update'])->name('api.admin.subscription-plans.update');
-                Route::delete('/{id}', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'destroy'])->name('api.admin.subscription-plans.destroy');
-                Route::post('/{id}/toggle', [\App\Http\Controllers\Admin\SubscriptionPlanController::class, 'toggle'])->name('api.admin.subscription-plans.toggle');
-            });
         });
     });
 });
+
+// Google One Tap web login
+Route::post('/auth/google/one-tap', [\App\Http\Controllers\Api\GoogleAuthController::class, 'handleWebGoogleAuth'])->name('google.onetap');

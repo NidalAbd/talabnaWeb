@@ -369,4 +369,102 @@ class GoogleAuthController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Handle Google One Tap login for web frontend.
+     * Receives the credential JWT from Google's client-side library.
+     */
+    public function handleWebGoogleAuth(Request $request): JsonResponse
+    {
+        $credential = $request->input('credential');
+        if (!$credential) {
+            return response()->json(['error' => 'No credential provided'], 422);
+        }
+
+        try {
+            $client = new GoogleClient(['client_id' => config('services.google.client_id')]);
+            $httpClient = new \GuzzleHttp\Client([
+                'timeout' => 10,
+                'connect_timeout' => 5,
+            ]);
+            $client->setHttpClient($httpClient);
+
+            $payload = $client->verifyIdToken($credential);
+
+            if (!$payload) {
+                return response()->json(['error' => 'Invalid Google token'], 401);
+            }
+
+            $googleId = $payload['sub'];
+            $email = $payload['email'] ?? null;
+            $name = $payload['name'] ?? 'User';
+            $photoUrl = $payload['picture'] ?? null;
+
+            if (!$email) {
+                return response()->json(['error' => 'Email not provided by Google'], 422);
+            }
+
+            // Find or create user
+            $user = User::where('google_id', $googleId)->first();
+            if (!$user) {
+                $user = User::where('email', $email)->first();
+            }
+
+            $isNewUser = false;
+
+            if ($user) {
+                // Update existing user
+                $user->google_id = $googleId;
+                $user->auth_type = 'google';
+                $user->save();
+            } else {
+                // Create new user
+                $isNewUser = true;
+                $baseName = Str::slug($name, '_');
+                $userName = $baseName . rand(1000, 9999);
+                while (User::where('user_name', $userName)->exists()) {
+                    $userName = $baseName . rand(1000, 9999);
+                }
+
+                $user = User::create([
+                    'user_name' => $userName,
+                    'name' => $name,
+                    'email' => $email,
+                    'password' => Hash::make(Str::random(32)),
+                    'google_id' => $googleId,
+                    'auth_type' => 'google',
+                    'gender' => 'ذكر',
+                ]);
+
+                // Assign default role
+                $defaultRole = Role::where('name', 'user')->first();
+                if ($defaultRole) {
+                    $user->roles()->syncWithoutDetaching([$defaultRole->id]);
+                }
+
+                // Assign default permissions
+                $permissions = \App\Models\Permission::whereIn('name', [
+                    'post_create', 'post_read', 'post_update', 'post_delete',
+                    'comment_create', 'comment_read', 'comment_update', 'comment_delete',
+                    'photo_create', 'photo_read'
+                ])->pluck('id');
+                if ($permissions->isNotEmpty()) {
+                    $user->Permission()->syncWithoutDetaching($permissions);
+                }
+            }
+
+            // Log the user in with a web session
+            Auth::login($user, true);
+
+            return response()->json([
+                'success' => true,
+                'user' => $user->load('roles', 'photos'),
+                'is_new' => $isNewUser,
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Web Google auth error: ' . $e->getMessage());
+            return response()->json(['error' => 'Authentication failed: ' . $e->getMessage()], 500);
+        }
+    }
+
 }

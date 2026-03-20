@@ -1,19 +1,10 @@
 @php
-    // Detect locale from query param, Accept-Language header, or default
-    $currentLocale = request()->query('lang', request()->header('Accept-Language', 'ar'));
-    $currentLocale = explode(',', $currentLocale)[0];
-    $currentLocale = explode('-', $currentLocale)[0];
-    $activeLanguages = \App\Models\Language::getActiveOrdered();
-    $activeCodes = $activeLanguages->pluck('code')->toArray();
-    if (!in_array($currentLocale, $activeCodes)) $currentLocale = 'ar';
-    $isRtl = in_array($currentLocale, ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'yi', 'sd']);
-
     // Server-side SEO data generation for search engine crawlers
     $seoController = app(\App\Http\Controllers\SeoController::class);
-    $seoData = $seoController->getServerSideSeo(request()->path(), $currentLocale);
+    $seoData = $seoController->getServerSideSeo(request()->path(), 'ar');
 @endphp
 <!DOCTYPE html>
-<html lang="{{ $currentLocale }}" dir="{{ $isRtl ? 'rtl' : 'ltr' }}">
+<html lang="{{ $seoData['locale'] ?? 'ar' }}" dir="rtl">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -39,11 +30,7 @@
     <meta property="og:image:height" content="{{ $seoData['og']['image_height'] ?? '630' }}">
     <meta property="og:url" content="{{ $seoData['canonical'] ?? url()->current() }}">
     <meta property="og:locale" content="{{ $seoData['og']['locale'] ?? 'ar_SA' }}">
-    @foreach($activeLanguages as $lang)
-        @if($lang->code !== $currentLocale)
-            <meta property="og:locale:alternate" content="{{ $lang->code }}">
-        @endif
-    @endforeach
+    <meta property="og:locale:alternate" content="en_US">
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -55,10 +42,9 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ $seoData['canonical'] ?? url()->current() }}">
 
-    <!-- Hreflang for multilingual SEO (all active languages) -->
-    @foreach($activeLanguages as $lang)
-        <link rel="alternate" hreflang="{{ $lang->code }}" href="{{ url()->current() }}{{ str_contains(url()->current(), '?') ? '&' : '?' }}lang={{ $lang->code }}">
-    @endforeach
+    <!-- Hreflang for multilingual SEO -->
+    <link rel="alternate" hreflang="ar" href="{{ url()->current() }}?locale=ar">
+    <link rel="alternate" hreflang="en" href="{{ url()->current() }}?locale=en">
     <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
 
     <!-- JSON-LD Structured Data -->
@@ -85,7 +71,7 @@
             "contactPoint": {
                 "@type": "ContactPoint",
                 "contactType": "customer service",
-                "availableLanguage": [{!! $activeLanguages->map(fn($l) => '"'.$l->name.'"')->implode(', ') !!}]
+                "availableLanguage": ["Arabic", "English"]
             }
         }
         </script>
@@ -147,47 +133,16 @@
         /* Below-fold sections: defer rendering */
         .section-latest,.section-locations,.section-popular,.download-cta{content-visibility:auto;contain-intrinsic-size:0 600px}
     </style>
+
+    <!-- Google One Tap -->
+    <meta name="google-client-id" content="{{ config('services.google.client_id') }}">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
     <!-- Initial Loader -->
     <div id="app-loader">
         <div class="loader-spinner"></div>
     </div>
-
-    <!-- Server-side content preview for search engine crawlers -->
-    @if(!empty($seoData['content_preview']))
-    <div id="seo-content" style="display:none" aria-hidden="true">
-        <article itemscope itemtype="https://schema.org/Product">
-            <h1 itemprop="name">{{ $seoData['content_preview']['title'] ?? '' }}</h1>
-            <div itemprop="description">{{ $seoData['content_preview']['description'] ?? '' }}</div>
-            @if(!empty($seoData['content_preview']['price']))
-            <div itemprop="offers" itemscope itemtype="https://schema.org/Offer">
-                <span itemprop="price">{{ $seoData['content_preview']['price'] }}</span>
-                <span itemprop="priceCurrency">{{ $seoData['content_preview']['currency'] ?? 'USD' }}</span>
-            </div>
-            @endif
-            <div>{{ $seoData['content_preview']['category'] ?? '' }} &gt; {{ $seoData['content_preview']['subcategory'] ?? '' }}</div>
-            <div>{{ $seoData['content_preview']['city'] ?? '' }}, {{ $seoData['content_preview']['country'] ?? '' }}</div>
-            <span itemprop="author">{{ $seoData['content_preview']['user'] ?? '' }}</span>
-            <time itemprop="datePublished">{{ $seoData['content_preview']['date'] ?? '' }}</time>
-        </article>
-    </div>
-    @endif
-
-    @if(!empty($seoData['breadcrumbs']))
-    <nav id="seo-breadcrumbs" style="display:none" aria-hidden="true">
-        <ol itemscope itemtype="https://schema.org/BreadcrumbList">
-            @foreach($seoData['breadcrumbs'] as $i => $crumb)
-            @if(!empty($crumb['name']))
-            <li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
-                <a itemprop="item" href="{{ $crumb['url'] ?? '#' }}"><span itemprop="name">{{ $crumb['name'] }}</span></a>
-                <meta itemprop="position" content="{{ $i + 1 }}" />
-            </li>
-            @endif
-            @endforeach
-        </ol>
-    </nav>
-    @endif
 
     <!-- Vue App Mount Point -->
     <div id="app"></div>
