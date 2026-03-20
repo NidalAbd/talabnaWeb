@@ -5,14 +5,18 @@
 
 export function apiFetch(url, options = {}) {
   const locale = localStorage.getItem('locale') || 'ar'
-  const userCountryId = localStorage.getItem('user_country_id') || ''
-  const userCityId = localStorage.getItem('user_city_id') || ''
+  const userCountryId = localStorage.getItem('user_country_id')
+  const userCityId = localStorage.getItem('user_city_id')
 
-  // Add locale + location as query parameters
+  // Add locale + location as query parameters (skip empty/null values)
   const separator = url.includes('?') ? '&' : '?'
   let params = `lang=${locale}`
-  if (userCountryId) params += `&user_country_id=${userCountryId}`
-  if (userCityId) params += `&user_city_id=${userCityId}`
+  if (userCountryId && userCountryId !== 'null' && userCountryId !== '') {
+    params += `&user_country_id=${userCountryId}`
+  }
+  if (userCityId && userCityId !== 'null' && userCityId !== '') {
+    params += `&user_city_id=${userCityId}`
+  }
 
   const localizedUrl = `${url}${separator}${params}`
 

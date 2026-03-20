@@ -81,22 +81,24 @@ export const useAppStore = defineStore('app', () => {
     if (userCountryId.value && userCountryId.value !== 'null') return
 
     try {
-      const response = await fetch('https://ip-api.com/json/?fields=countryCode,city')
+      // Use ipapi.co (free, HTTPS, no key needed, 1000/day)
+      const response = await fetch('https://ipapi.co/json/')
       if (response.ok) {
         const data = await response.json()
-        if (data.countryCode) {
-          userCountry.value = data.countryCode
+        const cc = data.country_code || data.country
+        if (cc) {
+          userCountry.value = cc
           userCity.value = data.city || null
-          localStorage.setItem('user_country', data.countryCode)
+          localStorage.setItem('user_country', cc)
           localStorage.setItem('user_city', data.city || '')
 
           // Resolve to our DB country ID
-          const countryResponse = await fetch(`/api/public/countries`)
+          const countryResponse = await fetch('/api/public/countries')
           if (countryResponse.ok) {
             const countryData = await countryResponse.json()
             const countriesList = countryData.countries || countryData || []
             const matched = countriesList.find(c =>
-              c.iso_code === data.countryCode || c.country_code === data.countryCode
+              c.iso_code === cc || c.country_code === cc || c.code === cc
             )
             if (matched) {
               userCountryId.value = matched.id
