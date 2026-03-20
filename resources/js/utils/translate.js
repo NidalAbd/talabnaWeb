@@ -17,6 +17,7 @@ const fallbacks = {
   'nav.login': { ar: 'تسجيل الدخول', en: 'Login' },
   'nav.logout': { ar: 'تسجيل الخروج', en: 'Logout' },
   'nav.dashboard': { ar: 'لوحة التحكم', en: 'Dashboard' },
+  'nav.countries': { ar: 'الدول', en: 'Countries' },
   'nav.quick_links': { ar: 'روابط سريعة', en: 'Quick Links' },
   'nav.about': { ar: 'عن طلبنا', en: 'About Us' },
   'nav.contact': { ar: 'اتصل بنا', en: 'Contact Us' },

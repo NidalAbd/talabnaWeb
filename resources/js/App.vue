@@ -44,6 +44,42 @@
               </router-link>
             </div>
           </div>
+
+          <!-- Countries Dropdown -->
+          <div class="dropdown" @mouseenter="countryMenuOpen = true" @mouseleave="countryMenuOpen = false">
+            <button class="nav-link">
+              <i class="mdi mdi-earth"></i>
+              {{ t('nav.countries') }}
+              <i class="mdi mdi-chevron-down" style="font-size: 18px;"></i>
+            </button>
+            <div class="dropdown-menu dropdown-menu-countries" :class="{ open: countryMenuOpen }">
+              <router-link
+                v-for="country in topCountries"
+                :key="country.id"
+                :to="`/services/${country.id}/${country.slug || ''}`"
+                class="dropdown-item"
+                @click="countryMenuOpen = false"
+              >
+                <img
+                  v-if="country.flag_url"
+                  :src="country.flag_url"
+                  :alt="country.name_localized || country.name_en"
+                  style="width: 20px; height: 14px; object-fit: cover; border-radius: 2px;"
+                />
+                <i v-else class="mdi mdi-flag" style="font-size: 16px;"></i>
+                {{ country.name_localized || country.name_en || country.name }}
+              </router-link>
+              <router-link
+                v-if="allCountries.length > 10"
+                to="/browse"
+                class="dropdown-item dropdown-item-more"
+                @click="countryMenuOpen = false"
+              >
+                <i class="mdi mdi-dots-horizontal"></i>
+                {{ t('home.view_all') }} ({{ allCountries.length }})
+              </router-link>
+            </div>
+          </div>
         </div>
 
         <div class="flex-1"></div>
@@ -185,6 +221,24 @@
         {{ cat.name_localized || cat.name_en || cat.name }}
       </router-link>
       <div class="drawer-divider"></div>
+      <div class="drawer-subheader">{{ t('nav.countries') }}</div>
+      <router-link
+        v-for="country in topCountries"
+        :key="'mob-' + country.id"
+        :to="`/services/${country.id}/${country.slug || ''}`"
+        class="drawer-item"
+        @click="mobileDrawer = false"
+      >
+        <img
+          v-if="country.flag_url"
+          :src="country.flag_url"
+          :alt="country.name_localized || country.name_en"
+          style="width: 20px; height: 14px; object-fit: cover; border-radius: 2px;"
+        />
+        <i v-else class="mdi mdi-flag"></i>
+        {{ country.name_localized || country.name_en || country.name }}
+      </router-link>
+      <div class="drawer-divider"></div>
       <!-- Login (when not logged in) -->
       <a v-if="!isLoggedIn" href="/login" class="drawer-item">
         <i class="mdi mdi-login"></i>
@@ -306,6 +360,9 @@ const mobileDrawer = ref(false)
 const searchQuery = ref('')
 const userMenuOpen = ref(false)
 const catMenuOpen = ref(false)
+const countryMenuOpen = ref(false)
+const allCountries = ref([])
+const topCountries = computed(() => allCountries.value.slice(0, 10))
 
 // Computed properties for user
 const isLoggedIn = computed(() => !!appStore.user)
@@ -373,6 +430,21 @@ const fetchCategories = async () => {
   }
 }
 
+const fetchCountries = async () => {
+  try {
+    const response = await apiFetch('/api/public/countries')
+    if (response.ok) {
+      const data = await response.json()
+      const list = data.countries || data || []
+      allCountries.value = list.map(c => ({
+        ...c,
+        flag_url: c.iso_code ? `https://flagcdn.com/w40/${c.iso_code.toLowerCase()}.png` : null,
+        slug: (c.name_en || c.name || '').toLowerCase().replace(/\s+/g, '-'),
+      }))
+    }
+  } catch (_) {}
+}
+
 const fetchCurrentUser = async () => {
   try {
     const response = await fetch('/api/user', {
@@ -425,12 +497,32 @@ onMounted(() => {
   // Apply theme to root element
   document.documentElement.setAttribute('data-theme', appStore.theme)
   fetchCategories()
+  fetchCountries()
   fetchCurrentUser()
   document.addEventListener('click', handleClickOutside)
 })
 </script>
 
 <style>
+/* Countries Dropdown */
+.dropdown-menu-countries {
+  max-height: 400px;
+  overflow-y: auto;
+  min-width: 220px;
+}
+
+.dropdown-menu-countries .dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dropdown-item-more {
+  border-top: 1px solid var(--color-border, #e5e7eb);
+  color: var(--color-primary, #667eea) !important;
+  font-weight: 600;
+}
+
 /* Language Dropdown */
 .lang-dropdown {
   position: absolute;
