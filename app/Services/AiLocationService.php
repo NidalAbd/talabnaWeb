@@ -453,51 +453,129 @@ class AiLocationService
             $country->save();
         }
 
-        // Step 2: Translate city names in batches of 50 cities per locale
+        // Step 2: Translate city names — batch cities, ALL locales concurrently per batch
         $countryCities = cities::where('country_id', $country->id)->get();
-        $needsTranslation = [];
-
+        $localesNeeded = [];
         foreach ($activeLocales as $langName => $locale) {
-            if ($locale === 'en') continue; // English is source
-            $needsTranslation[$locale] = $langName;
+            if ($locale === 'en') continue;
+            $localesNeeded[$locale] = $langName;
         }
 
-        foreach ($needsTranslation as $locale => $langName) {
-            // Find cities missing this locale
-            $citiesNeedingTranslation = $countryCities->filter(function ($city) use ($locale) {
-                $name = $city->name;
-                return is_array($name) && empty($name[$locale]) && !empty($name['en']);
-            });
+        // Find cities that need ANY translation
+        $citiesNeedingWork = $countryCities->filter(function ($city) use ($localesNeeded) {
+            $name = $city->name;
+            if (!is_array($name) || empty($name['en'])) return false;
+            foreach ($localesNeeded as $locale => $langName) {
+                if (empty($name[$locale])) return true;
+            }
+            return false;
+        });
 
-            if ($citiesNeedingTranslation->isEmpty()) continue;
+        if ($citiesNeedingWork->isNotEmpty()) {
+            // Process 50 cities at a time, translate ALL locales concurrently
+            $cityBatches = $citiesNeedingWork->chunk(50);
 
-            // Process in batches of 50
-            $batches = $citiesNeedingTranslation->chunk(50);
-            foreach ($batches as $batch) {
-                $toTranslate = [];
-                foreach ($batch as $city) {
-                    $toTranslate["city_{$city->id}"] = $city->name['en'];
+            foreach ($cityBatches as $batchIndex => $cityBatch) {
+                // Build English names for this batch
+                $englishNames = [];
+                foreach ($cityBatch as $city) {
+                    $englishNames["city_{$city->id}"] = $city->name['en'];
                 }
 
-                $result = $this->translateBatch($toTranslate, $langName);
-                if (!$result) continue;
+                // Send concurrent requests for ALL locales at once
+                $localeResults = $this->translateConcurrent($englishNames, $localesNeeded);
 
-                foreach ($batch as $city) {
+                // Apply all translations
+                foreach ($cityBatch as $city) {
                     $key = "city_{$city->id}";
-                    if (isset($result[$key]) && !empty($result[$key])) {
-                        $name = $city->name;
-                        $name[$locale] = $result[$key];
+                    $name = $city->name;
+                    $changed = false;
+
+                    foreach ($localeResults as $locale => $translations) {
+                        if (isset($translations[$key]) && !empty($translations[$key])) {
+                            $name[$locale] = $translations[$key];
+                            $translated++;
+                            $changed = true;
+                        }
+                    }
+
+                    if ($changed) {
                         $city->name = $name;
                         $city->save();
-                        $translated++;
                     }
                 }
-            }
 
-            Log::info("Translated {$citiesNeedingTranslation->count()} cities to {$langName} for {$countryEnName}");
+                Log::info("Batch " . ($batchIndex + 1) . "/" . $cityBatches->count() . ": Translated " . $cityBatch->count() . " cities for {$countryEnName}");
+            }
         }
 
         return ['success' => true, 'translated' => $translated];
+    }
+
+    /**
+     * Translate a batch of texts to MULTIPLE languages concurrently using Http::pool().
+     * Sends up to 5 concurrent requests (one per locale).
+     *
+     * @param array $batch Key-value pairs to translate (e.g., ['city_1' => 'Gaza City', ...])
+     * @param array $locales ['locale' => 'Language Name', ...] (e.g., ['ar' => 'Arabic', 'tr' => 'Turkish'])
+     * @return array ['locale' => ['city_1' => 'translated', ...], ...]
+     */
+    protected function translateConcurrent(array $batch, array $locales): array
+    {
+        if (empty($batch) || empty($this->apiKey) || empty($locales)) return [];
+
+        $results = [];
+        $jsonInput = json_encode($batch, JSON_UNESCAPED_UNICODE);
+
+        // Process locales in groups of 5 (concurrent)
+        $localeChunks = array_chunk($locales, 5, true);
+
+        foreach ($localeChunks as $chunk) {
+            $responses = Http::pool(function ($pool) use ($chunk, $jsonInput) {
+                foreach ($chunk as $locale => $langName) {
+                    $prompt = "Translate these city/place names to {$langName}.\n"
+                        . "Use official/commonly accepted names. Keep JSON keys same.\n"
+                        . "Return ONLY JSON, no markdown.\n\n" . $jsonInput;
+
+                    $pool->as($locale)
+                        ->withHeaders([
+                            'Authorization' => 'Bearer ' . $this->apiKey,
+                            'Content-Type' => 'application/json',
+                        ])
+                        ->timeout(120)
+                        ->connectTimeout(30)
+                        ->post('https://api.openai.com/v1/chat/completions', [
+                            'model' => $this->model,
+                            'messages' => [
+                                ['role' => 'system', 'content' => 'You are a geography expert. Translate place names accurately. Return only valid JSON.'],
+                                ['role' => 'user', 'content' => $prompt],
+                            ],
+                            'temperature' => 0.2,
+                            'max_tokens' => 8192,
+                        ]);
+                }
+            });
+
+            foreach ($responses as $locale => $response) {
+                try {
+                    if ($response instanceof \Exception) continue;
+                    if (!$response->successful()) continue;
+
+                    $content = $response->json('choices.0.message.content', '');
+                    $content = preg_replace('/^```(?:json)?\s*\n?/m', '', $content);
+                    $content = preg_replace('/\n?```\s*$/m', '', $content);
+                    $parsed = json_decode(trim($content), true);
+
+                    if (json_last_error() === JSON_ERROR_NONE && is_array($parsed)) {
+                        $results[$locale] = $parsed;
+                    }
+                } catch (\Exception $e) {
+                    Log::error("Concurrent translation failed for {$locale}: " . $e->getMessage());
+                }
+            }
+        }
+
+        return $results;
     }
 
     /**
