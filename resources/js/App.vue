@@ -104,7 +104,7 @@
               data-auto_prompt="true"
               data-context="signin"
               data-ux_mode="popup"
-              data-auto_select="true"
+              data-auto_select="false"
               data-itp_support="true">
             </div>
             <div class="g_id_signin"
@@ -431,8 +431,10 @@ const handleGoogleCredential = async (response) => {
     const data = await res.json()
     if (data.success && data.user) {
       appStore.setUser(data.user)
-      // Reload to refresh session state
-      window.location.reload()
+      // Cancel One Tap prompt to prevent loop
+      if (window.google) {
+        window.google.accounts.id.cancel()
+      }
     } else {
       console.error('Google auth failed:', data.error)
       alert(data.error || 'Login failed')
@@ -454,8 +456,8 @@ const initGoogleOneTap = () => {
       window.google.accounts.id.initialize({
         client_id: googleClientId,
         callback: handleGoogleCredential,
-        auto_select: true,
-        cancel_on_tap_outside: false,
+        auto_select: false,
+        cancel_on_tap_outside: true,
       })
       // Render buttons
       const containers = document.querySelectorAll('.g_id_signin')
@@ -481,18 +483,19 @@ onMounted(() => {
   // Apply theme to root element
   document.documentElement.setAttribute('data-theme', appStore.theme)
   fetchCategories()
-  fetchCurrentUser()
-  document.addEventListener('click', handleClickOutside)
-
-  // Initialize Google One Tap after a short delay (wait for script to load)
-  const checkGoogle = setInterval(() => {
-    if (window.google) {
-      clearInterval(checkGoogle)
-      initGoogleOneTap()
+  fetchCurrentUser().then(() => {
+    // Only init Google One Tap after we know user auth state
+    if (!isLoggedIn.value) {
+      const checkGoogle = setInterval(() => {
+        if (window.google) {
+          clearInterval(checkGoogle)
+          initGoogleOneTap()
+        }
+      }, 500)
+      setTimeout(() => clearInterval(checkGoogle), 10000)
     }
-  }, 500)
-  // Stop checking after 10s
-  setTimeout(() => clearInterval(checkGoogle), 10000)
+  })
+  document.addEventListener('click', handleClickOutside)
 })
 </script>
 
