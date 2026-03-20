@@ -343,6 +343,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { t, initTranslations, loadTranslations } from '@/utils/translate'
+import { apiFetch } from '@/utils/api'
 
 const router = useRouter()
 const appStore = useAppStore()
