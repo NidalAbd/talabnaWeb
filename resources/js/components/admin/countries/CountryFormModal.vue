@@ -13,76 +13,45 @@
 
       <form @submit.prevent="handleSubmit">
         <div class="modal-body-advanced">
-          <!-- Language Tabs -->
-          <div class="tabs-container">
+          <!-- Language Tabs (all active languages) -->
+          <div class="tabs-container" style="flex-wrap: wrap;">
             <button
+              v-for="lang in languages"
+              :key="lang.code"
               type="button"
               class="tab-btn"
-              :class="{ active: activeTab === 'en' }"
-              @click="activeTab = 'en'"
+              :class="{ active: activeTab === lang.code }"
+              @click="activeTab = lang.code"
             >
-              English
-            </button>
-            <button
-              type="button"
-              class="tab-btn"
-              :class="{ active: activeTab === 'ar' }"
-              @click="activeTab = 'ar'"
-            >
-              Arabic
+              {{ lang.native_name || lang.name }}
+              <span v-if="formData.name[lang.code]" style="color: #10b981; margin-left: 4px;">&#10003;</span>
             </button>
           </div>
 
-          <!-- English Tab -->
-          <div v-show="activeTab === 'en'" class="tab-content">
+          <!-- Language Input (dynamic for each language) -->
+          <div v-for="lang in languages" :key="'input-'+lang.code" v-show="activeTab === lang.code" class="tab-content">
             <div class="form-group-modern">
               <label class="form-label-modern">
-                Country Name (English) <span class="required">*</span>
+                Country Name ({{ lang.name }}) <span v-if="lang.code === 'en'" class="required">*</span>
               </label>
               <input
-                v-model="formData.name.en"
+                v-model="formData.name[lang.code]"
                 type="text"
                 class="form-input-modern"
-                placeholder="Enter country name in English"
-                required
+                :placeholder="`Enter country name in ${lang.name}`"
+                :required="lang.code === 'en'"
+                :dir="rtlCodes.includes(lang.code) ? 'rtl' : 'ltr'"
               >
             </div>
 
             <div class="form-group-modern">
-              <label class="form-label-modern">Currency Name (English)</label>
+              <label class="form-label-modern">Currency Name ({{ lang.name }})</label>
               <input
-                v-model="formData.currency_name.en"
+                v-model="formData.currency_name[lang.code]"
                 type="text"
                 class="form-input-modern"
-                placeholder="Enter currency name in English"
-              >
-            </div>
-          </div>
-
-          <!-- Arabic Tab -->
-          <div v-show="activeTab === 'ar'" class="tab-content">
-            <div class="form-group-modern">
-              <label class="form-label-modern">
-                Country Name (Arabic) <span class="required">*</span>
-              </label>
-              <input
-                v-model="formData.name.ar"
-                type="text"
-                class="form-input-modern"
-                placeholder="أدخل اسم الدولة بالعربية"
-                required
-                dir="rtl"
-              >
-            </div>
-
-            <div class="form-group-modern">
-              <label class="form-label-modern">Currency Name (Arabic)</label>
-              <input
-                v-model="formData.currency_name.ar"
-                type="text"
-                class="form-input-modern"
-                placeholder="أدخل اسم العملة بالعربية"
-                dir="rtl"
+                :placeholder="`Enter currency name in ${lang.name}`"
+                :dir="rtlCodes.includes(lang.code) ? 'rtl' : 'ltr'"
               >
             </div>
           </div>
@@ -160,7 +129,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { useCountries } from '../../../composables/useCountries'
 
 const props = defineProps({
@@ -182,33 +151,69 @@ const errorMessage = ref('')
 const imagePreview = ref(null)
 const imageFile = ref(null)
 const originalCountryCode = ref('')
+const languages = ref([])
 
 const formData = ref({
-  name: {
-    en: '',
-    ar: ''
-  },
-  currency_name: {
-    en: '',
-    ar: ''
-  },
+  name: {},
+  currency_name: {},
   country_code: '',
   currency_code: ''
 })
 
-// Initialize form data when editing
+const rtlCodes = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'yi', 'sd']
+
+onMounted(async () => {
+  try {
+    const response = await fetch('/api/languages')
+    if (response.ok) {
+      const data = await response.json()
+      languages.value = data.languages || []
+    }
+  } catch (_) {}
+  if (languages.value.length === 0) {
+    languages.value = [
+      { code: 'ar', name: 'Arabic', native_name: 'العربية' },
+      { code: 'en', name: 'English', native_name: 'English' },
+    ]
+  }
+  // Init empty name fields
+  const nameObj = {}
+  const currObj = {}
+  for (const lang of languages.value) {
+    nameObj[lang.code] = formData.value.name[lang.code] || ''
+    currObj[lang.code] = formData.value.currency_name[lang.code] || ''
+  }
+  formData.value.name = { ...nameObj, ...formData.value.name }
+  formData.value.currency_name = { ...currObj, ...formData.value.currency_name }
+})
+
+// Initialize form data when editing — preserve ALL language translations
 watch(() => props.country, (newCountry) => {
   if (newCountry && props.mode === 'edit') {
     originalCountryCode.value = newCountry.country_code || ''
+
+    // Copy all existing name translations
+    const nameObj = {}
+    const currObj = {}
+    if (newCountry.name && typeof newCountry.name === 'object') {
+      for (const [key, value] of Object.entries(newCountry.name)) {
+        nameObj[key] = value || ''
+      }
+    }
+    if (newCountry.currency_name && typeof newCountry.currency_name === 'object') {
+      for (const [key, value] of Object.entries(newCountry.currency_name)) {
+        currObj[key] = value || ''
+      }
+    }
+    // Ensure all active languages have an entry
+    for (const lang of languages.value) {
+      if (!nameObj[lang.code]) nameObj[lang.code] = ''
+      if (!currObj[lang.code]) currObj[lang.code] = ''
+    }
+
     formData.value = {
-      name: {
-        en: newCountry.name?.en || '',
-        ar: newCountry.name?.ar || ''
-      },
-      currency_name: {
-        en: newCountry.currency_name?.en || '',
-        ar: newCountry.currency_name?.ar || ''
-      },
+      name: nameObj,
+      currency_name: currObj,
       country_code: newCountry.country_code || '',
       currency_code: newCountry.currency_code || ''
     }
@@ -245,9 +250,13 @@ const handleSubmit = async () => {
   try {
     const submitData = new FormData()
 
-    // Always include name fields
-    submitData.append('name[en]', formData.value.name.en || '')
-    submitData.append('name[ar]', formData.value.name.ar || '')
+    // Send all language translations for name and currency_name
+    for (const [locale, value] of Object.entries(formData.value.name)) {
+      if (value) submitData.append(`name[${locale}]`, value)
+    }
+    for (const [locale, value] of Object.entries(formData.value.currency_name)) {
+      if (value) submitData.append(`currency_name[${locale}]`, value)
+    }
 
     // Only include country_code if it has changed from original (for edit) or has value (for create)
     const newCountryCode = formData.value.country_code?.trim() || ''
@@ -268,8 +277,7 @@ const handleSubmit = async () => {
     }
 
     // Include currency name fields
-    submitData.append('currency_name[en]', formData.value.currency_name.en || '')
-    submitData.append('currency_name[ar]', formData.value.currency_name.ar || '')
+    // currency_name already sent above in the loop
 
     // Include flag if new one was uploaded
     if (imageFile.value) {
