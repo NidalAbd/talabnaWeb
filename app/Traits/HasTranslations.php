@@ -182,4 +182,33 @@ trait HasTranslations
     {
         return $query->orderByRaw("JSON_EXTRACT({$field}, '$.{$locale}') {$direction}");
     }
+
+    /**
+     * Override getAttribute to auto-translate translatable fields.
+     * When accessing $model->title, returns the translated string for current locale
+     * instead of the raw JSON array.
+     * Use $model->getRawOriginal('title') or $model->getAttributes()['title'] for raw data.
+     */
+    public function getAttribute($key)
+    {
+        $value = parent::getAttribute($key);
+        
+        // Only translate if field is in translatable list and value is an array
+        if (in_array($key, $this->getTranslatableFields()) && is_array($value)) {
+            return $this->translate($key);
+        }
+        
+        return $value;
+    }
+
+    /**
+     * Get the raw (untranslated) value of a translatable field.
+     * Returns the full JSON array with all locale translations.
+     */
+    public function getRawTranslations(string $field): ?array
+    {
+        $value = parent::getAttribute($field);
+        return is_array($value) ? $value : null;
+    }
+
 }

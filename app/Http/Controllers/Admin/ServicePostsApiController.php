@@ -11,6 +11,17 @@ use Illuminate\Http\Request;
 
 class ServicePostsApiController extends Controller
 {
+
+    private function localizedName($nameField): string
+    {
+        if (is_string($nameField)) return $nameField;
+        if (is_array($nameField)) {
+            $locale = app()->getLocale();
+            return $nameField[$locale] ?? $nameField['ar'] ?? $nameField['en'] ?? array_values(array_filter($nameField))[0] ?? '';
+        }
+        return '';
+    }
+
     /**
      * Get paginated service posts with filters
      */
@@ -73,8 +84,8 @@ class ServicePostsApiController extends Controller
             $transformedPosts = $servicePosts->getCollection()->map(function ($post) {
                 return [
                     'id' => $post->id,
-                    'title' => $post->title,
-                    'description' => $post->description,
+                    'title' => $post->translate('title') ?? $this->localizedName($post->title),
+                    'description' => $post->translate('description') ?? $this->localizedName($post->description),
                     'price' => $post->price,
                     'price_currency_code' => $post->price_currency_code,
                     'type' => $post->type,
@@ -88,19 +99,19 @@ class ServicePostsApiController extends Controller
                     ] : null,
                     'category' => $post->category ? [
                         'id' => $post->category->id,
-                        'name' => $post->category->name,
+                        'name' => $this->localizedName($post->category->name),
                     ] : null,
                     'sub_category' => $post->subCategory ? [
                         'id' => $post->subCategory->id,
-                        'name' => $post->subCategory->name,
+                        'name' => $this->localizedName($post->subCategory->name),
                     ] : null,
                     'country' => $post->country ? [
                         'id' => $post->country->id,
-                        'name' => $post->country->name,
+                        'name' => $this->localizedName($post->country->name),
                     ] : null,
                     'city' => $post->city ? [
                         'id' => $post->city->id,
-                        'name' => $post->city->name,
+                        'name' => $this->localizedName($post->city->name),
                     ] : null,
                     'media' => $post->photos->first() ? [
                         'src' => $post->photos->first()->src,
