@@ -13,55 +13,34 @@
 
       <form @submit.prevent="handleSubmit">
         <div class="modal-body-advanced">
-          <!-- Language Tabs -->
-          <div class="tabs-container">
+          <!-- Language Tabs (all active languages) -->
+          <div class="tabs-container" style="flex-wrap: wrap;">
             <button
+              v-for="lang in languages"
+              :key="lang.code"
               type="button"
               class="tab-btn"
-              :class="{ active: activeTab === 'en' }"
-              @click="activeTab = 'en'"
+              :class="{ active: activeTab === lang.code }"
+              @click="activeTab = lang.code"
             >
-              English
-            </button>
-            <button
-              type="button"
-              class="tab-btn"
-              :class="{ active: activeTab === 'ar' }"
-              @click="activeTab = 'ar'"
-            >
-              Arabic
+              {{ lang.native_name || lang.name }}
+              <span v-if="formData.name[lang.code]" style="color: #10b981; margin-left: 4px;">&#10003;</span>
             </button>
           </div>
 
-          <!-- English Tab -->
-          <div v-show="activeTab === 'en'" class="tab-content">
+          <!-- Language Input (dynamic for each language) -->
+          <div v-for="lang in languages" :key="'input-'+lang.code" v-show="activeTab === lang.code" class="tab-content">
             <div class="form-group-modern">
               <label class="form-label-modern">
-                City Name (English) <span class="required">*</span>
+                City Name ({{ lang.name }}) <span v-if="lang.code === 'en'" class="required">*</span>
               </label>
               <input
-                v-model="formData.name.en"
+                v-model="formData.name[lang.code]"
                 type="text"
                 class="form-input-modern"
-                placeholder="Enter city name in English"
-                required
-              >
-            </div>
-          </div>
-
-          <!-- Arabic Tab -->
-          <div v-show="activeTab === 'ar'" class="tab-content">
-            <div class="form-group-modern">
-              <label class="form-label-modern">
-                City Name (Arabic) <span class="required">*</span>
-              </label>
-              <input
-                v-model="formData.name.ar"
-                type="text"
-                class="form-input-modern"
-                placeholder="أدخل اسم المدينة بالعربية"
-                required
-                dir="rtl"
+                :placeholder="`Enter city name in ${lang.name}`"
+                :required="lang.code === 'en'"
+                :dir="['ar','he','fa','ur','ps','ku','yi','sd'].includes(lang.code) ? 'rtl' : 'ltr'"
               >
             </div>
           </div>
@@ -150,18 +129,40 @@ const errorMessage = ref('')
 const imagePreview = ref(null)
 const imageFile = ref(null)
 const countries = ref([])
+const languages = ref([])
 
 const formData = ref({
-  name: {
-    en: '',
-    ar: ''
-  },
+  name: {},
   country_id: ''
 })
 
 onMounted(async () => {
+  await loadLanguages()
   await loadCountries()
 })
+
+const loadLanguages = async () => {
+  try {
+    const response = await fetch('/api/languages')
+    if (response.ok) {
+      const data = await response.json()
+      languages.value = data.languages || []
+      // Initialize empty name fields for each language
+      const nameObj = {}
+      for (const lang of languages.value) {
+        nameObj[lang.code] = ''
+      }
+      formData.value.name = nameObj
+    }
+  } catch (_) {
+    // Fallback to ar+en
+    languages.value = [
+      { code: 'ar', name: 'Arabic', native_name: 'العربية' },
+      { code: 'en', name: 'English', native_name: 'English' },
+    ]
+    formData.value.name = { ar: '', en: '' }
+  }
+}
 
 const loadCountries = async () => {
   try {
@@ -173,14 +174,24 @@ const loadCountries = async () => {
   }
 }
 
-// Initialize form data when editing
+// Initialize form data when editing — preserve ALL language translations
 watch(() => props.city, (newCity) => {
   if (newCity && props.mode === 'edit') {
+    const nameObj = {}
+    // Copy all existing translations from the city
+    if (newCity.name && typeof newCity.name === 'object') {
+      for (const [key, value] of Object.entries(newCity.name)) {
+        nameObj[key] = value || ''
+      }
+    }
+    // Ensure all active languages have an entry
+    for (const lang of languages.value) {
+      if (!nameObj[lang.code]) {
+        nameObj[lang.code] = ''
+      }
+    }
     formData.value = {
-      name: {
-        en: newCity.name?.en || '',
-        ar: newCity.name?.ar || ''
-      },
+      name: nameObj,
       country_id: newCity.country_id || ''
     }
 
@@ -213,8 +224,12 @@ const handleSubmit = async () => {
 
   try {
     const submitData = new FormData()
-    submitData.append('name[en]', formData.value.name.en)
-    submitData.append('name[ar]', formData.value.name.ar)
+    // Send all language translations
+    for (const [locale, value] of Object.entries(formData.value.name)) {
+      if (value) {
+        submitData.append(`name[${locale}]`, value)
+      }
+    }
     submitData.append('country_id', formData.value.country_id)
 
     if (imageFile.value) {
