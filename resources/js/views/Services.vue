@@ -133,7 +133,7 @@
       <!-- Grid View -->
       <div v-else-if="viewMode === 'grid'" class="row">
         <div v-for="listing in listings" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <listing-card :listing="listing" :locale="isArabic ? 'ar' : 'en'" />
+          <listing-card :listing="listing" :locale="appStore.locale" />
         </div>
       </div>
 

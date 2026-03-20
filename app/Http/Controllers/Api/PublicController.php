@@ -903,19 +903,38 @@ class PublicController extends Controller
             $title = $listing->translate('title', $locale) ?? $listing->translate('title') ?? '';
             $desc = $listing->translate('description', $locale) ?? $listing->translate('description') ?? '';
 
+            $firstPhoto = $listing->photos->first();
+            $imageUrl = null;
+            if ($firstPhoto) {
+                $imageUrl = $firstPhoto->is_external
+                    ? $firstPhoto->src
+                    : '/' . ltrim($firstPhoto->src, '/');
+            }
+
             return [
                 'id' => $listing->id,
                 'title' => $title,
                 'description' => \Str::limit($desc, 100),
                 'price' => $listing->price,
+                'price_currency_code' => $listing->price_currency_code,
                 'currency' => $listing->price_currency_code,
-                'image' => $listing->photos->first()
-                    ? ($listing->photos->first()->is_external
-                        ? $listing->photos->first()->src
-                        : '/' . ltrim($listing->photos->first()->src, '/'))
-                    : null,
+                'image' => $imageUrl,
+                'photos' => $listing->photos->toArray(),
+                'category' => $listing->category ? [
+                    'id' => $listing->category->id,
+                    'name' => $this->getLocalizedName($listing->category->name, 'ar'),
+                    'name_en' => $this->getLocalizedName($listing->category->name, 'en'),
+                    'name_localized' => $this->getLocalizedName($listing->category->name, $locale),
+                ] : null,
+                'city' => $listing->city ? [
+                    'name' => $cityName,
+                    'name_localized' => $cityName[$locale] ?? $cityName['ar'] ?? '',
+                ] : null,
                 'city_name' => $cityName ? ($cityName[$locale] ?? $cityName['ar'] ?? '') : '',
+                'have_badge' => $listing->have_badge,
                 'badge' => $listing->have_badge !== 'عادي' ? $listing->have_badge : null,
+                'view_count' => $listing->view_count ?? 0,
+                'favorites_count' => $listing->favorites_count ?? 0,
                 'created_at' => $listing->created_at->toIso8601String(),
             ];
         });
