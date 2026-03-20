@@ -147,12 +147,16 @@ const loadLanguages = async () => {
     if (response.ok) {
       const data = await response.json()
       languages.value = data.languages || []
-      // Initialize empty name fields for each language
+      // Initialize name fields, preserving existing data
       const nameObj = {}
       for (const lang of languages.value) {
-        nameObj[lang.code] = ''
+        nameObj[lang.code] = formData.value.name[lang.code] || ''
       }
       formData.value.name = nameObj
+      // Re-apply city data after languages loaded (edit mode)
+      if (props.city && props.mode === 'edit') {
+        applyCityData(props.city)
+      }
     }
   } catch (_) {
     // Fallback to ar+en
@@ -174,30 +178,32 @@ const loadCountries = async () => {
   }
 }
 
-// Initialize form data when editing — preserve ALL language translations
+const applyCityData = (city) => {
+  if (!city) return
+  const nameObj = {}
+  if (city.name && typeof city.name === 'object') {
+    for (const [key, value] of Object.entries(city.name)) {
+      nameObj[key] = value || ''
+    }
+  }
+  for (const lang of languages.value) {
+    if (!nameObj[lang.code]) {
+      nameObj[lang.code] = ''
+    }
+  }
+  formData.value = {
+    name: nameObj,
+    country_id: city.country_id || ''
+  }
+  if (city.image_url) {
+    imagePreview.value = '/storage/' + city.image_url
+  }
+}
+
+// Initialize form data when editing
 watch(() => props.city, (newCity) => {
   if (newCity && props.mode === 'edit') {
-    const nameObj = {}
-    // Copy all existing translations from the city
-    if (newCity.name && typeof newCity.name === 'object') {
-      for (const [key, value] of Object.entries(newCity.name)) {
-        nameObj[key] = value || ''
-      }
-    }
-    // Ensure all active languages have an entry
-    for (const lang of languages.value) {
-      if (!nameObj[lang.code]) {
-        nameObj[lang.code] = ''
-      }
-    }
-    formData.value = {
-      name: nameObj,
-      country_id: newCity.country_id || ''
-    }
-
-    if (newCity.image_url) {
-      imagePreview.value = `/storage/${newCity.image_url}`
-    }
+    applyCityData(newCity)
   }
 }, { immediate: true })
 
