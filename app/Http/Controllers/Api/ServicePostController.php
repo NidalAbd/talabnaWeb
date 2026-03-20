@@ -969,14 +969,29 @@ class ServicePostController extends Controller
     public function getCities(Request $request): JsonResponse
     {
         try {
-            $cities = cities::query();
+            $countryId = $request->has('country_id') ? (int) $request->country_id : null;
+            $locale = app()->getLocale();
 
-            // Filter by country if provided
-            if ($request->has('country_id') && is_numeric($request->country_id)) {
-                $cities->where('country_id', (int)$request->country_id);
-            }
+            $cacheKey = "cities_list_{$countryId}_{$locale}";
+            $cities = Cache::remember($cacheKey, 3600, function () use ($countryId, $locale) {
+                $query = cities::query();
 
-            $cities = $cities->orderBy('name->en')->get();
+                if ($countryId) {
+                    $query->where('country_id', $countryId);
+                }
+
+                return $query->orderBy('name->en')->get()->map(function ($city) use ($locale) {
+                    $name = $city->name;
+                    $nameLocalized = is_array($name) ? ($name[$locale] ?? $name['en'] ?? $name['ar'] ?? '') : $name;
+                    return [
+                        'id' => $city->id,
+                        'name' => is_array($name) ? ($name['ar'] ?? '') : $name,
+                        'name_en' => is_array($name) ? ($name['en'] ?? '') : $name,
+                        'name_localized' => $nameLocalized,
+                        'country_id' => $city->country_id,
+                    ];
+                });
+            });
 
             return response()->json([
                 'data' => $cities
