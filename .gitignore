@@ -1,4 +1,6 @@
-﻿.env.backup
+﻿.env
+.env.backup
+.env.production
 *.log
 hot
 /public/storage
