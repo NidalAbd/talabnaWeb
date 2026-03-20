@@ -138,7 +138,7 @@
 
     <!-- Browse by Location -->
     <section class="section-locations py-12" id="locations">
-      <div class="container-fluid px-4 px-md-5">
+      <div class="container">
         <div class="section-header">
           <div>
             <h2 class="section-title">{{ locale === 'ar' ? 'تصفح حسب الموقع' : 'Browse by Location' }}</h2>
@@ -146,7 +146,7 @@
           </div>
         </div>
         <div class="row" v-if="!loadingLocations">
-          <div v-for="country in countries" :key="country.id" class="col-4 col-sm-3 col-md-2 col-lg-1-custom mb-3">
+          <div v-for="country in countries" :key="country.id" class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
             <router-link :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
               <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="80" class="img-cover location-flag-img" style="height: 80px; width: 100%;" @error="handleImgError($event)">
               <div class="location-info">
@@ -486,11 +486,6 @@ onMounted(() => {
 .cat-icon { width: 52px; height: 52px; border-radius: 14px; display: flex; align-items: center; justify-content: center; margin-bottom: 0.75rem; }
 .category-card-home h5 { font-size: 0.9rem; font-weight: 600; margin: 0 0 0.25rem; color: rgb(var(--v-theme-on-surface)); }
 .cat-count { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.5); }
-
-/* Location Grid - full width */
-.col-lg-1-custom { flex: 0 0 auto; width: 14.285%; } /* 7 per row on large */
-@media (min-width: 1400px) { .col-lg-1-custom { width: 10%; } } /* 10 per row on xl */
-@media (max-width: 575px) { .col-4 { padding-left: 4px; padding-right: 4px; } }
 
 /* Location Cards */
 .location-card-home {
