@@ -912,7 +912,7 @@ class PublicController extends Controller
                 'image' => $listing->photos->first()
                     ? ($listing->photos->first()->is_external
                         ? $listing->photos->first()->src
-                        : '/storage/' . $listing->photos->first()->src)
+                        : '/' . ltrim($listing->photos->first()->src, '/'))
                     : null,
                 'city_name' => $cityName ? ($cityName[$locale] ?? $cityName['ar'] ?? '') : '',
                 'badge' => $listing->have_badge !== 'عادي' ? $listing->have_badge : null,
