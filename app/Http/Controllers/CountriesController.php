@@ -221,13 +221,27 @@ class CountriesController extends Controller
 
     public function CountriesSelected($countries): JsonResponse
     {
-        $cities = cities::where('country_id', $countries)->get();
+        $locale = app()->getLocale();
+        $cities = cities::where('country_id', $countries)->get()->map(function ($city) use ($locale) {
+            $name = $city->name;
+            $nameLocalized = is_array($name) ? ($name[$locale] ?? $name['en'] ?? $name['ar'] ?? '') : $name;
+            $arr = $city->toArray();
+            $arr['name_localized'] = $nameLocalized;
+            return $arr;
+        });
         return response()->json(['cities' => $cities]);
     }
 
     public function countryList(): JsonResponse
     {
-        $countries = countries::all();
+        $locale = app()->getLocale();
+        $countries = countries::all()->map(function ($country) use ($locale) {
+            $name = $country->name;
+            $nameLocalized = is_array($name) ? ($name[$locale] ?? $name['en'] ?? $name['ar'] ?? '') : $name;
+            $arr = $country->toArray();
+            $arr['name_localized'] = $nameLocalized;
+            return $arr;
+        });
         return response()->json(compact('countries'));
     }
 }
