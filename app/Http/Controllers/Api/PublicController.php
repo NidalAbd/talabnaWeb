@@ -48,6 +48,12 @@ class PublicController extends Controller
      * Get localized name from a JSON name field.
      * Returns the name in the current app locale with fallbacks.
      */
+    private function localizedNameFor($name, string $locale): string
+    {
+        $decoded = $this->decodeName($name);
+        return $decoded[$locale] ?? $decoded['en'] ?? $decoded['ar'] ?? array_values(array_filter($decoded))[0] ?? '';
+    }
+
     private function localizedName($name): string
     {
         $locale = app()->getLocale();
@@ -922,9 +928,9 @@ class PublicController extends Controller
                 'photos' => $listing->photos->toArray(),
                 'category' => $listing->category ? [
                     'id' => $listing->category->id,
-                    'name' => $this->getLocalizedName($listing->category->name, 'ar'),
-                    'name_en' => $this->getLocalizedName($listing->category->name, 'en'),
-                    'name_localized' => $this->getLocalizedName($listing->category->name, $locale),
+                    'name' => $this->localizedNameFor($listing->category->name, 'ar'),
+                    'name_en' => $this->localizedNameFor($listing->category->name, 'en'),
+                    'name_localized' => $this->localizedNameFor($listing->category->name, $locale),
                 ] : null,
                 'city' => $listing->city ? [
                     'name' => $cityName,
