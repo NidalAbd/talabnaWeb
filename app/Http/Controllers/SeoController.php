@@ -133,33 +133,30 @@ class SeoController extends Controller
 
         if (!$listing) return $seo;
 
+        $title = $listing->translate('title', $locale) ?? $listing->translate('title') ?? '';
+        $description = $listing->translate('description', $locale) ?? $listing->translate('description') ?? '';
         $cityName = $this->getLocalizedName($listing->city?->name, $locale);
         $countryName = $this->getLocalizedName($listing->country?->name, $locale);
         $categoryName = $this->getLocalizedName($listing->category?->name, $locale);
         $location = $cityName ? "$cityName, $countryName" : $countryName;
 
         // Title with location and category
-        $seo['title'] = $locale === 'ar'
-            ? "{$listing->title} | {$categoryName} في {$location} - طلبنا"
-            : "{$listing->title} | {$categoryName} in {$location} - Talabna";
+        $seo['title'] = "{$title} | {$categoryName} - {$location} - Talabna";
 
         // Rich description
-        $seo['description'] = $locale === 'ar'
-            ? mb_substr(strip_tags($listing->description), 0, 155) . "... | السعر: {$listing->price} {$listing->price_currency_code} | الموقع: {$location}"
-            : mb_substr(strip_tags($listing->description), 0, 155) . "... | Price: {$listing->price} {$listing->price_currency_code} | Location: {$location}";
+        $descExcerpt = mb_substr(strip_tags($description), 0, 155);
+        $seo['description'] = "{$descExcerpt}... | {$listing->price} {$listing->price_currency_code} | {$location}";
 
         // Keywords
-        $seo['keywords'] = implode(', ', [
-            $listing->title,
+        $seo['keywords'] = implode(', ', array_filter([
+            $title,
             $categoryName,
             $cityName,
             $countryName,
-            $locale === 'ar' ? 'للبيع' : 'for sale',
-            $locale === 'ar' ? 'إعلان' : 'ad'
-        ]);
+        ]));
 
         // Canonical URL
-        $slug = $this->slugify($listing->title);
+        $slug = $this->slugify($title);
         $seo['canonical'] = "{$baseUrl}/listing/{$id}/{$slug}";
 
         // Open Graph
@@ -187,8 +184,8 @@ class SeoController extends Controller
         $seo['jsonLd'][] = [
             '@context' => 'https://schema.org',
             '@type' => 'Product',
-            'name' => $listing->title,
-            'description' => mb_substr(strip_tags($listing->description), 0, 500),
+            'name' => $title,
+            'description' => mb_substr(strip_tags($description), 0, 500),
             'image' => $seo['og']['image'],
             'sku' => 'TLB-' . $listing->id,
             'mpn' => 'TLB' . str_pad($listing->id, 8, '0', STR_PAD_LEFT),
@@ -301,7 +298,7 @@ class SeoController extends Controller
                 [
                     '@type' => 'ListItem',
                     'position' => 3,
-                    'name' => $listing->title,
+                    'name' => $title,
                     'item' => $seo['canonical'],
                 ],
             ],
@@ -309,9 +306,9 @@ class SeoController extends Controller
 
         // Breadcrumbs for Vue
         $seo['breadcrumbs'] = [
-            ['title' => $locale === 'ar' ? 'الرئيسية' : 'Home', 'href' => '/'],
-            ['title' => $categoryName, 'href' => "/category/{$listing->categories_id}"],
-            ['title' => $listing->title, 'href' => null],
+            ['name' => 'Talabna', 'url' => $baseUrl],
+            ['name' => $categoryName, 'url' => "{$baseUrl}/category/{$listing->categories_id}"],
+            ['name' => $title, 'url' => $seo['canonical']],
         ];
 
         return $seo;
