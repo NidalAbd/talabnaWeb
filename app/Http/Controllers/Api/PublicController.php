@@ -936,7 +936,7 @@ class PublicController extends Controller
                     'name' => $cityName,
                     'name_localized' => $cityName[$locale] ?? $cityName['ar'] ?? '',
                 ] : null,
-                'city_name' => $cityName ? ($cityName[$locale] ?? $cityName['ar'] ?? '') : '',
+                'city_name' => $cityName ? ($cityName[$locale] ?? $cityName['en'] ?? $cityName['ar'] ?? '') : '',
                 'have_badge' => $listing->have_badge,
                 'badge' => $listing->have_badge !== 'عادي' ? $listing->have_badge : null,
                 'view_count' => $listing->view_count ?? 0,
@@ -961,14 +961,14 @@ class PublicController extends Controller
                 }])
                 ->having('service_posts_count', '>', 0)
                 ->orderByDesc('service_posts_count')
-                ->limit(20)
+                ->limit(10)
                 ->get();
 
             foreach ($citiesData as $city) {
                 $cityName = $this->decodeName($city->name);
                 $subLocations[] = [
                     'id' => $city->id,
-                    'name' => $cityName[$locale] ?? $cityName['ar'] ?? '',
+                    'name' => $cityName[$locale] ?? $cityName['en'] ?? $cityName['ar'] ?? array_values(array_filter($cityName))[0] ?? '',
                     'count' => $city->service_posts_count,
                     'icon' => 'mdi-city',
                     'color' => 'success',
