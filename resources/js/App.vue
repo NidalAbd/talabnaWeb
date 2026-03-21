@@ -101,7 +101,7 @@
             <div id="g_id_onload"
               :data-client_id="googleClientId"
               data-callback="handleGoogleCredential"
-              data-auto_prompt="true"
+              data-auto_prompt="false"
               data-context="signin"
               data-ux_mode="popup"
               data-auto_select="false"
@@ -484,8 +484,8 @@ onMounted(() => {
   document.documentElement.setAttribute('data-theme', appStore.theme)
   fetchCategories()
   fetchCurrentUser().then(() => {
-    // Only init Google One Tap after we know user auth state
     if (!isLoggedIn.value) {
+      // Only init Google One Tap if not logged in
       const checkGoogle = setInterval(() => {
         if (window.google) {
           clearInterval(checkGoogle)
@@ -493,6 +493,15 @@ onMounted(() => {
         }
       }, 500)
       setTimeout(() => clearInterval(checkGoogle), 10000)
+    } else {
+      // User is logged in - cancel any One Tap prompt
+      const checkGoogle2 = setInterval(() => {
+        if (window.google) {
+          clearInterval(checkGoogle2)
+          window.google.accounts.id.cancel()
+        }
+      }, 500)
+      setTimeout(() => clearInterval(checkGoogle2), 5000)
     }
   })
   document.addEventListener('click', handleClickOutside)
