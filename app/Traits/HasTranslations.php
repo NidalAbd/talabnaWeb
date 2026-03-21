@@ -136,13 +136,16 @@ trait HasTranslations
         $locale = App::getLocale();
 
         foreach ($this->getTranslatableFields() as $field) {
-            $rawValue = $this->getAttribute($field);
+            // Use parent::getAttribute to get raw array (bypasses our auto-translate)
+            $rawValue = parent::getAttribute($field);
 
-            // Store all translations under a nested key for frontend editing
             if (is_array($rawValue)) {
+                // Store all translations under a nested key for frontend editing
                 $array['translations'][$field] = $rawValue;
-                // Resolve to current locale for display
-                $array[$field] = $this->translate($field, $locale);
+                // Resolve to current locale string for display
+                $array[$field] = $rawValue[$locale] 
+                    ?? $rawValue[config('app.fallback_locale', 'ar')] 
+                    ?? (!empty($rawValue) ? array_values(array_filter($rawValue))[0] ?? null : null);
             }
         }
 
@@ -191,14 +194,24 @@ trait HasTranslations
      */
     public function getAttribute($key)
     {
-        $value = parent::getAttribute($key);
-        
-        // Only translate if field is in translatable list and value is an array
-        if (in_array($key, $this->getTranslatableFields()) && is_array($value)) {
-            return $this->translate($key);
+        // Only auto-translate translatable fields
+        if (in_array($key, $this->getTranslatableFields())) {
+            $value = parent::getAttribute($key);
+            if (is_array($value)) {
+                $locale = \Illuminate\Support\Facades\App::getLocale();
+                if (isset($value[$locale]) && !empty($value[$locale])) {
+                    return $value[$locale];
+                }
+                $defaultLocale = config('app.fallback_locale', 'ar');
+                if (isset($value[$defaultLocale]) && !empty($value[$defaultLocale])) {
+                    return $value[$defaultLocale];
+                }
+                return !empty($value) ? array_values(array_filter($value))[0] ?? null : null;
+            }
+            return $value;
         }
         
-        return $value;
+        return parent::getAttribute($key);
     }
 
     /**
