@@ -258,7 +258,7 @@ class ServicePostsApiController extends Controller
                     ] : null,
                     'photos' => $post->photos->map(fn($p) => [
                         'id' => $p->id,
-                        'src' => $p->is_external ? $p->src : '/storage/' . ltrim($p->src, '/'),
+                        'src' => $p->src,
                         'is_external' => (bool) $p->is_external,
                         'is_video' => (bool) $p->isVideo,
                     ]),
