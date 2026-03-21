@@ -69,6 +69,41 @@
               :dir="['ar','he','fa','ur','ps','ku'].includes(locale) ? 'rtl' : 'ltr'"></textarea>
           </div>
 
+          <!-- Badge Management -->
+          <div class="section-header mt-4">
+            <label class="form-label-bold">Badge (Admin Only)</label>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Badge Type</label>
+              <select v-model="badgeForm.badge_type_id" class="form-input">
+                <option v-for="bt in badgeTypes" :key="bt.id" :value="bt.id">
+                  {{ bt.name_en || bt.name_ar }} ({{ bt.slug }})
+                </option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Duration</label>
+              <select v-model="badgeForm.duration" class="form-input">
+                <option value="1">1 Day</option>
+                <option value="3">3 Days</option>
+                <option value="7">7 Days</option>
+                <option value="14">14 Days</option>
+                <option value="30">30 Days</option>
+                <option value="90">90 Days</option>
+                <option value="365">1 Year</option>
+                <option value="unlimited">Unlimited</option>
+              </select>
+            </div>
+            <div class="form-group" style="justify-content: flex-end;">
+              <button type="button" class="btn-action badge-btn" @click="applyBadge" :disabled="applyingBadge">
+                <i :class="applyingBadge ? 'fas fa-spinner fa-spin' : 'fas fa-award'"></i>
+                {{ applyingBadge ? 'Applying...' : 'Apply Badge' }}
+              </button>
+            </div>
+          </div>
+          <div v-if="badgeMessage" class="success-msg mt-2"><i class="fas fa-check-circle"></i> {{ badgeMessage }}</div>
+
           <!-- Category -->
           <div class="form-row mt-4">
             <div class="form-group">
@@ -133,6 +168,14 @@ const activeTab = ref('ar')
 const descTab = ref('ar')
 const categories = ref([])
 const subcategories = ref([])
+const badgeTypes = ref([])
+const applyingBadge = ref(false)
+const badgeMessage = ref('')
+
+const badgeForm = reactive({
+  badge_type_id: null,
+  duration: '7',
+})
 
 const form = reactive({
   title: {},
@@ -150,6 +193,26 @@ const getLocalName = (name) => {
   if (typeof name === 'string') return name
   if (typeof name === 'object') return name.ar || name.en || Object.values(name)[0] || ''
   return ''
+}
+
+const applyBadge = async () => {
+  if (!badgeForm.badge_type_id) return
+  applyingBadge.value = true
+  badgeMessage.value = ''
+  try {
+    const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content
+    const res = await fetch(`/api/admin/service-posts/${props.postId}/change-badge`, {
+      method: 'POST',
+      headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRF-TOKEN': csrfToken, 'X-Requested-With': 'XMLHttpRequest' },
+      credentials: 'same-origin',
+      body: JSON.stringify(badgeForm),
+    })
+    const data = await res.json()
+    if (!res.ok) throw new Error(data.error || 'Failed')
+    badgeMessage.value = data.message
+    emit('saved')
+  } catch (e) { saveError.value = e.message }
+  finally { applyingBadge.value = false }
 }
 
 const loadSubcategories = async () => {
@@ -201,15 +264,25 @@ const savePost = async () => {
 onMounted(async () => {
   try {
     // Load post + categories in parallel
-    const [postRes, catRes] = await Promise.all([
+    const [postRes, catRes, badgeRes] = await Promise.all([
       fetch(`/api/admin/service-posts/${props.postId}`),
       fetch('/api/admin/service-posts/categories'),
+      fetch('/api/admin/badge-types'),
     ])
     const postData = await postRes.json()
     const catData = await catRes.json()
+    const badgeData = await badgeRes.json()
 
     post.value = postData.post
     categories.value = catData.categories || []
+    badgeTypes.value = badgeData.badge_types || badgeData.data || []
+
+    // Set current badge
+    if (postData.post.badge_type_id) {
+      badgeForm.badge_type_id = postData.post.badge_type_id
+    } else if (badgeTypes.value.length) {
+      badgeForm.badge_type_id = badgeTypes.value[0].id
+    }
 
     // Populate form
     const p = postData.post
@@ -267,4 +340,6 @@ onMounted(async () => {
 .btn-action.save { background: linear-gradient(135deg, #f093fb, #f5576c); color: white; }
 .btn-action.save:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,87,108,0.4); }
 .btn-action:disabled { opacity: 0.6; cursor: not-allowed; }
+.btn-action.badge-btn { background: linear-gradient(135deg, #f5af19, #f12711); color: white; padding: 0.5rem 1rem; font-size: 0.85rem; }
+.btn-action.badge-btn:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(245,175,25,0.4); }
 </style>

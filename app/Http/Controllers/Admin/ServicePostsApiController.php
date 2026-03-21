@@ -319,6 +319,52 @@ class ServicePostsApiController extends Controller
         }
     }
 
+
+    /**
+     * Admin: Change post badge type and duration (including unlimited)
+     */
+    public function changeBadge(Request $request, $id): JsonResponse
+    {
+        try {
+            $post = ServicePost::findOrFail($id);
+
+            $validated = $request->validate([
+                'badge_type_id' => 'required|integer|exists:badge_types,id',
+                'duration' => 'required',
+            ]);
+
+            $badgeType = \App\Models\BadgeType::findOrFail($validated['badge_type_id']);
+            $duration = $validated['duration'];
+
+            $post->badge_type_id = $badgeType->id;
+            $post->have_badge = $badgeType->slug ?? $badgeType->name_ar ?? $badgeType->name;
+
+            if ($duration === 'unlimited' || $duration === 0 || $duration === '0') {
+                $post->badge_duration = 36500;
+                $post->badge_expires_at = now()->addYears(100);
+            } else {
+                $days = (int) $duration;
+                $post->badge_duration = $days;
+                $post->badge_expires_at = now()->addDays($days);
+            }
+
+            $post->save();
+
+            return response()->json([
+                'message' => "Badge changed to {$badgeType->name_en}",
+                'post' => [
+                    'id' => $post->id,
+                    'have_badge' => $post->have_badge,
+                    'badge_type_id' => $post->badge_type_id,
+                    'badge_duration' => $post->badge_duration,
+                    'badge_expires_at' => $post->badge_expires_at?->toISOString(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to change badge', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     /**
      * Delete a service post
      */

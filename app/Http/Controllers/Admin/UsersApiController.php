@@ -335,4 +335,40 @@ class UsersApiController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Admin: Add/deduct points for a user
+     */
+    public function adjustPoints(Request $request, $id): \Illuminate\Http\JsonResponse
+    {
+        try {
+            $user = \App\Models\User::findOrFail($id);
+
+            $validated = $request->validate([
+                'amount' => 'required|integer',
+                'reason' => 'nullable|string|max:255',
+            ]);
+
+            $amount = $validated['amount'];
+            $reason = $validated['reason'] ?? ($amount > 0 ? 'Admin added points' : 'Admin deducted points');
+
+            \App\Models\palservice_points::create([
+                'user_id' => $user->id,
+                'point' => $amount,
+                'name' => $reason,
+                'price' => 0,
+                'points' => abs($amount),
+            ]);
+
+            $newBalance = \App\Models\palservice_points::where('user_id', $user->id)->sum('point');
+
+            return response()->json([
+                'message' => ($amount > 0 ? 'Added' : 'Deducted') . ' ' . abs($amount) . ' points. New balance: ' . $newBalance,
+                'balance' => $newBalance,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to adjust points', 'message' => $e->getMessage()], 500);
+        }
+    }
+
 }

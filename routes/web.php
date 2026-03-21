@@ -684,6 +684,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/users/{id}', [\App\Http\Controllers\Admin\UsersApiController::class, 'show'])->name('api.admin.users.show');
             Route::put('/users/{id}', [\App\Http\Controllers\Admin\UsersApiController::class, 'update'])->name('api.admin.users.update');
             Route::post('/users/{id}/toggle-ban', [\App\Http\Controllers\Admin\UsersApiController::class, 'toggleBan'])->name('api.admin.users.toggle-ban');
+            Route::post('/users/{id}/adjust-points', [\App\Http\Controllers\Admin\UsersApiController::class, 'adjustPoints'])->name('api.admin.users.adjust-points');
             Route::delete('/users/{id}', [\App\Http\Controllers\Admin\UsersApiController::class, 'destroy'])->name('api.admin.users.destroy');
 
             // Roles
@@ -761,6 +762,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::delete('/service-posts/bulk-destroy', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'bulkDestroy'])->name('api.admin.service-posts.bulk-destroy');
             Route::get('/service-posts/{id}', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'show'])->name('api.admin.service-posts.show');
             Route::put('/service-posts/{id}', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'update'])->name('api.admin.service-posts.update');
+            Route::post('/service-posts/{id}/change-badge', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'changeBadge'])->name('api.admin.service-posts.change-badge');
             Route::delete('/service-posts/{id}', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'destroy'])->name('api.admin.service-posts.destroy');
 
             // Reports
