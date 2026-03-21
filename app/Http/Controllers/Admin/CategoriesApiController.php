@@ -450,6 +450,8 @@ class CategoriesApiController extends Controller
             'is_suspended' => (bool) $category->isSuspended,
             'service_posts_count' => $category->service_posts_count ?? 0,
             'sub_categories_count' => $category->sub_categories_count ?? 0,
+            'posts_count' => $category->service_posts_count ?? 0,
+            'subcategories_count' => $category->sub_categories_count ?? 0,
             'created_at' => $category->created_at?->toISOString(),
             'updated_at' => $category->updated_at?->toISOString(),
         ];
