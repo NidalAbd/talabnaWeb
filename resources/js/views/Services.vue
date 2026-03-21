@@ -104,7 +104,13 @@
         </div>
       </div>
       <div v-if="citiesLoading" class="text-center py-2"><i class="mdi mdi-loading mdi-spin"></i></div>
-      <div v-if="citiesHasMore && !citiesLoading" ref="citiesScrollTrigger" style="height: 1px;"></div>
+      <div v-if="citiesHasMore && !citiesLoading" class="text-center mt-2">
+        <button class="load-more-btn" @click="loadMoreCities">
+          <i class="mdi mdi-chevron-down"></i>
+          {{ isArabic ? 'عرض المزيد' : 'Load More' }}
+          <span class="load-more-remaining">({{ citiesTotalCount - citiesList.length }})</span>
+        </button>
+      </div>
     </div>
 
     <!-- Listings -->
@@ -204,7 +210,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useAdvancedSeo } from '@/composables/useAdvancedSeo'
@@ -228,7 +234,6 @@ const citiesPage = ref(1)
 const citiesHasMore = ref(false)
 const citiesLoading = ref(false)
 const citiesTotalCount = ref(0)
-const citiesScrollTrigger = ref(null)
 let citySearchTimer = null
 const stats = ref({
   totalListings: 0,
@@ -464,26 +469,6 @@ watch(
   { deep: true }
 )
 
-// Infinite scroll observer for cities
-let citiesObserver = null
-watch(citiesScrollTrigger, (el) => {
-  if (citiesObserver) citiesObserver.disconnect()
-  if (!el) return
-  citiesObserver = new IntersectionObserver((entries) => {
-    if (entries[0].isIntersecting) loadMoreCities()
-  }, { threshold: 0.1 })
-  citiesObserver.observe(el)
-})
-
-watch(() => citiesList.value.length, () => {
-  nextTick(() => {
-    if (citiesScrollTrigger.value && citiesObserver) {
-      citiesObserver.disconnect()
-      citiesObserver.observe(citiesScrollTrigger.value)
-    }
-  })
-})
-
 onMounted(() => {
   loadData()
 })
@@ -512,4 +497,7 @@ onMounted(() => {
 .city-chip .mdi { font-size: 13px; color: rgba(var(--v-theme-on-surface), 0.35); }
 .city-chip-name { flex: 1; font-size: 0.75rem; font-weight: 500; color: rgb(var(--v-theme-on-surface)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .city-chip-count { font-size: 0.65rem; color: rgba(var(--v-theme-on-surface), 0.4); }
+.load-more-btn { background: transparent; border: 1px solid rgba(var(--v-theme-on-surface), 0.15); color: rgb(var(--v-theme-on-surface)); padding: 6px 20px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
+.load-more-btn:hover { border-color: rgb(var(--v-theme-primary)); color: rgb(var(--v-theme-primary)); background: rgba(var(--v-theme-primary), 0.05); }
+.load-more-remaining { font-size: 0.7rem; opacity: 0.6; }
 </style>
