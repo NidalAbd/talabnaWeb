@@ -94,14 +94,12 @@
           <button v-if="citySearch" class="search-clear-btn" @click="citySearch = ''; fetchCities(true)"><i class="mdi mdi-close"></i></button>
         </div>
       </div>
-      <div class="row">
-        <div v-for="city in citiesList" :key="city.id" class="col-4 col-sm-3 col-md-2 mb-2">
-          <router-link :to="city.route" class="city-chip">
-            <i class="mdi mdi-map-marker-outline"></i>
-            <span class="city-chip-name">{{ city.name }}</span>
-            <span class="city-chip-count">{{ city.count }}</span>
-          </router-link>
-        </div>
+      <div class="cities-grid">
+        <router-link v-for="city in citiesList" :key="city.id" :to="city.route" class="city-chip">
+          <i class="mdi mdi-map-marker-outline"></i>
+          <span class="city-chip-name">{{ city.name }}</span>
+          <span class="city-chip-count">{{ city.count }}</span>
+        </router-link>
       </div>
       <div v-if="citiesLoading" class="text-center py-2"><i class="mdi mdi-loading mdi-spin"></i></div>
       <div v-if="citiesHasMore && !citiesLoading" class="text-center mt-2">
@@ -492,11 +490,13 @@ onMounted(() => {
 .search-cities-wrapper .mdi-magnify { color: rgba(var(--v-theme-on-surface), 0.35); font-size: 16px; margin-right: 4px; }
 .search-cities-input { border: none; outline: none; background: transparent; font-size: 0.8rem; width: 100%; color: inherit; }
 .search-clear-btn { background: none; border: none; cursor: pointer; color: rgba(var(--v-theme-on-surface), 0.4); padding: 0; }
-.city-chip { display: flex; align-items: center; gap: 4px; padding: 5px 8px; border-radius: 6px; border: 1px solid rgba(var(--v-theme-on-surface), 0.08); background: var(--color-surface, #fff); text-decoration: none; transition: all 0.15s; }
-.city-chip:hover { border-color: rgb(var(--v-theme-primary)); background: rgba(var(--v-theme-primary), 0.05); }
-.city-chip .mdi { font-size: 13px; color: rgba(var(--v-theme-on-surface), 0.35); }
-.city-chip-name { flex: 1; font-size: 0.75rem; font-weight: 500; color: rgb(var(--v-theme-on-surface)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.city-chip-count { font-size: 0.65rem; color: rgba(var(--v-theme-on-surface), 0.4); }
+.cities-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 10px; }
+@media (max-width: 575px) { .cities-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+.city-chip { display: flex; align-items: center; gap: 6px; padding: 8px 12px; border-radius: 10px; border: 1px solid rgba(var(--v-theme-on-surface), 0.1); background: var(--color-surface, #fff); text-decoration: none; transition: all 0.2s; }
+.city-chip:hover { border-color: rgb(var(--v-theme-primary)); background: rgba(var(--v-theme-primary), 0.06); transform: translateY(-1px); }
+.city-chip .mdi { font-size: 16px; color: rgba(var(--v-theme-on-surface), 0.4); }
+.city-chip-name { flex: 1; font-size: 0.85rem; font-weight: 500; color: rgb(var(--v-theme-on-surface)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.city-chip-count { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.45); font-weight: 600; }
 .load-more-btn { background: transparent; border: 1px solid rgba(var(--v-theme-on-surface), 0.15); color: rgb(var(--v-theme-on-surface)); padding: 6px 20px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; font-weight: 500; transition: all 0.2s; display: inline-flex; align-items: center; gap: 4px; }
 .load-more-btn:hover { border-color: rgb(var(--v-theme-primary)); color: rgb(var(--v-theme-primary)); background: rgba(var(--v-theme-primary), 0.05); }
 .load-more-remaining { font-size: 0.7rem; opacity: 0.6; }

@@ -147,7 +147,7 @@
         </div>
         <div class="countries-grid" v-if="!loadingLocations">
           <router-link v-for="country in countries" :key="country.id" :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
-            <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="48" class="img-cover location-flag-img" style="height: 48px; width: 100%;" @error="handleImgError($event)">
+            <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="64" class="img-cover location-flag-img" style="height: 64px; width: 100%;" @error="handleImgError($event)">
             <div class="location-info">
               <h5>{{ locale === 'ar' ? country.name : country.name_en }}</h5>
               <span>{{ formatNumber(country.listings_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
@@ -488,11 +488,11 @@ onMounted(() => {
 /* Countries Grid - auto-fill, no empty space */
 .countries-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 14px;
 }
-@media (min-width: 1200px) { .countries-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } }
-@media (max-width: 575px) { .countries-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } }
+@media (min-width: 1200px) { .countries-grid { grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); } }
+@media (max-width: 575px) { .countries-grid { grid-template-columns: repeat(2, 1fr); gap: 10px; } }
 
 /* Location Cards */
 .location-card-home {
@@ -502,9 +502,9 @@ onMounted(() => {
 }
 .location-card-home:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
 .location-flag-img { border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06); }
-.location-info { padding: 0.4rem 0.5rem; text-align: center; }
-.location-info h5 { font-size: 0.75rem; font-weight: 600; margin: 0 0 0.1rem; color: rgb(var(--v-theme-on-surface)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.location-info span { font-size: 0.65rem; color: rgba(var(--v-theme-on-surface), 0.5); }
+.location-info { padding: 0.5rem 0.6rem; text-align: center; }
+.location-info h5 { font-size: 0.85rem; font-weight: 600; margin: 0 0 0.15rem; color: rgb(var(--v-theme-on-surface)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.location-info span { font-size: 0.7rem; color: rgba(var(--v-theme-on-surface), 0.5); }
 
 /* Tabs */
 .tabs {
