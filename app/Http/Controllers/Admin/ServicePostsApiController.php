@@ -337,7 +337,7 @@ class ServicePostsApiController extends Controller
             $duration = $validated['duration'];
 
             $post->badge_type_id = $badgeType->id;
-            $post->have_badge = $badgeType->slug ?? $badgeType->name_ar ?? $badgeType->name;
+            $post->have_badge = $badgeType->name_ar;
 
             if ($duration === 'unlimited' || $duration === 0 || $duration === '0') {
                 $post->badge_duration = 36500;

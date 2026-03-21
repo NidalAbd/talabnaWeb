@@ -52,7 +52,7 @@
         <select class="filter-select" v-model="filters.category" @change="onCategoryChange">
           <option value="">All Categories</option>
           <option v-for="cat in categories" :key="cat.id" :value="cat.id">
-            {{ cat.name.en || cat.name.ar || 'Unknown' }}
+            {{ typeof cat.name === 'string' ? cat.name : (cat.name?.en || cat.name?.ar || 'Unknown') }}
           </option>
         </select>
         <select
@@ -62,7 +62,7 @@
         >
           <option value="">All Subcategories</option>
           <option v-for="subcat in subcategories" :key="subcat.id" :value="subcat.id">
-            {{ subcat.name.en || subcat.name.ar || 'Unknown' }}
+            {{ typeof subcat.name === 'string' ? subcat.name : (subcat.name?.en || subcat.name?.ar || 'Unknown') }}
           </option>
         </select>
         <select class="filter-select" v-model="filters.status">
@@ -185,10 +185,10 @@
             <td>
               <div class="category-cell">
                 <span class="badge info">
-                  {{ post.category?.name?.en || post.category?.name?.ar || 'N/A' }}
+                  {{ typeof post.category?.name === 'string' ? post.category.name : (post.category?.name?.en || post.category?.name?.ar || 'N/A') }}
                 </span>
                 <span v-if="post.sub_category" class="badge secondary small">
-                  {{ post.sub_category?.name?.en || post.sub_category?.name?.ar }}
+                  {{ typeof post.sub_category?.name === 'string' ? post.sub_category.name : (post.sub_category?.name?.en || post.sub_category?.name?.ar || '') }}
                 </span>
               </div>
             </td>
