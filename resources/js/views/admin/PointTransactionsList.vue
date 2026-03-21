@@ -82,12 +82,21 @@
                     <tr v-for="transaction in transactions.data" :key="transaction.id">
                         <td><span class="id-badge">{{ transaction.id }}</span></td>
                         <td>
-                            <div v-if="transaction.from_user && transaction.from_user.id === 0" class="user-cell google-play">
-                                <strong><i class="fab fa-google-play" style="color: #34a853; margin-right: 4px;"></i>{{ transaction.from_user.name }}</strong>
-                            </div>
-                            <div v-else-if="transaction.from_user" class="user-cell">
+                            <div v-if="transaction.from_user" class="user-cell">
                                 <strong>{{ transaction.from_user.name }}</strong>
                                 <span class="user-email">{{ transaction.from_user.email }}</span>
+                            </div>
+                            <div v-else-if="transaction.type === 'purchase' || transaction.type === 'purchased'" class="source-badge google-play">
+                                <img src="https://www.gstatic.com/android/market_images/web/favicon_v3.ico" alt="Google Play" style="width: 16px; height: 16px; border-radius: 3px;">
+                                <span>Google Play</span>
+                            </div>
+                            <div v-else-if="transaction.type === 'admin_grant' || transaction.type === 'admin_credit'" class="source-badge admin-source">
+                                <i class="fas fa-shield-alt"></i>
+                                <span>Admin</span>
+                            </div>
+                            <div v-else-if="transaction.type === 'bonus'" class="source-badge bonus-source">
+                                <i class="fas fa-gift"></i>
+                                <span>System Bonus</span>
                             </div>
                             <span v-else class="text-muted">-</span>
                         </td>
@@ -102,7 +111,7 @@
                             <span class="points-badge">{{ transaction.point }} pts</span>
                         </td>
                         <td>
-                            <span v-if="transaction.type === 'purchased'" class="badge success">
+                            <span v-if="transaction.type === 'purchased' || transaction.type === 'purchase'" class="badge success">
                                 <i class="fas fa-shopping-cart"></i> Purchased
                             </span>
                             <span v-else-if="transaction.type === 'used'" class="badge warning">
@@ -203,10 +212,7 @@
                         <div class="detail-row">
                             <span class="detail-label">From User</span>
                             <span class="detail-value">
-                                <div v-if="selectedTransaction.from_user && selectedTransaction.from_user.id === 0">
-                                    <i class="fab fa-google-play" style="color: #34a853; margin-right: 4px;"></i>{{ selectedTransaction.from_user.name }}
-                                </div>
-                                <div v-else-if="selectedTransaction.from_user">
+                                <div v-if="selectedTransaction.from_user">
                                     {{ selectedTransaction.from_user.name }}<br>
                                     <small class="text-muted">{{ selectedTransaction.from_user.email }}</small>
                                 </div>
@@ -1012,4 +1018,8 @@ onMounted(async () => {
         justify-content: center;
     }
 }
+.source-badge { display: inline-flex; align-items: center; gap: 6px; padding: 4px 10px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; }
+.source-badge.google-play { background: rgba(1, 135, 95, 0.1); color: #01875f; }
+.source-badge.admin-source { background: rgba(102, 126, 234, 0.1); color: #667eea; }
+.source-badge.bonus-source { background: rgba(245, 175, 25, 0.1); color: #f5af19; }
 </style>
