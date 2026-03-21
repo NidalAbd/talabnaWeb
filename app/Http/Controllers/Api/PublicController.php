@@ -1058,4 +1058,61 @@ class PublicController extends Controller
             'badges' => $badges,
         ]);
     }
+
+    /**
+     * Search/paginate cities for a country (web frontend only).
+     * GET /api/public/country-cities?country_id=X&search=Y&page=1&per_page=18
+     */
+    public function countryCities(Request $request): JsonResponse
+    {
+        $countryId = $request->input('country_id');
+        if (!$countryId) return response()->json(['cities' => [], 'has_more' => false]);
+
+        $search = $request->input('search', '');
+        $page = (int) $request->input('page', 1);
+        $perPage = (int) $request->input('per_page', 18);
+        $locale = app()->getLocale();
+
+        $query = \App\Models\cities::where('country_id', $countryId)
+            ->withCount(['servicePosts' => function($q) {
+                $q->where('state', 'published');
+            }])
+            ->having('service_posts_count', '>', 0);
+
+        if ($search) {
+            $query->where(function($q) use ($search) {
+                $q->whereRaw("JSON_EXTRACT(name, '$.en') LIKE ?", ["%{$search}%"])
+                  ->orWhereRaw("JSON_EXTRACT(name, '$.ar') LIKE ?", ["%{$search}%"])
+                  ->orWhereRaw("name LIKE ?", ["%{$search}%"]);
+            });
+        }
+
+        $total = $query->count();
+        $cities = $query->orderByDesc('service_posts_count')
+            ->skip(($page - 1) * $perPage)
+            ->take($perPage)
+            ->get();
+
+        $result = $cities->map(function($city) use ($locale, $countryId) {
+            $name = $city->name;
+            $cityName = is_array($name) 
+                ? ($name[$locale] ?? $name['en'] ?? $name['ar'] ?? array_values(array_filter($name))[0] ?? '') 
+                : ($name ?? '');
+            $slug = urlencode($cityName);
+            return [
+                'id' => $city->id,
+                'name' => $cityName,
+                'count' => $city->service_posts_count,
+                'route' => "/services/{$countryId}/_/{$city->id}/{$slug}",
+            ];
+        });
+
+        return response()->json([
+            'cities' => $result,
+            'has_more' => ($page * $perPage) < $total,
+            'total' => $total,
+            'page' => $page,
+        ]);
+    }
+
 }

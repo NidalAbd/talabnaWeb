@@ -85,31 +85,26 @@
     </div>
 
     <!-- Sub-locations -->
-    <div v-if="subLocations.length > 0" class="mb-8">
-      <div class="d-flex align-center justify-between mb-3" style="flex-wrap: wrap; gap: 8px;">
-        <h2 class="text-h5 font-weight-bold mb-0">{{ subLocationsTitle }}</h2>
-        <div v-if="subLocations.length > 6" class="search-cities-wrapper">
+    <div v-if="citiesList.length > 0 || citySearch" class="mb-6">
+      <div class="d-flex align-center justify-between mb-2" style="flex-wrap: wrap; gap: 8px;">
+        <h2 class="text-h6 font-weight-bold mb-0">{{ subLocationsTitle }} <span v-if="citiesTotalCount" class="text-caption text-muted">({{ citiesTotalCount }})</span></h2>
+        <div class="search-cities-wrapper">
           <i class="mdi mdi-magnify"></i>
-          <input v-model="citySearch" type="text" :placeholder="isArabic ? 'بحث في المدن...' : 'Search cities...'" class="search-cities-input">
-          <button v-if="citySearch" class="search-clear-btn" @click="citySearch = ''"><i class="mdi mdi-close"></i></button>
+          <input v-model="citySearch" type="text" :placeholder="isArabic ? 'بحث...' : 'Search...'" class="search-cities-input" @input="debounceCitySearch">
+          <button v-if="citySearch" class="search-clear-btn" @click="citySearch = ''; fetchCities(true)"><i class="mdi mdi-close"></i></button>
         </div>
       </div>
       <div class="row">
-        <div v-for="loc in visibleCities" :key="loc.id" class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
-          <router-link :to="loc.route" class="card card-hover pa-3 text-center h-100" style="text-decoration: none; display: block;">
-            <div class="avatar avatar-40 mx-auto mb-2" :style="{ background: loc.color || 'var(--color-primary)' }">
-              <i class="mdi" :class="loc.icon || 'mdi-folder'" style="font-size: 20px; color: #fff;"></i>
-            </div>
-            <div class="text-body-2 font-weight-medium text-truncate">{{ loc.name }}</div>
-            <div class="text-caption text-muted">{{ loc.count }} {{ isArabic ? 'إعلان' : 'ads' }}</div>
+        <div v-for="city in citiesList" :key="city.id" class="col-4 col-sm-3 col-md-2 mb-2">
+          <router-link :to="city.route" class="city-chip">
+            <i class="mdi mdi-map-marker-outline"></i>
+            <span class="city-chip-name">{{ city.name }}</span>
+            <span class="city-chip-count">{{ city.count }}</span>
           </router-link>
         </div>
       </div>
-      <div v-if="filteredCities.length > cityShowCount && !citySearch" class="text-center mt-2">
-        <button class="btn btn-outline-primary btn-sm" @click="cityShowCount += 10" style="border-radius: 20px; padding: 6px 24px;">
-          <i class="mdi mdi-chevron-down"></i> {{ isArabic ? 'عرض المزيد' : 'Show More' }} ({{ filteredCities.length - cityShowCount }} {{ isArabic ? 'متبقي' : 'remaining' }})
-        </button>
-      </div>
+      <div v-if="citiesLoading" class="text-center py-2"><i class="mdi mdi-loading mdi-spin"></i></div>
+      <div v-if="citiesHasMore && !citiesLoading" ref="citiesScrollTrigger" style="height: 1px;"></div>
     </div>
 
     <!-- Listings -->
@@ -209,7 +204,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useAdvancedSeo } from '@/composables/useAdvancedSeo'
@@ -227,8 +222,14 @@ const placeholderImage = '/storage/countryFlag/placeholder-flag.jpg'
 const locationInfo = ref(null)
 const listings = ref([])
 const subLocations = ref([])
+const citiesList = ref([])
 const citySearch = ref('')
-const cityShowCount = ref(10)
+const citiesPage = ref(1)
+const citiesHasMore = ref(false)
+const citiesLoading = ref(false)
+const citiesTotalCount = ref(0)
+const citiesScrollTrigger = ref(null)
+let citySearchTimer = null
 const stats = ref({
   totalListings: 0,
   totalCategories: 0,
@@ -300,16 +301,35 @@ const pageDescription = computed(() => {
     : 'Browse the latest listings and services available'
 })
 
-const filteredCities = computed(() => {
-  if (!citySearch.value) return subLocations.value
-  const q = citySearch.value.toLowerCase()
-  return subLocations.value.filter(c => c.name && c.name.toLowerCase().includes(q))
-})
+// City pagination with server-side search
+const fetchCities = async (reset = false) => {
+  const cid = route.params.countryId
+  if (!cid || route.params.cityId) return
+  if (reset) { citiesPage.value = 1; citiesList.value = [] }
+  citiesLoading.value = true
+  try {
+    const p = new URLSearchParams({ country_id: cid, page: citiesPage.value, per_page: 18 })
+    if (citySearch.value) p.append('search', citySearch.value)
+    const res = await fetch('/api/public/country-cities?' + p.toString())
+    if (res.ok) {
+      const data = await res.json()
+      if (reset || citiesPage.value === 1) citiesList.value = data.cities || []
+      else citiesList.value.push(...(data.cities || []))
+      citiesHasMore.value = data.has_more || false
+      citiesTotalCount.value = data.total || 0
+    }
+  } catch (e) { console.error('Error:', e) }
+  finally { citiesLoading.value = false }
+}
 
-const visibleCities = computed(() => {
-  if (citySearch.value) return filteredCities.value
-  return filteredCities.value.slice(0, cityShowCount.value)
-})
+const debounceCitySearch = () => {
+  clearTimeout(citySearchTimer)
+  citySearchTimer = setTimeout(() => fetchCities(true), 300)
+}
+
+const loadMoreCities = () => {
+  if (citiesHasMore.value && !citiesLoading.value) { citiesPage.value++; fetchCities() }
+}
 
 const subLocationsTitle = computed(() => {
   if (route.params.cityId) {
@@ -410,8 +430,8 @@ async function loadData() {
       locationInfo.value = data.location || null
       listings.value = data.listings?.data || []
       subLocations.value = data.subLocations || []
-      cityShowCount.value = 10
       citySearch.value = ''
+      fetchCities(true)
       stats.value = data.stats || stats.value
       pagination.value = {
         currentPage: data.listings?.current_page || 1,
@@ -444,6 +464,26 @@ watch(
   { deep: true }
 )
 
+// Infinite scroll observer for cities
+let citiesObserver = null
+watch(citiesScrollTrigger, (el) => {
+  if (citiesObserver) citiesObserver.disconnect()
+  if (!el) return
+  citiesObserver = new IntersectionObserver((entries) => {
+    if (entries[0].isIntersecting) loadMoreCities()
+  }, { threshold: 0.1 })
+  citiesObserver.observe(el)
+})
+
+watch(() => citiesList.value.length, () => {
+  nextTick(() => {
+    if (citiesScrollTrigger.value && citiesObserver) {
+      citiesObserver.disconnect()
+      citiesObserver.observe(citiesScrollTrigger.value)
+    }
+  })
+})
+
 onMounted(() => {
   loadData()
 })
@@ -463,10 +503,13 @@ onMounted(() => {
   margin: 0 0.5rem;
   opacity: 0.5;
 }
-.search-cities-wrapper { position: relative; display: flex; align-items: center; background: var(--color-surface, #fff); border: 1px solid rgba(var(--v-theme-on-surface), 0.15); border-radius: 20px; padding: 4px 12px; min-width: 180px; }
-.search-cities-wrapper .mdi-magnify { color: rgba(var(--v-theme-on-surface), 0.4); font-size: 18px; margin-right: 4px; }
-.search-cities-input { border: none; outline: none; background: transparent; font-size: 0.85rem; width: 100%; color: inherit; }
-.search-clear-btn { background: none; border: none; cursor: pointer; color: rgba(var(--v-theme-on-surface), 0.4); padding: 0 2px; }
-.btn-outline-primary { border: 1px solid rgb(var(--v-theme-primary)); color: rgb(var(--v-theme-primary)); background: transparent; cursor: pointer; transition: all 0.2s; }
-.btn-outline-primary:hover { background: rgba(var(--v-theme-primary), 0.1); }
+.search-cities-wrapper { display: flex; align-items: center; background: var(--color-surface, #fff); border: 1px solid rgba(var(--v-theme-on-surface), 0.12); border-radius: 20px; padding: 3px 10px; min-width: 160px; }
+.search-cities-wrapper .mdi-magnify { color: rgba(var(--v-theme-on-surface), 0.35); font-size: 16px; margin-right: 4px; }
+.search-cities-input { border: none; outline: none; background: transparent; font-size: 0.8rem; width: 100%; color: inherit; }
+.search-clear-btn { background: none; border: none; cursor: pointer; color: rgba(var(--v-theme-on-surface), 0.4); padding: 0; }
+.city-chip { display: flex; align-items: center; gap: 4px; padding: 5px 8px; border-radius: 6px; border: 1px solid rgba(var(--v-theme-on-surface), 0.08); background: var(--color-surface, #fff); text-decoration: none; transition: all 0.15s; }
+.city-chip:hover { border-color: rgb(var(--v-theme-primary)); background: rgba(var(--v-theme-primary), 0.05); }
+.city-chip .mdi { font-size: 13px; color: rgba(var(--v-theme-on-surface), 0.35); }
+.city-chip-name { flex: 1; font-size: 0.75rem; font-weight: 500; color: rgb(var(--v-theme-on-surface)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.city-chip-count { font-size: 0.65rem; color: rgba(var(--v-theme-on-surface), 0.4); }
 </style>

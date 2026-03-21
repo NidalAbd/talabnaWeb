@@ -148,7 +148,7 @@
         <div class="row" v-if="!loadingLocations">
           <div v-for="country in countries" :key="country.id" class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
             <router-link :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
-              <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="80" class="img-cover location-flag-img" style="height: 80px; width: 100%;" @error="handleImgError($event)">
+              <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="48" class="img-cover location-flag-img" style="height: 48px; width: 100%;" @error="handleImgError($event)">
               <div class="location-info">
                 <h5>{{ locale === 'ar' ? country.name : country.name_en }}</h5>
                 <span>{{ formatNumber(country.listings_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
@@ -495,9 +495,9 @@ onMounted(() => {
 }
 .location-card-home:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
 .location-flag-img { border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06); }
-.location-info { padding: 0.75rem; text-align: center; }
-.location-info h5 { font-size: 0.85rem; font-weight: 600; margin: 0 0 0.2rem; color: rgb(var(--v-theme-on-surface)); }
-.location-info span { font-size: 0.7rem; color: rgba(var(--v-theme-on-surface), 0.5); }
+.location-info { padding: 0.4rem 0.5rem; text-align: center; }
+.location-info h5 { font-size: 0.75rem; font-weight: 600; margin: 0 0 0.1rem; color: rgb(var(--v-theme-on-surface)); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.location-info span { font-size: 0.65rem; color: rgba(var(--v-theme-on-surface), 0.5); }
 
 /* Tabs */
 .tabs {

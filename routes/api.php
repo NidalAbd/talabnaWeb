@@ -44,7 +44,7 @@ Route::get('/translations/{locale}/{group}', [LanguageApiController::class, 'tra
 | Public API Routes (No Authentication Required)
 |--------------------------------------------------------------------------
 */
-Route::middleware([\App\Http\Middleware\SetLocale::class])->prefix('public')->group(function () {
+Route::prefix('public')->group(function () {
     // Categories & Subcategories
     Route::get('/categories', [PublicController::class, 'categories']);
     Route::get('/categories/{categoryId}/subcategories', [PublicController::class, 'subcategories']);
@@ -61,6 +61,7 @@ Route::middleware([\App\Http\Middleware\SetLocale::class])->prefix('public')->gr
 
     // Location
     Route::get('/countries', [PublicController::class, 'countries']);
+    Route::get('/country-cities', [PublicController::class, 'countryCities']);
     Route::get('/countries/{countryId}/cities', [PublicController::class, 'cities']);
 
     // Search
@@ -283,17 +284,6 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/migrate-old-badges', [BadgeTypeController::class, 'migrateOldBadges']);
     });
 
-    // Subscription Routes
-    Route::prefix('subscriptions')->group(function () {
-        Route::get('/plans', [App\Http\Controllers\Api\SubscriptionController::class, 'plans']);
-        Route::get('/status', [App\Http\Controllers\Api\SubscriptionController::class, 'status']);
-        Route::post('/subscribe', [App\Http\Controllers\Api\SubscriptionController::class, 'subscribe']);
-        Route::post('/cancel', [App\Http\Controllers\Api\SubscriptionController::class, 'cancel']);
-        Route::post('/toggle-auto-renew', [App\Http\Controllers\Api\SubscriptionController::class, 'toggleAutoRenew']);
-        Route::post('/check-feature', [App\Http\Controllers\Api\SubscriptionController::class, 'checkFeature']);
-        Route::post('/use-feature', [App\Http\Controllers\Api\SubscriptionController::class, 'useFeature']);
-    });
-
     // Badge application routes for service posts
     Route::post('service_posts/{servicePost}/apply-badge', [BadgeTypeController::class, 'applyBadgeToPost']);
     Route::post('service_posts/{servicePost}/remove-badge', [BadgeTypeController::class, 'removeBadgeFromPost']);
@@ -321,24 +311,6 @@ Route::middleware(['auth:api'])->group(function () {
         Route::get('/live', [App\Http\Controllers\Api\RequestMonitorController::class, 'liveActivity']);
         Route::get('/history', [App\Http\Controllers\Api\RequestMonitorController::class, 'history']);
         Route::delete('/cleanup', [App\Http\Controllers\Api\RequestMonitorController::class, 'cleanup']);
-    });
-
-    // Subscription Plan Management Routes (Admin)
-    Route::prefix('admin/subscription-plans')->group(function () {
-        Route::get('/', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index']);
-        Route::post('/', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store']);
-        Route::get('/stats', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'stats']);
-        Route::get('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'show']);
-        Route::put('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update']);
-        Route::delete('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'destroy']);
-        Route::post('/{id}/toggle', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'toggle']);
-    });
-
-    // Auto-Translation Routes (Admin)
-    Route::prefix('admin/auto-translate')->group(function () {
-        Route::post('/{locale}', [App\Http\Controllers\Api\AutoTranslateController::class, 'start']);
-        Route::get('/{locale}/progress', [App\Http\Controllers\Api\AutoTranslateController::class, 'progress']);
-        Route::post('/on-demand', [App\Http\Controllers\Api\AutoTranslateController::class, 'onDemand']);
     });
 
     // Translation Management Routes (Admin)
