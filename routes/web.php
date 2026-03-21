@@ -874,6 +874,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::delete('/{id}', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'destroy'])->name('api.admin.languages.destroy');
                 Route::post('/{id}/toggle', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'toggle'])->name('api.admin.languages.toggle');
                 Route::post('/{id}/set-default', [\App\Http\Controllers\Admin\LanguageManagementController::class, 'setDefault'])->name('api.admin.languages.set-default');
+                Route::get('/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'index'])->name('api.admin.languages.content-translations');
+                Route::post('/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'store'])->name('api.admin.languages.content-translations.store');
             });
 
             // Command Monitor
