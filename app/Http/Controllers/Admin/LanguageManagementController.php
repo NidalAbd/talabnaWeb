@@ -3,16 +3,10 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\BadgeType;
-use App\Models\Categories;
 use App\Models\Language;
-use App\Models\ServicePost;
-use App\Models\Sub_categories;
-use App\Models\SubscriptionPlan;
 use App\Models\Translation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class LanguageManagementController extends Controller
@@ -384,113 +378,74 @@ class LanguageManagementController extends Controller
      */
     public function stats(): JsonResponse
     {
-        $languages = Language::ordered()->get();
-        $defaultLocale = Language::getDefault()?->code ?? 'ar';
+        $languages = Language::orderBy('sort_order')->get();
+        $sourceLanguage = $languages->firstWhere('is_default', true) ?? $languages->first();
 
-        // Count default locale translation keys
-        $defaultKeyCount = Translation::where('locale', $defaultLocale)->count();
-
-        // Per-model translation stats
-        $modelConfigs = [
-            'ui_strings' => ['table' => 'translations', 'type' => 'key_value', 'icon' => 'fas fa-font', 'label' => 'UI Strings'],
-            'categories' => ['table' => 'categories', 'fields' => ['name'], 'icon' => 'fas fa-th-large', 'label' => 'Categories'],
-            'sub_categories' => ['table' => 'sub_categories', 'fields' => ['name'], 'icon' => 'fas fa-sitemap', 'label' => 'Subcategories'],
-            'badge_types' => ['table' => 'badge_types', 'fields' => ['name'], 'icon' => 'fas fa-certificate', 'label' => 'Badge Types'],
-            'service_posts' => ['table' => 'service_posts', 'fields' => ['title', 'description'], 'icon' => 'fas fa-briefcase', 'label' => 'Service Posts'],
-        ];
-
-        $languageStats = [];
-        foreach ($languages as $lang) {
-            if ($lang->code === $defaultLocale) {
-                // Source language
-                $languageStats[] = [
-                    'id' => $lang->id,
-                    'code' => $lang->code,
-                    'name' => $lang->name,
-                    'native_name' => $lang->native_name,
-                    'direction' => $lang->direction,
-                    'is_active' => $lang->is_active,
-                    'is_default' => $lang->is_default,
-                    'is_source' => true,
-                    'models' => [],
-                    'overall' => ['translated' => 0, 'total' => 0, 'percentage' => 100],
-                ];
-                continue;
-            }
+        $languageData = $languages->map(function ($lang) use ($sourceLanguage) {
+            $isSource = $lang->id === ($sourceLanguage->id ?? null);
 
             $models = [];
-            $overallTranslated = 0;
-            $overallTotal = 0;
+            $totalTranslated = 0;
+            $totalItems = 0;
 
-            foreach ($modelConfigs as $key => $config) {
-                if ($key === 'ui_strings') {
-                    // Key-value translations table
-                    $total = $defaultKeyCount;
-                    $translated = Translation::where('locale', $lang->code)
-                        ->whereRaw("value IS NOT NULL AND TRIM(value) != ''")
-                        ->count();
-                } else {
-                    // JSON column models — count by rows (items), not by fields
-                    $total = DB::table($config['table'])->count();
-                    // An item is "translated" if ALL its fields have the locale key
-                    $fields = $config['fields'];
-                    $query = DB::table($config['table']);
-                    foreach ($fields as $field) {
-                        $query->whereNotNull($field)
-                            ->whereRaw("JSON_EXTRACT(`{$field}`, '$.{$lang->code}') IS NOT NULL")
-                            ->whereRaw("JSON_EXTRACT(`{$field}`, '$.{$lang->code}') != '\"\"'");
-                    }
-                    $translated = $query->count();
-                }
+            // UI Strings
+            $uiTotal = \App\Models\Translation::where('locale', $sourceLanguage->code ?? 'ar')->count();
+            $uiTranslated = \App\Models\Translation::where('locale', $lang->code)->count();
+            $models['ui_strings'] = ['label' => 'UI Strings', 'translated' => $uiTranslated, 'total' => $uiTotal, 'percentage' => $uiTotal ? round($uiTranslated / $uiTotal * 100) : 0];
+            $totalTranslated += $uiTranslated;
+            $totalItems += $uiTotal;
 
-                $percentage = $total > 0 ? round(($translated / $total) * 100) : 100;
-                $models[$key] = [
-                    'label' => $config['label'],
-                    'icon' => $config['icon'],
-                    'translated' => $translated,
-                    'total' => $total,
-                    'percentage' => $percentage,
-                ];
-                $overallTranslated += $translated;
-                $overallTotal += $total;
-            }
+            // Categories
+            $catTotal = \App\Models\Categories::count();
+            $catTranslated = \App\Models\Categories::whereRaw("JSON_EXTRACT(name, '$.{$lang->code}') IS NOT NULL AND JSON_EXTRACT(name, '$.{$lang->code}') != '\"\"'")->count();
+            $models['categories'] = ['label' => 'Categories', 'translated' => $catTranslated, 'total' => $catTotal, 'percentage' => $catTotal ? round($catTranslated / $catTotal * 100) : 0];
+            $totalTranslated += $catTranslated;
+            $totalItems += $catTotal;
 
-            $overallPct = $overallTotal > 0 ? round(($overallTranslated / $overallTotal) * 100) : 100;
+            // Subcategories
+            $subTotal = \App\Models\Sub_categories::count();
+            $subTranslated = \App\Models\Sub_categories::whereRaw("JSON_EXTRACT(name, '$.{$lang->code}') IS NOT NULL AND JSON_EXTRACT(name, '$.{$lang->code}') != '\"\"'")->count();
+            $models['sub_categories'] = ['label' => 'Subcategories', 'translated' => $subTranslated, 'total' => $subTotal, 'percentage' => $subTotal ? round($subTranslated / $subTotal * 100) : 0];
+            $totalTranslated += $subTranslated;
+            $totalItems += $subTotal;
 
-            $languageStats[] = [
+            // Service Posts
+            $postTotal = \App\Models\ServicePost::count();
+            $postTranslated = \App\Models\ServicePost::whereRaw("JSON_EXTRACT(title, '$.{$lang->code}') IS NOT NULL AND JSON_EXTRACT(title, '$.{$lang->code}') != '\"\"'")->count();
+            $models['service_posts'] = ['label' => 'Service Posts', 'translated' => $postTranslated, 'total' => $postTotal, 'percentage' => $postTotal ? round($postTranslated / $postTotal * 100) : 0];
+            $totalTranslated += $postTranslated;
+            $totalItems += $postTotal;
+
+            $overallPct = $totalItems ? round($totalTranslated / $totalItems * 100) : 0;
+
+            return [
                 'id' => $lang->id,
                 'code' => $lang->code,
                 'name' => $lang->name,
                 'native_name' => $lang->native_name,
                 'direction' => $lang->direction,
-                'is_active' => $lang->is_active,
-                'is_default' => $lang->is_default,
-                'is_source' => false,
+                'is_active' => (bool) $lang->is_active,
+                'is_default' => (bool) $lang->is_default,
+                'is_source' => $isSource,
+                'sort_order' => $lang->sort_order,
                 'models' => $models,
                 'overall' => [
-                    'translated' => $overallTranslated,
-                    'total' => $overallTotal,
+                    'translated' => $totalTranslated,
+                    'total' => $totalItems,
+                    'remaining' => $totalItems - $totalTranslated,
                     'percentage' => $overallPct,
-                    'remaining' => $overallTotal - $overallTranslated,
                 ],
             ];
-        }
-
-        $totalLangs = count($languages);
-        $activeLangs = $languages->where('is_active', true)->count();
-        $avgCompletion = $totalLangs > 1
-            ? round(collect($languageStats)->where('is_source', false)->avg('overall.percentage'))
-            : 100;
-        $rtlCount = $languages->where('direction', 'rtl')->count();
+        });
 
         return response()->json([
             'success' => true,
-            'total' => $totalLangs,
-            'active' => $activeLangs,
-            'avg_completion' => $avgCompletion,
-            'rtl_count' => $rtlCount,
-            'default_locale' => $defaultLocale,
-            'languages' => $languageStats,
+            'total' => $languages->count(),
+            'active' => $languages->where('is_active', true)->count(),
+            'inactive' => $languages->where('is_active', false)->count(),
+            'rtl_count' => $languages->where('direction', 'rtl')->count(),
+            'ltr_count' => $languages->where('direction', 'ltr')->count(),
+            'languages' => $languageData,
         ]);
     }
 
