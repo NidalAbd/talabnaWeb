@@ -125,7 +125,7 @@
             <label class="form-label-bold">Photos ({{ post.photos.length }})</label>
             <div class="photos-preview">
               <div v-for="photo in post.photos" :key="photo.id" class="photo-thumb">
-                <img :src="photo.src" @error="$event.target.src='/storage/photos/og-image.jpg'">
+                <img :src="photo.src.startsWith('http') ? photo.src : (photo.src.startsWith('/') ? photo.src : '/' + photo.src)" @error="$event.target.src='/storage/photos/og-image.jpg'">
               </div>
             </div>
           </div>
@@ -218,7 +218,7 @@ const applyBadge = async () => {
 const loadSubcategories = async () => {
   if (!form.categories_id) return
   try {
-    const res = await fetch(`/api/admin/service-posts/subcategories?category_id=${form.categories_id}`)
+    const res = await fetch(`/api/admin/service-posts/subcategories?category_id=${form.categories_id}`, { credentials: 'same-origin' })
     const data = await res.json()
     subcategories.value = data.subcategories || []
   } catch (e) { console.error(e) }
@@ -265,9 +265,9 @@ onMounted(async () => {
   try {
     // Load post + categories in parallel
     const [postRes, catRes, badgeRes] = await Promise.all([
-      fetch(`/api/admin/service-posts/${props.postId}`),
-      fetch('/api/admin/service-posts/categories'),
-      fetch('/api/admin/badge-types'),
+      fetch(`/api/admin/service-posts/${props.postId}`, { credentials: 'same-origin' }),
+      fetch('/api/admin/service-posts/categories', { credentials: 'same-origin' }),
+      fetch('/api/admin/badge-types', { credentials: 'same-origin' }),
     ])
     const postData = await postRes.json()
     const catData = await catRes.json()

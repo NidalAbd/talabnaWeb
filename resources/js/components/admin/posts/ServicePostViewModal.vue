@@ -21,7 +21,7 @@
         <div v-if="post.photos && post.photos.length" class="photos-gallery mb-4">
           <div class="photos-grid">
             <div v-for="photo in post.photos" :key="photo.id" class="photo-item">
-              <img :src="photo.src" :alt="post.title" @error="$event.target.src='/storage/photos/og-image.jpg'">
+              <img :src="photoUrl(photo)" :alt="post.title" @error="$event.target.src='/storage/photos/og-image.jpg'">
             </div>
           </div>
         </div>
@@ -100,6 +100,11 @@ const error = ref('')
 
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'
 const truncate = (s, n) => s && s.length > n ? s.substring(0, n) + '...' : s
+const photoUrl = (photo) => {
+  if (!photo || !photo.src) return '/storage/photos/og-image.jpg'
+  if (photo.is_external || photo.src.startsWith('http')) return photo.src
+  return photo.src.startsWith('/') ? photo.src : '/' + photo.src
+}
 
 onMounted(async () => {
   try {

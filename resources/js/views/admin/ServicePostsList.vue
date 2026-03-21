@@ -516,7 +516,12 @@ async function handleBulkDelete() {
 function getMediaUrl(media) {
   if (!media || !media.src) return placeholderImage
   if (media.is_external) return media.src
-  return `/storage/${media.src}`
+  const src = media.src
+  // Already has full path
+  if (src.startsWith('http')) return src
+  if (src.startsWith('/')) return src
+  // Raw src like "storage/posts/ai/xxx.png"
+  return '/' + src
 }
 
 function getVideoThumbnail(media) {
