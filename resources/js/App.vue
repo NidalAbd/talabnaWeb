@@ -44,6 +44,28 @@
               </router-link>
             </div>
           </div>
+
+          <!-- Countries Dropdown -->
+          <div class="dropdown">
+            <button class="nav-link d-flex align-center gap-1" @click="countryMenuOpen = !countryMenuOpen">
+              <i class="mdi mdi-earth"></i>
+              {{ appStore.locale === 'ar' ? 'الدول' : 'Countries' }}
+              <i class="mdi mdi-chevron-down" style="font-size: 18px;"></i>
+            </button>
+            <div class="dropdown-menu country-dropdown" :class="{ open: countryMenuOpen }">
+              <router-link
+                v-for="country in navCountries"
+                :key="country.id"
+                :to="`/services/${country.id}/${country.slug || country.id}`"
+                class="dropdown-item"
+                @click="countryMenuOpen = false"
+              >
+                <img v-if="country.flag" :src="country.flag" style="width: 20px; height: 14px; object-fit: cover; border-radius: 2px;" @error="$event.target.style.display='none'">
+                <i v-else class="mdi mdi-flag-variant-outline" style="font-size: 16px;"></i>
+                {{ appStore.locale === 'ar' ? country.name : (country.name_en || country.name) }}
+              </router-link>
+            </div>
+          </div>
         </div>
 
         <div class="flex-1"></div>
@@ -66,10 +88,18 @@
             <i class="mdi" :class="appStore.isDark ? 'mdi-weather-sunny' : 'mdi-weather-night'" style="font-size: 20px;"></i>
           </button>
 
-          <!-- Language Toggle -->
-          <button class="btn btn-icon btn-text" @click="toggleLocale">
-            <span style="font-weight: 700; font-size: 0.875rem;">{{ appStore.locale === 'ar' ? 'EN' : 'ع' }}</span>
-          </button>
+          <!-- Language Selector -->
+          <div class="dropdown">
+            <button class="btn btn-icon btn-text" @click="langMenuOpen = !langMenuOpen" style="font-weight: 700; font-size: 0.8rem; min-width: 36px;">
+              {{ appStore.locale.toUpperCase() }}
+            </button>
+            <div class="dropdown-menu lang-dropdown" :class="{ open: langMenuOpen }" @click="langMenuOpen = false">
+              <button v-for="lang in availableLanguages" :key="lang.code" class="dropdown-item"
+                :class="{ active: appStore.locale === lang.code }" @click="changeLanguage(lang.code)">
+                {{ lang.native_name || lang.name }}
+              </button>
+            </div>
+          </div>
 
           <!-- User Menu (when logged in) -->
           <div v-if="isLoggedIn" class="dropdown d-none d-sm-block">
@@ -295,6 +325,8 @@ const googleBtnDesktop = ref(null)
 const googleBtnMobile = ref(null)
 const googleClientId = document.querySelector('meta[name="google-client-id"]')?.content || ''
 const catMenuOpen = ref(false)
+const countryMenuOpen = ref(false)
+const navCountries = ref([])
 
 // Computed properties for user
 const isLoggedIn = computed(() => !!appStore.user)
@@ -318,13 +350,49 @@ const userAvatar = computed(() => {
 
 import { getCategoryIcon, getCategoryColor } from '@/utils/helpers'
 
-const toggleLocale = () => {
-  appStore.setLocale(appStore.locale === 'ar' ? 'en' : 'ar')
+const langMenuOpen = ref(false)
+const availableLanguages = ref([
+  { code: 'ar', name: 'Arabic', native_name: 'العربية' },
+  { code: 'en', name: 'English', native_name: 'English' },
+  { code: 'hi', name: 'Hindi', native_name: 'हिन्दी' },
+  { code: 'tr', name: 'Turkish', native_name: 'Türkçe' },
+  { code: 'fr', name: 'French', native_name: 'Français' },
+  { code: 'es', name: 'Spanish', native_name: 'Español' },
+  { code: 'ur', name: 'Urdu', native_name: 'اردو' },
+  { code: 'bn', name: 'Bengali', native_name: 'বাংলা' },
+  { code: 'pt', name: 'Portuguese', native_name: 'Português' },
+  { code: 'ru', name: 'Russian', native_name: 'Русский' },
+  { code: 'id', name: 'Indonesian', native_name: 'Bahasa Indonesia' },
+  { code: 'de', name: 'German', native_name: 'Deutsch' },
+  { code: 'zh', name: 'Chinese', native_name: '中文' },
+  { code: 'ku', name: 'Kurdish', native_name: 'کوردی' },
+  { code: 'fa', name: 'Persian', native_name: 'فارسی' },
+  { code: 'sw', name: 'Swahili', native_name: 'Kiswahili' },
+  { code: 'ms', name: 'Malay', native_name: 'Bahasa Melayu' },
+])
+
+const changeLanguage = (code) => {
+  appStore.setLocale(code)
+  langMenuOpen.value = false
+  // Reload to apply language change across all content
+  window.location.reload()
 }
 
 const doSearch = () => {
   if (searchQuery.value.trim()) {
     router.push({ name: 'search', query: { q: searchQuery.value } })
+  }
+}
+
+const fetchNavCountries = async () => {
+  try {
+    const response = await fetch('/api/public/countries')
+    if (response.ok) {
+      const data = await response.json()
+      navCountries.value = data.countries || []
+    }
+  } catch (e) {
+    console.error('Error fetching countries:', e)
   }
 }
 
@@ -384,6 +452,12 @@ const logout = async () => {
 const handleClickOutside = (e) => {
   if (userMenuOpen.value && !e.target.closest('.dropdown')) {
     userMenuOpen.value = false
+  }
+  if (langMenuOpen.value && !e.target.closest('.dropdown')) {
+    langMenuOpen.value = false
+  }
+  if (countryMenuOpen.value && !e.target.closest('.dropdown')) {
+    countryMenuOpen.value = false
   }
 }
 
@@ -469,6 +543,7 @@ onMounted(() => {
   // Apply theme to root element
   document.documentElement.setAttribute('data-theme', appStore.theme)
   fetchCategories()
+  fetchNavCountries()
   fetchCurrentUser().then(() => {
     if (!isLoggedIn.value) {
       // Only init Google One Tap if not logged in
@@ -495,6 +570,25 @@ onMounted(() => {
 </script>
 
 <style>
+/* Country Dropdown */
+.country-dropdown {
+  max-height: 400px; overflow-y: auto; min-width: 200px;
+  display: grid; grid-template-columns: 1fr;
+}
+.country-dropdown .dropdown-item {
+  display: flex; align-items: center; gap: 8px;
+}
+
+/* Language Dropdown */
+.lang-dropdown {
+  max-height: 400px; overflow-y: auto; min-width: 160px;
+}
+.lang-dropdown .dropdown-item.active {
+  background: rgba(var(--v-theme-primary), 0.1);
+  color: rgb(var(--v-theme-primary));
+  font-weight: 700;
+}
+
 /* Global styles for non-Vuetify app */
 
 /* Apply theme reactively */

@@ -10,20 +10,9 @@ export const useAppStore = defineStore('app', () => {
   const countries = ref([])
   const loading = ref(false)
 
-  // User's detected/saved location
-  const userCountry = ref(localStorage.getItem('user_country') || null) // ISO code e.g. 'PS'
-  const userCity = ref(localStorage.getItem('user_city') || null)
-  const userCountryId = ref(localStorage.getItem('user_country_id') || null)
-  const userCityId = ref(localStorage.getItem('user_city_id') || null)
-
-  // Available languages (loaded from API)
-  const languages = ref(JSON.parse(localStorage.getItem('languages') || '[]'))
-
-  // RTL language codes
-  const rtlCodes = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'yi', 'sd']
-
   // Getters
-  const isRTL = computed(() => rtlCodes.includes(locale.value))
+  const rtlLocales = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'sd']
+  const isRTL = computed(() => rtlLocales.includes(locale.value))
   const isAuthenticated = computed(() => !!user.value)
   const isDark = computed(() => theme.value === 'dark')
 
@@ -32,19 +21,8 @@ export const useAppStore = defineStore('app', () => {
     locale.value = newLocale
     localStorage.setItem('locale', newLocale)
     document.documentElement.lang = newLocale
-    document.documentElement.dir = rtlCodes.includes(newLocale) ? 'rtl' : 'ltr'
-  }
-
-  async function fetchLanguages() {
-    try {
-      const response = await fetch('/api/languages')
-      if (response.ok) {
-        const data = await response.json()
-        const langs = data.languages || []
-        languages.value = langs
-        localStorage.setItem('languages', JSON.stringify(langs))
-      }
-    } catch (_) {}
+    const rtl = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'sd']
+    document.documentElement.dir = rtl.includes(newLocale) ? 'rtl' : 'ltr'
   }
 
   function toggleTheme() {
@@ -75,48 +53,6 @@ export const useAppStore = defineStore('app', () => {
     loading.value = state
   }
 
-  // Detect user's country from IP (for guests)
-  async function detectLocation() {
-    // Skip if already detected or user is logged in with country
-    if (userCountryId.value && userCountryId.value !== 'null') return
-
-    try {
-      // Use ipapi.co (free, HTTPS, no key needed, 1000/day)
-      const response = await fetch('https://ipapi.co/json/')
-      if (response.ok) {
-        const data = await response.json()
-        const cc = data.country_code || data.country
-        if (cc) {
-          userCountry.value = cc
-          userCity.value = data.city || null
-          localStorage.setItem('user_country', cc)
-          localStorage.setItem('user_city', data.city || '')
-
-          // Resolve to our DB country ID
-          const countryResponse = await fetch('/api/public/countries')
-          if (countryResponse.ok) {
-            const countryData = await countryResponse.json()
-            const countriesList = countryData.countries || countryData || []
-            const matched = countriesList.find(c =>
-              c.iso_code === cc || c.country_code === cc || c.code === cc
-            )
-            if (matched) {
-              userCountryId.value = matched.id
-              localStorage.setItem('user_country_id', matched.id)
-            }
-          }
-        }
-      }
-    } catch (_) {}
-  }
-
-  function setUserLocation(countryId, cityId) {
-    userCountryId.value = countryId
-    userCityId.value = cityId
-    localStorage.setItem('user_country_id', countryId || '')
-    localStorage.setItem('user_city_id', cityId || '')
-  }
-
   // Initialize
   function init() {
     const savedLocale = localStorage.getItem('locale') || 'ar'
@@ -132,21 +68,13 @@ export const useAppStore = defineStore('app', () => {
     user,
     categories,
     countries,
-    languages,
     loading,
-    userCountry,
-    userCity,
-    userCountryId,
-    userCityId,
     // Getters
     isRTL,
     isAuthenticated,
     isDark,
     // Actions
     setLocale,
-    fetchLanguages,
-    detectLocation,
-    setUserLocation,
     toggleTheme,
     setTheme,
     setUser,
