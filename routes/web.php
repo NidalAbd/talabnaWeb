@@ -759,6 +759,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/service-posts/subcategories', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'getSubcategories'])->name('api.admin.service-posts.subcategories');
             Route::get('/service-posts', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'index'])->name('api.admin.service-posts.index');
             Route::delete('/service-posts/bulk-destroy', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'bulkDestroy'])->name('api.admin.service-posts.bulk-destroy');
+            Route::get('/service-posts/{id}', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'show'])->name('api.admin.service-posts.show');
+            Route::put('/service-posts/{id}', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'update'])->name('api.admin.service-posts.update');
             Route::delete('/service-posts/{id}', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'destroy'])->name('api.admin.service-posts.destroy');
 
             // Reports

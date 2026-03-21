@@ -191,6 +191,134 @@ class ServicePostsApiController extends Controller
         }
     }
 
+
+    /**
+     * Get a single service post with all details for view/edit
+     */
+    public function show($id): JsonResponse
+    {
+        try {
+            $post = ServicePost::with(['photos', 'user', 'category', 'subCategory', 'country', 'city', 'badgeType'])
+                ->findOrFail($id);
+
+            $titleRaw = $post->getRawTranslations('title') ?? ['ar' => $post->title];
+            $descRaw = $post->getRawTranslations('description') ?? ['ar' => $post->description];
+
+            return response()->json([
+                'post' => [
+                    'id' => $post->id,
+                    'title' => $post->title,
+                    'title_translations' => $titleRaw,
+                    'description' => $post->description,
+                    'description_translations' => $descRaw,
+                    'price' => $post->price,
+                    'price_currency_code' => $post->price_currency_code,
+                    'price_currency_name' => $post->price_currency_name,
+                    'type' => $post->type,
+                    'state' => $post->state,
+                    'have_badge' => $post->have_badge,
+                    'badge_type_id' => $post->badge_type_id,
+                    'badge_duration' => $post->badge_duration,
+                    'badge_expires_at' => $post->badge_expires_at?->toISOString(),
+                    'view_count' => $post->view_count ?? 0,
+                    'favorites_count' => $post->favorites_count ?? 0,
+                    'report_count' => $post->report_count ?? 0,
+                    'location_latitudes' => $post->location_latitudes,
+                    'location_longitudes' => $post->location_longitudes,
+                    'categories_id' => $post->categories_id,
+                    'sub_categories_id' => $post->sub_categories_id,
+                    'country_id' => $post->country_id,
+                    'city_id' => $post->city_id,
+                    'user' => $post->user ? [
+                        'id' => $post->user->id,
+                        'user_name' => $post->user->user_name,
+                        'email' => $post->user->email,
+                    ] : null,
+                    'category' => $post->category ? [
+                        'id' => $post->category->id,
+                        'name' => $this->localizedName($post->category->name),
+                    ] : null,
+                    'sub_category' => $post->subCategory ? [
+                        'id' => $post->subCategory->id,
+                        'name' => $this->localizedName($post->subCategory->name),
+                    ] : null,
+                    'country' => $post->country ? [
+                        'id' => $post->country->id,
+                        'name' => $this->localizedName($post->country->name),
+                    ] : null,
+                    'city' => $post->city ? [
+                        'id' => $post->city->id,
+                        'name' => $this->localizedName($post->city->name),
+                    ] : null,
+                    'badge' => $post->badgeType ? [
+                        'id' => $post->badgeType->id,
+                        'name_ar' => $post->badgeType->name_ar,
+                        'name_en' => $post->badgeType->name_en,
+                        'color' => $post->badgeType->color,
+                    ] : null,
+                    'photos' => $post->photos->map(fn($p) => [
+                        'id' => $p->id,
+                        'src' => $p->is_external ? $p->src : '/storage/' . ltrim($p->src, '/'),
+                        'is_external' => (bool) $p->is_external,
+                        'is_video' => (bool) $p->isVideo,
+                    ]),
+                    'created_at' => $post->created_at->toISOString(),
+                    'updated_at' => $post->updated_at->toISOString(),
+                ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Post not found', 'message' => $e->getMessage()], 404);
+        }
+    }
+
+    /**
+     * Update a service post from admin panel
+     */
+    public function update(Request $request, $id): JsonResponse
+    {
+        try {
+            $post = ServicePost::findOrFail($id);
+
+            $validated = $request->validate([
+                'title' => 'sometimes|array',
+                'description' => 'sometimes|array',
+                'price' => 'sometimes|numeric|min:0',
+                'type' => 'sometimes|string',
+                'state' => 'sometimes|string|in:published,not published',
+                'categories_id' => 'sometimes|integer|exists:categories,id',
+                'sub_categories_id' => 'sometimes|integer|exists:sub_categories,id',
+                'country_id' => 'sometimes|integer|exists:countries,id',
+                'city_id' => 'sometimes|integer|exists:cities,id',
+            ]);
+
+            // Handle title translations
+            if ($request->has('title')) {
+                $post->setAttribute('title', $request->input('title'));
+            }
+            if ($request->has('description')) {
+                $post->setAttribute('description', $request->input('description'));
+            }
+
+            // Update simple fields
+            foreach (['price', 'type', 'state', 'categories_id', 'sub_categories_id', 'country_id', 'city_id'] as $field) {
+                if ($request->has($field)) {
+                    $post->$field = $request->input($field);
+                }
+            }
+
+            $post->save();
+
+            return response()->json([
+                'message' => 'Service post updated successfully',
+                'post' => $post->fresh()->toArray(),
+            ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json(['error' => 'Validation failed', 'errors' => $e->errors()], 422);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Failed to update post', 'message' => $e->getMessage()], 500);
+        }
+    }
+
     /**
      * Delete a service post
      */

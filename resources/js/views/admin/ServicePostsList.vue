@@ -228,12 +228,12 @@
             </td>
             <td>
               <div class="table-actions">
-                <a :href="`/service_posts/${post.id}`" class="action-btn-small view" title="View">
+                <button @click="openViewModal(post.id)" class="action-btn-small view" title="View">
                   <i class="fas fa-eye"></i>
-                </a>
-                <a :href="`/service_posts/${post.id}/edit`" class="action-btn-small edit" title="Edit">
+                </button>
+                <button @click="openEditModal(post.id)" class="action-btn-small edit" title="Edit">
                   <i class="fas fa-edit"></i>
-                </a>
+                </button>
                 <button @click="handleDelete(post)" class="action-btn-small delete" title="Delete">
                   <i class="fas fa-trash"></i>
                 </button>
@@ -287,6 +287,22 @@
       </div>
     </div>
 
+    <!-- View Modal -->
+    <ServicePostViewModal
+      v-if="viewModalPostId"
+      :post-id="viewModalPostId"
+      @close="viewModalPostId = null"
+      @edit="(id) => { viewModalPostId = null; openEditModal(id) }"
+    />
+
+    <!-- Edit Modal -->
+    <ServicePostEditModal
+      v-if="editModalPostId"
+      :post-id="editModalPostId"
+      @close="editModalPostId = null"
+      @saved="() => { editModalPostId = null; fetchServicePosts(filters) }"
+    />
+
     <!-- Delete Modal -->
     <div class="modal-overlay" v-if="showDeleteModal" @click="showDeleteModal = false">
       <div class="modern-modal" @click.stop>
@@ -317,6 +333,8 @@
 <script setup>
 import { ref, onMounted, computed, reactive, watch } from 'vue'
 import { useServicePosts } from '../../composables/useServicePosts'
+import ServicePostViewModal from '../../components/admin/posts/ServicePostViewModal.vue'
+import ServicePostEditModal from '../../components/admin/posts/ServicePostEditModal.vue'
 
 const {
   servicePosts,
@@ -349,6 +367,11 @@ const filters = reactive({
 
 const selectedPosts = ref([])
 const showDeleteModal = ref(false)
+const viewModalPostId = ref(null)
+const editModalPostId = ref(null)
+
+const openViewModal = (id) => { viewModalPostId.value = id }
+const openEditModal = (id) => { editModalPostId.value = id }
 const postToDelete = ref(null)
 const isDeleting = ref(false)
 
