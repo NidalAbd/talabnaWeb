@@ -22,7 +22,7 @@
               <i class="mdi mdi-earth" style="font-size: 24px; color: #fff;"></i>
             </div>
             <div>
-              <div class="text-caption text-muted">{{ t('browse.country') }}</div>
+              <div class="text-caption text-muted">{{ isArabic ? 'الدولة' : 'Country' }}</div>
               <div class="text-h6 font-weight-bold">{{ locationInfo.country.name }}</div>
             </div>
           </div>
@@ -35,7 +35,7 @@
               <i class="mdi mdi-city" style="font-size: 24px; color: #fff;"></i>
             </div>
             <div>
-              <div class="text-caption text-muted">{{ t('browse.city') }}</div>
+              <div class="text-caption text-muted">{{ isArabic ? 'المدينة' : 'City' }}</div>
               <div class="text-h6 font-weight-bold">{{ locationInfo.city.name }}</div>
             </div>
           </div>
@@ -48,7 +48,7 @@
               <i class="mdi mdi-shape" style="font-size: 24px; color: #fff;"></i>
             </div>
             <div>
-              <div class="text-caption text-muted">{{ t('browse.category') }}</div>
+              <div class="text-caption text-muted">{{ isArabic ? 'التصنيف' : 'Category' }}</div>
               <div class="text-h6 font-weight-bold">{{ locationInfo.category.name }}</div>
             </div>
           </div>
@@ -61,42 +61,54 @@
       <div class="col-6 col-md-3">
         <div class="card card-color-primary pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalListings }}</div>
-          <div class="text-body-2">{{ t('listing.listings') }}</div>
+          <div class="text-body-2">{{ isArabic ? 'إعلان' : 'Listings' }}</div>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card card-color-success pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalCategories }}</div>
-          <div class="text-body-2">{{ t('nav.categories') }}</div>
+          <div class="text-body-2">{{ isArabic ? 'تصنيف' : 'Categories' }}</div>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card card-color-info pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalCities }}</div>
-          <div class="text-body-2">{{ t('browse.city') }}</div>
+          <div class="text-body-2">{{ isArabic ? 'مدينة' : 'Cities' }}</div>
         </div>
       </div>
       <div class="col-6 col-md-3">
         <div class="card card-color-warning pa-4 text-center">
           <div class="text-h4 font-weight-bold">{{ stats.totalUsers }}</div>
-          <div class="text-body-2">{{ t('services.advertisers') }}</div>
+          <div class="text-body-2">{{ isArabic ? 'معلن' : 'Advertisers' }}</div>
         </div>
       </div>
     </div>
 
     <!-- Sub-locations -->
     <div v-if="subLocations.length > 0" class="mb-8">
-      <h2 class="text-h5 font-weight-bold mb-4">{{ subLocationsTitle }}</h2>
+      <div class="d-flex align-center justify-between mb-3" style="flex-wrap: wrap; gap: 8px;">
+        <h2 class="text-h5 font-weight-bold mb-0">{{ subLocationsTitle }}</h2>
+        <div v-if="subLocations.length > 6" class="search-cities-wrapper">
+          <i class="mdi mdi-magnify"></i>
+          <input v-model="citySearch" type="text" :placeholder="isArabic ? 'بحث في المدن...' : 'Search cities...'" class="search-cities-input">
+          <button v-if="citySearch" class="search-clear-btn" @click="citySearch = ''"><i class="mdi mdi-close"></i></button>
+        </div>
+      </div>
       <div class="row">
-        <div v-for="loc in subLocations" :key="loc.id" class="col-6 col-sm-4 col-md-3 col-lg-2">
+        <div v-for="loc in visibleCities" :key="loc.id" class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
           <router-link :to="loc.route" class="card card-hover pa-3 text-center h-100" style="text-decoration: none; display: block;">
             <div class="avatar avatar-40 mx-auto mb-2" :style="{ background: loc.color || 'var(--color-primary)' }">
               <i class="mdi" :class="loc.icon || 'mdi-folder'" style="font-size: 20px; color: #fff;"></i>
             </div>
             <div class="text-body-2 font-weight-medium text-truncate">{{ loc.name }}</div>
-            <div class="text-caption text-muted">{{ loc.count }} {{ t('services.ads') }}</div>
+            <div class="text-caption text-muted">{{ loc.count }} {{ isArabic ? 'إعلان' : 'ads' }}</div>
           </router-link>
         </div>
+      </div>
+      <div v-if="filteredCities.length > cityShowCount && !citySearch" class="text-center mt-2">
+        <button class="btn btn-outline-primary btn-sm" @click="cityShowCount += 10" style="border-radius: 20px; padding: 6px 24px;">
+          <i class="mdi mdi-chevron-down"></i> {{ isArabic ? 'عرض المزيد' : 'Show More' }} ({{ filteredCities.length - cityShowCount }} {{ isArabic ? 'متبقي' : 'remaining' }})
+        </button>
       </div>
     </div>
 
@@ -104,7 +116,7 @@
     <div class="mb-4">
       <div class="d-flex align-center justify-between mb-4">
         <h2 class="text-h5 font-weight-bold">
-          {{ t('listing.listings') }}
+          {{ isArabic ? 'الإعلانات' : 'Listings' }}
           <span class="text-body-2 text-muted">({{ pagination.total }})</span>
         </h2>
         <div class="btn-toggle">
@@ -120,45 +132,20 @@
       <!-- Loading -->
       <div v-if="loading" class="text-center py-8">
         <div class="spinner spinner-md"></div>
-        <p class="mt-4 text-muted">{{ t('services.loading') }}</p>
+        <p class="mt-4 text-muted">{{ isArabic ? 'جاري التحميل...' : 'Loading...' }}</p>
       </div>
 
-      <!-- No Results — Be the First CTA -->
-      <div v-else-if="listings.length === 0" class="be-first-section">
-        <div class="be-first-card">
-          <div class="be-first-icon">
-            <i class="mdi mdi-rocket-launch"></i>
-          </div>
-          <h2 class="be-first-title">{{ t('services.be_first_title') }}</h2>
-          <p class="be-first-desc">{{ t('services.be_first_desc') }}</p>
-          <div class="be-first-features">
-            <div class="be-first-feature">
-              <i class="mdi mdi-check-circle"></i>
-              <span>{{ t('services.be_first_free') }}</span>
-            </div>
-            <div class="be-first-feature">
-              <i class="mdi mdi-check-circle"></i>
-              <span>{{ t('services.be_first_reach') }}</span>
-            </div>
-            <div class="be-first-feature">
-              <i class="mdi mdi-check-circle"></i>
-              <span>{{ t('services.be_first_easy') }}</span>
-            </div>
-          </div>
-          <div class="be-first-actions">
-            <a href="https://play.google.com/store/apps/details?id=com.talabna.talabna" target="_blank" class="btn btn-primary btn-lg">
-              <i class="mdi mdi-cellphone-arrow-down"></i>
-              {{ t('services.be_first_download') }}
-            </a>
-          </div>
-          <p class="be-first-hint">{{ t('services.be_first_hint') }}</p>
-        </div>
+      <!-- No Results -->
+      <div v-else-if="listings.length === 0" class="card pa-8 text-center">
+        <i class="mdi mdi-magnify-close" style="font-size: 64px; color: var(--color-text-muted);"></i>
+        <h3 class="text-h6 mt-4">{{ isArabic ? 'لا توجد إعلانات' : 'No listings found' }}</h3>
+        <p class="text-muted">{{ isArabic ? 'جرب تغيير الموقع أو التصنيف' : 'Try changing location or category' }}</p>
       </div>
 
       <!-- Grid View -->
       <div v-else-if="viewMode === 'grid'" class="row">
         <div v-for="listing in listings" :key="listing.id" class="col-12 col-sm-6 col-md-4 col-lg-3">
-          <listing-card :listing="listing" :locale="appStore.locale" />
+          <listing-card :listing="listing" :locale="isArabic ? 'ar' : 'en'" />
         </div>
       </div>
 
@@ -222,13 +209,11 @@
 </template>
 
 <script setup>
-import { apiFetch } from "@/utils/api"
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import { useAdvancedSeo } from '@/composables/useAdvancedSeo'
 import ListingCard from '@/components/ListingCard.vue'
-import { t } from '@/utils/translate'
 
 const route = useRoute()
 const appStore = useAppStore()
@@ -242,6 +227,8 @@ const placeholderImage = '/storage/countryFlag/placeholder-flag.jpg'
 const locationInfo = ref(null)
 const listings = ref([])
 const subLocations = ref([])
+const citySearch = ref('')
+const cityShowCount = ref(10)
 const stats = ref({
   totalListings: 0,
   totalCategories: 0,
@@ -268,7 +255,7 @@ const paginationPages = computed(() => {
 })
 
 const pageTitle = computed(() => {
-  if (!locationInfo.value) return t('services.title')
+  if (!locationInfo.value) return isArabic.value ? 'خدمات' : 'Services'
 
   const parts = []
   if (locationInfo.value.category) {
@@ -282,7 +269,7 @@ const pageTitle = computed(() => {
   }
 
   if (parts.length === 0) {
-    return t('services.title_full')
+    return isArabic.value ? 'خدمات وإعلانات' : 'Services & Listings'
   }
 
   return parts.join(' ')
@@ -313,6 +300,17 @@ const pageDescription = computed(() => {
     : 'Browse the latest listings and services available'
 })
 
+const filteredCities = computed(() => {
+  if (!citySearch.value) return subLocations.value
+  const q = citySearch.value.toLowerCase()
+  return subLocations.value.filter(c => c.name && c.name.toLowerCase().includes(q))
+})
+
+const visibleCities = computed(() => {
+  if (citySearch.value) return filteredCities.value
+  return filteredCities.value.slice(0, cityShowCount.value)
+})
+
 const subLocationsTitle = computed(() => {
   if (route.params.cityId) {
     return isArabic.value ? 'التصنيفات المتاحة' : 'Available Categories'
@@ -324,7 +322,7 @@ const subLocationsTitle = computed(() => {
 
 const breadcrumbs = computed(() => {
   const items = [
-    { title: t('nav.home'), to: '/', disabled: false }
+    { title: isArabic.value ? 'الرئيسية' : 'Home', to: '/', disabled: false }
   ]
 
   if (locationInfo.value?.country) {
@@ -389,7 +387,7 @@ function slugify(text) {
 }
 
 function formatPrice(price, currency) {
-  if (!price) return t('services.contact_price')
+  if (!price) return isArabic.value ? 'اتصل للسعر' : 'Contact for price'
   return `${price.toLocaleString()} ${currency || ''}`
 }
 
@@ -404,7 +402,7 @@ async function loadData() {
     if (route.params.cityId) params.append('city_id', route.params.cityId)
     if (route.params.categoryId) params.append('category_id', route.params.categoryId)
 
-    const response = await apiFetch(`/api/public/services?${params.toString()}`)
+    const response = await fetch(`/api/public/services?${params.toString()}`)
 
     if (response.ok) {
       const data = await response.json()
@@ -412,6 +410,8 @@ async function loadData() {
       locationInfo.value = data.location || null
       listings.value = data.listings?.data || []
       subLocations.value = data.subLocations || []
+      cityShowCount.value = 10
+      citySearch.value = ''
       stats.value = data.stats || stats.value
       pagination.value = {
         currentPage: data.listings?.current_page || 1,
@@ -450,111 +450,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Be the First CTA */
-.be-first-section {
-  display: flex;
-  justify-content: center;
-  padding: 2rem 0;
-}
-
-.be-first-card {
-  background: white;
-  border-radius: 20px;
-  padding: 3rem 2.5rem;
-  text-align: center;
-  max-width: 520px;
-  width: 100%;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
-  border: 1px solid #f0f0f0;
-}
-
-[data-theme="dark"] .be-first-card {
-  background: #1e293b;
-  border-color: #334155;
-}
-
-.be-first-icon {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin: 0 auto 1.5rem;
-}
-
-.be-first-icon i {
-  font-size: 36px;
-  color: white;
-}
-
-.be-first-title {
-  font-size: 1.5rem;
-  font-weight: 800;
-  color: #1a1a2e;
-  margin: 0 0 0.75rem;
-}
-
-[data-theme="dark"] .be-first-title {
-  color: #f1f5f9;
-}
-
-.be-first-desc {
-  color: #6b7280;
-  font-size: 0.95rem;
-  line-height: 1.6;
-  margin: 0 0 1.5rem;
-}
-
-.be-first-features {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  margin-bottom: 2rem;
-  text-align: start;
-  max-width: 300px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.be-first-feature {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.9rem;
-  color: #374151;
-}
-
-[data-theme="dark"] .be-first-feature {
-  color: #cbd5e1;
-}
-
-.be-first-feature i {
-  color: #10b981;
-  font-size: 1.1rem;
-}
-
-.be-first-actions {
-  margin-bottom: 1.25rem;
-}
-
-.be-first-actions .btn {
-  padding: 0.85rem 2rem;
-  font-size: 1rem;
-  font-weight: 700;
-  border-radius: 12px;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.be-first-hint {
-  font-size: 0.8rem;
-  color: #9ca3af;
-  margin: 0;
-}
-
 .text-clamp-2 {
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -568,4 +463,10 @@ onMounted(() => {
   margin: 0 0.5rem;
   opacity: 0.5;
 }
+.search-cities-wrapper { position: relative; display: flex; align-items: center; background: var(--color-surface, #fff); border: 1px solid rgba(var(--v-theme-on-surface), 0.15); border-radius: 20px; padding: 4px 12px; min-width: 180px; }
+.search-cities-wrapper .mdi-magnify { color: rgba(var(--v-theme-on-surface), 0.4); font-size: 18px; margin-right: 4px; }
+.search-cities-input { border: none; outline: none; background: transparent; font-size: 0.85rem; width: 100%; color: inherit; }
+.search-clear-btn { background: none; border: none; cursor: pointer; color: rgba(var(--v-theme-on-surface), 0.4); padding: 0 2px; }
+.btn-outline-primary { border: 1px solid rgb(var(--v-theme-primary)); color: rgb(var(--v-theme-primary)); background: transparent; cursor: pointer; transition: all 0.2s; }
+.btn-outline-primary:hover { background: rgba(var(--v-theme-primary), 0.1); }
 </style>
