@@ -145,16 +145,14 @@
             <p class="section-subtitle">{{ locale === 'ar' ? 'اعثر على الخدمات في منطقتك' : 'Find services in your area' }}</p>
           </div>
         </div>
-        <div class="row" v-if="!loadingLocations">
-          <div v-for="country in countries" :key="country.id" class="col-6 col-sm-4 col-md-3 col-lg-2 mb-3">
-            <router-link :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
-              <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="48" class="img-cover location-flag-img" style="height: 48px; width: 100%;" @error="handleImgError($event)">
-              <div class="location-info">
-                <h5>{{ locale === 'ar' ? country.name : country.name_en }}</h5>
-                <span>{{ formatNumber(country.listings_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
-              </div>
-            </router-link>
-          </div>
+        <div class="countries-grid" v-if="!loadingLocations">
+          <router-link v-for="country in countries" :key="country.id" :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
+            <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="48" class="img-cover location-flag-img" style="height: 48px; width: 100%;" @error="handleImgError($event)">
+            <div class="location-info">
+              <h5>{{ locale === 'ar' ? country.name : country.name_en }}</h5>
+              <span>{{ formatNumber(country.listings_count || 0) }} {{ locale === 'ar' ? 'إعلان' : 'listings' }}</span>
+            </div>
+          </router-link>
         </div>
       </div>
     </section>
@@ -487,11 +485,20 @@ onMounted(() => {
 .category-card-home h5 { font-size: 0.9rem; font-weight: 600; margin: 0 0 0.25rem; color: rgb(var(--v-theme-on-surface)); }
 .cat-count { font-size: 0.75rem; color: rgba(var(--v-theme-on-surface), 0.5); }
 
+/* Countries Grid - auto-fill, no empty space */
+.countries-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  gap: 12px;
+}
+@media (min-width: 1200px) { .countries-grid { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); } }
+@media (max-width: 575px) { .countries-grid { grid-template-columns: repeat(3, 1fr); gap: 8px; } }
+
 /* Location Cards */
 .location-card-home {
-  display: block; background: rgb(var(--v-theme-surface)); border-radius: 14px;
+  display: block; background: rgb(var(--v-theme-surface)); border-radius: 12px;
   overflow: hidden; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-  border: 1px solid rgba(var(--v-theme-on-surface), 0.06); height: 100%;
+  border: 1px solid rgba(var(--v-theme-on-surface), 0.06);
 }
 .location-card-home:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.1); }
 .location-flag-img { border-bottom: 1px solid rgba(var(--v-theme-on-surface), 0.06); }
