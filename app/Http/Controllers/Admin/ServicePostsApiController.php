@@ -292,7 +292,91 @@ class ServicePostsApiController extends Controller
                                 : null,
                             'viewed_at' => $v->viewed_at,
                         ]),
+                    'likes_count' => \DB::table('favorites')
+                        ->where('favoritable_type', 'App\\Models\\ServicePost')
+                        ->where('favoritable_id', $post->id)->count(),
+                    'recent_likes' => \DB::table('favorites')
+                        ->join('users', 'users.id', '=', 'favorites.user_id')
+                        ->leftJoin('photos', function ($join) {
+                            $join->on('photos.photoable_id', '=', 'users.id')
+                                ->where('photos.photoable_type', '=', 'App\\Models\\User');
+                        })
+                        ->where('favorites.favoritable_type', 'App\\Models\\ServicePost')
+                        ->where('favorites.favoritable_id', $post->id)
+                        ->orderByDesc('favorites.created_at')
+                        ->limit(10)
+                        ->select([
+                            'users.id',
+                            'users.user_name',
+                            'users.name',
+                            'photos.src as avatar_src',
+                            'photos.is_external as avatar_is_external',
+                            'favorites.created_at as liked_at',
+                        ])
+                        ->get()
+                        ->map(fn($v) => [
+                            'id' => $v->id,
+                            'user_name' => $v->user_name,
+                            'name' => $v->name,
+                            'avatar' => $v->avatar_src
+                                ? ($v->avatar_is_external ? $v->avatar_src : asset($v->avatar_src))
+                                : null,
+                            'liked_at' => $v->liked_at,
+                        ]),
                 ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Post not found', 'message' => $e->getMessage()], 404);
+        }
+    }
+
+    /**
+     * Get paginated list of users who liked a post
+     */
+    public function likers(Request $request, $id): JsonResponse
+    {
+        try {
+            $post = ServicePost::findOrFail($id);
+            $perPage = (int) $request->input('per_page', 20);
+
+            $likers = \DB::table('favorites')
+                ->join('users', 'users.id', '=', 'favorites.user_id')
+                ->leftJoin('photos', function ($join) {
+                    $join->on('photos.photoable_id', '=', 'users.id')
+                        ->where('photos.photoable_type', '=', 'App\\Models\\User');
+                })
+                ->where('favorites.favoritable_type', 'App\\Models\\ServicePost')
+                ->where('favorites.favoritable_id', $post->id)
+                ->orderByDesc('favorites.created_at')
+                ->select([
+                    'users.id',
+                    'users.user_name',
+                    'users.name',
+                    'users.email',
+                    'photos.src as avatar_src',
+                    'photos.is_external as avatar_is_external',
+                    'favorites.created_at as liked_at',
+                ])
+                ->paginate($perPage);
+
+            $likers->getCollection()->transform(fn($v) => [
+                'id' => $v->id,
+                'user_name' => $v->user_name,
+                'name' => $v->name,
+                'email' => $v->email,
+                'avatar' => $v->avatar_src
+                    ? ($v->avatar_is_external ? $v->avatar_src : asset($v->avatar_src))
+                    : null,
+                'liked_at' => $v->liked_at,
+            ]);
+
+            return response()->json([
+                'post_id' => $post->id,
+                'post_title' => $post->title,
+                'total_likes' => \DB::table('favorites')
+                    ->where('favoritable_type', 'App\\Models\\ServicePost')
+                    ->where('favoritable_id', $post->id)->count(),
+                'likers' => $likers,
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Post not found', 'message' => $e->getMessage()], 404);

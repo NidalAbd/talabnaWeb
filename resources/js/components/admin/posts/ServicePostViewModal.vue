@@ -100,6 +100,53 @@
           </button>
         </div>
 
+        <!-- Likes Section -->
+        <div class="mt-4">
+          <label class="form-label-bold">
+            <i class="fas fa-heart" style="color:#e74c3c"></i> Likes
+            <span v-if="post.likes_count != null" class="likes-count-badge">{{ post.likes_count }}</span>
+          </label>
+          <div v-if="post.recent_likes && post.recent_likes.length" class="viewers-list">
+            <div v-for="liker in post.recent_likes" :key="liker.id" class="viewer-item">
+              <img :src="liker.avatar || '/vendor/adminlte/dist/img/user-default.jpg'" :alt="liker.user_name" class="viewer-avatar">
+              <div class="viewer-info">
+                <span class="viewer-name">{{ liker.user_name }}</span>
+                <span class="viewer-time">{{ formatDate(liker.liked_at) }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-else class="no-viewers">
+            <i class="fas fa-heart-broken"></i> No likes yet
+          </div>
+          <button v-if="post.likes_count > 10" class="btn-view-all btn-view-all-likes" @click="showAllLikers = true">
+            View all {{ post.likes_count }} likes
+          </button>
+        </div>
+
+        <!-- All Likers Panel -->
+        <div v-if="showAllLikers" class="viewers-panel likers-panel">
+          <div class="viewers-panel-header">
+            <h4><i class="fas fa-heart" style="color:#e74c3c"></i> All Likes ({{ allLikersTotal }})</h4>
+            <button class="modal-close-btn" @click="showAllLikers = false"><i class="fas fa-times"></i></button>
+          </div>
+          <div v-if="loadingLikers" class="text-center py-3"><i class="fas fa-spinner fa-spin"></i></div>
+          <div v-else class="viewers-list">
+            <div v-for="liker in allLikers" :key="liker.id" class="viewer-item">
+              <img :src="liker.avatar || '/vendor/adminlte/dist/img/user-default.jpg'" :alt="liker.user_name" class="viewer-avatar">
+              <div class="viewer-info">
+                <span class="viewer-name">{{ liker.user_name }}</span>
+                <span class="viewer-email">{{ liker.email }}</span>
+                <span class="viewer-time">{{ formatDate(liker.liked_at) }}</span>
+              </div>
+            </div>
+          </div>
+          <div v-if="allLikersLastPage > 1" class="viewers-pagination">
+            <button :disabled="allLikersPage <= 1" @click="loadAllLikers(allLikersPage - 1)">Previous</button>
+            <span>Page {{ allLikersPage }} / {{ allLikersLastPage }}</span>
+            <button :disabled="allLikersPage >= allLikersLastPage" @click="loadAllLikers(allLikersPage + 1)">Next</button>
+          </div>
+        </div>
+
         <!-- All Viewers Modal -->
         <div v-if="showAllViewers" class="viewers-panel">
           <div class="viewers-panel-header">
@@ -153,6 +200,14 @@ const allViewersPage = ref(1)
 const allViewersLastPage = ref(1)
 const allViewersTotal = ref(0)
 
+// All likers panel state
+const showAllLikers = ref(false)
+const loadingLikers = ref(false)
+const allLikers = ref([])
+const allLikersPage = ref(1)
+const allLikersLastPage = ref(1)
+const allLikersTotal = ref(0)
+
 const formatDate = (d) => d ? new Date(d).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-'
 const truncate = (s, n) => s && s.length > n ? s.substring(0, n) + '...' : s
 const photoUrl = (photo) => {
@@ -177,8 +232,28 @@ const loadAllViewers = async (page = 1) => {
   }
 }
 
+const loadAllLikers = async (page = 1) => {
+  loadingLikers.value = true
+  try {
+    const res = await fetch(`/api/admin/service-posts/${props.postId}/likers?page=${page}&per_page=20`)
+    const data = await res.json()
+    allLikers.value = data.likers?.data || []
+    allLikersPage.value = data.likers?.current_page || 1
+    allLikersLastPage.value = data.likers?.last_page || 1
+    allLikersTotal.value = data.total_likes || 0
+  } catch (e) {
+    console.error('Failed to load likers:', e)
+  } finally {
+    loadingLikers.value = false
+  }
+}
+
 watch(showAllViewers, (val) => {
   if (val) loadAllViewers(1)
+})
+
+watch(showAllLikers, (val) => {
+  if (val) loadAllLikers(1)
 })
 
 onMounted(async () => {
@@ -225,6 +300,10 @@ onMounted(async () => {
 .btn-action.cancel { background: white; border: 2px solid #e9ecef; color: #6c757d; }
 .btn-action.primary { background: linear-gradient(135deg, #667eea, #764ba2); color: white; }
 .btn-action.primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(102,126,234,0.4); }
+.likes-count-badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; margin-left: 6px; font-weight: 600; }
+.btn-view-all-likes { border-color: #f5c6cb; background: #fff5f5; color: #e74c3c; }
+.btn-view-all-likes:hover { background: #ffe0e0; }
+.likers-panel { border-color: #e74c3c; }
 .viewers-count-badge { background: #667eea; color: white; padding: 2px 8px; border-radius: 12px; font-size: 0.7rem; margin-left: 6px; font-weight: 600; }
 .viewers-list { display: flex; flex-direction: column; gap: 6px; max-height: 300px; overflow-y: auto; }
 .viewer-item { display: flex; align-items: center; gap: 10px; padding: 6px 10px; background: #f8f9fa; border-radius: 10px; }

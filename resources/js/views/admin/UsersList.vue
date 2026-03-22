@@ -190,6 +190,10 @@
               <i class="fas fa-eye"></i>
               <span>{{ user.viewed_posts_count }} Views</span>
             </div>
+            <div class="stat-item" v-if="user.liked_posts_count > 0">
+              <i class="fas fa-heart" style="color:#e74c3c"></i>
+              <span>{{ user.liked_posts_count }} Likes</span>
+            </div>
             <div class="stat-item warning" v-if="user.reports_count > 0">
               <i class="fas fa-exclamation-triangle"></i>
               <span>{{ user.reports_count }} Reports</span>
@@ -282,6 +286,9 @@
                 <span class="badge info"><i class="fas fa-box"></i> {{ user.service_posts_count }}</span>
                 <span v-if="user.viewed_posts_count > 0" class="badge secondary">
                   <i class="fas fa-eye"></i> {{ user.viewed_posts_count }}
+                </span>
+                <span v-if="user.liked_posts_count > 0" class="badge" style="background:#ffebee;color:#c62828">
+                  <i class="fas fa-heart"></i> {{ user.liked_posts_count }}
                 </span>
                 <span v-if="user.reports_count > 0" class="badge warning">
                   <i class="fas fa-flag"></i> {{ user.reports_count }}

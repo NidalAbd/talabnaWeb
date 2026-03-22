@@ -72,9 +72,13 @@ class UsersApiController extends Controller
             // Base query
             $query = User::with(['photos', 'roles'])
                 ->withCount(['reports', 'servicePosts'])
-                ->addSelect(['viewed_posts_count' => \DB::table('post_views')
-                    ->selectRaw('count(*)')
-                    ->whereColumn('post_views.user_id', 'users.id')
+                ->addSelect([
+                    'viewed_posts_count' => \DB::table('post_views')
+                        ->selectRaw('count(*)')
+                        ->whereColumn('post_views.user_id', 'users.id'),
+                    'liked_posts_count' => \DB::table('favorites')
+                        ->selectRaw('count(*)')
+                        ->whereColumn('favorites.user_id', 'users.id'),
                 ]);
 
             // Apply filters
@@ -119,6 +123,7 @@ class UsersApiController extends Controller
                     'reports_count' => $user->reports_count,
                     'service_posts_count' => $user->service_posts_count ?? 0,
                     'viewed_posts_count' => (int) ($user->viewed_posts_count ?? 0),
+                    'liked_posts_count' => (int) ($user->liked_posts_count ?? 0),
                 ];
             });
 
@@ -211,6 +216,24 @@ class UsersApiController extends Controller
                             'post_id' => $v->id,
                             'title' => $v->title,
                             'viewed_at' => $v->viewed_at,
+                        ]),
+                    'liked_posts_count' => \DB::table('favorites')->where('user_id', $user->id)->count(),
+                    'recent_likes' => \DB::table('favorites')
+                        ->join('service_posts', 'service_posts.id', '=', 'favorites.favoritable_id')
+                        ->where('favorites.user_id', $user->id)
+                        ->where('favorites.favoritable_type', 'App\\Models\\ServicePost')
+                        ->orderByDesc('favorites.created_at')
+                        ->limit(10)
+                        ->select([
+                            'service_posts.id',
+                            'service_posts.title',
+                            'favorites.created_at as liked_at',
+                        ])
+                        ->get()
+                        ->map(fn($v) => [
+                            'post_id' => $v->id,
+                            'title' => $v->title,
+                            'liked_at' => $v->liked_at,
                         ]),
                 ]
             ]);
