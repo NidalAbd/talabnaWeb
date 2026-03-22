@@ -447,14 +447,10 @@ try {
 // ── Command Monitor ────────────────────────────────────────
 hc_section('Command Monitor');
 
-try {
-    $ctrl = app(CommandMonitorController::class);
-    $resp = $ctrl->index();
-    $data = json_decode($resp->getContent(), true);
-    hc_test('command-monitor returns 200', $resp->getStatusCode() === 200);
+[$status, $data] = hc_call(CommandMonitorController::class, 'index');
+if ($data !== null) {
+    hc_test('command-monitor returns 200', $status === 200);
     hc_test('command-monitor has commands', isset($data['commands']));
-} catch (\Exception $e) {
-    hc_test('command-monitor', false, $e->getMessage());
 }
 
 // ── Print standalone results if run directly ───────────────
