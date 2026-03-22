@@ -444,17 +444,22 @@ class GoogleAuthController extends Controller
                 // Assign default role
                 $defaultRole = Role::where('name', 'user')->first();
                 if ($defaultRole) {
-                    $user->roles()->syncWithoutDetaching([$defaultRole->id]);
+                    $user->roles()->attach($defaultRole->id, ['user_type' => get_class($user)]);
                 }
+            }
 
-                // Assign default permissions
-                $permissions = \App\Models\Permission::whereIn('name', [
-                    'post_create', 'post_read', 'post_update', 'post_delete',
-                    'comment_create', 'comment_read', 'comment_update', 'comment_delete',
-                    'photo_create', 'photo_read'
-                ])->pluck('id');
-                if ($permissions->isNotEmpty()) {
-                    $user->Permission()->syncWithoutDetaching($permissions);
+            // Save or update Google profile photo
+            if ($photoUrl) {
+                $existingPhoto = $user->photos()->first();
+                if (!$existingPhoto) {
+                    $user->photos()->save(new Photos([
+                        'src' => $photoUrl,
+                        'is_external' => true,
+                    ]));
+                } elseif (!$existingPhoto->is_external) {
+                    $existingPhoto->src = $photoUrl;
+                    $existingPhoto->is_external = true;
+                    $existingPhoto->save();
                 }
             }
 
