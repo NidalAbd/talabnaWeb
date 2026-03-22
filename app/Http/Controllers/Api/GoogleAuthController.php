@@ -219,6 +219,11 @@ class GoogleAuthController extends Controller
                             'is_external' => true,
                         ]);
                         $user->photos()->save($photo);
+                    } elseif (!$existingPhoto->is_external) {
+                        // Update local default avatar to Google photo
+                        $existingPhoto->src = $request->photo_url;
+                        $existingPhoto->is_external = true;
+                        $existingPhoto->save();
                     }
                 }
 
