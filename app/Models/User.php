@@ -91,6 +91,14 @@ class User extends Authenticatable implements CanResetPasswordContract
     {
         return $this->hasMany(ServicePost::class);
     }
+
+    public function viewedPosts(): BelongsToMany
+    {
+        return $this->belongsToMany(ServicePost::class, 'post_views')
+            ->withPivot('viewed_at')
+            ->orderByPivot('viewed_at', 'desc');
+    }
+
     public function subcategories()
     {
         return $this->belongsToMany(Sub_categories::class, 'user_subcategory', 'user_id', 'sub_categories_id');

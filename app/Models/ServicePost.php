@@ -259,6 +259,13 @@ class ServicePost extends Model
         return $this->morphMany(Favorite::class, 'favoritable');
     }
 
+    public function viewers(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'post_views')
+            ->withPivot('viewed_at')
+            ->orderByPivot('viewed_at', 'desc');
+    }
+
     public function comments(): HasMany
     {
         return $this->hasMany(Comment::class);

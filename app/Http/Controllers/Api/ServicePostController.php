@@ -183,11 +183,20 @@ class ServicePostController extends Controller
         return response()->json(compact('servicePosts'));
     }
 
-    public function viewAdd($servicePost): JsonResponse
+    public function viewAdd(Request $request, $servicePost): JsonResponse
     {
         $servicePostShow = ServicePost::find($servicePost);
-        // Increment the view count of the service post
         $servicePostShow->increment('view_count');
+
+        // Track which user viewed this post
+        $user = $request->user();
+        if ($user) {
+            \DB::table('post_views')->updateOrInsert(
+                ['service_post_id' => $servicePostShow->id, 'user_id' => $user->id],
+                ['viewed_at' => now()]
+            );
+        }
+
         return response()->json(['view' => $servicePostShow->view_count]);
     }
 
