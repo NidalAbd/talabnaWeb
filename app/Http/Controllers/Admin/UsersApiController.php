@@ -190,6 +190,23 @@ class UsersApiController extends Controller
                     'service_posts_count' => $user->servicePosts->count(),
                     'reports_count' => $user->reports->count(),
                     'points_balance' => $user->points ?? 0,
+                    'viewed_posts_count' => \DB::table('post_views')->where('user_id', $user->id)->count(),
+                    'recent_views' => \DB::table('post_views')
+                        ->join('service_posts', 'service_posts.id', '=', 'post_views.service_post_id')
+                        ->where('post_views.user_id', $user->id)
+                        ->orderByDesc('post_views.viewed_at')
+                        ->limit(10)
+                        ->select([
+                            'service_posts.id',
+                            'service_posts.title',
+                            'post_views.viewed_at',
+                        ])
+                        ->get()
+                        ->map(fn($v) => [
+                            'post_id' => $v->id,
+                            'title' => $v->title,
+                            'viewed_at' => $v->viewed_at,
+                        ]),
                 ]
             ]);
         } catch (\Exception $e) {

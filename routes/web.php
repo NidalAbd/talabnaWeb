@@ -764,6 +764,7 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::put('/service-posts/{id}', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'update'])->name('api.admin.service-posts.update');
             Route::post('/service-posts/{id}/change-badge', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'changeBadge'])->name('api.admin.service-posts.change-badge');
             Route::delete('/service-posts/{id}', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'destroy'])->name('api.admin.service-posts.destroy');
+            Route::get('/service-posts/{id}/viewers', [\App\Http\Controllers\Admin\ServicePostsApiController::class, 'viewers'])->name('api.admin.service-posts.viewers');
 
             // Reports
             Route::get('/reports/stats', [\App\Http\Controllers\Admin\ReportsApiController::class, 'getStats'])->name('api.admin.reports.stats');

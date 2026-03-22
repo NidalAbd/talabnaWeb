@@ -264,7 +264,86 @@ class ServicePostsApiController extends Controller
                     ]),
                     'created_at' => $post->created_at->toISOString(),
                     'updated_at' => $post->updated_at->toISOString(),
+                    'unique_viewers_count' => \DB::table('post_views')->where('service_post_id', $post->id)->count(),
+                    'recent_viewers' => \DB::table('post_views')
+                        ->join('users', 'users.id', '=', 'post_views.user_id')
+                        ->leftJoin('photos', function ($join) {
+                            $join->on('photos.photoable_id', '=', 'users.id')
+                                ->where('photos.photoable_type', '=', 'App\\Models\\User');
+                        })
+                        ->where('post_views.service_post_id', $post->id)
+                        ->orderByDesc('post_views.viewed_at')
+                        ->limit(10)
+                        ->select([
+                            'users.id',
+                            'users.user_name',
+                            'users.name',
+                            'photos.src as avatar_src',
+                            'photos.is_external as avatar_is_external',
+                            'post_views.viewed_at',
+                        ])
+                        ->get()
+                        ->map(fn($v) => [
+                            'id' => $v->id,
+                            'user_name' => $v->user_name,
+                            'name' => $v->name,
+                            'avatar' => $v->avatar_src
+                                ? ($v->avatar_is_external ? $v->avatar_src : asset($v->avatar_src))
+                                : null,
+                            'viewed_at' => $v->viewed_at,
+                        ]),
                 ],
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Post not found', 'message' => $e->getMessage()], 404);
+        }
+    }
+
+    /**
+     * Get paginated list of users who viewed a post
+     */
+    public function viewers(Request $request, $id): JsonResponse
+    {
+        try {
+            $post = ServicePost::findOrFail($id);
+            $perPage = (int) $request->input('per_page', 20);
+
+            $viewers = \DB::table('post_views')
+                ->join('users', 'users.id', '=', 'post_views.user_id')
+                ->leftJoin('photos', function ($join) {
+                    $join->on('photos.photoable_id', '=', 'users.id')
+                        ->where('photos.photoable_type', '=', 'App\\Models\\User');
+                })
+                ->where('post_views.service_post_id', $post->id)
+                ->orderByDesc('post_views.viewed_at')
+                ->select([
+                    'users.id',
+                    'users.user_name',
+                    'users.name',
+                    'users.email',
+                    'photos.src as avatar_src',
+                    'photos.is_external as avatar_is_external',
+                    'post_views.viewed_at',
+                ])
+                ->paginate($perPage);
+
+            $viewers->getCollection()->transform(fn($v) => [
+                'id' => $v->id,
+                'user_name' => $v->user_name,
+                'name' => $v->name,
+                'email' => $v->email,
+                'avatar' => $v->avatar_src
+                    ? ($v->avatar_is_external ? $v->avatar_src : asset($v->avatar_src))
+                    : null,
+                'viewed_at' => $v->viewed_at,
+            ]);
+
+            return response()->json([
+                'post_id' => $post->id,
+                'post_title' => $post->title,
+                'total_views' => $post->view_count ?? 0,
+                'unique_viewers' => \DB::table('post_views')->where('service_post_id', $post->id)->count(),
+                'viewers' => $viewers,
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Post not found', 'message' => $e->getMessage()], 404);
