@@ -71,7 +71,11 @@ class UsersApiController extends Controller
 
             // Base query
             $query = User::with(['photos', 'roles'])
-                ->withCount(['reports', 'servicePosts']);
+                ->withCount(['reports', 'servicePosts'])
+                ->addSelect(['viewed_posts_count' => \DB::table('post_views')
+                    ->selectRaw('count(*)')
+                    ->whereColumn('post_views.user_id', 'users.id')
+                ]);
 
             // Apply filters
             if ($status) {
@@ -114,6 +118,7 @@ class UsersApiController extends Controller
                     'roles' => $user->roles->pluck('display_name')->filter()->values()->toArray(),
                     'reports_count' => $user->reports_count,
                     'service_posts_count' => $user->service_posts_count ?? 0,
+                    'viewed_posts_count' => (int) ($user->viewed_posts_count ?? 0),
                 ];
             });
 
