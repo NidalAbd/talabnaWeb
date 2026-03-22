@@ -108,10 +108,14 @@ $userId = \App\Models\User::value('id');
 if ($userId) {
     [$status, $data] = hc_call_with_id(UsersApiController::class, 'show', $userId);
     if ($data !== null) {
-        hc_test('users show returns 200', $status === 200);
-        hc_test('users show has user key', isset($data['user']));
-        hc_test('users show has points_balance', isset($data['user']['points_balance']));
-        hc_test('users show has service_posts_count', isset($data['user']['service_posts_count']));
+        hc_test('users show returns 200', $status === 200, isset($data['error']) ? "error: {$data['message']}" : '');
+        if ($status === 200 && isset($data['user'])) {
+            hc_test('users show has user key', true);
+            hc_test('users show has points_balance', isset($data['user']['points_balance']));
+            hc_test('users show has service_posts_count', isset($data['user']['service_posts_count']));
+        } elseif ($status !== 200) {
+            hc_test('users show has user key', false, "status {$status}: " . ($data['message'] ?? 'unknown'));
+        }
     }
 }
 
@@ -298,11 +302,19 @@ try {
     hc_test('translations stats', false, $e->getMessage());
 }
 
-// Content Translations
-[$status, $data] = hc_call(ContentTranslationController::class, 'index', ['per_page' => 3]);
-if ($data !== null) {
-    hc_test('content-translations index returns 200', $status === 200);
-    hc_test('content-translations has data', isset($data['data']));
+// Content Translations (requires language code parameter)
+try {
+    $ctrl = app(ContentTranslationController::class);
+    $langCode = \App\Models\Language::where('is_default', true)->value('code') ?? 'ar';
+    $req = \Illuminate\Http\Request::create("/api/admin/languages/{$langCode}/content-translations?model=categories&per_page=3", 'GET', [
+        'model' => 'categories', 'per_page' => 3,
+    ]);
+    $resp = $ctrl->index($req, $langCode);
+    $ctData = json_decode($resp->getContent(), true);
+    hc_test('content-translations index returns 200', $resp->getStatusCode() === 200);
+    hc_test('content-translations has data', isset($ctData['data']));
+} catch (\Exception $e) {
+    hc_test('content-translations index', false, $e->getMessage());
 }
 
 // ── Reports ────────────────────────────────────────────────

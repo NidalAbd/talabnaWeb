@@ -153,7 +153,6 @@ class UsersApiController extends Controller
                 'country',
                 'city',
                 'reports',
-                'pointTransactions'
             ])->findOrFail($id);
 
             return response()->json([

@@ -45,8 +45,8 @@ if ($data !== null && !empty($data['service_posts']['data'])) {
     hc_test('posts: title is string (not JSON obj)', is_string($post['title'] ?? null));
     hc_test('posts: description is string', is_string($post['description'] ?? null));
     hc_test('posts: has id', isset($post['id']));
-    hc_test('posts: has user_id', isset($post['user_id']));
-    hc_test('posts: has categories_id', isset($post['categories_id']));
+    hc_test('posts: has user object', isset($post['user']));
+    hc_test('posts: has category object', isset($post['category']));
 
     // Category name should be resolved to string in the nested object
     if (isset($post['category'])) {
@@ -107,12 +107,14 @@ if ($data !== null && !empty($data['users']['data'])) {
 $userId = \App\Models\User::value('id');
 if ($userId) {
     [$status, $data] = hc_call_with_id(UsersApiController::class, 'show', $userId);
-    if ($data !== null && isset($data['user'])) {
+    if ($data !== null && $status === 200 && isset($data['user'])) {
         $u = $data['user'];
         hc_test('user show: has points_balance', isset($u['points_balance']),
             'got keys: ' . implode(', ', array_keys($u)));
         hc_test('user show: has service_posts_count', isset($u['service_posts_count']));
         hc_test('user show: has roles', isset($u['roles']));
+    } elseif ($data !== null && $status !== 200) {
+        hc_test('user show: endpoint works', false, "status {$status}: " . ($data['message'] ?? 'unknown error'));
     }
 }
 
