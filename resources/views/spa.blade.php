@@ -1,4 +1,15 @@
 @php
+    // 301 redirect old ?locale= to ?lang= for SEO consistency
+    if (request()->has('locale') && !request()->has('lang')) {
+        $query = request()->query();
+        $query['lang'] = $query['locale'];
+        unset($query['locale']);
+        $redirectUrl = request()->url() . '?' . http_build_query($query);
+        header("HTTP/1.1 301 Moved Permanently");
+        header("Location: {$redirectUrl}");
+        exit;
+    }
+
     // Detect locale from ?lang= or legacy ?locale= parameter
     $requestedLocale = request()->query('lang', request()->query('locale', session('locale', 'ar')));
     $activeLocales = \App\Models\Language::getActiveOrdered()->pluck('code')->toArray();
