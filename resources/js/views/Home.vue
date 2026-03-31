@@ -210,6 +210,7 @@ import { useSeo } from '@/composables/useSeo'
 import ListingCard from '@/components/ListingCard.vue'
 import { getCategoryIcon, getCategoryColor, formatNumber } from '@/utils/helpers'
 import { t } from '@/utils/translate'
+import { apiFetch } from '@/utils/api'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -251,7 +252,7 @@ const handleImgError = (event) => {
 // Fetch functions with defensive coding
 const fetchCategories = async () => {
   try {
-    const response = await fetch(`/api/public/categories?lang=${locale}`)
+    const response = await apiFetch('/api/public/categories')
     if (!response.ok) return
     const data = await response.json()
     categories.value = Array.isArray(data.categories) ? data.categories : []
@@ -265,7 +266,7 @@ const fetchCategories = async () => {
 const fetchFeatured = async () => {
   loadingFeatured.value = true
   try {
-    const response = await fetch(`/api/public/featured?lang=${locale}`)
+    const response = await apiFetch('/api/public/featured')
     if (!response.ok) return
     const data = await response.json()
     featured.value = Array.isArray(data.featured) ? data.featured : []
@@ -281,11 +282,11 @@ const fetchFeatured = async () => {
 const fetchLatest = async (categoryId = null) => {
   loadingLatest.value = true
   try {
-    let url = `/api/public/latest?lang=${locale}`
+    let url = '/api/public/latest'
     if (categoryId && categoryId !== 'all') {
-      url += `&category_id=${categoryId}`
+      url += `?category_id=${categoryId}`
     }
-    const response = await fetch(url)
+    const response = await apiFetch(url)
     if (!response.ok) return
     const data = await response.json()
     latest.value = Array.isArray(data.latest) ? data.latest : []
@@ -300,7 +301,7 @@ const fetchLatest = async (categoryId = null) => {
 const fetchPopular = async () => {
   loadingPopular.value = true
   try {
-    const response = await fetch(`/api/public/popular?lang=${locale}`)
+    const response = await apiFetch('/api/public/popular')
     if (!response.ok) return
     const data = await response.json()
     popular.value = Array.isArray(data.popular) ? data.popular : []
@@ -314,7 +315,7 @@ const fetchPopular = async () => {
 
 const fetchStats = async () => {
   try {
-    const response = await fetch('/api/public/stats')
+    const response = await apiFetch('/api/public/stats')
     if (!response.ok) return
     const data = await response.json()
     stats.value = data || {}
@@ -327,7 +328,7 @@ const fetchStats = async () => {
 const fetchCountries = async () => {
   loadingLocations.value = true
   try {
-    const response = await fetch(`/api/public/countries?lang=${locale}`)
+    const response = await apiFetch('/api/public/countries')
     if (!response.ok) return
     const data = await response.json()
     countries.value = Array.isArray(data.countries) ? data.countries : []

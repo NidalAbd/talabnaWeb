@@ -346,6 +346,7 @@ const userAvatar = computed(() => {
 })
 
 import { getCategoryIcon, getCategoryColor } from '@/utils/helpers'
+import { apiFetch } from '@/utils/api'
 
 const langMenuOpen = ref(false)
 const availableLanguages = ref([
@@ -383,7 +384,7 @@ const doSearch = () => {
 
 const fetchNavCountries = async () => {
   try {
-    const response = await fetch(`/api/public/countries?lang=${appStore.locale}`)
+    const response = await apiFetch('/api/public/countries')
     if (response.ok) {
       const data = await response.json()
       navCountries.value = data.countries || []
@@ -395,7 +396,7 @@ const fetchNavCountries = async () => {
 
 const fetchCategories = async () => {
   try {
-    const response = await fetch(`/api/public/categories?lang=${appStore.locale}`)
+    const response = await apiFetch('/api/public/categories')
     if (response.ok) {
       const data = await response.json()
       appStore.setCategories(data.categories || data)
