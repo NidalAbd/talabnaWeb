@@ -884,6 +884,9 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::get('/command-monitor', [CommandMonitorController::class, 'index'])->name('api.admin.command-monitor.index');
             Route::get('/command-monitor/progress', [CommandMonitorController::class, 'progress'])->name('api.admin.command-monitor.progress');
 
+            // Auto-translate (AI translation)
+            Route::post('/auto-translate/{locale}', [\App\Http\Controllers\Api\AutoTranslateController::class, 'start'])->name('api.admin.auto-translate.start');
+
             // Translations Management (using API controller for web admin)
             Route::prefix('translations')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Admin\TranslationManagementController::class, 'index'])->name('api.admin.translations.index');
