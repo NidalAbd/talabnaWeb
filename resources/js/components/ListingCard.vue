@@ -129,10 +129,11 @@ const isFavorite = ref(false)
 
 const getCategoryName = (item) => {
   if (!item) return ''
+  if (item.name_localized) return item.name_localized
   if (item.name && typeof item.name === 'object') {
     return getLocalizedName(item.name, props.locale)
   }
-  return props.locale === 'ar' ? item.name : (item.name_en || item.name || '')
+  return item.name_en || item.name || ''
 }
 
 const getLocationName = (item) => getCategoryName(item)
