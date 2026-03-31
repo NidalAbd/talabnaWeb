@@ -561,10 +561,8 @@ const clearFilters = () => {
 
 onMounted(() => {
   updateMeta({
-    title: locale.value === 'ar' ? 'تصفح الإعلانات - طلبنا' : 'Browse Listings - Talabna',
-    description: locale.value === 'ar'
-      ? 'تصفح جميع الإعلانات المبوبة. سيارات، عقارات، هواتف، وظائف والمزيد.'
-      : 'Browse all classified ads. Cars, real estate, phones, jobs and more.',
+    title: t('browse.title') + ' - ' + t('app.name'),
+    description: t('browse.title') + '. ' + t('home.hero_desc'),
   })
 
   // Parse URL query params for shareable/bookmarkable filters

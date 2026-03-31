@@ -111,8 +111,8 @@ const locale = computed(() => appStore.locale)
 
 onMounted(() => {
   updateMeta({
-    title: locale.value === 'ar' ? 'شروط الاستخدام - طلبنا' : 'Terms of Service - Talabna',
-    description: locale.value === 'ar' ? 'شروط استخدام منصة طلبنا للإعلانات المبوبة' : 'Terms of service for Talabna classified ads platform',
+    title: t('terms.title') + ' - ' + t('app.name'),
+    description: t('terms.title') + ' - ' + t('app.tagline'),
   })
 })
 </script>

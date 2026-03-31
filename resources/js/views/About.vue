@@ -36,8 +36,8 @@
                 <div class="avatar avatar-64 mx-auto mb-4" :style="{ background: value.color }">
                   <i class="mdi" :class="value.icon" style="font-size: 32px; color: #fff;"></i>
                 </div>
-                <h3 class="text-h6 font-weight-bold mb-2">{{ locale === 'ar' ? value.titleAr : value.titleEn }}</h3>
-                <p class="text-body-2 text-muted">{{ locale === 'ar' ? value.descAr : value.descEn }}</p>
+                <h3 class="text-h6 font-weight-bold mb-2">{{ t(value.titleKey) }}</h3>
+                <p class="text-body-2 text-muted">{{ t(value.descKey) }}</p>
               </div>
             </div>
           </div>
@@ -48,7 +48,7 @@
             <div class="row">
               <div v-for="stat in aboutStats" :key="stat.labelEn" class="col-6 col-md-3">
                 <div class="text-h3 font-weight-bold text-white">{{ stat.value }}</div>
-                <div class="text-body-2 text-white" style="opacity: 0.8">{{ locale === 'ar' ? stat.labelAr : stat.labelEn }}</div>
+                <div class="text-body-2 text-white" style="opacity: 0.8">{{ t(stat.labelKey) }}</div>
               </div>
             </div>
           </div>
@@ -82,32 +82,30 @@ const { updateMeta, setOrganizationSchema, setFaqSchema } = useSeo()
 const locale = computed(() => appStore.locale)
 
 const values = [
-  { icon: 'mdi-shield-check', color: '#10B981', titleAr: 'الأمان', titleEn: 'Security', descAr: 'نحمي بياناتك وخصوصيتك بأحدث تقنيات الحماية', descEn: 'We protect your data and privacy with the latest security technologies' },
-  { icon: 'mdi-lightning-bolt', color: '#F59E0B', titleAr: 'السرعة', titleEn: 'Speed', descAr: 'منصة سريعة وسهلة الاستخدام مع تجربة سلسة', descEn: 'Fast and easy to use platform with a smooth experience' },
-  { icon: 'mdi-heart', color: '#EF4444', titleAr: 'الثقة', titleEn: 'Trust', descAr: 'بناء مجتمع موثوق من المستخدمين المُوثّقين', descEn: 'Building a trusted community of verified users' },
-  { icon: 'mdi-earth', color: '#06B6D4', titleAr: 'التغطية', titleEn: 'Coverage', descAr: 'نخدم أكثر من 22 دولة في المنطقة العربية', descEn: 'Serving over 22 countries across the Arab region' },
+  { icon: 'mdi-shield-check', color: '#10B981', titleKey: 'about.value_security', descKey: 'about.value_security_desc' },
+  { icon: 'mdi-lightning-bolt', color: '#F59E0B', titleKey: 'about.value_speed', descKey: 'about.value_speed_desc' },
+  { icon: 'mdi-heart', color: '#EF4444', titleKey: 'about.value_trust', descKey: 'about.value_trust_desc' },
+  { icon: 'mdi-earth', color: '#06B6D4', titleKey: 'about.value_coverage', descKey: 'about.value_coverage_desc' },
 ]
 
 const aboutStats = [
-  { value: '22+', labelAr: 'دولة', labelEn: 'Countries' },
-  { value: '500+', labelAr: 'مستخدم', labelEn: 'Users' },
-  { value: '1000+', labelAr: 'إعلان', labelEn: 'Listings' },
-  { value: '8', labelAr: 'تصنيف', labelEn: 'Categories' },
+  { value: '22+', labelKey: 'about.stat_countries' },
+  { value: '500+', labelKey: 'about.stat_users' },
+  { value: '1000+', labelKey: 'about.stat_listings' },
+  { value: '8', labelKey: 'about.stat_categories' },
 ]
 
 onMounted(() => {
   updateMeta({
-    title: locale.value === 'ar' ? 'من نحن - طلبنا | منصة الإعلانات المبوبة' : 'About Us - Talabna | Classified Ads Platform',
-    description: locale.value === 'ar'
-      ? 'تعرف على طلبنا، منصة الإعلانات المبوبة الرائدة في المنطقة العربية. نربط بين البائعين والمشترين بأمان وسهولة.'
-      : 'Learn about Talabna, the leading classified ads platform in the Arab region. We connect sellers and buyers safely and easily.',
+    title: t('about.title') + ' - ' + t('app.name') + ' | ' + t('app.tagline'),
+    description: t('about.mission_p1'),
   })
   setOrganizationSchema()
   setFaqSchema([
-    { question: locale.value === 'ar' ? 'ما هي طلبنا؟' : 'What is Talabna?', answer: locale.value === 'ar' ? 'طلبنا هي منصة إعلانات مبوبة رائدة تخدم المنطقة العربية، تتيح نشر إعلانات في فئات الوظائف والعقارات والسيارات والأجهزة والخدمات.' : 'Talabna is a leading classified ads platform serving the Arab region, allowing posting in jobs, real estate, cars, electronics, and services categories.' },
-    { question: locale.value === 'ar' ? 'هل طلبنا مجانية؟' : 'Is Talabna free?', answer: locale.value === 'ar' ? 'نعم، إنشاء الحساب ونشر الإعلانات مجاني. يمكنك شراء شارات مميزة لتعزيز ظهور إعلاناتك.' : 'Yes, creating an account and posting ads is free. You can purchase premium badges to boost your listing visibility.' },
-    { question: locale.value === 'ar' ? 'كيف أتواصل مع البائع؟' : 'How do I contact a seller?', answer: locale.value === 'ar' ? 'يمكنك التواصل مع البائع عبر الاتصال المباشر أو واتساب من صفحة الإعلان.' : 'You can contact the seller via direct call or WhatsApp from the listing page.' },
-    { question: locale.value === 'ar' ? 'ما هي الدول المدعومة؟' : 'What countries are supported?', answer: locale.value === 'ar' ? 'نخدم أكثر من 22 دولة عربية تشمل فلسطين، مصر، السعودية، الأردن، العراق، الإمارات وغيرها.' : 'We serve over 22 Arab countries including Palestine, Egypt, Saudi Arabia, Jordan, Iraq, UAE and more.' },
+    { question: t('faq.what_is'), answer: t('faq.what_is_answer') },
+    { question: t('faq.is_free'), answer: t('faq.is_free_answer') },
+    { question: t('faq.contact_seller'), answer: t('faq.contact_seller_answer') },
+    { question: t('faq.countries'), answer: t('faq.countries_answer') },
   ])
 })
 </script>

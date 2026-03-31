@@ -196,6 +196,30 @@ const fallbacks = {
   'notfound.title': { ar: 'الصفحة غير موجودة', en: 'Page Not Found' },
   'notfound.desc': { ar: 'عذراً، الصفحة التي تبحث عنها غير موجودة أو تم نقلها.', en: 'Sorry, the page you are looking for does not exist or has been moved.' },
   'notfound.back': { ar: 'العودة للرئيسية', en: 'Back to Home' },
+
+  // About page values
+  'about.value_security': { ar: 'الأمان', en: 'Security' },
+  'about.value_security_desc': { ar: 'نحمي بياناتك وخصوصيتك بأحدث تقنيات الحماية', en: 'We protect your data and privacy with the latest security technologies' },
+  'about.value_speed': { ar: 'السرعة', en: 'Speed' },
+  'about.value_speed_desc': { ar: 'منصة سريعة وسهلة الاستخدام مع تجربة سلسة', en: 'Fast and easy to use platform with a smooth experience' },
+  'about.value_trust': { ar: 'الثقة', en: 'Trust' },
+  'about.value_trust_desc': { ar: 'بناء مجتمع موثوق من المستخدمين المُوثّقين', en: 'Building a trusted community of verified users' },
+  'about.value_coverage': { ar: 'التغطية', en: 'Coverage' },
+  'about.value_coverage_desc': { ar: 'نخدم أكثر من 22 دولة في المنطقة العربية', en: 'Serving over 22 countries across the Arab region' },
+  'about.stat_countries': { ar: 'دولة', en: 'Countries' },
+  'about.stat_users': { ar: 'مستخدم', en: 'Users' },
+  'about.stat_listings': { ar: 'إعلان', en: 'Listings' },
+  'about.stat_categories': { ar: 'تصنيف', en: 'Categories' },
+
+  // FAQ
+  'faq.what_is': { ar: 'ما هي طلبنا؟', en: 'What is Talabna?' },
+  'faq.what_is_answer': { ar: 'طلبنا هي منصة إعلانات مبوبة رائدة تخدم المنطقة العربية، تتيح نشر إعلانات في فئات الوظائف والعقارات والسيارات والأجهزة والخدمات.', en: 'Talabna is a leading classified ads platform serving the Arab region, allowing posting in jobs, real estate, cars, electronics, and services categories.' },
+  'faq.is_free': { ar: 'هل طلبنا مجانية؟', en: 'Is Talabna free?' },
+  'faq.is_free_answer': { ar: 'نعم، إنشاء الحساب ونشر الإعلانات مجاني. يمكنك شراء شارات مميزة لتعزيز ظهور إعلاناتك.', en: 'Yes, creating an account and posting ads is free. You can purchase premium badges to boost your listing visibility.' },
+  'faq.contact_seller': { ar: 'كيف أتواصل مع البائع؟', en: 'How do I contact a seller?' },
+  'faq.contact_seller_answer': { ar: 'يمكنك التواصل مع البائع عبر الاتصال المباشر أو واتساب من صفحة الإعلان.', en: 'You can contact the seller via direct call or WhatsApp from the listing page.' },
+  'faq.countries': { ar: 'ما هي الدول المدعومة؟', en: 'What countries are supported?' },
+  'faq.countries_answer': { ar: 'نخدم أكثر من 22 دولة عربية تشمل فلسطين، مصر، السعودية، الأردن، العراق، الإمارات وغيرها.', en: 'We serve over 22 Arab countries including Palestine, Egypt, Saudi Arabia, Jordan, Iraq, UAE and more.' },
 }
 
 /**

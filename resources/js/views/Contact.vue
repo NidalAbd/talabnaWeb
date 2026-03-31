@@ -115,8 +115,8 @@ const submitForm = async () => {
 
 onMounted(() => {
   updateMeta({
-    title: locale.value === 'ar' ? 'اتصل بنا - طلبنا' : 'Contact Us - Talabna',
-    description: locale.value === 'ar' ? 'تواصل مع فريق طلبنا للدعم والاستفسارات' : 'Contact Talabna team for support and inquiries',
+    title: t('contact.title') + ' - ' + t('app.name'),
+    description: t('contact.subtitle'),
   })
 })
 </script>

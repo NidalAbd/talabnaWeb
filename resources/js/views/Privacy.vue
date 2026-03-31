@@ -109,8 +109,8 @@ const locale = computed(() => appStore.locale)
 
 onMounted(() => {
   updateMeta({
-    title: locale.value === 'ar' ? 'سياسة الخصوصية - طلبنا' : 'Privacy Policy - Talabna',
-    description: locale.value === 'ar' ? 'سياسة الخصوصية لمنصة طلبنا للإعلانات المبوبة' : 'Privacy policy for Talabna classified ads platform',
+    title: t('privacy.title') + ' - ' + t('app.name'),
+    description: t('privacy.title') + ' - ' + t('app.tagline'),
   })
 })
 </script>

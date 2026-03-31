@@ -29,8 +29,8 @@ const locale = computed(() => appStore.locale)
 
 onMounted(() => {
   updateMeta({
-    title: locale.value === 'ar' ? '404 - الصفحة غير موجودة | طلبنا' : '404 - Page Not Found | Talabna',
-    description: locale.value === 'ar' ? 'الصفحة المطلوبة غير موجودة' : 'The requested page was not found',
+    title: '404 - ' + t('notfound.title') + ' | ' + t('app.name'),
+    description: t('notfound.desc'),
   })
 })
 </script>

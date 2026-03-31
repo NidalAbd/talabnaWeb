@@ -357,7 +357,8 @@ const formatDate = (date, yearOnly = false) => {
   if (!date) return ''
   const d = new Date(date)
   if (yearOnly) return d.getFullYear()
-  return d.toLocaleDateString(locale.value === 'ar' ? 'ar-SA' : 'en-US', {
+  const localeMap = { ar: 'ar-SA', en: 'en-US', tr: 'tr-TR', fr: 'fr-FR', es: 'es-ES', hi: 'hi-IN', ur: 'ur-PK', bn: 'bn-BD', pt: 'pt-BR', ru: 'ru-RU', id: 'id-ID', de: 'de-DE', zh: 'zh-CN', ku: 'ku-IQ', fa: 'fa-IR', sw: 'sw-KE', ms: 'ms-MY' }
+  return d.toLocaleDateString(localeMap[locale.value] || 'en-US', {
     year: 'numeric',
     month: 'long',
     day: 'numeric',

@@ -117,11 +117,9 @@ onMounted(() => {
   searchQuery.value = query.value
   updateMeta({
     title: query.value
-      ? (locale.value === 'ar' ? `نتائج البحث: ${query.value} - طلبنا` : `Search: ${query.value} - Talabna`)
-      : (locale.value === 'ar' ? 'بحث - طلبنا' : 'Search - Talabna'),
-    description: locale.value === 'ar'
-      ? `نتائج البحث عن "${query.value}" في طلبنا - منصة الإعلانات المبوبة`
-      : `Search results for "${query.value}" on Talabna - Classified Ads Platform`,
+      ? `${t('search.title')}: ${query.value} - ${t('app.name')}`
+      : `${t('search.title')} - ${t('app.name')}`,
+    description: `${t('search.results_for')} "${query.value}" - ${t('app.name')} - ${t('app.tagline')}`,
   })
   fetchResults()
 })
