@@ -886,6 +886,8 @@ Route::middleware(['auth', 'admin'])->group(function () {
 
             // Auto-translate (AI translation)
             Route::post('/auto-translate/{locale}', [\App\Http\Controllers\Api\AutoTranslateController::class, 'start'])->name('api.admin.auto-translate.start');
+            Route::get('/auto-translate/{locale}/progress', [\App\Http\Controllers\Api\AutoTranslateController::class, 'progress'])->name('api.admin.auto-translate.progress');
+            Route::post('/auto-translate/{locale}/stop', [\App\Http\Controllers\Api\AutoTranslateController::class, 'stop'])->name('api.admin.auto-translate.stop');
 
             // Translations Management (using API controller for web admin)
             Route::prefix('translations')->group(function () {
