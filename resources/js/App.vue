@@ -40,7 +40,7 @@
                 @click="catMenuOpen = false"
               >
                 <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
-                {{ cat.name[appStore.locale] || cat.name['en'] || cat.name['ar'] || cat.name }}
+                {{ cat.name_localized || cat.name_en || cat.name }}
               </router-link>
             </div>
           </div>
@@ -62,7 +62,7 @@
               >
                 <img v-if="country.flag" :src="country.flag" style="width: 20px; height: 14px; object-fit: cover; border-radius: 2px;" @error="$event.target.style.display='none'">
                 <i v-else class="mdi mdi-flag-variant-outline" style="font-size: 16px;"></i>
-                {{ (typeof country.name === 'object' ? (country.name[appStore.locale] || country.name['en'] || country.name['ar']) : country.name) || country.name }}
+                {{ country.name_localized || country.name_en || country.name }}
               </router-link>
             </div>
           </div>
@@ -196,7 +196,7 @@
         @click="mobileDrawer = false"
       >
         <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
-        {{ cat.name[appStore.locale] || cat.name['en'] || cat.name['ar'] || cat.name }}
+        {{ cat.name_localized || cat.name_en || cat.name }}
       </router-link>
       <div class="drawer-divider"></div>
       <!-- Google Sign In (when not logged in) -->
@@ -259,7 +259,7 @@
                 :key="cat.id"
                 :to="`/category/${cat.id}`"
               >
-                {{ cat.name[appStore.locale] || cat.name['en'] || cat.name['ar'] || cat.name }}
+                {{ cat.name_localized || cat.name_en || cat.name }}
               </router-link>
             </div>
           </div>
@@ -383,7 +383,7 @@ const doSearch = () => {
 
 const fetchNavCountries = async () => {
   try {
-    const response = await fetch('/api/public/countries')
+    const response = await fetch(`/api/public/countries?lang=${appStore.locale}`)
     if (response.ok) {
       const data = await response.json()
       navCountries.value = data.countries || []
@@ -395,7 +395,7 @@ const fetchNavCountries = async () => {
 
 const fetchCategories = async () => {
   try {
-    const response = await fetch('/api/public/categories')
+    const response = await fetch(`/api/public/categories?lang=${appStore.locale}`)
     if (response.ok) {
       const data = await response.json()
       appStore.setCategories(data.categories || data)

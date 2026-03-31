@@ -72,7 +72,7 @@
               <div class="cat-icon" :style="{ background: getCategoryColor(cat.id) + '18', color: getCategoryColor(cat.id) }">
                 <i class="mdi" :class="getCategoryIcon(cat.id)" :style="{ color: getCategoryColor(cat.id) }"></i>
               </div>
-              <h5>{{ (typeof cat.name === 'object' ? (cat.name[locale] || cat.name['en'] || cat.name['ar']) : cat.name) }}</h5>
+              <h5>{{ (cat.name_localized || cat.name_en || cat.name) }}</h5>
               <span class="cat-count">{{ formatNumber(cat.posts_count || 0) }} {{ t('listing.listings') }}</span>
             </router-link>
           </div>
@@ -117,7 +117,7 @@
         <div class="tabs mb-6">
           <button class="tab" :class="{ active: activeTab === 'all' }" @click="activeTab = 'all'">{{ t('browse.all') }}</button>
           <button v-for="cat in categories.slice(0, 5)" :key="cat.id" class="tab" :class="{ active: activeTab === cat.id }" @click="activeTab = cat.id">
-            {{ (typeof cat.name === 'object' ? (cat.name[locale] || cat.name['en'] || cat.name['ar']) : cat.name) }}
+            {{ (cat.name_localized || cat.name_en || cat.name) }}
           </button>
         </div>
         <div class="row" v-if="!loadingLatest">
@@ -146,7 +146,7 @@
           <router-link v-for="country in countries" :key="country.id" :to="`/services/${country.id}/${country.slug}`" class="location-card-home text-decoration-none">
             <img :src="country.flag || '/storage/countryFlag/placeholder-flag.jpg'" loading="lazy" decoding="async" width="200" height="64" class="img-cover location-flag-img" style="height: 64px; width: 100%;" @error="handleImgError($event)">
             <div class="location-info">
-              <h5>{{ (typeof country.name === 'object' ? (country.name[locale] || country.name['en'] || country.name['ar']) : country.name) }}</h5>
+              <h5>{{ (country.name_localized || country.name_en || country.name) }}</h5>
               <span>{{ formatNumber(country.listings_count || 0) }} {{ t('listing.listings') }}</span>
             </div>
           </router-link>
@@ -251,7 +251,7 @@ const handleImgError = (event) => {
 // Fetch functions with defensive coding
 const fetchCategories = async () => {
   try {
-    const response = await fetch('/api/public/categories')
+    const response = await fetch(`/api/public/categories?lang=${locale}`)
     if (!response.ok) return
     const data = await response.json()
     categories.value = Array.isArray(data.categories) ? data.categories : []
@@ -265,7 +265,7 @@ const fetchCategories = async () => {
 const fetchFeatured = async () => {
   loadingFeatured.value = true
   try {
-    const response = await fetch('/api/public/featured')
+    const response = await fetch(`/api/public/featured?lang=${locale}`)
     if (!response.ok) return
     const data = await response.json()
     featured.value = Array.isArray(data.featured) ? data.featured : []
@@ -281,9 +281,9 @@ const fetchFeatured = async () => {
 const fetchLatest = async (categoryId = null) => {
   loadingLatest.value = true
   try {
-    let url = '/api/public/latest'
+    let url = `/api/public/latest?lang=${locale}`
     if (categoryId && categoryId !== 'all') {
-      url += `?category_id=${categoryId}`
+      url += `&category_id=${categoryId}`
     }
     const response = await fetch(url)
     if (!response.ok) return
@@ -300,7 +300,7 @@ const fetchLatest = async (categoryId = null) => {
 const fetchPopular = async () => {
   loadingPopular.value = true
   try {
-    const response = await fetch('/api/public/popular')
+    const response = await fetch(`/api/public/popular?lang=${locale}`)
     if (!response.ok) return
     const data = await response.json()
     popular.value = Array.isArray(data.popular) ? data.popular : []
@@ -327,7 +327,7 @@ const fetchStats = async () => {
 const fetchCountries = async () => {
   loadingLocations.value = true
   try {
-    const response = await fetch('/api/public/countries')
+    const response = await fetch(`/api/public/countries?lang=${locale}`)
     if (!response.ok) return
     const data = await response.json()
     countries.value = Array.isArray(data.countries) ? data.countries : []
