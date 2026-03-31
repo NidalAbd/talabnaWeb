@@ -54,17 +54,21 @@ class SeoController extends Controller
     {
         $baseUrl = config('app.url', 'https://talbna.cloud');
 
-        // Default SEO data
+        // Default SEO data — try DB translations first, fallback to ar/en
+        $seoTitle = $this->getSeoTranslation('seo.home_title', $locale,
+            'طلبنا - أكبر سوق للإعلانات المبوبة في الوطن العربي',
+            'Talabna - The Largest Classified Ads Marketplace');
+        $seoDesc = $this->getSeoTranslation('seo.home_description', $locale,
+            'اكتشف آلاف الإعلانات المبوبة في السيارات، العقارات، الوظائف، الإلكترونيات والمزيد. بيع واشتري بسهولة وأمان على منصة طلبنا.',
+            'Discover thousands of classified ads in cars, real estate, jobs, electronics and more. Buy and sell easily and safely on Talabna.');
+        $seoKeywords = $this->getSeoTranslation('seo.home_keywords', $locale,
+            'إعلانات مبوبة, سيارات للبيع, عقارات, وظائف, هواتف, بيع وشراء, فلسطين, غزة',
+            'classified ads, cars for sale, real estate, jobs, phones, buy and sell, Palestine, Gaza');
+
         $seo = [
-            'title' => $locale === 'ar'
-                ? 'طلبنا - أكبر سوق للإعلانات المبوبة في الوطن العربي'
-                : 'Talabna - The Largest Classified Ads Marketplace',
-            'description' => $locale === 'ar'
-                ? 'اكتشف آلاف الإعلانات المبوبة في السيارات، العقارات، الوظائف، الإلكترونيات والمزيد. بيع واشتري بسهولة وأمان على منصة طلبنا.'
-                : 'Discover thousands of classified ads in cars, real estate, jobs, electronics and more. Buy and sell easily and safely on Talabna.',
-            'keywords' => $locale === 'ar'
-                ? 'إعلانات مبوبة, سيارات للبيع, عقارات, وظائف, هواتف, بيع وشراء, فلسطين, غزة'
-                : 'classified ads, cars for sale, real estate, jobs, phones, buy and sell, Palestine, Gaza',
+            'title' => $seoTitle,
+            'description' => $seoDesc,
+            'keywords' => $seoKeywords,
             'locale' => $locale,
             'canonical' => $baseUrl . $path . ($locale !== 'ar' ? '?lang=' . $locale : ''),
             'alternates' => $this->generateHreflangAlternates($baseUrl, $path),
@@ -913,6 +917,27 @@ class SeoController extends Controller
     }
 
     // ==================== END SLUG-BASED SEO METHODS ====================
+
+    /**
+     * Get a translated SEO string from the translations table, with ar/en fallbacks.
+     */
+    private function getSeoTranslation(string $key, string $locale, string $arFallback, string $enFallback): string
+    {
+        if ($locale === 'ar') return $arFallback;
+        if ($locale === 'en') return $enFallback;
+
+        // Try from translations table
+        $parts = explode('.', $key, 2);
+        $group = $parts[0] ?? 'seo';
+        $transKey = $parts[1] ?? $key;
+
+        $translation = \App\Models\Translation::where('locale', $locale)
+            ->where('group', $group)
+            ->where('key', $transKey)
+            ->value('value');
+
+        return $translation ?: $enFallback;
+    }
 
     /**
      * Generate hreflang alternates for all active languages.

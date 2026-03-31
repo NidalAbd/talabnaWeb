@@ -89,9 +89,12 @@ class SitemapController extends Controller
      */
     public function pages()
     {
-        $content = Cache::remember('sitemap-pages', 3600, function () {
+        $content = Cache::remember('sitemap-pages-v3', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
+
+            $languages = \App\Models\Language::getActiveOrdered();
+            $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
 
             $pages = [
                 ['url' => '/', 'priority' => '1.0', 'changefreq' => 'daily'],
@@ -109,6 +112,15 @@ class SitemapController extends Controller
                 $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
                 $xml .= '<changefreq>' . $page['changefreq'] . '</changefreq>';
                 $xml .= '<priority>' . $page['priority'] . '</priority>';
+                // Hreflang alternates for all active languages
+                foreach ($languages as $lang) {
+                    $href = url($page['url']);
+                    if ($lang->code !== $defaultLocale) {
+                        $href .= '?lang=' . $lang->code;
+                    }
+                    $xml .= '<xhtml:link rel="alternate" hreflang="' . $lang->code . '" href="' . $href . '"/>';
+                }
+                $xml .= '<xhtml:link rel="alternate" hreflang="x-default" href="' . url($page['url']) . '"/>';
                 $xml .= '</url>';
             }
 

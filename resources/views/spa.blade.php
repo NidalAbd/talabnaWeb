@@ -1,10 +1,17 @@
 @php
+    // Detect locale from ?lang= parameter, session, or Accept-Language header
+    $requestedLocale = request()->query('lang', session('locale', 'ar'));
+    $activeLocales = \App\Models\Language::getActiveOrdered()->pluck('code')->toArray();
+    $locale = in_array($requestedLocale, $activeLocales) ? $requestedLocale : 'ar';
+    $rtlLocales = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'sd'];
+    $dir = in_array($locale, $rtlLocales) ? 'rtl' : 'ltr';
+
     // Server-side SEO data generation for search engine crawlers
     $seoController = app(\App\Http\Controllers\SeoController::class);
-    $seoData = $seoController->getServerSideSeo(request()->path(), 'ar');
+    $seoData = $seoController->getServerSideSeo(request()->path(), $locale);
 @endphp
 <!DOCTYPE html>
-<html lang="{{ $seoData['locale'] ?? 'ar' }}" dir="rtl">
+<html lang="{{ $locale }}" dir="{{ $dir }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -30,7 +37,11 @@
     <meta property="og:image:height" content="{{ $seoData['og']['image_height'] ?? '630' }}">
     <meta property="og:url" content="{{ $seoData['canonical'] ?? url()->current() }}">
     <meta property="og:locale" content="{{ $seoData['og']['locale'] ?? 'ar_SA' }}">
-    <meta property="og:locale:alternate" content="en_US">
+    @foreach(['ar_SA','en_US','tr_TR','fr_FR','es_ES','hi_IN','ur_PK','bn_BD','pt_BR','ru_RU','id_ID','de_DE','zh_CN','ku_IQ','fa_IR','sw_KE','ms_MY'] as $ogLoc)
+        @if($ogLoc !== ($seoData['og']['locale'] ?? 'ar_SA'))
+    <meta property="og:locale:alternate" content="{{ $ogLoc }}">
+        @endif
+    @endforeach
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
@@ -42,10 +53,11 @@
     <!-- Canonical URL -->
     <link rel="canonical" href="{{ $seoData['canonical'] ?? url()->current() }}">
 
-    <!-- Hreflang for multilingual SEO -->
-    <link rel="alternate" hreflang="ar" href="{{ url()->current() }}?locale=ar">
-    <link rel="alternate" hreflang="en" href="{{ url()->current() }}?locale=en">
-    <link rel="alternate" hreflang="x-default" href="{{ url()->current() }}">
+    <!-- Hreflang for multilingual SEO (all {{ count($seoData['alternates'] ?? []) }} active languages) -->
+    @foreach($seoData['alternates'] ?? [] as $alt)
+        <link rel="alternate" hreflang="{{ $alt['hreflang'] }}" href="{{ $alt['href'] }}">
+    @endforeach
+    <meta http-equiv="Content-Language" content="{{ $locale }}">
 
     <!-- JSON-LD Structured Data -->
     @if(!empty($seoData['jsonLd']))
@@ -71,7 +83,8 @@
             "contactPoint": {
                 "@type": "ContactPoint",
                 "contactType": "customer service",
-                "availableLanguage": ["Arabic", "English"]
+                "email": "support@talbna.cloud",
+                "availableLanguage": ["Arabic", "English", "Turkish", "French", "Spanish", "Hindi", "Urdu", "Bengali", "Portuguese", "Russian", "Indonesian", "German", "Chinese", "Kurdish", "Persian", "Swahili", "Malay"]
             }
         }
         </script>
