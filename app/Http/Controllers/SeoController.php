@@ -603,13 +603,15 @@ class SeoController extends Controller
         $totalListings = ServicePost::where('state', 'published')->count();
         $totalUsers = User::where('is_active', '!=', 'banned')->count();
 
-        $seo['title'] = $locale === 'ar'
-            ? "طلبنا - أكبر سوق للإعلانات المبوبة | {$totalListings}+ إعلان"
-            : "Talabna - Largest Classified Ads Marketplace | {$totalListings}+ Listings";
+        $baseTitle = $this->getSeoTranslation('seo.home_title', $locale,
+            'طلبنا - أكبر سوق للإعلانات المبوبة',
+            'Talabna - Largest Classified Ads Marketplace');
+        $listingsWord = $locale === 'ar' ? 'إعلان' : 'Listings';
+        $seo['title'] = "{$baseTitle} | {$totalListings}+ {$listingsWord}";
 
-        $seo['description'] = $locale === 'ar'
-            ? "انضم إلى {$totalUsers}+ مستخدم على طلبنا. تصفح {$totalListings}+ إعلان في السيارات، العقارات، الوظائف، الإلكترونيات والمزيد. بيع واشتري بسهولة وأمان."
-            : "Join {$totalUsers}+ users on Talabna. Browse {$totalListings}+ listings in cars, real estate, jobs, electronics and more. Buy and sell easily and safely.";
+        $seo['description'] = $this->getSeoTranslation('seo.home_description', $locale,
+            "انضم إلى {$totalUsers}+ مستخدم على طلبنا. تصفح {$totalListings}+ إعلان في السيارات، العقارات، الوظائف، الإلكترونيات والمزيد. بيع واشتري بسهولة وأمان.",
+            "Join {$totalUsers}+ users on Talabna. Browse {$totalListings}+ listings in cars, real estate, jobs, electronics and more. Buy and sell easily and safely.");
 
         // JSON-LD Organization
         $seo['jsonLd'][] = [
