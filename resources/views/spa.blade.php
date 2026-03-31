@@ -1,6 +1,6 @@
 @php
-    // Detect locale from ?lang= parameter, session, or Accept-Language header
-    $requestedLocale = request()->query('lang', session('locale', 'ar'));
+    // Detect locale from ?lang= or legacy ?locale= parameter
+    $requestedLocale = request()->query('lang', request()->query('locale', session('locale', 'ar')));
     $activeLocales = \App\Models\Language::getActiveOrdered()->pluck('code')->toArray();
     $locale = in_array($requestedLocale, $activeLocales) ? $requestedLocale : 'ar';
     $rtlLocales = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'sd'];

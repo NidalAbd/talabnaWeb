@@ -9,6 +9,15 @@ class SetLocale
 {
     public function handle($request, Closure $next)
     {
+        // Redirect old ?locale= to ?lang= for SEO consistency (301 permanent)
+        if ($request->has('locale') && !$request->has('lang')) {
+            $query = $request->query();
+            $query['lang'] = $query['locale'];
+            unset($query['locale']);
+            $newUrl = $request->url() . '?' . http_build_query($query);
+            return redirect($newUrl, 301);
+        }
+
         // Priority: 1) ?lang= query param  2) Accept-Language header  3) session  4) config default
         $locale = $request->query('lang')
             ?? $request->header('Accept-Language')
