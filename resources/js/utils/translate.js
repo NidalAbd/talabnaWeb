@@ -40,6 +40,9 @@ const fallbacks = {
   'footer.rights': { ar: 'جميع الحقوق محفوظة', en: 'All rights reserved' },
   'footer.follow': { ar: 'تابعنا', en: 'Follow Us' },
   'footer.download': { ar: 'حمل التطبيق', en: 'Download App' },
+  'footer.about_desc': { ar: 'أكبر منصة للإعلانات المبوبة. بيع واشتري بسهولة وأمان.', en: 'The largest classified ads marketplace. Buy and sell easily and safely.' },
+  'nav.legal': { ar: 'قانوني', en: 'Legal' },
+  'nav.sitemap': { ar: 'خريطة الموقع', en: 'Sitemap' },
 
   // Browse page
   'browse.title': { ar: 'تصفح الإعلانات', en: 'Browse Listings' },

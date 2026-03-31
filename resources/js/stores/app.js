@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { t as translate, loadTranslations } from '@/utils/translate'
 
 export const useAppStore = defineStore('app', () => {
   // State
@@ -9,6 +10,7 @@ export const useAppStore = defineStore('app', () => {
   const categories = ref([])
   const countries = ref([])
   const loading = ref(false)
+  const translationsLoaded = ref(false)
 
   // Getters
   const rtlLocales = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'sd']
@@ -16,13 +18,20 @@ export const useAppStore = defineStore('app', () => {
   const isAuthenticated = computed(() => !!user.value)
   const isDark = computed(() => theme.value === 'dark')
 
+  // Translation helper
+  function t(key) {
+    return translate(key)
+  }
+
   // Actions
-  function setLocale(newLocale) {
+  async function setLocale(newLocale) {
     locale.value = newLocale
     localStorage.setItem('locale', newLocale)
     document.documentElement.lang = newLocale
     const rtl = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'sd']
     document.documentElement.dir = rtl.includes(newLocale) ? 'rtl' : 'ltr'
+    await loadTranslations(newLocale)
+    translationsLoaded.value = true
   }
 
   function toggleTheme() {
@@ -54,10 +63,10 @@ export const useAppStore = defineStore('app', () => {
   }
 
   // Initialize
-  function init() {
+  async function init() {
     const savedLocale = localStorage.getItem('locale') || 'ar'
     const savedTheme = localStorage.getItem('theme') || 'light'
-    setLocale(savedLocale)
+    await setLocale(savedLocale)
     setTheme(savedTheme)
   }
 
@@ -69,11 +78,13 @@ export const useAppStore = defineStore('app', () => {
     categories,
     countries,
     loading,
+    translationsLoaded,
     // Getters
     isRTL,
     isAuthenticated,
     isDark,
     // Actions
+    t,
     setLocale,
     toggleTheme,
     setTheme,
