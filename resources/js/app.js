@@ -8,6 +8,8 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import App from './App.vue'
 import router from './router'
+import { setStore } from './utils/translate'
+import { useAppStore } from './stores/app'
 
 // Load MDI icons: inject @font-face with font-display:swap, then load CSS classes
 if (typeof window !== 'undefined') {
@@ -29,8 +31,13 @@ if (typeof window !== 'undefined') {
 const app = createApp(App)
 
 // Use plugins
-app.use(createPinia())
+const pinia = createPinia()
+app.use(pinia)
 app.use(router)
+
+// Wire up translate.js to use the reactive store
+const appStore = useAppStore()
+setStore(appStore)
 
 // Global error handler
 app.config.errorHandler = (err, vm, info) => {
