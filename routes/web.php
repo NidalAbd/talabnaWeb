@@ -906,5 +906,21 @@ Route::middleware(['auth', 'admin'])->group(function () {
     });
 });
 
+// Referral link — stores code in cookie, redirects to Play Store or home
+Route::get('/r/{code}', function (string $code) {
+    $valid = \App\Models\User::where('referral_code', $code)->exists();
+    if ($valid) {
+        // Store in cookie for 30 days — picked up by Google auth on first sign-in
+        cookie()->queue('referral_code', $code, 60 * 24 * 30);
+    }
+    // If on mobile, redirect to Play Store. Otherwise, redirect to home.
+    $userAgent = request()->header('User-Agent', '');
+    $isMobile = preg_match('/Android|iPhone|iPad/i', $userAgent);
+    if ($isMobile) {
+        return redirect('https://play.google.com/store/apps/details?id=com.talabna.talabna&referrer=' . urlencode('ref=' . $code));
+    }
+    return redirect('/')->cookie('referral_code', $code, 60 * 24 * 30);
+})->name('referral.link');
+
 // Google One Tap web login
 Route::post('/auth/google/one-tap', [\App\Http\Controllers\Api\GoogleAuthController::class, 'handleWebGoogleAuth'])->name('google.onetap');
