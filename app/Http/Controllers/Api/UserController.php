@@ -72,7 +72,8 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'device_token' => 'nullable|string', // Add validation for device_token
+            'device_token' => 'nullable|string',
+            'referral_code' => 'nullable|string|max:8',
         ]);
 
         // Check validation
@@ -190,6 +191,11 @@ class UserController extends Controller
                 'type' => 'login'
             ]);
             $user->notifications()->save($notification);
+
+            // Process referral if code provided
+            if ($request->filled('referral_code')) {
+                User::processReferral($user, $request->input('referral_code'));
+            }
 
             // Commit transaction
             DB::commit();

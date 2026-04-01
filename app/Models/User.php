@@ -64,6 +64,10 @@ class User extends Authenticatable implements CanResetPasswordContract
         'google_id',
         'auth_type',
         'fcm_token',
+        'referral_code',
+        'referred_by',
+        'direct_referrals_count',
+        'total_referrals_count',
     ];
 
     /**
@@ -86,6 +90,63 @@ class User extends Authenticatable implements CanResetPasswordContract
         'pointsBalance' => 'integer',
         'data_saver_enabled' => 'boolean',
     ];
+
+    protected static function booted()
+    {
+        static::creating(function ($user) {
+            if (empty($user->referral_code)) {
+                $user->referral_code = self::generateUniqueReferralCode();
+            }
+        });
+    }
+
+    public static function generateUniqueReferralCode(): string
+    {
+        do {
+            $code = strtoupper(\Str::random(8));
+        } while (self::where('referral_code', $code)->exists());
+        return $code;
+    }
+
+    /**
+     * Process referral: set referred_by and increment ancestor counts.
+     */
+    public static function processReferral(User $newUser, string $referralCode): void
+    {
+        $referrer = self::where('referral_code', $referralCode)->first();
+        if (!$referrer || $referrer->id === $newUser->id) return;
+
+        $newUser->referred_by = $referrer->id;
+        $newUser->save();
+
+        // Walk up the chain: increment total for all ancestors, direct only for immediate parent
+        $currentId = $referrer->id;
+        $isDirect = true;
+        while ($currentId) {
+            $ancestor = self::find($currentId);
+            if (!$ancestor) break;
+
+            $ancestor->total_referrals_count = ($ancestor->total_referrals_count ?? 0) + 1;
+            if ($isDirect) {
+                $ancestor->direct_referrals_count = ($ancestor->direct_referrals_count ?? 0) + 1;
+                $isDirect = false;
+            }
+            $ancestor->save();
+
+            $currentId = $ancestor->referred_by;
+        }
+    }
+
+    // Referral relationships
+    public function referrer(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'referred_by');
+    }
+
+    public function referrals(): HasMany
+    {
+        return $this->hasMany(User::class, 'referred_by');
+    }
 
     public function servicePosts(): HasMany
     {

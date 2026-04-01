@@ -117,6 +117,9 @@ Route::post('register-device', [BanCheckController::class, 'registerDevice'])->n
 // Google authentication routes
 Route::post('auth/google', [GoogleAuthController::class, 'handleGoogleAuth']);
 
+// Referral validation (public — no auth needed for registration flow)
+Route::get('referral/validate/{code}', [\App\Http\Controllers\Api\ReferralController::class, 'validateCode']);
+
 // Protected routes (require authentication)
 Route::middleware('auth:sanctum')->group(function () {
     Route::post('logout', [UserController::class, 'logout']);
@@ -125,6 +128,11 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:api'])->group(function () {
+    // Referral routes
+    Route::get('user/{user}/referral-info', [\App\Http\Controllers\Api\ReferralController::class, 'getReferralInfo']);
+    Route::get('user/{user}/referrals', [\App\Http\Controllers\Api\ReferralController::class, 'getDirectReferrals']);
+    Route::get('user/{user}/referral-tree', [\App\Http\Controllers\Api\ReferralController::class, 'getReferralTree']);
+
     Route::post('data-saver/toggle', [GoogleAuthController::class, 'toggleDataSaver']);
     Route::post('logout', [App\Http\Controllers\Api\UserController::class,'logout']);
     Route::apiResource('users', App\Http\Controllers\Api\UserController::class);

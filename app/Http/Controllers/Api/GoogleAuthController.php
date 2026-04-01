@@ -41,7 +41,8 @@ class GoogleAuthController extends Controller
             'email' => 'required|email',
             'name' => 'required|string',
             'photo_url' => 'nullable|string',
-            'device_token' => 'nullable|string', // Add validation for device_token
+            'device_token' => 'nullable|string',
+            'referral_code' => 'nullable|string|max:8',
         ]);
 
         if ($validator->fails()) {
@@ -200,6 +201,11 @@ class GoogleAuthController extends Controller
                     'type' => 'login'
                 ]);
                 $user->notifications()->save($notification);
+
+                // Process referral if code provided
+                if ($request->filled('referral_code')) {
+                    User::processReferral($user, $request->input('referral_code'));
+                }
             } else {
                 // Update existing user's Google info
                 Log::info('Updating existing user for Google sign-in: ' . $user->id);
