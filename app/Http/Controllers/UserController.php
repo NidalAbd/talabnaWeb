@@ -144,8 +144,10 @@ class UserController extends Controller
             'followers',
             'following',
             'reports',
-            'city',  // Explicitly load city relationship
-            'country'  // Explicitly load country relationship
+            'city',
+            'country',
+            'referrer',
+            'referrals',
         ])
             ->withCount(['servicePosts', 'followers', 'following', 'reports'])
             ->findOrFail($id);

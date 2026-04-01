@@ -59,6 +59,63 @@
                             </li>
                         </ul>
 
+                        <!-- Referral Info -->
+                        <div class="card card-outline card-success mt-3">
+                            <div class="card-header">
+                                <h5 class="card-title"><i class="fas fa-user-plus mr-1"></i> Referral Info</h5>
+                            </div>
+                            <div class="card-body p-0">
+                                <table class="table table-sm mb-0">
+                                    <tr>
+                                        <td><b>Referral Code</b></td>
+                                        <td><code style="font-size: 14px; font-weight: bold;">{{ $user->referral_code }}</code></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Referred By</b></td>
+                                        <td>
+                                            @if($user->referrer)
+                                                <a href="{{ route('users.show', $user->referrer->id) }}">
+                                                    {{ $user->referrer->user_name }}
+                                                </a>
+                                            @else
+                                                <span class="text-muted">None (organic)</span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Direct Referrals</b></td>
+                                        <td><span class="badge badge-info">{{ $user->direct_referrals_count ?? 0 }}</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td><b>Total Referrals</b></td>
+                                        <td><span class="badge badge-success">{{ $user->total_referrals_count ?? 0 }}</span> <small class="text-muted">(including chain)</small></td>
+                                    </tr>
+                                </table>
+                            </div>
+                            @if($user->referrals->count() > 0)
+                                <div class="card-footer p-0">
+                                    <div class="p-2">
+                                        <small class="text-muted"><b>Direct referrals:</b></small>
+                                    </div>
+                                    <ul class="list-group list-group-flush" style="max-height: 200px; overflow-y: auto;">
+                                        @foreach($user->referrals as $ref)
+                                            <li class="list-group-item py-1 px-3">
+                                                <a href="{{ route('users.show', $ref->id) }}">
+                                                    {{ $ref->user_name }}
+                                                </a>
+                                                <span class="float-right text-muted" style="font-size: 11px;">
+                                                    {{ $ref->created_at->diffForHumans() }}
+                                                    @if(($ref->total_referrals_count ?? 0) > 0)
+                                                        <span class="badge badge-sm badge-success ml-1">+{{ $ref->total_referrals_count }}</span>
+                                                    @endif
+                                                </span>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endif
+                        </div>
+
                         <div class="d-flex">
                             <a href="{{ route('user.profile', ['user' => $user->id]) }}"
                                class="btn btn-primary btn-block mb-2">

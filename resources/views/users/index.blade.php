@@ -68,14 +68,14 @@
             <div class="col-lg-3 col-6">
                 <div class="small-box bg-warning shadow-sm">
                     <div class="inner">
-                        <h3>{{ $Users->sum('service_posts_count') }}</h3>
-                        <p>Total Posts</p>
+                        <h3>{{ App\Models\User::where('referred_by', '!=', null)->count() }}</h3>
+                        <p>Referred Users</p>
                     </div>
                     <div class="icon">
-                        <i class="fas fa-file-alt"></i>
+                        <i class="fas fa-user-plus"></i>
                     </div>
-                    <a href="#" class="small-box-footer">
-                        More info <i class="fas fa-arrow-circle-right"></i>
+                    <a href="{{ route('users.index', ['sort' => 'referrals']) }}" class="small-box-footer">
+                        Top referrers <i class="fas fa-arrow-circle-right"></i>
                     </a>
                 </div>
             </div>
@@ -159,12 +159,14 @@
                         <tr>
                             <th style="width: 5%">ID</th>
                             <th style="width: 10%">Username</th>
-                            <th style="width: 10%">Status</th>
-                            <th style="width: 10%">Role</th>
-                            <th style="width: 20%">Email</th>
-                            <th style="width: 8%">Reports</th>
-                            <th style="width: 8%">Posts</th>
-                            <th style="width: 29%">Actions</th>
+                            <th style="width: 8%">Status</th>
+                            <th style="width: 8%">Role</th>
+                            <th style="width: 15%">Email</th>
+                            <th style="width: 6%">Reports</th>
+                            <th style="width: 6%">Posts</th>
+                            <th style="width: 8%">Referral Code</th>
+                            <th style="width: 6%">Referrals</th>
+                            <th style="width: 28%">Actions</th>
                         </tr>
                         </thead>
                         <tbody>
@@ -212,6 +214,18 @@
                                     </td>
                                     <td>
                                         <span class="badge badge-primary badge-pill">{{ $user->service_posts_count }}</span>
+                                    </td>
+                                    <td>
+                                        <code class="text-muted" style="font-size: 11px;">{{ $user->referral_code }}</code>
+                                    </td>
+                                    <td>
+                                        @if(($user->total_referrals_count ?? 0) > 0)
+                                            <span class="badge badge-success badge-pill" data-toggle="tooltip" title="Direct: {{ $user->direct_referrals_count ?? 0 }} | Total: {{ $user->total_referrals_count ?? 0 }}">
+                                                <i class="fas fa-user-plus mr-1"></i>{{ $user->total_referrals_count }}
+                                            </span>
+                                        @else
+                                            <span class="text-muted">0</span>
+                                        @endif
                                     </td>
                                     <td>
                                         <div class="btn-group">
@@ -262,7 +276,7 @@
                             @endforeach
                         @else
                             <tr>
-                                <td colspan="8" class="text-center py-4">
+                                <td colspan="10" class="text-center py-4">
                                     <div class="alert alert-info m-0">
                                         <i class="fas fa-info-circle mr-1"></i> {{ __('No users found') }}
                                     </div>
