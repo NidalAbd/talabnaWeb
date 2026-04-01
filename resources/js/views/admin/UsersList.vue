@@ -194,6 +194,10 @@
               <i class="fas fa-heart" style="color:#e74c3c"></i>
               <span>{{ user.liked_posts_count }} Likes</span>
             </div>
+            <div class="stat-item" v-if="user.total_referrals_count > 0">
+              <i class="fas fa-user-plus" style="color:#2e7d32"></i>
+              <span>{{ user.total_referrals_count }} Referrals</span>
+            </div>
             <div class="stat-item warning" v-if="user.reports_count > 0">
               <i class="fas fa-exclamation-triangle"></i>
               <span>{{ user.reports_count }} Reports</span>
@@ -289,6 +293,9 @@
                 </span>
                 <span v-if="user.liked_posts_count > 0" class="badge" style="background:#ffebee;color:#c62828">
                   <i class="fas fa-heart"></i> {{ user.liked_posts_count }}
+                </span>
+                <span v-if="user.total_referrals_count > 0" class="badge" style="background:#e8f5e9;color:#2e7d32">
+                  <i class="fas fa-user-plus"></i> {{ user.total_referrals_count }}
                 </span>
                 <span v-if="user.reports_count > 0" class="badge warning">
                   <i class="fas fa-flag"></i> {{ user.reports_count }}

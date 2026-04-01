@@ -124,6 +124,9 @@ class UsersApiController extends Controller
                     'service_posts_count' => $user->service_posts_count ?? 0,
                     'viewed_posts_count' => (int) ($user->viewed_posts_count ?? 0),
                     'liked_posts_count' => (int) ($user->liked_posts_count ?? 0),
+                    'referral_code' => $user->referral_code,
+                    'direct_referrals_count' => $user->direct_referrals_count ?? 0,
+                    'total_referrals_count' => $user->total_referrals_count ?? 0,
                 ];
             });
 
@@ -163,6 +166,7 @@ class UsersApiController extends Controller
                 'country',
                 'city',
                 'reports',
+                'referrer',
             ])->findOrFail($id);
 
             return response()->json([
@@ -234,6 +238,29 @@ class UsersApiController extends Controller
                             'post_id' => $v->id,
                             'title' => $v->title,
                             'liked_at' => $v->liked_at,
+                        ]),
+                    // Referral data
+                    'referral_code' => $user->referral_code,
+                    'referred_by' => $user->referrer ? [
+                        'id' => $user->referrer->id,
+                        'user_name' => $user->referrer->user_name,
+                    ] : null,
+                    'direct_referrals_count' => $user->direct_referrals_count ?? 0,
+                    'total_referrals_count' => $user->total_referrals_count ?? 0,
+                    'recent_referrals' => $user->referrals()
+                        ->with('photos')
+                        ->orderByDesc('created_at')
+                        ->limit(10)
+                        ->get()
+                        ->map(fn($r) => [
+                            'id' => $r->id,
+                            'user_name' => $r->user_name,
+                            'name' => $r->name,
+                            'avatar' => $r->photos->first()
+                                ? ($r->photos->first()->is_external ? $r->photos->first()->src : asset($r->photos->first()->src))
+                                : null,
+                            'created_at' => $r->created_at->toISOString(),
+                            'total_referrals_count' => $r->total_referrals_count ?? 0,
                         ]),
                 ]
             ]);
