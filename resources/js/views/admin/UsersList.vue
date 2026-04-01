@@ -243,6 +243,7 @@
             <th>Contact</th>
             <th>Roles</th>
             <th>Status</th>
+            <th>Referral</th>
             <th>Stats</th>
             <th>Actions</th>
           </tr>
@@ -286,6 +287,16 @@
               </span>
             </td>
             <td>
+              <div class="referral-cell">
+                <code style="font-size: 10px; color: #888;">{{ user.referral_code }}</code>
+                <div v-if="user.total_referrals_count > 0" style="margin-top: 2px;">
+                  <span class="badge" style="background:#e8f5e9;color:#2e7d32; font-size: 10px;">
+                    <i class="fas fa-user-plus"></i> {{ user.direct_referrals_count }} direct / {{ user.total_referrals_count }} total
+                  </span>
+                </div>
+              </div>
+            </td>
+            <td>
               <div class="stats-cell">
                 <span class="badge info"><i class="fas fa-box"></i> {{ user.service_posts_count }}</span>
                 <span v-if="user.viewed_posts_count > 0" class="badge secondary">
@@ -293,9 +304,6 @@
                 </span>
                 <span v-if="user.liked_posts_count > 0" class="badge" style="background:#ffebee;color:#c62828">
                   <i class="fas fa-heart"></i> {{ user.liked_posts_count }}
-                </span>
-                <span v-if="user.total_referrals_count > 0" class="badge" style="background:#e8f5e9;color:#2e7d32">
-                  <i class="fas fa-user-plus"></i> {{ user.total_referrals_count }}
                 </span>
                 <span v-if="user.reports_count > 0" class="badge warning">
                   <i class="fas fa-flag"></i> {{ user.reports_count }}
