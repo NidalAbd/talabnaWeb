@@ -619,21 +619,33 @@ const aiGenerating = ref(false)
 const aiProgress = ref({ done: 0, total: 0 })
 
 const generateAllSubcategories = async () => {
-  const ids = subcategories.value.data.map(s => s.id)
+  // Fetch ALL subcategory IDs (not just current page)
+  const params = new URLSearchParams({ per_page: '1000' })
+  if (filters.value.category_id) params.set('category_id', filters.value.category_id)
 
-  if (ids.length === 0) {
-    alert('No subcategories on this page')
+  let allIds = []
+  try {
+    const res = await fetch(`/api/admin/subcategories?${params}`, { credentials: 'same-origin' })
+    const data = await res.json()
+    allIds = (data.data || []).map(s => s.id)
+  } catch (e) {
+    alert('Failed to fetch subcategories')
     return
   }
 
-  if (!confirm(`Generate AI images for ${ids.length} subcategories on this page? This calls DALL-E for each.`)) return
+  if (allIds.length === 0) {
+    alert('No subcategories found')
+    return
+  }
+
+  if (!confirm(`Generate AI images for ALL ${allIds.length} subcategories? This calls DALL-E for each.`)) return
 
   aiGenerating.value = true
-  aiProgress.value = { done: 0, total: ids.length }
+  aiProgress.value = { done: 0, total: allIds.length }
 
   const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || ''
 
-  for (const id of ids) {
+  for (const id of allIds) {
     try {
       const res = await fetch(`/ai-image/generate-subcategory/${id}`, {
         method: 'POST',
