@@ -87,8 +87,9 @@
         <button class="action-btn secondary" @click="resetFilters">
           <i class="fas fa-redo"></i>
         </button>
-        <button class="action-btn ai-generate" @click="generateAllSubcategories">
-          <i class="fas fa-magic"></i> AI Generate All
+        <button class="action-btn ai-generate" @click="generateAllSubcategories" :disabled="aiGenerating">
+          <i :class="aiGenerating ? 'fas fa-spinner fa-spin' : 'fas fa-magic'"></i>
+          {{ aiGenerating ? `Generating ${aiProgress.done}/${aiProgress.total}...` : 'AI Generate All' }}
         </button>
         <button class="action-btn ai-posts" @click="openAiPostsModal">
           <i class="fas fa-robot"></i> AI Generate Posts
@@ -614,17 +615,48 @@ const handleGenerateAiImage = async (subcategory) => {
   }
 }
 
-const generateAllSubcategories = () => {
-  const form = document.createElement('form')
-  form.method = 'POST'
-  form.action = '/ai-image/generate-all-subcategories'
-  const csrf = document.createElement('input')
-  csrf.type = 'hidden'
-  csrf.name = '_token'
-  csrf.value = document.querySelector('meta[name="csrf-token"]')?.content || ''
-  form.appendChild(csrf)
-  document.body.appendChild(form)
-  form.submit()
+const aiGenerating = ref(false)
+const aiProgress = ref({ done: 0, total: 0 })
+
+const generateAllSubcategories = async () => {
+  const ids = subcategories.value.data.map(s => s.id)
+
+  if (ids.length === 0) {
+    alert('No subcategories on this page')
+    return
+  }
+
+  if (!confirm(`Generate AI images for ${ids.length} subcategories on this page? This calls DALL-E for each.`)) return
+
+  aiGenerating.value = true
+  aiProgress.value = { done: 0, total: ids.length }
+
+  const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || ''
+
+  for (const id of ids) {
+    try {
+      const res = await fetch(`/ai-image/generate-subcategory/${id}`, {
+        method: 'POST',
+        headers: {
+          'X-CSRF-TOKEN': csrfToken,
+          'Accept': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin',
+      })
+      const data = await res.json()
+      if (data.success && data.image_url) {
+        const idx = subcategories.value.data.findIndex(s => s.id === id)
+        if (idx !== -1) subcategories.value.data[idx].image_url = data.image_url
+      }
+    } catch (e) {
+      console.error(`Failed for #${id}:`, e)
+    }
+    aiProgress.value.done++
+  }
+
+  aiGenerating.value = false
+  alert(`Done! Generated ${aiProgress.value.done}/${aiProgress.value.total} images.`)
 }
 
 const getImageUrl = (url) => {
