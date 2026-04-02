@@ -92,15 +92,12 @@ class UserController extends Controller
         // Start database transaction for robust error handling
         DB::beginTransaction();
         try {
-            // Fetch random country and city
-            $country = Countries::findOrFail(1);
-
-            // Ensure country exists
+            // Fetch default country and city
+            $country = Countries::first();
             if (!$country) {
                 throw new \Exception('No country found for user registration');
             }
-
-            $city = Cities::findOrFail(1);
+            $city = Cities::where('country_id', $country->id)->first();
 
             // Create user with FCM token
             $user = User::create([

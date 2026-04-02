@@ -104,11 +104,8 @@ class GoogleAuthController extends Controller
                 $isNewUser = true;
 
                 // Get default country and city
-                $country = Countries::findOrFail(1);
-                $city = null;
-                if ($country) {
-                    $city = Cities::findOrFail(1);
-                }
+                $country = Countries::first();
+                $city = $country ? Cities::where('country_id', $country->id)->first() : null;
 
                 // Create user data array
                 $userData = [
