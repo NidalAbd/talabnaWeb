@@ -51,20 +51,29 @@ class GoogleAuthController extends Controller
         }
 
         try {
-            Log::info('Received Google auth request from: ' . $request->email);
+            $idToken = $request->id_token;
+            Log::info('Received Google auth request', [
+                'email' => $request->email,
+                'id_token_length' => strlen($idToken ?? ''),
+                'id_token_prefix' => substr($idToken ?? '', 0, 20) . '...',
+                'has_access_token' => !empty($request->access_token),
+            ]);
 
-            // Verify Google ID token with retry (first call may be slow due to key fetch)
+            // Verify Google ID token with retry
             $payload = null;
-            $client = new GoogleClient(['client_id' => config('services.google.client_id')]);
+            $clientId = config('services.google.client_id');
+            Log::info('Google client_id: ' . substr($clientId, 0, 30) . '...');
 
-            // Set HTTP client timeout to prevent hanging
+            $client = new GoogleClient(['client_id' => $clientId]);
+
+            // Set HTTP client timeout
             $httpClient = new \GuzzleHttp\Client([
-                'timeout' => 10,
-                'connect_timeout' => 5,
+                'timeout' => 15,
+                'connect_timeout' => 10,
             ]);
             $client->setHttpClient($httpClient);
 
-            // Cache Google's public keys to avoid re-fetching on every request
+            // Cache Google's public keys
             $cacheDir = storage_path('app/google-cache');
             if (!is_dir($cacheDir)) {
                 mkdir($cacheDir, 0755, true);
@@ -72,20 +81,30 @@ class GoogleAuthController extends Controller
             $client->setCache(new \Google\Auth\Cache\FileSystemCacheItemPool($cacheDir));
 
             // Try verification with retry
-            for ($attempt = 1; $attempt <= 2; $attempt++) {
+            for ($attempt = 1; $attempt <= 3; $attempt++) {
                 try {
-                    $payload = $client->verifyIdToken($request->id_token);
-                    if ($payload) break;
+                    $payload = $client->verifyIdToken($idToken);
+                    if ($payload) {
+                        Log::info("Google token verified on attempt {$attempt}");
+                        break;
+                    } else {
+                        Log::warning("Google verifyIdToken returned null on attempt {$attempt}");
+                    }
                 } catch (\Exception $verifyEx) {
                     Log::warning("Google token verification attempt {$attempt} failed: " . $verifyEx->getMessage());
-                    if ($attempt < 2) {
-                        usleep(500000); // 500ms delay before retry
+                    if ($attempt < 3) {
+                        // Clear cached keys on retry in case they're stale
+                        array_map('unlink', glob($cacheDir . '/*'));
+                        usleep(1000000); // 1s delay before retry
                     }
                 }
             }
 
             if (!$payload) {
-                Log::error('Invalid Google ID token after retries');
+                Log::error('Invalid Google ID token after retries', [
+                    'token_length' => strlen($idToken ?? ''),
+                    'client_id' => substr($clientId, 0, 30),
+                ]);
                 return response()->json(['error' => 'Invalid Google ID token'], 401);
             }
 
