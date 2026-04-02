@@ -192,10 +192,12 @@ class DalleImageService
 
             // Move old photo to gallery instead of deleting
             $oldPhoto = $category->photos()->first();
-            if ($oldPhoto) {
+            if ($oldPhoto && $oldPhoto->src) {
                 $this->copyToGallery('category', $category->id, $oldPhoto->src);
                 $oldPath = str_replace('storage/', '', $oldPhoto->src);
                 Storage::disk('public')->delete($oldPath);
+                $oldPhoto->delete();
+            } elseif ($oldPhoto) {
                 $oldPhoto->delete();
             }
 
@@ -261,10 +263,12 @@ class DalleImageService
 
             // Move old photo to gallery instead of deleting
             $oldPhoto = $subcategory->photos()->first();
-            if ($oldPhoto) {
+            if ($oldPhoto && $oldPhoto->src) {
                 $this->copyToGallery('subcategory', $subcategory->id, $oldPhoto->src);
                 $oldPath = str_replace('storage/', '', $oldPhoto->src);
                 Storage::disk('public')->delete($oldPath);
+                $oldPhoto->delete();
+            } elseif ($oldPhoto) {
                 $oldPhoto->delete();
             }
 
