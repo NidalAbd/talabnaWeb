@@ -68,6 +68,19 @@ class User extends Authenticatable implements CanResetPasswordContract
         'referred_by',
         'direct_referrals_count',
         'total_referrals_count',
+        'phone_verified_at',
+        'whatsapp_verified_at',
+        'country_changed_at',
+    ];
+
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'phone_verified_at' => 'datetime',
+        'whatsapp_verified_at' => 'datetime',
+        'country_changed_at' => 'datetime',
+        'phone_otp_expires_at' => 'datetime',
+        'pointsBalance' => 'integer',
+        'data_saver_enabled' => 'boolean',
     ];
 
     /**
@@ -78,17 +91,6 @@ class User extends Authenticatable implements CanResetPasswordContract
     protected $hidden = [
         'password',
         'remember_token',
-    ];
-
-    /**
-     * The attributes that should be cast.
-     *
-     * @var array<string, string>
-     */
-    protected $casts = [
-        'email_verified_at' => 'datetime',
-        'pointsBalance' => 'integer',
-        'data_saver_enabled' => 'boolean',
     ];
 
     protected static function booted()

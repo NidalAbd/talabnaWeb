@@ -128,6 +128,12 @@ Route::middleware('auth:sanctum')->group(function () {
 });
 
 Route::middleware(['auth:api'])->group(function () {
+    // Phone verification routes
+    Route::post('phone/verify', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'verify']);
+    Route::post('phone/verify-both', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'verifyBoth']);
+    Route::get('phone/status', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'status']);
+    Route::post('phone/change-country', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'changeCountry']);
+
     // Referral routes
     Route::get('user/{user}/referral-info', [\App\Http\Controllers\Api\ReferralController::class, 'getReferralInfo']);
     Route::get('user/{user}/referrals', [\App\Http\Controllers\Api\ReferralController::class, 'getDirectReferrals']);

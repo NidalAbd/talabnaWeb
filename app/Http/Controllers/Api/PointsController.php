@@ -40,6 +40,26 @@ class PointsController extends Controller
      */
     public function transfer(TransferPointsRequest $request): JsonResponse
     {
+        // Block transfers if phone not verified
+        $user = $request->user();
+        if (!$user->phone_verified_at) {
+            return response()->json([
+                'success' => false,
+                'error' => 'phone_not_verified',
+                'message' => 'Please verify your phone number before transferring points.',
+            ], 403);
+        }
+
+        // Block transfers for 7 days after country change
+        if ($user->country_changed_at && $user->country_changed_at->addDays(7)->isFuture()) {
+            $days = (int) now()->diffInDays($user->country_changed_at->addDays(7));
+            return response()->json([
+                'success' => false,
+                'error' => 'country_change_cooldown',
+                'message' => "Point transfers are paused for {$days} more days after country change.",
+            ], 429);
+        }
+
         try {
             $result = $this->pointsService->transferPoints(
                 fromUserId: $request->user()->id,
