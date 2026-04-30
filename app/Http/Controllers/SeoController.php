@@ -124,7 +124,40 @@ class SeoController extends Controller
             $seo = $this->getBrowseSeo($locale, $seo, $baseUrl);
         }
 
+        // Re-anchor hreflang alternates on the final canonical URL. Path
+        // handlers may rewrite canonical (e.g. forcing the Arabic-slug variant
+        // for /services/{id}/{slug}); if alternates were left pointing at the
+        // request path, the default-locale alternate would disagree with
+        // canonical and Google flags it as an hreflang/canonical conflict.
+        $seo['alternates'] = $this->buildAlternatesFromCanonical($seo['canonical']);
+
         return $seo;
+    }
+
+    /**
+     * Build hreflang alternates anchored on a canonical URL. Default-locale
+     * alternate equals canonical; other locales add ?lang=X.
+     */
+    private function buildAlternatesFromCanonical(string $canonical): array
+    {
+        $languages = \App\Models\Language::getActiveOrdered();
+        $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
+
+        // Strip any existing ?lang= so we don't compound query params.
+        $base = preg_replace('/([?&])lang=[^&]*(&|$)/', '$1', $canonical);
+        $base = rtrim(rtrim($base, '?'), '&');
+
+        $alternates = [];
+        foreach ($languages as $lang) {
+            $href = $base;
+            if ($lang->code !== $defaultLocale) {
+                $href .= (str_contains($base, '?') ? '&' : '?') . 'lang=' . $lang->code;
+            }
+            $alternates[] = ['hreflang' => $lang->code, 'href' => $href];
+        }
+        $alternates[] = ['hreflang' => 'x-default', 'href' => $base];
+
+        return $alternates;
     }
 
     /**
