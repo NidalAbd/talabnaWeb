@@ -12,7 +12,13 @@ class SetLocale
 
     public function handle($request, Closure $next)
     {
-        $defaultLocale = config('app.locale', self::DEFAULT_LOCALE);
+        // The site default is the language flagged as default in the
+        // languages table (Arabic on this site), NOT config('app.locale')
+        // which is still 'en' from the Laravel scaffolding. Falling back
+        // to config would canonicalize unprefixed URLs to /en/... which
+        // breaks the path-prefix pattern (default = unprefixed canonical).
+        $defaultLocale = \App\Models\Language::getDefault()?->code
+            ?? config('app.locale', self::DEFAULT_LOCALE);
         $activeCodes = \App\Models\Language::getActiveOrdered()->pluck('code')->toArray();
 
         // 301 legacy ?locale=X → ?lang=X (kept for any external links that

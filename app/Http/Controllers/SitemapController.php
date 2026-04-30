@@ -15,13 +15,12 @@ use Illuminate\Support\Facades\DB;
 
 class SitemapController extends Controller
 {
-    /** Records per page in the listings sitemap. Each record emits up to
-     *  ~17 locale URLs each with hreflang for ~17 alternates, so per-record
-     *  XML is ~6 KB. 200 records/page = ~24 MB chunk, well under Google's
-     *  50 MB / 50K-URL limits. */
+    /** Records per page across the paginated sitemap sections. Each record
+     *  emits ~17 locale URLs × ~3.5 KB ≈ 60 KB per record, so 400 records ≈
+     *  24 MB per chunk — under Google's 50 MB / 50K-URL caps. */
     private const LISTINGS_PER_PAGE = 200;
-    /** Same idea for users — 200 records × 1 URL each = small, but keeps
-     *  pagination consistent. */
+    private const LOCATIONS_PER_PAGE = 400;
+    private const LOC_CAT_PER_PAGE = 400;
     private const USERS_PER_PAGE = 1000;
 
     /**
@@ -30,43 +29,33 @@ class SitemapController extends Controller
     public function index()
     {
         try {
-        $content = Cache::remember('sitemap-index-v3', 3600, function () {
+        $content = Cache::remember('sitemap-index-v4', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+            $now = now()->toIso8601String();
 
-            // Main pages sitemap
-            $xml .= '<sitemap>';
-            $xml .= '<loc>' . url('/sitemap-pages.xml') . '</loc>';
-            $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
-            $xml .= '</sitemap>';
+            $xml .= '<sitemap><loc>' . url('/sitemap-pages.xml') . '</loc><lastmod>' . $now . '</lastmod></sitemap>';
+            $xml .= '<sitemap><loc>' . url('/sitemap-categories.xml') . '</loc><lastmod>' . $now . '</lastmod></sitemap>';
 
-            // Categories sitemap
-            $xml .= '<sitemap>';
-            $xml .= '<loc>' . url('/sitemap-categories.xml') . '</loc>';
-            $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
-            $xml .= '</sitemap>';
+            // Locations sitemap (paginated)
+            $locationCount = count($this->locationRecords());
+            $locationPages = max(1, (int) ceil($locationCount / self::LOCATIONS_PER_PAGE));
+            for ($i = 1; $i <= $locationPages; $i++) {
+                $xml .= '<sitemap><loc>' . url("/sitemap-locations-{$i}.xml") . '</loc><lastmod>' . $now . '</lastmod></sitemap>';
+            }
 
-            // Locations sitemap (countries, cities, services by location)
-            $xml .= '<sitemap>';
-            $xml .= '<loc>' . url('/sitemap-locations.xml') . '</loc>';
-            $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
-            $xml .= '</sitemap>';
-
-            // Location + Category combinations sitemap
-            $xml .= '<sitemap>';
-            $xml .= '<loc>' . url('/sitemap-location-categories.xml') . '</loc>';
-            $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
-            $xml .= '</sitemap>';
+            // Location-categories sitemap (paginated)
+            $locCatCount = count($this->locationCategoryRecords());
+            $locCatPages = max(1, (int) ceil($locCatCount / self::LOC_CAT_PER_PAGE));
+            for ($i = 1; $i <= $locCatPages; $i++) {
+                $xml .= '<sitemap><loc>' . url("/sitemap-location-categories-{$i}.xml") . '</loc><lastmod>' . $now . '</lastmod></sitemap>';
+            }
 
             // Listings sitemap (paginated)
             $totalListings = ServicePost::where('state', 'published')->count();
-            $listingPages = ceil($totalListings / self::LISTINGS_PER_PAGE);
-
-            for ($i = 1; $i <= max(1, $listingPages); $i++) {
-                $xml .= '<sitemap>';
-                $xml .= '<loc>' . url("/sitemap-listings-{$i}.xml") . '</loc>';
-                $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
-                $xml .= '</sitemap>';
+            $listingPages = max(1, (int) ceil($totalListings / self::LISTINGS_PER_PAGE));
+            for ($i = 1; $i <= $listingPages; $i++) {
+                $xml .= '<sitemap><loc>' . url("/sitemap-listings-{$i}.xml") . '</loc><lastmod>' . $now . '</lastmod></sitemap>';
             }
 
             // Users sitemap (paginated) — only profiles with published listings.
@@ -77,13 +66,9 @@ class SitemapController extends Controller
                     $q->where('state', 'published');
                 })
                 ->count();
-            $userPages = ceil($totalUsers / self::USERS_PER_PAGE);
-
-            for ($i = 1; $i <= max(1, $userPages); $i++) {
-                $xml .= '<sitemap>';
-                $xml .= '<loc>' . url("/sitemap-users-{$i}.xml") . '</loc>';
-                $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
-                $xml .= '</sitemap>';
+            $userPages = max(1, (int) ceil($totalUsers / self::USERS_PER_PAGE));
+            for ($i = 1; $i <= $userPages; $i++) {
+                $xml .= '<sitemap><loc>' . url("/sitemap-users-{$i}.xml") . '</loc><lastmod>' . $now . '</lastmod></sitemap>';
             }
 
             $xml .= '</sitemapindex>';
@@ -198,116 +183,128 @@ class SitemapController extends Controller
      * Generate sitemap for locations (countries and cities)
      * URLs like: /services/palestine/gaza - خدمات في غزة، فلسطين
      */
-    public function locations()
+    public function locations($page = 1)
     {
-        $content = Cache::remember('sitemap-locations-v4', 3600, function () {
-            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
+        $page = max(1, (int) $page);
+        $cacheKey = "sitemap-locations-v5-{$page}";
+        $content = Cache::remember($cacheKey, 3600, function () use ($page) {
+            $records = $this->locationRecords();
+            $offset = ($page - 1) * self::LOCATIONS_PER_PAGE;
+            $slice = array_slice($records, $offset, self::LOCATIONS_PER_PAGE);
 
             $activeLanguages = \App\Models\Language::getActiveOrdered();
             $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
             $allLocales = $activeLanguages->pluck('code')->all();
-
-            $countriesWithServices = countries::whereHas('cities', function($q) {
-                $q->whereHas('servicePosts', function($sq) {
-                    $sq->where('state', 'published');
-                });
-            })->orWhereIn('id', function($query) {
-                $query->select('country_id')
-                    ->from('service_posts')
-                    ->where('state', 'published')
-                    ->distinct();
-            })->get();
-
             $now = now()->toIso8601String();
-            foreach ($countriesWithServices as $country) {
-                $countrySlugAr = $this->slugify($country->name, 'ar');
+
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
+            foreach ($slice as $r) {
                 $xml .= $this->multiLocaleUrlBlock(
-                    "/services/{$country->id}/{$countrySlugAr}",
-                    $allLocales, $activeLanguages, $defaultLocale,
-                    $now, 'daily', '0.8'
+                    $r['path'], $allLocales, $activeLanguages, $defaultLocale,
+                    $now, 'daily', $r['priority']
                 );
-
-                $citiesWithServices = cities::where('country_id', $country->id)
-                    ->whereIn('id', function($query) {
-                        $query->select('city_id')
-                            ->from('service_posts')
-                            ->where('state', 'published')
-                            ->whereNotNull('city_id')
-                            ->distinct();
-                    })->get();
-
-                foreach ($citiesWithServices as $city) {
-                    $citySlugAr = $this->slugify($city->name, 'ar');
-                    $xml .= $this->multiLocaleUrlBlock(
-                        "/services/{$country->id}/{$countrySlugAr}/{$city->id}/{$citySlugAr}",
-                        $allLocales, $activeLanguages, $defaultLocale,
-                        $now, 'daily', '0.7'
-                    );
-                }
             }
-
             $xml .= '</urlset>';
-
             return $xml;
         });
-
-        return response($content, 200)
-            ->header('Content-Type', 'application/xml');
+        return response($content, 200)->header('Content-Type', 'application/xml');
     }
 
     /**
-     * Generate sitemap for location + category combinations
-     * URLs like: /services/palestine/gaza/cars - سيارات للبيع في غزة
+     * Build the flat list of locale-agnostic location paths (countries + cities
+     * with services). Cached separately so paginated requests don't re-run the
+     * country-cities-services query graph.
      */
-    public function locationCategories()
+    private function locationRecords(): array
     {
-        $content = Cache::remember('sitemap-location-categories-v3', 3600, function () {
-            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
+        return Cache::remember('location-records-v1', 3600, function () {
+            $records = [];
+            $countries = countries::whereHas('cities', function($q) {
+                $q->whereHas('servicePosts', fn($sq) => $sq->where('state', 'published'));
+            })->orWhereIn('id', function($q) {
+                $q->select('country_id')->from('service_posts')->where('state', 'published')->distinct();
+            })->get();
+
+            foreach ($countries as $country) {
+                $countrySlug = $this->slugify($country->name, 'ar');
+                $records[] = [
+                    'path' => "/services/{$country->id}/{$countrySlug}",
+                    'priority' => '0.8',
+                ];
+                $cities = cities::where('country_id', $country->id)
+                    ->whereIn('id', function($q) {
+                        $q->select('city_id')->from('service_posts')
+                            ->where('state', 'published')->whereNotNull('city_id')->distinct();
+                    })->get();
+                foreach ($cities as $city) {
+                    $records[] = [
+                        'path' => "/services/{$country->id}/{$countrySlug}/{$city->id}/" . $this->slugify($city->name, 'ar'),
+                        'priority' => '0.7',
+                    ];
+                }
+            }
+            return $records;
+        });
+    }
+
+    /**
+     * Generate sitemap for location + category combinations (paginated).
+     */
+    public function locationCategories($page = 1)
+    {
+        $page = max(1, (int) $page);
+        $cacheKey = "sitemap-location-categories-v4-{$page}";
+        $content = Cache::remember($cacheKey, 3600, function () use ($page) {
+            $records = $this->locationCategoryRecords();
+            $offset = ($page - 1) * self::LOC_CAT_PER_PAGE;
+            $slice = array_slice($records, $offset, self::LOC_CAT_PER_PAGE);
 
             $activeLanguages = \App\Models\Language::getActiveOrdered();
             $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
             $allLocales = $activeLanguages->pluck('code')->all();
-
-            $categories = Categories::where('isSuspended', false)->get();
-            $citiesWithServices = cities::whereIn('id', function($query) {
-                $query->select('city_id')
-                    ->from('service_posts')
-                    ->where('state', 'published')
-                    ->whereNotNull('city_id')
-                    ->distinct();
-            })->with('country')->get();
-
             $now = now()->toIso8601String();
-            foreach ($citiesWithServices as $city) {
-                if (!$city->country) continue;
-                $countrySlugAr = $this->slugify($city->country->name, 'ar');
-                $citySlugAr = $this->slugify($city->name, 'ar');
 
-                foreach ($categories as $category) {
-                    $hasServices = ServicePost::where('state', 'published')
-                        ->where('city_id', $city->id)
-                        ->where('categories_id', $category->id)
-                        ->exists();
-                    if (!$hasServices) continue;
-
-                    $categorySlugAr = $this->slugify($category->name, 'ar');
-                    $xml .= $this->multiLocaleUrlBlock(
-                        "/services/{$city->country->id}/{$countrySlugAr}/{$city->id}/{$citySlugAr}/{$category->id}/{$categorySlugAr}",
-                        $allLocales, $activeLanguages, $defaultLocale,
-                        $now, 'daily', '0.6'
-                    );
-                }
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
+            foreach ($slice as $path) {
+                $xml .= $this->multiLocaleUrlBlock(
+                    $path, $allLocales, $activeLanguages, $defaultLocale,
+                    $now, 'daily', '0.6'
+                );
             }
-
             $xml .= '</urlset>';
-
             return $xml;
         });
+        return response($content, 200)->header('Content-Type', 'application/xml');
+    }
 
-        return response($content, 200)
-            ->header('Content-Type', 'application/xml');
+    private function locationCategoryRecords(): array
+    {
+        return Cache::remember('location-category-records-v1', 3600, function () {
+            $records = [];
+            $categories = Categories::where('isSuspended', false)->get();
+            $cities = cities::whereIn('id', function($q) {
+                $q->select('city_id')->from('service_posts')
+                    ->where('state', 'published')->whereNotNull('city_id')->distinct();
+            })->with('country')->get();
+
+            foreach ($cities as $city) {
+                if (!$city->country) continue;
+                $countrySlug = $this->slugify($city->country->name, 'ar');
+                $citySlug = $this->slugify($city->name, 'ar');
+                foreach ($categories as $cat) {
+                    $hasServices = ServicePost::where('state', 'published')
+                        ->where('city_id', $city->id)
+                        ->where('categories_id', $cat->id)
+                        ->exists();
+                    if (!$hasServices) continue;
+                    $catSlug = $this->slugify($cat->name, 'ar');
+                    $records[] = "/services/{$city->country->id}/{$countrySlug}/{$city->id}/{$citySlug}/{$cat->id}/{$catSlug}";
+                }
+            }
+            return $records;
+        });
     }
 
     /**
