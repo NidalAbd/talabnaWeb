@@ -109,8 +109,10 @@ class SitemapController extends Controller
 
             $now = now()->toIso8601String();
             foreach ($pages as $page) {
+                // Static pages have no locale-specific path; same path everywhere.
                 $xml .= $this->multiLocaleUrlBlock(
-                    $page['url'], $allLocales, $activeLanguages, $defaultLocale,
+                    fn(string $loc) => $page['url'],
+                    $allLocales, $activeLanguages, $defaultLocale,
                     $now, $page['changefreq'], $page['priority']
                 );
             }
@@ -142,10 +144,9 @@ class SitemapController extends Controller
 
             $categories = Categories::where('isSuspended', false)->get();
             foreach ($categories as $category) {
-                $slugAr = $this->slugify($category->name, 'ar');
-                $path = "/category/{$category->id}/{$slugAr}";
                 $xml .= $this->multiLocaleUrlBlock(
-                    $path, $allLocales, $activeLanguages, $defaultLocale,
+                    fn(string $loc) => "/category/{$category->id}/" . $this->slugify($category->name, $loc),
+                    $allLocales, $activeLanguages, $defaultLocale,
                     ($category->updated_at ?? now())->toIso8601String(),
                     'daily', '0.8'
                 );
@@ -155,11 +156,12 @@ class SitemapController extends Controller
                 ->with('category')->get();
             foreach ($subcategories as $sub) {
                 if ($sub->category && !$sub->category->isSuspended) {
-                    $categorySlug = $this->slugify($sub->category->name, 'ar');
-                    $subcategorySlug = $this->slugify($sub->name, 'ar');
-                    $path = "/category/{$sub->categories_id}/{$categorySlug}/subcategory/{$sub->id}/{$subcategorySlug}";
                     $xml .= $this->multiLocaleUrlBlock(
-                        $path, $allLocales, $activeLanguages, $defaultLocale,
+                        fn(string $loc) => "/category/{$sub->categories_id}/"
+                            . $this->slugify($sub->category->name, $loc)
+                            . "/subcategory/{$sub->id}/"
+                            . $this->slugify($sub->name, $loc),
+                        $allLocales, $activeLanguages, $defaultLocale,
                         ($sub->updated_at ?? now())->toIso8601String(),
                         'daily', '0.7'
                     );
@@ -200,8 +202,18 @@ class SitemapController extends Controller
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
             foreach ($slice as $r) {
+                // $r is ['type'=>'country'|'city', 'country_id'=>..., 'country_name'=>JSON,
+                //        'city_id'=>?, 'city_name'=>?, 'priority'=>...]
                 $xml .= $this->multiLocaleUrlBlock(
-                    $r['path'], $allLocales, $activeLanguages, $defaultLocale,
+                    function (string $loc) use ($r) {
+                        $countrySlug = $this->slugify($r['country_name'], $loc);
+                        if ($r['type'] === 'country') {
+                            return "/services/{$r['country_id']}/{$countrySlug}";
+                        }
+                        $citySlug = $this->slugify($r['city_name'], $loc);
+                        return "/services/{$r['country_id']}/{$countrySlug}/{$r['city_id']}/{$citySlug}";
+                    },
+                    $allLocales, $activeLanguages, $defaultLocale,
                     $now, 'daily', $r['priority']
                 );
             }
@@ -218,7 +230,7 @@ class SitemapController extends Controller
      */
     private function locationRecords(): array
     {
-        return Cache::remember('location-records-v1', 3600, function () {
+        return Cache::remember('location-records-v2', 3600, function () {
             $records = [];
             $countries = countries::whereHas('cities', function($q) {
                 $q->whereHas('servicePosts', fn($sq) => $sq->where('state', 'published'));
@@ -227,9 +239,13 @@ class SitemapController extends Controller
             })->get();
 
             foreach ($countries as $country) {
-                $countrySlug = $this->slugify($country->name, 'ar');
+                // Store the raw multilingual JSON name so per-locale slugs
+                // can be computed at chunk-render time.
+                $rawCountryName = $country->getAttributes()['name'] ?? $country->name;
                 $records[] = [
-                    'path' => "/services/{$country->id}/{$countrySlug}",
+                    'type' => 'country',
+                    'country_id' => $country->id,
+                    'country_name' => $rawCountryName,
                     'priority' => '0.8',
                 ];
                 $cities = cities::where('country_id', $country->id)
@@ -239,7 +255,11 @@ class SitemapController extends Controller
                     })->get();
                 foreach ($cities as $city) {
                     $records[] = [
-                        'path' => "/services/{$country->id}/{$countrySlug}/{$city->id}/" . $this->slugify($city->name, 'ar'),
+                        'type' => 'city',
+                        'country_id' => $country->id,
+                        'country_name' => $rawCountryName,
+                        'city_id' => $city->id,
+                        'city_name' => $city->getAttributes()['name'] ?? $city->name,
                         'priority' => '0.7',
                     ];
                 }
@@ -267,9 +287,15 @@ class SitemapController extends Controller
 
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
-            foreach ($slice as $path) {
+            foreach ($slice as $r) {
+                // $r is ['country_id'=>..., 'country_name'=>JSON, 'city_id'=>...,
+                //        'city_name'=>JSON, 'cat_id'=>..., 'cat_name'=>JSON]
                 $xml .= $this->multiLocaleUrlBlock(
-                    $path, $allLocales, $activeLanguages, $defaultLocale,
+                    fn(string $loc) => "/services/{$r['country_id']}/"
+                        . $this->slugify($r['country_name'], $loc)
+                        . "/{$r['city_id']}/" . $this->slugify($r['city_name'], $loc)
+                        . "/{$r['cat_id']}/" . $this->slugify($r['cat_name'], $loc),
+                    $allLocales, $activeLanguages, $defaultLocale,
                     $now, 'daily', '0.6'
                 );
             }
@@ -281,7 +307,7 @@ class SitemapController extends Controller
 
     private function locationCategoryRecords(): array
     {
-        return Cache::remember('location-category-records-v1', 3600, function () {
+        return Cache::remember('location-category-records-v2', 3600, function () {
             $records = [];
             $categories = Categories::where('isSuspended', false)->get();
             $cities = cities::whereIn('id', function($q) {
@@ -291,16 +317,22 @@ class SitemapController extends Controller
 
             foreach ($cities as $city) {
                 if (!$city->country) continue;
-                $countrySlug = $this->slugify($city->country->name, 'ar');
-                $citySlug = $this->slugify($city->name, 'ar');
+                $countryRaw = $city->country->getAttributes()['name'] ?? $city->country->name;
+                $cityRaw = $city->getAttributes()['name'] ?? $city->name;
                 foreach ($categories as $cat) {
                     $hasServices = ServicePost::where('state', 'published')
                         ->where('city_id', $city->id)
                         ->where('categories_id', $cat->id)
                         ->exists();
                     if (!$hasServices) continue;
-                    $catSlug = $this->slugify($cat->name, 'ar');
-                    $records[] = "/services/{$city->country->id}/{$countrySlug}/{$city->id}/{$citySlug}/{$cat->id}/{$catSlug}";
+                    $records[] = [
+                        'country_id' => $city->country->id,
+                        'country_name' => $countryRaw,
+                        'city_id' => $city->id,
+                        'city_name' => $cityRaw,
+                        'cat_id' => $cat->id,
+                        'cat_name' => $cat->getAttributes()['name'] ?? $cat->name,
+                    ];
                 }
             }
             return $records;
@@ -312,7 +344,7 @@ class SitemapController extends Controller
      */
     public function listings($page = 1)
     {
-        $cacheKey = "sitemap-listings-v4-{$page}";
+        $cacheKey = "sitemap-listings-v5-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::LISTINGS_PER_PAGE;
@@ -334,15 +366,12 @@ class SitemapController extends Controller
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
             foreach ($listings as $listing) {
-                // Locale-agnostic path; multiLocaleUrlBlock prefixes per locale.
-                $path = SlugResolver::buildPostUrl($listing, 'en');
-
-                // Per-listing translation gate. multiLocaleUrlBlock auto-adds
-                // default + 'en' fallbacks even if missing.
                 $completedLocales = $listing->getCompletedLocales();
-
                 $xml .= $this->multiLocaleUrlBlock(
-                    $path, $completedLocales, $activeLanguages, $defaultLocale,
+                    // Per-locale path: country/city/cat/sub/title-id all in
+                    // the requested locale's slug.
+                    fn(string $loc) => SlugResolver::buildPostUrl($listing, $loc),
+                    $completedLocales, $activeLanguages, $defaultLocale,
                     ($listing->updated_at ?? now())->toIso8601String(),
                     'weekly', '0.6'
                 );
@@ -362,7 +391,7 @@ class SitemapController extends Controller
      */
     public function users($page = 1)
     {
-        $cacheKey = "sitemap-users-v2-{$page}";
+        $cacheKey = "sitemap-users-v3-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::USERS_PER_PAGE;
@@ -385,10 +414,10 @@ class SitemapController extends Controller
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
             foreach ($users as $user) {
-                // Profile UI is fully translated via the i18n bundle, so all
-                // active locales are valid variants.
+                // Profile path is just /user/{id} — no locale-specific slug.
                 $xml .= $this->multiLocaleUrlBlock(
-                    "/user/{$user->id}", $allLocales, $activeLanguages, $defaultLocale,
+                    fn(string $loc) => "/user/{$user->id}",
+                    $allLocales, $activeLanguages, $defaultLocale,
                     ($user->updated_at ?? now())->toIso8601String(),
                     'weekly', '0.5'
                 );
@@ -521,20 +550,22 @@ class SitemapController extends Controller
 
     /**
      * Emit one full <url> block per completed locale for a single piece of
-     * content. Each block has its own self-canonical <loc> (the locale-prefixed
-     * URL) and lists every other completed locale as <xhtml:link hreflang>.
-     * This is what gets each language variant indexed as a distinct page.
+     * content. Each block has its own self-canonical <loc> (the locale-
+     * prefixed URL with locale-translated slug) and lists every other
+     * completed locale as <xhtml:link hreflang>. This is what gets each
+     * language variant indexed as a distinct page with locale-appropriate
+     * keywords in the URL.
      *
-     * @param string $path  locale-agnostic site path (e.g. /listing/123)
-     * @param array  $completedLocales codes the record has translations for
-     * @param iterable $activeLanguages full active-language list (for ordering)
+     * @param callable $pathBuilder  fn(string $locale): string returning the
+     *                               locale-agnostic site path for that locale
+     *                               (e.g. /services/{country-slug-in-locale}/...)
+     * @param array $completedLocales codes the record has translations for
+     * @param iterable $activeLanguages
      * @param string $defaultLocale  unprefixed locale (e.g. 'ar')
      * @param string $lastmod  ISO-8601 timestamp
-     * @param string $changefreq
-     * @param string $priority
      */
     private function multiLocaleUrlBlock(
-        string $path,
+        callable $pathBuilder,
         array $completedLocales,
         $activeLanguages,
         string $defaultLocale,
@@ -542,30 +573,31 @@ class SitemapController extends Controller
         string $changefreq,
         string $priority
     ): string {
-        // Always include the default locale and 'en' as common fallbacks even
-        // if the record lacks them — matches the visible page behaviour.
+        // Always include default + 'en' as fallbacks (matches page behaviour).
         $emitLocales = array_values(array_unique(array_merge(
             $completedLocales,
             [$defaultLocale, 'en']
         )));
 
         // Pre-compute every alternate URL once per record.
-        $alternates = '';
+        $urls = [];  // code => full URL
         foreach ($activeLanguages as $lang) {
             if (!in_array($lang->code, $emitLocales, true)) continue;
-            $alt = $this->localizedUrl($path, $lang->code, $defaultLocale);
-            $alternates .= '<xhtml:link rel="alternate" hreflang="' . $lang->code . '" href="' . htmlspecialchars($alt, ENT_XML1) . '"/>';
+            $urls[$lang->code] = $this->localizedUrl($pathBuilder($lang->code), $lang->code, $defaultLocale);
         }
-        $defaultUrl = $this->localizedUrl($path, $defaultLocale, $defaultLocale);
+
+        $alternates = '';
+        foreach ($urls as $code => $url) {
+            $alternates .= '<xhtml:link rel="alternate" hreflang="' . $code . '" href="' . htmlspecialchars($url, ENT_XML1) . '"/>';
+        }
+        $defaultUrl = $urls[$defaultLocale] ?? (array_values($urls)[0] ?? '');
         $alternates .= '<xhtml:link rel="alternate" hreflang="x-default" href="' . htmlspecialchars($defaultUrl, ENT_XML1) . '"/>';
 
-        // One <url> block per completed locale — each self-canonicalizes.
+        // One <url> block per locale — each self-canonicalizes to its own URL.
         $xml = '';
-        foreach ($activeLanguages as $lang) {
-            if (!in_array($lang->code, $emitLocales, true)) continue;
-            $loc = $this->localizedUrl($path, $lang->code, $defaultLocale);
+        foreach ($urls as $code => $url) {
             $xml .= '<url>';
-            $xml .= '<loc>' . htmlspecialchars($loc, ENT_XML1) . '</loc>';
+            $xml .= '<loc>' . htmlspecialchars($url, ENT_XML1) . '</loc>';
             $xml .= '<lastmod>' . $lastmod . '</lastmod>';
             $xml .= '<changefreq>' . $changefreq . '</changefreq>';
             $xml .= '<priority>' . $priority . '</priority>';

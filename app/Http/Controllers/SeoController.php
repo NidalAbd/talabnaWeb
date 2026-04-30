@@ -128,12 +128,37 @@ class SeoController extends Controller
         }
 
         // Re-derive hreflang alternates from the FINAL canonical URL after
-        // path-specific handlers have run (they may rewrite canonical).
-        // Each alternate is the canonical's locale-agnostic path rendered
-        // under the appropriate locale prefix.
-        $seo['alternates'] = $this->buildAlternatesFromCanonical($seo['canonical'], $locale, $defaultLocale, $baseUrl);
+        // path-specific handlers have run, UNLESS the handler already built
+        // per-locale alternates (each locale has a different slug, so the
+        // canonical-stripping fallback can't reconstruct them).
+        if (empty($seo['_alternates_locked'])) {
+            $seo['alternates'] = $this->buildAlternatesFromCanonical($seo['canonical'], $locale, $defaultLocale, $baseUrl);
+        }
+        unset($seo['_alternates_locked']);
 
         return $seo;
+    }
+
+    /**
+     * Build hreflang alternates from a per-locale path builder. Used by
+     * handlers where each locale has a different URL slug (listing,
+     * services). Returns alternates in the same shape as
+     * buildAlternatesFromCanonical.
+     */
+    private function buildPerLocaleAlternates(callable $pathBuilder, string $baseUrl, string $defaultLocale): array
+    {
+        $alternates = [];
+        foreach (\App\Models\Language::getActiveOrdered() as $lang) {
+            $alternates[] = [
+                'hreflang' => $lang->code,
+                'href' => $this->localizedUrl($baseUrl, $pathBuilder($lang->code), $lang->code, $defaultLocale),
+            ];
+        }
+        $alternates[] = [
+            'hreflang' => 'x-default',
+            'href' => $this->localizedUrl($baseUrl, $pathBuilder($defaultLocale), $defaultLocale, $defaultLocale),
+        ];
+        return $alternates;
     }
 
     /**
@@ -244,7 +269,16 @@ class SeoController extends Controller
         // /listing/{id} URLs already in Google's index consolidate to the
         // /services/{country}/{city}/{cat}/{sub}/{slug-id} URL the sitemap now
         // submits — instead of self-canonicalizing as a duplicate.
-        $seo['canonical'] = $this->localizedUrl($baseUrl, SlugResolver::buildPostUrl($listing, 'en'), $locale, $this->defaultLocale());
+        // Per-locale slug — each locale gets its own translated URL.
+        $seo['canonical'] = $this->localizedUrl($baseUrl, SlugResolver::buildPostUrl($listing, $locale), $locale, $this->defaultLocale());
+        // Override the alternates with per-locale paths since each language
+        // has a different slug. (The default builder in generateSeoData
+        // assumes one locale-agnostic path.)
+        $seo['alternates'] = $this->buildPerLocaleAlternates(
+            fn(string $loc) => SlugResolver::buildPostUrl($listing, $loc),
+            $baseUrl, $this->defaultLocale()
+        );
+        $seo['_alternates_locked'] = true;
 
         // Open Graph
         $seo['og']['type'] = 'product';
@@ -488,29 +522,28 @@ class SeoController extends Controller
         $cityName = $city ? $this->getLocalizedName($city->name, $locale) : '';
         $categoryName = $category ? $this->getLocalizedName($category->name, $locale) : '';
 
-        // Force canonical to the Arabic-slug variant regardless of which slug
-        // variant the request used. Otherwise /services/1/Palestine and
-        // /services/1/فلسطين both self-canonicalize and Google flags them as
-        // duplicates with mismatched canonicals.
-        //
-        // Must use the same slug encoding the sitemap uses (urlencoded native
-        // Arabic — preserves \p{L}\p{N}, no transliteration), otherwise the
-        // sitemap's submitted URL won't match the page's canonical and we
-        // recreate the very mismatch we're trying to fix.
+        // Per-locale canonical: the slug for each segment is in the requested
+        // locale (so /tr/services/{tr-country-slug}/... self-canonicalizes
+        // and is indexed independently by Google for Turkish queries).
         if ($country) {
-            $segments = [
-                (string) $countryId,
-                $this->slugify($this->getLocalizedName($country->name, 'ar')),
-            ];
-            if ($city && $cityId) {
-                $segments[] = (string) $cityId;
-                $segments[] = $this->slugify($this->getLocalizedName($city->name, 'ar'));
-            }
-            if ($category && $categoryId) {
-                $segments[] = (string) $categoryId;
-                $segments[] = $this->slugify($this->getLocalizedName($category->name, 'ar'));
-            }
-            $seo['canonical'] = $this->localizedUrl($baseUrl, '/services/' . implode('/', $segments), $locale, $this->defaultLocale());
+            $buildPath = function (string $loc) use ($country, $city, $cityId, $category, $categoryId) {
+                $segments = [
+                    (string) $country->id,
+                    $this->slugify($this->getLocalizedName($country->name, $loc)),
+                ];
+                if ($city && $cityId) {
+                    $segments[] = (string) $cityId;
+                    $segments[] = $this->slugify($this->getLocalizedName($city->name, $loc));
+                }
+                if ($category && $categoryId) {
+                    $segments[] = (string) $categoryId;
+                    $segments[] = $this->slugify($this->getLocalizedName($category->name, $loc));
+                }
+                return '/services/' . implode('/', $segments);
+            };
+            $seo['canonical'] = $this->localizedUrl($baseUrl, $buildPath($locale), $locale, $this->defaultLocale());
+            $seo['alternates'] = $this->buildPerLocaleAlternates($buildPath, $baseUrl, $this->defaultLocale());
+            $seo['_alternates_locked'] = true;
         }
 
         // Build query for listing count
