@@ -410,15 +410,23 @@ class SeoController extends Controller
         // variant the request used. Otherwise /services/1/Palestine and
         // /services/1/فلسطين both self-canonicalize and Google flags them as
         // duplicates with mismatched canonicals.
+        //
+        // Must use the same slug encoding the sitemap uses (urlencoded native
+        // Arabic — preserves \p{L}\p{N}, no transliteration), otherwise the
+        // sitemap's submitted URL won't match the page's canonical and we
+        // recreate the very mismatch we're trying to fix.
         if ($country) {
-            $segments = [$countryId, SlugResolver::makeSlug($country->name, 'ar')];
+            $segments = [
+                (string) $countryId,
+                $this->slugify($this->getLocalizedName($country->name, 'ar')),
+            ];
             if ($city && $cityId) {
-                $segments[] = $cityId;
-                $segments[] = SlugResolver::makeSlug($city->name, 'ar');
+                $segments[] = (string) $cityId;
+                $segments[] = $this->slugify($this->getLocalizedName($city->name, 'ar'));
             }
             if ($category && $categoryId) {
-                $segments[] = $categoryId;
-                $segments[] = SlugResolver::makeSlug($category->name, 'ar');
+                $segments[] = (string) $categoryId;
+                $segments[] = $this->slugify($this->getLocalizedName($category->name, 'ar'));
             }
             $seo['canonical'] = rtrim($baseUrl, '/') . '/services/' . implode('/', $segments);
         }
