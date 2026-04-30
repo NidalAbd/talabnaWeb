@@ -201,6 +201,33 @@ Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug}/{categoryId}
     return view('spa');
 })->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+', 'categoryId' => '[0-9]+'])->name('services.category');
 
+// Slug-based SEO URLs (no numeric IDs). The sitemap submits these — without
+// these routes Laravel returns 404 before SeoController can handle them.
+// Constraint: first segment must NOT be purely numeric (numeric routes above
+// catch those). Pattern matches up to 5 path segments.
+Route::get('/services/{country}', function() {
+    return view('spa');
+})->where('country', '(?!\d+$)[A-Za-z0-9%\-]+')->name('services.slug.country');
+
+Route::get('/services/{country}/{city}', function() {
+    return view('spa');
+})->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+', 'city' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.city');
+
+Route::get('/services/{country}/{city}/{category}', function() {
+    return view('spa');
+})->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.category');
+
+Route::get('/services/{country}/{city}/{category}/{subcategory}', function() {
+    return view('spa');
+})->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.subcategory');
+
+Route::get('/services/{country}/{city}/{category}/{subcategory}/{post}', function() {
+    return view('spa');
+})->where([
+    'country' => '(?!\d+$)[A-Za-z0-9%\-]+',
+    'post' => '[A-Za-z0-9%\-]+-\d+',
+])->name('services.slug.post');
+
 // Deep Link Routes
 Route::get('api/deep-link/{route}/{id?}', [DeepLinkController::class, 'redirect'])->name('deep.link');
 Route::get('/api/validate-deep-link/{route}/{id}', [DeepLinkController::class, 'validateDeepLinkResource'])
