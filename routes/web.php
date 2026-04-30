@@ -138,95 +138,105 @@ Route::get('/test-add-reply/{parentCommentId}', function($parentCommentId) {
 
 /*
 |--------------------------------------------------------------------------
-| Vue SPA Routes (Public)
+| Vue SPA Routes (Public) — registered twice
 |--------------------------------------------------------------------------
+| - Default locale (Arabic): unprefixed canonical paths (e.g. /listing/123).
+| - Non-default locales: same paths under a /{locale}/ prefix (/en/listing/123,
+|   /zh/listing/123, …). Each locale URL self-canonicalizes so Google indexes
+|   them as distinct pages — that's what gets us beyond a single 1×N indexing
+|   ceiling and into the 17×N range for fully-translated content.
 */
-Route::get('/', function() {
-    return view('spa');
-})->name('landing');
+$spaRoutes = function () {
+    Route::get('/', function() {
+        return view('spa');
+    })->name('landing');
 
-Route::get('/browse', function() {
-    return view('spa');
-})->name('browse');
+    Route::get('/browse', function() {
+        return view('spa');
+    })->name('browse');
 
-Route::get('/category/{id}/{slug?}', function() {
-    return view('spa');
-})->name('category.show');
+    Route::get('/category/{id}/{slug?}', function() {
+        return view('spa');
+    })->name('category.show');
 
-Route::get('/listing/{id}/{slug?}', function() {
-    return view('spa');
-})->name('listing.show');
+    Route::get('/listing/{id}/{slug?}', function() {
+        return view('spa');
+    })->name('listing.show');
 
-Route::get('/search', function() {
-    return view('spa');
-})->name('search');
+    Route::get('/search', function() {
+        return view('spa');
+    })->name('search');
 
-Route::get('/user/{id}', function() {
-    return view('spa');
-})->where('id', '[0-9]+')->name('user.public.profile');
+    Route::get('/user/{id}', function() {
+        return view('spa');
+    })->where('id', '[0-9]+')->name('user.public.profile');
 
-Route::get('/about', function() {
-    return view('spa');
-})->name('about');
+    Route::get('/about', function() {
+        return view('spa');
+    })->name('about');
 
-Route::get('/contact', function() {
-    return view('spa');
-})->name('contact');
+    Route::get('/contact', function() {
+        return view('spa');
+    })->name('contact');
 
-Route::get('/privacy', function() {
-    return view('spa');
-})->name('privacy');
+    Route::get('/privacy', function() {
+        return view('spa');
+    })->name('privacy');
 
-Route::get('/terms', function() {
-    return view('spa');
-})->name('terms');
+    Route::get('/terms', function() {
+        return view('spa');
+    })->name('terms');
 
-/*
-|--------------------------------------------------------------------------
-| Services/Location Routes (SEO Pages)
-|--------------------------------------------------------------------------
-*/
-// Services by country
-Route::get('/services/{countryId}/{countrySlug?}', function() {
-    return view('spa');
-})->where('countryId', '[0-9]+')->name('services.country');
+    // Numeric-id services routes
+    Route::get('/services/{countryId}/{countrySlug?}', function() {
+        return view('spa');
+    })->where('countryId', '[0-9]+')->name('services.country');
 
-// Services by country and city
-Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug?}', function() {
-    return view('spa');
-})->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+'])->name('services.city');
+    Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug?}', function() {
+        return view('spa');
+    })->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+'])->name('services.city');
 
-// Services by country, city, and category
-Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug}/{categoryId}/{categorySlug?}', function() {
-    return view('spa');
-})->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+', 'categoryId' => '[0-9]+'])->name('services.category');
+    Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug}/{categoryId}/{categorySlug?}', function() {
+        return view('spa');
+    })->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+', 'categoryId' => '[0-9]+'])->name('services.category');
 
-// Slug-based SEO URLs (no numeric IDs). The sitemap submits these — without
-// these routes Laravel returns 404 before SeoController can handle them.
-// Constraint: first segment must NOT be purely numeric (numeric routes above
-// catch those). Pattern matches up to 5 path segments.
-Route::get('/services/{country}', function() {
-    return view('spa');
-})->where('country', '(?!\d+$)[A-Za-z0-9%\-]+')->name('services.slug.country');
+    // Slug-based SEO URLs (no numeric IDs). First segment must not be purely
+    // numeric — those go to the numeric routes above.
+    Route::get('/services/{country}', function() {
+        return view('spa');
+    })->where('country', '(?!\d+$)[A-Za-z0-9%\-]+')->name('services.slug.country');
 
-Route::get('/services/{country}/{city}', function() {
-    return view('spa');
-})->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+', 'city' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.city');
+    Route::get('/services/{country}/{city}', function() {
+        return view('spa');
+    })->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+', 'city' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.city');
 
-Route::get('/services/{country}/{city}/{category}', function() {
-    return view('spa');
-})->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.category');
+    Route::get('/services/{country}/{city}/{category}', function() {
+        return view('spa');
+    })->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.category');
 
-Route::get('/services/{country}/{city}/{category}/{subcategory}', function() {
-    return view('spa');
-})->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.subcategory');
+    Route::get('/services/{country}/{city}/{category}/{subcategory}', function() {
+        return view('spa');
+    })->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.subcategory');
 
-Route::get('/services/{country}/{city}/{category}/{subcategory}/{post}', function() {
-    return view('spa');
-})->where([
-    'country' => '(?!\d+$)[A-Za-z0-9%\-]+',
-    'post' => '[A-Za-z0-9%\-]+-\d+',
-])->name('services.slug.post');
+    Route::get('/services/{country}/{city}/{category}/{subcategory}/{post}', function() {
+        return view('spa');
+    })->where([
+        'country' => '(?!\d+$)[A-Za-z0-9%\-]+',
+        'post' => '[A-Za-z0-9%\-]+-\d+',
+    ])->name('services.slug.post');
+};
+
+// Default locale (Arabic) — unprefixed
+$spaRoutes();
+
+// Non-default locales — /{locale}/* . Locale codes hard-coded here to keep
+// route compilation static and avoid touching the DB on every route refresh;
+// keep in sync with the active_languages table.
+Route::group([
+    'prefix' => '{locale}',
+    'where' => ['locale' => 'en|tr|fr|es|hi|ur|bn|pt|ru|id|de|zh|ku|fa|sw|ms'],
+    'as' => 'locale.',
+], $spaRoutes);
 
 // Deep Link Routes
 Route::get('api/deep-link/{route}/{id?}', [DeepLinkController::class, 'redirect'])->name('deep.link');

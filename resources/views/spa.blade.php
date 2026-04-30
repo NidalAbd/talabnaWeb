@@ -1,29 +1,24 @@
 @php
-    // 301 redirect old ?locale= to ?lang= for SEO consistency
-    if (request()->has('locale') && !request()->has('lang')) {
-        $query = request()->query();
-        $query['lang'] = $query['locale'];
-        unset($query['locale']);
-        $redirectUrl = request()->url() . '?' . http_build_query($query);
-        header("HTTP/1.1 301 Moved Permanently");
-        header("Location: {$redirectUrl}");
-        exit;
-    }
-
-    // Detect locale from ?lang= or legacy ?locale= parameter
-    $requestedLocale = request()->query('lang', request()->query('locale', session('locale', 'ar')));
-    $activeLocales = \App\Models\Language::getActiveOrdered()->pluck('code')->toArray();
-    $locale = in_array($requestedLocale, $activeLocales) ? $requestedLocale : 'ar';
+    // SetLocale middleware (web group) has already resolved the locale from
+    // the {locale} route param, Accept-Language, or session, and issued
+    // 301 redirects for legacy ?locale= and ?lang= query-string URLs.
+    $locale = \Illuminate\Support\Facades\App::getLocale();
     $rtlLocales = ['ar', 'he', 'fa', 'ur', 'ps', 'ku', 'sd'];
     $dir = in_array($locale, $rtlLocales) ? 'rtl' : 'ltr';
 
-    // Server-side SEO data generation for search engine crawlers
-    $seoController = app(\App\Http\Controllers\SeoController::class);
-    $seoData = $seoController->getServerSideSeo(request()->path(), $locale);
+    // The path passed to the SEO controller is the request path WITHOUT the
+    // locale prefix (e.g. for /en/listing/1080 we want /listing/1080) — keeps
+    // the regex handlers in SeoController locale-agnostic.
+    $rawPath = request()->path();
+    $localePrefix = request()->route('locale');
+    $seoPath = $localePrefix ? preg_replace('#^' . preg_quote($localePrefix, '#') . '/?#', '/', $rawPath) : $rawPath;
+    if (!str_starts_with($seoPath, '/')) $seoPath = '/' . $seoPath;
 
-    // If the SEO controller flagged the resource as missing (deleted listing,
-    // missing user, unknown country/city/category slug), return HTTP 404 so
-    // Google sees the proper status instead of a soft 404.
+    $seoController = app(\App\Http\Controllers\SeoController::class);
+    $seoData = $seoController->getServerSideSeo($seoPath, $locale);
+
+    // If the SEO controller flagged the resource as missing, return HTTP 404
+    // so Google sees the proper status instead of a soft 404.
     if (!empty($seoData['notFound'])) {
         http_response_code(404);
     }

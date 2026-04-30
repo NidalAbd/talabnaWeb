@@ -37,6 +37,10 @@ class Kernel extends HttpKernel
             \Illuminate\View\Middleware\ShareErrorsFromSession::class,
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
+            // Resolves the active locale from the {locale} route param (path-
+            // prefixed routes), Accept-Language header, or session, then
+            // 301-redirects legacy ?lang=X URLs to the new /{X}/path format.
+            \App\Http\Middleware\SetLocale::class,
         ],
 
         'api' => [

@@ -65,13 +65,16 @@ class SeoController extends Controller
             'إعلانات مبوبة, سيارات للبيع, عقارات, وظائف, هواتف, بيع وشراء, فلسطين, غزة',
             'classified ads, cars for sale, real estate, jobs, phones, buy and sell, Palestine, Gaza');
 
+        $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
         $seo = [
             'title' => $seoTitle,
             'description' => $seoDesc,
             'keywords' => $seoKeywords,
             'locale' => $locale,
-            'canonical' => $baseUrl . $path . ($locale !== 'ar' ? '?lang=' . $locale : ''),
-            'alternates' => $this->generateHreflangAlternates($baseUrl, $path),
+            // Canonical = the locale-prefixed version of the path. Default
+            // locale (ar) is unprefixed; other locales sit under /{code}/.
+            'canonical' => $this->localizedUrl($baseUrl, $path, $locale, $defaultLocale),
+            'alternates' => [],  // re-generated at the end of generateSeoData
             'og' => [
                 'type' => 'website',
                 'site_name' => 'Talabna - طلبنا',
@@ -124,39 +127,68 @@ class SeoController extends Controller
             $seo = $this->getBrowseSeo($locale, $seo, $baseUrl);
         }
 
-        // Re-anchor hreflang alternates on the final canonical URL. Path
-        // handlers may rewrite canonical (e.g. forcing the Arabic-slug variant
-        // for /services/{id}/{slug}); if alternates were left pointing at the
-        // request path, the default-locale alternate would disagree with
-        // canonical and Google flags it as an hreflang/canonical conflict.
-        $seo['alternates'] = $this->buildAlternatesFromCanonical($seo['canonical']);
+        // Re-derive hreflang alternates from the FINAL canonical URL after
+        // path-specific handlers have run (they may rewrite canonical).
+        // Each alternate is the canonical's locale-agnostic path rendered
+        // under the appropriate locale prefix.
+        $seo['alternates'] = $this->buildAlternatesFromCanonical($seo['canonical'], $locale, $defaultLocale, $baseUrl);
 
         return $seo;
     }
 
     /**
-     * Build hreflang alternates anchored on a canonical URL. Default-locale
-     * alternate equals canonical; other locales add ?lang=X.
+     * Cached default-locale lookup; called from every path handler that
+     * builds a canonical URL.
      */
-    private function buildAlternatesFromCanonical(string $canonical): array
+    private ?string $defaultLocaleCache = null;
+    private function defaultLocale(): string
     {
-        $languages = \App\Models\Language::getActiveOrdered();
-        $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
+        return $this->defaultLocaleCache ??= (\App\Models\Language::getDefault()?->code ?? 'ar');
+    }
 
-        // Strip any existing ?lang= so we don't compound query params.
-        $base = preg_replace('/([?&])lang=[^&]*(&|$)/', '$1', $canonical);
-        $base = rtrim(rtrim($base, '?'), '&');
+    /**
+     * Build a localized URL: path is the locale-agnostic site path
+     * (e.g. /listing/1080); default locale is unprefixed, others are under
+     * /{code}/. Strips any leading slash from $path to keep concatenation
+     * predictable.
+     */
+    private function localizedUrl(string $baseUrl, string $path, string $locale, string $defaultLocale): string
+    {
+        $base = rtrim($baseUrl, '/');
+        $cleanPath = '/' . ltrim($path, '/');
+        if ($locale === $defaultLocale) {
+            return $base . $cleanPath;
+        }
+        return $base . '/' . $locale . $cleanPath;
+    }
+
+    /**
+     * Build hreflang alternates from a canonical URL by stripping the locale
+     * prefix (if any) and re-rendering the path under each active locale.
+     * One <link rel="alternate" hreflang="X"> per active language.
+     */
+    private function buildAlternatesFromCanonical(string $canonical, string $currentLocale, string $defaultLocale, string $baseUrl): array
+    {
+        $base = rtrim($baseUrl, '/');
+        // Convert canonical → locale-agnostic path. Strip $baseUrl + any leading
+        // /{locale}/ that matches an active language code.
+        $path = preg_replace('#^' . preg_quote($base, '#') . '#', '', $canonical) ?: '/';
+        $path = preg_replace('#^/(en|tr|fr|es|hi|ur|bn|pt|ru|id|de|zh|ku|fa|sw|ms)(/|$)#', '/', $path);
+        // Strip any residual ?lang= legacy query.
+        $path = preg_replace('/([?&])lang=[^&]*(&|$)/', '$1', $path);
+        $path = rtrim(rtrim($path, '?'), '&');
 
         $alternates = [];
-        foreach ($languages as $lang) {
-            $href = $base;
-            if ($lang->code !== $defaultLocale) {
-                $href .= (str_contains($base, '?') ? '&' : '?') . 'lang=' . $lang->code;
-            }
-            $alternates[] = ['hreflang' => $lang->code, 'href' => $href];
+        foreach (\App\Models\Language::getActiveOrdered() as $lang) {
+            $alternates[] = [
+                'hreflang' => $lang->code,
+                'href' => $this->localizedUrl($baseUrl, $path, $lang->code, $defaultLocale),
+            ];
         }
-        $alternates[] = ['hreflang' => 'x-default', 'href' => $base];
-
+        $alternates[] = [
+            'hreflang' => 'x-default',
+            'href' => $this->localizedUrl($baseUrl, $path, $defaultLocale, $defaultLocale),
+        ];
         return $alternates;
     }
 
@@ -212,7 +244,7 @@ class SeoController extends Controller
         // /listing/{id} URLs already in Google's index consolidate to the
         // /services/{country}/{city}/{cat}/{sub}/{slug-id} URL the sitemap now
         // submits — instead of self-canonicalizing as a duplicate.
-        $seo['canonical'] = $baseUrl . SlugResolver::buildPostUrl($listing, 'en');
+        $seo['canonical'] = $this->localizedUrl($baseUrl, SlugResolver::buildPostUrl($listing, 'en'), $locale, $this->defaultLocale());
 
         // Open Graph
         $seo['og']['type'] = 'product';
@@ -478,7 +510,7 @@ class SeoController extends Controller
                 $segments[] = (string) $categoryId;
                 $segments[] = $this->slugify($this->getLocalizedName($category->name, 'ar'));
             }
-            $seo['canonical'] = rtrim($baseUrl, '/') . '/services/' . implode('/', $segments);
+            $seo['canonical'] = $this->localizedUrl($baseUrl, '/services/' . implode('/', $segments), $locale, $this->defaultLocale());
         }
 
         // Build query for listing count
@@ -791,7 +823,7 @@ class SeoController extends Controller
         $seo['description'] = $locale === 'ar'
             ? "تصفح جميع الإعلانات والخدمات في {$name} على طلبنا"
             : "Browse all ads and services in {$name} on Talabna";
-        $seo['canonical'] = $baseUrl . $path;
+        $seo['canonical'] = $this->localizedUrl($baseUrl, $path, $locale, $this->defaultLocale());
         $seo['og']['type'] = 'website';
 
         return $seo;
@@ -811,7 +843,7 @@ class SeoController extends Controller
         $seo['description'] = $locale === 'ar'
             ? "إعلانات وخدمات في {$cityName}، {$countryName} - بيع واشتري على طلبنا"
             : "Ads and services in {$cityName}, {$countryName} - Buy and sell on Talabna";
-        $seo['canonical'] = $baseUrl . $path;
+        $seo['canonical'] = $this->localizedUrl($baseUrl, $path, $locale, $this->defaultLocale());
         $seo['breadcrumbs'] = [
             ['name' => 'Talabna', 'url' => $baseUrl],
             ['name' => $countryName, 'url' => $baseUrl . '/services/' . $countrySlug],
@@ -838,7 +870,7 @@ class SeoController extends Controller
         $seo['description'] = $locale === 'ar'
             ? "إعلانات {$catName} في {$cityName}، {$countryName} - أفضل العروض على طلبنا"
             : "{$catName} in {$cityName}, {$countryName} - Best deals on Talabna";
-        $seo['canonical'] = $baseUrl . $path;
+        $seo['canonical'] = $this->localizedUrl($baseUrl, $path, $locale, $this->defaultLocale());
         $seo['breadcrumbs'] = [
             ['name' => 'Talabna', 'url' => $baseUrl],
             ['name' => $countryName, 'url' => $baseUrl . '/services/' . $countrySlug],
@@ -878,7 +910,7 @@ class SeoController extends Controller
         $seo['description'] = $locale === 'ar'
             ? "تصفح إعلانات {$subName} ({$catName}) في {$cityName}، {$countryName} على طلبنا"
             : "Browse {$subName} ({$catName}) in {$cityName}, {$countryName} on Talabna";
-        $seo['canonical'] = $baseUrl . $path;
+        $seo['canonical'] = $this->localizedUrl($baseUrl, $path, $locale, $this->defaultLocale());
         $seo['breadcrumbs'] = [
             ['name' => 'Talabna', 'url' => $baseUrl],
             ['name' => $countryName, 'url' => $baseUrl . '/services/' . $countrySlug],
@@ -925,7 +957,7 @@ class SeoController extends Controller
 
         $seo['title'] = "{$title} - {$cityName}, {$countryName} | Talabna";
         $seo['description'] = mb_substr(strip_tags($description), 0, 160);
-        $seo['canonical'] = $baseUrl . $path;
+        $seo['canonical'] = $this->localizedUrl($baseUrl, $path, $locale, $this->defaultLocale());
 
         // OpenGraph
         $seo['og']['type'] = 'article';

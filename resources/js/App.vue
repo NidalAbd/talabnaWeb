@@ -372,19 +372,22 @@ const availableLanguages = ref([
 const changeLanguage = (code) => {
   appStore.setLocale(code)
   langMenuOpen.value = false
-  // Navigate to the locale-suffixed URL with a full page load so Laravel
-  // re-renders SSR meta tags (canonical, hreflang) for the new locale and
-  // Google sees real navigation into the ?lang=X URLs declared in the
-  // sitemap. window.location.reload() at the same URL never produces a
-  // ?lang=X navigation event, weakening the perceived legitimacy of those
-  // URLs.
+  // Navigate to the path-prefixed locale URL with a full page load so Laravel
+  // re-renders SSR meta (canonical, hreflang) for the new locale. Default
+  // locale (ar) is unprefixed; all others sit under /{code}/.
   const defaultLocale = 'ar'
+  const localeCodes = ['en','tr','fr','es','hi','ur','bn','pt','ru','id','de','zh','ku','fa','sw','ms']
   const url = new URL(window.location.href)
-  if (code === defaultLocale) {
-    url.searchParams.delete('lang')
-  } else {
-    url.searchParams.set('lang', code)
+  // Strip any existing locale prefix from the path.
+  const segments = url.pathname.split('/').filter(Boolean)
+  if (segments.length > 0 && localeCodes.includes(segments[0])) {
+    segments.shift()
   }
+  const basePath = '/' + segments.join('/')
+  // Strip the legacy ?lang= query param if present so the new URL is clean.
+  url.searchParams.delete('lang')
+  url.pathname = code === defaultLocale ? basePath : `/${code}${basePath}`
+  if (url.pathname === '') url.pathname = '/'
   window.location.assign(url.toString())
 }
 
