@@ -372,8 +372,20 @@ const availableLanguages = ref([
 const changeLanguage = (code) => {
   appStore.setLocale(code)
   langMenuOpen.value = false
-  // Reload to apply language change across all content
-  window.location.reload()
+  // Navigate to the locale-suffixed URL with a full page load so Laravel
+  // re-renders SSR meta tags (canonical, hreflang) for the new locale and
+  // Google sees real navigation into the ?lang=X URLs declared in the
+  // sitemap. window.location.reload() at the same URL never produces a
+  // ?lang=X navigation event, weakening the perceived legitimacy of those
+  // URLs.
+  const defaultLocale = 'ar'
+  const url = new URL(window.location.href)
+  if (code === defaultLocale) {
+    url.searchParams.delete('lang')
+  } else {
+    url.searchParams.set('lang', code)
+  }
+  window.location.assign(url.toString())
 }
 
 const doSearch = () => {

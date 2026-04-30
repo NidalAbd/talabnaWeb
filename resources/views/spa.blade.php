@@ -43,7 +43,7 @@
     <meta name="description" content="{{ $seoData['description'] ?? 'طلبنا - أكبر منصة للإعلانات المبوبة في الوطن العربي. بيع واشتري السيارات، العقارات، الهواتف، الوظائف والمزيد بسهولة وأمان.' }}">
     <meta name="keywords" content="{{ $seoData['keywords'] ?? 'إعلانات مبوبة, سيارات للبيع, عقارات, وظائف, هواتف, بيع وشراء, classified ads' }}">
     <meta name="author" content="Talabna">
-    @if(!empty($seoData['notFound']))
+    @if(!empty($seoData['notFound']) || !empty($seoData['untranslated']))
     <meta name="robots" content="noindex, follow">
     @else
     <meta name="robots" content="index, follow">

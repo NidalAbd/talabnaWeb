@@ -173,6 +173,18 @@ class SeoController extends Controller
             return $seo;
         }
 
+        // If the user requested a locale this listing has no translation for,
+        // we serve fallback content but tell Google to noindex this URL —
+        // otherwise /listing/X?lang=ru would be flagged as a duplicate of the
+        // canonical English/Arabic version.
+        $completedLocales = array_unique(array_merge(
+            $listing->getCompletedLocales(),
+            [\App\Models\Language::getDefault()?->code ?? 'ar', 'en']
+        ));
+        if (!in_array($locale, $completedLocales, true)) {
+            $seo['untranslated'] = true;
+        }
+
         $title = $listing->translate('title', $locale) ?? $listing->translate('title') ?? '';
         $description = $listing->translate('description', $locale) ?? $listing->translate('description') ?? '';
         $cityName = $this->getLocalizedName($listing->city?->name, $locale);
@@ -891,6 +903,15 @@ class SeoController extends Controller
     {
         $post = ServicePost::with(['photos', 'category', 'subCategory', 'user'])->find($postId);
         if (!$post) { $seo['notFound'] = true; return $seo; }
+
+        // Translation gating — see getListingSeo for rationale.
+        $completedLocales = array_unique(array_merge(
+            $post->getCompletedLocales(),
+            [\App\Models\Language::getDefault()?->code ?? 'ar', 'en']
+        ));
+        if (!in_array($locale, $completedLocales, true)) {
+            $seo['untranslated'] = true;
+        }
 
         $title = $post->translate('title', $locale) ?? $post->translate('title', 'ar') ?? '';
         $description = $post->translate('description', $locale) ?? $post->translate('description', 'ar') ?? '';

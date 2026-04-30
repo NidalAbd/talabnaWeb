@@ -87,12 +87,16 @@ trait HasTranslations
 
     /**
      * Get all available locales for this model's translations.
+     *
+     * Uses parent::getAttribute() to bypass the auto-translating override
+     * below — otherwise we'd receive a resolved string instead of the JSON
+     * array and would always return an empty array.
      */
     public function getAvailableLocales(): array
     {
         $locales = [];
         foreach ($this->getTranslatableFields() as $field) {
-            $value = $this->getAttribute($field);
+            $value = parent::getAttribute($field);
             if (is_array($value)) {
                 $locales = array_merge($locales, array_keys($value));
             }
@@ -101,7 +105,8 @@ trait HasTranslations
     }
 
     /**
-     * Check which locales have complete translations.
+     * Check which locales have complete translations (all translatable fields
+     * populated for that locale).
      */
     public function getCompletedLocales(): array
     {
@@ -112,7 +117,7 @@ trait HasTranslations
         foreach ($allLocales as $locale) {
             $allFilled = true;
             foreach ($fields as $field) {
-                $value = $this->getAttribute($field);
+                $value = parent::getAttribute($field);
                 if (!is_array($value) || empty($value[$locale] ?? null)) {
                     $allFilled = false;
                     break;

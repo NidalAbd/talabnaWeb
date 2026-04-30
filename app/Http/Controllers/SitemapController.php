@@ -342,7 +342,7 @@ class SitemapController extends Controller
      */
     public function listings($page = 1)
     {
-        $cacheKey = "sitemap-listings-v2-{$page}";
+        $cacheKey = "sitemap-listings-v3-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = 1000;
@@ -352,36 +352,53 @@ class SitemapController extends Controller
             // (country_id, city_id, categories_id, sub_categories_id). Without
             // them buildPostUrl emits a single-segment /services/{slug-id}
             // path that no route matches → every listing 404s.
+            // Need 'description' too for getCompletedLocales() to evaluate
+            // both translatable fields per locale.
             $listings = ServicePost::where('state', 'published')
                 ->orderBy('id')
                 ->skip($offset)
                 ->take($perPage)
                 ->get([
-                    'id', 'title', 'updated_at',
+                    'id', 'title', 'description', 'updated_at',
                     'country_id', 'city_id', 'categories_id', 'sub_categories_id',
                 ]);
 
             $activeLanguages = \App\Models\Language::getActiveOrdered();
+            $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
 
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
             foreach ($listings as $listing) {
-                // Build SEO-friendly slug URL
                 $seoUrl = SlugResolver::buildPostUrl($listing, 'en');
                 $baseUrl = url($seoUrl);
+
+                // Per-record translation gating: only emit hreflang for the
+                // locales this listing has BOTH a title AND description for
+                // (Google flags untranslated /?lang=X URLs as duplicates of the
+                // original). Always include the default locale and 'en' as the
+                // common-fallback even if missing — matches the visible page
+                // behaviour, which falls back to those locales.
+                $completedLocales = array_unique(array_merge(
+                    $listing->getCompletedLocales(),
+                    [$defaultLocale, 'en']
+                ));
 
                 $xml .= '<url>';
                 $xml .= '<loc>' . $baseUrl . '</loc>';
                 $xml .= '<lastmod>' . ($listing->updated_at ?? now())->toIso8601String() . '</lastmod>';
                 $xml .= '<changefreq>weekly</changefreq>';
                 $xml .= '<priority>0.6</priority>';
-                // Add hreflang alternates for each active language
                 foreach ($activeLanguages as $lang) {
-                    $langUrl = $baseUrl . '?lang=' . $lang->code;
-                    $xml .= '<xhtml:link rel="alternate" hreflang="' . $lang->code . '" href="' . $langUrl . '"/>';
+                    if (!in_array($lang->code, $completedLocales, true)) {
+                        continue;
+                    }
+                    $langUrl = $lang->code === $defaultLocale
+                        ? $baseUrl
+                        : $baseUrl . '?lang=' . $lang->code;
+                    $xml .= '<xhtml:link rel="alternate" hreflang="' . $lang->code . '" href="' . htmlspecialchars($langUrl, ENT_XML1) . '"/>';
                 }
-                $xml .= '<xhtml:link rel="alternate" hreflang="x-default" href="' . $baseUrl . '"/>';
+                $xml .= '<xhtml:link rel="alternate" hreflang="x-default" href="' . htmlspecialchars($baseUrl, ENT_XML1) . '"/>';
                 $xml .= '</url>';
             }
 
