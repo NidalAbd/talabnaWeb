@@ -32,12 +32,19 @@ class SetLocale
 
         // 301 legacy ?lang=X → /{X}/path. Old query-param URLs in Google's
         // index need to migrate to the new path-prefixed canonical URLs so
-        // the index consolidates onto the new structure.
+        // the index consolidates onto the new structure. Skip API and
+        // sitemap routes — the SPA calls /api/public/* with ?lang= for
+        // locale-aware responses, and we don't want to redirect those into
+        // /en/api/* which doesn't exist. Same for /sitemap*.xml.
         $queryLang = $request->query('lang');
-        if ($queryLang && !$request->route('locale')) {
+        $path = $request->path();
+        $isApiOrSitemap = str_starts_with($path, 'api/')
+            || str_starts_with($path, 'sitemap')
+            || $path === 'robots.txt';
+        if ($queryLang && !$request->route('locale') && !$isApiOrSitemap) {
             $normalized = $this->normalizeLocale($queryLang, $defaultLocale, $activeCodes);
-            $path = $request->path() === '/' ? '' : $request->path();
-            $newPath = $normalized === $defaultLocale ? "/{$path}" : "/{$normalized}/{$path}";
+            $cleanPath = $path === '/' ? '' : $path;
+            $newPath = $normalized === $defaultLocale ? "/{$cleanPath}" : "/{$normalized}/{$cleanPath}";
             $newPath = rtrim($newPath, '/') ?: '/';
             $remainingQuery = $request->query();
             unset($remainingQuery['lang']);
