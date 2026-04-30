@@ -168,7 +168,10 @@ class SeoController extends Controller
         $listing = ServicePost::with(['photos', 'city', 'country', 'category', 'subCategory', 'user'])
             ->find($id);
 
-        if (!$listing) return $seo;
+        if (!$listing) {
+            $seo['notFound'] = true;
+            return $seo;
+        }
 
         $title = $listing->translate('title', $locale) ?? $listing->translate('title') ?? '';
         $description = $listing->translate('description', $locale) ?? $listing->translate('description') ?? '';
@@ -193,9 +196,11 @@ class SeoController extends Controller
             $countryName,
         ]));
 
-        // Canonical URL
-        $slug = $this->slugify($title);
-        $seo['canonical'] = "{$baseUrl}/listing/{$id}/{$slug}";
+        // Canonical points to the new SEO-friendly slug URL so legacy
+        // /listing/{id} URLs already in Google's index consolidate to the
+        // /services/{country}/{city}/{cat}/{sub}/{slug-id} URL the sitemap now
+        // submits — instead of self-canonicalizing as a duplicate.
+        $seo['canonical'] = $baseUrl . SlugResolver::buildPostUrl($listing, 'en');
 
         // Open Graph
         $seo['og']['type'] = 'product';
@@ -358,7 +363,7 @@ class SeoController extends Controller
     private function getCategorySeo(int $categoryId, ?int $subcategoryId, string $locale, array $seo, string $baseUrl): array
     {
         $category = Categories::find($categoryId);
-        if (!$category) return $seo;
+        if (!$category) { $seo['notFound'] = true; return $seo; }
 
         $categoryName = $this->getLocalizedName($category->name, $locale);
         $subcategoryName = null;
@@ -629,7 +634,7 @@ class SeoController extends Controller
         $user = User::withCount(['servicePosts' => fn($q) => $q->where('state', 'published')])
             ->find($userId);
 
-        if (!$user) return $seo;
+        if (!$user) { $seo['notFound'] = true; return $seo; }
 
         $seo['title'] = $locale === 'ar'
             ? "{$user->name} | {$user->service_posts_count} إعلان على طلبنا"
@@ -767,7 +772,7 @@ class SeoController extends Controller
     private function getSlugCountrySeo(string $countrySlug, string $locale, array $seo, string $baseUrl, string $path): array
     {
         $country = SlugResolver::resolveCountry($countrySlug);
-        if (!$country) return $seo;
+        if (!$country) { $seo['notFound'] = true; return $seo; }
 
         $name = $this->getLocalizedName($country->name, $locale);
         $seo['title'] = "{$name} | Talabna";
@@ -783,9 +788,9 @@ class SeoController extends Controller
     private function getSlugCitySeo(string $countrySlug, string $citySlug, string $locale, array $seo, string $baseUrl, string $path): array
     {
         $country = SlugResolver::resolveCountry($countrySlug);
-        if (!$country) return $seo;
+        if (!$country) { $seo['notFound'] = true; return $seo; }
         $city = SlugResolver::resolveCity($citySlug, $country->id);
-        if (!$city) return $seo;
+        if (!$city) { $seo['notFound'] = true; return $seo; }
 
         $cityName = $this->getLocalizedName($city->name, $locale);
         $countryName = $this->getLocalizedName($country->name, $locale);
@@ -807,11 +812,11 @@ class SeoController extends Controller
     private function getSlugCategorySeo(string $countrySlug, string $citySlug, string $catSlug, string $locale, array $seo, string $baseUrl, string $path): array
     {
         $country = SlugResolver::resolveCountry($countrySlug);
-        if (!$country) return $seo;
+        if (!$country) { $seo['notFound'] = true; return $seo; }
         $city = SlugResolver::resolveCity($citySlug, $country->id);
-        if (!$city) return $seo;
+        if (!$city) { $seo['notFound'] = true; return $seo; }
         $category = SlugResolver::resolveCategory($catSlug);
-        if (!$category) return $seo;
+        if (!$category) { $seo['notFound'] = true; return $seo; }
 
         $cityName = $this->getLocalizedName($city->name, $locale);
         $countryName = $this->getLocalizedName($country->name, $locale);
@@ -844,11 +849,11 @@ class SeoController extends Controller
     private function getSlugSubcategorySeo(string $countrySlug, string $citySlug, string $catSlug, string $subSlug, string $locale, array $seo, string $baseUrl, string $path): array
     {
         $country = SlugResolver::resolveCountry($countrySlug);
-        if (!$country) return $seo;
+        if (!$country) { $seo['notFound'] = true; return $seo; }
         $city = SlugResolver::resolveCity($citySlug, $country->id);
-        if (!$city) return $seo;
+        if (!$city) { $seo['notFound'] = true; return $seo; }
         $category = SlugResolver::resolveCategory($catSlug);
-        if (!$category) return $seo;
+        if (!$category) { $seo['notFound'] = true; return $seo; }
         $subcategory = SlugResolver::resolveSubcategory($subSlug, $category->id);
         if (!$subcategory) return $seo;
 
@@ -885,7 +890,7 @@ class SeoController extends Controller
     private function getSlugPostSeo(string $countrySlug, string $citySlug, string $catSlug, string $subSlug, int $postId, string $locale, array $seo, string $baseUrl, string $path): array
     {
         $post = ServicePost::with(['photos', 'category', 'subCategory', 'user'])->find($postId);
-        if (!$post) return $seo;
+        if (!$post) { $seo['notFound'] = true; return $seo; }
 
         $title = $post->translate('title', $locale) ?? $post->translate('title', 'ar') ?? '';
         $description = $post->translate('description', $locale) ?? $post->translate('description', 'ar') ?? '';

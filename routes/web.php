@@ -233,8 +233,14 @@ Route::get('api/deep-link/{route}/{id?}', [DeepLinkController::class, 'redirect'
 Route::get('/api/validate-deep-link/{route}/{id}', [DeepLinkController::class, 'validateDeepLinkResource'])
     ->middleware('auth:api');
 
-// Authentication Routes
-Auth::routes();
+// Authentication Routes — wrap in a middleware that sends X-Robots-Tag:
+// noindex so /login, /register, /password/* etc. don't end up in Google's
+// index even if external sites link to them.
+Route::middleware([function ($request, $next) {
+    return $next($request)->header('X-Robots-Tag', 'noindex, nofollow');
+}])->group(function () {
+    Auth::routes();
+});
 
 // API route to get current authenticated user (for SPA)
 Route::get('/api/user', function () {

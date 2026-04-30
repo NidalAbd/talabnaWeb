@@ -20,6 +20,13 @@
     // Server-side SEO data generation for search engine crawlers
     $seoController = app(\App\Http\Controllers\SeoController::class);
     $seoData = $seoController->getServerSideSeo(request()->path(), $locale);
+
+    // If the SEO controller flagged the resource as missing (deleted listing,
+    // missing user, unknown country/city/category slug), return HTTP 404 so
+    // Google sees the proper status instead of a soft 404.
+    if (!empty($seoData['notFound'])) {
+        http_response_code(404);
+    }
 @endphp
 <!DOCTYPE html>
 <html lang="{{ $locale }}" dir="{{ $dir }}">
@@ -36,7 +43,11 @@
     <meta name="description" content="{{ $seoData['description'] ?? 'طلبنا - أكبر منصة للإعلانات المبوبة في الوطن العربي. بيع واشتري السيارات، العقارات، الهواتف، الوظائف والمزيد بسهولة وأمان.' }}">
     <meta name="keywords" content="{{ $seoData['keywords'] ?? 'إعلانات مبوبة, سيارات للبيع, عقارات, وظائف, هواتف, بيع وشراء, classified ads' }}">
     <meta name="author" content="Talabna">
+    @if(!empty($seoData['notFound']))
+    <meta name="robots" content="noindex, follow">
+    @else
     <meta name="robots" content="index, follow">
+    @endif
 
     <!-- OpenGraph Meta -->
     <meta property="og:type" content="{{ $seoData['og']['type'] ?? 'website' }}">
