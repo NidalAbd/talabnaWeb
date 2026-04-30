@@ -81,22 +81,31 @@ class GoogleAuthController extends Controller
             $client->setCache(new \Google\Auth\Cache\FileSystemCacheItemPool($cacheDir));
 
             // Try verification with retry
+            $clearCache = function () use ($cacheDir) {
+                foreach (glob($cacheDir . '/*') ?: [] as $f) {
+                    @unlink($f);
+                }
+            };
             for ($attempt = 1; $attempt <= 3; $attempt++) {
+                $failed = false;
                 try {
                     $payload = $client->verifyIdToken($idToken);
                     if ($payload) {
                         Log::info("Google token verified on attempt {$attempt}");
                         break;
-                    } else {
-                        Log::warning("Google verifyIdToken returned null on attempt {$attempt}");
                     }
+                    Log::warning("Google verifyIdToken returned null on attempt {$attempt}");
+                    $failed = true;
                 } catch (\Exception $verifyEx) {
                     Log::warning("Google token verification attempt {$attempt} failed: " . $verifyEx->getMessage());
-                    if ($attempt < 3) {
-                        // Clear cached keys on retry in case they're stale
-                        array_map('unlink', glob($cacheDir . '/*'));
-                        usleep(1000000); // 1s delay before retry
-                    }
+                    $failed = true;
+                }
+                // Clear cached keys before retry — Google's FileSystemCacheItemPool can
+                // hold stale rotated certs forever; a stale cache makes every retry fail
+                // identically. Clear on BOTH null returns and exceptions.
+                if ($failed && $attempt < 3) {
+                    $clearCache();
+                    usleep(1000000);
                 }
             }
 
@@ -335,11 +344,13 @@ class GoogleAuthController extends Controller
     public function logout(Request $request)
     {
         try {
-            // Revoke the token that was used to authenticate the request
-            $request->user()->currentAccessToken()->delete();
-
-            // Clear FCM token if needed
             $user = $request->user();
+            // App uses Passport, not Sanctum — currentAccessToken() returns null here.
+            $token = $user->token();
+            if ($token) {
+                $token->revoke();
+            }
+
             $user->fcm_token = null;
             $user->save();
 

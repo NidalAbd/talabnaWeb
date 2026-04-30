@@ -60,8 +60,14 @@ class SitemapController extends Controller
                 $xml .= '</sitemap>';
             }
 
-            // Users sitemap (paginated) - public profiles
-            $totalUsers = User::where('is_active', '!=', 'banned')->count();
+            // Users sitemap (paginated) — only profiles with published listings.
+            // Empty profiles are thin content; submitting them causes Google
+            // to flag them as "Crawled - currently not indexed".
+            $totalUsers = User::where('is_active', '!=', 'banned')
+                ->whereHas('servicePosts', function ($q) {
+                    $q->where('state', 'published');
+                })
+                ->count();
             $userPages = ceil($totalUsers / 1000);
 
             for ($i = 1; $i <= max(1, $userPages); $i++) {
@@ -198,9 +204,9 @@ class SitemapController extends Controller
      */
     public function locations()
     {
-        $content = Cache::remember('sitemap-locations', 3600, function () {
+        $content = Cache::remember('sitemap-locations-v2', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
-            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
             // Get countries that have services
             $countriesWithServices = countries::whereHas('cities', function($q) {
@@ -214,27 +220,28 @@ class SitemapController extends Controller
                     ->distinct();
             })->get();
 
+            // Submit ONE canonical URL per location (Arabic — site's primary
+            // locale). The English variant is exposed via hreflang. This avoids
+            // Google flagging Ar/En siblings as duplicates with mismatched
+            // canonicals (Page indexing → "Duplicate, Google chose different
+            // canonical than user").
             foreach ($countriesWithServices as $country) {
                 $countrySlugAr = $this->slugify($country->name, 'ar');
                 $countrySlugEn = $this->slugify($country->name, 'en');
 
-                // Country page - Arabic
+                $countryUrlAr = url("/services/{$country->id}/{$countrySlugAr}");
+                $countryUrlEn = url("/services/{$country->id}/{$countrySlugEn}");
+
                 $xml .= '<url>';
-                $xml .= '<loc>' . url("/services/{$country->id}/{$countrySlugAr}") . '</loc>';
+                $xml .= '<loc>' . $countryUrlAr . '</loc>';
                 $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
                 $xml .= '<changefreq>daily</changefreq>';
                 $xml .= '<priority>0.8</priority>';
+                $xml .= '<xhtml:link rel="alternate" hreflang="ar" href="' . $countryUrlAr . '"/>';
+                $xml .= '<xhtml:link rel="alternate" hreflang="en" href="' . $countryUrlEn . '"/>';
+                $xml .= '<xhtml:link rel="alternate" hreflang="x-default" href="' . $countryUrlAr . '"/>';
                 $xml .= '</url>';
 
-                // Country page - English
-                $xml .= '<url>';
-                $xml .= '<loc>' . url("/services/{$country->id}/{$countrySlugEn}") . '</loc>';
-                $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
-                $xml .= '<changefreq>daily</changefreq>';
-                $xml .= '<priority>0.8</priority>';
-                $xml .= '</url>';
-
-                // Cities in this country
                 $citiesWithServices = cities::where('country_id', $country->id)
                     ->whereIn('id', function($query) {
                         $query->select('city_id')
@@ -248,21 +255,17 @@ class SitemapController extends Controller
                     $citySlugAr = $this->slugify($city->name, 'ar');
                     $citySlugEn = $this->slugify($city->name, 'en');
 
-                    // City page - Arabic
-                    // URL: /services/country-id/country-slug/city-id/city-slug
-                    $xml .= '<url>';
-                    $xml .= '<loc>' . url("/services/{$country->id}/{$countrySlugAr}/{$city->id}/{$citySlugAr}") . '</loc>';
-                    $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
-                    $xml .= '<changefreq>daily</changefreq>';
-                    $xml .= '<priority>0.7</priority>';
-                    $xml .= '</url>';
+                    $cityUrlAr = url("/services/{$country->id}/{$countrySlugAr}/{$city->id}/{$citySlugAr}");
+                    $cityUrlEn = url("/services/{$country->id}/{$countrySlugEn}/{$city->id}/{$citySlugEn}");
 
-                    // City page - English
                     $xml .= '<url>';
-                    $xml .= '<loc>' . url("/services/{$country->id}/{$countrySlugEn}/{$city->id}/{$citySlugEn}") . '</loc>';
+                    $xml .= '<loc>' . $cityUrlAr . '</loc>';
                     $xml .= '<lastmod>' . now()->toIso8601String() . '</lastmod>';
                     $xml .= '<changefreq>daily</changefreq>';
                     $xml .= '<priority>0.7</priority>';
+                    $xml .= '<xhtml:link rel="alternate" hreflang="ar" href="' . $cityUrlAr . '"/>';
+                    $xml .= '<xhtml:link rel="alternate" hreflang="en" href="' . $cityUrlEn . '"/>';
+                    $xml .= '<xhtml:link rel="alternate" hreflang="x-default" href="' . $cityUrlAr . '"/>';
                     $xml .= '</url>';
                 }
             }
@@ -345,11 +348,18 @@ class SitemapController extends Controller
             $perPage = 1000;
             $offset = ($page - 1) * $perPage;
 
+            // Must include the foreign keys SlugResolver::buildPostUrl reads
+            // (country_id, city_id, categories_id, sub_categories_id). Without
+            // them buildPostUrl emits a single-segment /services/{slug-id}
+            // path that no route matches → every listing 404s.
             $listings = ServicePost::where('state', 'published')
                 ->orderBy('id')
                 ->skip($offset)
                 ->take($perPage)
-                ->get(['id', 'title', 'updated_at']);
+                ->get([
+                    'id', 'title', 'updated_at',
+                    'country_id', 'city_id', 'categories_id', 'sub_categories_id',
+                ]);
 
             $activeLanguages = \App\Models\Language::getActiveOrdered();
 
@@ -396,6 +406,9 @@ class SitemapController extends Controller
             $offset = ($page - 1) * $perPage;
 
             $users = User::where('is_active', '!=', 'banned')
+                ->whereHas('servicePosts', function ($q) {
+                    $q->where('state', 'published');
+                })
                 ->orderBy('id')
                 ->skip($offset)
                 ->take($perPage)

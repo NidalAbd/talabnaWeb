@@ -406,6 +406,23 @@ class SeoController extends Controller
         $cityName = $city ? $this->getLocalizedName($city->name, $locale) : '';
         $categoryName = $category ? $this->getLocalizedName($category->name, $locale) : '';
 
+        // Force canonical to the Arabic-slug variant regardless of which slug
+        // variant the request used. Otherwise /services/1/Palestine and
+        // /services/1/فلسطين both self-canonicalize and Google flags them as
+        // duplicates with mismatched canonicals.
+        if ($country) {
+            $segments = [$countryId, SlugResolver::makeSlug($country->name, 'ar')];
+            if ($city && $cityId) {
+                $segments[] = $cityId;
+                $segments[] = SlugResolver::makeSlug($city->name, 'ar');
+            }
+            if ($category && $categoryId) {
+                $segments[] = $categoryId;
+                $segments[] = SlugResolver::makeSlug($category->name, 'ar');
+            }
+            $seo['canonical'] = rtrim($baseUrl, '/') . '/services/' . implode('/', $segments);
+        }
+
         // Build query for listing count
         $query = ServicePost::where('state', 'published');
         if ($countryId) $query->where('country_id', $countryId);

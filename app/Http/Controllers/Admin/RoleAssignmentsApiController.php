@@ -134,14 +134,25 @@ class RoleAssignmentsApiController extends Controller
             DB::beginTransaction();
 
             try {
-                // Sync roles
+                // The role_user / permission_user pivots have a NOT NULL `user_type`
+                // column (polymorphic relation). Plain sync(ids) only writes the
+                // foreign key — must pass pivot data so user_type is populated.
+                $userType = get_class($user);
+
                 if ($request->has('roles')) {
-                    $user->roles()->sync($request->input('roles', []));
+                    $rolesSync = [];
+                    foreach ((array) $request->input('roles', []) as $rid) {
+                        $rolesSync[$rid] = ['user_type' => $userType];
+                    }
+                    $user->roles()->sync($rolesSync);
                 }
 
-                // Sync permissions
                 if ($request->has('permissions')) {
-                    $user->permissions()->sync($request->input('permissions', []));
+                    $permissionsSync = [];
+                    foreach ((array) $request->input('permissions', []) as $pid) {
+                        $permissionsSync[$pid] = ['user_type' => $userType];
+                    }
+                    $user->permissions()->sync($permissionsSync);
                 }
 
                 DB::commit();
