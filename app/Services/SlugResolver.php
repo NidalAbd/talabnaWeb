@@ -151,8 +151,11 @@ class SlugResolver
             if ($sub) $parts[] = self::makeSlug($sub->name, $locale);
         }
 
-        // Post slug + ID
-        $titleSlug = self::makeSlug($post->title, $locale);
+        // Post slug + ID. ServicePost uses HasTranslations, so $post->title
+        // auto-translates to the active App::getLocale() — bypass that and
+        // read the raw JSON so makeSlug picks the requested $locale's value.
+        $rawTitle = $post->getAttributes()['title'] ?? null;
+        $titleSlug = self::makeSlug($rawTitle ?? '', $locale);
         $parts[] = $titleSlug . '-' . $post->id;
 
         return implode('/', $parts);
