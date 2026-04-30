@@ -233,12 +233,10 @@ Route::get('api/deep-link/{route}/{id?}', [DeepLinkController::class, 'redirect'
 Route::get('/api/validate-deep-link/{route}/{id}', [DeepLinkController::class, 'validateDeepLinkResource'])
     ->middleware('auth:api');
 
-// Authentication Routes — wrap in a middleware that sends X-Robots-Tag:
-// noindex so /login, /register, /password/* etc. don't end up in Google's
-// index even if external sites link to them.
-Route::middleware([function ($request, $next) {
-    return $next($request)->header('X-Robots-Tag', 'noindex, nofollow');
-}])->group(function () {
+// Authentication Routes — wrapped in the 'noindex' alias (see Kernel.php
+// $routeMiddleware) so /login, /register, /password/* respond with
+// X-Robots-Tag: noindex, nofollow regardless of the underlying view.
+Route::middleware('noindex')->group(function () {
     Auth::routes();
 });
 

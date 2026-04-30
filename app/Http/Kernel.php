@@ -68,6 +68,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'admin' => \App\Http\Middleware\AdminAccessMiddleware::class,
         'check.user.ban' => \App\Http\Middleware\CheckUserBan::class,
+        'noindex' => \App\Http\Middleware\AddNoIndexHeader::class,
 
     ];
 }
