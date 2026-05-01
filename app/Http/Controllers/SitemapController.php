@@ -528,8 +528,10 @@ class SitemapController extends Controller
             return 'item';
         }
 
-        // Convert text to a safe format - keep only letters, numbers, spaces and hyphens
-        $text = preg_replace('/[^\p{L}\p{N}\s-]/u', '', $text);
+        // Keep letters (\p{L}), numbers (\p{N}), combining marks (\p{M} —
+        // vowel signs / diacritics like Hindi matras and Arabic harakat that
+        // are essential to script integrity), spaces, and hyphens.
+        $text = preg_replace('/[^\p{L}\p{N}\p{M}\s-]/u', '', $text);
         $text = preg_replace('/[\s-]+/', '-', $text);
         $text = trim($text, '-');
 
