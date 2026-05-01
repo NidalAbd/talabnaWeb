@@ -505,14 +505,16 @@ class SitemapController extends Controller
             }
         }
 
-        // Handle array/JSON names (multilingual)
+        // Handle array/JSON names (multilingual). Pick the requested locale
+        // first, then fall through to ar → en → first available. Previously
+        // this was hardcoded to special-case 'ar' and treat every other
+        // locale as 'en' — that's why /hi/services/38/Pakistan/... had the
+        // English country slug instead of the Hindi translation.
         if (is_array($text)) {
-            // Get preferred locale, fallback to other locale, then first available
-            if ($preferredLocale === 'ar') {
-                $text = $text['ar'] ?? $text['en'] ?? (count($text) > 0 ? array_values($text)[0] : 'item');
-            } else {
-                $text = $text['en'] ?? $text['ar'] ?? (count($text) > 0 ? array_values($text)[0] : 'item');
-            }
+            $text = $text[$preferredLocale]
+                ?? $text['ar']
+                ?? $text['en']
+                ?? (count($text) > 0 ? array_values($text)[0] : 'item');
         }
 
         // Ensure we have a string
