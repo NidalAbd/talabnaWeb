@@ -15,13 +15,19 @@ use Illuminate\Support\Facades\DB;
 
 class SitemapController extends Controller
 {
-    /** Records per page across the paginated sitemap sections. Each record
-     *  emits ~17 locale URLs × ~3.5 KB ≈ 60 KB per record, so 400 records ≈
-     *  24 MB per chunk — under Google's 50 MB / 50K-URL caps. */
+    /** Records per page across the paginated sitemap sections.
+     *
+     *  Each record emits ~17 locale URLs × ~3.5 KB hreflang block ≈ 60 KB
+     *  per record. We're under Google's 50 MB / 50K-URL caps in either
+     *  case, but Google's "Couldn't fetch" rate climbs sharply once chunks
+     *  exceed ~12 MB — even though docs say 50 MB is allowed. Listings at
+     *  8-9 MB never fail; locations at 20+ MB fail on ~40% of fetches.
+     *  200 records ≈ 10-11 MB which matches the listings reliability.
+     */
     private const LISTINGS_PER_PAGE = 200;
-    private const LOCATIONS_PER_PAGE = 400;
-    private const LOC_CAT_PER_PAGE = 400;
-    private const USERS_PER_PAGE = 1000;
+    private const LOCATIONS_PER_PAGE = 200;
+    private const LOC_CAT_PER_PAGE = 200;
+    private const USERS_PER_PAGE = 500;
 
     /**
      * Generate the main sitemap index
@@ -29,7 +35,7 @@ class SitemapController extends Controller
     public function index()
     {
         try {
-        $content = Cache::remember('sitemap-index-v4', 3600, function () {
+        $content = Cache::remember('sitemap-index-v5', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
             $now = now()->toIso8601String();
@@ -188,7 +194,7 @@ class SitemapController extends Controller
     public function locations($page = 1)
     {
         $page = max(1, (int) $page);
-        $cacheKey = "sitemap-locations-v5-{$page}";
+        $cacheKey = "sitemap-locations-v6-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationRecords();
             $offset = ($page - 1) * self::LOCATIONS_PER_PAGE;
@@ -274,7 +280,7 @@ class SitemapController extends Controller
     public function locationCategories($page = 1)
     {
         $page = max(1, (int) $page);
-        $cacheKey = "sitemap-location-categories-v4-{$page}";
+        $cacheKey = "sitemap-location-categories-v5-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationCategoryRecords();
             $offset = ($page - 1) * self::LOC_CAT_PER_PAGE;
@@ -391,7 +397,7 @@ class SitemapController extends Controller
      */
     public function users($page = 1)
     {
-        $cacheKey = "sitemap-users-v3-{$page}";
+        $cacheKey = "sitemap-users-v4-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::USERS_PER_PAGE;
