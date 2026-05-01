@@ -190,8 +190,18 @@ const routes = [
   },
 ]
 
+// Detect locale prefix from the URL at app boot. Laravel registers the
+// public SPA routes both unprefixed (default ar) and under /{locale}/ for
+// 16 other languages. Set Vue router's base to the locale prefix so the
+// router matches the path WITHOUT the prefix (e.g. /fr/listing/1493 → match
+// /listing/:id with base /fr). Internal navigation via router.push keeps
+// the prefix automatically.
+const LOCALE_CODES = ['en','tr','fr','es','hi','ur','bn','pt','ru','id','de','zh','ku','fa','sw','ms']
+const firstSeg = (window.location.pathname.split('/').filter(Boolean)[0] || '').toLowerCase()
+const localeBase = LOCALE_CODES.includes(firstSeg) ? `/${firstSeg}` : '/'
+
 const router = createRouter({
-  history: createWebHistory(),
+  history: createWebHistory(localeBase),
   routes,
   scrollBehavior(to, from, savedPosition) {
     if (savedPosition) {
