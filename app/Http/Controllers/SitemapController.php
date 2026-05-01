@@ -18,16 +18,37 @@ class SitemapController extends Controller
     /** Records per page across the paginated sitemap sections.
      *
      *  Each record emits ~17 locale URLs × ~3.5 KB hreflang block ≈ 60 KB
-     *  per record. We're under Google's 50 MB / 50K-URL caps in either
-     *  case, but Google's "Couldn't fetch" rate climbs sharply once chunks
-     *  exceed ~12 MB — even though docs say 50 MB is allowed. Listings at
-     *  8-9 MB never fail; locations at 20+ MB fail on ~40% of fetches.
-     *  200 records ≈ 10-11 MB which matches the listings reliability.
+     *  per record. Targeting ~5 MB per chunk after gzip; Google's fetch
+     *  reliability is ~100% at this size. Combined with gzip-encoded
+     *  responses (xmlResponse helper) that's ~1 MB on the wire.
      */
     private const LISTINGS_PER_PAGE = 200;
-    private const LOCATIONS_PER_PAGE = 200;
-    private const LOC_CAT_PER_PAGE = 200;
-    private const USERS_PER_PAGE = 500;
+    private const LOCATIONS_PER_PAGE = 100;
+    private const LOC_CAT_PER_PAGE = 100;
+    private const USERS_PER_PAGE = 200;
+
+    /**
+     * Build a sitemap response: gzip the XML if the client accepts it
+     * (Googlebot does), set a long browser cache, and set the right
+     * Content-Type. ~80% smaller on the wire = vastly better fetch
+     * reliability for Google.
+     */
+    private function xmlResponse(string $xml): \Illuminate\Http\Response
+    {
+        $request = request();
+        $accept = $request->header('Accept-Encoding', '');
+        $body = $xml;
+        $headers = [
+            'Content-Type' => 'application/xml',
+            'Cache-Control' => 'public, max-age=3600',
+        ];
+        if (str_contains($accept, 'gzip')) {
+            $body = gzencode($xml, 6);
+            $headers['Content-Encoding'] = 'gzip';
+            $headers['Vary'] = 'Accept-Encoding';
+        }
+        return response($body, 200, $headers);
+    }
 
     /**
      * Generate the main sitemap index
@@ -35,7 +56,7 @@ class SitemapController extends Controller
     public function index()
     {
         try {
-        $content = Cache::remember('sitemap-index-v5', 3600, function () {
+        $content = Cache::remember('sitemap-index-v6', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
             $now = now()->toIso8601String();
@@ -82,11 +103,10 @@ class SitemapController extends Controller
             return $xml;
         });
 
-        return response($content, 200)
-            ->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($content);
         } catch (\Exception $e) {
             \Log::error('Sitemap index error: ' . $e->getMessage());
-            return response($this->emptyIndex(), 200)->header('Content-Type', 'application/xml');
+            return $this->xmlResponse($this->emptyIndex());
         }
     }
 
@@ -128,8 +148,7 @@ class SitemapController extends Controller
             return $xml;
         });
 
-        return response($content, 200)
-            ->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($content);
     }
 
     /**
@@ -179,11 +198,10 @@ class SitemapController extends Controller
             return $xml;
         });
 
-        return response($content, 200)
-            ->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($content);
         } catch (\Exception $e) {
             \Log::error('Sitemap categories error: ' . $e->getMessage());
-            return response($this->emptyUrlset(), 200)->header('Content-Type', 'application/xml');
+            return $this->xmlResponse($this->emptyUrlset());
         }
     }
 
@@ -194,7 +212,7 @@ class SitemapController extends Controller
     public function locations($page = 1)
     {
         $page = max(1, (int) $page);
-        $cacheKey = "sitemap-locations-v6-{$page}";
+        $cacheKey = "sitemap-locations-v7-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationRecords();
             $offset = ($page - 1) * self::LOCATIONS_PER_PAGE;
@@ -226,7 +244,7 @@ class SitemapController extends Controller
             $xml .= '</urlset>';
             return $xml;
         });
-        return response($content, 200)->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($content);
     }
 
     /**
@@ -280,7 +298,7 @@ class SitemapController extends Controller
     public function locationCategories($page = 1)
     {
         $page = max(1, (int) $page);
-        $cacheKey = "sitemap-location-categories-v5-{$page}";
+        $cacheKey = "sitemap-location-categories-v6-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationCategoryRecords();
             $offset = ($page - 1) * self::LOC_CAT_PER_PAGE;
@@ -308,7 +326,7 @@ class SitemapController extends Controller
             $xml .= '</urlset>';
             return $xml;
         });
-        return response($content, 200)->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($content);
     }
 
     private function locationCategoryRecords(): array
@@ -388,8 +406,7 @@ class SitemapController extends Controller
             return $xml;
         });
 
-        return response($content, 200)
-            ->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($content);
     }
 
     /**
@@ -397,7 +414,7 @@ class SitemapController extends Controller
      */
     public function users($page = 1)
     {
-        $cacheKey = "sitemap-users-v4-{$page}";
+        $cacheKey = "sitemap-users-v5-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::USERS_PER_PAGE;
@@ -434,8 +451,7 @@ class SitemapController extends Controller
             return $xml;
         });
 
-        return response($content, 200)
-            ->header('Content-Type', 'application/xml');
+        return $this->xmlResponse($content);
     }
 
     /**
