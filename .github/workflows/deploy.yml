@@ -360,8 +360,16 @@ jobs:
             # from disk (no DB queries, no XML build per request) — required
             # to handle Google's parallel sitemap-chunk fetch bursts that
             # were exhausting Hostinger's PHP-FPM concurrency.
-            php artisan sitemap:generate 2>&1 | tail -10
-            echo "✅ Sitemap generated"
+            echo "→ running sitemap:generate"
+            php artisan sitemap:generate
+            artisan_rc=$?
+            echo "→ sitemap:generate exit code: $artisan_rc"
+            if [ $artisan_rc -ne 0 ]; then
+                echo "❌ sitemap:generate failed (exit $artisan_rc)"
+            else
+                file_count=$(ls storage/app/sitemaps/*.xml.gz 2>/dev/null | wc -l)
+                echo "✅ Sitemap generated — $file_count gz files"
+            fi
 
       - name: Cleanup
         run: |
