@@ -356,6 +356,12 @@ jobs:
             php artisan cache:clear
             php artisan route:clear
             echo "✅ Caches cleared"
+            # Pre-generate static sitemap files. Google fetches these directly
+            # from disk (no DB queries, no XML build per request) — required
+            # to handle Google's parallel sitemap-chunk fetch bursts that
+            # were exhausting Hostinger's PHP-FPM concurrency.
+            php artisan sitemap:generate 2>&1 | tail -10
+            echo "✅ Sitemap generated"
 
       - name: Cleanup
         run: |

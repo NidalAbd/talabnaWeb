@@ -27,6 +27,45 @@ class SitemapController extends Controller
     private const LOC_CAT_PER_PAGE = 100;
     private const USERS_PER_PAGE = 200;
 
+    /** Public accessors for the GenerateSitemap artisan command. */
+    public static function listingsPerPage(): int { return self::LISTINGS_PER_PAGE; }
+    public static function locationsPerPage(): int { return self::LOCATIONS_PER_PAGE; }
+    public static function locCatPerPage(): int { return self::LOC_CAT_PER_PAGE; }
+    public static function usersPerPage(): int { return self::USERS_PER_PAGE; }
+    public static function locationRecordsCount(): int { return count((new self)->locationRecords()); }
+    public static function locationCategoryRecordsCount(): int { return count((new self)->locationCategoryRecords()); }
+
+    /**
+     * If a static pre-generated sitemap file exists in storage/app/sitemaps/,
+     * serve it directly (no DB queries, no XML build). Falls through to the
+     * dynamic Cache::remember path otherwise. Static files are produced by
+     * `php artisan sitemap:generate` after every deploy.
+     */
+    private function tryStaticFile(string $name): ?\Illuminate\Http\Response
+    {
+        $disk = \Illuminate\Support\Facades\Storage::disk('local');
+        $rawKey = "sitemaps/{$name}";
+        $gzKey = "sitemaps/{$name}.gz";
+        if (!$disk->exists($rawKey)) {
+            return null;
+        }
+        $accept = request()->header('Accept-Encoding', '');
+        if (str_contains($accept, 'gzip') && $disk->exists($gzKey)) {
+            return response($disk->get($gzKey), 200, [
+                'Content-Type' => 'application/xml',
+                'Content-Encoding' => 'gzip',
+                'Vary' => 'Accept-Encoding',
+                'Cache-Control' => 'public, max-age=3600',
+                'X-Sitemap-Source' => 'static',
+            ]);
+        }
+        return response($disk->get($rawKey), 200, [
+            'Content-Type' => 'application/xml',
+            'Cache-Control' => 'public, max-age=3600',
+            'X-Sitemap-Source' => 'static',
+        ]);
+    }
+
     /**
      * Build a sitemap response: gzip the XML if the client accepts it
      * (Googlebot does), set a long browser cache, and set the right
@@ -55,6 +94,7 @@ class SitemapController extends Controller
      */
     public function index()
     {
+        if ($static = $this->tryStaticFile('sitemap.xml')) return $static;
         try {
         $content = Cache::remember('sitemap-index-v6', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -115,6 +155,7 @@ class SitemapController extends Controller
      */
     public function pages()
     {
+        if ($static = $this->tryStaticFile('sitemap-pages.xml')) return $static;
         $content = Cache::remember('sitemap-pages-v4', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
@@ -156,6 +197,7 @@ class SitemapController extends Controller
      */
     public function categories()
     {
+        if ($static = $this->tryStaticFile('sitemap-categories.xml')) return $static;
         try {
         $content = Cache::remember('sitemap-categories-v4', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -212,6 +254,7 @@ class SitemapController extends Controller
     public function locations($page = 1)
     {
         $page = max(1, (int) $page);
+        if ($static = $this->tryStaticFile("sitemap-locations-{$page}.xml")) return $static;
         $cacheKey = "sitemap-locations-v7-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationRecords();
@@ -298,6 +341,7 @@ class SitemapController extends Controller
     public function locationCategories($page = 1)
     {
         $page = max(1, (int) $page);
+        if ($static = $this->tryStaticFile("sitemap-location-categories-{$page}.xml")) return $static;
         $cacheKey = "sitemap-location-categories-v6-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationCategoryRecords();
@@ -368,6 +412,8 @@ class SitemapController extends Controller
      */
     public function listings($page = 1)
     {
+        $page = max(1, (int) $page);
+        if ($static = $this->tryStaticFile("sitemap-listings-{$page}.xml")) return $static;
         $cacheKey = "sitemap-listings-v5-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
@@ -414,6 +460,8 @@ class SitemapController extends Controller
      */
     public function users($page = 1)
     {
+        $page = max(1, (int) $page);
+        if ($static = $this->tryStaticFile("sitemap-users-{$page}.xml")) return $static;
         $cacheKey = "sitemap-users-v5-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {

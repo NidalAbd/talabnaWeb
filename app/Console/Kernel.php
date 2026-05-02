@@ -19,6 +19,15 @@ class Kernel extends ConsoleKernel
         // This ensures badges expire at approximately the same time they were created
         $schedule->command('badges:expire')->everyFifteenMinutes();
 
+        // Regenerate static sitemap files daily at 5 AM. Keeps Google's view
+        // fresh as new listings are added between deploys. Static-file
+        // serving means Google fetches never hit the DB or PHP rendering.
+        $schedule->command('sitemap:generate')
+            ->dailyAt('05:00')
+            ->withoutOverlapping()
+            ->runInBackground()
+            ->appendOutputTo(storage_path('logs/sitemap-generate.log'));
+
         // SEO: Sync Google Search Console data daily at 3 AM
         $schedule->command('seo:sync --days=3')
             ->dailyAt('03:00')
