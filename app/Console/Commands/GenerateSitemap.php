@@ -25,6 +25,11 @@ class GenerateSitemap extends Command
         $disk = Storage::disk('local');
         $dir = 'sitemaps';
         $disk->makeDirectory($dir);
+        // Ensure directory is web-readable. Default Laravel makeDirectory
+        // sometimes uses umask 077 which produces 0700 dirs — Apache's
+        // security layer 403s on those during high-concurrency Googlebot
+        // bursts. 0755 lets every layer traverse cleanly.
+        @chmod($disk->path($dir), 0755);
 
         // Wipe any previous files so removed chunks (e.g. when listing count
         // shrinks) don't linger.
@@ -37,6 +42,11 @@ class GenerateSitemap extends Command
         $write = function (string $name, string $xml) use ($disk, $dir) {
             $disk->put("{$dir}/{$name}", $xml);
             $disk->put("{$dir}/{$name}.gz", gzencode($xml, 6));
+            // Force 0644 — default umask sometimes leaves files at 0600
+            // which Hostinger's web layer translates to 403 for Googlebot
+            // during burst fetches.
+            @chmod($disk->path("{$dir}/{$name}"), 0644);
+            @chmod($disk->path("{$dir}/{$name}.gz"), 0644);
             $this->line(sprintf('  wrote %-45s xml=%-9s gz=%-7s',
                 $name, $disk->size("{$dir}/{$name}"), $disk->size("{$dir}/{$name}.gz")));
         };
