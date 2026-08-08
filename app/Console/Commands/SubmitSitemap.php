@@ -24,7 +24,7 @@ class SubmitSitemap extends Command
         $urls = [];
 
         // Static pages
-        $pages = ['/', '/browse', '/search', '/about', '/contact', '/privacy', '/terms'];
+        $pages = ['/', '/browse', '/search', '/about', '/contact', '/privacy', '/terms', '/delete-account'];
 
         foreach ($pages as $page) {
             $urls[] = $baseUrl . $page;

@@ -172,6 +172,7 @@ class SitemapController extends Controller
                 ['url' => '/contact', 'priority' => '0.5', 'changefreq' => 'monthly'],
                 ['url' => '/privacy', 'priority' => '0.3', 'changefreq' => 'yearly'],
                 ['url' => '/terms', 'priority' => '0.3', 'changefreq' => 'yearly'],
+                ['url' => '/delete-account', 'priority' => '0.3', 'changefreq' => 'yearly'],
             ];
 
             $now = now()->toIso8601String();

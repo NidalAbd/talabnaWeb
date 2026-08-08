@@ -12,6 +12,7 @@ const About = () => import('@/views/About.vue')
 const Contact = () => import('@/views/Contact.vue')
 const Privacy = () => import('@/views/Privacy.vue')
 const Terms = () => import('@/views/Terms.vue')
+const DeleteAccount = () => import('@/views/DeleteAccount.vue')
 const NotFound = () => import('@/views/NotFound.vue')
 
 // Admin views
@@ -111,6 +112,15 @@ const routes = [
     component: Terms,
     meta: {
       title: 'شروط الاستخدام - طلبنا',
+    },
+  },
+  {
+    path: '/delete-account',
+    name: 'delete-account',
+    component: DeleteAccount,
+    meta: {
+      title: 'حذف الحساب - طلبنا',
+      description: 'كيفية حذف حسابك وبياناتك من طلبنا',
     },
   },
   // Location-based services pages (SEO friendly)

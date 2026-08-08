@@ -189,6 +189,14 @@ $spaRoutes = function () {
         return view('spa');
     })->name('terms');
 
+    // Public, no-login-required page describing how to delete an account —
+    // required by Google Play's Account Deletion policy (App content > Data
+    // safety > Account deletion) so the request path works even for someone
+    // who has uninstalled the app.
+    Route::get('/delete-account', function() {
+        return view('spa');
+    })->name('delete-account');
+
     // Numeric-id services routes
     Route::get('/services/{countryId}/{countrySlug?}', function() {
         return view('spa');

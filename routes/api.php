@@ -141,6 +141,10 @@ Route::middleware(['auth:api'])->group(function () {
 
     Route::post('data-saver/toggle', [GoogleAuthController::class, 'toggleDataSaver']);
     Route::post('logout', [App\Http\Controllers\Api\UserController::class,'logout']);
+    // Self-service account deletion (Play Store Account Deletion policy).
+    // Deletes the authenticated caller's own account — never takes a user
+    // id, unlike the admin ban/unban routes below.
+    Route::delete('account', [App\Http\Controllers\Api\AccountController::class, 'destroy']);
     Route::apiResource('users', App\Http\Controllers\Api\UserController::class);
     Route::put('user/{userId}/change-email', [App\Http\Controllers\Api\UserController::class, 'changeEmail']);
     Route::put('user/{userId}/change-password', [App\Http\Controllers\Api\UserController::class, 'changePassword']);
