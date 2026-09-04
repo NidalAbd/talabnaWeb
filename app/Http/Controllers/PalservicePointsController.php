@@ -216,15 +216,8 @@ class PalservicePointsController extends Controller
 
                 // Check if device token is registered
                 if (!empty($recipientUser->fcm_token)) {
-                    $device_token = $recipientUser->fcm_token;
-                    $subject = 'Points Received';
-
                     // Create and send point purchase notification
-                    $pointNotification = new point_purchase_notifications(
-                        $request->points,
-                        $subject,
-                        $device_token
-                    );
+                    $pointNotification = new point_purchase_notifications('approved', (int) $request->points);
                     $recipientUser->notify($pointNotification);
                 }
             }
