@@ -123,7 +123,7 @@ export function useUsers() {
         }
     }
 
-    const adjustPoints = async (userId, amount, reason) => {
+    const adjustPoints = async (userId, amount, reason, notify = true) => {
         try {
             const response = await fetch(`/api/admin/users/${userId}/adjust-points`, {
                 method: 'POST',
@@ -131,7 +131,7 @@ export function useUsers() {
                     'Content-Type': 'application/json',
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
-                body: JSON.stringify({ amount, reason })
+                body: JSON.stringify({ amount, reason, notify })
             })
 
             const data = await response.json()

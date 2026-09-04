@@ -418,10 +418,12 @@ class UsersApiController extends Controller
             $validated = $request->validate([
                 'amount' => 'required|integer',
                 'reason' => 'nullable|string|max:255',
+                'notify' => 'nullable|boolean',
             ]);
 
             $amount = $validated['amount'];
             $reason = $validated['reason'] ?? ($amount > 0 ? 'Admin added points' : 'Admin deducted points');
+            $notify = $validated['notify'] ?? true;
 
             \App\Models\palservice_points::create([
                 'user_id' => $user->id,
@@ -433,12 +435,49 @@ class UsersApiController extends Controller
 
             $newBalance = \App\Models\palservice_points::where('user_id', $user->id)->sum('point');
 
+            if ($notify) {
+                $this->notifyPointsAdjustment($user, $amount, $reason);
+            }
+
             return response()->json([
                 'message' => ($amount > 0 ? 'Added' : 'Deducted') . ' ' . abs($amount) . ' points. New balance: ' . $newBalance,
                 'balance' => $newBalance,
             ]);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to adjust points', 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /**
+     * Notify a user (in-app + push) about an admin points adjustment.
+     */
+    private function notifyPointsAdjustment(User $user, int $amount, string $reason): void
+    {
+        $absAmount = abs($amount);
+
+        $message = json_encode([
+            'en' => $amount > 0
+                ? "Admin has added $absAmount points to your account. ($reason)"
+                : "Admin has deducted $absAmount points from your account. ($reason)",
+            'ar' => $amount > 0
+                ? "قام المسؤول بإضافة {$absAmount} نقطة إلى حسابك. ({$reason})"
+                : "قام المسؤول بخصم {$absAmount} نقطة من حسابك. ({$reason})",
+        ]);
+
+        \App\Models\Notification::create([
+            'message' => $message,
+            'user_id' => $user->id,
+            'type' => $amount > 0 ? 'pointIn' : 'pointOut',
+        ]);
+
+        // Push notification is only wired up for the "points added" wording;
+        // deductions still get the in-app Notification record above.
+        if ($amount > 0 && !empty($user->fcm_token)) {
+            try {
+                $user->notify(new \App\Notifications\point_purchase_notifications('approved', $absAmount));
+            } catch (\Exception $e) {
+                \Illuminate\Support\Facades\Log::error('Failed to send admin points adjustment FCM: ' . $e->getMessage());
+            }
         }
     }
 

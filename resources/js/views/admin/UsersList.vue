@@ -142,6 +142,9 @@
               <button @click="openEditModal(user)" class="menu-item">
                 <i class="fas fa-edit"></i> Edit User
               </button>
+              <button @click="openPointsModal(user)" class="menu-item">
+                <i class="fas fa-coins"></i> Adjust Points
+              </button>
               <button @click="handleToggleBan(user)" class="menu-item">
                 <i :class="user.is_active === 'active' ? 'fas fa-ban' : 'fas fa-check'"></i>
                 {{ user.is_active === 'active' ? 'Ban User' : 'Unban User' }}
@@ -185,6 +188,10 @@
             <div class="stat-item">
               <i class="fas fa-box"></i>
               <span>{{ user.service_posts_count }} Posts</span>
+            </div>
+            <div class="stat-item">
+              <i class="fas fa-coins" style="color:#f9a825"></i>
+              <span>{{ user.points_balance || 0 }} Points</span>
             </div>
             <div class="stat-item" v-if="user.viewed_posts_count > 0">
               <i class="fas fa-eye"></i>
@@ -299,6 +306,9 @@
             <td>
               <div class="stats-cell">
                 <span class="badge info"><i class="fas fa-box"></i> {{ user.service_posts_count }}</span>
+                <span class="badge" style="background:#fff8e1;color:#f9a825">
+                  <i class="fas fa-coins"></i> {{ user.points_balance || 0 }}
+                </span>
                 <span v-if="user.viewed_posts_count > 0" class="badge secondary">
                   <i class="fas fa-eye"></i> {{ user.viewed_posts_count }}
                 </span>
@@ -317,6 +327,9 @@
                 </a>
                 <button @click="openEditModal(user)" class="action-btn-small edit" title="Edit">
                   <i class="fas fa-edit"></i>
+                </button>
+                <button @click="openPointsModal(user)" class="action-btn-small points" title="Adjust Points">
+                  <i class="fas fa-coins"></i>
                 </button>
                 <button
                   @click="handleToggleBan(user)"
@@ -417,6 +430,14 @@
       @close="showEditModal = false"
       @saved="handleUserSaved"
     />
+
+    <!-- Quick Points Modal -->
+    <QuickPointsModal
+      v-if="showPointsModal"
+      :user="pointsUser"
+      @close="showPointsModal = false"
+      @saved="handlePointsSaved"
+    />
   </div>
 </template>
 
@@ -424,6 +445,7 @@
 import { ref, onMounted, watch, reactive, computed, onBeforeUnmount } from 'vue'
 import { useUsers } from '../../composables/useUsers'
 import UserEditModal from '../../components/admin/users/UserEditModal.vue'
+import QuickPointsModal from '../../components/admin/users/QuickPointsModal.vue'
 
 const { users, loading, fetchUsers, toggleBan, deleteUser } = useUsers()
 
@@ -443,6 +465,10 @@ const isDeleting = ref(false)
 // Edit modal state
 const showEditModal = ref(false)
 const selectedUserId = ref(null)
+
+// Quick points modal state
+const showPointsModal = ref(false)
+const pointsUser = ref(null)
 
 const filters = reactive({
   status: '',
@@ -601,6 +627,23 @@ const handleUserSaved = () => {
   showEditModal.value = false
   selectedUserId.value = null
   loadUsers(users.value.current_page)
+}
+
+// Quick points modal handlers
+const openPointsModal = (user) => {
+  closeMenus()
+  pointsUser.value = user
+  showPointsModal.value = true
+}
+
+const handlePointsSaved = ({ userId, balance }) => {
+  showPointsModal.value = false
+  pointsUser.value = null
+
+  const userIndex = users.value.data.findIndex(u => u.id === userId)
+  if (userIndex !== -1) {
+    users.value.data[userIndex].points_balance = balance
+  }
 }
 </script>
 
@@ -1276,6 +1319,11 @@ const handleUserSaved = () => {
 .action-btn-small.edit {
   background: #fff3e0;
   color: #ef6c00;
+}
+
+.action-btn-small.points {
+  background: #fff8e1;
+  color: #f9a825;
 }
 
 .action-btn-small.ban {
