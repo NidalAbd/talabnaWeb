@@ -425,15 +425,35 @@ class UsersApiController extends Controller
             $reason = $validated['reason'] ?? ($amount > 0 ? 'Admin added points' : 'Admin deducted points');
             $notify = $validated['notify'] ?? true;
 
-            \App\Models\palservice_points::create([
-                'user_id' => $user->id,
-                'point' => $amount,
-                'name' => $reason,
-                'price' => 0,
-                'points' => abs($amount),
-            ]);
+            $newBalance = DB::transaction(function () use ($user, $amount) {
+                $balanceRow = \App\Models\palservice_points::where('user_id', $user->id)->lockForUpdate()->first();
+                $currentBalance = $balanceRow->point ?? 0;
 
-            $newBalance = \App\Models\palservice_points::where('user_id', $user->id)->sum('point');
+                if ($amount < 0 && $currentBalance < abs($amount)) {
+                    throw new \RuntimeException("User only has $currentBalance points, cannot deduct " . abs($amount));
+                }
+
+                $newBalance = $currentBalance + $amount;
+
+                if ($balanceRow) {
+                    $balanceRow->point = $newBalance;
+                    $balanceRow->save();
+                } else {
+                    \App\Models\palservice_points::create([
+                        'user_id' => $user->id,
+                        'point' => $newBalance,
+                    ]);
+                }
+
+                \App\Models\point_transactions::create([
+                    'from_user_id' => $amount > 0 ? null : $user->id,
+                    'to_user_id' => $amount > 0 ? $user->id : null,
+                    'type' => $amount > 0 ? 'admin_grant' : 'used',
+                    'point' => abs($amount),
+                ]);
+
+                return $newBalance;
+            });
 
             if ($notify) {
                 $this->notifyPointsAdjustment($user, $amount, $reason);
@@ -443,6 +463,8 @@ class UsersApiController extends Controller
                 'message' => ($amount > 0 ? 'Added' : 'Deducted') . ' ' . abs($amount) . ' points. New balance: ' . $newBalance,
                 'balance' => $newBalance,
             ]);
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => 'Insufficient balance', 'message' => $e->getMessage()], 422);
         } catch (\Exception $e) {
             return response()->json(['error' => 'Failed to adjust points', 'message' => $e->getMessage()], 500);
         }
