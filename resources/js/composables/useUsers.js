@@ -123,6 +123,30 @@ export function useUsers() {
         }
     }
 
+    const adjustPoints = async (userId, amount, reason) => {
+        try {
+            const response = await fetch(`/api/admin/users/${userId}/adjust-points`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify({ amount, reason })
+            })
+
+            const data = await response.json()
+
+            if (!response.ok) {
+                throw new Error(data.message || data.error || 'Failed to adjust points')
+            }
+
+            return data
+        } catch (err) {
+            console.error('Error adjusting points:', err)
+            throw err
+        }
+    }
+
     const getRoles = async () => {
         try {
             const response = await fetch('/api/admin/users/roles')
@@ -147,6 +171,7 @@ export function useUsers() {
         updateUser,
         toggleBan,
         deleteUser,
+        adjustPoints,
         getRoles
     }
 }

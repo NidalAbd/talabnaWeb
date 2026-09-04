@@ -153,6 +153,65 @@
               </div>
             </div>
 
+            <!-- Points Section -->
+            <div class="form-section">
+              <h4 class="section-title">
+                <i class="fas fa-coins"></i> Adjust Points
+              </h4>
+
+              <p class="points-current">
+                Current balance: <strong>{{ userData.points_balance || 0 }}</strong> points
+              </p>
+
+              <div class="form-row">
+                <div class="form-group-modern">
+                  <label class="form-label-modern">Amount</label>
+                  <input
+                    v-model.number="pointsForm.amount"
+                    type="number"
+                    min="1"
+                    step="1"
+                    class="form-input-modern"
+                    placeholder="e.g. 100"
+                  >
+                </div>
+
+                <div class="form-group-modern">
+                  <label class="form-label-modern">Reason (optional)</label>
+                  <input
+                    v-model="pointsForm.reason"
+                    type="text"
+                    class="form-input-modern"
+                    placeholder="e.g. Support compensation"
+                  >
+                </div>
+              </div>
+
+              <div class="points-actions">
+                <button
+                  type="button"
+                  class="btn-points btn-points-add"
+                  :disabled="isAdjustingPoints || !pointsForm.amount"
+                  @click="handleAdjustPoints('add')"
+                >
+                  <i class="fas fa-plus"></i> Add Points
+                </button>
+                <button
+                  type="button"
+                  class="btn-points btn-points-deduct"
+                  :disabled="isAdjustingPoints || !pointsForm.amount"
+                  @click="handleAdjustPoints('deduct')"
+                >
+                  <i class="fas fa-minus"></i> Deduct Points
+                </button>
+              </div>
+
+              <div v-if="pointsMessage" class="points-message" :class="pointsMessageType">
+                <i :class="pointsMessageType === 'success' ? 'fas fa-check-circle' : 'fas fa-exclamation-circle'"></i>
+                {{ pointsMessage }}
+              </div>
+            </div>
+
             <!-- Error Message -->
             <div v-if="errorMessage" class="error-message-modern">
               <i class="fas fa-exclamation-circle"></i>
@@ -188,7 +247,7 @@ const props = defineProps({
 
 const emit = defineEmits(['close', 'saved'])
 
-const { fetchUser, updateUser, getRoles } = useUsers()
+const { fetchUser, updateUser, getRoles, adjustPoints } = useUsers()
 
 const loading = ref(true)
 const loadingRoles = ref(true)
@@ -196,6 +255,14 @@ const isSubmitting = ref(false)
 const errorMessage = ref('')
 const userData = ref(null)
 const availableRoles = ref([])
+
+const pointsForm = ref({
+  amount: null,
+  reason: ''
+})
+const isAdjustingPoints = ref(false)
+const pointsMessage = ref('')
+const pointsMessageType = ref('success')
 
 const formData = ref({
   name: '',
@@ -257,6 +324,35 @@ const handleSubmit = async () => {
     errorMessage.value = error.message || 'Failed to update user'
   } finally {
     isSubmitting.value = false
+  }
+}
+
+const handleAdjustPoints = async (direction) => {
+  const rawAmount = Number(pointsForm.value.amount)
+
+  if (!Number.isInteger(rawAmount) || rawAmount <= 0) {
+    pointsMessageType.value = 'error'
+    pointsMessage.value = 'Enter a whole number greater than 0'
+    return
+  }
+
+  isAdjustingPoints.value = true
+  pointsMessage.value = ''
+
+  try {
+    const signedAmount = direction === 'deduct' ? -rawAmount : rawAmount
+    const data = await adjustPoints(props.userId, signedAmount, pointsForm.value.reason || undefined)
+
+    userData.value.points_balance = data.balance
+    pointsMessageType.value = 'success'
+    pointsMessage.value = data.message || 'Points updated successfully'
+    pointsForm.value.amount = null
+    pointsForm.value.reason = ''
+  } catch (error) {
+    pointsMessageType.value = 'error'
+    pointsMessage.value = error.message || 'Failed to adjust points'
+  } finally {
+    isAdjustingPoints.value = false
   }
 }
 
@@ -455,6 +551,67 @@ const formatDate = (dateString) => {
 
 .info-section {
   background: linear-gradient(135deg, #e8f4f8 0%, #e3f2fd 100%);
+}
+
+.points-current {
+  margin: 0 0 1rem;
+  color: #555;
+  font-size: 0.9rem;
+}
+
+.points-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.btn-points {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1rem;
+  border: none;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: opacity 0.2s;
+  color: white;
+}
+
+.btn-points:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btn-points-add {
+  background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+}
+
+.btn-points-deduct {
+  background: linear-gradient(135deg, #ff416c 0%, #ff4b2b 100%);
+}
+
+.points-message {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 1rem;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.9rem;
+}
+
+.points-message.success {
+  background: #e6f9f0;
+  color: #0f9d58;
+}
+
+.points-message.error {
+  background: #fdecea;
+  color: #c0392b;
 }
 
 .stats-row {
