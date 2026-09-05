@@ -25,8 +25,9 @@ class ReportsApiController extends Controller
             $sortDirection = $request->input('sort_direction', 'desc');
             $perPage = $request->input('per_page', 15);
 
-            // Get grouped reports with count
+            // Get grouped reports with count (exclude reports whose post/user was since deleted)
             $query = Report::with(['reportable'])
+                ->whereHasMorph('reportable', [User::class, ServicePost::class])
                 ->select('reportable_type', 'reportable_id', DB::raw('count(*) as total'), DB::raw('MAX(created_at) as latest_report'))
                 ->groupBy('reportable_type', 'reportable_id');
 
@@ -207,6 +208,10 @@ class ReportsApiController extends Controller
 
                         case 'delete':
                             $reportable->delete();
+                            // Clean up any reports pointing at the now-deleted post
+                            Report::where('reportable_type', ServicePost::class)
+                                ->where('reportable_id', $id)
+                                ->delete();
                             break;
 
                         case 'warning':

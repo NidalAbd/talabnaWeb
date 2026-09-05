@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useTopProgress } from '../composables/useTopProgress'
 
 // Import components
 import ModernDashboard from '../views/admin/ModernDashboard.vue'
@@ -69,6 +70,15 @@ const router = createRouter({
   history: createWebHistory(),
   routes
 })
+
+// Top progress bar during route transitions
+const { start, finish } = useTopProgress()
+router.beforeEach((to, from, next) => {
+  start()
+  next()
+})
+router.afterEach(() => finish())
+router.onError(() => finish())
 
 // Update page title on route change
 router.afterEach((to) => {

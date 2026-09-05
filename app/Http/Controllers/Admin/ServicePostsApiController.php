@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\ServicePost;
 use App\Models\Categories;
 use App\Models\Sub_categories;
+use App\Models\Report;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -545,6 +546,11 @@ class ServicePostsApiController extends Controller
             }
 
             $post->delete();
+
+            // Clean up any reports pointing at the now-deleted post
+            Report::where('reportable_type', ServicePost::class)
+                ->where('reportable_id', $id)
+                ->delete();
 
             return response()->json([
                 'message' => 'Service post deleted successfully'

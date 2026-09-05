@@ -1,5 +1,7 @@
 <template>
   <div class="admin-spa-container">
+    <TopProgressBar />
+
     <!-- Content Header (Page header) -->
     <div class="content-header">
       <div class="container-fluid">
@@ -36,6 +38,7 @@
 <script setup>
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import TopProgressBar from '../../components/admin/TopProgressBar.vue'
 
 const route = useRoute()
 

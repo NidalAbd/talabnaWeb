@@ -18,13 +18,7 @@
       </div>
     </div>
 
-    <!-- Loading State -->
-    <div v-if="loading" class="loading-state">
-      <div class="loader-modern"></div>
-      <p>Loading dashboard data...</p>
-    </div>
-
-    <template v-else>
+    <template v-if="!loading">
       <!-- Row 2: Key Metrics (4 stat cards with growth trends) -->
       <div class="stats-grid">
         <div class="stat-card-compact stat-blue" style="cursor:pointer" @click="navigateTo('/users')">
@@ -147,6 +141,23 @@
                 </td>
                 <td class="actions-cell">
                   <div class="quick-actions" v-if="item.reportable">
+                    <!-- View item -->
+                    <button
+                      v-if="item.reportable_type === 'post'"
+                      class="action-btn-sm action-view"
+                      @click="viewPostId = item.reportable_id"
+                      title="View post"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <a
+                      v-else
+                      :href="`/users/${item.reportable_id}`"
+                      class="action-btn-sm action-view"
+                      title="View user"
+                    >
+                      <i class="fas fa-eye"></i>
+                    </a>
                     <!-- Post actions -->
                     <template v-if="item.reportable_type === 'post'">
                       <button
@@ -346,6 +357,13 @@
                   <td class="actions-cell">
                     <div class="quick-actions">
                       <button
+                        class="action-btn-sm action-view"
+                        @click="viewPostId = post.id"
+                        title="View post"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </button>
+                      <button
                         v-if="post.state !== 'published'"
                         class="action-btn-sm action-publish"
                         @click="changePostState(post, 'published')"
@@ -418,6 +436,13 @@
                   </td>
                   <td class="actions-cell">
                     <div class="quick-actions">
+                      <a
+                        :href="`/users/${user.id}`"
+                        class="action-btn-sm action-view"
+                        title="View user"
+                      >
+                        <i class="fas fa-eye"></i>
+                      </a>
                       <button
                         v-if="user.is_active !== 'banned'"
                         class="action-btn-sm action-ban"
@@ -497,6 +522,14 @@
         {{ toast.message }}
       </div>
     </transition>
+
+    <!-- Post View Modal -->
+    <ServicePostViewModal
+      v-if="viewPostId"
+      :post-id="viewPostId"
+      @close="viewPostId = null"
+      @edit="viewPostId = null; navigateTo('/service_posts')"
+    />
   </div>
 </template>
 
@@ -507,10 +540,14 @@ import LineChart from '../../components/admin/charts/LineChart.vue'
 import PieChart from '../../components/admin/charts/PieChart.vue'
 import BarChart from '../../components/admin/charts/BarChart.vue'
 import MixedChart from '../../components/admin/charts/MixedChart.vue'
+import ServicePostViewModal from '../../components/admin/posts/ServicePostViewModal.vue'
+import { useTopProgress } from '../../composables/useTopProgress'
 
 const router = useRouter()
 const loading = ref(true)
 const actionLoading = reactive({})
+const viewPostId = ref(null)
+const topProgress = useTopProgress()
 
 const toast = reactive({ show: false, message: '', type: 'success' })
 const showToast = (message, type = 'success') => {
@@ -711,6 +748,7 @@ onMounted(async () => {
 
 const loadAllStats = async () => {
   loading.value = true
+  topProgress.start()
   try {
     const [dashRes, reportsRes] = await Promise.all([
       fetch('/api/admin/dashboard'),
@@ -752,6 +790,7 @@ const loadAllStats = async () => {
     console.error('Error loading dashboard stats:', error)
   } finally {
     loading.value = false
+    topProgress.finish()
   }
 }
 
@@ -1068,28 +1107,6 @@ const getReportableStatusClass = (item) => {
 .refresh-btn:disabled {
   opacity: 0.7;
   cursor: not-allowed;
-}
-
-/* Loading */
-.loading-state {
-  text-align: center;
-  padding: 4rem;
-  background: white;
-  border-radius: 16px;
-}
-
-.loader-modern {
-  width: 50px;
-  height: 50px;
-  border: 4px solid #e2e8f0;
-  border-top-color: #667eea;
-  border-radius: 50%;
-  margin: 0 auto 1rem;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  to { transform: rotate(360deg); }
 }
 
 /* Stats grid spacing */
@@ -1500,6 +1517,12 @@ const getReportableStatusClass = (item) => {
 .action-btn-sm:hover:not(:disabled) {
   transform: translateY(-1px);
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.action-view {
+  background: #e0f2fe;
+  color: #0284c7;
+  text-decoration: none;
 }
 
 .action-publish {

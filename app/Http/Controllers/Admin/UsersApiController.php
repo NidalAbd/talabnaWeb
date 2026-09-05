@@ -378,6 +378,11 @@ class UsersApiController extends Controller
 
             $user->delete();
 
+            // Clean up any reports pointing at the now-deleted user
+            \App\Models\Report::where('reportable_type', User::class)
+                ->where('reportable_id', $id)
+                ->delete();
+
             return response()->json([
                 'success' => true,
                 'message' => 'User deleted successfully'

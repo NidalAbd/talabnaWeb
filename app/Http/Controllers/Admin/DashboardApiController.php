@@ -312,6 +312,7 @@ class DashboardApiController extends Controller
     private function getRecentReports(): array
     {
         return Report::with(['reporter', 'reportable'])
+            ->whereHasMorph('reportable', [User::class, ServicePost::class])
             ->latest()
             ->take(5)
             ->get()
