@@ -38,13 +38,19 @@
           <!-- Title Translations -->
           <div class="section-header">
             <label class="form-label-bold">Title Translations</label>
+            <span class="locale-progress">{{ filledCount(form.title) }}/{{ availableLocales.length }} filled</span>
           </div>
-          <div class="tabs-container">
-            <button v-for="locale in availableLocales" :key="'t-'+locale" type="button"
-              class="tab-btn" :class="{ active: activeTab === locale }" @click="activeTab = locale">
-              {{ locale }}
-              <span v-if="form.title[locale]" class="check">&#10003;</span>
+          <div class="locale-picker">
+            <button v-for="locale in pinnedLocales" :key="'tp-'+locale" type="button"
+              class="locale-chip" :class="{ active: activeTab === locale, filled: !!form.title[locale] }"
+              @click="activeTab = locale">
+              {{ locale.toUpperCase() }}
             </button>
+            <select v-model="activeTab" class="locale-select">
+              <option v-for="locale in availableLocales" :key="'to-'+locale" :value="locale">
+                {{ form.title[locale] ? '✓ ' : '' }}{{ locale.toUpperCase() }}
+              </option>
+            </select>
           </div>
           <div v-for="locale in availableLocales" :key="'ti-'+locale" v-show="activeTab === locale">
             <input v-model="form.title[locale]" type="text" class="form-input"
@@ -55,13 +61,19 @@
           <!-- Description Translations -->
           <div class="section-header mt-4">
             <label class="form-label-bold">Description Translations</label>
+            <span class="locale-progress">{{ filledCount(form.description) }}/{{ availableLocales.length }} filled</span>
           </div>
-          <div class="tabs-container">
-            <button v-for="locale in availableLocales" :key="'d-'+locale" type="button"
-              class="tab-btn" :class="{ active: descTab === locale }" @click="descTab = locale">
-              {{ locale }}
-              <span v-if="form.description[locale]" class="check">&#10003;</span>
+          <div class="locale-picker">
+            <button v-for="locale in pinnedLocales" :key="'dp-'+locale" type="button"
+              class="locale-chip" :class="{ active: descTab === locale, filled: !!form.description[locale] }"
+              @click="descTab = locale">
+              {{ locale.toUpperCase() }}
             </button>
+            <select v-model="descTab" class="locale-select">
+              <option v-for="locale in availableLocales" :key="'do-'+locale" :value="locale">
+                {{ form.description[locale] ? '✓ ' : '' }}{{ locale.toUpperCase() }}
+              </option>
+            </select>
           </div>
           <div v-for="locale in availableLocales" :key="'di-'+locale" v-show="descTab === locale">
             <textarea v-model="form.description[locale]" class="form-input form-textarea" rows="4"
@@ -188,6 +200,9 @@ const form = reactive({
 })
 
 const availableLocales = ['ar', 'en', 'hi', 'tr', 'fr', 'es', 'ur', 'bn', 'pt', 'ru', 'id', 'de', 'zh', 'ku', 'fa', 'sw', 'ms']
+const pinnedLocales = ['ar', 'en']
+
+const filledCount = (translations) => availableLocales.filter(locale => !!translations[locale]).length
 
 const getLocalName = (name) => {
   if (typeof name === 'string') return name

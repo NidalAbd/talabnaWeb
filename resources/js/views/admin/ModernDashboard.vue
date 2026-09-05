@@ -70,6 +70,23 @@
         </div>
       </div>
 
+      <!-- Dashboard Tabs -->
+      <div class="dash-tabs">
+        <button
+          v-for="tab in dashboardTabs"
+          :key="tab.id"
+          class="dash-tab-btn"
+          :class="{ active: activeDashTab === tab.id }"
+          @click="activeDashTab = tab.id"
+        >
+          <i :class="tab.icon"></i>
+          {{ tab.label }}
+          <span v-if="tab.id === 'reports' && reportedItems.length > 0" class="dash-tab-badge">{{ reportedItems.length }}</span>
+        </button>
+      </div>
+
+      <!-- Tab: Overview (secondary stats + system health) -->
+      <template v-if="activeDashTab === 'overview'">
       <!-- Row 3: Secondary Metrics (4 stat cards) -->
       <div class="stats-grid">
         <div class="stat-card-compact stat-green" style="cursor:pointer" @click="navigateTo('/service_posts?status=published')">
@@ -105,7 +122,47 @@
         </div>
       </div>
 
-      <!-- Reported Items - Quick Actions (sorted by report count desc) -->
+      <!-- System Health (full-width card) -->
+      <div class="column-card" style="margin-bottom: 1.5rem;">
+        <h3 class="card-title"><i class="fas fa-heartbeat"></i> System Health</h3>
+        <div class="health-metrics-row">
+          <div class="health-item">
+            <div class="health-header">
+              <span>User Engagement</span>
+              <span class="health-value">{{ userEngagementPercent }}%</span>
+            </div>
+            <div class="health-bar">
+              <div class="health-bar-fill bg-green" :style="{ width: userEngagementPercent + '%' }"></div>
+            </div>
+          </div>
+          <div class="health-item">
+            <div class="health-header">
+              <span>Post Approval Rate</span>
+              <span class="health-value">{{ postApprovalRate }}%</span>
+            </div>
+            <div class="health-bar">
+              <div class="health-bar-fill bg-blue" :style="{ width: postApprovalRate + '%' }"></div>
+            </div>
+          </div>
+          <div class="health-item">
+            <div class="health-header">
+              <span>Points Utilization</span>
+              <span class="health-value">{{ pointsUtilization }}%</span>
+            </div>
+            <div class="health-bar">
+              <div class="health-bar-fill bg-orange" :style="{ width: pointsUtilization + '%' }"></div>
+            </div>
+          </div>
+        </div>
+        <div class="system-status">
+          <span class="status-badge status-online"><i class="fas fa-circle"></i> System Online</span>
+          <span class="status-info">{{ formatNumber(stats.totalPosts + stats.totalUsers) }} Total Records</span>
+        </div>
+      </div>
+      </template>
+
+      <!-- Tab: Reported Items - Quick Actions (sorted by report count desc) -->
+      <template v-if="activeDashTab === 'reports'">
       <div class="column-card" style="margin-bottom: 1.5rem;" v-if="reportedItems.length > 0">
         <div class="card-header-row">
           <h3 class="card-title"><i class="fas fa-exclamation-triangle" style="color:#ef4444"></i> Reported Items — Quick Actions</h3>
@@ -231,7 +288,14 @@
           </table>
         </div>
       </div>
+      <div v-else class="column-card empty-state">
+        <i class="fas fa-check-circle" style="color:#10b981"></i>
+        <p>No reported items right now</p>
+      </div>
+      </template>
 
+      <!-- Tab: Analytics (charts) -->
+      <template v-if="activeDashTab === 'analytics'">
       <!-- Row 4: Growth Charts (2-column) -->
       <div class="charts-row">
         <div class="chart-card">
@@ -288,45 +352,10 @@
           </div>
         </div>
       </div>
+      </template>
 
-      <!-- Row 7: System Health (full-width card) -->
-      <div class="column-card" style="margin-bottom: 1.5rem;">
-        <h3 class="card-title"><i class="fas fa-heartbeat"></i> System Health</h3>
-        <div class="health-metrics-row">
-          <div class="health-item">
-            <div class="health-header">
-              <span>User Engagement</span>
-              <span class="health-value">{{ userEngagementPercent }}%</span>
-            </div>
-            <div class="health-bar">
-              <div class="health-bar-fill bg-green" :style="{ width: userEngagementPercent + '%' }"></div>
-            </div>
-          </div>
-          <div class="health-item">
-            <div class="health-header">
-              <span>Post Approval Rate</span>
-              <span class="health-value">{{ postApprovalRate }}%</span>
-            </div>
-            <div class="health-bar">
-              <div class="health-bar-fill bg-blue" :style="{ width: postApprovalRate + '%' }"></div>
-            </div>
-          </div>
-          <div class="health-item">
-            <div class="health-header">
-              <span>Points Utilization</span>
-              <span class="health-value">{{ pointsUtilization }}%</span>
-            </div>
-            <div class="health-bar">
-              <div class="health-bar-fill bg-orange" :style="{ width: pointsUtilization + '%' }"></div>
-            </div>
-          </div>
-        </div>
-        <div class="system-status">
-          <span class="status-badge status-online"><i class="fas fa-circle"></i> System Online</span>
-          <span class="status-info">{{ formatNumber(stats.totalPosts + stats.totalUsers) }} Total Records</span>
-        </div>
-      </div>
-
+      <!-- Tab: Activity (recent posts/users, activity feed, top users) -->
+      <template v-if="activeDashTab === 'activity'">
       <!-- Row 8: Recent Tables with Quick Actions (2-column) -->
       <div class="two-column-section">
         <!-- Recent Posts Table with Quick Actions -->
@@ -513,6 +542,7 @@
           </div>
         </div>
       </div>
+      </template>
     </template>
 
     <!-- Toast Notification -->
@@ -548,6 +578,14 @@ const loading = ref(true)
 const actionLoading = reactive({})
 const viewPostId = ref(null)
 const topProgress = useTopProgress()
+
+const activeDashTab = ref('overview')
+const dashboardTabs = [
+  { id: 'overview', label: 'Overview', icon: 'fas fa-gauge-high' },
+  { id: 'reports', label: 'Reported Items', icon: 'fas fa-exclamation-triangle' },
+  { id: 'analytics', label: 'Analytics', icon: 'fas fa-chart-line' },
+  { id: 'activity', label: 'Activity', icon: 'fas fa-stream' },
+]
 
 const toast = reactive({ show: false, message: '', type: 'success' })
 const showToast = (message, type = 'success') => {
@@ -1112,6 +1150,71 @@ const getReportableStatusClass = (item) => {
 /* Stats grid spacing */
 .stats-grid {
   margin-bottom: 1.25rem;
+}
+
+/* Dashboard Tabs */
+.dash-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  background: white;
+  padding: 0.5rem;
+  border-radius: 14px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  margin-bottom: 1.5rem;
+}
+
+.dash-tab-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.1rem;
+  border: none;
+  background: transparent;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.dash-tab-btn:hover {
+  background: #f1f5f9;
+  color: #334155;
+}
+
+.dash-tab-btn.active {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+}
+
+.dash-tab-badge {
+  background: #ef4444;
+  color: white;
+  font-size: 0.7rem;
+  font-weight: 700;
+  padding: 0.1rem 0.45rem;
+  border-radius: 10px;
+  min-width: 18px;
+  text-align: center;
+}
+
+.dash-tab-btn.active .dash-tab-badge {
+  background: rgba(255, 255, 255, 0.3);
+}
+
+@media (max-width: 640px) {
+  .dash-tabs {
+    justify-content: stretch;
+  }
+
+  .dash-tab-btn {
+    flex: 1;
+    justify-content: center;
+    text-align: center;
+  }
 }
 
 /* Dual Pie Container */
