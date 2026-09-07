@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\BadgeType;
 use App\Models\Categories;
+use App\Models\JobPostDetails;
 use App\Services\BadgeService;
 use App\Models\cities;
 use App\Models\countries;
@@ -218,6 +219,46 @@ class ServicePostController extends Controller
         return response()->json(['message' => 'Service Post Photo has been updated!', 'id' => $servicePost]);
     }
 
+    /**
+     * Create/update the job_post_details row for a post, when its category
+     * is flagged as a job category and the request includes a job_details
+     * payload. No-op for every other category — the generic post schema
+     * stays untouched.
+     */
+    private function saveJobDetails(ServicePost $servicePost, Request $request): void
+    {
+        $category = Categories::find($servicePost->categories_id);
+        if (!$category || !$category->is_job_category) {
+            return;
+        }
+
+        $jobDetails = $request->input('job_details');
+        if (!is_array($jobDetails)) {
+            return;
+        }
+
+        $validator = Validator::make($jobDetails, [
+            'employment_type' => 'nullable|in:full_time,part_time,contract,remote',
+            'experience_level' => 'nullable|in:entry,mid,senior',
+            'salary_min' => 'nullable|integer|min:0',
+            'salary_max' => 'nullable|integer|min:0|gte:salary_min',
+            'salary_currency' => 'nullable|string|max:10',
+            'required_skills' => 'nullable|array',
+            'required_skills.*' => 'string|max:60',
+            'education_level' => 'nullable|string|max:100',
+        ]);
+
+        if ($validator->fails()) {
+            Log::warning('Invalid job_details payload, skipping', ['errors' => $validator->errors()]);
+            return;
+        }
+
+        JobPostDetails::updateOrCreate(
+            ['service_post_id' => $servicePost->id],
+            $validator->validated()
+        );
+    }
+
     public function store(Request $request)
     {
         Log::info('Incoming Request Data:', $request->all());
@@ -389,6 +430,8 @@ class ServicePostController extends Controller
             ]);
 
             Log::info('Service Post Created', ['servicePost' => $servicePost->id]);
+
+            $this->saveJobDetails($servicePost, $request);
 
             // Handle image upload
             if ($request->hasFile('images')) {
@@ -1190,6 +1233,8 @@ class ServicePostController extends Controller
             ];
 
             $servicePost->update($updateData);
+
+            $this->saveJobDetails($servicePost, $request);
 
             // Handle image upload
             if ($request->hasFile('images')) {

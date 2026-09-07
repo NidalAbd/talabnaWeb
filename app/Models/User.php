@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
@@ -153,6 +154,11 @@ class User extends Authenticatable implements CanResetPasswordContract
     public function servicePosts(): HasMany
     {
         return $this->hasMany(ServicePost::class);
+    }
+
+    public function resume(): HasOne
+    {
+        return $this->hasOne(Resume::class);
     }
 
     public function viewedPosts(): BelongsToMany

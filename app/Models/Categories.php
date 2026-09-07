@@ -14,9 +14,11 @@ class Categories extends Model
         'name',
         'is_featured',
         'is_popular',
+        'is_job_category',
     ];
     protected $casts = [
         'name' => 'array', // Automatically decode JSON to an array
+        'is_job_category' => 'boolean',
     ];
     public function sub_categories()
     {
@@ -47,5 +49,10 @@ class Categories extends Model
     public function scopePopular($query)
     {
         return $query->where('is_popular', true);
+    }
+
+    public function scopeJobCategory($query)
+    {
+        return $query->where('is_job_category', true);
     }
 }

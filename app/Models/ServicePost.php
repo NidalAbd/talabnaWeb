@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Carbon\Carbon;
 
@@ -242,6 +243,11 @@ class ServicePost extends Model
     public function photos(): MorphMany
     {
         return $this->morphMany(Photos::class, 'photoable');
+    }
+
+    public function jobDetails(): HasOne
+    {
+        return $this->hasOne(JobPostDetails::class);
     }
 
     public function subCategory()

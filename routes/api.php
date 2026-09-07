@@ -265,6 +265,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('getFavourite/{service_posts}',[FavoriteController::class, 'getFavourite']);
     Route::post('doFavourite/{service_posts}',[FavoriteController::class, 'doFavourite']);
 
+    // Job section: resume + matching
+    Route::get('resume', [App\Http\Controllers\Api\ResumeController::class, 'show']);
+    Route::post('resume', [App\Http\Controllers\Api\ResumeController::class, 'store']);
+    Route::get('jobs/matches', [App\Http\Controllers\Api\JobMatchesController::class, 'index']);
+
     Route::get('statistics}',[App\Http\Controllers\dashboard::class, 'index']);
 
     Route::apiResource('subcategories', SubcategoriesController::class);
