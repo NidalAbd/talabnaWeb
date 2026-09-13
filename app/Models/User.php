@@ -210,6 +210,18 @@ class User extends Authenticatable implements CanResetPasswordContract
         return $this->following()->where('user_id', $user->id)->exists();
     }
 
+    /** Reviews left about this user (by other users, as a seller). */
+    public function reviewsReceived()
+    {
+        return $this->hasMany(Review::class, 'reviewed_user_id');
+    }
+
+    /** Reviews this user has written about others. */
+    public function reviewsWritten()
+    {
+        return $this->hasMany(Review::class, 'reviewer_id');
+    }
+
     public function photos(): MorphMany
     {
         return $this->morphMany(Photos::class, 'photoable');

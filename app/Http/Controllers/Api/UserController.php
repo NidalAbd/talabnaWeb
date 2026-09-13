@@ -329,9 +329,15 @@ class UserController extends Controller
     public function UserProfile(User $user): JsonResponse
     {
         try {
-            $userData = $user->loadCount(['following', 'followers', 'servicePosts' => function ($query) {
-                $query->where('state', 'published');
-            }])->load('photos','country', 'city' , 'roles' );
+            $userData = $user->loadCount([
+                'following',
+                'followers',
+                'servicePosts' => function ($query) {
+                    $query->where('state', 'published');
+                },
+                'reviewsReceived as reviews_count',
+            ])->load('photos', 'country', 'city', 'roles');
+            $userData->average_rating = round((float) $userData->reviewsReceived()->avg('rating'), 2);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
