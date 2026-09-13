@@ -121,9 +121,20 @@ Route::post('auth/google', [GoogleAuthController::class, 'handleGoogleAuth']);
 Route::get('referral/validate/{code}', [\App\Http\Controllers\Api\ReferralController::class, 'validateCode']);
 
 // Protected routes (require authentication)
-Route::middleware('auth:sanctum')->group(function () {
+// Was 'auth:sanctum' — sanctum isn't even registered as a guard in
+// config/auth.php (only 'web' and 'api'/Passport exist), and every token
+// this app issues (UserController::login) is a Passport token, same as
+// every other authenticated route below. That mismatch meant GET /api/user
+// couldn't succeed with any token the app actually sends — likely a 500
+// (undefined guard) rather than even a clean 401.
+Route::middleware('auth:api')->group(function () {
     Route::post('logout', [UserController::class, 'logout']);
-    Route::get('user', [UserController::class, 'show']);
+    // 'user' (not 'me') collided with the unrelated, already-live
+    // routes/web.php:264 `/api/user` (session-guarded, used by the web
+    // SPA's App.vue) — Laravel silently matched that one first, so this
+    // route was completely unreachable by the mobile app regardless of
+    // guard. Renamed rather than touching the SPA's working route.
+    Route::get('me', [UserController::class, 'show']);
     Route::get('user/check_token', [UserController::class, 'check_token']);
 });
 
@@ -160,6 +171,9 @@ Route::middleware(['auth:api'])->group(function () {
     Route::delete('users/{user}/unfollow', [App\Http\Controllers\Api\UserController::class,'unfollow'])->name('users.unfollow');
     Route::get('users/{user}/follower', [App\Http\Controllers\Api\UserController::class,'doFollowUnFollow'])->name('users.doFollowUnFollow');
     Route::get('users/{user}/is-following', [App\Http\Controllers\Api\UserController::class, 'isFollowingUser'])->name('users.isFollowing');
+    Route::get('users/{user}/reviews', [App\Http\Controllers\Api\ReviewController::class, 'index'])->name('users.reviews');
+    Route::post('reviews', [App\Http\Controllers\Api\ReviewController::class, 'store'])->name('reviews.store');
+    Route::delete('reviews/{review}', [App\Http\Controllers\Api\ReviewController::class, 'destroy'])->name('reviews.destroy');
     Route::post('users/{userId}/ban', [App\Http\Controllers\Api\UserController::class, 'banUser']);
     Route::post('/update-device-token', [App\Http\Controllers\Api\UserController::class, 'updateDeviceToken']);
 
@@ -270,6 +284,25 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('resume', [App\Http\Controllers\Api\ResumeController::class, 'store']);
     Route::get('jobs/matches', [App\Http\Controllers\Api\JobMatchesController::class, 'index']);
 
+    // Subscriptions: built (models, service, controller, Flutter screen) but never
+    // routed — closing that gap from the Step-1 audit.
+    Route::get('subscriptions/plans', [App\Http\Controllers\Api\SubscriptionController::class, 'plans']);
+    Route::get('subscriptions/status', [App\Http\Controllers\Api\SubscriptionController::class, 'status']);
+    Route::post('subscriptions/subscribe', [App\Http\Controllers\Api\SubscriptionController::class, 'subscribe']);
+    Route::post('subscriptions/cancel', [App\Http\Controllers\Api\SubscriptionController::class, 'cancel']);
+    Route::post('subscriptions/toggle-auto-renew', [App\Http\Controllers\Api\SubscriptionController::class, 'toggleAutoRenew']);
+    Route::post('subscriptions/check-feature', [App\Http\Controllers\Api\SubscriptionController::class, 'checkFeature']);
+    Route::post('subscriptions/use-feature', [App\Http\Controllers\Api\SubscriptionController::class, 'useFeature']);
+
+    // In-app chat — alongside (not instead of) the external contact sheet
+    // (WhatsApp/call/email). Deliberately simple: client polls, no
+    // websockets/push.
+    Route::get('conversations', [App\Http\Controllers\Api\ConversationController::class, 'index']);
+    Route::post('conversations', [App\Http\Controllers\Api\ConversationController::class, 'store']);
+    Route::get('conversations/{conversation}/messages', [App\Http\Controllers\Api\ConversationController::class, 'messages']);
+    Route::post('conversations/{conversation}/messages', [App\Http\Controllers\Api\ConversationController::class, 'sendMessage']);
+    Route::post('conversations/{conversation}/read', [App\Http\Controllers\Api\ConversationController::class, 'markRead']);
+
     Route::get('statistics}',[App\Http\Controllers\dashboard::class, 'index']);
 
     Route::apiResource('subcategories', SubcategoriesController::class);
@@ -305,6 +338,17 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/{badgeType}/set-default', [BadgeTypeController::class, 'setDefault']);
         Route::post('/{badgeType}/toggle-active', [BadgeTypeController::class, 'toggleActive']);
         Route::post('/migrate-old-badges', [BadgeTypeController::class, 'migrateOldBadges']);
+    });
+
+    // Subscription Plan Management Routes (Admin) — same gap as above
+    Route::prefix('admin/subscription-plans')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store']);
+        Route::get('/stats', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'stats']);
+        Route::get('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'show']);
+        Route::put('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update']);
+        Route::delete('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'destroy']);
+        Route::post('/{id}/toggle', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'toggle']);
     });
 
     // Badge application routes for service posts
