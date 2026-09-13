@@ -103,6 +103,10 @@ Route::middleware('auth:api')->get('/user/status', function (Request $request) {
     ]);
 });
 
+// Checked on every app launch, before login is even possible — must stay
+// outside the auth:api group.
+Route::get('app-version', [App\Http\Controllers\Api\AppVersionController::class, 'show']);
+
 Route::post('login', [App\Http\Controllers\Api\UserController::class,'login']);
 Route::post('/facebook/login', [App\Http\Controllers\Api\UserController::class, 'FaceBookSignIn']);
 Route::post('register', [App\Http\Controllers\Api\UserController::class,'register']);
@@ -325,6 +329,10 @@ Route::middleware(['auth:api'])->group(function () {
     // These routes will be used by the Flutter app for country/city filtering
     Route::get('countries', [ServicePostController::class, 'getCountries']);
     Route::get('cities', [ServicePostController::class, 'getCities']);
+
+    // App Version / force-update config (Admin) — bump minimum_build_number
+    // and set is_mandatory=true to force everyone below it to update.
+    Route::put('admin/app-version', [App\Http\Controllers\Api\AppVersionController::class, 'update']);
 
     // Badge Type Management Routes (Admin)
     Route::prefix('admin/badge-types')->group(function () {
