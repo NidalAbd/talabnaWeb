@@ -28,6 +28,14 @@ class AiSettler
                 $count += $this->settle($r) ? 1 : 0;
             });
 
+        // A refund that could not be made is retried every 10 minutes until it works (never left with the user out of pocket).
+        AiRequest::where('status', AiRequest::REFUND_FAILED)->where('updated_at', '<', now()->subMinutes(10))->limit(50)->get()
+            ->each(function (AiRequest $r) use (&$count) {
+                $this->ledger->fail($r, $r->error_code ?: 'refund_retry', $r->error_message ?: 'Refund retried');
+                $r->touch();
+                $count++;
+            });
+
         return $count;
     }
 

@@ -34,21 +34,32 @@ class AiActionsTest extends TestCase
         config(['services.openai.key' => 'test-key']);
         Storage::fake('local');
 
-        // Production MySQL has 'refund' in the type enum (a MySQL-only migration); give the test ledger a plain string.
+        // The ledger exactly as production had it: type is an enum WITHOUT 'refund' (SQLite enforces it as a CHECK).
+        $this->ledgerTable(withRefund: false);
+
+        $this->user = $this->makeUser('writer1', 30);
+        Passport::actingAs($this->user);
+    }
+
+    private function ledgerTable(bool $withRefund): void
+    {
         Schema::dropIfExists('point_transactions');
-        Schema::create('point_transactions', function ($t) {
+        Schema::create('point_transactions', function ($t) use ($withRefund) {
             $t->id();
             $t->unsignedBigInteger('from_user_id')->nullable();
             $t->unsignedBigInteger('to_user_id')->nullable();
-            $t->string('type');
+            $t->enum('type', $withRefund ? ['purchase', 'transfer', 'admin_grant', 'used', 'refund'] : ['purchase', 'transfer', 'admin_grant', 'used']);
             $t->integer('point');
             $t->string('status')->nullable();
             $t->text('metadata')->nullable();
             $t->timestamps();
         });
+    }
 
-        $this->user = $this->makeUser('writer1', 30);
-        Passport::actingAs($this->user);
+    /** Ledger rows that record an AI refund, whatever type label they carry. */
+    private function refundRows(): \Illuminate\Support\Collection
+    {
+        return DB::table('point_transactions')->where('metadata', 'like', '%"reason":"ai_failed"%')->get();
     }
 
     private function makeUser(string $name, int $points): User
@@ -203,7 +214,8 @@ class AiActionsTest extends TestCase
         $this->assertSame('provider_error', $row->error_code);
         $this->assertNotNull($row->refund_transaction_id);
         $this->assertDatabaseHas('point_transactions', ['type' => 'used', 'point' => 2]);
-        $this->assertDatabaseHas('point_transactions', ['type' => 'refund', 'point' => 2]);
+        $this->assertCount(1, $this->refundRows());
+        $this->assertSame(2, $this->refundRows()->first()->point);
     }
 
     public function test_an_unreachable_provider_refunds_too(): void
@@ -256,7 +268,7 @@ class AiActionsTest extends TestCase
         app(AiSettler::class)->settle($ai);
 
         $this->assertSame(30, $this->balance());
-        $this->assertSame(1, DB::table('point_transactions')->where('type', 'refund')->count());
+        $this->assertCount(1, $this->refundRows());
     }
 
     // ── image ─────────────────────────────────────────────────────────────
@@ -754,5 +766,56 @@ class AiActionsTest extends TestCase
         } finally {
             $this->assertSame(27, $this->balance(), 'a refused charge takes nothing');
         }
+    }
+
+    // ── the refund must never depend on the ledger's type label ──────────
+
+    public function test_a_refund_still_returns_the_points_when_the_ledger_has_no_refund_type(): void
+    {
+        // (setUp uses production's real schema: no 'refund' in the enum)
+        $this->fake(['api.openai.com/*' => Http::response([], 500)]);
+
+        $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'a b c'])->assertStatus(502)->assertJsonPath('refunded', true);
+
+        $this->assertSame(30, $this->balance(), 'the user must get the points back');
+        $row = $this->refundRows()->first();
+        $this->assertSame('admin_grant', $row->type, 'recorded with a type the old schema accepts');
+        $this->assertSame('refund', json_decode($row->metadata, true)['ledger_type']);
+        $this->assertSame('failed', AiRequest::first()->status);
+        $this->assertNotNull(AiRequest::first()->refund_transaction_id);
+    }
+
+    public function test_after_the_schema_is_fixed_refunds_are_recorded_as_refund(): void
+    {
+        $this->ledgerTable(withRefund: true);
+        $this->fake(['api.openai.com/*' => Http::response([], 500)]);
+
+        $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'a b c'])->assertStatus(502);
+
+        $this->assertSame(30, $this->balance());
+        $this->assertSame('refund', $this->refundRows()->first()->type);
+    }
+
+    public function test_a_request_stuck_as_refund_failed_is_retried_and_the_user_gets_the_points(): void
+    {
+        $ai = app(AiLedger::class)->start($this->user->id, 'generate_video', $this->id());
+        $this->assertSame(10, $this->balance());
+        $ai->update(['status' => AiRequest::REFUND_FAILED, 'refund_attempts' => 5, 'error_code' => 'blocked', 'updated_at' => now()->subMinutes(30)]);
+
+        $this->artisan('ai-points:settle')->assertExitCode(0);
+
+        $this->assertSame(30, $this->balance());
+        $this->assertSame('failed', $ai->refresh()->status);
+        $this->assertNotNull($ai->refunded_at);
+    }
+
+    public function test_a_recent_refund_failed_request_is_not_hammered_every_minute(): void
+    {
+        $ai = app(AiLedger::class)->start($this->user->id, 'generate_video', $this->id());
+        $ai->update(['status' => AiRequest::REFUND_FAILED, 'refund_attempts' => 5, 'updated_at' => now()->subMinutes(2)]);
+
+        app(AiSettler::class)->settleAll();
+
+        $this->assertSame(10, $this->balance(), 'retried only after 10 minutes');
     }
 }
