@@ -351,6 +351,20 @@ class ServicePostController extends Controller
             }
         }
 
+        // Extra photos/videos beyond the free ones cost points (charged below, inside the transaction).
+        $newMedia = $request->hasFile('images') ? count($request->file('images')) : 0;
+        if (\App\Services\MediaSlots::exceedsMax(0, $newMedia)) {
+            return response()->json(['error' => 'A post can have at most '.\App\Services\MediaSlots::max().' photos or videos.'], 422);
+        }
+        $mediaCost = \App\Services\MediaSlots::extraCost(0, $newMedia);
+        if ($mediaCost > 0 && $user->pointsBalance < $pointCost + $mediaCost) {
+            return response()->json([
+                'error' => 'Not enough points for the extra photos/videos.',
+                'required' => $pointCost + $mediaCost,
+                'balance' => (int) $user->pointsBalance,
+            ], 402);
+        }
+
         // Start transaction
         DB::beginTransaction();
         Log::info('Transaction started for service post creation');
@@ -433,6 +447,8 @@ class ServicePostController extends Controller
 
             $this->saveJobDetails($servicePost, $request);
 
+            \App\Services\MediaSlots::charge($user->id, $mediaCost, $servicePost->id);
+
             // Handle image upload
             if ($request->hasFile('images')) {
                 Log::info('Processing image uploads', ['count' => count($request->file('images'))]);
@@ -504,6 +520,10 @@ class ServicePostController extends Controller
                 'data' => $servicePostResponse->original['servicePosts']->first()
             ], 201);
 
+        } catch (\App\Exceptions\InsufficientBalanceException $e) {
+            DB::rollBack(); // the post and anything charged so far are undone
+
+            return response()->json(['error' => 'Not enough points for the extra photos/videos.', 'required' => $pointCost + $mediaCost, 'balance' => $e->getCurrentBalance()], 402);
         } catch (\Exception $e) {
             // An error occurred, rollback the transaction
             DB::rollBack();
@@ -1108,6 +1128,23 @@ class ServicePostController extends Controller
         return response()->json(compact('servicePosts'));
     }
 
+    /** Saves the newly uploaded photos/videos of an update (called inside the charging transaction). */
+    private function storeUpdatedMedia(ServicePost $servicePost, Request $request): void
+    {
+        if (! $request->hasFile('images')) {
+            return;
+        }
+        foreach ($request->file('images') as $photo) {
+            // Store without 'storage/' in the path
+            $photoPath = $photo->store('photos/posts', 'public');
+
+            $servicePost->photos()->create([
+                'src' => 'storage/'.$photoPath,
+                'isVideo' => $photo->getClientOriginalExtension() === 'mp4' ? 1 : 0,
+            ]);
+        }
+    }
+
     public function update(Request $request, ServicePost $servicePost): JsonResponse
     {
         Log::info('Incoming Request Data servicePost: ' . $servicePost);
@@ -1232,33 +1269,25 @@ class ServicePostController extends Controller
                 'type' => $validatedData['type'],
             ];
 
+            $newMedia = $request->hasFile('images') ? count($request->file('images')) : 0;
+            $onPost = $servicePost->photos()->count();
+            if (\App\Services\MediaSlots::exceedsMax($onPost, $newMedia)) {
+                return response()->json(['error' => 'A post can have at most '.\App\Services\MediaSlots::max().' photos or videos.'], 422);
+            }
+            $mediaCost = \App\Services\MediaSlots::extraCost($onPost, $newMedia);
+            if ($mediaCost > 0 && $user->pointsBalance < $mediaCost) {
+                return response()->json(['error' => 'Not enough points for the extra photos/videos.', 'required' => $mediaCost, 'balance' => (int) $user->pointsBalance], 402);
+            }
+
             $servicePost->update($updateData);
 
             $this->saveJobDetails($servicePost, $request);
 
-            // Handle image upload
-            if ($request->hasFile('images')) {
-                foreach ($request->file('images') as $photo) {
-                    // Store without 'storage/' in the path
-                    $photoPath = $photo->store('photos/posts', 'public');
-
-                    // Create the full path for database storage
-                    $databasePath = 'storage/' . $photoPath;
-
-                    // Check if the file is a video (MP4)
-                    if ($photo->getClientOriginalExtension() === 'mp4') {
-                        $servicePost->photos()->create([
-                            'src' => $databasePath,
-                            'isVideo' => 1,
-                        ]);
-                    } else {
-                        $servicePost->photos()->create([
-                            'src' => $databasePath,
-                            'isVideo' => 0,
-                        ]);
-                    }
-                }
-            }
+            // Charge the extra slots and save the media together: if saving fails, the points are not taken.
+            DB::transaction(function () use ($user, $mediaCost, $servicePost, $request) {
+                \App\Services\MediaSlots::charge($user->id, $mediaCost, $servicePost->id);
+                $this->storeUpdatedMedia($servicePost, $request);
+            });
 
             // Send notification
             $message = json_encode([
@@ -1278,6 +1307,8 @@ class ServicePostController extends Controller
                 'id' => $servicePost->id
             ]);
 
+        } catch (\App\Exceptions\InsufficientBalanceException $e) {
+            return response()->json(['error' => 'Not enough points for the extra photos/videos.', 'required' => $e->getRequestedAmount(), 'balance' => $e->getCurrentBalance()], 402);
         } catch (Exception $e) {
             Log::error('Error Updating Service Post:', ['error' => $e->getMessage()]);
             return response()->json(['error' => $e->getMessage()], 500);
