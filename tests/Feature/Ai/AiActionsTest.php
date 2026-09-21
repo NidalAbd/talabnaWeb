@@ -451,4 +451,124 @@ class AiActionsTest extends TestCase
         $this->actingAs($admin, 'web')->postJson("/api/admin/ai-usage/requests/{$ai->id}/refund")->assertStatus(409);
         $this->assertSame(30, $this->balance());
     }
+
+    // ── quality: form context, plain short prose ─────────────────────────
+
+    public function test_enhancement_carries_every_form_field_already_filled(): void
+    {
+        $this->fake($this->chat(['title' => 'Toyota Corolla 2018', 'description' => 'One owner.']));
+
+        $this->postJson('/api/ai/enhance-post', [
+            'request_id' => $this->id(), 'title' => 'corolla 2018', 'description' => 'good car one owner', 'language' => 'en',
+            'context' => ['post_type' => 'عرض', 'category' => 'Cars', 'sub_category' => 'Sedan', 'price' => 250000, 'currency' => 'EGP', 'city' => 'Cairo', 'country' => 'Egypt'],
+        ])->assertOk();
+
+        Http::assertSent(function ($r) {
+            $user = $r['messages'][1]['content'];
+            $system = $r['messages'][0]['content'];
+
+            return str_contains($user, 'Post type: offer') && str_contains($user, 'Category: Cars > Sedan')
+                && str_contains($user, 'Price: 250000 EGP') && str_contains($user, 'Location: Cairo, Egypt')
+                && str_contains($system, 'OFFER') && str_contains($system, 'as the seller');
+        });
+    }
+
+    public function test_a_request_is_written_as_someone_asking_not_as_a_seller(): void
+    {
+        $this->fake($this->chat(['title' => 'Looking for a Corolla', 'description' => 'Need one.']));
+
+        $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'need corolla', 'description' => 'want a used corolla', 'context' => ['post_type' => 'طلب']])->assertOk();
+
+        Http::assertSent(fn ($r) => str_contains($r['messages'][0]['content'], 'REQUEST') && str_contains($r['messages'][0]['content'], 'never as a seller')
+            && str_contains($r['messages'][1]['content'], 'Post type: request'));
+    }
+
+    public function test_the_prompt_asks_for_creative_writing_and_a_short_length_for_short_input(): void
+    {
+        $this->fake($this->chat(['title' => 'A', 'description' => 'B']));
+        $forty = 'Toyota Corolla 2018, one owner, good car'; // exactly 40 characters
+        $this->assertSame(40, mb_strlen($forty));
+
+        $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'corolla', 'description' => $forty])->assertOk();
+
+        Http::assertSent(function ($r) {
+            $system = $r['messages'][0]['content'];
+
+            return str_contains($system, 'Be CREATIVE')
+                && str_contains($system, 'do not just rearrange')
+                && str_contains($system, 'short list of points')       // lists are allowed
+                && ! str_contains($system, 'NO bullet points')          // and never forbidden
+                && str_contains($system, 'at most 300 characters')
+                && str_contains($system, 'ideally about 240')           // 40 chars in -> about 240 out, never 900
+                && str_contains($system, 'do not pad');
+        });
+    }
+
+    public function test_a_list_of_points_from_the_ai_is_kept_as_it_is(): void
+    {
+        $this->fake($this->chat(['title' => 'Toyota Corolla 2018', 'description' => "Family-friendly sedan, easy on fuel:\n- Single owner\n- Only 90,000 km\n- Clean inside and out"]));
+
+        $res = $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'corolla', 'description' => 'good car single owner 90000 km clean'])->assertOk();
+
+        $this->assertStringContainsString("\n- Single owner", $res->json('result.description'));
+        $this->assertStringContainsString('- Only 90,000 km', $res->json('result.description'));
+    }
+
+    public function test_a_long_answer_for_short_input_is_cut_to_300_characters_at_a_sentence(): void
+    {
+        $long = str_repeat('This is a clear and friendly sentence about the car. ', 20); // about 1000 characters
+        $this->fake($this->chat(['title' => 'Toyota Corolla 2018', 'description' => $long]));
+
+        $res = $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'corolla', 'description' => 'good car one owner'])->assertOk();
+
+        $out = $res->json('result.description');
+        $this->assertLessThanOrEqual(300, mb_strlen($out));
+        $this->assertStringEndsWith('.', $out);
+        $this->assertGreaterThan(150, mb_strlen($out), 'a whole number of sentences, not a stub');
+    }
+
+    public function test_a_long_user_text_is_not_cut_below_what_the_user_wrote(): void
+    {
+        $mine = str_repeat('The car is in very good condition and was serviced regularly. ', 8); // about 480 characters
+        $this->fake($this->chat(['title' => 'Car', 'description' => $mine]));
+
+        $res = $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'car', 'description' => $mine])->assertOk();
+
+        $this->assertGreaterThan(400, mb_strlen($res->json('result.description')), 'polishing must not delete most of a long text');
+        Http::assertSent(fn ($r) => str_contains($r['messages'][0]['content'], 'at most '.mb_strlen(trim($mine)).' characters'));
+    }
+
+    public function test_the_title_never_exceeds_the_50_characters_the_app_field_allows(): void
+    {
+        $this->fake($this->chat(['title' => 'Toyota Corolla 2018 in excellent condition with a single careful owner and full service history', 'description' => 'Fine.']));
+
+        $res = $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'corolla', 'description' => 'good car'])->assertOk();
+
+        $title = $res->json('result.title');
+        $this->assertLessThanOrEqual(50, mb_strlen($title));
+        $this->assertStringNotContainsString('  ', $title);
+        $this->assertStringEndsNotWith(' ', $title);
+        $this->assertStringStartsWith('Toyota Corolla 2018', $title);
+    }
+
+    public function test_an_empty_description_is_not_invented(): void
+    {
+        $this->fake($this->chat(['title' => 'Toyota Corolla 2018', 'description' => '']));
+
+        $res = $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'corolla 2018'])->assertOk();
+
+        $this->assertSame('', $res->json('result.description'));
+        Http::assertSent(fn ($r) => str_contains($r['messages'][0]['content'], 'do not invent one'));
+    }
+
+    public function test_translation_and_the_suggestions_also_know_the_post_type(): void
+    {
+        $this->fake($this->chat(['title' => 'Cherche voiture', 'description' => 'Je cherche.']));
+        $this->postJson('/api/ai/translate-post', ['request_id' => $this->id(), 'title' => 'Looking for a car', 'description' => 'I need one.', 'source_language' => 'en', 'target_language' => 'fr', 'context' => ['post_type' => 'طلب']])->assertOk();
+        Http::assertSent(fn ($r) => str_contains($r['messages'][0]['content'], 'REQUEST') && str_contains($r['messages'][0]['content'], 'a list stays a list'));
+
+        $this->fake($this->chat(['low' => 100, 'typical' => 200, 'high' => 300, 'note' => 'Rough.']));
+        $this->postJson('/api/ai/suggest-price', ['request_id' => $this->id(), 'title' => 'Need a bike', 'currency' => 'EGP', 'context' => ['post_type' => 'طلب', 'category' => 'Bikes']])->assertOk();
+        Http::assertSent(fn ($r) => str_contains($r['messages'][0]['content'], 'budget') && str_contains($r['messages'][1]['content'], 'Category: Bikes'));
+    }
 }
