@@ -774,6 +774,30 @@ class ServicePostController extends Controller
         }
     }
 
+    /**
+     * Pages a feed query WITHOUT pinning featured (badge) posts on top: the organic posts come in the query's own order,
+     * and a couple of featured ones (a seeded, weighted rotation per user and hour) are placed in fixed slots of each page.
+     */
+    private function paginateWithRotatingBadges($query, int $userId, int $page)
+    {
+        $picker = new \App\Services\Feed\SponsoredPicker();
+        $base = clone $query; // all the filters, none of the exclusions below
+
+        $pool = (clone $base)->reorder()->setEagerLoads([])->select('service_posts.id', 'service_posts.have_badge')
+            ->where('service_posts.have_badge', '!=', 'عادي')
+            ->where(fn ($w) => $w->whereNull('service_posts.badge_expires_at')->orWhere('service_posts.badge_expires_at', '>', now()))
+            ->limit(300)->get()->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge])->all();
+        $picked = $picker->pick($pool, 10, $userId.'|'.now()->format('YmdH'));
+
+        $paginator = $query->when($picked, fn ($q) => $q->whereNotIn('service_posts.id', $picked))->paginate(10);
+
+        $slice = array_slice($picked, max(0, ($page - 1) * count(\App\Services\Feed\SponsoredPicker::SLOTS)), count(\App\Services\Feed\SponsoredPicker::SLOTS));
+        $sponsored = $slice ? (clone $base)->reorder()->whereIn('service_posts.id', $slice)->get()->keyBy('id')->all() : [];
+        $paginator->setCollection(collect($picker->mix($paginator->items(), $sponsored, $picked, $page)));
+
+        return $paginator;
+    }
+
     public function servicePostCategory($category, Request $request): JsonResponse
     {
         $user = Auth::id();
@@ -839,15 +863,9 @@ class ServicePostController extends Controller
             $distanceExpression = (new ServicePost)->distanceExpression($userLatitude, $userLongitude);
             $servicePosts->orderByRaw($distanceExpression);
         } else {
-            // First sort by badge type (Diamond → Gold → Normal)
-            // Then within each badge type, sort by location relevance
-            // Finally sort by creation date (newest first)
+            // Fresh posts first, near ones before far ones. Featured (badge) posts are NOT pinned on top any more:
+            // they are rotated into fixed slots below, so every page shows new content.
             $servicePosts->orderByRaw("
-        CASE
-            WHEN have_badge = 'ماسي' THEN 1
-            WHEN have_badge = 'ذهبي' THEN 2
-            ELSE 3
-        END,
         CASE
             WHEN country_id = ? AND city_id = ? THEN 1
             WHEN country_id = ? THEN 2
@@ -860,8 +878,10 @@ class ServicePostController extends Controller
             $servicePosts->where('categories_id', $category);
         }
 
-        // Paginate results
-        $servicePosts = $servicePosts->paginate(10);
+        // Paginate results (featured posts spread through the pages)
+        $servicePosts = $category == 6
+            ? $servicePosts->paginate(10) // "Near" is ordered by distance only
+            : $this->paginateWithRotatingBadges($servicePosts, $currentUser->id, (int) $request->get('page', 1));
 
         // Log filter parameters for debugging
         Log::info('Service Post Category Filters', [
@@ -951,15 +971,8 @@ class ServicePostController extends Controller
             $servicePosts->where('city_id', (int)$request->city_id);
         }
 
-        // First sort by badge type (Diamond → Gold → Normal)
-        // Then within each badge type, sort by location relevance
-        // Finally sort by creation date (newest first)
+        // Fresh posts first, near ones before far ones; featured posts are rotated into fixed slots (not pinned on top).
         $servicePosts->orderByRaw("
-    CASE
-        WHEN have_badge = 'ماسي' THEN 1
-        WHEN have_badge = 'ذهبي' THEN 2
-        ELSE 3
-    END,
     CASE
         WHEN country_id = ? AND city_id = ? THEN 1
         WHEN country_id = ? THEN 2
@@ -974,8 +987,8 @@ class ServicePostController extends Controller
             $servicePosts->with('photos');
         }
 
-        // Paginate the results
-        $servicePosts = $servicePosts->paginate(10);
+        // Paginate the results (featured posts spread through the pages)
+        $servicePosts = $this->paginateWithRotatingBadges($servicePosts, $currentUser->id, (int) $request->get('page', 1));
 
         // Log filter parameters for debugging
         Log::info('Service Post SubCategory Filters', [

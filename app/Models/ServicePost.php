@@ -196,6 +196,7 @@ class ServicePost extends Model
     public static function distance($lat1, $lng1, $lat2, $lng2): float|int
     {
         $earth_radius = 6371;
+        [$lat1, $lng1, $lat2, $lng2] = [(float) $lat1, (float) $lng1, (float) $lat2, (float) $lng2]; // a post or user without a location
 
         $dLat = deg2rad($lat2 - $lat1);
         $dLon = deg2rad($lng2 - $lng1);
