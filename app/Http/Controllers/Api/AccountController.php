@@ -62,6 +62,9 @@ class AccountController extends Controller
 
         $userId = $user->id;
 
+        // Guideline 5.1.1(v): revoke the Sign in with Apple token when the account is deleted.
+        app(\App\Services\Auth\AppleTokenRevoker::class)->forget($user);
+
         try {
             DB::transaction(function () use ($user) {
                 $this->deletePhotosFor($user);

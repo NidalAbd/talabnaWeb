@@ -48,6 +48,20 @@ class UsersApiController extends Controller
                 ]
             ];
 
+            // Sign-in method + device breakdown for the dashboard.
+            $auth = \App\Services\Auth\AuthTracker::stats();
+            $by = fn (string $k, string $v) => (int) ($auth[$k][$v] ?? 0);
+            foreach ([
+                ['Google accounts', $auth['linked']['google'], 'fab fa-google', 'secondary'],
+                ['Apple accounts', $auth['linked']['apple'], 'fab fa-apple', 'dark'],
+                ['Last login: Android', $by('by_last_login_platform', 'android'), 'fab fa-android', 'success'],
+                ['Last login: iOS', $by('by_last_login_platform', 'ios'), 'fab fa-apple', 'info'],
+                ['Active 7d: Android', $by('active_7d_by_platform', 'android'), 'fab fa-android', 'success'],
+                ['Active 7d: iOS', $by('active_7d_by_platform', 'ios'), 'fab fa-apple', 'info'],
+            ] as [$label, $value, $icon, $color]) {
+                $stats[] = ['label' => $label, 'value' => $value, 'icon' => $icon, 'color' => $color, 'link' => route('users.index')];
+            }
+
             return response()->json(['stats' => $stats]);
         } catch (\Exception $e) {
             return response()->json([
@@ -127,6 +141,13 @@ class UsersApiController extends Controller
                     'referral_code' => $user->referral_code,
                     'direct_referrals_count' => $user->direct_referrals_count ?? 0,
                     'total_referrals_count' => $user->total_referrals_count ?? 0,
+                    // How / from what device this user signs in (see App\Services\Auth\AuthTracker).
+                    'sign_in_methods' => array_values(array_filter([$user->google_id ? 'google' : null, $user->apple_id ? 'apple' : null])),
+                    'sign_up_method' => $user->sign_up_method,
+                    'sign_up_platform' => $user->sign_up_platform,
+                    'last_login_method' => $user->last_login_method,
+                    'last_login_platform' => $user->last_login_platform,
+                    'last_login_at' => $user->last_login_at,
                 ];
             });
 

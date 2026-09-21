@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\CategoriesController;
 use App\Http\Controllers\Api\CommentController;
 use App\Http\Controllers\Api\FavoriteController;
 use App\Http\Controllers\Api\GoogleAuthController;
+use App\Http\Controllers\Api\AppleAuthController;
 use App\Http\Controllers\Api\LanguageApiController;
 use App\Http\Controllers\Api\PalservicePointsController;
 use App\Http\Controllers\Api\PublicController;
@@ -120,6 +121,7 @@ Route::post('register-device', [BanCheckController::class, 'registerDevice'])->n
 
 // Google authentication routes
 Route::post('auth/google', [GoogleAuthController::class, 'handleGoogleAuth']);
+Route::post('auth/apple', [AppleAuthController::class, 'handleAppleAuth'])->middleware('throttle:12,1');
 
 // Referral validation (public — no auth needed for registration flow)
 Route::get('referral/validate/{code}', [\App\Http\Controllers\Api\ReferralController::class, 'validateCode']);
@@ -214,6 +216,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::middleware(['throttle:purchases'])->prefix('points')->group(function () {
         Route::post('/purchase', [App\Http\Controllers\Api\PointsController::class, 'purchase']);
         Route::post('/google-verify', [App\Http\Controllers\Api\PointsController::class, 'verifyGooglePurchase']);
+        Route::post('/apple-verify', [App\Http\Controllers\Api\PointsController::class, 'verifyApplePurchase']);
     });
 
     // PIN Management Routes (with rate limiting)
@@ -278,6 +281,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('service_posts/ChangeBadge/{service_posts}', [ServicePostController::class, 'changeBadge']);
     Route::put('service_posts/incrementView/{service_posts}', [ServicePostController::class, 'viewAdd']);
     Route::post('reports/reported/{reported}/reportedId/{reportedId}/reason/{reason}', [App\Http\Controllers\Api\ReportController::class, 'store']);
+
+    // Block list (App Store guideline 1.2)
+    Route::get('blocked-users', [App\Http\Controllers\Api\BlockController::class, 'index']);
+    Route::post('users/{user}/block', [App\Http\Controllers\Api\BlockController::class, 'store']);
+    Route::delete('users/{user}/block', [App\Http\Controllers\Api\BlockController::class, 'destroy']);
 
     Route::apiResource('favorites', FavoriteController::class);
     Route::get('getFavourite/{service_posts}',[FavoriteController::class, 'getFavourite']);

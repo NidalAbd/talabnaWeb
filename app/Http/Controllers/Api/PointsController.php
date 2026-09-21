@@ -17,6 +17,7 @@ use App\Services\TransferPinService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\AppleIapVerificationService;
 use Illuminate\Support\Facades\Log;
 
 class PointsController extends Controller
@@ -477,5 +478,59 @@ class PointsController extends Controller
                 'message' => 'Failed to credit points',
             ], 500);
         }
+    }
+
+    /**
+     * Verify an App Store purchase and credit points (POST /api/points/apple-verify).
+     * Idempotent on Apple's transaction id: replaying a receipt never credits twice.
+     */
+    public function verifyApplePurchase(Request $request, AppleIapVerificationService $apple): JsonResponse
+    {
+        $data = $request->validate([
+            'product_id' => 'required|string|max:128',
+            'receipt' => 'required|string|max:2000000',
+            'transaction_id' => 'required|string|max:64',
+        ]);
+
+        $user = $request->user();
+        $pointsAmount = $apple->getPointsForProduct($data['product_id']);
+        if ($pointsAmount === null) {
+            return response()->json(['success' => false, 'message' => 'Invalid product ID'], 400);
+        }
+
+        // Already credited? Same user: report success (app can finish the transaction).
+        // Another user: this purchase belongs to someone else.
+        $existing = \App\Models\point_purchase_requests::where('apple_transaction_id', $data['transaction_id'])->first();
+        if ($existing) {
+            if ((int) $existing->user_id !== (int) $user->id) {
+                return response()->json(['success' => false, 'message' => 'Purchase already processed'], 409);
+            }
+
+            return response()->json(['success' => true, 'message' => 'Purchase already processed', 'points' => $pointsAmount, 'duplicate' => true]);
+        }
+
+        $verification = $apple->verifyPurchase($data['product_id'], $data['receipt'], $data['transaction_id']);
+        if (! $verification['verified']) {
+            Log::warning('Apple purchase verification failed', [
+                'user_id' => $user->id,
+                'product_id' => $data['product_id'],
+                'error' => $verification['error'] ?? 'unknown',
+            ]);
+
+            return response()->json(['success' => false, 'message' => $verification['error'] ?? 'Purchase verification failed'], 422);
+        }
+
+        try {
+            $this->pointsService->creditApplePurchase($user->id, $pointsAmount, $data['product_id'], $verification['transaction_id']);
+        } catch (\Illuminate\Database\UniqueConstraintViolationException $e) {
+            // A concurrent request credited it first.
+            return response()->json(['success' => true, 'message' => 'Purchase already processed', 'points' => $pointsAmount, 'duplicate' => true]);
+        } catch (\Throwable $e) {
+            Log::error('Failed to credit Apple purchase', ['user_id' => $user->id, 'error' => $e->getMessage()]);
+
+            return response()->json(['success' => false, 'message' => 'Failed to credit points'], 500);
+        }
+
+        return response()->json(['success' => true, 'message' => 'Points credited successfully', 'points' => $pointsAmount, 'duplicate' => false]);
     }
 }

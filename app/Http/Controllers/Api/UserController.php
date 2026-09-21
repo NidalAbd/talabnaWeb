@@ -47,6 +47,7 @@ class UserController extends Controller
         }
 
         $user = Auth::user();
+        \App\Services\Auth\AuthTracker::record($user->id, 'email', $request, false);
         $accessToken = $user->createToken('authToken')->accessToken;
 
         // Update FCM token if provided
@@ -126,6 +127,7 @@ class UserController extends Controller
             $user->photos()->save($photo);
 
             // Generate access token
+            \App\Services\Auth\AuthTracker::record($user->id, 'email', $request, true);
             $accessToken = $user->createToken('authToken')->accessToken;
 
             // Role and Permissions Assignment
