@@ -408,7 +408,7 @@ class AiController extends Controller
             return response()->json($body, 202);
         }
 
-        $body['error'] = ($ai->error_message ?: 'The AI could not finish this.').($ai->refunded_at ? ' You were not charged.' : ' Your points will be returned shortly.');
+        $body['error'] = ($ai->error_message ?: 'The AI could not finish this.').($ai->refunded_at ? ' Your points were returned.' : ' Your points will be returned shortly.');
         $body['code'] = $ai->error_code;
 
         return response()->json($body, in_array($ai->error_code, ['blocked', 'bad_answer'], true) ? 422 : 502);
