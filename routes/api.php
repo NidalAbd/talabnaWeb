@@ -284,7 +284,19 @@ Route::middleware(['auth:api'])->group(function () {
 
     // AI helpers for post creation, paid in points (price from the ai_features table)
     Route::get('ai/pricing', [App\Http\Controllers\Api\AiController::class, 'pricing']);
-    Route::post('ai/enhance-text', [App\Http\Controllers\Api\AiController::class, 'enhanceText'])->middleware('throttle:20,1');
+    Route::middleware('throttle:20,1')->group(function () {
+        Route::post('ai/enhance-post', [App\Http\Controllers\Api\AiController::class, 'enhancePost']);
+        Route::post('ai/translate-post', [App\Http\Controllers\Api\AiController::class, 'translatePost']);
+        Route::post('ai/suggest-category', [App\Http\Controllers\Api\AiController::class, 'suggestCategory']);
+        Route::post('ai/suggest-price', [App\Http\Controllers\Api\AiController::class, 'suggestPrice']);
+    });
+    Route::middleware('throttle:8,1')->group(function () {
+        Route::post('ai/generate-image', [App\Http\Controllers\Api\AiController::class, 'generateImage']);
+        Route::post('ai/generate-video', [App\Http\Controllers\Api\AiController::class, 'generateVideo']);
+    });
+    Route::get('ai/requests', [App\Http\Controllers\Api\AiController::class, 'history']);
+    Route::get('ai/requests/{uuid}', [App\Http\Controllers\Api\AiController::class, 'show']);
+    Route::get('ai/requests/{uuid}/file', [App\Http\Controllers\Api\AiController::class, 'file']);
 
     // Block list (App Store guideline 1.2)
     Route::get('blocked-users', [App\Http\Controllers\Api\BlockController::class, 'index']);

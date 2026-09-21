@@ -29,6 +29,7 @@ import LanguagesList from '../views/admin/languages/LanguagesList.vue'
 import LanguageTranslations from '../views/admin/languages/LanguageTranslations.vue'
 import TranslationsList from '../views/admin/translations/TranslationsList.vue'
 import CommandMonitor from '../views/admin/CommandMonitor.vue'
+import AiUsage from '../views/admin/AiUsage.vue'
 import AiContentDashboard from '../views/admin/AiContentDashboard.vue'
 import SubscriptionPlansList from '../views/admin/SubscriptionPlansList.vue'
 import AutoTranslateDashboard from '../views/admin/AutoTranslateDashboard.vue'
@@ -60,6 +61,7 @@ const routes = [
   { path: '/admin/languages', name: 'languages.index', component: LanguagesList, meta: { title: 'Languages' } },
   { path: '/admin/languages/:code/translations', name: 'languages.translations', component: LanguageTranslations, meta: { title: 'Language Translations' } },
   { path: '/admin/translations', name: 'translations.index', component: TranslationsList, meta: { title: 'Translations' } },
+  { path: '/admin/ai-usage', name: 'ai_usage.index', component: AiUsage, meta: { title: 'AI Usage' } },
   { path: '/admin/command-monitor', name: 'command_monitor.index', component: CommandMonitor, meta: { title: 'Command Monitor' } },
   { path: '/admin/ai-content', name: 'ai_content.index', component: AiContentDashboard, meta: { title: 'AI Content Generator' } },
   { path: '/admin/subscription-plans', name: 'subscription_plans.index', component: SubscriptionPlansList, meta: { title: 'Subscription Plans' } },

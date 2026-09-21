@@ -26,13 +26,12 @@ return new class extends Migration
         $now = now();
         foreach ([
             // key, points, enabled, description
-            ['enhance_title', 1, true, 'Improve a post title'],
-            ['enhance_description', 1, true, 'Improve a post description'],
-            ['translate_text', 1, false, 'Translate a title or description into another language'],
-            ['suggest_category', 1, false, 'Suggest the category and subcategory from the text or photos'],
-            ['suggest_price', 1, false, 'Suggest a price'],
-            ['generate_image', 3, false, 'Generate an image for the post'],
-            ['generate_video', 20, false, 'Generate a short video for the post'],
+            ['enhance_post', 2, true, 'Improve the title and description together'],
+            ['translate_post', 2, true, 'Translate the title and description into another language'],
+            ['suggest_category', 1, true, 'Suggest the category and subcategory'],
+            ['suggest_price', 1, true, 'Suggest a price range'],
+            ['generate_image', 3, true, 'Generate an image for the post'],
+            ['generate_video', 20, true, 'Generate a short video for the post'],
         ] as [$key, $points, $enabled, $description]) {
             DB::table('ai_features')->insert([
                 'key' => $key, 'points_cost' => $points, 'enabled' => $enabled,

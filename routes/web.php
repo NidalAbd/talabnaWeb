@@ -667,6 +667,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/command-monitor', [HomeController::class, 'index'])
         ->name('command_monitor.index');
 
+    // AI Usage (paid AI charges, failures, refunds) - Vue SPA
+    Route::get('/ai-usage', [HomeController::class, 'index'])
+        ->name('ai_usage.index');
+
     // AI Content - Vue SPA
     Route::get('/ai-content', [HomeController::class, 'index'])
         ->name('ai_content.index');
@@ -930,6 +934,11 @@ Route::middleware(['auth', 'admin'])->group(function () {
                 Route::get('/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'index'])->name('api.admin.languages.content-translations');
                 Route::post('/{code}/content-translations', [\App\Http\Controllers\Admin\ContentTranslationController::class, 'store'])->name('api.admin.languages.content-translations.store');
             });
+
+            // Paid AI: every charge, failure and refund
+            Route::get('/ai-usage/summary', [\App\Http\Controllers\Api\AiMonitorController::class, 'summary'])->name('api.admin.ai-usage.summary');
+            Route::get('/ai-usage/requests', [\App\Http\Controllers\Api\AiMonitorController::class, 'index'])->name('api.admin.ai-usage.requests');
+            Route::post('/ai-usage/requests/{id}/refund', [\App\Http\Controllers\Api\AiMonitorController::class, 'refund'])->name('api.admin.ai-usage.refund');
 
             // Command Monitor
             Route::get('/command-monitor', [CommandMonitorController::class, 'index'])->name('api.admin.command-monitor.index');
