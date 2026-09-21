@@ -655,4 +655,104 @@ class AiActionsTest extends TestCase
         Http::assertSent(fn ($r) => $r->url() === 'https://api.openai.com/v1/images/generations' && str_contains($r['prompt'], 'a red bicycle leaning on a wall'));
         $this->assertSame(27, $this->balance(), 'a failed helper step must not fail or refund the paid action');
     }
+
+    // ── load protection, creations, media slots ──────────────────────────
+
+    public function test_pricing_tells_the_app_the_media_slot_rules(): void
+    {
+        $this->getJson('/api/ai/pricing')->assertOk()
+            ->assertJsonPath('media_slots.free', 4)->assertJsonPath('media_slots.max', 10)->assertJsonPath('media_slots.extra_points', 1);
+    }
+
+    public function test_when_the_system_is_busy_nothing_is_charged_and_the_user_is_told_to_retry(): void
+    {
+        config(['ai.limits.parallel_image' => 2]);
+        foreach ([1, 2] as $n) {
+            $other = $this->makeUser("busy$n", 10);
+            AiRequest::create(['uuid' => $this->id(), 'user_id' => $other->id, 'feature' => 'generate_image', 'points' => 3, 'status' => 'processing']);
+        }
+        $this->fake([]);
+
+        $this->postJson('/api/ai/generate-image', ['request_id' => $this->id(), 'prompt' => 'a red bicycle'])
+            ->assertStatus(503)->assertJsonPath('code', 'busy');
+
+        $this->assertSame(30, $this->balance());
+        Http::assertNothingSent();
+    }
+
+    public function test_the_daily_media_limit_per_user_is_enforced_before_charging(): void
+    {
+        config(['ai.limits.daily_media_per_user' => 2]);
+        foreach ([1, 2] as $n) {
+            AiRequest::create(['uuid' => $this->id(), 'user_id' => $this->user->id, 'feature' => 'generate_image', 'points' => 3, 'status' => 'succeeded']);
+        }
+        $this->fake([]);
+
+        $this->postJson('/api/ai/generate-image', ['request_id' => $this->id(), 'prompt' => 'a red bicycle'])->assertStatus(429)->assertJsonPath('code', 'daily_limit');
+        $this->assertSame(30, $this->balance());
+    }
+
+    public function test_failed_generations_do_not_count_against_the_daily_limit(): void
+    {
+        config(['ai.limits.daily_media_per_user' => 1]);
+        AiRequest::create(['uuid' => $this->id(), 'user_id' => $this->user->id, 'feature' => 'generate_image', 'points' => 3, 'status' => 'failed']);
+        $this->fake($this->chat(['prompt' => 'A red bicycle on a plain background, soft light']) + ['api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => $this->jpegB64()]]])]);
+
+        $this->postJson('/api/ai/generate-image', ['request_id' => $this->id(), 'prompt' => 'a red bicycle'])->assertOk();
+    }
+
+    public function test_creations_lists_my_recent_finished_media_and_nobody_elses(): void
+    {
+        $this->fake($this->chat(['prompt' => 'A red bicycle on a plain background, soft light']) + ['api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => $this->jpegB64()]]])]);
+        $id = $this->id();
+        $this->postJson('/api/ai/generate-image', ['request_id' => $id, 'prompt' => 'a red bicycle leaning on a wall'])->assertOk();
+
+        $list = $this->getJson('/api/ai/creations')->assertOk();
+        $this->assertCount(1, $list->json());
+        $this->assertSame($id, $list->json('0.request_id'));
+        $this->assertSame('image', $list->json('0.file_type'));
+        $this->assertSame('a red bicycle leaning on a wall', $list->json('0.prompt'));
+
+        Passport::actingAs($this->makeUser('other2', 5));
+        $this->assertCount(0, $this->getJson('/api/ai/creations')->json());
+    }
+
+    public function test_creations_drops_files_that_were_pruned(): void
+    {
+        $this->fake($this->chat(['prompt' => 'A red bicycle on a plain background, soft light']) + ['api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => $this->jpegB64()]]])]);
+        $id = $this->id();
+        $this->postJson('/api/ai/generate-image', ['request_id' => $id, 'prompt' => 'a red bicycle leaning on a wall'])->assertOk();
+        Storage::disk('local')->delete("ai-results/$id.jpg");
+
+        $this->assertCount(0, $this->getJson('/api/ai/creations')->json());
+    }
+
+    public function test_extra_media_slots_cost_only_for_new_items_beyond_the_free_and_already_held_ones(): void
+    {
+        $cost = fn (int $on, int $new) => \App\Services\MediaSlots::extraCost($on, $new);
+        $this->assertSame(0, $cost(0, 4), 'four on a new post are free');
+        $this->assertSame(1, $cost(0, 5));
+        $this->assertSame(6, $cost(0, 10));
+        $this->assertSame(0, $cost(4, 0));
+        $this->assertSame(2, $cost(4, 2), 'a post that has 4 pays for its 5th and 6th');
+        $this->assertSame(1, $cost(5, 1), 'the 6th');
+        $this->assertSame(0, $cost(2, 2), 'still within the free four');
+        $this->assertSame(1, $cost(3, 2), 'only the 5th is beyond the free four');
+        $this->assertTrue(\App\Services\MediaSlots::exceedsMax(8, 3));
+        $this->assertFalse(\App\Services\MediaSlots::exceedsMax(8, 2));
+    }
+
+    public function test_charging_extra_slots_writes_a_ledger_row_and_never_goes_negative(): void
+    {
+        \App\Services\MediaSlots::charge($this->user->id, 3, 77);
+        $this->assertSame(27, $this->balance());
+        $this->assertDatabaseHas('point_transactions', ['type' => 'used', 'point' => 3]);
+
+        $this->expectException(\App\Exceptions\InsufficientBalanceException::class);
+        try {
+            \App\Services\MediaSlots::charge($this->user->id, 999, 77);
+        } finally {
+            $this->assertSame(27, $this->balance(), 'a refused charge takes nothing');
+        }
+    }
 }

@@ -19,6 +19,21 @@ return [
     // A request still "processing" after this long is given up on and refunded.
     'stale_minutes' => ['text' => 3, 'image' => 6, 'video' => 20],
 
+    // Extra photos/videos on a post: the first `free_media` are free, up to `max_media` in total, and each one beyond the
+    // free ones costs `extra_media_points`. Charged when the post is saved, in the same transaction as the post.
+    'media' => [
+        'free' => (int) env('POST_FREE_MEDIA', 4),
+        'max' => (int) env('POST_MAX_MEDIA', 10),
+        'extra_points' => (int) env('POST_EXTRA_MEDIA_POINTS', 1),
+    ],
+
+    // Load protection for generation: nothing is charged when the system is busy or the daily limit is reached.
+    'limits' => [
+        'parallel_image' => (int) env('AI_PARALLEL_IMAGE', 4),
+        'parallel_video' => (int) env('AI_PARALLEL_VIDEO', 6),
+        'daily_media_per_user' => (int) env('AI_DAILY_MEDIA_PER_USER', 30),
+    ],
+
     // Generated files are kept this long so a lost response can still be fetched.
     'result_days' => 7,
 ];

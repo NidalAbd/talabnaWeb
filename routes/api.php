@@ -294,6 +294,7 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('ai/generate-image', [App\Http\Controllers\Api\AiController::class, 'generateImage']);
         Route::post('ai/generate-video', [App\Http\Controllers\Api\AiController::class, 'generateVideo']);
     });
+    Route::get('ai/creations', [App\Http\Controllers\Api\AiController::class, 'creations']);
     Route::get('ai/requests', [App\Http\Controllers\Api\AiController::class, 'history']);
     Route::get('ai/requests/{uuid}', [App\Http\Controllers\Api\AiController::class, 'show']);
     Route::get('ai/requests/{uuid}/file', [App\Http\Controllers\Api\AiController::class, 'file']);

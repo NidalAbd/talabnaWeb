@@ -49,6 +49,11 @@ class AiController extends Controller
                 $f->key => ['points' => $f->points_cost, 'enabled' => $f->enabled],
             ]),
             'balance' => $this->ledger->balance($userId),
+            'media_slots' => [
+                'free' => \App\Services\MediaSlots::free(),
+                'max' => \App\Services\MediaSlots::max(),
+                'extra_points' => \App\Services\MediaSlots::pointsEach(),
+            ],
             'pending' => AiRequest::where('user_id', $userId)->where('status', AiRequest::PROCESSING)->get(['uuid', 'feature'])
                 ->map(fn ($r) => ['request_id' => $r->uuid, 'feature' => $r->feature])->values(),
         ]);
@@ -253,6 +258,26 @@ class AiController extends Controller
         ]);
     }
 
+    /** GET /api/ai/creations - the caller's recent finished images/videos (kept for a few days) to pick from again. */
+    public function creations(Request $request): JsonResponse
+    {
+        $keep = now()->subDays((int) config('ai.result_days', 7));
+
+        return response()->json(
+            AiRequest::where('user_id', $request->user()->id)->where('status', AiRequest::SUCCEEDED)
+                ->whereIn('feature', ['generate_image', 'generate_video'])->whereNotNull('result_path')->where('completed_at', '>=', $keep)
+                ->latest('id')->limit(30)->get()
+                ->filter(fn (AiRequest $r) => Storage::disk('local')->exists($r->result_path))
+                ->map(fn (AiRequest $r) => [
+                    'request_id' => $r->uuid,
+                    'file_type' => str_ends_with($r->result_path, '.mp4') ? 'video' : 'image',
+                    'file_url' => url('/api/ai/requests/'.$r->uuid.'/file'),
+                    'prompt' => mb_substr(preg_replace('/^USER:\s*/', '', explode("\n", (string) $r->prompt)[0] ?? ''), 0, 200),
+                    'created_at' => $r->created_at?->toIso8601String(),
+                ])->values()
+        );
+    }
+
     /** GET /api/ai/requests - the caller's recent AI actions, refunds included. */
     public function history(Request $request): JsonResponse
     {
@@ -331,6 +356,17 @@ class AiController extends Controller
         $configured = $media ? $this->media->isConfigured() : $this->text->isConfigured();
         if (! $configured) {
             return response()->json(['error' => 'AI is not available right now, try again later.'], 503);
+        }
+        if (in_array($feature, ['generate_image', 'generate_video'], true)) {
+            $global = $feature === 'generate_video' ? (int) config('ai.limits.parallel_video', 6) : (int) config('ai.limits.parallel_image', 4);
+            if ($global > 0 && AiRequest::where('feature', $feature)->where('status', AiRequest::PROCESSING)->count() >= $global) {
+                return response()->json(['error' => 'Lots of people are creating right now. Try again in a minute; you were not charged.', 'code' => 'busy'], 503);
+            }
+            $daily = (int) config('ai.limits.daily_media_per_user', 30);
+            if ($daily > 0 && AiRequest::where('user_id', $userId)->whereIn('feature', ['generate_image', 'generate_video'])
+                ->where('created_at', '>=', now()->subDay())->where('status', '!=', AiRequest::FAILED)->count() >= $daily) {
+                return response()->json(['error' => 'You reached today\'s limit for AI images and videos. Try again tomorrow.', 'code' => 'daily_limit'], 429);
+            }
         }
         $cap = self::MAX_PARALLEL[$feature] ?? null;
         if ($cap && AiRequest::where('user_id', $userId)->where('feature', $feature)->where('status', AiRequest::PROCESSING)->count() >= $cap) {
