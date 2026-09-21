@@ -63,6 +63,7 @@ class User extends Authenticatable implements CanResetPasswordContract
         'password',
         'data_saver_enabled',
         'google_id',
+        'apple_id',
         'auth_type',
         'fcm_token',
         'referral_code',
@@ -92,6 +93,7 @@ class User extends Authenticatable implements CanResetPasswordContract
     protected $hidden = [
         'password',
         'remember_token',
+        'apple_refresh_token',
     ];
 
     protected static function booted()

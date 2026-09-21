@@ -63,6 +63,8 @@ class ServicePost extends Model
     {
         parent::boot();
 
+        static::addGlobalScope(new \App\Models\Scopes\HidesBlockedUsersScope());
+
         // When creating a new service post with a badge
         static::creating(function ($servicePost) {
             // Set badge expiration date if badge is not 'عادي' and duration is set

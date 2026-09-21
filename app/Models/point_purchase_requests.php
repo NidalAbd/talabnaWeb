@@ -24,6 +24,8 @@ class point_purchase_requests extends Model
         'google_order_id',
         'google_product_id',
         'google_purchase_token',
+        'apple_transaction_id',
+        'apple_product_id',
     ];
 
     protected $casts = [

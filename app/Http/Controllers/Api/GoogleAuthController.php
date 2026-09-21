@@ -65,6 +65,8 @@ class GoogleAuthController extends Controller
             Log::info('Google client_id: ' . substr($clientId, 0, 30) . '...');
 
             $client = new GoogleClient(['client_id' => $clientId]);
+            // Web/server client first, then the Android and iOS OAuth clients (an ID token's `aud` can be any of them).
+            $audiences = array_values(array_unique(array_filter([$clientId, config('services.google.android_client_id'), config('services.google.ios_client_id')])));
 
             // Set HTTP client timeout
             $httpClient = new \GuzzleHttp\Client([
@@ -89,7 +91,18 @@ class GoogleAuthController extends Controller
             for ($attempt = 1; $attempt <= 3; $attempt++) {
                 $failed = false;
                 try {
-                    $payload = $client->verifyIdToken($idToken);
+                    $payload = null;
+                    foreach ($audiences as $audience) {
+                        $client->setClientId($audience);
+                        try {
+                            $payload = $client->verifyIdToken($idToken);
+                        } catch (\Throwable $audienceMismatch) {
+                            $payload = null;
+                        }
+                        if ($payload) {
+                            break;
+                        }
+                    }
                     if ($payload) {
                         Log::info("Google token verified on attempt {$attempt}");
                         break;
@@ -116,6 +129,15 @@ class GoogleAuthController extends Controller
                 ]);
                 return response()->json(['error' => 'Invalid Google ID token'], 401);
             }
+
+            // Trust the email inside Google's signed token, never the one the client sent:
+            // otherwise a valid token for account A plus B's email would sign in as B.
+            $verifiedEmail = self::verifiedEmail($payload, (string) $request->email);
+            if ($verifiedEmail === null) {
+                Log::warning('Google sign-in rejected: token email missing or not verified');
+                return response()->json(['error' => 'Google account email is not verified'], 401);
+            }
+            $request->merge(['email' => $verifiedEmail]);
 
             Log::info('Google ID token verified successfully for: ' . $request->email);
 
@@ -271,6 +293,7 @@ class GoogleAuthController extends Controller
             }
 
             // Create token for the user - add a longer expiration
+            \App\Services\Auth\AuthTracker::record($user->id, 'google', $request, $isNewUser);
             $tokenResult = $user->createToken('google-auth-token');
             $token = $tokenResult->accessToken; // Use accessToken instead of plainTextToken
 
@@ -305,6 +328,23 @@ class GoogleAuthController extends Controller
             return response()->json(['error' => 'Authentication failed: ' . $e->getMessage()], 500);
         }
     }
+    /**
+     * The email to trust for a verified Google ID-token payload. Google puts the address in the
+     * signed `email` claim; the client-sent value is only a fallback for tokens without one
+     * and is never allowed to differ from the claim. Null when Google says it is unverified.
+     */
+    public static function verifiedEmail(array $payload, string $claimed): ?string
+    {
+        $verified = $payload['email_verified'] ?? true;
+        if ($verified === false || $verified === 'false') {
+            return null;
+        }
+
+        $email = strtolower(trim((string) ($payload['email'] ?? $claimed)));
+
+        return $email !== '' ? $email : null;
+    }
+
     /**
      * Generate a username based on the name
      *

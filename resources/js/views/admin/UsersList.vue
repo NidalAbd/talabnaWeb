@@ -250,6 +250,7 @@
             <th>Contact</th>
             <th>Roles</th>
             <th>Status</th>
+            <th>Sign-in / Device</th>
             <th>Referral</th>
             <th>Stats</th>
             <th>Actions</th>
@@ -292,6 +293,20 @@
                 <i :class="user.is_active === 'active' ? 'fas fa-check-circle' : 'fas fa-ban'"></i>
                 {{ user.is_active === 'active' ? 'Active' : 'Banned' }}
               </span>
+            </td>
+            <td>
+              <div class="signin-cell" style="font-size: 11px; line-height: 1.6;">
+                <span v-for="m in user.sign_in_methods" :key="m" class="badge"
+                      :style="m === 'apple' ? 'background:#111;color:#fff' : 'background:#e8f0fe;color:#1a56db'">
+                  <i :class="m === 'apple' ? 'fab fa-apple' : 'fab fa-google'"></i> {{ m === 'apple' ? 'Apple' : 'Google' }}
+                </span>
+                <span v-if="!user.sign_in_methods || !user.sign_in_methods.length" style="color:#888;">Email</span>
+                <div v-if="user.last_login_platform" style="color:#555;">
+                  <i :class="user.last_login_platform === 'ios' ? 'fab fa-apple' : (user.last_login_platform === 'android' ? 'fab fa-android' : 'fas fa-globe')"></i>
+                  {{ ({ios: 'iOS', android: 'Android', web: 'Web'})[user.last_login_platform] || 'Unknown' }}
+                </div>
+                <div v-if="user.last_login_at" style="color:#999;">{{ new Date(user.last_login_at).toLocaleString() }}</div>
+              </div>
             </td>
             <td>
               <div class="referral-cell">
@@ -354,7 +369,7 @@
         </tbody>
         <tbody v-else>
           <tr>
-            <td colspan="7" class="empty-state">
+            <td colspan="8" class="empty-state">
               <i class="fas fa-users"></i>
               <p>No users found</p>
               <button @click="resetFilters" class="action-btn primary">

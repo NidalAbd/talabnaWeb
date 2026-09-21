@@ -11,6 +11,11 @@ class Comment extends Model
 {
     use HasFactory;
 
+    protected static function booted(): void
+    {
+        static::addGlobalScope(new \App\Models\Scopes\HidesBlockedUsersScope());
+    }
+
     protected $fillable = [
         'user_id',
         'service_post_id',

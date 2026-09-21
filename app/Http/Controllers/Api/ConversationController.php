@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Conversation;
 use App\Models\Message;
+use App\Support\Blocks;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -23,8 +24,10 @@ class ConversationController extends Controller
     {
         $userId = Auth::id();
 
-        $conversations = Conversation::where('user_one_id', $userId)
-            ->orWhere('user_two_id', $userId)
+        $blocked = Blocks::blockedBy($userId);
+
+        $conversations = Conversation::where(fn ($q) => $q->where('user_one_id', $userId)->orWhere('user_two_id', $userId))
+            ->when($blocked, fn ($q) => $q->whereNotIn('user_one_id', $blocked)->whereNotIn('user_two_id', $blocked))
             ->with(['userOne.photos', 'userTwo.photos', 'servicePost:id,title'])
             ->orderByDesc('last_message_at')
             ->orderByDesc('created_at')
@@ -54,6 +57,10 @@ class ConversationController extends Controller
 
         if ($recipientId === $userId) {
             return response()->json(['error' => 'Cannot start a conversation with yourself'], 422);
+        }
+
+        if (Blocks::exists($userId, $recipientId)) {
+            return response()->json(['error' => 'You cannot message this user'], 403);
         }
 
         $conversation = Conversation::between($userId, $recipientId, $request->service_post_id);
@@ -86,6 +93,11 @@ class ConversationController extends Controller
         $userId = Auth::id();
         if (!$this->isParticipant($conversation, $userId)) {
             return response()->json(['error' => 'Not a participant in this conversation'], 403);
+        }
+
+        $other = $conversation->otherUser($userId);
+        if ($other && Blocks::exists($userId, $other->id)) {
+            return response()->json(['error' => 'You cannot message this user'], 403);
         }
 
         $validator = Validator::make($request->all(), [

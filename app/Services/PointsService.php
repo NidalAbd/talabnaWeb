@@ -578,6 +578,66 @@ class PointsService
     }
 
     /**
+     * Credit points from a verified App Store purchase. Idempotent on the Apple transaction id
+     * (unique column): a replayed receipt cannot credit twice.
+     */
+    public function creditApplePurchase(
+        int $userId,
+        int $pointsAmount,
+        string $productId,
+        string $transactionId
+    ): void {
+        DB::transaction(function () use ($userId, $pointsAmount, $productId, $transactionId) {
+            $purchaseRequest = point_purchase_requests::create([
+                'user_id' => $userId,
+                'points_requested' => $pointsAmount,
+                'price_per_point' => 0, // Price handled by the App Store
+                'total_price' => 0,
+                'status' => 'approved',
+                'auto_approved' => true,
+                'approval_type' => 'apple_iap',
+                'apple_transaction_id' => $transactionId,
+                'apple_product_id' => $productId,
+            ]);
+
+            $userBalance = palservice_points::where('user_id', $userId)
+                ->lockForUpdate()
+                ->first();
+
+            if ($userBalance) {
+                $userBalance->increment('point', $pointsAmount);
+            } else {
+                palservice_points::create([
+                    'user_id' => $userId,
+                    'point' => $pointsAmount,
+                ]);
+            }
+
+            point_transactions::create([
+                'from_user_id' => null,
+                'to_user_id' => $userId,
+                'type' => 'purchase',
+                'point' => $pointsAmount,
+                'status' => 'completed',
+                'metadata' => json_encode([
+                    'purchase_request_id' => $purchaseRequest->id,
+                    'payment_method' => 'apple_iap',
+                    'product_id' => $productId,
+                    'transaction_id' => $transactionId,
+                ]),
+            ]);
+
+            $this->auditService->logPurchase(
+                User::find($userId),
+                $pointsAmount,
+                $purchaseRequest
+            );
+
+            $this->sendPurchaseNotification(User::find($userId), $pointsAmount);
+        });
+    }
+
+    /**
      * Validate that both users are in the same country for transfers
      */
     private function validateSameCountry(User $fromUser, User $toUser): void
