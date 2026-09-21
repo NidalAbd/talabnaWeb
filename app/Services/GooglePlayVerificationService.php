@@ -28,14 +28,14 @@ class GooglePlayVerificationService
 
         if (empty($packageName)) {
             Log::error('Google Play package name not configured');
-            return ['verified' => false, 'error' => 'Google Play not configured'];
+            return ['verified' => false, 'error' => 'Google Play not configured', 'transient' => true];
         }
 
         try {
             $accessToken = $this->getAccessToken();
 
             if (!$accessToken) {
-                return ['verified' => false, 'error' => 'Failed to get access token'];
+                return ['verified' => false, 'error' => 'Failed to get access token', 'transient' => true];
             }
 
             $url = "https://androidpublisher.googleapis.com/androidpublisher/v3/applications/{$packageName}/purchases/products/{$productId}/tokens/{$purchaseToken}";
@@ -48,12 +48,18 @@ class GooglePlayVerificationService
                     'body' => $response->body(),
                     'product_id' => $productId,
                 ]);
-                return ['verified' => false, 'error' => 'Verification request failed'];
+                // 400/404: Google says this token/product is not valid (final). Anything else (auth, quota, 5xx) is on our side
+                // or Google's and worth retrying, so the app must NOT close the purchase.
+                return ['verified' => false, 'error' => 'Verification request failed', 'transient' => ! in_array($response->status(), [400, 404, 410], true)];
             }
 
             $data = $response->json();
 
             // purchaseState: 0 = Purchased, 1 = Canceled, 2 = Pending
+            if (($data['purchaseState'] ?? -1) === 2) {
+                // Pending (e.g. cash / slow payment): not paid yet, the app waits and Google will complete it later.
+                return ['verified' => false, 'error' => 'Payment is still pending', 'pending' => true, 'state' => 2];
+            }
             if (($data['purchaseState'] ?? -1) !== 0) {
                 return [
                     'verified' => false,
@@ -73,7 +79,7 @@ class GooglePlayVerificationService
             ];
         } catch (\Exception $e) {
             Log::error('Google Play verification exception: ' . $e->getMessage());
-            return ['verified' => false, 'error' => 'Verification exception: ' . $e->getMessage()];
+            return ['verified' => false, 'error' => 'Verification exception: ' . $e->getMessage(), 'transient' => true];
         }
     }
 

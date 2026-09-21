@@ -128,7 +128,9 @@ class ApplePurchaseTest extends TestCase
         $user = $this->actingUser();
         Http::fake();
 
-        $this->postJson(self::URL, $this->body('points_10', 'tx-9'))->assertStatus(422);
+        // 503 + retry: it is OUR configuration that is missing, not the customer's purchase that is bad, so the app keeps the
+        // paid transaction open and credits it as soon as this is fixed.
+        $this->postJson(self::URL, $this->body('points_10', 'tx-9'))->assertStatus(503)->assertJsonPath('retry', true);
         Http::assertNothingSent();
         $this->assertSame(0, $this->balance($user));
     }
@@ -138,7 +140,25 @@ class ApplePurchaseTest extends TestCase
         $user = $this->actingUser();
         Http::fake([AppleIapVerificationService::PRODUCTION_URL => Http::response('', 503)]);
 
-        $this->postJson(self::URL, $this->body('points_10', 'tx-10'))->assertStatus(422);
+        $this->postJson(self::URL, $this->body('points_10', 'tx-10'))->assertStatus(503)->assertJsonPath('retry', true);
+        $this->assertSame(0, $this->balance($user));
+    }
+
+    public function test_apple_being_down_is_retryable_but_a_bad_receipt_is_final(): void
+    {
+        $this->withoutMiddleware(\Illuminate\Routing\Middleware\ThrottleRequests::class); // six calls in one test
+        $user = $this->actingUser();
+
+        foreach ([21005, 21009, 21100] as $status) {
+            Http::swap(new \Illuminate\Http\Client\Factory());
+            $this->fakeApple(['status' => $status]);
+            $this->postJson(self::URL, $this->body('points_10', "tx-down-$status"))->assertStatus(503)->assertJsonPath('retry', true);
+        }
+        foreach ([21002, 21008, 21010] as $status) {
+            Http::swap(new \Illuminate\Http\Client\Factory());
+            $this->fakeApple(['status' => $status]);
+            $this->postJson(self::URL, $this->body('points_10', "tx-bad-$status"))->assertStatus(422)->assertJsonPath('retry', false);
+        }
         $this->assertSame(0, $this->balance($user));
     }
 
