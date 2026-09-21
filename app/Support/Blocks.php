@@ -14,15 +14,27 @@ class Blocks
     /** Ids of the users $userId has blocked. */
     public static function blockedBy(int $userId): array
     {
-        return self::$memo[$userId] ??= UserBlock::where('blocker_id', $userId)->pluck('blocked_id')->all();
+        // Never let a missing table (migration not run yet on this server) break feeds or chat.
+        return self::$memo[$userId] ??= self::safely(fn () => UserBlock::where('blocker_id', $userId)->pluck('blocked_id')->all(), []);
     }
 
     /** True if either user has blocked the other. */
     public static function exists(int $a, int $b): bool
     {
-        return UserBlock::where(fn ($q) => $q->where('blocker_id', $a)->where('blocked_id', $b))
+        return self::safely(fn () => UserBlock::where(fn ($q) => $q->where('blocker_id', $a)->where('blocked_id', $b))
             ->orWhere(fn ($q) => $q->where('blocker_id', $b)->where('blocked_id', $a))
-            ->exists();
+            ->exists(), false);
+    }
+
+    private static function safely(callable $query, mixed $fallback): mixed
+    {
+        try {
+            return $query();
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('blocks.unavailable', ['message' => $e->getMessage()]);
+
+            return $fallback;
+        }
     }
 
     /** Ids hidden from the signed-in API user (empty for guests, admin sessions and jobs). */

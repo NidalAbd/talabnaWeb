@@ -49,16 +49,20 @@ class UsersApiController extends Controller
             ];
 
             // Sign-in method + device breakdown for the dashboard.
-            $auth = \App\Services\Auth\AuthTracker::stats();
+            try {
+                $auth = \App\Services\Auth\AuthTracker::stats();
+            } catch (\Throwable $e) {
+                $auth = null; // the tracking migration has not run on this server yet: keep the rest of the dashboard working
+            }
             $by = fn (string $k, string $v) => (int) ($auth[$k][$v] ?? 0);
-            foreach ([
+            foreach ($auth ? [
                 ['Google accounts', $auth['linked']['google'], 'fab fa-google', 'secondary'],
                 ['Apple accounts', $auth['linked']['apple'], 'fab fa-apple', 'dark'],
                 ['Last login: Android', $by('by_last_login_platform', 'android'), 'fab fa-android', 'success'],
                 ['Last login: iOS', $by('by_last_login_platform', 'ios'), 'fab fa-apple', 'info'],
                 ['Active 7d: Android', $by('active_7d_by_platform', 'android'), 'fab fa-android', 'success'],
                 ['Active 7d: iOS', $by('active_7d_by_platform', 'ios'), 'fab fa-apple', 'info'],
-            ] as [$label, $value, $icon, $color]) {
+            ] : [] as [$label, $value, $icon, $color]) {
                 $stats[] = ['label' => $label, 'value' => $value, 'icon' => $icon, 'color' => $color, 'link' => route('users.index')];
             }
 

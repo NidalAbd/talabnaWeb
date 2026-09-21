@@ -137,6 +137,18 @@ class BlockUserTest extends TestCase
         $this->getJson('/api/conversations')->assertOk()->assertJsonCount(1, 'data');
     }
 
+    public function test_feeds_and_chat_keep_working_before_the_block_migration_has_run(): void
+    {
+        $post = $this->makePost($this->friend);
+        DB::statement('DROP TABLE user_blocks');
+        Blocks::forget();
+
+        Passport::actingAs($this->me);
+        $this->assertSame([$post], ServicePost::pluck('id')->all());          // scope falls back to "nothing blocked"
+        $this->postJson('/api/conversations', ['recipient_id' => $this->friend->id])->assertStatus(201);
+        $this->getJson('/api/conversations')->assertOk()->assertJsonCount(1, 'data');
+    }
+
     // ── helpers ─────────────────────────────────────────────────────────
 
     private function makeUser(string $name): User
