@@ -557,10 +557,26 @@ class UserController extends Controller
     }
 
 
+    private function profileFieldError(string $field, string $type, string $en, string $ar): JsonResponse
+    {
+        return response()->json([
+            'status' => 'error',
+            'error_type' => $type,
+            'field' => $field,
+            'message' => json_encode(['en' => $en, 'ar' => $ar]),
+        ], 422);
+    }
+
     public function update(Request $request, User $user): JsonResponse
     {
         Log::info('update user : ' . $user);
         Log::info('Request raw data: ', $request->all());
+
+        // A profile can only be edited by its owner (or an admin/moderator).
+        $actor = $request->user();
+        if (! $actor || ($actor->id !== $user->id && ! $actor->hasRole('admin') && ! $actor->hasRole('moderator'))) {
+            return response()->json(['status' => 'error', 'message' => 'You can only edit your own profile.'], 403);
+        }
 
         try {
             // Check if the phone numbers are already taken by another user
@@ -607,6 +623,7 @@ class UserController extends Controller
             // Validate the incoming request
             $validatedData = $request->validate([
                 'user_name' => 'nullable|string|max:255',
+                'name' => 'nullable|string|min:2|max:255',
                 'gender' => 'nullable|string|max:255',
                 'country' => 'nullable',
                 'city' => 'nullable',
@@ -620,6 +637,24 @@ class UserController extends Controller
 
             Log::info('Validated data: ', $validatedData);
 
+            // A CHANGED username must be 3-30 letters/digits/dots/underscores and unique. An unchanged one is left
+            // alone so accounts created earlier with other formats can still save their other details.
+            if (isset($validatedData['user_name']) && $validatedData['user_name'] !== $user->user_name) {
+                $newUserName = $validatedData['user_name'];
+                if (! preg_match('/^[A-Za-z0-9._]{3,30}$/', $newUserName)) {
+                    return $this->profileFieldError('user_name', 'validation',
+                        'Username must be 3-30 characters: letters, numbers, dots or underscores.',
+                        'اسم المستخدم من 3 إلى 30 حرفًا: أحرف إنجليزية أو أرقام أو نقطة أو شرطة سفلية.');
+                }
+                if (User::where('user_name', $newUserName)->where('id', '!=', $user->id)->exists()) {
+                    return $this->profileFieldError('user_name', 'unique_constraint',
+                        'This username is already taken.', 'اسم المستخدم هذا مستخدم بالفعل.');
+                }
+            }
+
+            if (isset($validatedData['name'])) {
+                $user->name = trim($validatedData['name']);
+            }
             $user->user_name = $validatedData['user_name'] ?? $user->user_name;
             $user->gender = $validatedData['gender'] ?? $user->gender;
             $user->fcm_token = $validatedData['device_token'] ?? $user->fcm_token;
