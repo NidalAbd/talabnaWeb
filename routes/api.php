@@ -264,6 +264,7 @@ Route::middleware(['auth:api'])->group(function () {
     // Service Post Routes
     Route::get('service_posts/users/{user}/favorite', [ServicePostController::class, 'servicePostFavorite']);
     Route::get('service_posts/user/{user}', [ServicePostController::class, 'servicePostUserId']);
+    Route::get('feed', [App\Http\Controllers\Api\FeedController::class, 'all'])->middleware('throttle:120,1');
     Route::get('service_posts/categories/{categories}', [ServicePostController::class, 'servicePostCategory']);
     Route::get('service_posts/reels', [ServicePostController::class, 'showFromReel']);
     Route::apiResource('service_posts',ServicePostController::class);
