@@ -282,6 +282,10 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('service_posts/incrementView/{service_posts}', [ServicePostController::class, 'viewAdd']);
     Route::post('reports/reported/{reported}/reportedId/{reportedId}/reason/{reason}', [App\Http\Controllers\Api\ReportController::class, 'store']);
 
+    // AI helpers for post creation, paid in points (price from the ai_features table)
+    Route::get('ai/pricing', [App\Http\Controllers\Api\AiController::class, 'pricing']);
+    Route::post('ai/enhance-text', [App\Http\Controllers\Api\AiController::class, 'enhanceText'])->middleware('throttle:20,1');
+
     // Block list (App Store guideline 1.2)
     Route::get('blocked-users', [App\Http\Controllers\Api\BlockController::class, 'index']);
     Route::post('users/{user}/block', [App\Http\Controllers\Api\BlockController::class, 'store']);
