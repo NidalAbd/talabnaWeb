@@ -171,6 +171,41 @@ class AiTextService
         return mb_substr(trim((string) $text, " \t\n\r\0\x0B\"'"), 0, $max);
     }
 
+    /**
+     * Writes ONE detailed prompt for the image/video model from everything the ad says (title, description - including
+     * text the AI already improved - and the form details), keeping the user's own words as the priority. If this
+     * step fails for any reason the user's own prompt is used, so the paid action never fails because of it.
+     *
+     * @param 'image'|'video' $kind
+     * @param array<string,mixed> $context
+     */
+    public function mediaPrompt(string $kind, string $userPrompt, string $title, string $description, array $context = []): string
+    {
+        $isVideo = $kind === 'video';
+        $system = 'You write ONE detailed prompt for an AI '.($isVideo ? 'video' : 'image').' generator that will illustrate a classified ad. '
+            .'Use the ad title, description and form details to decide WHAT to show: the actual item, service or place the ad is about '
+            .'(for a Request, show the thing the person is looking for; for a job, the work setting). The user\'s own request, when given, has priority. '
+            .'Describe the subject, its setting, lighting and camera angle in a realistic, natural, well-lit marketplace style. '
+            .($isVideo ? 'Add one simple camera move (such as a slow orbit or a gentle push-in) and subtle natural motion; the clip is 4 seconds. ' : '')
+            .'Do not invent specifics the ad does not state (brand, model, colour, year): stay neutral where unknown. '
+            .'No text, letters, logos, watermarks, or close-up faces. Write it in English, at most 380 characters. '
+            .'Answer with JSON only: {"prompt": string}.';
+
+        $user = $this->contextBlock($context)
+            .'Title: '.mb_substr($title, 0, 200)."\n"
+            .'Description: '.mb_substr($description, 0, 1200)."\n"
+            .'User\'s request for the '.($isVideo ? 'video' : 'picture').': '.mb_substr($userPrompt, 0, 500);
+
+        try {
+            $out = $this->json($system, $user, 220);
+            $prompt = trim((string) ($out['prompt'] ?? ''));
+
+            return mb_strlen($prompt) >= 20 ? mb_substr($prompt, 0, 600) : $userPrompt;
+        } catch (\Throwable) {
+            return $userPrompt;
+        }
+    }
+
     /** What the post is for, so the text is written from the right side (seller vs buyer). */
     private function voice(array $context, bool $categoryOfItem = false, bool $priceHint = false): string
     {

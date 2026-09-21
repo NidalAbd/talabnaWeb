@@ -161,16 +161,43 @@ class AiController extends Controller
     /** POST /api/ai/generate-image - waits for the picture (about a minute at most). */
     public function generateImage(Request $request): JsonResponse
     {
-        $d = $request->validate(['request_id' => 'required|uuid', 'prompt' => 'required|string|min:5|max:800']);
+        $d = $request->validate(['request_id' => 'required|uuid', 'prompt' => 'required|string|min:5|max:800',
+            'title' => 'nullable|string|max:200',
+            'description' => 'nullable|string|max:5000',
+            'context' => 'nullable|array',
+            'context.post_type' => 'nullable|string|max:20',
+            'context.category' => 'nullable|string|max:120',
+            'context.sub_category' => 'nullable|string|max:120',
+            'context.price' => 'nullable|numeric',
+            'context.currency' => 'nullable|string|max:10',
+            'context.city' => 'nullable|string|max:120',
+            'context.country' => 'nullable|string|max:120',
+        ]);
 
         return $this->run($request, 'generate_image', $d['request_id'], ['prompt' => $d['prompt'], 'provider' => 'openai'],
-            fn (AiRequest $r) => [[], $this->media->generateImage($d['prompt'], $r->uuid)], usesMedia: true);
+            function (AiRequest $r) use ($d) {
+                $final = $this->text->mediaPrompt('image', $d['prompt'], $d['title'] ?? '', $d['description'] ?? '', $this->context($d));
+                $this->recordFinalPrompt($r, $d['prompt'], $final);
+
+                return [[], $this->media->generateImage($final, $r->uuid)];
+            }, usesMedia: true);
     }
 
     /** POST /api/ai/generate-video - starts a job; the app polls GET /ai/requests/{id}. */
     public function generateVideo(Request $request): JsonResponse
     {
-        $d = $request->validate(['request_id' => 'required|uuid', 'prompt' => 'required|string|min:5|max:800']);
+        $d = $request->validate(['request_id' => 'required|uuid', 'prompt' => 'required|string|min:5|max:800',
+            'title' => 'nullable|string|max:200',
+            'description' => 'nullable|string|max:5000',
+            'context' => 'nullable|array',
+            'context.post_type' => 'nullable|string|max:20',
+            'context.category' => 'nullable|string|max:120',
+            'context.sub_category' => 'nullable|string|max:120',
+            'context.price' => 'nullable|numeric',
+            'context.currency' => 'nullable|string|max:10',
+            'context.city' => 'nullable|string|max:120',
+            'context.country' => 'nullable|string|max:120',
+        ]);
         $user = $request->user();
 
         if ($early = $this->precheck($user->id, 'generate_video', true)) {
@@ -188,7 +215,9 @@ class AiController extends Controller
         }
 
         try {
-            $ai->update(['provider_job_id' => $this->media->startVideo($d['prompt'])]);
+            $final = $this->text->mediaPrompt('video', $d['prompt'], $d['title'] ?? '', $d['description'] ?? '', $this->context($d));
+            $this->recordFinalPrompt($ai, $d['prompt'], $final);
+            $ai->update(['provider_job_id' => $this->media->startVideo($final)]);
         } catch (AiProviderException $e) {
             $this->ledger->fail($ai, $e->errorCode, $e->getMessage());
         } catch (\Throwable $e) {
@@ -235,6 +264,12 @@ class AiController extends Controller
     }
 
     // ── plumbing ────────────────────────────────────────────────────────────
+
+    /** Keep both what the user asked for and what was actually sent to the model, for abuse review. */
+    private function recordFinalPrompt(AiRequest $ai, string $userPrompt, string $final): void
+    {
+        $ai->update(['prompt' => $final === $userPrompt ? $userPrompt : "USER: {$userPrompt}\nSENT: {$final}"]);
+    }
 
     /** The form fields the app sent along; the old single `category` field still works. */
     private function context(array $d): array

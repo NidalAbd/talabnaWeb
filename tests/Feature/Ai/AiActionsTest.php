@@ -268,14 +268,14 @@ class AiActionsTest extends TestCase
 
     public function test_image_generation_charges_stores_the_file_and_serves_it_to_its_owner_only(): void
     {
-        $this->fake(['api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => $this->jpegB64()]]])]);
+        $this->fake($this->chat(['prompt' => 'A red bicycle leaning on a plain white wall, soft daylight, realistic marketplace photo, 3/4 angle']) + ['api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => $this->jpegB64()]]])]);
 
         $id = $this->id();
         $res = $this->postJson('/api/ai/generate-image', ['request_id' => $id, 'prompt' => 'a red bicycle leaning on a wall'])
             ->assertOk()->assertJsonPath('points_charged', 3)->assertJsonPath('file_type', 'image')->assertJsonPath('balance', 27);
         $this->assertStringEndsWith("/api/ai/requests/$id/file", $res->json('file_url'));
         Storage::disk('local')->assertExists("ai-results/$id.jpg");
-        Http::assertSent(fn ($r) => str_contains($r['prompt'], 'a red bicycle') && $r['model'] === 'gpt-image-1');
+        Http::assertSent(fn ($r) => $r->url() === 'https://api.openai.com/v1/images/generations' && str_contains($r['prompt'], 'red bicycle') && $r['model'] === 'gpt-image-1');
 
         $this->get("/api/ai/requests/$id/file")->assertOk()->assertHeader('Content-Type', 'image/jpeg');
 
@@ -286,7 +286,7 @@ class AiActionsTest extends TestCase
 
     public function test_a_blocked_image_prompt_is_refunded_with_a_clear_message(): void
     {
-        $this->fake(['api.openai.com/v1/images/generations' => Http::response(['error' => ['code' => 'moderation_blocked', 'message' => 'safety system']], 400)]);
+        $this->fake($this->chat(['prompt' => 'A scene that the safety system will refuse to draw, in detail']) + ['api.openai.com/v1/images/generations' => Http::response(['error' => ['code' => 'moderation_blocked', 'message' => 'safety system']], 400)]);
 
         $this->postJson('/api/ai/generate-image', ['request_id' => $this->id(), 'prompt' => 'something not allowed'])
             ->assertStatus(422)->assertJsonPath('code', 'blocked')->assertJsonPath('refunded', true);
@@ -297,7 +297,7 @@ class AiActionsTest extends TestCase
 
     public function test_an_image_answer_without_an_image_is_refunded(): void
     {
-        $this->fake(['api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => '']]])]);
+        $this->fake($this->chat(['prompt' => 'A red bicycle leaning on a plain white wall, soft daylight']) + ['api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => '']]])]);
 
         $this->postJson('/api/ai/generate-image', ['request_id' => $this->id(), 'prompt' => 'a red bicycle'])->assertStatus(422);
         $this->assertSame(30, $this->balance());
@@ -307,7 +307,7 @@ class AiActionsTest extends TestCase
 
     public function test_video_is_charged_at_start_and_delivered_when_the_job_completes(): void
     {
-        $this->fake([
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
             'api.openai.com/v1/videos/video_123/content' => Http::response(str_repeat('V', 5000), 200, ['Content-Type' => 'video/mp4']),
             'api.openai.com/v1/videos/video_123' => Http::sequence()
                 ->push(['id' => 'video_123', 'status' => 'in_progress'])
@@ -330,7 +330,7 @@ class AiActionsTest extends TestCase
 
     public function test_a_video_that_fails_at_the_provider_is_refunded_when_the_app_checks(): void
     {
-        $this->fake([
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
             'api.openai.com/v1/videos/video_9' => Http::response(['status' => 'failed', 'error' => ['code' => 'moderation_blocked']]),
             'api.openai.com/v1/videos' => Http::response(['id' => 'video_9']),
         ]);
@@ -344,7 +344,7 @@ class AiActionsTest extends TestCase
 
     public function test_a_video_that_cannot_be_started_is_refunded_immediately(): void
     {
-        $this->fake(['api.openai.com/v1/videos' => Http::response(['error' => ['message' => 'no access']], 404)]);
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + ['api.openai.com/v1/videos' => Http::response(['error' => ['message' => 'no access']], 404)]);
 
         $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'a bicycle rotating slowly'])
             ->assertStatus(502)->assertJsonPath('refunded', true)->assertJsonPath('code', 'provider_no_access');
@@ -353,7 +353,7 @@ class AiActionsTest extends TestCase
 
     public function test_an_abandoned_video_is_refunded_by_the_scheduled_settler_even_if_the_app_never_returns(): void
     {
-        $this->fake([
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
             'api.openai.com/v1/videos/video_7' => Http::response(['status' => 'in_progress']),
             'api.openai.com/v1/videos' => Http::response(['id' => 'video_7']),
         ]);
@@ -388,7 +388,7 @@ class AiActionsTest extends TestCase
 
     public function test_only_one_video_can_be_in_flight_per_user(): void
     {
-        $this->fake(['api.openai.com/v1/videos' => Http::response(['id' => 'video_1'])]);
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + ['api.openai.com/v1/videos' => Http::response(['id' => 'video_1'])]);
         $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'a bicycle rotating slowly'])->assertStatus(202);
 
         $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'another bicycle clip please'])->assertStatus(429);
@@ -570,5 +570,68 @@ class AiActionsTest extends TestCase
         $this->fake($this->chat(['low' => 100, 'typical' => 200, 'high' => 300, 'note' => 'Rough.']));
         $this->postJson('/api/ai/suggest-price', ['request_id' => $this->id(), 'title' => 'Need a bike', 'currency' => 'EGP', 'context' => ['post_type' => 'طلب', 'category' => 'Bikes']])->assertOk();
         Http::assertSent(fn ($r) => str_contains($r['messages'][0]['content'], 'budget') && str_contains($r['messages'][1]['content'], 'Category: Bikes'));
+    }
+
+    // ── media prompts are written from the whole ad ──────────────────────
+
+    public function test_the_image_prompt_is_written_from_title_description_and_form_details_not_the_title_alone(): void
+    {
+        $this->fake($this->chat(['prompt' => 'A clean silver Toyota Corolla sedan parked on a quiet street, soft daylight, realistic marketplace photo']) + [
+            'api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => $this->jpegB64()]]]),
+        ]);
+
+        $id = $this->id();
+        $this->postJson('/api/ai/generate-image', [
+            'request_id' => $id, 'prompt' => 'Toyota Corolla 2018',
+            'title' => 'Toyota Corolla 2018', 'description' => 'Family sedan, single owner, only 90,000 km, clean inside and out.',
+            'context' => ['post_type' => 'عرض', 'category' => 'Cars', 'sub_category' => 'Sedan'],
+        ])->assertOk();
+
+        // 1) the prompt writer saw the description and the form details
+        Http::assertSent(function ($r) {
+            if ($r->url() !== 'https://api.openai.com/v1/chat/completions') {
+                return false;
+            }
+            $user = $r['messages'][1]['content'];
+
+            return str_contains($user, 'Description: Family sedan, single owner, only 90,000 km')
+                && str_contains($user, 'Category: Cars > Sedan') && str_contains($user, 'Post type: offer')
+                && str_contains($r['messages'][0]['content'], 'has priority');
+        });
+        // 2) the image model got the written prompt, not just the title
+        Http::assertSent(fn ($r) => $r->url() === 'https://api.openai.com/v1/images/generations' && str_contains($r['prompt'], 'silver Toyota Corolla sedan parked on a quiet street'));
+        // 3) both are kept for review
+        $stored = AiRequest::where('uuid', $id)->value('prompt');
+        $this->assertStringContainsString('USER: Toyota Corolla 2018', $stored);
+        $this->assertStringContainsString('SENT: A clean silver Toyota Corolla sedan', $stored);
+    }
+
+    public function test_a_request_post_illustrates_the_thing_wanted_and_a_video_asks_for_a_camera_move(): void
+    {
+        $this->fake($this->chat(['prompt' => 'A used mountain bike on a plain background, slow orbit, soft light, natural motion']) + [
+            'api.openai.com/v1/videos' => Http::response(['id' => 'video_r']),
+        ]);
+
+        $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'looking for a used bike', 'title' => 'Need a bike', 'description' => 'Want a used mountain bike, any brand.', 'context' => ['post_type' => 'طلب']])->assertStatus(202);
+
+        Http::assertSent(fn ($r) => $r->url() === 'https://api.openai.com/v1/chat/completions'
+            && str_contains($r['messages'][0]['content'], 'video generator') && str_contains($r['messages'][0]['content'], 'camera move')
+            && str_contains($r['messages'][0]['content'], 'for a Request, show the thing the person is looking for')
+            && str_contains($r['messages'][1]['content'], 'Post type: request'));
+        Http::assertSent(fn ($r) => $r->url() === 'https://api.openai.com/v1/videos' && str_contains(json_encode($r->data()), 'used mountain bike on a plain background'));
+    }
+
+    public function test_if_the_prompt_writer_fails_the_users_own_prompt_is_used_and_the_action_still_succeeds(): void
+    {
+        $this->fake([
+            'api.openai.com/v1/chat/completions' => Http::response(['error' => ['message' => 'down']], 500),
+            'api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => $this->jpegB64()]]]),
+        ]);
+
+        $this->postJson('/api/ai/generate-image', ['request_id' => $this->id(), 'prompt' => 'a red bicycle leaning on a wall', 'title' => 'Bike'])
+            ->assertOk()->assertJsonPath('points_charged', 3);
+
+        Http::assertSent(fn ($r) => $r->url() === 'https://api.openai.com/v1/images/generations' && str_contains($r['prompt'], 'a red bicycle leaning on a wall'));
+        $this->assertSame(27, $this->balance(), 'a failed helper step must not fail or refund the paid action');
     }
 }
