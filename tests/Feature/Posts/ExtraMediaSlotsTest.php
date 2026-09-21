@@ -32,7 +32,7 @@ class ExtraMediaSlotsTest extends TestCase
             $t->id();
             $t->unsignedBigInteger('from_user_id')->nullable();
             $t->unsignedBigInteger('to_user_id')->nullable();
-            $t->string('type');
+            $t->enum('type', ['purchase', 'transfer', 'admin_grant', 'used']); // production's real schema
             $t->integer('point');
             $t->string('status')->nullable();
             $t->text('metadata')->nullable();

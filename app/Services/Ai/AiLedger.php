@@ -117,15 +117,7 @@ class AiLedger
                 $refundId = null;
                 if ($row->points > 0) {
                     palservice_points::where('user_id', $row->user_id)->lockForUpdate()->first()?->increment('point', $row->points);
-                    $refundId = point_transactions::create([
-                        'from_user_id' => $row->user_id,
-                        'to_user_id' => $row->user_id,
-                        'type' => 'refund',
-                        'point' => $row->points,
-                        'status' => 'completed',
-                        'metadata' => json_encode(['reason' => 'ai_failed', 'feature' => $row->feature, 'request' => $row->uuid,
-                            'charge_transaction_id' => $row->charge_transaction_id, 'code' => $code]),
-                    ])->id;
+                    $refundId = $this->refundLedgerRow($row, $code)->id;
                 }
 
                 $row->update([
@@ -140,6 +132,25 @@ class AiLedger
             });
         } catch (\Throwable $e) {
             $this->refundFailed($request, $code, $e);
+        }
+    }
+
+    /**
+     * The ledger row that records the refund. It is a 'refund' row; if the database does not accept that type (an older
+     * schema), it is recorded as 'admin_grant' so the user still gets the points back, with the reason in the metadata.
+     * Returning the points must never depend on the label of a ledger row.
+     */
+    private function refundLedgerRow(AiRequest $row, string $code): point_transactions
+    {
+        $meta = ['reason' => 'ai_failed', 'feature' => $row->feature, 'request' => $row->uuid, 'charge_transaction_id' => $row->charge_transaction_id, 'code' => $code];
+        $base = ['from_user_id' => $row->user_id, 'to_user_id' => $row->user_id, 'point' => $row->points, 'status' => 'completed'];
+
+        try {
+            return point_transactions::create($base + ['type' => 'refund', 'metadata' => json_encode($meta)]);
+        } catch (\Illuminate\Database\QueryException $e) {
+            Log::warning('ai.refund.ledger_type_fallback', ['request' => $row->uuid, 'error' => $e->getMessage()]);
+
+            return point_transactions::create($base + ['type' => 'admin_grant', 'metadata' => json_encode($meta + ['ledger_type' => 'refund'])]);
         }
     }
 

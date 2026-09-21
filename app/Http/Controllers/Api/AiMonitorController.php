@@ -92,7 +92,7 @@ class AiMonitorController extends Controller
 
         $failedWithoutRefund = AiRequest::where('status', AiRequest::FAILED)->where('points', '>', 0)->whereNull('refund_transaction_id')->count();
 
-        $refundedTwice = DB::table('point_transactions')->where('type', 'refund')->where('metadata', 'like', '%"reason":"ai_failed"%')
+        $refundedTwice = DB::table('point_transactions')->where('metadata', 'like', '%"reason":"ai_failed"%')
             ->selectRaw('metadata')->get()
             ->map(fn ($r) => json_decode($r->metadata, true)['request'] ?? null)->filter()
             ->countBy()->filter(fn ($n) => $n > 1)->count();
