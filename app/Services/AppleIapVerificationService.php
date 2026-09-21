@@ -35,7 +35,7 @@ class AppleIapVerificationService
         if (empty($secret)) {
             Log::error('Apple IAP shared secret not configured');
 
-            return ['verified' => false, 'error' => 'App Store purchases are not configured'];
+            return ['verified' => false, 'error' => 'App Store purchases are not configured', 'transient' => true];
         }
 
         try {
@@ -47,13 +47,18 @@ class AppleIapVerificationService
         } catch (\Throwable $e) {
             Log::warning('Apple verifyReceipt request failed', ['error' => $e->getMessage()]);
 
-            return ['verified' => false, 'error' => 'Could not reach the App Store, try again'];
+            return ['verified' => false, 'error' => 'Could not reach the App Store, try again', 'transient' => true];
         }
 
         if (($data['status'] ?? -1) !== 0) {
-            Log::warning('Apple verifyReceipt non-zero status', ['status' => $data['status'] ?? null]);
+            $status = (int) ($data['status'] ?? -1);
+            Log::warning('Apple verifyReceipt non-zero status', ['status' => $status]);
 
-            return ['verified' => false, 'error' => 'Purchase verification failed'];
+            // 21005 (App Store unavailable), 21009 (internal data access error) and 2110x (Apple internal) are Apple's side and
+            // worth retrying. 21002-21004/21010 etc. mean this receipt is bad or the secret is wrong (a config fix, not the user's fault).
+            $transient = in_array($status, [21005, 21009], true) || ($status >= 21100 && $status <= 21199) || in_array($status, [21003, 21004], true);
+
+            return ['verified' => false, 'error' => 'Purchase verification failed', 'transient' => $transient];
         }
 
         // A receipt from another app must never credit ours.

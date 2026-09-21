@@ -444,7 +444,9 @@ class PointsController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => $verification['error'] ?? 'Purchase verification failed',
-            ], 422);
+                'pending' => (bool) ($verification['pending'] ?? false),
+                'retry' => (bool) ($verification['transient'] ?? false) || (bool) ($verification['pending'] ?? false),
+            ], $this->verificationStatus($verification));
         }
 
         try {
@@ -484,6 +486,19 @@ class PointsController extends Controller
      * Verify an App Store purchase and credit points (POST /api/points/apple-verify).
      * Idempotent on Apple's transaction id: replaying a receipt never credits twice.
      */
+    /**
+     * The status the app acts on: 202 = payment still pending, 503 = our side or the store's side failed (the app keeps the
+     * purchase open and retries, so a paid customer is never left without points), 422 = the purchase is definitively invalid.
+     */
+    private function verificationStatus(array $verification): int
+    {
+        if (! empty($verification['pending'])) {
+            return 202;
+        }
+
+        return ! empty($verification['transient']) ? 503 : 422;
+    }
+
     public function verifyApplePurchase(Request $request, AppleIapVerificationService $apple): JsonResponse
     {
         $data = $request->validate([
@@ -517,7 +532,11 @@ class PointsController extends Controller
                 'error' => $verification['error'] ?? 'unknown',
             ]);
 
-            return response()->json(['success' => false, 'message' => $verification['error'] ?? 'Purchase verification failed'], 422);
+            return response()->json([
+                'success' => false,
+                'message' => $verification['error'] ?? 'Purchase verification failed',
+                'retry' => (bool) ($verification['transient'] ?? false),
+            ], $this->verificationStatus($verification));
         }
 
         try {
