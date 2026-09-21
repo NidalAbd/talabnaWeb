@@ -15,6 +15,10 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // Paid AI: finish or refund unfinished requests every minute, so nobody stays charged for a failure.
+        $schedule->command('ai-points:settle')->everyMinute()->withoutOverlapping(5);
+        $schedule->command('ai-points:settle --prune')->dailyAt('04:30');
+
         // Run badge expiration check every 15 minutes
         // This ensures badges expire at approximately the same time they were created
         $schedule->command('badges:expire')->everyFifteenMinutes();

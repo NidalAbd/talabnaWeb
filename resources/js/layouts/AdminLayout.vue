@@ -162,6 +162,7 @@ const menuItems = [
   { title: 'Languages', icon: 'mdi-translate', to: { name: 'languages.index' }, value: 'languages' },
   { title: 'Translations', icon: 'mdi-file-document-edit', to: { name: 'translations.index' }, value: 'translations' },
   { title: 'Command Monitor', icon: 'mdi-console', to: { name: 'command_monitor.index' }, value: 'command_monitor' },
+  { title: 'AI Usage', icon: 'mdi-cash-refund', to: { name: 'ai_usage.index' }, value: 'ai_usage' },
   { title: 'AI Content', icon: 'mdi-robot', to: { name: 'ai_content.index' }, value: 'ai_content' },
 ]
 
