@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Services\Apple\SignedTransactionVerifier;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
@@ -17,6 +18,10 @@ use Illuminate\Support\Facades\Log;
  */
 class AppleIapVerificationService
 {
+    public function __construct(private SignedTransactionVerifier $jws)
+    {
+    }
+
     public const PRODUCTION_URL = 'https://buy.itunes.apple.com/verifyReceipt';
     public const SANDBOX_URL = 'https://sandbox.itunes.apple.com/verifyReceipt';
 
@@ -31,6 +36,12 @@ class AppleIapVerificationService
      */
     public function verifyPurchase(string $productId, string $receipt, string $claimedTransactionId): array
     {
+        // The iOS app (StoreKit 2, the plugin default) sends the signed transaction (a JWS). It is verified against Apple's
+        // root certificate: no shared secret, no call to Apple. A legacy base64 receipt still goes through verifyReceipt below.
+        if (SignedTransactionVerifier::looksLikeJws($receipt)) {
+            return $this->verifySignedTransaction($productId, $receipt, $claimedTransactionId);
+        }
+
         $secret = config('services.apple_iap.shared_secret');
         if (empty($secret)) {
             Log::error('Apple IAP shared secret not configured');
@@ -80,6 +91,24 @@ class AppleIapVerificationService
         }
 
         return ['verified' => false, 'error' => 'Purchase not found in receipt'];
+    }
+
+    /** @return array{verified:bool, transaction_id?:string, error?:string, transient?:bool} */
+    private function verifySignedTransaction(string $productId, string $jws, string $claimedTransactionId): array
+    {
+        $result = $this->jws->verify($jws);
+        if (! $result['ok']) {
+            Log::warning('Apple signed transaction rejected', ['error' => $result['error'] ?? null]);
+
+            return ['verified' => false, 'error' => 'Purchase verification failed', 'transient' => false];
+        }
+
+        $error = $this->jws->checkTransaction($result['payload'], (string) config('services.apple_iap.bundle_id', 'com.talabna.talabna'), $productId, $claimedTransactionId);
+        if ($error !== null) {
+            return ['verified' => false, 'error' => $error, 'transient' => false];
+        }
+
+        return ['verified' => true, 'transaction_id' => (string) $result['payload']['transactionId']];
     }
 
     private function post(string $url, array $payload): array
