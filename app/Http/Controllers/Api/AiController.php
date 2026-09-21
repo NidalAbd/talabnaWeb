@@ -63,13 +63,21 @@ class AiController extends Controller
             'description' => 'nullable|string|max:5000',
             'language' => 'nullable|string|max:10',
             'category' => 'nullable|string|max:120',
+            'context' => 'nullable|array',
+            'context.post_type' => 'nullable|string|max:20',
+            'context.category' => 'nullable|string|max:120',
+            'context.sub_category' => 'nullable|string|max:120',
+            'context.price' => 'nullable|numeric',
+            'context.currency' => 'nullable|string|max:10',
+            'context.city' => 'nullable|string|max:120',
+            'context.country' => 'nullable|string|max:120',
         ]);
         if (trim(($d['title'] ?? '').($d['description'] ?? '')) === '') {
             return response()->json(['error' => 'Write a title or description first.'], 422);
         }
 
         return $this->run($request, 'enhance_post', $d['request_id'], [],
-            fn () => [$this->text->enhancePost($d['title'] ?? '', $d['description'] ?? '', $d['language'] ?? '', $d['category'] ?? null), null]);
+            fn () => [$this->text->enhancePost($d['title'] ?? '', $d['description'] ?? '', $d['language'] ?? '', $this->context($d)), null]);
     }
 
     /** POST /api/ai/translate-post - translate title and description together. */
@@ -81,13 +89,21 @@ class AiController extends Controller
             'description' => 'nullable|string|max:5000',
             'source_language' => 'required|string|max:10',
             'target_language' => 'required|string|max:10|different:source_language',
+            'context' => 'nullable|array',
+            'context.post_type' => 'nullable|string|max:20',
+            'context.category' => 'nullable|string|max:120',
+            'context.sub_category' => 'nullable|string|max:120',
+            'context.price' => 'nullable|numeric',
+            'context.currency' => 'nullable|string|max:10',
+            'context.city' => 'nullable|string|max:120',
+            'context.country' => 'nullable|string|max:120',
         ]);
         if (trim(($d['title'] ?? '').($d['description'] ?? '')) === '') {
             return response()->json(['error' => 'Write a title or description first.'], 422);
         }
 
         return $this->run($request, 'translate_post', $d['request_id'], [],
-            fn () => [$this->text->translatePost($d['title'] ?? '', $d['description'] ?? '', $d['source_language'], $d['target_language']), null]);
+            fn () => [$this->text->translatePost($d['title'] ?? '', $d['description'] ?? '', $d['source_language'], $d['target_language'], $this->context($d)), null]);
     }
 
     /** POST /api/ai/suggest-category */
@@ -98,13 +114,21 @@ class AiController extends Controller
             'title' => 'nullable|string|max:200',
             'description' => 'nullable|string|max:5000',
             'job' => 'nullable|boolean',
+            'context' => 'nullable|array',
+            'context.post_type' => 'nullable|string|max:20',
+            'context.category' => 'nullable|string|max:120',
+            'context.sub_category' => 'nullable|string|max:120',
+            'context.price' => 'nullable|numeric',
+            'context.currency' => 'nullable|string|max:10',
+            'context.city' => 'nullable|string|max:120',
+            'context.country' => 'nullable|string|max:120',
         ]);
         if (trim(($d['title'] ?? '').($d['description'] ?? '')) === '') {
             return response()->json(['error' => 'Write a title or description first.'], 422);
         }
 
         return $this->run($request, 'suggest_category', $d['request_id'], [],
-            fn () => [$this->text->suggestCategory($d['title'] ?? '', $d['description'] ?? '', (bool) ($d['job'] ?? false)), null]);
+            fn () => [$this->text->suggestCategory($d['title'] ?? '', $d['description'] ?? '', (bool) ($d['job'] ?? false), $this->context($d)), null]);
     }
 
     /** POST /api/ai/suggest-price */
@@ -117,13 +141,21 @@ class AiController extends Controller
             'category' => 'nullable|string|max:120',
             'currency' => 'required|string|max:10',
             'language' => 'nullable|string|max:10',
+            'context' => 'nullable|array',
+            'context.post_type' => 'nullable|string|max:20',
+            'context.category' => 'nullable|string|max:120',
+            'context.sub_category' => 'nullable|string|max:120',
+            'context.price' => 'nullable|numeric',
+            'context.currency' => 'nullable|string|max:10',
+            'context.city' => 'nullable|string|max:120',
+            'context.country' => 'nullable|string|max:120',
         ]);
         if (trim(($d['title'] ?? '').($d['description'] ?? '')) === '') {
             return response()->json(['error' => 'Write a title or description first.'], 422);
         }
 
         return $this->run($request, 'suggest_price', $d['request_id'], [],
-            fn () => [$this->text->suggestPrice($d['title'] ?? '', $d['description'] ?? '', $d['category'] ?? null, $d['currency'], $d['language'] ?? null), null]);
+            fn () => [$this->text->suggestPrice($d['title'] ?? '', $d['description'] ?? '', $d['category'] ?? ($d['context']['category'] ?? null), $d['currency'], $d['language'] ?? null, $this->context($d)), null]);
     }
 
     /** POST /api/ai/generate-image - waits for the picture (about a minute at most). */
@@ -203,6 +235,17 @@ class AiController extends Controller
     }
 
     // ── plumbing ────────────────────────────────────────────────────────────
+
+    /** The form fields the app sent along; the old single `category` field still works. */
+    private function context(array $d): array
+    {
+        $ctx = $d['context'] ?? [];
+        if (! empty($d['category']) && empty($ctx['category'])) {
+            $ctx['category'] = $d['category'];
+        }
+
+        return $ctx;
+    }
 
     /**
      * @param callable(AiRequest):array{0:array,1:?string} $work returns [result, storedFilePath]
