@@ -185,10 +185,12 @@ class AiTextService
         $system = 'You write ONE detailed prompt for an AI '.($isVideo ? 'video' : 'image').' generator that will illustrate a classified ad. '
             .'Use the ad title, description and form details to decide WHAT to show: the actual item, service or place the ad is about '
             .'(for a Request, show the thing the person is looking for; for a job, the work setting). The user\'s own request, when given, has priority. '
-            .'Describe the subject, its setting, lighting and camera angle in a realistic, natural, well-lit marketplace style. '
+            .'Show ONLY the item or service itself, in a simple neutral setting (a plain background or a simple everyday setting that fits it), '
+            .'in a realistic, natural, well-lit marketplace style. Describe the subject, lighting and camera angle. '
             .($isVideo ? 'Add one simple camera move (such as a slow orbit or a gentle push-in) and subtle natural motion; the clip is 4 seconds. ' : '')
-            .'Do not invent specifics the ad does not state (brand, model, colour, year): stay neutral where unknown. '
-            .'No text, letters, logos, watermarks, or close-up faces. Write it in English, at most 380 characters. '
+            .'STRICT: do not add anything the ad does not state: no colours, brands, models, years, extra objects, crowds, shoppers, other people, '
+            .'signs or landmarks. If the colour or model is unknown, keep it neutral and unspecified. The location (city/country) is only context, '
+            .'never scenery. No text, letters, logos, watermarks, or close-up faces. Write it in English, at most 380 characters. '
             .'Answer with JSON only: {"prompt": string}.';
 
         $user = $this->contextBlock($context)

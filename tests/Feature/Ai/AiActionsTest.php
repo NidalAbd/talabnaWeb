@@ -606,6 +606,27 @@ class AiActionsTest extends TestCase
         $this->assertStringContainsString('SENT: A clean silver Toyota Corolla sedan', $stored);
     }
 
+    public function test_the_prompt_writer_is_told_not_to_invent_colours_scenery_or_people(): void
+    {
+        $this->fake($this->chat(['prompt' => 'A car parked on a plain neutral background, soft daylight, realistic marketplace photo']) + [
+            'api.openai.com/v1/images/generations' => Http::response(['data' => [['b64_json' => $this->jpegB64()]]]),
+        ]);
+
+        $this->postJson('/api/ai/generate-image', ['request_id' => $this->id(), 'prompt' => 'Toyota Corolla', 'title' => 'Toyota Corolla', 'context' => ['city' => 'Cairo']])->assertOk();
+
+        Http::assertSent(function ($r) {
+            if ($r->url() !== 'https://api.openai.com/v1/chat/completions') {
+                return false;
+            }
+            $system = $r['messages'][0]['content'];
+
+            return str_contains($system, 'Show ONLY the item')
+                && str_contains($system, 'no colours, brands, models')
+                && str_contains($system, 'crowds, shoppers, other people')
+                && str_contains($system, 'never scenery');
+        });
+    }
+
     public function test_a_request_post_illustrates_the_thing_wanted_and_a_video_asks_for_a_camera_move(): void
     {
         $this->fake($this->chat(['prompt' => 'A used mountain bike on a plain background, slow orbit, soft light, natural motion']) + [
