@@ -5,7 +5,7 @@
         <div class="card shadow-lg border-0">
             <div class="card-body p-5">
                 <h2 class="text-center mb-4 text-primary fw-bold">Terms of Service</h2>
-                <p class="text-muted text-center">Last Updated: {{ date('F d, Y') }}</p>
+                <p class="text-muted text-center">Last Updated: October 2, 2026</p>
 
                 <div class="border-bottom mb-4"></div>
 
@@ -76,7 +76,7 @@
                 <h4 class="fw-bold text-secondary mt-4">14. Contact Us</h4>
                 <p>If you have any questions about these Terms, please contact us:</p>
                 <ul class="list-unstyled">
-                    <li>📧 Email: <a href="mailto:talbna@talbna.cloud" class="text-primary">talbna@talbna.cloud</a></li>
+                    <li>📧 Email: <a href="mailto:support@talbna.cloud" class="text-primary">support@talbna.cloud</a></li>
                     <li>🌍 Website: <a href="https://talbna.cloud/policy" class="text-primary">https://talbna.cloud/policy</a></li>
                 </ul>
 

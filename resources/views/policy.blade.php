@@ -5,7 +5,7 @@
         <div class="card shadow-lg border-0">
             <div class="card-body p-5">
                 <h2 class="text-center mb-4 text-primary fw-bold">Child Safety Standards Policy</h2>
-                <p class="text-muted text-center">Last Updated: {{ date('F d, Y') }}</p>
+                <p class="text-muted text-center">Last Updated: October 2, 2026</p>
 
                 <div class="border-bottom mb-4"></div>
 
@@ -30,7 +30,7 @@
                 <h4 class="fw-bold text-secondary mt-4">5. Contact Information</h4>
                 <p>If you have any concerns about child safety, please reach out to our support team:</p>
                 <ul class="list-unstyled">
-                    <li>📧 Email: <a href="mailto:talbna@talbna.cloud" class="text-primary">talbna@talbna.cloud</a></li>
+                    <li>📧 Email: <a href="mailto:support@talbna.cloud" class="text-primary">support@talbna.cloud</a></li>
                     <li>🌍 Website: <a href="https://talbna.cloud/policy" class="text-primary">https://talbna.cloud/policy</a></li>
                 </ul>
 
