@@ -53,7 +53,7 @@
               <p>نحمي بياناتك باستخدام اتصالات مشفرة (HTTPS) وضوابط وصول على خوادمنا، ورمز PIN لتأكيد تحويلات النقاط. لا يوجد نظام آمن بالكامل، لذا يرجى عدم مشاركة كلمات المرور أو بيانات الدفع في الدردشات.</p>
 
               <h2>الأطفال</h2>
-              <p>طلبنا غير موجه للأطفال دون 13 عامًا، ولا نجمع معلوماتهم عن قصد. إذا اعتقدت أن طفلًا قدم لنا معلومات شخصية، تواصل معنا وسنحذفها.</p>
+              <p>يجب أن يكون عمر مستخدمي طلبنا 18 عامًا أو أكثر، ولا نجمع معلومات الأطفال عن قصد. إذا اعتقدت أن قاصرًا قدم لنا معلومات شخصية، تواصل معنا وسنحذفها.</p>
 
               <h2>خياراتك</h2>
               <ul>
@@ -109,7 +109,7 @@
               <p>We protect your data with encrypted connections (HTTPS), access controls on our servers, and a PIN to confirm points transfers. No system is perfectly secure, so please do not share passwords or payment details in chats.</p>
 
               <h2>Children</h2>
-              <p>Talabna is not intended for children under 13, and we do not knowingly collect information from them. If you believe a child has given us personal information, contact us and we will delete it.</p>
+              <p>You must be 18 or older to use Talabna, and we do not knowingly collect information from children. If you believe a minor has given us personal information, contact us and we will delete it.</p>
 
               <h2>Your Choices</h2>
               <ul>

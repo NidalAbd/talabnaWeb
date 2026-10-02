@@ -3,7 +3,7 @@
     <section class="hero-gradient py-12">
       <div class="container text-center">
         <h1 class="text-h3 font-weight-bold text-white">{{ t('terms.title') }}</h1>
-        <p class="text-body-1 text-white mt-2" style="opacity:0.8">{{ t('terms.updated') }}</p>
+        <p class="text-body-1 text-white mt-2" style="opacity:0.8">{{ locale === 'ar' ? 'آخر تحديث: 2 أكتوبر 2026' : 'Last updated: October 2, 2026' }}</p>
       </div>
     </section>
 
@@ -32,12 +32,14 @@
                 <li>يحظر نشر إعلانات وهمية أو احتيالية</li>
                 <li>أنت المسؤول الوحيد عن محتوى إعلاناتك</li>
                 <li>يحق لنا حذف أي إعلان يخالف هذه الشروط</li>
+                <li>لا نتسامح إطلاقًا مع المحتوى المرفوض أو المستخدمين المسيئين. يمكنك الإبلاغ عن أي إعلان أو ريلز أو مستخدم وحظر أي مستخدم من داخل التطبيق، ونراجع البلاغات ونحذف المحتوى المخالف ونحظر المستخدمين المخالفين</li>
               </ul>
 
               <h2>نظام النقاط والشارات</h2>
               <ul>
                 <li>يمكنك شراء النقاط لترقية إعلاناتك بشارات مميزة</li>
-                <li>النقاط غير قابلة للاسترداد بعد الاستخدام</li>
+                <li>تتم عمليات الشراء داخل التطبيق عبر App Store أو Google Play، وتخضع طلبات استرداد المبالغ لسياسات المتجر</li>
+                <li>لا يمكن استرجاع النقاط بعد استخدامها داخل التطبيق</li>
                 <li>أسعار النقاط تختلف حسب الدولة</li>
                 <li>تحويل النقاط بين المستخدمين يخضع لحدود يومية</li>
               </ul>
@@ -73,12 +75,14 @@
                 <li>Posting fake or fraudulent listings is prohibited</li>
                 <li>You are solely responsible for the content of your listings</li>
                 <li>We reserve the right to remove any listing that violates these terms</li>
+                <li>We have zero tolerance for objectionable content or abusive users. You can report any listing, reel or user and block any user in the app; we review reports, remove content that breaks these terms and ban users who violate them</li>
               </ul>
 
               <h2>Points and Badges System</h2>
               <ul>
                 <li>You can purchase points to upgrade your listings with premium badges</li>
-                <li>Points are non-refundable after use</li>
+                <li>In-app purchases are made through the App Store or Google Play, and refund requests follow the store's own policies</li>
+                <li>Points cannot be returned once they have been used in the app</li>
                 <li>Point prices vary by country</li>
                 <li>Point transfers between users are subject to daily limits</li>
               </ul>
