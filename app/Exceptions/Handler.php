@@ -22,7 +22,11 @@ class Handler extends ExceptionHandler
      * @var array<int, class-string<\Throwable>>
      */
     protected $dontReport = [
-        //
+        // Passport's TokenGuard reports this for every request carrying an
+        // expired/revoked bearer token, then answers 401 normally — so it
+        // isn't a failure, just an old app session. It was the only ERROR in
+        // laravel.log (2026-10-02 review), drowning out real ones.
+        \League\OAuth2\Server\Exception\OAuthServerException::class,
     ];
 
     /**
