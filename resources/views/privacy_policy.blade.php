@@ -31,7 +31,7 @@
                     <li>Deliver chat messages and notify you about activity on your account and listings.</li>
                     <li>Credit purchased points and subscriptions and keep your points history.</li>
                     <li>Run the optional AI tools you choose to use, such as improving a description, translating a listing, suggesting a category or price, or generating an image.</li>
-                    <li>Prevent spam, fraud and content that breaks our rules.</li>
+                    <li>Prevent spam, fraud and content that breaks our rules, review content and users you report, and stop users you block from contacting you.</li>
                     <li>Answer your support requests and fix problems.</li>
                 </ul>
 
@@ -56,6 +56,7 @@
                 <h4 class="fw-bold text-secondary mt-4">8. Your Choices</h4>
                 <ul>
                     <li>Edit or delete your listings, reels and profile at any time in the app.</li>
+                    <li>Report a listing, reel or user, and block users you don't want to hear from; you can manage blocked users in Settings.</li>
                     <li>Turn location access and notifications on or off in your device settings.</li>
                     <li>Request a copy of your data or its deletion by contacting us.</li>
                 </ul>
