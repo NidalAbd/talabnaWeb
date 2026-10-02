@@ -7,6 +7,7 @@ use App\Models\AiFeature;
 use App\Models\AiRequest;
 use App\Models\palservice_points;
 use App\Models\point_transactions;
+use App\Services\SubscriptionService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
@@ -44,6 +45,16 @@ class AiLedger
                 }
                 $points = (int) $price->points_cost;
 
+                // Subscription allowances (2026-10-02: Basic users were still
+                // charged points for the AI images their plan includes).
+                $cover = $this->coverage($userId, $feature);
+                if ($cover !== null) {
+                    $points = 0;
+                    if ($cover['usage'] !== null) {
+                        app(SubscriptionService::class)->useFeature($userId, $cover['usage']);
+                    }
+                }
+
                 $balance = palservice_points::where('user_id', $userId)->lockForUpdate()->first();
                 $current = (int) ($balance?->point ?? 0);
                 if ($points > 0 && $current < $points) {
@@ -59,7 +70,8 @@ class AiLedger
                     'type' => 'used',
                     'point' => $points,
                     'status' => 'completed',
-                    'metadata' => json_encode(['reason' => 'ai', 'feature' => $feature, 'request' => $uuid]),
+                    'metadata' => json_encode(['reason' => 'ai', 'feature' => $feature, 'request' => $uuid]
+                        + ($cover !== null ? ['covered_by' => 'subscription', 'covered_usage' => $cover['usage']] : [])),
                 ]);
 
                 $request = AiRequest::create(array_merge([
@@ -81,6 +93,59 @@ class AiLedger
                 return $existing;
             }
             throw $e;
+        }
+    }
+
+    /**
+     * Features a subscription plan includes: feature key => [plan feature key, usage counter or null].
+     * A counter means a monthly allowance (ai_images_per_month); null means unlimited while the plan has it.
+     */
+    private const PLAN_COVERS = [
+        'generate_image' => ['ai_images_per_month', 'ai_images_used'],
+        'translate_post' => ['auto_translate_posts', null],
+    ];
+
+    /** ['usage' => ?string] when the user's active plan covers this feature now, else null. */
+    public function coverage(int $userId, string $feature): ?array
+    {
+        $map = self::PLAN_COVERS[$feature] ?? null;
+        if ($map === null) {
+            return null;
+        }
+        [$limitKey, $usageKey] = $map;
+        $subs = app(SubscriptionService::class);
+        $ok = $usageKey === null
+            ? $subs->hasFeature($userId, $limitKey)
+            : $subs->canUseFeature($userId, $limitKey, $usageKey);
+        return $ok ? ['usage' => $usageKey] : null;
+    }
+
+    /** Remaining plan uses of a feature (null = not covered, -1 = unlimited). */
+    public function remainingAllowance(int $userId, string $feature): ?int
+    {
+        $map = self::PLAN_COVERS[$feature] ?? null;
+        if ($map === null || $this->coverage($userId, $feature) === null) {
+            return null;
+        }
+        [$limitKey, $usageKey] = $map;
+        if ($usageKey === null) {
+            return -1;
+        }
+        $sub = app(SubscriptionService::class)->getActiveSubscription($userId);
+        $limit = (int) ($sub?->getFeature($limitKey, 0) ?? 0);
+        $used = (int) (($sub?->usage ?? [])[$usageKey] ?? 0);
+        return max(0, $limit - $used);
+    }
+
+    private function returnAllowance(AiRequest $row): void
+    {
+        if (! $row->charge_transaction_id) {
+            return;
+        }
+        $charge = point_transactions::find($row->charge_transaction_id);
+        $meta = json_decode((string) ($charge?->metadata ?? ''), true) ?: [];
+        if (($meta['covered_by'] ?? null) === 'subscription' && ! empty($meta['covered_usage'])) {
+            app(SubscriptionService::class)->useFeature($row->user_id, $meta['covered_usage'], -1);
         }
     }
 
@@ -113,6 +178,9 @@ class AiLedger
                 if (! $row || ! in_array($row->status, [AiRequest::PROCESSING, AiRequest::REFUND_FAILED], true)) {
                     return; // already succeeded or already refunded
                 }
+
+                // A plan-covered request gives its allowance back instead of points.
+                $this->returnAllowance($row);
 
                 $refundId = null;
                 if ($row->points > 0) {

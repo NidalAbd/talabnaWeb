@@ -45,9 +45,17 @@ class AiController extends Controller
         return response()->json([
             'version' => (int) optional($features->max('updated_at'))->timestamp,
             'confirm_from' => (int) config('ai.confirm_from', 3),
-            'features' => $features->mapWithKeys(fn (AiFeature $f) => [
-                $f->key => ['points' => $f->points_cost, 'enabled' => $f->enabled],
-            ]),
+            // 'points' is what THIS user pays now: 0 when their plan includes
+            // the feature ('included' = remaining uses, -1 = unlimited).
+            'features' => $features->mapWithKeys(function (AiFeature $f) use ($userId) {
+                $left = $this->ledger->remainingAllowance($userId, $f->key);
+                return [$f->key => [
+                    'points'      => $left !== null ? 0 : $f->points_cost,
+                    'base_points' => $f->points_cost,
+                    'enabled'     => $f->enabled,
+                    'included'    => $left,
+                ]];
+            }),
             'balance' => $this->ledger->balance($userId),
             'media_slots' => [
                 'free' => \App\Services\MediaSlots::free(),
