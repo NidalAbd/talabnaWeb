@@ -3,7 +3,7 @@
     <section class="hero-gradient py-12">
       <div class="container text-center">
         <h1 class="text-h3 font-weight-bold text-white">{{ t('privacy.title') }}</h1>
-        <p class="text-body-1 text-white mt-2" style="opacity:0.8">{{ t('privacy.updated') }}</p>
+        <p class="text-body-1 text-white mt-2" style="opacity:0.8">{{ locale === 'ar' ? 'آخر تحديث: 2 أكتوبر 2026' : 'Last updated: October 2, 2026' }}</p>
       </div>
     </section>
 
@@ -13,82 +13,114 @@
           <div class="card pa-8">
             <div class="policy-content" v-if="locale === 'ar'">
               <h2>مقدمة</h2>
-              <p>نحن في طلبنا نلتزم بحماية خصوصيتك وبياناتك الشخصية. توضح سياسة الخصوصية هذه كيفية جمع واستخدام وحماية معلوماتك عند استخدام منصتنا وتطبيقنا.</p>
+              <p>طلبنا سوق إلكتروني (تطبيق وموقع) يمكنك من خلاله نشر وتصفح إعلانات الوظائف والعقارات والسيارات والأجهزة والخدمات، ومشاركة مقاطع فيديو قصيرة (ريلز)، والدردشة مع المستخدمين الآخرين. توضح هذه السياسة المعلومات التي نجمعها، ولماذا نجمعها، ومع من نشاركها، ومدة احتفاظنا بها، والخيارات المتاحة لك.</p>
 
               <h2>المعلومات التي نجمعها</h2>
-              <p>نجمع الأنواع التالية من المعلومات:</p>
+              <p>نجمع فقط المعلومات اللازمة لتشغيل السوق:</p>
               <ul>
-                <li><strong>معلومات الحساب:</strong> الاسم، البريد الإلكتروني، رقم الهاتف، تاريخ الميلاد، والجنس عند إنشاء حسابك.</li>
-                <li><strong>معلومات الإعلانات:</strong> عناوين وأوصاف وصور الإعلانات التي تنشرها.</li>
-                <li><strong>معلومات الموقع:</strong> الدولة والمدينة لعرض المحتوى المناسب لمنطقتك.</li>
-                <li><strong>معلومات الجهاز:</strong> نوع الجهاز، نظام التشغيل، ومعرف الجهاز لإرسال الإشعارات.</li>
-                <li><strong>بيانات الاستخدام:</strong> كيفية تفاعلك مع المنصة لتحسين تجربتك.</li>
+                <li><strong>بيانات الحساب:</strong> الاسم والبريد الإلكتروني ورقم الهاتف وتاريخ الميلاد والجنس وصورة الملف الشخصي، ومعرّف تسجيل الدخول عبر Google أو Apple إذا استخدمته.</li>
+                <li><strong>الإعلانات والريلز:</strong> العناوين والأوصاف والأسعار والفئات والصور ومقاطع الفيديو التي تنشرها، وهي مرئية للمستخدمين الآخرين.</li>
+                <li><strong>الموقع:</strong> الدولة والمدينة والموقع الذي ترفقه بالإعلان، وموقع جهازك فقط عندما تسمح بذلك، لعرض الإعلانات القريبة منك.</li>
+                <li><strong>الرسائل:</strong> المحادثات التي تتبادلها مع المستخدمين الآخرين، ونحفظها ليتمكن الطرفان من قراءتها.</li>
+                <li><strong>النقاط والمشتريات:</strong> رصيد نقاطك وسجلها وتحويلات النقاط بين المستخدمين، وسجلات الشراء من App Store أو Google Play. لا نتلقى بيانات بطاقتك أبدًا.</li>
+                <li><strong>بيانات الجهاز:</strong> طراز الجهاز ونظام التشغيل وإصدار التطبيق وعنوان IP ورمز الإشعارات.</li>
               </ul>
 
               <h2>كيف نستخدم معلوماتك</h2>
               <ul>
-                <li>تقديم خدماتنا وتحسينها وتخصيصها</li>
-                <li>التواصل معك بشأن حسابك وإعلاناتك</li>
-                <li>إرسال إشعارات مهمة حول المنصة</li>
-                <li>ضمان أمان المنصة ومنع الاحتيال</li>
-                <li>الامتثال للمتطلبات القانونية</li>
+                <li>إنشاء حسابك وإدارته وتسجيل دخولك</li>
+                <li>نشر إعلاناتك ومقاطع الريلز وعرضها لمن يتصفح حسب الفئة أو الموقع</li>
+                <li>توصيل رسائل الدردشة وإشعارك بالنشاط على حسابك وإعلاناتك</li>
+                <li>إضافة النقاط والاشتراكات المشتراة وتنفيذ تحويلات النقاط والاحتفاظ بسجلها</li>
+                <li>تشغيل أدوات الذكاء الاصطناعي الاختيارية التي تختار استخدامها، مثل تحسين الوصف أو ترجمة الإعلان أو اقتراح الفئة أو السعر أو إنشاء صورة</li>
+                <li>منع الرسائل المزعجة والاحتيال والمحتوى المخالف لقواعدنا، ومراجعة المحتوى والمستخدمين الذين تبلّغ عنهم، ومنع المستخدمين الذين تحظرهم من التواصل معك</li>
+                <li>الرد على طلبات الدعم وحل المشكلات</li>
               </ul>
-
-              <h2>حماية البيانات</h2>
-              <p>نستخدم تدابير أمنية متقدمة لحماية بياناتك بما في ذلك التشفير والحماية بكلمة مرور ورمز PIN للتحويلات المالية.</p>
 
               <h2>مشاركة البيانات</h2>
-              <p>لا نبيع أو نؤجر بياناتك الشخصية لأطراف ثالثة. قد نشارك بيانات محدودة مع:</p>
+              <p>لا نبيع بياناتك الشخصية ولا نستخدمها لإعلانات جهات خارجية. نشاركها فقط في الحالات التالية:</p>
               <ul>
-                <li>مزودي الخدمات الذين يساعدوننا في تشغيل المنصة (مثل خدمات الدفع والاستضافة)</li>
-                <li>الجهات القانونية عند الطلب بموجب القانون</li>
+                <li><strong>المستخدمون الآخرون:</strong> إعلاناتك ومقاطع الريلز وملفك العام وأي بيانات تواصل تضيفها إلى الإعلان تكون مرئية للمستخدمين الآخرين.</li>
+                <li><strong>مزودو الخدمات:</strong> Google Firebase (الإشعارات)، وخرائط Google (الخرائط والموقع)، وGoogle وApple (تسجيل الدخول)، وApp Store وGoogle Play (المدفوعات)، وHostinger (الاستضافة).</li>
+                <li><strong>مزود الذكاء الاصطناعي:</strong> عند استخدامك لأداة ذكاء اصطناعي، يُرسل النص أو الصورة التي تقدمها إلى OpenAI فقط لإنتاج تلك النتيجة.</li>
+                <li><strong>أسباب قانونية:</strong> عندما يتطلب القانون ذلك، أو لحماية المستخدمين من الاحتيال أو الضرر.</li>
               </ul>
 
-              <h2>حقوقك</h2>
-              <p>يمكنك في أي وقت تعديل بياناتك الشخصية أو حذف حسابك أو طلب نسخة من بياناتك عن طريق التواصل معنا على support@talbna.cloud.</p>
+              <h2>الاحتفاظ بالبيانات وحذف الحساب</h2>
+              <p>نحتفظ بمعلوماتك طالما كان حسابك نشطًا. يمكنك حذف حسابك في أي وقت من التطبيق عبر <strong>الإعدادات ← حذف الحساب</strong>، أو بمراسلتنا. يؤدي حذف الحساب إلى إزالة ملفك الشخصي وإعلاناتك ومقاطع الريلز وسجل النقاط، باستثناء السجلات التي يلزمنا القانون بالاحتفاظ بها (مثل سجلات الشراء).</p>
+
+              <h2>حماية البيانات</h2>
+              <p>نحمي بياناتك باستخدام اتصالات مشفرة (HTTPS) وضوابط وصول على خوادمنا، ورمز PIN لتأكيد تحويلات النقاط. لا يوجد نظام آمن بالكامل، لذا يرجى عدم مشاركة كلمات المرور أو بيانات الدفع في الدردشات.</p>
+
+              <h2>الأطفال</h2>
+              <p>طلبنا غير موجه للأطفال دون 13 عامًا، ولا نجمع معلوماتهم عن قصد. إذا اعتقدت أن طفلًا قدم لنا معلومات شخصية، تواصل معنا وسنحذفها.</p>
+
+              <h2>خياراتك</h2>
+              <ul>
+                <li>تعديل أو حذف إعلاناتك ومقاطع الريلز وملفك الشخصي في أي وقت من التطبيق.</li>
+                <li>الإبلاغ عن إعلان أو ريلز أو مستخدم، وحظر المستخدمين؛ ويمكنك إدارة المستخدمين المحظورين من الإعدادات.</li>
+                <li>تشغيل أو إيقاف الوصول إلى الموقع والإشعارات من إعدادات جهازك.</li>
+                <li>طلب نسخة من بياناتك أو حذفها بالتواصل معنا.</li>
+              </ul>
 
               <h2>التواصل معنا</h2>
-              <p>لأي استفسارات حول سياسة الخصوصية، تواصل معنا على: support@talbna.cloud</p>
+              <p>لأي استفسار حول سياسة الخصوصية أو لطلب الاطلاع على بياناتك أو حذفها، تواصل معنا على: <a href="mailto:support@talbna.cloud">support@talbna.cloud</a></p>
             </div>
 
             <div class="policy-content" v-else>
               <h2>Introduction</h2>
-              <p>At Talabna, we are committed to protecting your privacy and personal data. This privacy policy explains how we collect, use, and protect your information when you use our platform and application.</p>
+              <p>Talabna is a marketplace app and website where you can post and browse listings for jobs, real estate, cars, devices and services, share short video reels, and chat with other users. This policy explains what information we collect, why we collect it, who we share it with, how long we keep it, and the choices you have.</p>
 
               <h2>Information We Collect</h2>
-              <p>We collect the following types of information:</p>
+              <p>We collect only the information needed to run the marketplace:</p>
               <ul>
-                <li><strong>Account Information:</strong> Name, email, phone number, date of birth, and gender when you create your account.</li>
-                <li><strong>Listing Information:</strong> Titles, descriptions, and photos of listings you publish.</li>
-                <li><strong>Location Information:</strong> Country and city to display relevant content for your area.</li>
-                <li><strong>Device Information:</strong> Device type, OS, and device ID for sending notifications.</li>
-                <li><strong>Usage Data:</strong> How you interact with the platform to improve your experience.</li>
+                <li><strong>Account data:</strong> name, email address, phone number, date of birth, gender, profile photo, and your Google or Apple sign-in identifier if you use one.</li>
+                <li><strong>Listings and reels:</strong> titles, descriptions, prices, categories, photos and videos you publish. These are visible to other users.</li>
+                <li><strong>Location:</strong> your country and city, the location you attach to a listing, and your device location only when you allow it, to show listings near you.</li>
+                <li><strong>Messages:</strong> chats you exchange with other users, stored so both sides can read them.</li>
+                <li><strong>Points and purchases:</strong> your points balance and history, points transfers between users, and App Store or Google Play purchase records. We never receive your card details.</li>
+                <li><strong>Device data:</strong> device model, operating system, app version, IP address and a push-notification token.</li>
               </ul>
 
               <h2>How We Use Your Information</h2>
               <ul>
-                <li>Provide, improve, and personalize our services</li>
-                <li>Communicate with you about your account and listings</li>
-                <li>Send important notifications about the platform</li>
-                <li>Ensure platform security and prevent fraud</li>
-                <li>Comply with legal requirements</li>
+                <li>Create and manage your account and sign you in</li>
+                <li>Publish your listings and reels and show them to people browsing by category or location</li>
+                <li>Deliver chat messages and notify you about activity on your account and listings</li>
+                <li>Credit purchased points and subscriptions, process points transfers, and keep your points history</li>
+                <li>Run the optional AI tools you choose to use, such as improving a description, translating a listing, suggesting a category or price, or generating an image</li>
+                <li>Prevent spam, fraud and content that breaks our rules, review content and users you report, and stop users you block from contacting you</li>
+                <li>Answer your support requests and fix problems</li>
               </ul>
-
-              <h2>Data Protection</h2>
-              <p>We use advanced security measures to protect your data including encryption, password protection, and PIN codes for financial transfers.</p>
 
               <h2>Data Sharing</h2>
-              <p>We do not sell or rent your personal data to third parties. We may share limited data with:</p>
+              <p>We do not sell your personal information and we do not use it for third-party advertising. We share it only in these cases:</p>
               <ul>
-                <li>Service providers who help us operate the platform (e.g., payment and hosting services)</li>
-                <li>Legal authorities when required by law</li>
+                <li><strong>Other users:</strong> your listings, reels, public profile and any contact details you add to a listing are visible to other users.</li>
+                <li><strong>Service providers:</strong> Google Firebase (notifications), Google Maps (maps and location), Google and Apple (sign-in), Apple App Store and Google Play (payments), and Hostinger (hosting).</li>
+                <li><strong>AI provider:</strong> when you use an AI tool, the text or image you submit is sent to OpenAI only to produce that result.</li>
+                <li><strong>Legal reasons:</strong> when the law requires it, or to protect users from fraud or harm.</li>
               </ul>
 
-              <h2>Your Rights</h2>
-              <p>You can at any time edit your personal data, delete your account, or request a copy of your data by contacting us at support@talbna.cloud.</p>
+              <h2>Data Retention and Account Deletion</h2>
+              <p>We keep your information while your account is active. You can delete your account at any time in the app from <strong>Settings → Delete Account</strong>, or by emailing us. Deleting your account removes your profile, listings, reels and points history, except records we must keep by law (for example purchase records).</p>
+
+              <h2>Data Protection</h2>
+              <p>We protect your data with encrypted connections (HTTPS), access controls on our servers, and a PIN to confirm points transfers. No system is perfectly secure, so please do not share passwords or payment details in chats.</p>
+
+              <h2>Children</h2>
+              <p>Talabna is not intended for children under 13, and we do not knowingly collect information from them. If you believe a child has given us personal information, contact us and we will delete it.</p>
+
+              <h2>Your Choices</h2>
+              <ul>
+                <li>Edit or delete your listings, reels and profile at any time in the app.</li>
+                <li>Report a listing, reel or user, and block users you don't want to hear from; you can manage blocked users in Settings.</li>
+                <li>Turn location access and notifications on or off in your device settings.</li>
+                <li>Request a copy of your data or its deletion by contacting us.</li>
+              </ul>
 
               <h2>Contact Us</h2>
-              <p>For any questions about this privacy policy, contact us at: support@talbna.cloud</p>
+              <p>For questions about this privacy policy, or to request access to or deletion of your data, contact us at: <a href="mailto:support@talbna.cloud">support@talbna.cloud</a></p>
             </div>
           </div>
         </div>
