@@ -24,6 +24,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('badges:expire')->everyFifteenMinutes();
         $schedule->command('purchase-attempts:sweep')->hourly()->withoutOverlapping();
         $schedule->command('purchase-attempts:remind')->everyThirtyMinutes()->withoutOverlapping();
+        // Background worker for pushes (QUEUE_CONNECTION=database): drains the
+        // queue each minute; --max-time keeps it under the cron interval.
+        $schedule->command('queue:work --stop-when-empty --max-time=55 --tries=3')->everyMinute()->withoutOverlapping(2);
 
         // Regenerate static sitemap files daily at 5 AM. Keeps Google's view
         // fresh as new listings are added between deploys. Static-file

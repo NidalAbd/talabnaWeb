@@ -7,8 +7,11 @@ use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 
 /** "Finish your purchase?" — opens the buy-points screen. */
-class PurchaseReminderNotification extends Notification
+class PurchaseReminderNotification extends Notification implements \Illuminate\Contracts\Queue\ShouldQueue
 {
+    public $tries = 3;
+    use \Illuminate\Bus\Queueable;
+
     public const TEXT = [
         'failed' => [
             'en' => ['Your purchase didn’t go through', 'No charge was made. Tap to try again.'],

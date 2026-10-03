@@ -8,8 +8,9 @@ use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use Illuminate\Bus\Queueable;
 
-class new_servicepost_notification extends Notification
+class new_servicepost_notification extends Notification implements \Illuminate\Contracts\Queue\ShouldQueue
 {
+    public $tries = 3;
     use Queueable;
 
     private mixed $servicePost;

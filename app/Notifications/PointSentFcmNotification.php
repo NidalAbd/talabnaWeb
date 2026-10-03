@@ -7,8 +7,9 @@ use NotificationChannels\Fcm\FcmChannel;
 use NotificationChannels\Fcm\FcmMessage;
 use Illuminate\Bus\Queueable;
 
-class PointSentFcmNotification extends Notification
+class PointSentFcmNotification extends Notification implements \Illuminate\Contracts\Queue\ShouldQueue
 {
+    public $tries = 3;
     use Queueable;
 
     private int $points;

@@ -11,8 +11,9 @@ use Illuminate\Bus\Queueable;
  * "Your badge expired" push, in the user's app language (users.locale),
  * with the badge names translated too.
  */
-class BadgeExpirationNotification extends Notification
+class BadgeExpirationNotification extends Notification implements \Illuminate\Contracts\Queue\ShouldQueue
 {
+    public $tries = 3;
     use Queueable;
 
     /** [title, body] — {badge}, {normal}, {post} are filled in. */
