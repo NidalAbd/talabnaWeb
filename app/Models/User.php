@@ -103,6 +103,12 @@ class User extends Authenticatable implements CanResetPasswordContract
                 $user->referral_code = self::generateUniqueReferralCode();
             }
         });
+        // Multi-device push: every new device token is remembered.
+        static::saved(function ($user) {
+            if ($user->wasChanged('fcm_token') || $user->wasRecentlyCreated) {
+                if (!empty($user->fcm_token)) \App\Support\PushTokens::remember($user->id, $user->fcm_token);
+            }
+        });
     }
 
     public static function generateUniqueReferralCode(): string
@@ -176,7 +182,8 @@ class User extends Authenticatable implements CanResetPasswordContract
     }
     public function routeNotificationForFcm()
     {
-        return $this->fcm_token;
+        // Every signed-in device, not just the latest (FcmChannel multicasts).
+        return \App\Support\PushTokens::forUser($this->id, $this->fcm_token);
     }
     public function notifications(): HasMany
     {

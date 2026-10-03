@@ -28,6 +28,14 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Drop device tokens Firebase reports as dead (multi-device push).
+        \Illuminate\Support\Facades\Event::listen(\Illuminate\Notifications\Events\NotificationFailed::class, function ($e) {
+            $report = $e->data['report'] ?? null;
+            if ($report instanceof \Kreait\Firebase\Messaging\SendReport
+                && ($report->messageWasSentToUnknownToken() || $report->messageTargetWasInvalid())) {
+                \App\Support\PushTokens::forget((string) $report->target()->value());
+            }
+        });
         if(env('APP_ENV' !=='local')){
             URL::forceScheme('https');
         }

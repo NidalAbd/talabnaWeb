@@ -292,6 +292,10 @@ class UserController extends Controller
 
     public function logout(Request $request)
     {
+        // Stop pushes to the device that is signing out.
+        if ($t = $request->input('device_token')) {
+            \App\Support\PushTokens::forget((string) $t);
+        }
         $request->user()->token()->revoke();
         return response()->json(['status' => 'success', 'message' => 'Logged out successfully']);
     }

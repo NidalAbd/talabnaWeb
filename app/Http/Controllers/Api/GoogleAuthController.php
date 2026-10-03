@@ -391,6 +391,7 @@ class GoogleAuthController extends Controller
                 $token->revoke();
             }
 
+            \App\Support\PushTokens::forget((string) ($request->input('device_token') ?: $user->fcm_token));
             $user->fcm_token = null;
             $user->save();
 
