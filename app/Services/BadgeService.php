@@ -96,8 +96,9 @@ class BadgeService
             throw new Exception('Badge type is not active');
         }
 
-        $cost = $badge->calculateCost($days);
         $user = $servicePost->user;
+        // Plan perks: featured-post allowance and badge discount.
+        [$cost, $usesFeatured] = PlanPerks::badgePrice($user->id, $badge->calculateCost($days), $days);
 
         // Check points if needed
         if ($deductPoints && $cost > 0) {
@@ -112,6 +113,9 @@ class BadgeService
             // Deduct points if needed
             if ($deductPoints && $cost > 0) {
                 $this->deductPoints($user, $cost, $servicePost, $badge);
+            }
+            if ($deductPoints && $usesFeatured) {
+                PlanPerks::consumeFeatured($user->id);
             }
 
             // Update service post
@@ -175,7 +179,7 @@ class BadgeService
         }
 
         // Calculate new badge cost for the SAME remaining time
-        $newCost = $newBadge->calculateCost($remainingDays);
+        $newCost = PlanPerks::discounted($user->id, $newBadge->calculateCost($remainingDays));
 
         // Calculate net amount to charge
         $netAmount = $newCost - $refundAmount;
@@ -272,7 +276,7 @@ class BadgeService
         }
 
         // Calculate new badge cost
-        $newCost = $newBadge->calculateCost($days);
+        $newCost = PlanPerks::discounted($user->id, $newBadge->calculateCost($days));
 
         // Calculate net amount to charge/refund
         $netAmount = $newCost - $refundAmount;

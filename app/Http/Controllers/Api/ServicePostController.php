@@ -353,7 +353,7 @@ class ServicePostController extends Controller
 
         // Calculate cost and check points if a premium badge is selected
         if ($badgeTypeModel && !$badgeTypeModel->is_default && $badgeDuration > 0) {
-            $pointCost = $badgeTypeModel->calculateCost($badgeDuration);
+            [$pointCost, $usesFeatured] = \App\Services\PlanPerks::badgePrice($user->id, $badgeTypeModel->calculateCost($badgeDuration), (int) $badgeDuration);
 
             // Check if user has enough points
             if ($user->pointsBalance < $pointCost) {
@@ -365,10 +365,10 @@ class ServicePostController extends Controller
 
         // Extra photos/videos beyond the free ones cost points (charged below, inside the transaction).
         $newMedia = $request->hasFile('images') ? count($request->file('images')) : 0;
-        if (\App\Services\MediaSlots::exceedsMax(0, $newMedia)) {
-            return response()->json(['error' => 'A post can have at most '.\App\Services\MediaSlots::max().' photos or videos.'], 422);
+        if (\App\Services\MediaSlots::exceedsMax(0, $newMedia, $user->id)) {
+            return response()->json(['error' => 'A post can have at most '.\App\Services\MediaSlots::max($user->id).' photos or videos.'], 422);
         }
-        $mediaCost = \App\Services\MediaSlots::extraCost(0, $newMedia);
+        $mediaCost = \App\Services\MediaSlots::extraCost(0, $newMedia, $user->id);
         if ($mediaCost > 0 && $user->pointsBalance < $pointCost + $mediaCost) {
             return response()->json([
                 'error' => 'Not enough points for the extra photos/videos.',
@@ -400,7 +400,7 @@ class ServicePostController extends Controller
                 ]);
 
                 // Deduct points within the transaction
-                palservice_points::where('user_id', $user->id)->decrement('point', $pointCost);
+                palservice_points::where('user_id', $user->id)->decrement('point', $pointCost); if (!empty($usesFeatured)) \App\Services\PlanPerks::consumeFeatured($user->id);
 
                 // Create transaction record
                 $pointTransaction = point_transactions::create([
@@ -1306,10 +1306,10 @@ class ServicePostController extends Controller
 
             $newMedia = $request->hasFile('images') ? count($request->file('images')) : 0;
             $onPost = $servicePost->photos()->count();
-            if (\App\Services\MediaSlots::exceedsMax($onPost, $newMedia)) {
-                return response()->json(['error' => 'A post can have at most '.\App\Services\MediaSlots::max().' photos or videos.'], 422);
+            if (\App\Services\MediaSlots::exceedsMax($onPost, $newMedia, $user->id)) {
+                return response()->json(['error' => 'A post can have at most '.\App\Services\MediaSlots::max($user->id).' photos or videos.'], 422);
             }
-            $mediaCost = \App\Services\MediaSlots::extraCost($onPost, $newMedia);
+            $mediaCost = \App\Services\MediaSlots::extraCost($onPost, $newMedia, $user->id);
             if ($mediaCost > 0 && $user->pointsBalance < $mediaCost) {
                 return response()->json(['error' => 'Not enough points for the extra photos/videos.', 'required' => $mediaCost, 'balance' => (int) $user->pointsBalance], 402);
             }
@@ -1439,7 +1439,7 @@ class ServicePostController extends Controller
         }
 
         // Calculate point cost
-        $pointCost = $duration * $badgePrices[$badgeType];
+        [$pointCost, $usesFeatured] = \App\Services\PlanPerks::badgePrice($user->id, $duration * $badgePrices[$badgeType], (int) $duration);
 
         // Check if user has enough points
         if ($user->pointsBalance < $pointCost) {
@@ -1450,7 +1450,7 @@ class ServicePostController extends Controller
         }
 
         // Deduct points
-        palservice_points::where('user_id', $user->id)->decrement('point', $pointCost);
+        palservice_points::where('user_id', $user->id)->decrement('point', $pointCost); if (!empty($usesFeatured)) \App\Services\PlanPerks::consumeFeatured($user->id);
 
         // Create transaction record
         point_transactions::create([
@@ -1517,7 +1517,7 @@ class ServicePostController extends Controller
         }
 
         // Calculate point cost dynamically from badge model
-        $pointCost = $badgeTypeModel->calculateCost($duration);
+        [$pointCost, $usesFeatured] = \App\Services\PlanPerks::badgePrice($user->id, $badgeTypeModel->calculateCost($duration), (int) $duration);
 
         // Check if user has enough points
         if ($user->pointsBalance < $pointCost) {
@@ -1528,7 +1528,7 @@ class ServicePostController extends Controller
         }
 
         // Deduct points
-        palservice_points::where('user_id', $user->id)->decrement('point', $pointCost);
+        palservice_points::where('user_id', $user->id)->decrement('point', $pointCost); if (!empty($usesFeatured)) \App\Services\PlanPerks::consumeFeatured($user->id);
 
         // Create transaction record
         point_transactions::create([

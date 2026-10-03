@@ -542,7 +542,18 @@ class PointsService
                 ->first();
 
             if ($userBalance) {
-                $userBalance->increment('point', $pointsAmount);
+                $bonus = PlanPerks::bonusPoints($userId, $pointsAmount); // plan: bonus points on purchases
+                $userBalance->increment('point', $pointsAmount + $bonus);
+                if ($bonus > 0) {
+                    point_transactions::create([
+                        'from_user_id' => null,
+                        'to_user_id' => $userId,
+                        'type' => 'admin_grant',
+                        'point' => $bonus,
+                        'status' => 'completed',
+                        'metadata' => json_encode(['reason' => 'plan_bonus_points', 'purchase_points' => $pointsAmount]),
+                    ]);
+                }
             } else {
                 palservice_points::create([
                     'user_id' => $userId,
@@ -605,7 +616,18 @@ class PointsService
                 ->first();
 
             if ($userBalance) {
-                $userBalance->increment('point', $pointsAmount);
+                $bonus = PlanPerks::bonusPoints($userId, $pointsAmount); // plan: bonus points on purchases
+                $userBalance->increment('point', $pointsAmount + $bonus);
+                if ($bonus > 0) {
+                    point_transactions::create([
+                        'from_user_id' => null,
+                        'to_user_id' => $userId,
+                        'type' => 'admin_grant',
+                        'point' => $bonus,
+                        'status' => 'completed',
+                        'metadata' => json_encode(['reason' => 'plan_bonus_points', 'purchase_points' => $pointsAmount]),
+                    ]);
+                }
             } else {
                 palservice_points::create([
                     'user_id' => $userId,

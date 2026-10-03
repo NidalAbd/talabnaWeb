@@ -13,14 +13,14 @@ use Illuminate\Support\Facades\DB;
  */
 class MediaSlots
 {
-    public static function free(): int
+    public static function free(?int $userId = null): int
     {
-        return (int) config('ai.media.free', 4);
+        return max((int) config('ai.media.free', 4), PlanPerks::freePhotos($userId));
     }
 
-    public static function max(): int
+    public static function max(?int $userId = null): int
     {
-        return (int) config('ai.media.max', 10);
+        return max((int) config('ai.media.max', 10), PlanPerks::freePhotos($userId));
     }
 
     public static function pointsEach(): int
@@ -29,20 +29,20 @@ class MediaSlots
     }
 
     /** Only NEW slots beyond what the post already had (or the free amount) are charged. */
-    public static function extraCost(int $alreadyOnPost, int $newFiles): int
+    public static function extraCost(int $alreadyOnPost, int $newFiles, ?int $userId = null): int
     {
         if ($newFiles <= 0) {
             return 0;
         }
         $after = $alreadyOnPost + $newFiles;
-        $paidFor = max(self::free(), $alreadyOnPost);
+        $paidFor = max(self::free($userId), $alreadyOnPost);
 
         return max(0, $after - $paidFor) * self::pointsEach();
     }
 
-    public static function exceedsMax(int $alreadyOnPost, int $newFiles): bool
+    public static function exceedsMax(int $alreadyOnPost, int $newFiles, ?int $userId = null): bool
     {
-        return $alreadyOnPost + $newFiles > self::max();
+        return $alreadyOnPost + $newFiles > self::max($userId);
     }
 
     /**

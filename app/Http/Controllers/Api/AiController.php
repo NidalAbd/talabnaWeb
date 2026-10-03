@@ -58,8 +58,8 @@ class AiController extends Controller
             }),
             'balance' => $this->ledger->balance($userId),
             'media_slots' => [
-                'free' => \App\Services\MediaSlots::free(),
-                'max' => \App\Services\MediaSlots::max(),
+                'free' => \App\Services\MediaSlots::free($userId),
+                'max' => \App\Services\MediaSlots::max($userId),
                 'extra_points' => \App\Services\MediaSlots::pointsEach(),
             ],
             'pending' => AiRequest::where('user_id', $userId)->where('status', AiRequest::PROCESSING)->get(['uuid', 'feature'])
