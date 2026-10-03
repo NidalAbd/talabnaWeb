@@ -22,6 +22,7 @@ class Conversation extends Model
 
     protected $casts = [
         'last_message_at' => 'datetime',
+        'last_message_body' => \App\Casts\EncryptedText::class,
     ];
 
     public function userOne(): BelongsTo

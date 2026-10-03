@@ -19,6 +19,7 @@ class Message extends Model
 
     protected $casts = [
         'read_at' => 'datetime',
+        'body' => \App\Casts\EncryptedText::class,
     ];
 
     public function conversation(): BelongsTo
