@@ -122,6 +122,7 @@ Route::post('register-device', [BanCheckController::class, 'registerDevice'])->n
 // Google authentication routes
 Route::post('auth/google', [GoogleAuthController::class, 'handleGoogleAuth'])->middleware('throttle:12,1');
 Route::post('auth/apple', [AppleAuthController::class, 'handleAppleAuth'])->middleware('throttle:12,1');
+Route::match(['get', 'post'], 'auth/apple/callback', [AppleAuthController::class, 'appleCallback'])->middleware('throttle:30,1');
 
 // Referral validation (public — no auth needed for registration flow)
 Route::get('referral/validate/{code}', [\App\Http\Controllers\Api\ReferralController::class, 'validateCode']);

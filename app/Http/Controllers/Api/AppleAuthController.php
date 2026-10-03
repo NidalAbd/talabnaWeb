@@ -60,11 +60,14 @@ class AppleAuthController extends Controller
         }
 
         if (! $user) {
+            // Apple sends the email only on the first authorization of an Apple ID for this app.
+            // When it's missing (e.g. that first sign-in went to an account that no longer exists),
+            // the account is keyed on the Apple id with a placeholder that never receives mail;
+            // signing in with Apple again finds it by apple_id. Hide My Email addresses
+            // (@privaterelay.appleid.com) are real, verified emails and take the normal path.
             if (! $email) {
-                return response()->json([
-                    'error' => 'Apple did not share an email address. Remove Talabna from Settings > Apple ID > '
-                        .'Sign in with Apple and try again, or use another sign-in method.',
-                ], 422);
+                $email = 'apple.'.substr(hash('sha256', $appleId), 0, 20).'@users.talbna.invalid';
+                $emailVerified = false;
             }
             // An account owns this email but Apple did not verify it, so never hand it over.
             if (User::where('email', $email)->exists()) {
@@ -86,7 +89,7 @@ class AppleAuthController extends Controller
         }
 
         // Keep Apple's refresh token so account deletion can revoke it (no-op until the .p8 key is set).
-        app(\App\Services\Auth\AppleTokenRevoker::class)->remember($user, $data['authorization_code'] ?? null);
+        app(\App\Services\Auth\AppleTokenRevoker::class)->remember($user, $data['authorization_code'] ?? null, $claims['aud'] ?? null);
 
         \App\Services\Auth\AuthTracker::record($user->id, 'apple', $request, $isNewUser);
         $token = $user->createToken('apple-auth-token')->accessToken;
@@ -115,9 +118,21 @@ class AppleAuthController extends Controller
         ]);
     }
 
+    /**
+     * Return URL of Apple's web sign-in (Android, Services ID com.talabna.signin). Apple posts
+     * code/id_token here; we hand them to the app's sign_in_with_apple callback activity, and the app
+     * then calls POST auth/apple as on iOS.
+     */
+    public function appleCallback(Request $request): \Illuminate\Http\RedirectResponse
+    {
+        $query = http_build_query($request->only(['code', 'id_token', 'state', 'user', 'error']));
+
+        return redirect()->away('intent://callback?'.$query.'#Intent;package=com.talabna.talabna;scheme=signinwithapple;end');
+    }
+
     private function createUser(string $appleId, string $email, bool $emailVerified, array $data): User
     {
-        $name = trim((string) ($data['name'] ?? '')) ?: Str::before($email, '@');
+        $name = trim((string) ($data['name'] ?? '')) ?: (str_ends_with($email, '.invalid') ? 'Talabna User' : Str::before($email, '@'));
         $country = countries::first();
         $city = $country ? cities::where('country_id', $country->id)->first() : null;
 

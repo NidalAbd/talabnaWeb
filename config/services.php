@@ -42,7 +42,9 @@ return [
     'apple' => [
         // Sign in with Apple: the iOS bundle id is the identity-token audience.
         'client_id' => env('APPLE_CLIENT_ID', 'com.talabna.talabna'),
-        'services_id' => env('APPLE_SERVICES_ID'),
+        // Android signs in through Apple's web flow with this Services ID (return URL
+        // https://talbna.cloud/api/auth/apple/callback); its tokens carry it as `aud`.
+        'services_id' => env('APPLE_SERVICES_ID', 'com.talabna.signin'),
         // Token revocation on account deletion (guideline 5.1.1(v)): Apple developer key (.p8).
         'team_id' => env('APPLE_TEAM_ID'),
         'key_id' => env('APPLE_KEY_ID'),

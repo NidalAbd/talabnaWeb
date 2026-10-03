@@ -31,14 +31,21 @@ class AppleTokenRevoker
     }
 
     /** At sign-in: swap the one-time authorization code for a refresh token and store it encrypted. */
-    public function remember(Model $user, ?string $authorizationCode): void
+    /**
+     * $clientId is the token's audience: the bundle id for the native iOS flow, the Services ID for the
+     * Android/web flow. The code can only be exchanged (and the token later revoked) by that same client,
+     * so a non-default client is stored with the token as "client_id|token".
+     */
+    public function remember(Model $user, ?string $authorizationCode, ?string $clientId = null): void
     {
         if (! $authorizationCode || ! $this->configured()) {
             return;
         }
-        $refreshToken = $this->exchangeCode($authorizationCode);
+        $clientId = $clientId ?: $this->clientId();
+        $refreshToken = $this->exchangeCode($authorizationCode, $clientId);
         if ($refreshToken) {
-            $user->forceFill(['apple_refresh_token' => Crypt::encryptString($refreshToken)])->save();
+            $stored = $clientId === $this->clientId() ? $refreshToken : $clientId.'|'.$refreshToken;
+            $user->forceFill(['apple_refresh_token' => Crypt::encryptString($stored)])->save();
         }
     }
 
@@ -49,14 +56,16 @@ class AppleTokenRevoker
             return;
         }
         try {
-            $this->revoke(Crypt::decryptString($user->apple_refresh_token));
+            $stored = Crypt::decryptString($user->apple_refresh_token);
+            [$clientId, $token] = str_contains($stored, '|') ? explode('|', $stored, 2) : [null, $stored];
+            $this->revoke($token, $clientId);
         } catch (\Throwable $e) {
             Log::warning('apple.token.forget failed', ['message' => $e->getMessage()]);
         }
     }
 
     /** Exchanges the sign-in authorization code for a refresh token; null when unavailable. */
-    public function exchangeCode(string $authorizationCode): ?string
+    public function exchangeCode(string $authorizationCode, ?string $clientId = null): ?string
     {
         if (! $this->configured()) {
             return null;
@@ -64,8 +73,8 @@ class AppleTokenRevoker
 
         try {
             $response = Http::asForm()->timeout(10)->post(self::TOKEN_URL, [
-                'client_id' => $this->clientId(),
-                'client_secret' => $this->clientSecret(),
+                'client_id' => $clientId ?: $this->clientId(),
+                'client_secret' => $this->clientSecret(null, $clientId),
                 'code' => $authorizationCode,
                 'grant_type' => 'authorization_code',
             ]);
@@ -85,7 +94,7 @@ class AppleTokenRevoker
     }
 
     /** Revokes a refresh token at Apple. True on success; false (logged) otherwise. */
-    public function revoke(string $refreshToken): bool
+    public function revoke(string $refreshToken, ?string $clientId = null): bool
     {
         if (! $this->configured()) {
             return false;
@@ -93,8 +102,8 @@ class AppleTokenRevoker
 
         try {
             $response = Http::asForm()->timeout(10)->post(self::REVOKE_URL, [
-                'client_id' => $this->clientId(),
-                'client_secret' => $this->clientSecret(),
+                'client_id' => $clientId ?: $this->clientId(),
+                'client_secret' => $this->clientSecret(null, $clientId),
                 'token' => $refreshToken,
                 'token_type_hint' => 'refresh_token',
             ]);
@@ -112,7 +121,7 @@ class AppleTokenRevoker
     }
 
     /** ES256 JWT Apple accepts as the client secret. */
-    public function clientSecret(?int $now = null): string
+    public function clientSecret(?int $now = null, ?string $clientId = null): string
     {
         $now ??= time();
         $header = ['alg' => 'ES256', 'kid' => (string) config('services.apple.key_id'), 'typ' => 'JWT'];
@@ -121,7 +130,7 @@ class AppleTokenRevoker
             'iat' => $now,
             'exp' => $now + 300,
             'aud' => self::AUDIENCE,
-            'sub' => $this->clientId(),
+            'sub' => $clientId ?: $this->clientId(),
         ];
         $input = self::b64url(json_encode($header)).'.'.self::b64url(json_encode($claims));
 
