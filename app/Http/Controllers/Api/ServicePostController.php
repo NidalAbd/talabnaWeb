@@ -1418,7 +1418,11 @@ class ServicePostController extends Controller
     private function updateServicePostBadge(ServicePost $servicePost, User $user, string $badgeType, int $duration): array
     {
         // Badge prices per day
-        $badgePrices = ['ذهبي' => 2, 'ماسي' => 10, 'عادي' => 0];
+        // Prices come from the badge types table (admin-editable), matched by the legacy Arabic name.
+        $badgePrices = ['عادي' => 0];
+        foreach (\App\Models\BadgeType::all() as $bt) {
+            $badgePrices[$bt->name_ar] = (int) $bt->points_per_day;
+        }
 
         // If changing to normal badge, just update without points
         if ($badgeType === 'عادي') {

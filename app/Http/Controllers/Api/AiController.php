@@ -370,7 +370,7 @@ class AiController extends Controller
             if ($global > 0 && AiRequest::where('feature', $feature)->where('status', AiRequest::PROCESSING)->count() >= $global) {
                 return response()->json(['error' => 'Lots of people are creating right now. Try again in a minute; you were not charged.', 'code' => 'busy'], 503);
             }
-            $daily = (int) config('ai.limits.daily_media_per_user', 30);
+            $daily = (int) \App\Models\AppSetting::get('ai.daily_media_per_user', config('ai.limits.daily_media_per_user', 30));
             if ($daily > 0 && AiRequest::where('user_id', $userId)->whereIn('feature', ['generate_image', 'generate_video'])
                 ->where('created_at', '>=', now()->subDay())->where('status', '!=', AiRequest::FAILED)->count() >= $daily) {
                 return response()->json(['error' => 'You reached today\'s limit for AI images and videos. Try again tomorrow.', 'code' => 'daily_limit'], 429);

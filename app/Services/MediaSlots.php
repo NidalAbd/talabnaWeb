@@ -15,17 +15,17 @@ class MediaSlots
 {
     public static function free(?int $userId = null): int
     {
-        return max((int) config('ai.media.free', 4), PlanPerks::freePhotos($userId));
+        return max((int) \App\Models\AppSetting::get('media.free', config('ai.media.free', 4)), PlanPerks::freePhotos($userId));
     }
 
     public static function max(?int $userId = null): int
     {
-        return max((int) config('ai.media.max', 10), PlanPerks::freePhotos($userId));
+        return max((int) \App\Models\AppSetting::get('media.max', config('ai.media.max', 10)), PlanPerks::freePhotos($userId));
     }
 
     public static function pointsEach(): int
     {
-        return (int) config('ai.media.extra_points', 1);
+        return (int) \App\Models\AppSetting::get('media.extra_points', config('ai.media.extra_points', 1));
     }
 
     /** Only NEW slots beyond what the post already had (or the free amount) are charged. */

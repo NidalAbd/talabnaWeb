@@ -621,6 +621,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/point-purchase-requests', [HomeController::class, 'index'])
         ->name('point_purchase_requests.index');
 
+    // Pricing - Vue SPA
+    Route::get('/pricing', [HomeController::class, 'index'])
+        ->name('pricing.index');
+
     // Purchase attempts - Vue SPA
     Route::get('/purchase-attempts', [HomeController::class, 'index'])
         ->name('purchase_attempts.index');
@@ -859,6 +863,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
             Route::post('/country-pricing/{id}/toggle-transfers', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'toggleTransfers'])->name('api.admin.country-pricing.toggle-transfers');
             Route::post('/country-pricing/{id}/exchange-rate', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'updateExchangeRate'])->name('api.admin.country-pricing.exchange-rate');
             Route::post('/country-pricing/{id}/custom-price', [\App\Http\Controllers\Admin\CountryPricingApiController::class, 'setCustomPrice'])->name('api.admin.country-pricing.custom-price');
+
+            // Point prices for AI actions and photo/video slots
+            Route::get('/pricing', [\App\Http\Controllers\Admin\PricingApiController::class, 'index'])->name('api.admin.pricing.index');
+            Route::put('/pricing', [\App\Http\Controllers\Admin\PricingApiController::class, 'update'])->name('api.admin.pricing.update');
 
             // Purchase attempts (store Buy taps and their outcome)
             Route::get('/purchase-attempts/stats', [\App\Http\Controllers\Admin\PurchaseAttemptsApiController::class, 'stats'])->name('api.admin.purchase-attempts.stats');
