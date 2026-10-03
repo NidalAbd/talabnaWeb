@@ -219,6 +219,10 @@ Route::middleware(['auth:api'])->group(function () {
         Route::post('/apple-verify', [App\Http\Controllers\Api\PointsController::class, 'verifyApplePurchase']);
     });
 
+    // Store purchase attempts (logged before the store sheet opens).
+    Route::post('points/attempts', [App\Http\Controllers\Api\PurchaseAttemptController::class, 'start'])->middleware('throttle:30,1');
+    Route::put('points/attempts/{id}', [App\Http\Controllers\Api\PurchaseAttemptController::class, 'update'])->middleware('throttle:60,1');
+
     // PIN Management Routes (with rate limiting)
     Route::middleware(['throttle:pin'])->prefix('points/pin')->group(function () {
         Route::post('/set', [App\Http\Controllers\Api\PointsController::class, 'setPin']);

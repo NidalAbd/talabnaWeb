@@ -111,6 +111,9 @@
                         <a href="/point-purchase-requests" class="nav-link"><i class="nav-icon fas fa-shopping-cart"></i><p>Purchase Requests</p></a>
                     </li>
                     <li class="nav-item">
+                        <a href="/admin/purchase-attempts" class="nav-link"><i class="nav-icon fas fa-cart-arrow-down"></i><p>Purchase Attempts</p></a>
+                    </li>
+                    <li class="nav-item">
                         <a href="/point-transactions" class="nav-link"><i class="nav-icon fas fa-exchange-alt"></i><p>Transactions</p></a>
                     </li>
 

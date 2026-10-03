@@ -86,6 +86,7 @@ document.addEventListener('DOMContentLoaded', () => {
         href.includes('/admin/premium-features') ||
         href.includes('/admin/levels') ||
         href.includes('/admin/point-purchase-requests') ||
+        href.includes('/admin/purchase-attempts') ||
         href.includes('/admin/point-transactions') ||
         href.includes('/admin/marketing-notifications') ||
         href.includes('/admin/analytics') ||

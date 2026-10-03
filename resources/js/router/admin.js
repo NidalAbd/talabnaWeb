@@ -18,6 +18,8 @@ import BannedDevicesList from '../views/admin/BannedDevicesList.vue'
 import PointPackagesList from '../views/admin/PointPackagesList.vue'
 import CountryPricingList from '../views/admin/CountryPricingList.vue'
 import PointPurchaseRequestsList from '../views/admin/PointPurchaseRequestsList.vue'
+import PurchaseAttemptsList from '../views/admin/PurchaseAttemptsList.vue'
+import PurchaseAttemptsList from '../views/admin/PurchaseAttemptsList.vue'
 import PointTransactionsList from '../views/admin/PointTransactionsList.vue'
 import MarketingNotificationsList from '../views/admin/MarketingNotificationsList.vue'
 import Analytics from '../views/admin/Analytics.vue'
@@ -51,6 +53,7 @@ const routes = [
   { path: '/admin/point-packages', name: 'point_packages.index', component: PointPackagesList, meta: { title: 'Point Packages' } },
   { path: '/admin/country-pricing', name: 'country_pricing.index', component: CountryPricingList, meta: { title: 'Country Pricing' } },
   { path: '/admin/point-purchase-requests', name: 'point_purchase_requests.index', component: PointPurchaseRequestsList, meta: { title: 'Purchase Requests' } },
+  { path: '/admin/purchase-attempts', name: 'purchase_attempts.index', component: PurchaseAttemptsList, meta: { title: 'Purchase Attempts' } },
   { path: '/admin/point-transactions', name: 'point_transactions.index', component: PointTransactionsList, meta: { title: 'Point Transactions' } },
   { path: '/admin/marketing-notifications', name: 'marketing_notifications.index', component: MarketingNotificationsList, meta: { title: 'Marketing Notifications' } },
   { path: '/admin/analytics', name: 'analytics.index', component: Analytics, meta: { title: 'Analytics' } },

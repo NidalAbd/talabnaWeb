@@ -7,6 +7,20 @@ use Illuminate\Database\Eloquent\Model;
 
 class point_purchase_requests extends Model
 {
+    protected static function booted(): void
+    {
+        // A store purchase our server verified closes the matching attempt.
+        static::created(function ($r) {
+            if ($r->status === 'approved' && ($r->google_product_id || $r->apple_product_id)) {
+                try {
+                    \App\Models\PurchaseAttempt::markCompletedByServer((int) $r->user_id, $r->google_product_id ?: $r->apple_product_id, (int) $r->id);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('purchase attempt link failed: ' . $e->getMessage());
+                }
+            }
+        });
+    }
+
     use HasFactory;
 
     protected $fillable = [
