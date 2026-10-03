@@ -404,6 +404,10 @@ class BadgeTypeController extends Controller
             return response()->json(['error' => 'Service post not found'], 404);
         }
 
+        // Only the post's owner (or an admin) may change its badge — the
+        // points come out of the owner's balance.
+        if ($deny = $this->denyUnlessOwnerOrAdmin($servicePost)) return $deny;
+
         try {
             $post = $this->badgeService->applyBadge(
                 $servicePost,
@@ -434,6 +438,10 @@ class BadgeTypeController extends Controller
         if (!$servicePost) {
             return response()->json(['error' => 'Service post not found'], 404);
         }
+
+        // Only the post's owner (or an admin) may change its badge — the
+        // points come out of the owner's balance.
+        if ($deny = $this->denyUnlessOwnerOrAdmin($servicePost)) return $deny;
 
         try {
             $post = $this->badgeService->removeBadge($servicePost);
@@ -468,6 +476,10 @@ class BadgeTypeController extends Controller
             return response()->json(['error' => 'Service post not found'], 404);
         }
 
+        // Only the post's owner (or an admin) may change its badge — the
+        // points come out of the owner's balance.
+        if ($deny = $this->denyUnlessOwnerOrAdmin($servicePost)) return $deny;
+
         try {
             $result = $this->badgeService->upgradeBadge(
                 $servicePost,
@@ -486,5 +498,14 @@ class BadgeTypeController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => $e->getMessage()], 400);
         }
+    }
+
+    private function denyUnlessOwnerOrAdmin(ServicePost $servicePost): ?JsonResponse
+    {
+        $user = auth()->user();
+        if ($user && ((int) $servicePost->user_id === (int) $user->id || $user->hasRole(['admin']))) {
+            return null;
+        }
+        return response()->json(['error' => 'You can only change badges on your own posts'], 403);
     }
 }

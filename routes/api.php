@@ -361,7 +361,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('admin/app-version', [App\Http\Controllers\Api\AppVersionController::class, 'update']);
 
     // Badge Type Management Routes (Admin)
-    Route::prefix('admin/badge-types')->group(function () {
+    Route::middleware(['admin'])->prefix('admin/badge-types')->group(function () {
         Route::get('/', [BadgeTypeController::class, 'index']);
         Route::post('/', [BadgeTypeController::class, 'store']);
         Route::get('/statistics', [BadgeTypeController::class, 'statistics']);
@@ -375,7 +375,7 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     // Subscription Plan Management Routes (Admin) — same gap as above
-    Route::prefix('admin/subscription-plans')->group(function () {
+    Route::middleware(['admin'])->prefix('admin/subscription-plans')->group(function () {
         Route::get('/', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'index']);
         Route::post('/', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'store']);
         Route::get('/stats', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'stats']);
@@ -391,7 +391,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('service_posts/{servicePost}/upgrade-badge', [BadgeTypeController::class, 'upgradeBadge']);
 
     // Language Management Routes (Admin)
-    Route::prefix('admin/languages')->group(function () {
+    Route::middleware(['admin'])->prefix('admin/languages')->group(function () {
         Route::get('/', [LanguageManagementController::class, 'index']);
         Route::post('/', [LanguageManagementController::class, 'store']);
         Route::get('/stats', [LanguageManagementController::class, 'stats']);
@@ -415,7 +415,7 @@ Route::middleware(['auth:api'])->group(function () {
     });
 
     // Translation Management Routes (Admin)
-    Route::prefix('admin/translations')->group(function () {
+    Route::middleware(['admin'])->prefix('admin/translations')->group(function () {
         Route::get('/', [TranslationManagementController::class, 'index']);
         Route::post('/', [TranslationManagementController::class, 'store']);
         Route::get('/stats', [TranslationManagementController::class, 'stats']);
