@@ -108,19 +108,19 @@ Route::middleware('auth:api')->get('/user/status', function (Request $request) {
 // outside the auth:api group.
 Route::get('app-version', [App\Http\Controllers\Api\AppVersionController::class, 'show']);
 
-Route::post('login', [App\Http\Controllers\Api\UserController::class,'login']);
-Route::post('/facebook/login', [App\Http\Controllers\Api\UserController::class, 'FaceBookSignIn']);
-Route::post('register', [App\Http\Controllers\Api\UserController::class,'register']);
+Route::post('login', [App\Http\Controllers\Api\UserController::class,'login'])->middleware('throttle:auth-login');
+Route::post('/facebook/login', [App\Http\Controllers\Api\UserController::class, 'FaceBookSignIn'])->middleware('throttle:20,1');
+Route::post('register', [App\Http\Controllers\Api\UserController::class,'register'])->middleware('throttle:auth-sensitive');
 Route::get('password/reset', [App\Http\Controllers\Auth\ForgotPasswordController::class,'showLinkRequestForm'])->name('api.password.request');
-Route::post('password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class,'sendResetLinkEmail'])->name('api.password.email');
+Route::post('password/email', [App\Http\Controllers\Auth\ForgotPasswordController::class,'sendResetLinkEmail'])->middleware('throttle:auth-sensitive')->name('api.password.email');
 Route::get('password/reset/{token}', [App\Http\Controllers\Auth\ResetPasswordController::class,'showResetForm'])->name('api.password.reset');
-Route::post('password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class,'reset'])->name('api.password.update');
+Route::post('password/reset', [App\Http\Controllers\Auth\ResetPasswordController::class,'reset'])->middleware('throttle:auth-sensitive')->name('api.password.update');
 
 Route::get('check-ban-status', [BanCheckController::class, 'checkBanStatus'])->name('api.check-ban-status');
 Route::post('register-device', [BanCheckController::class, 'registerDevice'])->name('api.register-device');
 
 // Google authentication routes
-Route::post('auth/google', [GoogleAuthController::class, 'handleGoogleAuth']);
+Route::post('auth/google', [GoogleAuthController::class, 'handleGoogleAuth'])->middleware('throttle:12,1');
 Route::post('auth/apple', [AppleAuthController::class, 'handleAppleAuth'])->middleware('throttle:12,1');
 
 // Referral validation (public — no auth needed for registration flow)

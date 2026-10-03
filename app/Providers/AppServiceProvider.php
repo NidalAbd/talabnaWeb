@@ -28,6 +28,23 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        // Brute-force protection for sign-in and password endpoints
+        // (2026-10-03): per IP, and per account so one email can't be
+        // guessed from many IPs.
+        \Illuminate\Support\Facades\RateLimiter::for('auth-login', function (\Illuminate\Http\Request $request) {
+            $email = strtolower(trim((string) $request->input('email')));
+            return [
+                \Illuminate\Cache\RateLimiting\Limit::perMinute(8)->by('ip:' . $request->ip()),
+                \Illuminate\Cache\RateLimiting\Limit::perHour(20)->by('acct:' . ($email !== '' ? sha1($email) : $request->ip())),
+            ];
+        });
+        \Illuminate\Support\Facades\RateLimiter::for('auth-sensitive', function (\Illuminate\Http\Request $request) {
+            return [
+                \Illuminate\Cache\RateLimiting\Limit::perMinute(5)->by('ip:' . $request->ip()),
+                \Illuminate\Cache\RateLimiting\Limit::perHour(30)->by('ip-h:' . $request->ip()),
+            ];
+        });
+
         // Drop device tokens Firebase reports as dead (multi-device push).
         \Illuminate\Support\Facades\Event::listen(\Illuminate\Notifications\Events\NotificationFailed::class, function ($e) {
             $report = $e->data['report'] ?? null;
