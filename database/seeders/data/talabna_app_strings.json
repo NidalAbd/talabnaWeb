@@ -15,9 +15,17 @@
   "ar": "تعذّر فتح الرابط",
   "en": "Could not launch URL"
  },
+ "about.currentyear_talbna_all_rights_reserved": {
+  "ar": "© {current_year} طلبنا. جميع الحقوق محفوظة.",
+  "en": "© {current_year} Talbna. All rights reserved."
+ },
  "about.email": {
   "ar": "البريد الإلكتروني",
   "en": "Email"
+ },
+ "about.error_e": {
+  "ar": "خطأ: {error}",
+  "en": "Error: {error}"
  },
  "about.facebook": {
   "ar": "فيسبوك",
@@ -31,6 +39,10 @@
   "ar": "صُنع بعناية من فريق طلبنا",
   "en": "Made with care by the Talbna team"
  },
+ "about.version_label": {
+  "ar": "الإصدار {version} ({build})",
+  "en": "Version {version} ({build})"
+ },
  "about.website": {
   "ar": "الموقع الإلكتروني",
   "en": "Website"
@@ -38,6 +50,10 @@
  "about.whatsapp": {
   "ar": "واتساب",
   "en": "WhatsApp"
+ },
+ "add_point.amount_limit": {
+  "ar": "المبلغ: {today}/{limit}",
+  "en": "Amount: {today}/{limit}"
  },
  "add_point.cannot_complete_transfer": {
   "ar": "تعذّر إتمام التحويل",
@@ -59,6 +75,14 @@
   "ar": "رمز غير صحيح",
   "en": "Invalid PIN"
  },
+ "add_point.legacy_transfer_success": {
+  "ar": "تم تحويل {points} نقطة بنجاح إلى المستخدم {id}",
+  "en": "Successfully transferred {points} points to user {id}"
+ },
+ "add_point.max_per_transfer": {
+  "ar": "الحد الأقصى لكل تحويل: {max} نقطة",
+  "en": "Max per transfer: {max} points"
+ },
  "add_point.no_previous_transactions": {
   "ar": "لا توجد معاملات سابقة",
   "en": "No previous transactions"
@@ -74,6 +98,10 @@
  "add_point.pin_created_success": {
   "ar": "تم إنشاء رمز التحويل بنجاح",
   "en": "Transfer PIN created successfully"
+ },
+ "add_point.pin_locked_message": {
+  "ar": "الرمز مقفل. حاول مجددًا بعد {minutes} دقيقة",
+  "en": "PIN is locked. Please try again in {minutes} minutes"
  },
  "add_point.pin_updated_success": {
   "ar": "تم تحديث رمز التحويل بنجاح",
@@ -107,6 +135,10 @@
   "ar": "ستظهر معاملاتك هنا بعد تحويل النقاط",
   "en": "Your transactions will appear here after point transfers"
  },
+ "add_point.transactions_with_user": {
+  "ar": "المعاملات مع المستخدم {id}",
+  "en": "Transactions with User {id}"
+ },
  "add_point.transfer_already_processed": {
   "ar": "تمت معالجة التحويل مسبقًا.",
   "en": "Transfer already processed."
@@ -119,13 +151,29 @@
   "ar": "تحويل النقاط",
   "en": "Transfer Points"
  },
+ "add_point.transfer_success": {
+  "ar": "تم تحويل {points} نقطة بنجاح",
+  "en": "Successfully transferred {points} points"
+ },
  "add_point.transfer_to_start": {
   "ar": "حوّل بعض النقاط لبدء المعاملات مع هذا المستخدم",
   "en": "Transfer some points to start transactions with this user"
  },
+ "add_point.transfers_limit": {
+  "ar": "التحويلات: {today}/{limit}",
+  "en": "Transfers: {today}/{limit}"
+ },
+ "add_point.user_id": {
+  "ar": "المستخدم {id}",
+  "en": "User {id}"
+ },
  "add_point.validator_invalid_number": {
   "ar": "يرجى إدخال رقم صحيح",
   "en": "Please enter a valid number"
+ },
+ "add_point.validator_max_exceeded": {
+  "ar": "الحد الأقصى لكل تحويل هو {max} نقطة",
+  "en": "Maximum per transfer is {max} points"
  },
  "add_point.validator_must_be_positive": {
   "ar": "يجب أن يكون عدد النقاط أكبر من صفر",
@@ -539,9 +587,21 @@
   "ar": "تأكيد",
   "en": "Confirm"
  },
+ "badge_confirmation.confirm_and_pay": {
+  "ar": "تأكيد ودفع {points} نقطة",
+  "en": "Confirm & Pay {points} pts"
+ },
  "badge_confirmation.confirm_badge": {
   "ar": "تأكيد الشارة",
   "en": "Confirm Badge"
+ },
+ "badge_confirmation.duration_days": {
+  "ar": "{duration} أيام",
+  "en": "{duration} days"
+ },
+ "badge_confirmation.duration_one_day": {
+  "ar": "{duration} يوم",
+  "en": "{duration} day"
  },
  "badge_confirmation.extend_duration": {
   "ar": "تمديد المدة",
@@ -558,6 +618,14 @@
  "badge_confirmation.insufficient_points_balance": {
   "ar": "رصيد النقاط غير كافٍ",
   "en": "Insufficient Points Balance"
+ },
+ "badge_confirmation.more_views_percent": {
+  "ar": "+{percent}% مشاهدات أكثر",
+  "en": "+{percent}% more views"
+ },
+ "badge_confirmation.need_more_points": {
+  "ar": "تحتاج إلى {points} نقطة إضافية لتفعيل هذه الشارة",
+  "en": "You need {points} more points to activate this badge"
  },
  "badge_confirmation.points_required": {
   "ar": "النقاط المطلوبة",
@@ -695,6 +763,10 @@
   "ar": "تصفح الكل",
   "en": "Browse all"
  },
+ "categories_tab.listings_count": {
+  "ar": "{count} إعلان",
+  "en": "{count} listings"
+ },
  "categories_tab.most_active": {
   "ar": "الأكثر نشاطًا",
   "en": "Most active"
@@ -815,9 +887,21 @@
   "ar": "رد",
   "en": "Reply"
  },
+ "comments.replying_to": {
+  "ar": "الرد على {name}",
+  "en": "Replying to {name}"
+ },
  "comments.unknown_user": {
   "ar": "مستخدم",
   "en": "User"
+ },
+ "comments.view_reply_one": {
+  "ar": "عرض {count} رد",
+  "en": "View {count} reply"
+ },
+ "comments.view_reply_other": {
+  "ar": "عرض {count} ردود",
+  "en": "View {count} replies"
  },
  "comments.write_a_reply": {
   "ar": "اكتب ردًا...",
@@ -859,6 +943,10 @@
   "ar": "تعذّر فتح تطبيق البريد",
   "en": "Could not launch email app"
  },
+ "email_button.error_e": {
+  "ar": "خطأ: {error}",
+  "en": "Error: {error}"
+ },
  "email_button.no_email_available": {
   "ar": "لا يوجد بريد إلكتروني",
   "en": "No email available"
@@ -890,6 +978,10 @@
  "favorites.explore_posts": {
   "ar": "استكشف المنشورات",
   "en": "Explore Posts"
+ },
+ "favorites.favoriteservicepostslength_posts": {
+  "ar": "{count} منشور",
+  "en": "{count} posts"
  },
  "favorites.no_favorites_yet": {
   "ar": "لا توجد مفضلات بعد",
@@ -934,6 +1026,10 @@
  "help.could_not_open_email_app": {
   "ar": "تعذّر فتح تطبيق البريد. يرجى مراسلة support@talbna.cloud مباشرة.",
   "en": "Could not open email app. Please email support@talbna.cloud directly."
+ },
+ "help.error_e": {
+  "ar": "خطأ: {error}",
+  "en": "Error: {error}"
  },
  "help.find_answers_to_common_questions": {
   "ar": "اعثر على إجابات الأسئلة الشائعة أدناه",
@@ -1071,6 +1167,14 @@
   "ar": "تعذّر تحميل الصورة",
   "en": "Failed to load image"
  },
+ "image_picker_button.error_processing_images": {
+  "ar": "خطأ في معالجة الصور: {error}",
+  "en": "Error processing images: {error}"
+ },
+ "image_picker_button.error_processing_video": {
+  "ar": "خطأ في معالجة الفيديو: {error}",
+  "en": "Error processing video: {error}"
+ },
  "location.number_cannot_start_with_0": {
   "ar": "لا يمكن أن يبدأ الرقم بـ 0",
   "en": "Number cannot start with 0"
@@ -1119,9 +1223,21 @@
   "ar": "اضغط على الخريطة لاختيار الموقع أو اسحب العلامة",
   "en": "Tap on the map to select location or drag the marker"
  },
+ "modern_badge_card.plus_percent_views": {
+  "ar": "+{percent}% مشاهدات",
+  "en": "+{percent}% views"
+ },
+ "modern_badge_card.pts_per_day": {
+  "ar": "{points} نقطة/يوم",
+  "en": "{points} pts/day"
+ },
  "modern_media_grid.add": {
   "ar": "إضافة",
   "en": "Add"
+ },
+ "modern_media_grid.can_select_up_to_photos": {
+  "ar": "يمكنك اختيار حتى {count} صور",
+  "en": "You can select up to {count} photos"
  },
  "modern_media_grid.choose_photos": {
   "ar": "اختر صورًا",
@@ -1270,6 +1386,10 @@
   "ar": "اليوم",
   "en": "TODAY"
  },
+ "notification.unreadcount_unread": {
+  "ar": "{unread_count} غير مقروء",
+  "en": "{unread_count} unread"
+ },
  "notification.view_post": {
   "ar": "عرض المنشور",
   "en": "View post"
@@ -1330,6 +1450,10 @@
   "ar": "تعذّر فتح تطبيق الهاتف",
   "en": "Could not launch phone app"
  },
+ "phone_button.error_e": {
+  "ar": "خطأ: {error}",
+  "en": "Error: {error}"
+ },
  "phone_button.no_phone_number": {
   "ar": "لا يوجد رقم هاتف",
   "en": "No phone number"
@@ -1345,6 +1469,10 @@
  "phone_tile.phone": {
   "ar": "الهاتف",
   "en": "Phone"
+ },
+ "pin_input.attempts_remaining": {
+  "ar": "متبقٍ {count} محاولات",
+  "en": "{count} attempts remaining"
  },
  "pin_input.confirm_pin": {
   "ar": "تأكيد الرمز",
@@ -1406,6 +1534,10 @@
   "ar": "تعذّر تحميل المنشورات. اسحب للأسفل للتحديث.",
   "en": "Could not load posts. Pull down to refresh."
  },
+ "post.category.failed_to_load_location_data": {
+  "ar": "تعذّر تحميل بيانات الموقع: {error}",
+  "en": "Failed to load location data: {error}"
+ },
  "post.category.listings": {
   "ar": "إعلانات",
   "en": "listings"
@@ -1441,6 +1573,10 @@
  "post.category.retry": {
   "ar": "إعادة المحاولة",
   "en": "Retry"
+ },
+ "post.create.complete_step_first": {
+  "ar": "أكمل خطوة \"{step}\" أولًا",
+  "en": "Complete \"{step}\" step first"
  },
  "post.create.connection_failed_check_your_internet": {
   "ar": "فشل الاتصال. تحقق من الإنترنت وحاول مجددًا.",
@@ -1598,6 +1734,10 @@
   "ar": "أبحث عن شيء",
   "en": "I am looking for something"
  },
+ "post.update.complete_formstepsititle_step_first": {
+  "ar": "أكمل خطوة \"{title}\" أولًا",
+  "en": "Complete \"{title}\" step first"
+ },
  "post.update.connection_failed_check_your_internet": {
   "ar": "فشل الاتصال. تحقق من الإنترنت وحاول مجددًا.",
   "en": "Connection failed. Check your internet and try again."
@@ -1642,6 +1782,10 @@
   "ar": "لديك تغييرات غير محفوظة على هذا المنشور. هل تريد استعادتها؟",
   "en": "You have unsaved changes to this post. Would you like to restore them?"
  },
+ "post_preview.badge_duration_days": {
+  "ar": "{duration} أيام",
+  "en": "{duration} days"
+ },
  "post_preview.premium_badge": {
   "ar": "شارة مميزة",
   "en": "Premium Badge"
@@ -1670,13 +1814,25 @@
   "ar": "اسم المستخدم",
   "en": "Username"
  },
+ "premium.your_post_will_be_displayed": {
+  "ar": "سيظهر منشورك بشارة {badge_type_text} المميزة كما هو موضح أدناه، مما يزيد ظهوره ويجذب مشاهدات أكثر.",
+  "en": "Your post will be displayed with a premium {badge_type_text} badge as shown below, increasing its visibility and attracting more views."
+ },
  "privacy.could_not_open_email_app": {
   "ar": "تعذّر فتح تطبيق البريد",
   "en": "Could not open email app"
  },
+ "privacy.error_e": {
+  "ar": "خطأ: {error}",
+  "en": "Error: {error}"
+ },
  "privacy.thank_you_for_reading_our": {
   "ar": "شكرًا لقراءة سياسة الخصوصية",
   "en": "Thank you for reading our privacy policy"
+ },
+ "privacy_policy.last_updated": {
+  "ar": "آخر تحديث: {date}",
+  "en": "Last Updated: {date}"
  },
  "privacy_policy.title": {
   "ar": "سياسة الخصوصية",
@@ -1970,6 +2126,10 @@
   "ar": "تعذّر بدء المحادثة",
   "en": "Could not start conversation"
  },
+ "profile_screen.error_e": {
+  "ar": "خطأ: {error}",
+  "en": "Error: {error}"
+ },
  "profile_screen.id_copied_to_clipboard": {
   "ar": "تم نسخ المعرّف",
   "en": "ID copied to clipboard"
@@ -1989,6 +2149,10 @@
  "purchase.approved": {
   "ar": "مقبول",
   "en": "Approved"
+ },
+ "purchase.buy_productpointsamount_points_productprice": {
+  "ar": "شراء {points_amount} نقطة - {price}",
+  "en": "Buy {points_amount} points - {price}"
  },
  "purchase.cancelled": {
   "ar": "ملغى",
@@ -2037,6 +2201,10 @@
  "purchase.something_went_wrong_please_try": {
   "ar": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
   "en": "Something went wrong. Please try again."
+ },
+ "purchase.statepointsamount_points_added_successfully": {
+  "ar": "تمت إضافة {points_amount} نقطة بنجاح!",
+  "en": "{points_amount} points added successfully!"
  },
  "purchase.too_many_attempts_please_wait": {
   "ar": "محاولات كثيرة. يرجى الانتظار قليلًا",
@@ -2146,6 +2314,10 @@
   "ar": "غير مهتم",
   "en": "Not interested"
  },
+ "reels_screen.rate_limit_countdown": {
+  "ar": "تم بلوغ الحد. إعادة المحاولة خلال {seconds} ثانية...",
+  "en": "Rate limit reached. Retrying in {seconds} seconds..."
+ },
  "reels_screen.removed_from_saved": {
   "ar": "تمت الإزالة من المحفوظات",
   "en": "Removed from saved"
@@ -2181,6 +2353,14 @@
  "reels_screen.view_on_map": {
   "ar": "عرض على الخريطة",
   "en": "View on map"
+ },
+ "reels_screen.view_reply_count_one": {
+  "ar": "عرض {count} رد",
+  "en": "View {count} reply"
+ },
+ "reels_screen.view_reply_count_other": {
+  "ar": "عرض {count} ردود",
+  "en": "View {count} replies"
  },
  "reels_screen.write_a_reply": {
   "ar": "اكتب ردًا...",
@@ -2238,6 +2418,10 @@
   "ar": "شارك كود الإحالة",
   "en": "Share Referral Code"
  },
+ "referral.share_message": {
+  "ar": "انضم إليّ في طلبنا! استخدم رمزي {code} عند التسجيل.\n\n{deep_link}",
+  "en": "Join me on Talabna! Use my code {code} when you sign up.\n\n{deep_link}"
+ },
  "referral.share_subject": {
   "ar": "انضم إليّ في طلبنا",
   "en": "Join me on Talabna"
@@ -2274,9 +2458,21 @@
   "ar": "الطلبات اليومية (آخر 30 يومًا)",
   "en": "Daily Requests (last 30 days)"
  },
+ "request_monitor_screen.daily_stats_line": {
+  "ar": "{requests} طلب  |  {users} مستخدم  |  {errors} خطأ",
+  "en": "{requests} req  |  {users} users  |  {errors} err"
+ },
+ "request_monitor_screen.endpoint_stats_line": {
+  "ar": "{count} طلب  |  {users} مستخدم  |  {avgMs} مللي ثانية متوسط",
+  "en": "{count} requests  |  {users} users  |  {avgMs}ms avg"
+ },
  "request_monitor_screen.errors": {
   "ar": "الأخطاء",
   "en": "Errors"
+ },
+ "request_monitor_screen.errors_short": {
+  "ar": "{errors} خطأ",
+  "en": "{errors} err"
  },
  "request_monitor_screen.failed_to_load_data": {
   "ar": "تعذّر تحميل البيانات",
@@ -2317,6 +2513,10 @@
  "request_monitor_screen.last_7_days": {
   "ar": "آخر 7 أيام",
   "en": "Last 7 days"
+ },
+ "request_monitor_screen.last_n_hours": {
+  "ar": "آخر {hours} ساعة",
+  "en": "Last {hours} hours"
  },
  "request_monitor_screen.max_response": {
   "ar": "أقصى استجابة",
@@ -2374,6 +2574,14 @@
   "ar": "7 أيام",
   "en": "7 days"
  },
+ "request_monitor_screen.period_hrs": {
+  "ar": "{hours} ساعة",
+  "en": "{hours} hrs"
+ },
+ "request_monitor_screen.raw_logs_subtitle": {
+  "ar": "{count} صف (التنظيف التلقائي يحتفظ بآخر 3 أيام)",
+  "en": "{count} rows (auto-cleanup keeps last 3 days)"
+ },
  "request_monitor_screen.raw_logs_title": {
   "ar": "السجلات الخام في قاعدة البيانات",
   "en": "Raw Logs in Database"
@@ -2422,6 +2630,10 @@
   "ar": "إجمالي الطلبات",
   "en": "Total Requests"
  },
+ "request_monitor_screen.total_requests_count": {
+  "ar": "{count} طلب",
+  "en": "{count} requests"
+ },
  "request_monitor_screen.unique_ips": {
   "ar": "عناوين IP الفريدة",
   "en": "Unique IPs"
@@ -2429,6 +2641,18 @@
  "request_monitor_screen.unique_users": {
   "ar": "المستخدمون الفريدون",
   "en": "Unique Users"
+ },
+ "request_monitor_screen.user_hash": {
+  "ar": "المستخدم #{userId}",
+  "en": "User #{userId}"
+ },
+ "request_monitor_screen.user_id_line": {
+  "ar": "معرّف المستخدم: {userId}",
+  "en": "User ID: {userId}"
+ },
+ "request_monitor_screen.user_stats_line": {
+  "ar": "{count} طلب  |  {ips} عنوان IP  |  {avgMs} مللي ثانية متوسط  |  {errors} خطأ",
+  "en": "{count} requests  |  {ips} IPs  |  {avgMs}ms avg  |  {errors} errors"
  },
  "resume.add_skill": {
   "ar": "أضف مهارة",
@@ -2666,6 +2890,10 @@
   "ar": "لا توجد نتائج",
   "en": "No results found"
  },
+ "search_screen.posts_count": {
+  "ar": "المنشورات ({count})",
+  "en": "Posts ({count})"
+ },
  "search_screen.recent_searches": {
   "ar": "عمليات البحث الأخيرة",
   "en": "Recent searches"
@@ -2689,6 +2917,10 @@
  "search_screen.type_to_find_users_and_posts": {
   "ar": "اكتب في حقل البحث للعثور على مستخدمين ومنشورات",
   "en": "Type in the search field to find users and posts"
+ },
+ "search_screen.users_count": {
+  "ar": "المستخدمون ({count})",
+  "en": "Users ({count})"
  },
  "service_post.expired": {
   "ar": "منتهية الصلاحية",
@@ -2742,6 +2974,10 @@
   "ar": "توثيق هذا المنشور",
   "en": "Mark this post as verified"
  },
+ "service_post_action.operation_error": {
+  "ar": "خطأ في العملية: {error}",
+  "en": "Service Post Operation Error: {error}"
+ },
  "service_post_action.operation_success": {
   "ar": "تمت العملية بنجاح",
   "en": "Service Post Operation Success"
@@ -2758,9 +2994,17 @@
   "ar": "إلغاء حظر المستخدم",
   "en": "Unblock User"
  },
+ "service_post_card.days_ago": {
+  "ar": "منذ {count} ي",
+  "en": "{count}d ago"
+ },
  "service_post_card.featured": {
   "ar": "مميز",
   "en": "FEATURED"
+ },
+ "service_post_card.hours_ago": {
+  "ar": "منذ {count} س",
+  "en": "{count}h ago"
  },
  "service_post_card.just_now": {
   "ar": "الآن",
@@ -2769,6 +3013,10 @@
  "service_post_card.like_failed": {
   "ar": "تعذّر حفظ الإعجاب. حاول مجددًا.",
   "en": "Could not save your like. Try again."
+ },
+ "service_post_card.minutes_ago": {
+  "ar": "منذ {count} د",
+  "en": "{count}m ago"
  },
  "service_post_card.offer": {
   "ar": "عرض",
@@ -2866,6 +3114,10 @@
   "ar": "تم تفعيل وضع توفير البيانات",
   "en": "Data Saver Mode Enabled"
  },
+ "settings.data_saver_error": {
+  "ar": "خطأ في تحديث وضع توفير البيانات: {error}",
+  "en": "Error updating data saver mode: {error}"
+ },
  "settings.data_saver_info": {
   "ar": "في وضع توفير البيانات لن يتم تحميل الصور والوسائط في المنشورات باستثناء قسم المقاطع، وهذا يساعد على تقليل استهلاك البيانات.",
   "en": "In Data Saver Mode, media and photos in all posts will not be loaded except for the reels category. This will help reduce data consumption."
@@ -2877,6 +3129,10 @@
  "settings.delete_account_desc": {
   "ar": "سيؤدي هذا إلى حذف ملفك الشخصي وإعلاناتك وصورك وتعليقاتك وسجل النقاط والمشتريات نهائيًا، ولا يمكن التراجع عن ذلك.",
   "en": "This permanently deletes your profile, listings, photos, comments, and points/purchase history. This cannot be undone."
+ },
+ "settings.delete_account_error": {
+  "ar": "تعذّر حذف حسابك: {error}",
+  "en": "Could not delete your account: {error}"
  },
  "settings.delete_account_title": {
   "ar": "حذف حسابك؟",
@@ -2905,6 +3161,10 @@
  "settings.language_changed": {
   "ar": "تم تغيير اللغة بنجاح",
   "en": "Language changed successfully"
+ },
+ "settings.logout_error": {
+  "ar": "خطأ أثناء تسجيل الخروج: {error}",
+  "en": "Error during logout: {error}"
  },
  "settings.password_required": {
   "ar": "كلمة المرور مطلوبة",
@@ -3034,6 +3294,10 @@
   "ar": "خطأ في تحميل المعاملات",
   "en": "Error loading transactions"
  },
+ "transaction_list.from_user": {
+  "ar": "من: {name}",
+  "en": "From: {name}"
+ },
  "transaction_list.new": {
   "ar": "جديد",
   "en": "New"
@@ -3057,6 +3321,10 @@
  "transaction_list.sent_points_tab": {
   "ar": "المرسلة",
   "en": "Sent"
+ },
+ "transaction_list.to_user": {
+  "ar": "إلى: {name}",
+  "en": "To: {name}"
  },
  "transactions_screen.admin_grant": {
   "ar": "منحة من الإدارة",
@@ -3138,6 +3406,14 @@
   "ar": "تحويل كبير — تحقق من التفاصيل بعناية",
   "en": "Large transfer — verify details carefully"
  },
+ "transfer.limitsamounttodaylimitsdailylimit_pts": {
+  "ar": "{amount_today}/{daily_limit} نقطة",
+  "en": "{amount_today}/{daily_limit} pts"
+ },
+ "transfer.limitstransferstodaylimitsdailytransferlimit_transfers": {
+  "ar": "{transfers_today}/{daily_transfer_limit} تحويلات",
+  "en": "{transfers_today}/{daily_transfer_limit} transfers"
+ },
  "transfer.points": {
   "ar": "نقاط",
   "en": "points"
@@ -3181,6 +3457,10 @@
  "watsapp_button.could_not_launch_whatsapp": {
   "ar": "تعذّر فتح واتساب",
   "en": "Could not launch WhatsApp"
+ },
+ "watsapp_button.error_e": {
+  "ar": "خطأ: {error}",
+  "en": "Error: {error}"
  },
  "watsapp_button.no_whatsapp_number": {
   "ar": "لا يوجد رقم واتساب",
