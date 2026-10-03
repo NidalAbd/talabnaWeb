@@ -36,7 +36,7 @@ return [
 
         'database' => [
             'driver' => 'database',
-            'table' => 'service_posts',
+            'table' => 'jobs',
             'queue' => 'default',
             'retry_after' => 90,
             'after_commit' => false,
@@ -79,7 +79,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | These options configure the behavior of failed queue job logging so you
-    | can control which database and table are used to store the service_posts that
+    | can control which database and table are used to store the jobs that
     | have failed. You may change them to any database / table you wish.
     |
     */
