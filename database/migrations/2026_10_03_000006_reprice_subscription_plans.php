@@ -15,11 +15,11 @@ return new class extends Migration
     public function up(): void
     {
         $plans = [
-            'basic' => [10, ['ai_images_per_month' => 5, 'bonus_points_percent' => 0, 'featured_posts' => 1,
+            'basic' => [20, ['ai_images_per_month' => 5, 'bonus_points_percent' => 0, 'featured_posts' => 1,
                 'auto_translate_posts' => false, 'priority_support' => false, 'max_photos_per_post' => 10, 'badge_discount_percent' => 0]],
-            'pro' => [25, ['ai_images_per_month' => 20, 'bonus_points_percent' => 5, 'featured_posts' => 3,
+            'pro' => [50, ['ai_images_per_month' => 20, 'bonus_points_percent' => 5, 'featured_posts' => 3,
                 'auto_translate_posts' => true, 'priority_support' => false, 'max_photos_per_post' => 20, 'badge_discount_percent' => 10]],
-            'business' => [50, ['ai_images_per_month' => 50, 'bonus_points_percent' => 10, 'featured_posts' => 8,
+            'business' => [100, ['ai_images_per_month' => 50, 'bonus_points_percent' => 10, 'featured_posts' => 8,
                 'auto_translate_posts' => true, 'priority_support' => false, 'max_photos_per_post' => 30, 'badge_discount_percent' => 20]],
         ];
         foreach ($plans as $slug => [$price, $features]) {
