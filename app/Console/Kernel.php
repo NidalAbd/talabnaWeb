@@ -23,6 +23,7 @@ class Kernel extends ConsoleKernel
         // This ensures badges expire at approximately the same time they were created
         $schedule->command('badges:expire')->everyFifteenMinutes();
         $schedule->command('purchase-attempts:sweep')->hourly()->withoutOverlapping();
+        $schedule->command('purchase-attempts:remind')->everyThirtyMinutes()->withoutOverlapping();
 
         // Regenerate static sitemap files daily at 5 AM. Keeps Google's view
         // fresh as new listings are added between deploys. Static-file

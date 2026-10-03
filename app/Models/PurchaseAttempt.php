@@ -13,12 +13,13 @@ class PurchaseAttempt extends Model
 
     protected $fillable = [
         'user_id', 'product_id', 'platform', 'status', 'error_code', 'error_message',
-        'price', 'currency', 'app_version', 'purchase_request_id', 'resolved_at',
+        'price', 'currency', 'app_version', 'purchase_request_id', 'resolved_at', 'notified_at',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'resolved_at' => 'datetime',
+        'notified_at' => 'datetime',
     ];
 
     protected $attributes = ['status' => 'attempted'];
