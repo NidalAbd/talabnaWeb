@@ -55,6 +55,7 @@ class point_purchase_notifications extends Notification
         return FcmMessage::create()
             ->data([
                 'type' => 'point_purchase',
+                'target_type' => 'points',
                 'status' => $this->status,
                 'points' => (string) $this->points,
                 'request_id' => $this->requestId ?? '',
@@ -64,8 +65,8 @@ class point_purchase_notifications extends Notification
             ])
             ->notification(
                 \NotificationChannels\Fcm\Resources\Notification::create()
-                    ->title($title)
-                    ->body($body)
+                    ->title((($notifiable->locale ?? 'ar') === 'ar') ? $titleAr : $title)
+                    ->body((($notifiable->locale ?? 'ar') === 'ar') ? $bodyAr : $body)
             );
     }
 }

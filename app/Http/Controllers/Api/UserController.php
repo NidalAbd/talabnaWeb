@@ -452,22 +452,24 @@ class UserController extends Controller
         $isFollower = $currentUser->following->contains($followedUser);
 
         if ($isFollower) {
+            $followerName = $currentUser->user_name ?: ($currentUser->name ?: 'Someone');
             $message = json_encode([
-                'en' => "{$currentUser->username} started following you! You can check your new follower in the profile followers section. 👥",
-                'ar' => "بدأ {$currentUser->username} في متابعتك! يمكنك التحقق من المتابع الجديد في قسم المتابعين بالملف الشخصي. 👥"
-            ]);
+                'en' => "{$followerName} started following you! Tap to see their profile. 👥",
+                'ar' => "بدأ {$followerName} في متابعتك! اضغط لعرض ملفه الشخصي. 👥"
+            ], JSON_UNESCAPED_UNICODE);
 
             $notification = new Notification([
                 'message' => $message,
                 'user_id' => $followedUser->id,
-                'type'    => 'follower'
+                'type'    => 'follower',
+                'target_type' => 'user',
+                'target_id' => $currentUser->id,
             ]);
 
             $followedUser->notifications()->save($notification);
 
             try {
                 if (!empty($followedUser->fcm_token)) {
-                    $followerName = $currentUser->user_name ?? $currentUser->name ?? 'Someone';
                     $followedUser->notify(new \App\Notifications\NewFollowerNotification($followerName, $currentUser->id));
                 }
             } catch (\Exception $e) {

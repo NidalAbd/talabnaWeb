@@ -50,14 +50,16 @@ class CommentNotification extends Notification
             ->data([
                 'type' => $this->isReply ? 'comment_reply' : 'comment',
                 'post_id' => (string) $this->postId,
+                'target_type' => 'post',
+                'target_id' => (string) $this->postId,
                 'title_ar' => $titleAr,
                 'body_ar' => $bodyAr,
                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
             ])
             ->notification(
                 \NotificationChannels\Fcm\Resources\Notification::create()
-                    ->title($title)
-                    ->body($body)
+                    ->title((($notifiable->locale ?? 'ar') === 'ar') ? $titleAr : $title)
+                    ->body((($notifiable->locale ?? 'ar') === 'ar') ? $bodyAr : $body)
             );
     }
 }

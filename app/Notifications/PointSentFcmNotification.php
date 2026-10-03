@@ -38,6 +38,7 @@ class PointSentFcmNotification extends Notification
         return FcmMessage::create()
             ->data([
                 'type' => 'point_sent',
+                'target_type' => 'points',
                 'points' => (string) $this->points,
                 'to_user_id' => (string) $this->toUserId,
                 'title_ar' => $titleAr,
@@ -46,8 +47,8 @@ class PointSentFcmNotification extends Notification
             ])
             ->notification(
                 \NotificationChannels\Fcm\Resources\Notification::create()
-                    ->title($title)
-                    ->body($body)
+                    ->title((($notifiable->locale ?? 'ar') === 'ar') ? $titleAr : $title)
+                    ->body((($notifiable->locale ?? 'ar') === 'ar') ? $bodyAr : $body)
             );
     }
 }

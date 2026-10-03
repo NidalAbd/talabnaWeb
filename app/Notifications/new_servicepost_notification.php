@@ -37,6 +37,8 @@ class new_servicepost_notification extends Notification
             ->data([
                 'type' => 'new_service_post',
                 'post_id' => (string) $this->servicePost->id,
+                'target_type' => 'post',
+                'target_id' => (string) $this->servicePost->id,
                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',
             ])
             ->notification(

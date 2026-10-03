@@ -72,6 +72,8 @@ class BadgeExpirationNotification extends Notification
             ->data([
                 'type' => 'badge_expiration',
                 'post_id' => (string) $this->postId,
+                'target_type' => 'post',
+                'target_id' => (string) $this->postId,
                 'title_ar' => $titleAr,
                 'body_ar' => $bodyAr,
                 'click_action' => 'FLUTTER_NOTIFICATION_CLICK',

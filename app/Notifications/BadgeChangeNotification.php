@@ -65,6 +65,8 @@ class BadgeChangeNotification extends Notification
             ->data([
                 'type' => 'badge_' . $this->type,
                 'post_id' => (string) $this->postId,
+                'target_type' => 'post',
+                'target_id' => (string) $this->postId,
                 'badge_name' => $this->badgeName,
                 'title_ar' => $titleAr,
                 'body_ar' => $this->messageAr ?: $body,

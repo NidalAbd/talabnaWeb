@@ -12,13 +12,14 @@ class NotificationController extends Controller
 {
     public function index($user): \Illuminate\Http\JsonResponse
     {
-        $notifications = Notification::where('user_id', $user)->orderBy('created_at', 'desc')->paginate(10);
+        // Only your own notifications, whatever id is in the URL.
+        $notifications = Notification::where('user_id', Auth::id())->orderBy('created_at', 'desc')->paginate(10);
         return response()->json($notifications);
     }
 
     public function countNotification($user): \Illuminate\Http\JsonResponse
     {
-        $notifications = Notification::where('user_id', $user)->where('read', 0)->orderBy('created_at', 'desc')->count();
+        $notifications = Notification::where('user_id', Auth::id())->where('read', 0)->orderBy('created_at', 'desc')->count();
         return response()->json($notifications);
     }
 
