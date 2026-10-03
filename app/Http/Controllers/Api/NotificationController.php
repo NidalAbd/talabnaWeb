@@ -25,6 +25,9 @@ class NotificationController extends Controller
     public function markAsRead($user , $notification): \Illuminate\Http\JsonResponse
     {
         $notification = Notification::findOrFail($notification);
+        if ((int) $notification->user_id !== (int) Auth::id()) {
+            return response()->json(['error' => 'Not found'], 404);
+        }
         $notification->read = 1;
         $notification->save();
         return response()->json(['message' => 'Notification marked as read.' .$notification->read], 200);

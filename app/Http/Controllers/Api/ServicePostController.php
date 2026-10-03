@@ -205,6 +205,18 @@ class ServicePostController extends Controller
     {
 
         $servicePosts = ServicePost::find($servicePost);
+        if (!$servicePosts) {
+            return response()->json(['error' => 'Service post not found'], 404);
+        }
+        $me = Auth::user();
+        if (!$me || ((int) $servicePosts->user_id !== (int) $me->id && !$me->hasRole(['admin']))) {
+            return response()->json(['error' => 'You can only add photos to your own posts'], 403);
+        }
+        // Images and MP4 video only (never scripts or other files).
+        $request->validate([
+            'images' => 'nullable|array|max:10',
+            'images.*' => 'file|mimes:jpg,jpeg,png,webp,heic,heif,gif,mp4|max:51200',
+        ]);
         if ($request->hasFile('images')) {
             foreach ($request->file('images') as $photo) {
                 $photoPath = $photo->store('storage/photos/posts');
@@ -744,6 +756,16 @@ class ServicePostController extends Controller
     public function deletePhoto($servicePostImageId)
     {
         $photo = Photos::find($servicePostImageId);
+        if (!$photo) {
+            return response()->json(['error' => 'Photo not found'], 404);
+        }
+        // Only the owner of the post the photo belongs to (or an admin).
+        $owner = $photo->photoable;
+        $me = Auth::user();
+        if (!($owner instanceof ServicePost) || !$me
+            || ((int) $owner->user_id !== (int) $me->id && !$me->hasRole(['admin']))) {
+            return response()->json(['error' => 'You can only delete photos from your own posts'], 403);
+        }
         if (Storage::disk('public')->exists($photo->src) && !in_array($photo->src, ['storage/photos/servicepost1.jpg', 'storage/photos/servicepost2.jpg', 'storage/photos/servicepost3.jpg', 'storage/photos/servicepost4.jpg', 'storage/photos/servicepost5.jpg'])) {
             Storage::delete($photo->src);
         }
@@ -1566,6 +1588,9 @@ class ServicePostController extends Controller
         try {
             $user = Auth::user();
             $servicePost = ServicePost::findOrFail($servicePost);
+            if ((int) $servicePost->user_id !== (int) $user->id && !$user->hasRole(['admin'])) {
+                return response()->json(['error' => 'You can only change badges on your own posts'], 403);
+            }
 
             // Check if badge has expired before updating
             $this->checkAndUpdateBadgeExpiration($servicePost);
