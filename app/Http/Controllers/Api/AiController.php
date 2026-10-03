@@ -44,7 +44,8 @@ class AiController extends Controller
 
         return response()->json([
             'version' => (int) optional($features->max('updated_at'))->timestamp,
-            'confirm_from' => (int) config('ai.confirm_from', 3),
+            // Ask before every paid action (owner, 2026-10-03); plan-included uses cost 0 and skip it.
+            'confirm_from' => max(1, (int) \App\Models\AppSetting::get('ai.confirm_from', 1)),
             // 'points' is what THIS user pays now: 0 when their plan includes
             // the feature ('included' = remaining uses, -1 = unlimited).
             'features' => $features->mapWithKeys(function (AiFeature $f) use ($userId) {

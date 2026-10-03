@@ -37,6 +37,10 @@
           <input type="number" min="1" v-model.number="form.limits.daily_media_per_user" class="num" />
         </label>
         <p class="muted small">Stops anyone from generating without end, even with points. Max 2 images and 1 video at the same time.</p>
+        <label class="lim" style="margin-top:12px">Ask the user to confirm when an AI action costs at least (points)
+          <input type="number" min="1" v-model.number="form.limits.confirm_from" class="num" />
+        </label>
+        <p class="muted small">1 = always ask before taking points. Actions included in the user's plan are free and never ask.</p>
       </div>
 
       <div class="actions">
@@ -58,7 +62,7 @@ const loading = ref(true)
 const saving = ref(false)
 const message = ref('')
 const ok = ref(true)
-const form = ref({ ai_features: [], media: { free: 4, max: 10, extra_points: 1 }, limits: { daily_media_per_user: 30 } })
+const form = ref({ ai_features: [], media: { free: 4, max: 10, extra_points: 1 }, limits: { daily_media_per_user: 30, confirm_from: 1 } })
 
 async function load() {
   loading.value = true
