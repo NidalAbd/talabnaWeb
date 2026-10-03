@@ -3,7 +3,7 @@
     "apps": [],
     "details": [
       {
-        "appID": "TEAM_ID.com.talabna.talabna",
+        "appID": "K625SDN9H8.com.talabna.talabna",
         "paths": [
           "/api/deep-link/*",
           "/service-post/*",
@@ -17,7 +17,7 @@
   },
   "webcredentials": {
     "apps": [
-      "TEAM_ID.com.talabna.talabna"
+      "K625SDN9H8.com.talabna.talabna"
     ]
   }
 }
