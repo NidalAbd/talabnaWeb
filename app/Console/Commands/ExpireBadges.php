@@ -60,7 +60,7 @@ class ExpireBadges extends Command
                 ->get();
 
             foreach ($expiredByNewSystem as $post) {
-                $oldBadgeName = $post->badgeType?->name_ar ?? $post->have_badge;
+                $oldBadgeName = $this->badgeNames($post);
 
                 // Reset to default badge
                 $post->badge_type_id = $defaultBadge?->id;
@@ -73,8 +73,8 @@ class ExpireBadges extends Command
                 $this->createExpirationNotification($post, $oldBadgeName);
 
                 $count++;
-                $this->info("Expired badge for service post #{$post->id} - Badge was: {$oldBadgeName}");
-                Log::info("Expired badge for service post #{$post->id} - Badge was: {$oldBadgeName}");
+                $this->info("Expired badge for service post #{$post->id} - Badge was: " . ($oldBadgeName['en'] ?? reset($oldBadgeName)) . "");
+                Log::info("Expired badge for service post #{$post->id} - Badge was: " . ($oldBadgeName['en'] ?? reset($oldBadgeName)) . "");
             }
 
             // Fallback: Find posts using old have_badge system
@@ -86,6 +86,7 @@ class ExpireBadges extends Command
 
             foreach ($expiredByOldSystem as $post) {
                 $oldBadge = $post->have_badge;
+                $oldNames = $this->badgeNames($post);
 
                 // Reset badge to standard
                 $post->badge_type_id = $defaultBadge?->id;
@@ -95,7 +96,7 @@ class ExpireBadges extends Command
                 $post->save();
 
                 // Create expiration notification
-                $this->createExpirationNotification($post, $oldBadge);
+                $this->createExpirationNotification($post, $oldNames);
 
                 $count++;
                 $this->info("Expired badge for service post #{$post->id} (legacy) - Badge was: {$oldBadge}");
@@ -118,7 +119,7 @@ class ExpireBadges extends Command
                 $expirationDate = Carbon::parse($post->created_at)->addDays($post->badge_duration);
 
                 if (Carbon::now()->greaterThanOrEqualTo($expirationDate)) {
-                    $oldBadgeName = $post->badgeType?->name_ar ?? $post->have_badge;
+                    $oldBadgeName = $this->badgeNames($post);
 
                     // Reset badge to standard
                     $post->badge_type_id = $defaultBadge?->id;
@@ -131,8 +132,8 @@ class ExpireBadges extends Command
                     $this->createExpirationNotification($post, $oldBadgeName);
 
                     $count++;
-                    $this->info("Expired badge for service post #{$post->id} using fallback method - Badge was: {$oldBadgeName}");
-                    Log::info("Expired badge for service post #{$post->id} using fallback method - Badge was: {$oldBadgeName}");
+                    $this->info("Expired badge for service post #{$post->id} using fallback method - Badge was: " . ($oldBadgeName['en'] ?? reset($oldBadgeName)) . "");
+                    Log::info("Expired badge for service post #{$post->id} using fallback method - Badge was: " . ($oldBadgeName['en'] ?? reset($oldBadgeName)) . "");
                 } else {
                     // Update the badge_expires_at field for future checks
                     $post->badge_expires_at = $expirationDate;
@@ -161,12 +162,30 @@ class ExpireBadges extends Command
     /**
      * Create expiration notification
      */
-    protected function createExpirationNotification(ServicePost $post, string $oldBadgeName): void
+    /** The expired badge's name in every language (legacy posts: matched by their Arabic name). */
+    protected function badgeNames(ServicePost $post): array
     {
-        $message = json_encode([
-            'ar' => "تم تغيير شارة منشور الخدمة من {$oldBadgeName} إلى عادي بسبب انتهاء المدة.",
-            'en' => "Service Post Badge changed from {$oldBadgeName} to normal due to expiration."
-        ]);
+        $names = $post->badgeType?->name;
+        if (is_array($names) && $names) return $names;
+        $legacy = (string) $post->have_badge;
+        $match = \App\Models\BadgeType::all()->first(fn ($b) => in_array($legacy, (array) $b->name, true));
+        return $match ? (array) $match->name : ['ar' => $legacy, 'en' => $legacy];
+    }
+
+    protected function normalNames(): array
+    {
+        return (array) (\App\Models\BadgeType::where('slug', 'normal')->first()?->name ?? ['ar' => 'عادي', 'en' => 'Normal']);
+    }
+
+    protected function createExpirationNotification(ServicePost $post, array $oldBadgeName): void
+    {
+        $normal = $this->normalNames();
+        // In-app notification list: one text per supported language.
+        $texts = [];
+        foreach (array_keys(BadgeExpirationNotification::TEXT) as $lang) {
+            $texts[$lang] = BadgeExpirationNotification::render($lang, $oldBadgeName, $normal, $post->id)[1];
+        }
+        $message = json_encode($texts, JSON_UNESCAPED_UNICODE);
 
         Notification::create([
             'message' => $message,
@@ -178,7 +197,7 @@ class ExpireBadges extends Command
         try {
             $user = User::find($post->user_id);
             if ($user && !empty($user->fcm_token)) {
-                $user->notify(new BadgeExpirationNotification($oldBadgeName, $post->id));
+                $user->notify(new BadgeExpirationNotification($oldBadgeName, $post->id, $normal));
                 $this->info("FCM notification sent to user #{$post->user_id}");
             }
         } catch (\Exception $e) {
