@@ -1,0 +1,3209 @@
+{
+ "about.about": {
+  "ar": "حول التطبيق",
+  "en": "About"
+ },
+ "about.app_description": {
+  "ar": "طلبنا تطبيق متعدد الاستخدامات يتيح للمستخدمين نشر وتصفح فئات مختلفة مثل الوظائف والعقارات والسيارات والأجهزة والخدمات العامة. سواء كنت تبحث عن فرصة عمل جديدة أو مكان للسكن أو سيارة أو أي خدمة، فإن طلبنا يلبي احتياجاتك. واجهته السهلة وميزات البحث تجعل العثور على ما تريد والتواصل مع المشترين أو البائعين أمرًا سهلًا.",
+  "en": "Talbna is a versatile app that allows users to post and browse various categories such as jobs, real estate, cars, devices, and general services. Whether you're looking for a new career opportunity, a place to live, a car or any kind of service, Talbna has got you covered. Its user-friendly interface and search features make it easy to find what you're looking for and connect with potential buyers or sellers."
+ },
+ "about.contact_us": {
+  "ar": "تواصل معنا",
+  "en": "Contact Us"
+ },
+ "about.could_not_launch_url": {
+  "ar": "تعذّر فتح الرابط",
+  "en": "Could not launch URL"
+ },
+ "about.email": {
+  "ar": "البريد الإلكتروني",
+  "en": "Email"
+ },
+ "about.facebook": {
+  "ar": "فيسبوك",
+  "en": "Facebook"
+ },
+ "about.key_features": {
+  "ar": "الميزات الرئيسية",
+  "en": "Key Features"
+ },
+ "about.made_with_by_talbna_team": {
+  "ar": "صُنع بعناية من فريق طلبنا",
+  "en": "Made with care by the Talbna team"
+ },
+ "about.website": {
+  "ar": "الموقع الإلكتروني",
+  "en": "Website"
+ },
+ "about.whatsapp": {
+  "ar": "واتساب",
+  "en": "WhatsApp"
+ },
+ "add_point.cannot_complete_transfer": {
+  "ar": "تعذّر إتمام التحويل",
+  "en": "Cannot complete transfer"
+ },
+ "add_point.daily_transfer_limits": {
+  "ar": "حدود التحويل اليومية",
+  "en": "Daily Transfer Limits"
+ },
+ "add_point.enter_points_hint": {
+  "ar": "أدخل عدد النقاط",
+  "en": "Enter points amount"
+ },
+ "add_point.insufficient_balance": {
+  "ar": "ليس لديك رصيد كافٍ في حسابك",
+  "en": "You don't have enough balance in your account"
+ },
+ "add_point.invalid_pin": {
+  "ar": "رمز غير صحيح",
+  "en": "Invalid PIN"
+ },
+ "add_point.no_previous_transactions": {
+  "ar": "لا توجد معاملات سابقة",
+  "en": "No previous transactions"
+ },
+ "add_point.no_transactions_with_user": {
+  "ar": "لا توجد معاملات مع هذا المستخدم بعد",
+  "en": "No transactions with this user yet"
+ },
+ "add_point.number_of_points_label": {
+  "ar": "عدد النقاط",
+  "en": "Number of Points"
+ },
+ "add_point.pin_created_success": {
+  "ar": "تم إنشاء رمز التحويل بنجاح",
+  "en": "Transfer PIN created successfully"
+ },
+ "add_point.pin_updated_success": {
+  "ar": "تم تحديث رمز التحويل بنجاح",
+  "en": "Transfer PIN updated successfully"
+ },
+ "add_point.quick_selection": {
+  "ar": "اختيار سريع:",
+  "en": "Quick selection:"
+ },
+ "add_point.secure_transfer": {
+  "ar": "تحويل آمن",
+  "en": "Secure Transfer"
+ },
+ "add_point.sending_to": {
+  "ar": "الإرسال إلى",
+  "en": "Sending to"
+ },
+ "add_point.show_all_transactions": {
+  "ar": "عرض كل معاملاتك",
+  "en": "Show all your transactions"
+ },
+ "add_point.show_between_us": {
+  "ar": "عرض المعاملات بيننا",
+  "en": "Show transactions between us"
+ },
+ "add_point.too_many_attempts": {
+  "ar": "محاولات كثيرة. يرجى الانتظار قليلًا",
+  "en": "Too many attempts. Please wait a moment"
+ },
+ "add_point.transactions_will_appear": {
+  "ar": "ستظهر معاملاتك هنا بعد تحويل النقاط",
+  "en": "Your transactions will appear here after point transfers"
+ },
+ "add_point.transfer_already_processed": {
+  "ar": "تمت معالجة التحويل مسبقًا.",
+  "en": "Transfer already processed."
+ },
+ "add_point.transfer_points_desc": {
+  "ar": "أدخل عدد النقاط التي تريد تحويلها إلى المستخدم.",
+  "en": "Enter the number of points you want to transfer to the user."
+ },
+ "add_point.transfer_points_title": {
+  "ar": "تحويل النقاط",
+  "en": "Transfer Points"
+ },
+ "add_point.transfer_to_start": {
+  "ar": "حوّل بعض النقاط لبدء المعاملات مع هذا المستخدم",
+  "en": "Transfer some points to start transactions with this user"
+ },
+ "add_point.validator_invalid_number": {
+  "ar": "يرجى إدخال رقم صحيح",
+  "en": "Please enter a valid number"
+ },
+ "add_point.validator_must_be_positive": {
+  "ar": "يجب أن يكون عدد النقاط أكبر من صفر",
+  "en": "Points must be greater than zero"
+ },
+ "add_point.validator_required": {
+  "ar": "يرجى إدخال عدد النقاط",
+  "en": "Please enter the number of points"
+ },
+ "add_point.view_all_transactions": {
+  "ar": "عرض كل المعاملات",
+  "en": "View all transactions"
+ },
+ "add_point.your_recent_transactions": {
+  "ar": "معاملاتك الأخيرة",
+  "en": "Your Recent Transactions"
+ },
+ "ai.a_4_second_clip_usually_ready_in_1_3_minutes_you": {
+  "ar": "مقطع مدته 4 ثوانٍ. يكون جاهزًا عادةً خلال 1–3 دقائق ويمكنك متابعة التعديل خلال ذلك.",
+  "en": "A 4-second clip. Usually ready in 1–3 minutes; you can keep editing meanwhile."
+ },
+ "ai.a_rough_estimate_from_your_text_not_market_data": {
+  "ar": "تقدير تقريبي من نصك وليس بيانات السوق.",
+  "en": "A rough estimate from your text, not market data."
+ },
+ "ai.added_to_your_post": {
+  "ar": "تمت الإضافة إلى منشورك.",
+  "en": "Added to your post."
+ },
+ "ai.ai_image_ready": {
+  "ar": "صورة الذكاء الاصطناعي جاهزة.",
+  "en": "Your AI image is ready."
+ },
+ "ai.ai_pictures_are_illustrations_do_not_use_them_to": {
+  "ar": "صور الذكاء الاصطناعي رسوم توضيحية. لا تستخدمها لعرض سلعة تبيعها إن لم تكن تشبهها.",
+  "en": "AI pictures are illustrations. Do not use them to show an item you are selling if it does not look like that."
+ },
+ "ai.ai_video_ready": {
+  "ar": "فيديو الذكاء الاصطناعي جاهز.",
+  "en": "Your AI video is ready."
+ },
+ "ai.buy_points": {
+  "ar": "شراء نقاط",
+  "en": "Buy points"
+ },
+ "ai.cancel": {
+  "ar": "إلغاء",
+  "en": "Cancel"
+ },
+ "ai.category": {
+  "ar": "القسم",
+  "en": "Category"
+ },
+ "ai.cost": {
+  "ar": "التكلفة",
+  "en": "Cost"
+ },
+ "ai.could_not_load_tap_to_retry": {
+  "ar": "تعذّر التحميل. اضغط للمحاولة.",
+  "en": "Could not load. Tap to retry."
+ },
+ "ai.could_not_open_it_try_again": {
+  "ar": "تعذّر فتحه. حاول مجددًا.",
+  "en": "Could not open it. Try again."
+ },
+ "ai.could_not_reach_ai_check_your_connection": {
+  "ar": "تعذّر الاتصال بالذكاء الاصطناعي. تحقق من اتصالك.",
+  "en": "Could not reach AI. Check your connection."
+ },
+ "ai.create_a_short_video": {
+  "ar": "إنشاء فيديو قصير",
+  "en": "Create a short video"
+ },
+ "ai.create_an_image": {
+  "ar": "إنشاء صورة",
+  "en": "Create an image"
+ },
+ "ai.create_cost": {
+  "ar": "إنشاء · {cost}",
+  "en": "Create · {cost}"
+ },
+ "ai.create_image": {
+  "ar": "إنشاء صورة",
+  "en": "Create image"
+ },
+ "ai.create_video": {
+  "ar": "إنشاء فيديو",
+  "en": "Create video"
+ },
+ "ai.creating_your_image_under_a_minute": {
+  "ar": "جارٍ إنشاء الصورة… أقل من دقيقة.",
+  "en": "Creating your image… under a minute."
+ },
+ "ai.creating_your_video_usually_1_3_minutes_keep_edi": {
+  "ar": "جارٍ إنشاء الفيديو… عادةً 1–3 دقائق. تابع التعديل وسيُضاف هنا عند الجاهزية.",
+  "en": "Creating your video… usually 1–3 minutes. Keep editing; it is added here when ready."
+ },
+ "ai.describe_what_you_want_to_see": {
+  "ar": "صف ما تريد أن تراه",
+  "en": "Describe what you want to see"
+ },
+ "ai.description": {
+  "ar": "الوصف",
+  "en": "Description"
+ },
+ "ai.extra_photos_and_videos": {
+  "ar": "صور وفيديوهات إضافية",
+  "en": "Extra photos and videos"
+ },
+ "ai.extras_cost_short": {
+  "ar": "الإضافات تكلّف {cost} ولديك {balance}. اشترِ نقاطًا أو احذف بعضها.",
+  "en": "The extra photos/videos cost {cost} and you have {balance}. Buy points or remove some."
+ },
+ "ai.filled_from_your_title_and_description_edit_it_i": {
+  "ar": "مأخوذ من عنوانك ووصفك. عدّله إن أردت شيئًا محددًا؛ يستخدم الذكاء الاصطناعي إعلانك كاملًا لصياغته بالتفصيل.",
+  "en": "Filled from your title and description. Edit it if you want something specific; the AI uses your whole ad to make it detailed."
+ },
+ "ai.high": {
+  "ar": "مرتفع",
+  "en": "High"
+ },
+ "ai.if_it_fails_your_points_are_returned_automatical": {
+  "ar": "إن فشل تُعاد نقاطك تلقائيًا.",
+  "en": "If it fails, your points are returned automatically."
+ },
+ "ai.images_and_videos_you_made_in_the_last_7_days_us": {
+  "ar": "الصور والفيديوهات التي أنشأتها خلال آخر 7 أيام. إعادة استخدامها مجانية.",
+  "en": "Images and videos you made in the last 7 days. Using one again is free."
+ },
+ "ai.improve_title_description": {
+  "ar": "تحسين العنوان والوصف",
+  "en": "Improve title & description"
+ },
+ "ai.improved_text": {
+  "ar": "النص المحسّن",
+  "en": "Improved text"
+ },
+ "ai.included": {
+  "ar": "مشمول",
+  "en": "Included"
+ },
+ "ai.included_in_your_plan": {
+  "ar": "مشمول في اشتراكك",
+  "en": "Included in your plan"
+ },
+ "ai.is_this_what_you_wanted_use_it_or_try_again_with": {
+  "ar": "هل هذا ما أردته؟ استخدمه أو جرّب مجددًا بوصف جديد.",
+  "en": "Is this what you wanted? Use it, or try again with a new description."
+ },
+ "ai.keep_for_later": {
+  "ar": "احتفظ به لاحقًا",
+  "en": "Keep for later"
+ },
+ "ai.keep_mine": {
+  "ar": "أبقِ نصي",
+  "en": "Keep mine"
+ },
+ "ai.low": {
+  "ar": "منخفض",
+  "en": "Low"
+ },
+ "ai.no_photo_create_one_with_ai": {
+  "ar": "لا توجد صورة؟ أنشئ واحدة بالذكاء الاصطناعي",
+  "en": "No photo? Create one with AI"
+ },
+ "ai.not_enough_points": {
+  "ar": "رصيدك غير كافٍ",
+  "en": "Not enough points"
+ },
+ "ai.not_now": {
+  "ar": "ليس الآن",
+  "en": "Not now"
+ },
+ "ai.nothing_yet_create_an_image_or_video_first": {
+  "ar": "لا شيء بعد. أنشئ صورة أو فيديو أولاً.",
+  "en": "Nothing yet. Create an image or video first."
+ },
+ "ai.publish_cost": {
+  "ar": "انشر (−{cost})",
+  "en": "Publish (−{cost})"
+ },
+ "ai.ready_in_under_a_minute": {
+  "ar": "جاهزة خلال أقل من دقيقة.",
+  "en": "Ready in under a minute."
+ },
+ "ai.review": {
+  "ar": "مراجعة",
+  "en": "Review"
+ },
+ "ai.something_went_wrong_you_were_not_charged": {
+  "ar": "حدث خطأ ما. لم يتم خصم أي نقاط.",
+  "en": "Something went wrong. You were not charged."
+ },
+ "ai.suggest_category": {
+  "ar": "اقترح القسم",
+  "en": "Suggest category"
+ },
+ "ai.suggest_price": {
+  "ar": "اقترح السعر",
+  "en": "Suggest price"
+ },
+ "ai.suggested_category": {
+  "ar": "القسم المقترح",
+  "en": "Suggested category"
+ },
+ "ai.suggested_price": {
+  "ar": "السعر المقترح",
+  "en": "Suggested price"
+ },
+ "ai.tap_one_to_use_it_you_can_still_change_it": {
+  "ar": "اضغط على أحدها لاستخدامه. يمكنك تعديله لاحقًا.",
+  "en": "Tap one to use it. You can still change it."
+ },
+ "ai.the_ai_could_not_finish_your_points_are_returned": {
+  "ar": "تعذّر على الذكاء الاصطناعي الإكمال. تُعاد نقاطك.",
+  "en": "The AI could not finish. Your points are returned."
+ },
+ "ai.the_post_is_full_remove_one_first": {
+  "ar": "المنشور ممتلئ. احذف عنصرًا أولاً.",
+  "en": "The post is full. Remove one first."
+ },
+ "ai.the_suggested_category_is_not_available_pick_one": {
+  "ar": "القسم المقترح غير متاح. اختر قسمًا بنفسك.",
+  "en": "The suggested category is not available. Pick one yourself."
+ },
+ "ai.this_ai_feature_is_not_available_right_now": {
+  "ar": "هذه الميزة غير متاحة حاليًا.",
+  "en": "This AI feature is not available right now."
+ },
+ "ai.title": {
+  "ar": "العنوان",
+  "en": "Title"
+ },
+ "ai.translate_both": {
+  "ar": "ترجمة الاثنين",
+  "en": "Translate both"
+ },
+ "ai.try_again": {
+  "ar": "حاول مجددًا",
+  "en": "Try again"
+ },
+ "ai.typical": {
+  "ar": "معتاد",
+  "en": "Typical"
+ },
+ "ai.use_ai": {
+  "ar": "استخدم الذكاء الاصطناعي",
+  "en": "Use AI"
+ },
+ "ai.use_this": {
+  "ar": "استخدم هذا",
+  "en": "Use this"
+ },
+ "ai.write_a_few_words_first_then_ai_can_improve_them": {
+  "ar": "اكتب بضع كلمات أولاً ثم يحسّنها الذكاء الاصطناعي.",
+  "en": "Write a few words first, then AI can improve them."
+ },
+ "ai.write_your_title_and_description_first_then_ai_c": {
+  "ar": "اكتب العنوان والوصف أولاً ثم يختار الذكاء الاصطناعي القسم.",
+  "en": "Write your title and description first, then AI can pick the category."
+ },
+ "ai.your_balance": {
+  "ar": "رصيدك",
+  "en": "Your balance"
+ },
+ "ai.your_creations": {
+  "ar": "إبداعاتك",
+  "en": "Your creations"
+ },
+ "ai.your_image_is_ready": {
+  "ar": "الصورة جاهزة",
+  "en": "Your image is ready"
+ },
+ "ai.your_video_is_ready": {
+  "ar": "الفيديو جاهز",
+  "en": "Your video is ready"
+ },
+ "ai_data_consent.agree": {
+  "ar": "أوافق",
+  "en": "Agree"
+ },
+ "ai_data_consent.before_you_use_ai": {
+  "ar": "قبل استخدام الذكاء الاصطناعي",
+  "en": "Before you use AI"
+ },
+ "ai_data_consent.not_now": {
+  "ar": "ليس الآن",
+  "en": "Not now"
+ },
+ "ai_data_consent.privacy_policy": {
+  "ar": "سياسة الخصوصية",
+  "en": "Privacy Policy"
+ },
+ "ai_data_consent.when_you_use_ai_features_the_text_you_write_titl": {
+  "ar": "عند استخدام ميزات الذكاء الاصطناعي، يُرسَل النص أو الوصف الذي تكتبه (العنوان والوصف ووصف الصورة أو الفيديو) بشكل آمن إلى مزوّد ذكاء اصطناعي خارجي (OpenAI) لمعالجته. تُخصم النقاط عند بدء الطلب وتُعاد تلقائيًا إن فشل. لا تُدخل معلومات حساسة لا تريد مشاركتها. يمكنك حذف حسابك في أي وقت من الإعدادات.\n\nهل توافق على إرسال النص إلى هذا المزوّد؟",
+  "en": "When you use AI features, the text you write (title, description, or a picture/video description) is sent securely to a third-party AI provider (OpenAI) to process it. Points are taken when the request starts and returned automatically if it fails. Please do not enter sensitive information you do not want shared. You can delete your account any time in Settings.\n\nDo you agree to send your text to this provider?"
+ },
+ "app.info": {
+  "ar": "معلومات",
+  "en": "Info"
+ },
+ "app.unable_to_initialize": {
+  "ar": "تعذّر تشغيل التطبيق",
+  "en": "Unable to start the app"
+ },
+ "auth.agree_to_terms_required": {
+  "ar": "يرجى الموافقة على شروط الخدمة وسياسة الخصوصية",
+  "en": "Please agree to the Terms of Service and Privacy Policy"
+ },
+ "auth.changing_language": {
+  "ar": "جاري تغيير اللغة...",
+  "en": "Changing language..."
+ },
+ "auth.continue_with_apple": {
+  "ar": "المتابعة مع Apple",
+  "en": "Continue with Apple"
+ },
+ "auth.continue_with_google": {
+  "ar": "المتابعة مع جوجل",
+  "en": "Continue with Google"
+ },
+ "auth.enter_name": {
+  "ar": "يرجى إدخال اسمك",
+  "en": "Please enter your name"
+ },
+ "auth.error.email_already_registered": {
+  "ar": "هذا البريد الإلكتروني مسجل بالفعل. يرجى استخدام بريد آخر أو تسجيل الدخول.",
+  "en": "This email is already registered. Please use a different email or try logging in."
+ },
+ "auth.error.incorrect_credentials": {
+  "ar": "بريد إلكتروني أو كلمة مرور غير صحيحة. يرجى المحاولة مرة أخرى.",
+  "en": "Incorrect email or password. Please try again."
+ },
+ "auth.error.server_trouble": {
+  "ar": "نواجه مشكلة في الاتصال حالياً. يرجى المحاولة لاحقاً.",
+  "en": "We're having trouble connecting right now. Please try again later."
+ },
+ "auth.error.unable_to_connect": {
+  "ar": "تعذر الاتصال. يرجى التحقق من اتصالك بالإنترنت.",
+  "en": "Unable to connect. Please check your internet connection."
+ },
+ "auth.error.unexpected": {
+  "ar": "حدث خطأ غير متوقع. يرجى المحاولة مرة أخرى.",
+  "en": "An unexpected error occurred. Please try again."
+ },
+ "auth.error.verify_email": {
+  "ar": "يرجى التحقق من عنوان بريدك الإلكتروني قبل تسجيل الدخول.",
+  "en": "Please verify your email address before logging in."
+ },
+ "auth.error.weak_password": {
+  "ar": "يرجى استخدام كلمة مرور أقوى تتكون من 8 أحرف على الأقل، بما في ذلك أرقام ورموز.",
+  "en": "Please use a stronger password with at least 8 characters, including numbers and symbols."
+ },
+ "auth.i_agree_to": {
+  "ar": "أوافق على ",
+  "en": "I agree to the "
+ },
+ "auth.password_min_length": {
+  "ar": "كلمة المرور يجب أن تكون على الأقل {min} أحرف",
+  "en": "Password must be at least {min} characters"
+ },
+ "auth.please_confirm_password": {
+  "ar": "يرجى تأكيد كلمة المرور",
+  "en": "Please confirm your password"
+ },
+ "auth.register_subheader": {
+  "ar": "أنشئ حساباً للبدء",
+  "en": "Create an account to get started"
+ },
+ "auth.signing_in": {
+  "ar": "جاري تسجيل الدخول...",
+  "en": "Signing in..."
+ },
+ "auth.valid_email": {
+  "ar": "يرجى إدخال عنوان بريد إلكتروني صحيح",
+  "en": "Please enter a valid email address"
+ },
+ "auth_components.apple": {
+  "ar": "Apple",
+  "en": "Apple"
+ },
+ "auth_components.google": {
+  "ar": "Google",
+  "en": "Google"
+ },
+ "auth_components.or": {
+  "ar": "أو",
+  "en": "or"
+ },
+ "badge_confirmation.activate_premium_badge": {
+  "ar": "تفعيل الشارة المميزة",
+  "en": "Activate Premium Badge"
+ },
+ "badge_confirmation.badge_downgrade": {
+  "ar": "تخفيض الشارة",
+  "en": "Badge Downgrade"
+ },
+ "badge_confirmation.badge_upgrade": {
+  "ar": "ترقية الشارة",
+  "en": "Badge Upgrade"
+ },
+ "badge_confirmation.benefits": {
+  "ar": "المزايا",
+  "en": "Benefits"
+ },
+ "badge_confirmation.buy_points": {
+  "ar": "شراء نقاط",
+  "en": "Buy Points"
+ },
+ "badge_confirmation.confirm": {
+  "ar": "تأكيد",
+  "en": "Confirm"
+ },
+ "badge_confirmation.confirm_badge": {
+  "ar": "تأكيد الشارة",
+  "en": "Confirm Badge"
+ },
+ "badge_confirmation.extend_duration": {
+  "ar": "تمديد المدة",
+  "en": "Extend Duration"
+ },
+ "badge_confirmation.free": {
+  "ar": "مجاني",
+  "en": "Free"
+ },
+ "badge_confirmation.higher_visibility": {
+  "ar": "ظهور أعلى في نتائج البحث",
+  "en": "Higher visibility in search results"
+ },
+ "badge_confirmation.insufficient_points_balance": {
+  "ar": "رصيد النقاط غير كافٍ",
+  "en": "Insufficient Points Balance"
+ },
+ "badge_confirmation.points_required": {
+  "ar": "النقاط المطلوبة",
+  "en": "Points Required"
+ },
+ "badge_confirmation.premium_badge_on_post": {
+  "ar": "شارة مميزة على منشورك",
+  "en": "Premium badge on your post"
+ },
+ "badge_confirmation.premium_badge_removed": {
+  "ar": "ستتم إزالة الشارة المميزة من منشورك",
+  "en": "Premium badge will be removed from your post"
+ },
+ "badge_confirmation.pts": {
+  "ar": "نقطة",
+  "en": "pts"
+ },
+ "badge_confirmation.remaining_balance": {
+  "ar": "الرصيد المتبقي",
+  "en": "Remaining Balance"
+ },
+ "badge_confirmation.remove_premium_badge": {
+  "ar": "إزالة الشارة المميزة",
+  "en": "Remove Premium Badge"
+ },
+ "badge_confirmation.your_balance": {
+  "ar": "رصيدك",
+  "en": "Your Balance"
+ },
+ "badge_v2.an_error_occurred": {
+  "ar": "حدث خطأ",
+  "en": "An error occurred"
+ },
+ "badge_v2.change_badge": {
+  "ar": "تغيير الشارة",
+  "en": "Change Badge"
+ },
+ "badge_v2.current_badge": {
+  "ar": "الشارة الحالية",
+  "en": "Current Badge"
+ },
+ "badge_v2.days_remaining": {
+  "ar": "يوم متبقٍ",
+  "en": "days remaining"
+ },
+ "badge_v2.insufficient_points_balance": {
+  "ar": "رصيد النقاط غير كافٍ",
+  "en": "Insufficient points balance"
+ },
+ "badge_v2.no_badges_available": {
+  "ar": "لا توجد شارات متاحة",
+  "en": "No badges available"
+ },
+ "badge_v2.select_new_badge": {
+  "ar": "اختر شارة جديدة",
+  "en": "Select New Badge"
+ },
+ "banned.account_suspended": {
+  "ar": "تم تعليق الحساب",
+  "en": "Account Suspended"
+ },
+ "banned.contact_support": {
+  "ar": "تواصل مع الدعم",
+  "en": "Contact Support"
+ },
+ "banned.exit_app": {
+  "ar": "الخروج من التطبيق",
+  "en": "Exit App"
+ },
+ "banned.please_contact_support": {
+  "ar": "يرجى التواصل مع الدعم",
+  "en": "Please contact support"
+ },
+ "banned.reason": {
+  "ar": "السبب:",
+  "en": "Reason:"
+ },
+ "banned.sorry_your_account_has_been": {
+  "ar": "عذرًا، تم تعليق حسابك مؤقتًا",
+  "en": "Sorry, your account has been temporarily suspended"
+ },
+ "billing.purchase_failed": {
+  "ar": "فشلت عملية الشراء",
+  "en": "Purchase failed"
+ },
+ "billing.purchase_not_verified": {
+  "ar": "تعذّر التحقق من عملية الشراء",
+  "en": "Purchase could not be verified"
+ },
+ "block.block_user": {
+  "ar": "حظر هذا المستخدم",
+  "en": "Block this user"
+ },
+ "block.blocked": {
+  "ar": "تم حظر المستخدم",
+  "en": "User blocked"
+ },
+ "block.blocked_users": {
+  "ar": "المستخدمون المحظورون",
+  "en": "Blocked users"
+ },
+ "block.failed": {
+  "ar": "تعذر إكمال العملية، حاول مرة أخرى",
+  "en": "Something went wrong, please try again"
+ },
+ "block.none": {
+  "ar": "لا يوجد مستخدمون محظورون",
+  "en": "You have not blocked anyone"
+ },
+ "block.unblock": {
+  "ar": "إلغاء الحظر",
+  "en": "Unblock"
+ },
+ "block.unblocked": {
+  "ar": "تم إلغاء الحظر",
+  "en": "User unblocked"
+ },
+ "buy_points_prompt.buy_points": {
+  "ar": "شراء نقاط",
+  "en": "Buy points"
+ },
+ "buy_points_prompt.buy_points_to_continue": {
+  "ar": "اشترِ نقاطاً للمتابعة.",
+  "en": "Buy points to continue."
+ },
+ "buy_points_prompt.not_enough_points": {
+  "ar": "رصيد النقاط غير كافٍ",
+  "en": "Not enough points"
+ },
+ "buy_points_prompt.not_now": {
+  "ar": "ليس الآن",
+  "en": "Not now"
+ },
+ "categories_tab.browse_all": {
+  "ar": "تصفح الكل",
+  "en": "Browse all"
+ },
+ "categories_tab.most_active": {
+  "ar": "الأكثر نشاطًا",
+  "en": "Most active"
+ },
+ "categories_tab.no_subcategories_available": {
+  "ar": "لا توجد أقسام فرعية",
+  "en": "No subcategories available"
+ },
+ "categories_tab.subcategory_suspended": {
+  "ar": "هذا القسم الفرعي معلّق حاليًا",
+  "en": "This subcategory is currently suspended"
+ },
+ "categories_tab.title": {
+  "ar": "الأقسام",
+  "en": "Categories"
+ },
+ "categories_tab.trending": {
+  "ar": "الأكثر رواجًا",
+  "en": "TRENDING"
+ },
+ "categories_tab.unknown": {
+  "ar": "غير معروف",
+  "en": "Unknown"
+ },
+ "category_dropdown.failed_to_load_categories": {
+  "ar": "تعذّر تحميل الأقسام",
+  "en": "Failed to load categories"
+ },
+ "category_dropdown.unknown_category": {
+  "ar": "قسم غير معروف",
+  "en": "Unknown Category"
+ },
+ "change_category_subcategory.select_category_and_subcategory": {
+  "ar": "يرجى اختيار القسم والقسم الفرعي.",
+  "en": "Please select a category and subcategory."
+ },
+ "chat.load_error": {
+  "ar": "تعذّر تحميل رسائلك.",
+  "en": "Could not load your messages."
+ },
+ "chat.message_a_seller_hint": {
+  "ar": "راسل بائعًا من أحد الإعلانات لبدء محادثة.",
+  "en": "Message a seller from a listing to start one."
+ },
+ "chat.messages": {
+  "ar": "الرسائل",
+  "en": "Messages"
+ },
+ "chat.no_conversations_yet": {
+  "ar": "لا توجد محادثات بعد",
+  "en": "No conversations yet"
+ },
+ "chat.no_messages_yet": {
+  "ar": "لا توجد رسائل بعد",
+  "en": "No messages yet"
+ },
+ "chat.now": {
+  "ar": "الآن",
+  "en": "now"
+ },
+ "chat.say_hello": {
+  "ar": "قل مرحبًا 👋",
+  "en": "Say hello 👋"
+ },
+ "chat.send_failed": {
+  "ar": "تعذّر إرسال الرسالة",
+  "en": "Could not send message"
+ },
+ "chat.type_a_message": {
+  "ar": "اكتب رسالة…",
+  "en": "Type a message…"
+ },
+ "chat.you": {
+  "ar": "أنت",
+  "en": "You"
+ },
+ "collapsing_profile_header.message": {
+  "ar": "مراسلة",
+  "en": "Message"
+ },
+ "collapsing_profile_header.user": {
+  "ar": "مستخدم",
+  "en": "User"
+ },
+ "comments.add_a_comment": {
+  "ar": "أضف تعليقًا...",
+  "en": "Add a comment..."
+ },
+ "comments.be_the_first_to_comment": {
+  "ar": "كن أول من يعلّق!",
+  "en": "Be the first to comment!"
+ },
+ "comments.comments": {
+  "ar": "التعليقات",
+  "en": "Comments"
+ },
+ "comments.delete": {
+  "ar": "حذف",
+  "en": "Delete"
+ },
+ "comments.error_loading_comments": {
+  "ar": "خطأ في تحميل التعليقات",
+  "en": "Error loading comments"
+ },
+ "comments.hide_replies": {
+  "ar": "إخفاء الردود",
+  "en": "Hide replies"
+ },
+ "comments.no_comments_yet": {
+  "ar": "لا توجد تعليقات بعد",
+  "en": "No comments yet"
+ },
+ "comments.now": {
+  "ar": "الآن",
+  "en": "now"
+ },
+ "comments.reply": {
+  "ar": "رد",
+  "en": "Reply"
+ },
+ "comments.unknown_user": {
+  "ar": "مستخدم",
+  "en": "User"
+ },
+ "comments.write_a_reply": {
+  "ar": "اكتب ردًا...",
+  "en": "Write a reply..."
+ },
+ "common.copied": {
+  "ar": "تم النسخ",
+  "en": "Copied"
+ },
+ "common.load_more": {
+  "ar": "تحميل المزيد",
+  "en": "Load more"
+ },
+ "deep_link.failed_to_load_post": {
+  "ar": "تعذّر تحميل المنشور",
+  "en": "Failed to load post"
+ },
+ "deep_link.loading_post": {
+  "ar": "جارٍ تحميل المنشور",
+  "en": "Loading post"
+ },
+ "deep_link.loading_post_id": {
+  "ar": "جارٍ تحميل المنشور #{id}...",
+  "en": "Loading post #{id}..."
+ },
+ "deep_link.service_post": {
+  "ar": "منشور",
+  "en": "Post"
+ },
+ "deep_link.try_again": {
+  "ar": "حاول مجددًا",
+  "en": "Try Again"
+ },
+ "duration_chip_selector.duration": {
+  "ar": "المدة",
+  "en": "Duration"
+ },
+ "email_button.could_not_launch_email_app": {
+  "ar": "تعذّر فتح تطبيق البريد",
+  "en": "Could not launch email app"
+ },
+ "email_button.no_email_available": {
+  "ar": "لا يوجد بريد إلكتروني",
+  "en": "No email available"
+ },
+ "exit_confirmation.discard": {
+  "ar": "تجاهل",
+  "en": "Discard"
+ },
+ "exit_confirmation.discard_changes_message": {
+  "ar": "لديك تغييرات غير محفوظة. هل تريد المغادرة وتجاهل التغييرات؟",
+  "en": "You have unsaved changes. Are you sure you want to leave and discard your changes?"
+ },
+ "exit_confirmation.discard_changes_title": {
+  "ar": "تجاهل التغييرات؟",
+  "en": "Discard changes?"
+ },
+ "exit_confirmation.keep_editing": {
+  "ar": "متابعة التعديل",
+  "en": "Keep editing"
+ },
+ "exit_confirmation.save_draft": {
+  "ar": "حفظ المسودة والمغادرة",
+  "en": "Save draft and leave"
+ },
+ "exit_confirmation.save_or_discard_message": {
+  "ar": "احفظ ما أدخلته كمسودة لتكمل لاحقًا، أو تجاهله.",
+  "en": "Save what you entered as a draft so you can continue later, or discard it."
+ },
+ "favorites.explore_posts": {
+  "ar": "استكشف المنشورات",
+  "en": "Explore Posts"
+ },
+ "favorites.no_favorites_yet": {
+  "ar": "لا توجد مفضلات بعد",
+  "en": "No favorites yet"
+ },
+ "favorites.posts_you_like_will_appear": {
+  "ar": "ستظهر هنا المنشورات التي تعجبك",
+  "en": "Posts you like will appear here"
+ },
+ "favorites.something_went_wrong": {
+  "ar": "حدث خطأ ما",
+  "en": "Something went wrong"
+ },
+ "favorites.try_again": {
+  "ar": "حاول مجددًا",
+  "en": "Try Again"
+ },
+ "feed_video_player.error_loading_video": {
+  "ar": "خطأ في تحميل الفيديو",
+  "en": "Error loading video"
+ },
+ "follow.following_tab": {
+  "ar": "متابع",
+  "en": "Following"
+ },
+ "force_update.default_message": {
+  "ar": "يتوفر إصدار جديد من طلبنا. يرجى التحديث للمتابعة.",
+  "en": "A new version of Talabna is available. Please update to continue."
+ },
+ "force_update.latest_version": {
+  "ar": "أحدث إصدار: {version}",
+  "en": "Latest version: {version}"
+ },
+ "force_update.title": {
+  "ar": "التحديث مطلوب",
+  "en": "Update Required"
+ },
+ "force_update.update_now": {
+  "ar": "حدّث الآن",
+  "en": "Update Now"
+ },
+ "help.could_not_open_email_app": {
+  "ar": "تعذّر فتح تطبيق البريد. يرجى مراسلة support@talbna.cloud مباشرة.",
+  "en": "Could not open email app. Please email support@talbna.cloud directly."
+ },
+ "help.find_answers_to_common_questions": {
+  "ar": "اعثر على إجابات الأسئلة الشائعة أدناه",
+  "en": "Find answers to common questions below"
+ },
+ "help.frequently_questions": {
+  "ar": "الأسئلة الشائعة",
+  "en": "Frequently Questions"
+ },
+ "help.hello_i_need_help_with": {
+  "ar": "مرحبًا، أحتاج مساعدة في...",
+  "en": "Hello, I need help with..."
+ },
+ "help.support_request": {
+  "ar": "طلب دعم",
+  "en": "Support Request"
+ },
+ "help_center.app_crashing_title": {
+  "ar": "توقف التطبيق عن العمل",
+  "en": "App crashing"
+ },
+ "help_center.change_language_content": {
+  "ar": "انتقل إلى الإعدادات > التفضيلات > تغيير اللغة لاختيار لغتك المفضلة.",
+  "en": "Go to Settings > Preferences > Change Language to select your preferred language."
+ },
+ "help_center.change_language_title": {
+  "ar": "كيفية تغيير اللغة",
+  "en": "How to change language"
+ },
+ "help_center.connectivity_issues_content": {
+  "ar": "إذا واجهت مشاكل في الاتصال، يرجى التحقق من اتصالك بالإنترنت والمحاولة مرة أخرى.",
+  "en": "If you're having connectivity issues, please check your internet connection and try again."
+ },
+ "help_center.connectivity_issues_title": {
+  "ar": "مشاكل الاتصال",
+  "en": "Connectivity issues"
+ },
+ "help_center.reset_password_content": {
+  "ar": "لإعادة تعيين كلمة المرور، انتقل إلى شاشة تسجيل الدخول واضغط على \"نسيت كلمة المرور\"، ثم اتبع التعليمات المرسلة إلى بريدك الإلكتروني.",
+  "en": "To reset your password, go to the login screen and tap \"Forgot Password\". Follow the instructions sent to your email."
+ },
+ "help_center.reset_password_title": {
+  "ar": "كيفية إعادة تعيين كلمة المرور",
+  "en": "How to reset password"
+ },
+ "help_center.toggle_theme_content": {
+  "ar": "انتقل إلى الإعدادات > التفضيلات > المظهر للتبديل بين الوضع الداكن والفاتح.",
+  "en": "Go to Settings > Preferences > Appearance to switch between dark and light mode."
+ },
+ "help_center.toggle_theme_title": {
+  "ar": "كيفية التبديل بين الوضع الداكن والفاتح",
+  "en": "How to toggle dark/light mode"
+ },
+ "help_center.topic_account_title": {
+  "ar": "مشاكل الحساب",
+  "en": "Account Issues"
+ },
+ "help_center.topic_features_title": {
+  "ar": "ميزات التطبيق",
+  "en": "App Features"
+ },
+ "help_center.topic_troubleshooting_title": {
+  "ar": "حل المشكلات",
+  "en": "Troubleshooting"
+ },
+ "help_center.update_profile_content": {
+  "ar": "انتقل إلى الإعدادات > الحساب > تغيير البريد الإلكتروني أو تغيير كلمة المرور لتحديث معلوماتك.",
+  "en": "Go to Settings > Account > Change Email or Change Password to update your profile information."
+ },
+ "help_center.update_profile_title": {
+  "ar": "كيفية تحديث معلومات الملف الشخصي",
+  "en": "How to update profile information"
+ },
+ "home.all_feed_empty": {
+  "ar": "لا يوجد ما يُعرض بعد",
+  "en": "Nothing to show yet"
+ },
+ "home.all_feed_no_match": {
+  "ar": "لا توجد منشورات تطابق هذه الفلاتر",
+  "en": "No posts match these filters"
+ },
+ "home.card_view": {
+  "ar": "عرض البطاقات",
+  "en": "Card view"
+ },
+ "home.enable": {
+  "ar": "تفعيل",
+  "en": "Enable"
+ },
+ "home.filters": {
+  "ar": "الفلاتر",
+  "en": "Filters"
+ },
+ "home.later": {
+  "ar": "لاحقًا",
+  "en": "Later"
+ },
+ "home.list_view": {
+  "ar": "عرض القائمة",
+  "en": "List view"
+ },
+ "home.press_back_again_to_exit": {
+  "ar": "اضغط رجوع مرة أخرى للخروج",
+  "en": "Press back again to exit"
+ },
+ "home.to_receive_notifications_about_messages": {
+  "ar": "لتلقي إشعارات الرسائل والتعليقات والمتابعين الجدد، يرجى تفعيل الإشعارات.",
+  "en": "To receive notifications about messages, comments, and new followers, please enable notifications."
+ },
+ "home_screen.no_categories_available": {
+  "ar": "لا توجد أقسام",
+  "en": "No categories available"
+ },
+ "home_screen.refresh": {
+  "ar": "تحديث",
+  "en": "Refresh"
+ },
+ "home_screen_controller.fetching_logs": {
+  "ar": "جارٍ جلب السجلات...",
+  "en": "Fetching logs..."
+ },
+ "home_screen_controller.logs_printed_to_console": {
+  "ar": "تمت طباعة السجلات في وحدة التحكم",
+  "en": "Logs printed to console"
+ },
+ "home_screen_controller.unknown": {
+  "ar": "غير معروف",
+  "en": "Unknown"
+ },
+ "home_screen_list_app_bar_icon.user": {
+  "ar": "مستخدم",
+  "en": "User"
+ },
+ "image_grid.failed_to_load_image": {
+  "ar": "تعذّر تحميل الصورة",
+  "en": "Failed to load image"
+ },
+ "location.number_cannot_start_with_0": {
+  "ar": "لا يمكن أن يبدأ الرقم بـ 0",
+  "en": "Number cannot start with 0"
+ },
+ "location.number_should_be_9_digits": {
+  "ar": "يجب أن يتكون الرقم من 9 أرقام",
+  "en": "Number should be 9 digits"
+ },
+ "location.please_enter_a_number": {
+  "ar": "يرجى إدخال رقم",
+  "en": "Please enter a number"
+ },
+ "location_button.view_google_map": {
+  "ar": "عرض على خرائط Google",
+  "en": "view google map"
+ },
+ "location_helper.current_location_detected": {
+  "ar": "تم تحديد موقعك الحالي بنجاح",
+  "en": "Current location detected successfully"
+ },
+ "location_helper.using_default_location": {
+  "ar": "يتم استخدام الموقع الافتراضي (عمّان، الأردن)",
+  "en": "Using default location (Amman, Jordan)"
+ },
+ "location_picker.change": {
+  "ar": "تغيير",
+  "en": "Change"
+ },
+ "location_picker.confirm_location": {
+  "ar": "تأكيد الموقع",
+  "en": "Confirm Location"
+ },
+ "location_picker.location": {
+  "ar": "الموقع",
+  "en": "Location"
+ },
+ "location_picker.my_current_location": {
+  "ar": "موقعي الحالي",
+  "en": "My Current Location"
+ },
+ "location_picker.select_location": {
+  "ar": "اختر الموقع",
+  "en": "Select Location"
+ },
+ "location_picker.tap_on_the_map_to": {
+  "ar": "اضغط على الخريطة لاختيار الموقع أو اسحب العلامة",
+  "en": "Tap on the map to select location or drag the marker"
+ },
+ "modern_media_grid.add": {
+  "ar": "إضافة",
+  "en": "Add"
+ },
+ "modern_media_grid.choose_photos": {
+  "ar": "اختر صورًا",
+  "en": "Choose Photos"
+ },
+ "modern_media_grid.choose_video": {
+  "ar": "اختر فيديو",
+  "en": "Choose Video"
+ },
+ "modern_media_grid.cover": {
+  "ar": "الغلاف",
+  "en": "Cover"
+ },
+ "modern_media_grid.maximum_1_minute": {
+  "ar": "دقيقة واحدة كحد أقصى",
+  "en": "Maximum 1 minute"
+ },
+ "modern_media_grid.processing": {
+  "ar": "جاري المعالجة...",
+  "en": "Processing..."
+ },
+ "modern_media_grid.remaining_left": {
+  "ar": "({count} متبقي)",
+  "en": "({count} left)"
+ },
+ "modern_media_grid.video": {
+  "ar": "فيديو",
+  "en": "Video"
+ },
+ "modern_user_info.follow": {
+  "ar": "متابعة",
+  "en": "Follow"
+ },
+ "modern_user_info.following": {
+  "ar": "متابَع",
+  "en": "Following"
+ },
+ "modern_user_info.show_less": {
+  "ar": "عرض أقل",
+  "en": "Show less"
+ },
+ "modern_user_info.show_more": {
+  "ar": "عرض المزيد",
+  "en": "Show more"
+ },
+ "modern_user_info.user": {
+  "ar": "مستخدم",
+  "en": "user"
+ },
+ "nav.categories": {
+  "ar": "الأقسام",
+  "en": "Categories"
+ },
+ "nav.home": {
+  "ar": "الرئيسية",
+  "en": "Home"
+ },
+ "nav.post": {
+  "ar": "منشور",
+  "en": "Post"
+ },
+ "nav.profile": {
+  "ar": "حسابي",
+  "en": "Profile"
+ },
+ "nav.reels": {
+  "ar": "فيديو",
+  "en": "Reels"
+ },
+ "new.key": {
+  "en": "Default text"
+ },
+ "notification.all_caught_up": {
+  "ar": "لا جديد",
+  "en": "All caught up"
+ },
+ "notification.all_notifications_marked_as_read": {
+  "ar": "تم تحديد كل الإشعارات كمقروءة",
+  "en": "All notifications marked as read"
+ },
+ "notification.filter_activity": {
+  "ar": "النشاط",
+  "en": "Activity"
+ },
+ "notification.filter_all": {
+  "ar": "الكل",
+  "en": "All"
+ },
+ "notification.filter_messages": {
+  "ar": "الرسائل",
+  "en": "Messages"
+ },
+ "notification.filter_system": {
+  "ar": "النظام",
+  "en": "System"
+ },
+ "notification.go_back": {
+  "ar": "رجوع",
+  "en": "Go Back"
+ },
+ "notification.loading_ellipsis": {
+  "ar": "جارٍ التحميل...",
+  "en": "Loading..."
+ },
+ "notification.loading_post": {
+  "ar": "جارٍ تحميل المنشور...",
+  "en": "Loading post..."
+ },
+ "notification.mark_all_as_read": {
+  "ar": "تحديد الكل كمقروء",
+  "en": "Mark all as read"
+ },
+ "notification.mark_as_read": {
+  "ar": "تحديد كمقروء",
+  "en": "Mark as read"
+ },
+ "notification.no_notifications_yet": {
+  "ar": "لا توجد إشعارات بعد",
+  "en": "No notifications yet"
+ },
+ "notification.post": {
+  "ar": "منشور",
+  "en": "Post"
+ },
+ "notification.post_deleted_or_unavailable": {
+  "ar": "تم حذف هذا المنشور أو لم يعد متاحًا.",
+  "en": "This post has been deleted or is no longer available."
+ },
+ "notification.post_not_found": {
+  "ar": "المنشور غير موجود",
+  "en": "Post Not Found"
+ },
+ "notification.refresh": {
+  "ar": "تحديث",
+  "en": "Refresh"
+ },
+ "notification.request_taking_too_long": {
+  "ar": "يستغرق الطلب وقتًا طويلًا. ربما تم حذف المنشور.",
+  "en": "The request is taking too long. The post may have been deleted."
+ },
+ "notification.something_went_wrong": {
+  "ar": "حدث خطأ ما",
+  "en": "Something went wrong"
+ },
+ "notification.today": {
+  "ar": "اليوم",
+  "en": "TODAY"
+ },
+ "notification.view_post": {
+  "ar": "عرض المنشور",
+  "en": "View post"
+ },
+ "notification.yesterday": {
+  "ar": "أمس",
+  "en": "YESTERDAY"
+ },
+ "offline.back_online": {
+  "ar": "عاد الاتصال",
+  "en": "Back online"
+ },
+ "offline.no_internet_connection_showing_saved": {
+  "ar": "لا يوجد اتصال بالإنترنت - يتم عرض البيانات المحفوظة",
+  "en": "No internet connection - Showing saved data"
+ },
+ "offline.offline": {
+  "ar": "غير متصل",
+  "en": "Offline"
+ },
+ "offline_indicator.you_re_offline": {
+  "ar": "أنت غير متصل بالإنترنت",
+  "en": "You're offline"
+ },
+ "other_post_screen.no_posts_yet": {
+  "ar": "لا توجد منشورات بعد",
+  "en": "No Posts Yet"
+ },
+ "other_post_screen.something_went_wrong": {
+  "ar": "حدث خطأ ما",
+  "en": "Something went wrong"
+ },
+ "other_post_screen.try_again": {
+  "ar": "حاول مجددًا",
+  "en": "Try Again"
+ },
+ "other_profile_screen.copied_to_clipboard": {
+  "ar": "تم النسخ",
+  "en": "Copied to clipboard"
+ },
+ "other_profile_screen.could_not_start_conversation": {
+  "ar": "تعذّر بدء المحادثة",
+  "en": "Could not start conversation"
+ },
+ "other_profile_screen.now_following_user": {
+  "ar": "أنت الآن تتابع هذا المستخدم",
+  "en": "You are now following the user"
+ },
+ "other_profile_screen.unfollowed_user": {
+  "ar": "ألغيت متابعة هذا المستخدم",
+  "en": "You have unfollowed the user"
+ },
+ "other_user_post_screen.no_service_posts_found": {
+  "ar": "لا توجد منشورات خدمات",
+  "en": "No service posts found"
+ },
+ "phone_button.could_not_launch_phone_app": {
+  "ar": "تعذّر فتح تطبيق الهاتف",
+  "en": "Could not launch phone app"
+ },
+ "phone_button.no_phone_number": {
+  "ar": "لا يوجد رقم هاتف",
+  "en": "No phone number"
+ },
+ "phone_button.no_phone_number_available": {
+  "ar": "لا يوجد رقم هاتف",
+  "en": "No phone number available"
+ },
+ "phone_tile.no_data": {
+  "ar": "لا يوجد بيانات",
+  "en": "لا يوجد بيانات"
+ },
+ "phone_tile.phone": {
+  "ar": "الهاتف",
+  "en": "Phone"
+ },
+ "pin_input.confirm_pin": {
+  "ar": "تأكيد الرمز",
+  "en": "Confirm PIN"
+ },
+ "pin_input.create_transfer_pin": {
+  "ar": "إنشاء رمز التحويل",
+  "en": "Create Transfer PIN"
+ },
+ "pin_input.enter_a_new_4_digit_pin": {
+  "ar": "أدخل رمزًا جديدًا من 4 أرقام",
+  "en": "Enter a new 4-digit PIN"
+ },
+ "pin_input.enter_pin": {
+  "ar": "أدخل الرمز",
+  "en": "Enter PIN"
+ },
+ "pin_input.enter_your_pin_to_continue": {
+  "ar": "أدخل رمزك للمتابعة",
+  "en": "Enter your PIN to continue"
+ },
+ "pin_input.new_pin": {
+  "ar": "الرمز الجديد",
+  "en": "New PIN"
+ },
+ "pin_input.pins_do_not_match": {
+  "ar": "الرمزان غير متطابقين",
+  "en": "PINs do not match"
+ },
+ "pin_input.please_confirm_pin": {
+  "ar": "يرجى تأكيد الرمز",
+  "en": "Please confirm your PIN"
+ },
+ "pin_input.please_enter_4_digits": {
+  "ar": "يرجى إدخال 4 أرقام",
+  "en": "Please enter 4 digits"
+ },
+ "pin_input.save": {
+  "ar": "حفظ",
+  "en": "Save"
+ },
+ "pin_input.set_a_4_digit_pin": {
+  "ar": "عيّن رمزًا من 4 أرقام لحماية تحويلاتك",
+  "en": "Set a 4-digit PIN to secure your transfers"
+ },
+ "pin_input.update_transfer_pin": {
+  "ar": "تحديث رمز التحويل",
+  "en": "Update Transfer PIN"
+ },
+ "points.points": {
+  "ar": "النقاط",
+  "en": "Points"
+ },
+ "post.action.manage_badge": {
+  "ar": "إدارة الشارة",
+  "en": "Manage Badge"
+ },
+ "post.category.could_not_load_posts_pull": {
+  "ar": "تعذّر تحميل المنشورات. اسحب للأسفل للتحديث.",
+  "en": "Could not load posts. Pull down to refresh."
+ },
+ "post.category.listings": {
+  "ar": "إعلانات",
+  "en": "listings"
+ },
+ "post.category.no_internet_connection_pull_down": {
+  "ar": "لا يوجد اتصال بالإنترنت. اسحب للأسفل للتحديث.",
+  "en": "No internet connection. Pull down to refresh."
+ },
+ "post.category.no_posts_available": {
+  "ar": "لا توجد منشورات",
+  "en": "No posts available"
+ },
+ "post.category.no_posts_available_in_this": {
+  "ar": "لا توجد منشورات في هذا القسم",
+  "en": "No posts available in this category"
+ },
+ "post.category.no_posts_match_the_filter": {
+  "ar": "لا توجد منشورات تطابق معايير الفلترة",
+  "en": "No posts match the filter criteria"
+ },
+ "post.category.offer": {
+  "ar": "عرض",
+  "en": "Offer"
+ },
+ "post.category.request": {
+  "ar": "طلب",
+  "en": "Request"
+ },
+ "post.category.reset_filters": {
+  "ar": "إعادة ضبط الفلاتر",
+  "en": "Reset Filters"
+ },
+ "post.category.retry": {
+  "ar": "إعادة المحاولة",
+  "en": "Retry"
+ },
+ "post.create.connection_failed_check_your_internet": {
+  "ar": "فشل الاتصال. تحقق من الإنترنت وحاول مجددًا.",
+  "en": "Connection failed. Check your internet and try again."
+ },
+ "post.create.description_must_be_at_least": {
+  "ar": "يجب ألا يقل الوصف عن 40 حرفًا",
+  "en": "Description must be at least 40 characters"
+ },
+ "post.create.description_must_be_at_least_1": {
+  "ar": "يجب ألا يقل الوصف عن 40 حرفًا",
+  "en": "Description must be at least 40 characters"
+ },
+ "post.create.draft_restored": {
+  "ar": "تمت استعادة مسودتك",
+  "en": "Your draft was restored"
+ },
+ "post.create.failed_to_create_post_please": {
+  "ar": "تعذّر إنشاء المنشور. يرجى المحاولة مرة أخرى.",
+  "en": "Failed to create post. Please try again."
+ },
+ "post.create.failed_to_prepare_data_please": {
+  "ar": "تعذّر تجهيز البيانات. يرجى المحاولة مرة أخرى.",
+  "en": "Failed to prepare data. Please try again."
+ },
+ "post.create.insufficient_points_balance": {
+  "ar": "رصيد النقاط غير كافٍ",
+  "en": "Insufficient points balance"
+ },
+ "post.create.preview": {
+  "ar": "معاينة",
+  "en": "Preview"
+ },
+ "post.create.publish": {
+  "ar": "نشر",
+  "en": "Publish"
+ },
+ "post.create.restore": {
+  "ar": "استعادة",
+  "en": "Restore"
+ },
+ "post.create.restore_draft": {
+  "ar": "استعادة المسودة؟",
+  "en": "Restore Draft?"
+ },
+ "post.create.start_fresh": {
+  "ar": "البدء من جديد",
+  "en": "Start Fresh"
+ },
+ "post.create.title_too_short_minimum_3": {
+  "ar": "العنوان قصير جدًا (3 أحرف على الأقل)",
+  "en": "Title too short (minimum 3 characters)"
+ },
+ "post.create.you_have_a_saved_draft": {
+  "ar": "لديك مسودة محفوظة. هل تريد استعادتها؟",
+  "en": "You have a saved draft. Would you like to restore it?"
+ },
+ "post.job.add_skill": {
+  "ar": "أضف مهارة مطلوبة — اضغط إدخال",
+  "en": "Add a required skill — press enter"
+ },
+ "post.job.contract": {
+  "ar": "عقد",
+  "en": "Contract"
+ },
+ "post.job.currency": {
+  "ar": "ريال",
+  "en": "SAR"
+ },
+ "post.job.employment_type": {
+  "ar": "نوع العمل",
+  "en": "Employment type"
+ },
+ "post.job.entry": {
+  "ar": "مبتدئ",
+  "en": "Entry"
+ },
+ "post.job.experience_level": {
+  "ar": "مستوى الخبرة المطلوب",
+  "en": "Experience level required"
+ },
+ "post.job.full_time": {
+  "ar": "دوام كامل",
+  "en": "Full-time"
+ },
+ "post.job.max": {
+  "ar": "الحد الأقصى",
+  "en": "Max"
+ },
+ "post.job.mid": {
+  "ar": "متوسط",
+  "en": "Mid"
+ },
+ "post.job.min": {
+  "ar": "الحد الأدنى",
+  "en": "Min"
+ },
+ "post.job.part_time": {
+  "ar": "دوام جزئي",
+  "en": "Part-time"
+ },
+ "post.job.remote": {
+  "ar": "عن بُعد",
+  "en": "Remote"
+ },
+ "post.job.required_skills": {
+  "ar": "المهارات المطلوبة",
+  "en": "Required skills"
+ },
+ "post.job.salary_range": {
+  "ar": "نطاق الراتب (اختياري)",
+  "en": "Salary range (optional)"
+ },
+ "post.job.senior": {
+  "ar": "خبير",
+  "en": "Senior"
+ },
+ "post.job.step_title": {
+  "ar": "تفاصيل الوظيفة",
+  "en": "Job Details"
+ },
+ "post.parse_error_body": {
+  "ar": "تعذّر عرض هذا المنشور.",
+  "en": "This post could not be displayed."
+ },
+ "post.parse_error_title": {
+  "ar": "المنشور غير متاح",
+  "en": "Post unavailable"
+ },
+ "post.search_city": {
+  "ar": "ابحث عن مدينة...",
+  "en": "Search city..."
+ },
+ "post.state.active": {
+  "ar": "نشط",
+  "en": "Active"
+ },
+ "post.state.archived": {
+  "ar": "مؤرشف",
+  "en": "Archived"
+ },
+ "post.state.pending": {
+  "ar": "قيد المراجعة",
+  "en": "Pending Review"
+ },
+ "post.state.rejected": {
+  "ar": "مرفوض",
+  "en": "Rejected"
+ },
+ "post.type.offer_hint": {
+  "ar": "أعرض شيئًا",
+  "en": "I am offering something"
+ },
+ "post.type.request_hint": {
+  "ar": "أبحث عن شيء",
+  "en": "I am looking for something"
+ },
+ "post.update.connection_failed_check_your_internet": {
+  "ar": "فشل الاتصال. تحقق من الإنترنت وحاول مجددًا.",
+  "en": "Connection failed. Check your internet and try again."
+ },
+ "post.update.description_must_be_at_least": {
+  "ar": "يجب ألا يقل الوصف عن 40 حرفًا",
+  "en": "Description must be at least 40 characters"
+ },
+ "post.update.description_must_be_at_least_1": {
+  "ar": "يجب ألا يقل الوصف عن 40 حرفًا",
+  "en": "Description must be at least 40 characters"
+ },
+ "post.update.discard": {
+  "ar": "تجاهل",
+  "en": "Discard"
+ },
+ "post.update.failed_to_prepare_data_please": {
+  "ar": "تعذّر تجهيز البيانات. يرجى المحاولة مرة أخرى.",
+  "en": "Failed to prepare data. Please try again."
+ },
+ "post.update.failed_to_update_post_please": {
+  "ar": "تعذّر تحديث المنشور. يرجى المحاولة مرة أخرى.",
+  "en": "Failed to update post. Please try again."
+ },
+ "post.update.preview": {
+  "ar": "معاينة",
+  "en": "Preview"
+ },
+ "post.update.restore": {
+  "ar": "استعادة",
+  "en": "Restore"
+ },
+ "post.update.restore_draft": {
+  "ar": "استعادة التغييرات غير المحفوظة؟",
+  "en": "Restore Unsaved Changes?"
+ },
+ "post.update.title_too_short_minimum_3": {
+  "ar": "العنوان قصير جدًا (3 أحرف على الأقل)",
+  "en": "Title too short (minimum 3 characters)"
+ },
+ "post.update.you_have_unsaved_changes": {
+  "ar": "لديك تغييرات غير محفوظة على هذا المنشور. هل تريد استعادتها؟",
+  "en": "You have unsaved changes to this post. Would you like to restore them?"
+ },
+ "post_preview.premium_badge": {
+  "ar": "شارة مميزة",
+  "en": "Premium Badge"
+ },
+ "post_preview.review_and_publish": {
+  "ar": "راجع التفاصيل واضغط \"نشر\" للمتابعة",
+  "en": "Review the details and tap \"Publish\" to continue"
+ },
+ "premium.diamond": {
+  "ar": "ماسي",
+  "en": "Diamond"
+ },
+ "premium.golden": {
+  "ar": "ذهبي",
+  "en": "Golden"
+ },
+ "premium.how_your_premium_post_will": {
+  "ar": "هكذا سيظهر منشورك المميز",
+  "en": "How your premium post will appear"
+ },
+ "premium.premium_posts_get_5x_more": {
+  "ar": "المنشورات المميزة تحصل على مشاهدات أكثر بخمس مرات!",
+  "en": "Premium posts get 5x more views!"
+ },
+ "premium.username": {
+  "ar": "اسم المستخدم",
+  "en": "Username"
+ },
+ "privacy.could_not_open_email_app": {
+  "ar": "تعذّر فتح تطبيق البريد",
+  "en": "Could not open email app"
+ },
+ "privacy.thank_you_for_reading_our": {
+  "ar": "شكرًا لقراءة سياسة الخصوصية",
+  "en": "Thank you for reading our privacy policy"
+ },
+ "privacy_policy.title": {
+  "ar": "سياسة الخصوصية",
+  "en": "Privacy Policy"
+ },
+ "profile.email.email_updated_successfully": {
+  "ar": "تم تحديث البريد الإلكتروني بنجاح",
+  "en": "Email updated successfully"
+ },
+ "profile.email.enter_your_current_password": {
+  "ar": "أدخل كلمة المرور الحالية",
+  "en": "Enter your current password"
+ },
+ "profile.email.enter_your_new_email": {
+  "ar": "أدخل بريدك الإلكتروني الجديد",
+  "en": "Enter your new email"
+ },
+ "profile.email.enter_your_new_email_address": {
+  "ar": "أدخل بريدك الإلكتروني الجديد وكلمة المرور الحالية لإجراء التغييرات",
+  "en": "Enter your new email address and current password to make changes"
+ },
+ "profile.email.failed_to_update_email": {
+  "ar": "تعذّر تحديث البريد الإلكتروني",
+  "en": "Failed to update email"
+ },
+ "profile.email.new_email_address": {
+  "ar": "البريد الإلكتروني الجديد",
+  "en": "New Email Address"
+ },
+ "profile.email.please_enter_a_valid_email": {
+  "ar": "يرجى إدخال بريد إلكتروني صحيح",
+  "en": "Please enter a valid email address"
+ },
+ "profile.email.please_enter_an_email_address": {
+  "ar": "يرجى إدخال بريد إلكتروني",
+  "en": "Please enter an email address"
+ },
+ "profile.email.please_enter_your_password": {
+  "ar": "يرجى إدخال كلمة المرور",
+  "en": "Please enter your password"
+ },
+ "profile.email.update_your_email": {
+  "ar": "تحديث بريدك الإلكتروني",
+  "en": "Update Your Email"
+ },
+ "profile.info.active": {
+  "ar": "نشط",
+  "en": "Active"
+ },
+ "profile.info.female": {
+  "ar": "أنثى",
+  "en": "Female"
+ },
+ "profile.info.inactive": {
+  "ar": "غير نشط",
+  "en": "Inactive"
+ },
+ "profile.info.male": {
+  "ar": "ذكر",
+  "en": "Male"
+ },
+ "profile.member_since": {
+  "ar": "عضو منذ {date}",
+  "en": "Member since {date}"
+ },
+ "profile.password.change_your_password": {
+  "ar": "تغيير كلمة المرور",
+  "en": "Change Your Password"
+ },
+ "profile.password.confirm_your_new_password": {
+  "ar": "أكّد كلمة المرور الجديدة",
+  "en": "Confirm your new password"
+ },
+ "profile.password.current_password": {
+  "ar": "كلمة المرور الحالية",
+  "en": "Current Password"
+ },
+ "profile.password.enter_your_current_password": {
+  "ar": "أدخل كلمة المرور الحالية",
+  "en": "Enter your current password"
+ },
+ "profile.password.enter_your_new_password": {
+  "ar": "أدخل كلمة المرور الجديدة",
+  "en": "Enter your new password"
+ },
+ "profile.password.error": {
+  "ar": "خطأ",
+  "en": "Error"
+ },
+ "profile.password.failed_to_update_password": {
+  "ar": "تعذّر تحديث كلمة المرور",
+  "en": "Failed to update password"
+ },
+ "profile.password.ok": {
+  "ar": "حسنًا",
+  "en": "OK"
+ },
+ "profile.password.password_must_be_at_least": {
+  "ar": "يجب أن تتكون كلمة المرور من 6 أحرف على الأقل",
+  "en": "Password must be at least 6 characters"
+ },
+ "profile.password.password_updated_successfully": {
+  "ar": "تم تحديث كلمة المرور بنجاح",
+  "en": "Password updated successfully"
+ },
+ "profile.password.passwords_do_not_match": {
+  "ar": "كلمتا المرور غير متطابقتين",
+  "en": "Passwords do not match"
+ },
+ "profile.password.passwords_do_not_match_1": {
+  "ar": "كلمتا المرور غير متطابقتين",
+  "en": "Passwords do not match"
+ },
+ "profile.password.please_confirm_your_new_password": {
+  "ar": "يرجى تأكيد كلمة المرور الجديدة",
+  "en": "Please confirm your new password"
+ },
+ "profile.password.please_enter_a_new_password": {
+  "ar": "يرجى إدخال كلمة مرور جديدة",
+  "en": "Please enter a new password"
+ },
+ "profile.password.please_enter_your_current_password": {
+  "ar": "يرجى إدخال كلمة المرور الحالية واختيار كلمة مرور جديدة",
+  "en": "Please enter your current password and choose a new one"
+ },
+ "profile.password.this_field_is_required": {
+  "ar": "هذا الحقل مطلوب",
+  "en": "This field is required"
+ },
+ "profile.reviews_tab": {
+  "ar": "التقييمات",
+  "en": "Reviews"
+ },
+ "profile_check_builder.complete_profile_desc": {
+  "ar": "يجب إكمال ملفك الشخصي قبل إضافة منشورات أو استخدام الميزات الأخرى.",
+  "en": "You need to complete your profile before you can add posts or access other features."
+ },
+ "profile_check_builder.complete_your_profile": {
+  "ar": "أكمل ملفك الشخصي",
+  "en": "Complete Your Profile"
+ },
+ "profile_check_builder.update_profile": {
+  "ar": "تحديث الملف الشخصي",
+  "en": "Update Profile"
+ },
+ "profile_edit.3_30_characters_letters_numbers_dot_or_underscor": {
+  "ar": "من 3 إلى 30 حرفًا: أحرف إنجليزية أو أرقام أو نقطة أو شرطة سفلية",
+  "en": "3–30 characters: letters, numbers, dot or underscore"
+ },
+ "profile_edit.about_you": {
+  "ar": "عنك",
+  "en": "About you"
+ },
+ "profile_edit.account": {
+  "ar": "الحساب",
+  "en": "Account"
+ },
+ "profile_edit.allow_location_access_in_settings_to_use_this": {
+  "ar": "اسمح بالوصول إلى الموقع من الإعدادات لاستخدام هذه الميزة.",
+  "en": "Allow location access in Settings to use this."
+ },
+ "profile_edit.birthday_cannot_be_in_the_future": {
+  "ar": "لا يمكن أن يكون تاريخ الميلاد في المستقبل",
+  "en": "Birthday cannot be in the future"
+ },
+ "profile_edit.change_email": {
+  "ar": "تغيير البريد",
+  "en": "Change email"
+ },
+ "profile_edit.change_password": {
+  "ar": "تغيير كلمة المرور",
+  "en": "Change password"
+ },
+ "profile_edit.choose_a_username": {
+  "ar": "اختر اسم مستخدم",
+  "en": "Choose a username"
+ },
+ "profile_edit.choose_from_gallery": {
+  "ar": "اختر من المعرض",
+  "en": "Choose from gallery"
+ },
+ "profile_edit.could_not_read_your_location_try_again": {
+  "ar": "تعذّر قراءة موقعك. حاول مرة أخرى.",
+  "en": "Could not read your location. Try again."
+ },
+ "profile_edit.date_of_birth": {
+  "ar": "تاريخ الميلاد",
+  "en": "Date of birth"
+ },
+ "profile_edit.discard": {
+  "ar": "تجاهل",
+  "en": "Discard"
+ },
+ "profile_edit.female": {
+  "ar": "أنثى",
+  "en": "Female"
+ },
+ "profile_edit.full_name": {
+  "ar": "الاسم الكامل",
+  "en": "Full name"
+ },
+ "profile_edit.keep_editing": {
+  "ar": "متابعة التعديل",
+  "en": "Keep editing"
+ },
+ "profile_edit.location_saved": {
+  "ar": "تم حفظ الموقع",
+  "en": "Location saved"
+ },
+ "profile_edit.male": {
+  "ar": "ذكر",
+  "en": "Male"
+ },
+ "profile_edit.name_must_be_at_least_2_characters": {
+  "ar": "الاسم حرفان على الأقل",
+  "en": "Name must be at least 2 characters"
+ },
+ "profile_edit.no_location_saved": {
+  "ar": "لم يتم حفظ موقع",
+  "en": "No location saved"
+ },
+ "profile_edit.profile_pct_complete": {
+  "ar": "اكتمل {pct}٪ من ملفك",
+  "en": "Profile {pct}% complete"
+ },
+ "profile_edit.save_1_change": {
+  "ar": "حفظ تغيير واحد",
+  "en": "Save 1 change"
+ },
+ "profile_edit.shown_to_people_who_contact_you_about_your_posts": {
+  "ar": "يظهر لمن يتواصل معك بخصوص منشوراتك",
+  "en": "Shown to people who contact you about your posts"
+ },
+ "profile_edit.signed_in_with_apple": {
+  "ar": "تسجيل الدخول عبر Apple",
+  "en": "Signed in with Apple"
+ },
+ "profile_edit.signed_in_with_email": {
+  "ar": "تسجيل الدخول بالبريد الإلكتروني",
+  "en": "Signed in with email"
+ },
+ "profile_edit.signed_in_with_google": {
+  "ar": "تسجيل الدخول عبر Google",
+  "en": "Signed in with Google"
+ },
+ "profile_edit.take_a_photo": {
+  "ar": "التقط صورة",
+  "en": "Take a photo"
+ },
+ "profile_edit.turn_on_location_services_to_use_this": {
+  "ar": "فعّل خدمات الموقع لاستخدام هذه الميزة.",
+  "en": "Turn on location services to use this."
+ },
+ "profile_edit.unsaved_changes": {
+  "ar": "تغييرات غير محفوظة",
+  "en": "Unsaved changes"
+ },
+ "profile_edit.update": {
+  "ar": "تحديث",
+  "en": "Update"
+ },
+ "profile_edit.use_my_location": {
+  "ar": "استخدم موقعي",
+  "en": "Use my location"
+ },
+ "profile_edit.used_to_show_posts_near_you": {
+  "ar": "يُستخدم لعرض المنشورات القريبة منك.",
+  "en": "Used to show posts near you."
+ },
+ "profile_edit.username": {
+  "ar": "اسم المستخدم",
+  "en": "Username"
+ },
+ "profile_edit.verified": {
+  "ar": "موثّق",
+  "en": "Verified"
+ },
+ "profile_edit.you_changed_your_profile_but_did_not_save_it": {
+  "ar": "أجريت تغييرات على ملفك ولم تحفظها.",
+  "en": "You changed your profile but did not save it."
+ },
+ "profile_edit.you_must_be_at_least_13": {
+  "ar": "يجب ألا يقل عمرك عن 13 عامًا",
+  "en": "You must be at least 13"
+ },
+ "profile_edit.your_profile_is_complete": {
+  "ar": "ملفك الشخصي مكتمل",
+  "en": "Your profile is complete"
+ },
+ "profile_screen.could_not_start_conversation": {
+  "ar": "تعذّر بدء المحادثة",
+  "en": "Could not start conversation"
+ },
+ "profile_screen.id_copied_to_clipboard": {
+  "ar": "تم نسخ المعرّف",
+  "en": "ID copied to clipboard"
+ },
+ "profile_screen.no_user_profile_data_found": {
+  "ar": "لا توجد بيانات للملف الشخصي.",
+  "en": "No user profile data found."
+ },
+ "profile_screen.points_balance": {
+  "ar": "رصيد النقاط",
+  "en": "POINTS BALANCE"
+ },
+ "profile_screen.top_up": {
+  "ar": "شحن",
+  "en": "Top up"
+ },
+ "purchase.approved": {
+  "ar": "مقبول",
+  "en": "Approved"
+ },
+ "purchase.cancelled": {
+  "ar": "ملغى",
+  "en": "Cancelled"
+ },
+ "purchase.checking_store": {
+  "ar": "جارٍ التحقق من المتجر…",
+  "en": "Checking the store…"
+ },
+ "purchase.loading": {
+  "ar": "جارٍ التحميل...",
+  "en": "Loading..."
+ },
+ "purchase.no_previous_requests": {
+  "ar": "لا توجد طلبات سابقة",
+  "en": "No previous requests"
+ },
+ "purchase.no_products_available": {
+  "ar": "لا توجد منتجات متاحة",
+  "en": "No products available"
+ },
+ "purchase.pending": {
+  "ar": "قيد الانتظار",
+  "en": "Pending"
+ },
+ "purchase.points_1": {
+  "ar": "نقاط",
+  "en": "points"
+ },
+ "purchase.processing": {
+  "ar": "جارٍ المعالجة...",
+  "en": "Processing..."
+ },
+ "purchase.purchase_via_app_store": {
+  "ar": "الشراء عبر App Store",
+  "en": "Purchase via App Store"
+ },
+ "purchase.purchase_via_google_pay": {
+  "ar": "الشراء عبر Google Pay",
+  "en": "Purchase via Google Pay"
+ },
+ "purchase.select_points": {
+  "ar": "اختر النقاط",
+  "en": "Select Points"
+ },
+ "purchase.something_went_wrong_please_try": {
+  "ar": "حدث خطأ ما. يرجى المحاولة مرة أخرى.",
+  "en": "Something went wrong. Please try again."
+ },
+ "purchase.too_many_attempts_please_wait": {
+  "ar": "محاولات كثيرة. يرجى الانتظار قليلًا",
+  "en": "Too many attempts. Please wait a moment"
+ },
+ "purchase.too_many_requests": {
+  "ar": "طلبات كثيرة. حاول لاحقًا.",
+  "en": "Too many requests. Please try again later."
+ },
+ "purchase.transaction_history": {
+  "ar": "سجل المعاملات",
+  "en": "Transaction History"
+ },
+ "purchase.unavailable": {
+  "ar": "غير متاح",
+  "en": "Unavailable"
+ },
+ "purchase.your_previous_requests": {
+  "ar": "طلباتك السابقة",
+  "en": "Your Previous Requests"
+ },
+ "reels.be_first_to_comment": {
+  "ar": "كن أول من يعلّق!",
+  "en": "Be the first to comment!"
+ },
+ "reels.comments_count": {
+  "ar": "{count} تعليق",
+  "en": "{count} Comments"
+ },
+ "reels.loading_reels": {
+  "ar": "جارٍ تحميل المقاطع...",
+  "en": "Loading reels..."
+ },
+ "reels.loading_video": {
+  "ar": "جارٍ تحميل الفيديو...",
+  "en": "Loading video..."
+ },
+ "reels.replying_to": {
+  "ar": "الرد على {name}",
+  "en": "Replying to {name}"
+ },
+ "reels_screen.add_a_comment": {
+  "ar": "أضف تعليقًا...",
+  "en": "Add a comment..."
+ },
+ "reels_screen.call": {
+  "ar": "اتصال",
+  "en": "Call"
+ },
+ "reels_screen.check_out_this_reel": {
+  "ar": "شاهد هذا المقطع",
+  "en": "Check out this reel"
+ },
+ "reels_screen.connection_timed_out": {
+  "ar": "انتهت مهلة الاتصال. يرجى المحاولة مرة أخرى.",
+  "en": "Connection timed out. Please try again."
+ },
+ "reels_screen.contact": {
+  "ar": "تواصل",
+  "en": "Contact"
+ },
+ "reels_screen.contact_options": {
+  "ar": "خيارات التواصل",
+  "en": "Contact Options"
+ },
+ "reels_screen.copy_link": {
+  "ar": "نسخ الرابط",
+  "en": "Copy link"
+ },
+ "reels_screen.error_loading_content": {
+  "ar": "خطأ في تحميل المحتوى. يرجى المحاولة مرة أخرى.",
+  "en": "Error loading content. Please try again."
+ },
+ "reels_screen.hide_replies": {
+  "ar": "إخفاء الردود",
+  "en": "Hide replies"
+ },
+ "reels_screen.inquiry": {
+  "ar": "استفسار",
+  "en": "Inquiry"
+ },
+ "reels_screen.link_copied_to_clipboard": {
+  "ar": "تم نسخ الرابط",
+  "en": "Link copied to clipboard"
+ },
+ "reels_screen.location": {
+  "ar": "الموقع",
+  "en": "Location"
+ },
+ "reels_screen.network_connection_issue": {
+  "ar": "مشكلة في الاتصال بالشبكة. يرجى التحقق من اتصالك بالإنترنت.",
+  "en": "Network connection issue. Please check your internet connection."
+ },
+ "reels_screen.no_comments_yet": {
+  "ar": "لا توجد تعليقات بعد",
+  "en": "No comments yet"
+ },
+ "reels_screen.no_contact_information_available": {
+  "ar": "لا توجد معلومات تواصل",
+  "en": "No contact information available"
+ },
+ "reels_screen.no_reels_available": {
+  "ar": "لا توجد مقاطع حاليًا. حاول لاحقًا.",
+  "en": "No reels available at the moment. Try again later."
+ },
+ "reels_screen.not_interested": {
+  "ar": "غير مهتم",
+  "en": "Not interested"
+ },
+ "reels_screen.removed_from_saved": {
+  "ar": "تمت الإزالة من المحفوظات",
+  "en": "Removed from saved"
+ },
+ "reels_screen.reply": {
+  "ar": "رد",
+  "en": "Reply"
+ },
+ "reels_screen.report": {
+  "ar": "إبلاغ",
+  "en": "Report"
+ },
+ "reels_screen.save": {
+  "ar": "حفظ",
+  "en": "Save"
+ },
+ "reels_screen.saved": {
+  "ar": "تم الحفظ",
+  "en": "Saved"
+ },
+ "reels_screen.saved_to_favorites": {
+  "ar": "تم الحفظ في المفضلة",
+  "en": "Saved to favorites"
+ },
+ "reels_screen.too_many_requests": {
+  "ar": "طلبات كثيرة. يرجى المحاولة بعد قليل.",
+  "en": "Too many requests. Please try again in a moment."
+ },
+ "reels_screen.unknown": {
+  "ar": "غير معروف",
+  "en": "Unknown"
+ },
+ "reels_screen.view_on_map": {
+  "ar": "عرض على الخريطة",
+  "en": "View on map"
+ },
+ "reels_screen.write_a_reply": {
+  "ar": "اكتب ردًا...",
+  "en": "Write a reply..."
+ },
+ "referral.code_copied": {
+  "ar": "تم نسخ رمز الدعوة",
+  "en": "Referral code copied"
+ },
+ "referral.code_optional": {
+  "ar": "كود الإحالة (اختياري)",
+  "en": "Referral code (optional)"
+ },
+ "referral.direct": {
+  "ar": "إحالات مباشرة",
+  "en": "Direct Referrals"
+ },
+ "referral.invite": {
+  "ar": "ادعُ أصدقاءك وأحصل على مكافآت",
+  "en": "Invite friends and earn rewards"
+ },
+ "referral.invite_and_earn": {
+  "ar": "ادعُ الأصدقاء",
+  "en": "Invite friends"
+ },
+ "referral.join_message": {
+  "ar": "انضم إلى طلبنا باستخدام كود الإحالة الخاص بي",
+  "en": "Join Talabna using my referral code"
+ },
+ "referral.load_error": {
+  "ar": "تعذّر تحميل معلومات الدعوات.",
+  "en": "Could not load your referral info."
+ },
+ "referral.no_referrals": {
+  "ar": "لا توجد إحالات بعد",
+  "en": "No referrals yet"
+ },
+ "referral.no_referrals_yet": {
+  "ar": "لا توجد دعوات بعد — شارك رمزك للبدء.",
+  "en": "No referrals yet — share your code to get started."
+ },
+ "referral.not_signed_in": {
+  "ar": "يرجى تسجيل الدخول لعرض دعواتك.",
+  "en": "Please sign in to view your referrals."
+ },
+ "referral.referrals": {
+  "ar": "إحالات",
+  "en": "Referrals"
+ },
+ "referral.section": {
+  "ar": "ادعُ واربح",
+  "en": "Invite & Earn"
+ },
+ "referral.share": {
+  "ar": "شارك كود الإحالة",
+  "en": "Share Referral Code"
+ },
+ "referral.share_subject": {
+  "ar": "انضم إليّ في طلبنا",
+  "en": "Join me on Talabna"
+ },
+ "referral.title": {
+  "ar": "دعوة الأصدقاء",
+  "en": "Invite Friends"
+ },
+ "referral.total": {
+  "ar": "إجمالي الإحالات",
+  "en": "Total Referrals"
+ },
+ "referral.total_network": {
+  "ar": "إجمالي الشبكة",
+  "en": "Total network"
+ },
+ "referral.tree": {
+  "ar": "شجرة الإحالات",
+  "en": "Referral Tree"
+ },
+ "referral.your_code": {
+  "ar": "كود الإحالة الخاص بك",
+  "en": "Your Referral Code"
+ },
+ "referral.your_referrals": {
+  "ar": "دعواتك",
+  "en": "Your Referrals"
+ },
+ "request_monitor_screen.avg_response": {
+  "ar": "متوسط الاستجابة",
+  "en": "Avg Response"
+ },
+ "request_monitor_screen.daily_requests_title": {
+  "ar": "الطلبات اليومية (آخر 30 يومًا)",
+  "en": "Daily Requests (last 30 days)"
+ },
+ "request_monitor_screen.errors": {
+  "ar": "الأخطاء",
+  "en": "Errors"
+ },
+ "request_monitor_screen.failed_to_load_data": {
+  "ar": "تعذّر تحميل البيانات",
+  "en": "Failed to load data"
+ },
+ "request_monitor_screen.guest": {
+  "ar": "زائر",
+  "en": "Guest"
+ },
+ "request_monitor_screen.last_1_hour": {
+  "ar": "آخر ساعة",
+  "en": "Last 1 hour"
+ },
+ "request_monitor_screen.last_1_year": {
+  "ar": "آخر سنة",
+  "en": "Last 1 year"
+ },
+ "request_monitor_screen.last_24_hours": {
+  "ar": "آخر 24 ساعة",
+  "en": "Last 24 hours"
+ },
+ "request_monitor_screen.last_30_days": {
+  "ar": "آخر 30 يومًا",
+  "en": "Last 30 days"
+ },
+ "request_monitor_screen.last_3_days": {
+  "ar": "آخر 3 أيام",
+  "en": "Last 3 days"
+ },
+ "request_monitor_screen.last_6_hours": {
+  "ar": "آخر 6 ساعات",
+  "en": "Last 6 hours"
+ },
+ "request_monitor_screen.last_6_months": {
+  "ar": "آخر 6 أشهر",
+  "en": "Last 6 months"
+ },
+ "request_monitor_screen.last_7_days": {
+  "ar": "آخر 7 أيام",
+  "en": "Last 7 days"
+ },
+ "request_monitor_screen.max_response": {
+  "ar": "أقصى استجابة",
+  "en": "Max Response"
+ },
+ "request_monitor_screen.no_data": {
+  "ar": "لا توجد بيانات",
+  "en": "No data"
+ },
+ "request_monitor_screen.no_endpoint_data": {
+  "ar": "لا توجد بيانات لنقاط الوصول",
+  "en": "No endpoint data"
+ },
+ "request_monitor_screen.no_history_data": {
+  "ar": "لا توجد بيانات سجل بعد.\nتظهر البيانات بعد أول تنظيف يومي.",
+  "en": "No history data yet.\nData appears after the first daily cleanup."
+ },
+ "request_monitor_screen.no_recent_requests": {
+  "ar": "لا توجد طلبات حديثة",
+  "en": "No recent requests"
+ },
+ "request_monitor_screen.no_user_data": {
+  "ar": "لا توجد بيانات للمستخدمين",
+  "en": "No user data"
+ },
+ "request_monitor_screen.period_1_hour": {
+  "ar": "ساعة",
+  "en": "1 hour"
+ },
+ "request_monitor_screen.period_1_year": {
+  "ar": "سنة",
+  "en": "1 year"
+ },
+ "request_monitor_screen.period_24_hours": {
+  "ar": "24 ساعة",
+  "en": "24 hours"
+ },
+ "request_monitor_screen.period_30_days": {
+  "ar": "30 يومًا",
+  "en": "30 days"
+ },
+ "request_monitor_screen.period_3_days": {
+  "ar": "3 أيام",
+  "en": "3 days"
+ },
+ "request_monitor_screen.period_6_hours": {
+  "ar": "6 ساعات",
+  "en": "6 hours"
+ },
+ "request_monitor_screen.period_6_months": {
+  "ar": "6 أشهر",
+  "en": "6 months"
+ },
+ "request_monitor_screen.period_7_days": {
+  "ar": "7 أيام",
+  "en": "7 days"
+ },
+ "request_monitor_screen.raw_logs_title": {
+  "ar": "السجلات الخام في قاعدة البيانات",
+  "en": "Raw Logs in Database"
+ },
+ "request_monitor_screen.requests_per_hour": {
+  "ar": "الطلبات في الساعة",
+  "en": "Requests per Hour"
+ },
+ "request_monitor_screen.tab_endpoints": {
+  "ar": "نقاط الوصول",
+  "en": "Endpoints"
+ },
+ "request_monitor_screen.tab_history": {
+  "ar": "السجل",
+  "en": "History"
+ },
+ "request_monitor_screen.tab_live": {
+  "ar": "مباشر",
+  "en": "Live"
+ },
+ "request_monitor_screen.tab_overview": {
+  "ar": "نظرة عامة",
+  "en": "Overview"
+ },
+ "request_monitor_screen.tab_users": {
+  "ar": "المستخدمون",
+  "en": "Users"
+ },
+ "request_monitor_screen.time_period_tooltip": {
+  "ar": "الفترة الزمنية",
+  "en": "Time period"
+ },
+ "request_monitor_screen.title": {
+  "ar": "مراقبة الطلبات",
+  "en": "Request Monitor"
+ },
+ "request_monitor_screen.top_endpoints": {
+  "ar": "أكثر نقاط الوصول طلبًا",
+  "en": "Top Endpoints"
+ },
+ "request_monitor_screen.top_users_title": {
+  "ar": "أكثر المستخدمين (آخر 30 يومًا)",
+  "en": "Top Users (last 30 days)"
+ },
+ "request_monitor_screen.total_requests": {
+  "ar": "إجمالي الطلبات",
+  "en": "Total Requests"
+ },
+ "request_monitor_screen.unique_ips": {
+  "ar": "عناوين IP الفريدة",
+  "en": "Unique IPs"
+ },
+ "request_monitor_screen.unique_users": {
+  "ar": "المستخدمون الفريدون",
+  "en": "Unique Users"
+ },
+ "resume.add_skill": {
+  "ar": "أضف مهارة",
+  "en": "Add a skill"
+ },
+ "resume.basic_info": {
+  "ar": "المعلومات الأساسية",
+  "en": "Basic Info"
+ },
+ "resume.build_resume": {
+  "ar": "أنشئ سيرتي الذاتية",
+  "en": "Build My Resume"
+ },
+ "resume.build_resume_prompt": {
+  "ar": "أنشئ سيرتك الذاتية لترى وظائف مناسبة لك.",
+  "en": "Build your resume to see job matches tailored to you."
+ },
+ "resume.career_section": {
+  "ar": "المهنة",
+  "en": "Career"
+ },
+ "resume.contract": {
+  "ar": "عقد",
+  "en": "Contract"
+ },
+ "resume.desired_employment_type": {
+  "ar": "نوع العمل المطلوب",
+  "en": "Desired employment type"
+ },
+ "resume.desired_salary_range": {
+  "ar": "نطاق الراتب المطلوب (اختياري)",
+  "en": "Desired salary range (optional)"
+ },
+ "resume.education_level": {
+  "ar": "المستوى التعليمي (اختياري)",
+  "en": "Education level (optional)"
+ },
+ "resume.entry": {
+  "ar": "مبتدئ",
+  "en": "Entry"
+ },
+ "resume.experience": {
+  "ar": "الخبرة",
+  "en": "Experience"
+ },
+ "resume.experience_level": {
+  "ar": "مستوى الخبرة",
+  "en": "Experience level"
+ },
+ "resume.full_time": {
+  "ar": "دوام كامل",
+  "en": "Full-time"
+ },
+ "resume.headline": {
+  "ar": "المسمّى المهني (مثل \"مطوّر Flutter أول\")",
+  "en": "Headline (e.g. \"Senior Flutter Developer\")"
+ },
+ "resume.job_matches": {
+  "ar": "وظائف مناسبة لك",
+  "en": "Job Matches for You"
+ },
+ "resume.match_breakdown": {
+  "ar": "تفاصيل المطابقة",
+  "en": "Match Breakdown"
+ },
+ "resume.max": {
+  "ar": "الحد الأقصى",
+  "en": "Max"
+ },
+ "resume.mid": {
+  "ar": "متوسط",
+  "en": "Mid"
+ },
+ "resume.min": {
+  "ar": "الحد الأدنى",
+  "en": "Min"
+ },
+ "resume.my_resume": {
+  "ar": "سيرتي الذاتية",
+  "en": "My Resume"
+ },
+ "resume.next": {
+  "ar": "التالي",
+  "en": "Next"
+ },
+ "resume.no_headline": {
+  "ar": "(لا يوجد مسمّى بعد)",
+  "en": "(No headline yet)"
+ },
+ "resume.no_matches": {
+  "ar": "لا توجد وظائف للمطابقة بعد. عُد قريبًا!",
+  "en": "No job posts to match against yet. Check back soon!"
+ },
+ "resume.part_time": {
+  "ar": "دوام جزئي",
+  "en": "Part-time"
+ },
+ "resume.preferences": {
+  "ar": "التفضيلات",
+  "en": "Preferences"
+ },
+ "resume.previous": {
+  "ar": "السابق",
+  "en": "Previous"
+ },
+ "resume.remote": {
+  "ar": "عن بُعد",
+  "en": "Remote"
+ },
+ "resume.retry": {
+  "ar": "إعادة المحاولة",
+  "en": "Retry"
+ },
+ "resume.review": {
+  "ar": "مراجعة",
+  "en": "Review"
+ },
+ "resume.save": {
+  "ar": "حفظ السيرة الذاتية",
+  "en": "Save Resume"
+ },
+ "resume.saved": {
+  "ar": "تم حفظ السيرة الذاتية بنجاح",
+  "en": "Resume saved successfully"
+ },
+ "resume.senior": {
+  "ar": "خبير",
+  "en": "Senior"
+ },
+ "resume.skills": {
+  "ar": "المهارات",
+  "en": "Skills"
+ },
+ "resume.skills_hint": {
+  "ar": "أضف مهاراتك واحدة تلو الأخرى — تتم مطابقتها مع متطلبات الوظائف.",
+  "en": "Add your skills one by one — these are matched against job requirements."
+ },
+ "resume.summary": {
+  "ar": "نبذة",
+  "en": "Summary"
+ },
+ "resume.summary_hint": {
+  "ar": "فقرة قصيرة عن خلفيتك وما تبحث عنه",
+  "en": "A short paragraph about your background and what you're looking for"
+ },
+ "resume.title": {
+  "ar": "سيرتي الذاتية",
+  "en": "My Resume"
+ },
+ "resume.why_this_match": {
+  "ar": "لماذا هذه المطابقة؟",
+  "en": "Why this match?"
+ },
+ "resume.years": {
+  "ar": "سنوات",
+  "en": "years"
+ },
+ "resume.years_of_experience": {
+  "ar": "سنوات الخبرة",
+  "en": "Years of experience"
+ },
+ "reviews.comment_hint": {
+  "ar": "شارك تفاصيل تجربتك (اختياري)",
+  "en": "Share details of your experience (optional)"
+ },
+ "reviews.count": {
+  "ar": "{count} تقييم",
+  "en": "{count} reviews"
+ },
+ "reviews.load_error": {
+  "ar": "تعذّر تحميل التقييمات",
+  "en": "Could not load reviews"
+ },
+ "reviews.no_reviews_yet": {
+  "ar": "لا توجد تقييمات بعد",
+  "en": "No reviews yet"
+ },
+ "reviews.submit": {
+  "ar": "إرسال التقييم",
+  "en": "Submit review"
+ },
+ "reviews.unknown_user": {
+  "ar": "مستخدم",
+  "en": "User"
+ },
+ "reviews.write_review": {
+  "ar": "اكتب تقييمًا",
+  "en": "Write a review"
+ },
+ "reviews.write_review_short": {
+  "ar": "تقييم",
+  "en": "Review"
+ },
+ "routes.error": {
+  "ar": "خطأ",
+  "en": "Error"
+ },
+ "routes.go_back": {
+  "ar": "رجوع",
+  "en": "Go Back"
+ },
+ "routes.go_home": {
+  "ar": "الرئيسية",
+  "en": "Go Home"
+ },
+ "routes.loading_post": {
+  "ar": "جارٍ تحميل المنشور",
+  "en": "Loading Post"
+ },
+ "routes.not_found_body": {
+  "ar": "تعذّر العثور على هذا المحتوى.",
+  "en": "This content could not be found."
+ },
+ "routes.not_found_title": {
+  "ar": "غير موجود",
+  "en": "Not found"
+ },
+ "routes.post_not_found": {
+  "ar": "لم يتم العثور على المنشور #{id}",
+  "en": "Post #{id} not found"
+ },
+ "routes.reel_not_found": {
+  "ar": "لم يتم العثور على المقطع #{id}",
+  "en": "Reel #{id} not found"
+ },
+ "routes.service_post": {
+  "ar": "منشور",
+  "en": "Service Post"
+ },
+ "search_screen.clear_all": {
+  "ar": "مسح الكل",
+  "en": "Clear all"
+ },
+ "search_screen.no_results_found": {
+  "ar": "لا توجد نتائج",
+  "en": "No results found"
+ },
+ "search_screen.recent_searches": {
+  "ar": "عمليات البحث الأخيرة",
+  "en": "Recent searches"
+ },
+ "search_screen.search": {
+  "ar": "بحث",
+  "en": "Search"
+ },
+ "search_screen.search_for_users_or_posts": {
+  "ar": "ابحث عن مستخدمين أو منشورات",
+  "en": "Search for users or posts"
+ },
+ "search_screen.search_hint": {
+  "ar": "ابحث عن مستخدمين ومنشورات والمزيد...",
+  "en": "Search users, posts, and more..."
+ },
+ "search_screen.try_different_keywords": {
+  "ar": "جرّب كلمات مختلفة أو حسّن بحثك",
+  "en": "Try different keywords or refine your search"
+ },
+ "search_screen.type_to_find_users_and_posts": {
+  "ar": "اكتب في حقل البحث للعثور على مستخدمين ومنشورات",
+  "en": "Type in the search field to find users and posts"
+ },
+ "service_post.expired": {
+  "ar": "منتهية الصلاحية",
+  "en": "Expired"
+ },
+ "service_post.no_badge": {
+  "ar": "لا توجد شارة",
+  "en": "No badge"
+ },
+ "service_post.normal": {
+  "ar": "عادي",
+  "en": "Normal"
+ },
+ "service_post.us_dollar": {
+  "ar": "دولار امريكي",
+  "en": "US Dollar"
+ },
+ "service_post_action.admin_delete": {
+  "ar": "حذف من الإدارة",
+  "en": "Admin Delete"
+ },
+ "service_post_action.block_confirm": {
+  "ar": "حظر هذا المستخدم فورًا؟",
+  "en": "Block this user immediately?"
+ },
+ "service_post_action.block_user": {
+  "ar": "حظر المستخدم",
+  "en": "Block User"
+ },
+ "service_post_action.block_user_immediately": {
+  "ar": "حظر المستخدم فورًا",
+  "en": "Block user immediately"
+ },
+ "service_post_action.close": {
+  "ar": "إغلاق",
+  "en": "Close"
+ },
+ "service_post_action.delete_and_ban": {
+  "ar": "حذف وحظر",
+  "en": "Delete & Ban"
+ },
+ "service_post_action.delete_and_unban": {
+  "ar": "حذف وإلغاء الحظر",
+  "en": "Delete & Unban"
+ },
+ "service_post_action.delete_this_post": {
+  "ar": "حذف هذا المنشور؟",
+  "en": "Delete this post?"
+ },
+ "service_post_action.mark_post_as_verified": {
+  "ar": "توثيق هذا المنشور",
+  "en": "Mark this post as verified"
+ },
+ "service_post_action.operation_success": {
+  "ar": "تمت العملية بنجاح",
+  "en": "Service Post Operation Success"
+ },
+ "service_post_action.remove_block_from_user": {
+  "ar": "إزالة الحظر عن هذا المستخدم",
+  "en": "Remove block from this user"
+ },
+ "service_post_action.unblock_confirm": {
+  "ar": "إلغاء حظر هذا المستخدم فورًا؟",
+  "en": "Unblock this user immediately?"
+ },
+ "service_post_action.unblock_user": {
+  "ar": "إلغاء حظر المستخدم",
+  "en": "Unblock User"
+ },
+ "service_post_card.featured": {
+  "ar": "مميز",
+  "en": "FEATURED"
+ },
+ "service_post_card.just_now": {
+  "ar": "الآن",
+  "en": "Just now"
+ },
+ "service_post_card.like_failed": {
+  "ar": "تعذّر حفظ الإعجاب. حاول مجددًا.",
+  "en": "Could not save your like. Try again."
+ },
+ "service_post_card.offer": {
+  "ar": "عرض",
+  "en": "Offer"
+ },
+ "service_post_card.request": {
+  "ar": "طلب",
+  "en": "Request"
+ },
+ "service_post_card.unknown": {
+  "ar": "غير معروف",
+  "en": "Unknown"
+ },
+ "service_post_card.unknown_time": {
+  "ar": "وقت غير معروف",
+  "en": "Unknown time"
+ },
+ "service_post_fillter.all_cities": {
+  "ar": "جميع المدن",
+  "en": "All Cities"
+ },
+ "service_post_fillter.city": {
+  "ar": "المدينة",
+  "en": "City"
+ },
+ "service_post_fillter.clear_all": {
+  "ar": "مسح الكل",
+  "en": "Clear all"
+ },
+ "service_post_fillter.filters": {
+  "ar": "خيارات الفلترة",
+  "en": "Filters"
+ },
+ "service_post_fillter.loading_cities": {
+  "ar": "جارٍ تحميل المدن…",
+  "en": "Loading cities…"
+ },
+ "service_post_fillter.offer": {
+  "ar": "عرض",
+  "en": "Offer"
+ },
+ "service_post_fillter.post_type": {
+  "ar": "نوع المنشور",
+  "en": "Post type"
+ },
+ "service_post_fillter.price_chip": {
+  "ar": "السعر: {min}-{max}",
+  "en": "Price: {min}-{max}"
+ },
+ "service_post_fillter.price_range": {
+  "ar": "نطاق السعر",
+  "en": "Price range"
+ },
+ "service_post_fillter.request": {
+  "ar": "طلب",
+  "en": "Request"
+ },
+ "service_post_fillter.reset": {
+  "ar": "إعادة ضبط",
+  "en": "Reset"
+ },
+ "service_post_fillter.search_city": {
+  "ar": "ابحث عن مدينة",
+  "en": "Search city"
+ },
+ "service_post_fillter.show_results": {
+  "ar": "عرض النتائج",
+  "en": "Show results"
+ },
+ "setting_screen.user": {
+  "ar": "مستخدم",
+  "en": "User"
+ },
+ "settings.app_theme": {
+  "ar": "سمة التطبيق",
+  "en": "App Theme"
+ },
+ "settings.appearance_dark": {
+  "ar": "داكن",
+  "en": "Dark"
+ },
+ "settings.appearance_light": {
+  "ar": "فاتح",
+  "en": "Light"
+ },
+ "settings.confirm_password": {
+  "ar": "تأكيد كلمة المرور",
+  "en": "Confirm password"
+ },
+ "settings.data_saver_disabled": {
+  "ar": "تم إيقاف وضع توفير البيانات",
+  "en": "Data Saver Mode Disabled"
+ },
+ "settings.data_saver_enabled": {
+  "ar": "تم تفعيل وضع توفير البيانات",
+  "en": "Data Saver Mode Enabled"
+ },
+ "settings.data_saver_info": {
+  "ar": "في وضع توفير البيانات لن يتم تحميل الصور والوسائط في المنشورات باستثناء قسم المقاطع، وهذا يساعد على تقليل استهلاك البيانات.",
+  "en": "In Data Saver Mode, media and photos in all posts will not be loaded except for the reels category. This will help reduce data consumption."
+ },
+ "settings.data_saver_mode": {
+  "ar": "وضع توفير البيانات",
+  "en": "Data Saver Mode"
+ },
+ "settings.delete_account_desc": {
+  "ar": "سيؤدي هذا إلى حذف ملفك الشخصي وإعلاناتك وصورك وتعليقاتك وسجل النقاط والمشتريات نهائيًا، ولا يمكن التراجع عن ذلك.",
+  "en": "This permanently deletes your profile, listings, photos, comments, and points/purchase history. This cannot be undone."
+ },
+ "settings.delete_account_title": {
+  "ar": "حذف حسابك؟",
+  "en": "Delete your account?"
+ },
+ "settings.description_font_size": {
+  "ar": "حجم خط الوصف",
+  "en": "Description Font Size"
+ },
+ "settings.font_large": {
+  "ar": "كبير",
+  "en": "Large"
+ },
+ "settings.font_size_reset": {
+  "ar": "تمت إعادة حجم الخط إلى الافتراضي",
+  "en": "Font size reset to default"
+ },
+ "settings.font_small": {
+  "ar": "صغير",
+  "en": "Small"
+ },
+ "settings.got_it": {
+  "ar": "فهمت",
+  "en": "Got it"
+ },
+ "settings.language_changed": {
+  "ar": "تم تغيير اللغة بنجاح",
+  "en": "Language changed successfully"
+ },
+ "settings.password_required": {
+  "ar": "كلمة المرور مطلوبة",
+  "en": "Password is required"
+ },
+ "settings.reset": {
+  "ar": "إعادة ضبط",
+  "en": "Reset"
+ },
+ "settings.theme_default": {
+  "ar": "افتراضي",
+  "en": "Default"
+ },
+ "settings.theme_preview_badge": {
+  "ar": "مميز",
+  "en": "FEATURED"
+ },
+ "settings.theme_preview_chip": {
+  "ar": "شقق",
+  "en": "Apartments"
+ },
+ "settings.theme_preview_note": {
+  "ar": "معاينة مباشرة — اللون والوضع يتحكمان في كل ما سبق.",
+  "en": "Live preview — accent + mode drive everything above."
+ },
+ "settings.theme_preview_price": {
+  "ar": "185,000 ريال",
+  "en": "185,000 SAR"
+ },
+ "settings.theme_preview_title": {
+  "ar": "شقة 3 غرف، العليا",
+  "en": "3BR Apartment, Al Olaya"
+ },
+ "subcategory.failed_to_load_location_data": {
+  "ar": "تعذّر تحميل بيانات الموقع",
+  "en": "Failed to load location data"
+ },
+ "subcategory.filters": {
+  "ar": "الفلاتر",
+  "en": "Filters"
+ },
+ "subcategory.no_posts_match_your_filters": {
+  "ar": "لا توجد منشورات تطابق الفلاتر",
+  "en": "No posts match your filters"
+ },
+ "subcategory.offer": {
+  "ar": "عرض",
+  "en": "Offer"
+ },
+ "subcategory.oops_something_went_wrong": {
+  "ar": "عذرًا! حدث خطأ ما",
+  "en": "Oops! Something went wrong"
+ },
+ "subcategory.request": {
+  "ar": "طلب",
+  "en": "Request"
+ },
+ "subcategory.reset": {
+  "ar": "إعادة ضبط",
+  "en": "Reset"
+ },
+ "subcategory.retry": {
+  "ar": "إعادة المحاولة",
+  "en": "Retry"
+ },
+ "subcategory_dropdown.failed_to_load_subcategories": {
+  "ar": "تعذّر تحميل الأقسام الفرعية",
+  "en": "Failed to load subcategories"
+ },
+ "subcategory_dropdown.search": {
+  "ar": "بحث",
+  "en": "Search"
+ },
+ "subcategory_grid_view.suspended": {
+  "ar": "معلّق",
+  "en": "Suspended"
+ },
+ "subcategory_grid_view.try_checking_back_later": {
+  "ar": "حاول التحقق لاحقًا",
+  "en": "Try checking back later"
+ },
+ "term_of_services.and": {
+  "ar": " و",
+  "en": " and "
+ },
+ "terms.accept_continue": {
+  "ar": "موافقة ومتابعة",
+  "en": "Accept & Continue"
+ },
+ "terms.comprehensive_platform_for_jobs_real": {
+  "ar": "منصة شاملة للوظائف والعقارات والسيارات والخدمات",
+  "en": "Comprehensive platform for jobs, real estate, cars, and services"
+ },
+ "terms.i_agree_to_the": {
+  "ar": "أوافق على",
+  "en": "I agree to the "
+ },
+ "terms.last_updated_june_2025": {
+  "ar": "آخر تحديث: يونيو 2025",
+  "en": "Last updated: June 2025"
+ },
+ "terms.please_read_carefully": {
+  "ar": "يرجى القراءة بعناية",
+  "en": "Please read carefully"
+ },
+ "terms.please_scroll_down_to_read": {
+  "ar": "يرجى التمرير لأسفل لقراءة جميع الشروط",
+  "en": "Please scroll down to read all terms"
+ },
+ "terms.privacy_policy": {
+  "ar": "سياسة الخصوصية",
+  "en": "Privacy Policy"
+ },
+ "terms.terms_of_service": {
+  "ar": "شروط الخدمة",
+  "en": "Terms of Service"
+ },
+ "terms.terms_of_service_1": {
+  "ar": "شروط الخدمة",
+  "en": "Terms of Service"
+ },
+ "terms.welcome_to_talabna": {
+  "ar": "مرحبًا بك في طلبنا",
+  "en": "Welcome to Talabna"
+ },
+ "transaction_list.error_loading_transactions": {
+  "ar": "خطأ في تحميل المعاملات",
+  "en": "Error loading transactions"
+ },
+ "transaction_list.new": {
+  "ar": "جديد",
+  "en": "New"
+ },
+ "transaction_list.no_transactions_found": {
+  "ar": "لا توجد معاملات",
+  "en": "No transactions found"
+ },
+ "transaction_list.received_points": {
+  "ar": "النقاط المستلمة",
+  "en": "Received Points"
+ },
+ "transaction_list.received_points_tab": {
+  "ar": "المستلمة",
+  "en": "Received"
+ },
+ "transaction_list.sent_points": {
+  "ar": "النقاط المرسلة",
+  "en": "Sent Points"
+ },
+ "transaction_list.sent_points_tab": {
+  "ar": "المرسلة",
+  "en": "Sent"
+ },
+ "transactions_screen.admin_grant": {
+  "ar": "منحة من الإدارة",
+  "en": "Admin Grant"
+ },
+ "transactions_screen.all": {
+  "ar": "الكل",
+  "en": "All"
+ },
+ "transactions_screen.loading_transactions": {
+  "ar": "جارٍ تحميل المعاملات...",
+  "en": "Loading transactions..."
+ },
+ "transactions_screen.no_received_transactions": {
+  "ar": "لا توجد معاملات مستلمة",
+  "en": "No received transactions"
+ },
+ "transactions_screen.no_sent_transactions": {
+  "ar": "لا توجد معاملات مرسلة",
+  "en": "No sent transactions"
+ },
+ "transactions_screen.no_transactions": {
+  "ar": "لا توجد معاملات",
+  "en": "No transactions"
+ },
+ "transactions_screen.no_transactions_yet": {
+  "ar": "لا توجد معاملات بعد",
+  "en": "No transactions yet"
+ },
+ "transactions_screen.points_balance": {
+  "ar": "رصيد النقاط",
+  "en": "Points Balance"
+ },
+ "transactions_screen.points_purchase": {
+  "ar": "شراء نقاط",
+  "en": "Points Purchase"
+ },
+ "transactions_screen.points_received": {
+  "ar": "نقاط مستلمة",
+  "en": "Points Received"
+ },
+ "transactions_screen.points_sent": {
+  "ar": "نقاط مرسلة",
+  "en": "Points Sent"
+ },
+ "transactions_screen.points_used": {
+  "ar": "نقاط مستخدمة",
+  "en": "Points Used"
+ },
+ "transactions_screen.transactions_history": {
+  "ar": "سجل المعاملات",
+  "en": "Transactions History"
+ },
+ "transfer.after_transfer": {
+  "ar": "بعد التحويل",
+  "en": "After Transfer"
+ },
+ "transfer.cancel": {
+  "ar": "إلغاء",
+  "en": "Cancel"
+ },
+ "transfer.confirm_enter_pin": {
+  "ar": "تأكيد وإدخال الرمز",
+  "en": "Confirm & Enter PIN"
+ },
+ "transfer.confirm_transfer": {
+  "ar": "تأكيد التحويل",
+  "en": "Confirm Transfer"
+ },
+ "transfer.current_balance": {
+  "ar": "الرصيد الحالي",
+  "en": "Current Balance"
+ },
+ "transfer.daily_limits": {
+  "ar": "الحدود اليومية",
+  "en": "Daily Limits"
+ },
+ "transfer.large_transfer_verify_details_carefully": {
+  "ar": "تحويل كبير — تحقق من التفاصيل بعناية",
+  "en": "Large transfer — verify details carefully"
+ },
+ "transfer.points": {
+  "ar": "نقاط",
+  "en": "points"
+ },
+ "transfer.to": {
+  "ar": "إلى",
+  "en": "To"
+ },
+ "upload_progress.error_occurred": {
+  "ar": "حدث خطأ",
+  "en": "Error occurred"
+ },
+ "upload_progress.please_wait_upload": {
+  "ar": "يرجى الانتظار، قد يستغرق الرفع بعض الوقت",
+  "en": "Please wait, upload may take a moment"
+ },
+ "upload_progress.preparing": {
+  "ar": "جارٍ التجهيز...",
+  "en": "Preparing..."
+ },
+ "upload_progress.processing": {
+  "ar": "جارٍ المعالجة...",
+  "en": "Processing..."
+ },
+ "upload_progress.success": {
+  "ar": "تم بنجاح!",
+  "en": "Success!"
+ },
+ "upload_progress.uploading": {
+  "ar": "جارٍ الرفع...",
+  "en": "Uploading..."
+ },
+ "user_card.unknown_user": {
+  "ar": "مستخدم غير معروف",
+  "en": "Unknown User"
+ },
+ "wallet.points": {
+  "ar": "نقاط",
+  "en": "points"
+ },
+ "watsapp_button.could_not_launch_whatsapp": {
+  "ar": "تعذّر فتح واتساب",
+  "en": "Could not launch WhatsApp"
+ },
+ "watsapp_button.no_whatsapp_number": {
+  "ar": "لا يوجد رقم واتساب",
+  "en": "No WhatsApp number"
+ },
+ "watsapp_button.no_whatsapp_number_available": {
+  "ar": "لا يوجد رقم واتساب",
+  "en": "No WhatsApp number available"
+ },
+ "watsapp_tile.no_data": {
+  "ar": "لا توجد بيانات",
+  "en": "no data"
+ },
+ "welcome.browse_as_guest": {
+  "ar": "تصفح كزائر",
+  "en": "Browse as Guest"
+ },
+ "welcome.subtitle": {
+  "ar": "اكتشف الخدمات والإعلانات القريبة منك",
+  "en": "Discover services and ads near you"
+ },
+ "welcome.title": {
+  "ar": "مرحباً بك في طلبنا",
+  "en": "Welcome to Talabna"
+ }
+}
