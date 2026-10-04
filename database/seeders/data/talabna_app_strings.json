@@ -187,6 +187,10 @@
   "ar": "يرجى إدخال عدد النقاط",
   "en": "Please enter the number of points"
  },
+ "add_point.verify_phone_first": {
+  "ar": "وثّق رقم هاتفك لإرسال النقاط.",
+  "en": "Verify your phone number to send points."
+ },
  "add_point.view_all_transactions": {
   "ar": "عرض كل المعاملات",
   "en": "View all transactions"
@@ -478,6 +482,10 @@
  "app.info": {
   "ar": "معلومات",
   "en": "Info"
+ },
+ "app.retry": {
+  "ar": "إعادة المحاولة",
+  "en": "Retry"
  },
  "app.unable_to_initialize": {
   "ar": "تعذّر تشغيل التطبيق",
@@ -1003,6 +1011,10 @@
   "ar": "حاول مجددًا",
   "en": "Try Again"
  },
+ "feed.other_country": {
+  "ar": "دولة أخرى",
+  "en": "Other country"
+ },
  "feed_video_player.error_loading_video": {
   "ar": "خطأ في تحميل الفيديو",
   "en": "Error loading video"
@@ -1473,6 +1485,106 @@
  "phone_tile.phone": {
   "ar": "الهاتف",
   "en": "Phone"
+ },
+ "phone_verify.cancel": {
+  "ar": "إلغاء",
+  "en": "Cancel"
+ },
+ "phone_verify.change": {
+  "ar": "تغيير وتوثيق رقم جديد",
+  "en": "Change & verify new number"
+ },
+ "phone_verify.code_sent_to": {
+  "ar": "أرسلنا رمزًا من 6 أرقام برسالة SMS إلى {phone}.",
+  "en": "We sent a 6-digit code by SMS to {phone}."
+ },
+ "phone_verify.confirm": {
+  "ar": "تأكيد",
+  "en": "Confirm"
+ },
+ "phone_verify.enter_code": {
+  "ar": "أدخل الرمز",
+  "en": "Enter the code"
+ },
+ "phone_verify.enter_number": {
+  "ar": "أدخل الرقم مع رمز الدولة، مثل +201001234567.",
+  "en": "Enter the number with its country code, e.g. +201001234567."
+ },
+ "phone_verify.failed": {
+  "ar": "فشل التحقق. حاول مجددًا.",
+  "en": "Verification failed. Please try again."
+ },
+ "phone_verify.intro": {
+  "ar": "تحصل الأرقام الموثّقة على شارة في ملفك ومنشوراتك، وهي مطلوبة لإرسال النقاط. يمكن تغيير الرقم الموثّق مرة كل 30 يومًا.",
+  "en": "Verified numbers get a badge on your profile and posts, and are needed to send points. A verified number can be changed once every 30 days."
+ },
+ "phone_verify.locked": {
+  "ar": "يمكنك تغيير هذا الرقم بعد {days} يومًا.",
+  "en": "You can change this number again in {days} days."
+ },
+ "phone_verify.none_note": {
+  "ar": "سيتواصل معك المشترون بالاتصال الهاتفي فقط.",
+  "en": "Buyers will contact you by phone call only."
+ },
+ "phone_verify.numbers_verified": {
+  "ar": "أرقامك موثّقة",
+  "en": "Your numbers are verified"
+ },
+ "phone_verify.phone": {
+  "ar": "رقم الهاتف",
+  "en": "Phone number"
+ },
+ "phone_verify.same_note": {
+  "ar": "رمز واحد يوثّق هاتفك وواتسابك.",
+  "en": "One code verifies your phone and WhatsApp."
+ },
+ "phone_verify.same_wa_note": {
+  "ar": "واتسابك يستخدم رقم هاتفك.",
+  "en": "Your WhatsApp uses your phone number."
+ },
+ "phone_verify.send_code": {
+  "ar": "إرسال الرمز",
+  "en": "Send code"
+ },
+ "phone_verify.title": {
+  "ar": "تحقق من أرقامك",
+  "en": "Verify your numbers"
+ },
+ "phone_verify.verified": {
+  "ar": "تم التحقق ✓",
+  "en": "Verified ✓"
+ },
+ "phone_verify.verified_label": {
+  "ar": "موثّق",
+  "en": "Verified"
+ },
+ "phone_verify.verify_numbers": {
+  "ar": "وثّق الهاتف والواتساب",
+  "en": "Verify phone & WhatsApp"
+ },
+ "phone_verify.verify_whatsapp": {
+  "ar": "الهاتف موثّق · وثّق الواتساب",
+  "en": "Phone verified · verify WhatsApp"
+ },
+ "phone_verify.wa_different": {
+  "ar": "رقم آخر",
+  "en": "Different"
+ },
+ "phone_verify.wa_none": {
+  "ar": "لا أستخدمه",
+  "en": "No WhatsApp"
+ },
+ "phone_verify.wa_same": {
+  "ar": "نفس الرقم",
+  "en": "Same number"
+ },
+ "phone_verify.whatsapp": {
+  "ar": "واتساب",
+  "en": "WhatsApp"
+ },
+ "phone_verify.whatsapp_number": {
+  "ar": "رقم الواتساب",
+  "en": "WhatsApp number"
  },
  "pin_input.attempts_remaining": {
   "ar": "متبقٍ {count} محاولات",
@@ -3469,6 +3581,10 @@
  "user_card.unknown_user": {
   "ar": "مستخدم غير معروف",
   "en": "Unknown User"
+ },
+ "verified_badge.tooltip": {
+  "ar": "رقم هاتف موثّق",
+  "en": "Verified phone number"
  },
  "wallet.points": {
   "ar": "نقاط",
