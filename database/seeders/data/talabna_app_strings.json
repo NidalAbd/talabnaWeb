@@ -135,6 +135,10 @@
   "ar": "ستظهر معاملاتك هنا بعد تحويل النقاط",
   "en": "Your transactions will appear here after point transfers"
  },
+ "add_point.transactions_with_name": {
+  "ar": "المعاملات مع {name}",
+  "en": "Transactions with {name}"
+ },
  "add_point.transactions_with_user": {
   "ar": "المعاملات مع المستخدم {id}",
   "en": "Transactions with User {id}"
