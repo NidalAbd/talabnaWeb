@@ -2718,6 +2718,14 @@
   "ar": "المسمّى المهني (مثل \"مطوّر Flutter أول\")",
   "en": "Headline (e.g. \"Senior Flutter Developer\")"
  },
+ "resume.headline_short": {
+  "ar": "المسمّى المهني",
+  "en": "Headline"
+ },
+ "resume.improve_with_ai": {
+  "ar": "حسّن بالذكاء الاصطناعي",
+  "en": "Improve with AI"
+ },
  "resume.job_matches": {
   "ar": "وظائف مناسبة لك",
   "en": "Job Matches for You"
@@ -2797,6 +2805,10 @@
  "resume.skills_hint": {
   "ar": "أضف مهاراتك واحدة تلو الأخرى — تتم مطابقتها مع متطلبات الوظائف.",
   "en": "Add your skills one by one — these are matched against job requirements."
+ },
+ "resume.suggested_skills": {
+  "ar": "مهارات مقترحة",
+  "en": "Suggested skills"
  },
  "resume.summary": {
   "ar": "نبذة",
