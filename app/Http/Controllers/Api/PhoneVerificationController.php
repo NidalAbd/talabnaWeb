@@ -7,136 +7,169 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
+/**
+ * Phone and WhatsApp verification (rebuilt 2026-10-04).
+ *
+ * The app sends the SMS code through Firebase phone sign-in; once the user enters it, Firebase
+ * gives the app an ID token whose `phone_number` claim is the verified number. We verify that
+ * token here (the old flow trusted a firebase_uid sent by the client, so anyone could claim any
+ * number).
+ *
+ * Rules:
+ * - One number belongs to one account (phone or WhatsApp column of anyone else).
+ * - A number replaced by its owner is held for 30 days; one from a deleted account for 90 days.
+ * - A verified number can be replaced once every 30 days (per type).
+ * - At most 3 SMS codes a day per account and per number (request-code is called before the
+ *   app asks Firebase to send one).
+ * - type "both" (phone and WhatsApp are the same number) needs one code.
+ * - Verifying the phone sets the account's country from its dialling code, within the
+ *   30-day country-change rule.
+ * - A user can say they don't use WhatsApp; the profile is complete without it.
+ */
 class PhoneVerificationController extends Controller
 {
-    /**
-     * Verify phone number using Firebase ID token.
-     * Flutter does the SMS OTP via Firebase, then sends us the verified phone.
-     *
-     * POST /api/phone/verify
-     * Body: { phone: "+970599123456", type: "phone"|"whatsapp", firebase_uid: "xxx" }
-     */
+    /** Admin-controlled (Admin -> Pricing -> Phone verification). */
+    private function cooldownDays(): int
+    {
+        return max(1, (int) \App\Models\AppSetting::get('verification.change_cooldown_days', 30));
+    }
+
+    private function codesPerDay(): int
+    {
+        return max(1, (int) \App\Models\AppSetting::get('verification.codes_per_day', 3));
+    }
+
+    /** POST /api/phone/request-code  { phone, type: phone|whatsapp|both } */
+    public function requestCode(Request $request): JsonResponse
+    {
+        $data = $request->validate([
+            'phone' => 'required|string|max:20',
+            'type' => 'required|in:phone,whatsapp,both',
+        ]);
+        $user = Auth::user();
+        $phone = $this->normalize($data['phone']);
+        if (! $phone) {
+            return $this->fail('invalid_phone', 'Enter the number with its country code, e.g. +201001234567.', 422);
+        }
+
+        if ($error = $this->checkClaimable($user, $phone, $data['type'])) {
+            return $error;
+        }
+
+        foreach (["phone-code:user:{$user->id}", "phone-code:number:{$phone}"] as $key) {
+            if (RateLimiter::tooManyAttempts($key, $this->codesPerDay())) {
+                return $this->fail('too_many_codes', 'Too many codes today. Please try again tomorrow.', 429, [
+                    'retry_after_seconds' => RateLimiter::availableIn($key),
+                ]);
+            }
+        }
+        foreach (["phone-code:user:{$user->id}", "phone-code:number:{$phone}"] as $key) {
+            RateLimiter::hit($key, 86400);
+        }
+
+        return response()->json(['success' => true, 'phone' => $phone]);
+    }
+
+    /** POST /api/phone/verify  { phone, type: phone|whatsapp|both, firebase_id_token } */
     public function verify(Request $request): JsonResponse
     {
-        $request->validate([
+        $data = $request->validate([
             'phone' => 'required|string|max:20',
-            'type' => 'required|in:phone,whatsapp',
-            'firebase_uid' => 'required|string',
+            'type' => 'required|in:phone,whatsapp,both',
+            'firebase_id_token' => 'required|string',
         ]);
-
         $user = Auth::user();
-        $phone = $request->phone;
-        $type = $request->type;
-
-        // Check if this phone is already used by another user
-        $existingUser = User::where('id', '!=', $user->id)
-            ->where(function ($q) use ($phone) {
-                $q->where('phones', $phone)->orWhere('WatsNumber', $phone);
-            })->first();
-
-        if ($existingUser) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This phone number is already registered to another user.',
-            ], 409);
+        $phone = $this->normalize($data['phone']);
+        if (! $phone) {
+            return $this->fail('invalid_phone', 'Enter the number with its country code.', 422);
         }
 
-        if ($type === 'phone') {
-            $user->phones = $phone;
-            $user->phone_verified_at = now();
-            Log::info("Phone verified for user {$user->id}: {$phone}");
-        } else {
-            $user->WatsNumber = $phone;
-            $user->whatsapp_verified_at = now();
-            Log::info("WhatsApp verified for user {$user->id}: {$phone}");
+        try {
+            $token = app(\Kreait\Firebase\Contract\Auth::class)->verifyIdToken($data['firebase_id_token']);
+            $verifiedPhone = $this->normalize((string) $token->claims()->get('phone_number'));
+        } catch (\Throwable $e) {
+            Log::warning('phone.verify: invalid Firebase token', ['user' => $user->id, 'error' => $e->getMessage()]);
+
+            return $this->fail('invalid_code', 'The verification could not be confirmed. Please try again.', 422);
+        }
+        if ($verifiedPhone !== $phone) {
+            return $this->fail('phone_mismatch', 'The verified number does not match.', 422);
         }
 
-        $user->save();
+        if ($error = $this->checkClaimable($user, $phone, $data['type'])) {
+            return $error;
+        }
 
-        return response()->json([
-            'success' => true,
-            'message' => $type === 'phone' ? 'Phone number verified' : 'WhatsApp number verified',
-            'phone_verified_at' => $user->phone_verified_at?->toISOString(),
-            'whatsapp_verified_at' => $user->whatsapp_verified_at?->toISOString(),
-        ]);
+        DB::transaction(function () use ($user, $phone, $data) {
+            $types = $data['type'] === 'both' ? ['phone', 'whatsapp'] : [$data['type']];
+            foreach ($types as $type) {
+                [$column, $verifiedAt, $changedAt] = $this->columns($type);
+                $old = $user->{$column};
+                if ($old && $old !== $phone && $user->{$verifiedAt}) {
+                    // The replaced number stays reserved for its owner for 30 days.
+                    $this->hold($old, $user->id, 'changed', 30);
+                    $user->{$changedAt} = now();
+                }
+                $user->{$column} = $phone;
+                $user->{$verifiedAt} = now();
+                if ($type === 'whatsapp') {
+                    $user->no_whatsapp = false;
+                }
+            }
+            // The same number in the other field is verified by the same code
+            // (WhatsApp verified and equal to the phone = phone verified, and the reverse).
+            foreach (['phone', 'whatsapp'] as $other) {
+                [$column, $verifiedAt] = $this->columns($other);
+                if (! in_array($other, $types, true) && $user->{$column} === $phone) {
+                    $user->{$verifiedAt} = now();
+                    $types[] = $other;
+                }
+            }
+            if (in_array('phone', $types, true)) {
+                $this->applyCountryFromPhone($user, $phone);
+            }
+            $user->save();
+        });
+
+        return response()->json(['success' => true] + $this->statusPayload($user->fresh()));
     }
 
-    /**
-     * Verify phone and optionally set same number for WhatsApp.
-     *
-     * POST /api/phone/verify-both
-     * Body: { phone: "+970599123456", same_whatsapp: true, firebase_uid: "xxx" }
-     */
+    /** Kept for older app builds: same as verify with type both / phone. */
     public function verifyBoth(Request $request): JsonResponse
     {
-        $request->validate([
-            'phone' => 'required|string|max:20',
-            'same_whatsapp' => 'required|boolean',
-            'firebase_uid' => 'required|string',
-        ]);
+        $request->merge(['type' => $request->boolean('same_whatsapp') ? 'both' : 'phone']);
 
+        return $this->verify($request);
+    }
+
+    /** POST /api/phone/no-whatsapp  { no_whatsapp: bool } */
+    public function noWhatsapp(Request $request): JsonResponse
+    {
+        $data = $request->validate(['no_whatsapp' => 'required|boolean']);
         $user = Auth::user();
-        $phone = $request->phone;
-
-        // Check uniqueness
-        $existingUser = User::where('id', '!=', $user->id)
-            ->where(function ($q) use ($phone) {
-                $q->where('phones', $phone)->orWhere('WatsNumber', $phone);
-            })->first();
-
-        if ($existingUser) {
-            return response()->json([
-                'success' => false,
-                'message' => 'This phone number is already registered to another user.',
-            ], 409);
+        $user->no_whatsapp = $data['no_whatsapp'];
+        if ($data['no_whatsapp']) {
+            if ($user->WatsNumber && $user->whatsapp_verified_at && $user->WatsNumber !== $user->phones) {
+                $this->hold($user->WatsNumber, $user->id, 'changed', 30);
+            }
+            $user->WatsNumber = null;
+            $user->whatsapp_verified_at = null;
         }
-
-        $user->phones = $phone;
-        $user->phone_verified_at = now();
-
-        if ($request->same_whatsapp) {
-            $user->WatsNumber = $phone;
-            $user->whatsapp_verified_at = now();
-        }
-
         $user->save();
 
-        return response()->json([
-            'success' => true,
-            'message' => $request->same_whatsapp
-                ? 'Phone and WhatsApp verified (same number)'
-                : 'Phone verified. Please verify WhatsApp separately.',
-            'phone_verified_at' => $user->phone_verified_at?->toISOString(),
-            'whatsapp_verified_at' => $user->whatsapp_verified_at?->toISOString(),
-            'needs_whatsapp_verification' => !$request->same_whatsapp,
-        ]);
+        return response()->json(['success' => true] + $this->statusPayload($user));
     }
 
-    /**
-     * Get verification status for current user.
-     */
     public function status(): JsonResponse
     {
-        $user = Auth::user();
-
-        return response()->json([
-            'phones' => $user->phones,
-            'watsNumber' => $user->WatsNumber,
-            'phone_verified' => $user->phone_verified_at !== null,
-            'phone_verified_at' => $user->phone_verified_at?->toISOString(),
-            'whatsapp_verified' => $user->whatsapp_verified_at !== null,
-            'whatsapp_verified_at' => $user->whatsapp_verified_at?->toISOString(),
-            'country_changed_at' => $user->country_changed_at?->toISOString(),
-            'can_change_country' => $this->canChangeCountry($user),
-            'days_until_country_change' => $this->daysUntilCountryChange($user),
-        ]);
+        return response()->json($this->statusPayload(Auth::user()));
     }
 
-    /**
-     * Request country change (requires verified phone + 30 day cooldown).
-     */
+    /** Request country change (requires verified phone + 30 day cooldown). */
     public function changeCountry(Request $request): JsonResponse
     {
         $request->validate([
@@ -146,8 +179,7 @@ class PhoneVerificationController extends Controller
 
         $user = Auth::user();
 
-        // Must have verified phone
-        if (!$user->phone_verified_at) {
+        if (! $user->phone_verified_at) {
             return response()->json([
                 'success' => false,
                 'message' => 'Please verify your phone number before changing country.',
@@ -155,9 +187,9 @@ class PhoneVerificationController extends Controller
             ], 403);
         }
 
-        // 30-day cooldown
-        if (!$this->canChangeCountry($user)) {
-            $days = $this->daysUntilCountryChange($user);
+        if (! $this->canChangeCountry($user)) {
+            $days = $this->daysUntil($user->country_changed_at);
+
             return response()->json([
                 'success' => false,
                 'message' => "You can change country again in {$days} days.",
@@ -179,17 +211,152 @@ class PhoneVerificationController extends Controller
         ]);
     }
 
-    private function canChangeCountry(User $user): bool
+    /** Reserve the account's numbers when it is deleted (90 days). */
+    public static function holdNumbersOfDeletedUser(User $user): void
     {
-        if (!$user->country_changed_at) return true;
-        return $user->country_changed_at->addDays(30)->isPast();
+        foreach (array_unique(array_filter([$user->phones, $user->WatsNumber])) as $number) {
+            (new self())->hold($number, $user->id, 'deleted', 90);
+        }
     }
 
-    private function daysUntilCountryChange(User $user): int
+    // ------------------------------------------------------------------------------------------
+
+    private function checkClaimable(User $user, string $phone, string $type): ?JsonResponse
     {
-        if (!$user->country_changed_at) return 0;
-        $nextChange = $user->country_changed_at->addDays(30);
-        if ($nextChange->isPast()) return 0;
-        return (int) now()->diffInDays($nextChange);
+        $takenByOther = User::where('id', '!=', $user->id)
+            ->where(fn ($q) => $q->where('phones', $phone)->orWhere('WatsNumber', $phone))
+            ->exists();
+        if ($takenByOther) {
+            return $this->fail('number_taken', 'This number is already used by another account.', 409);
+        }
+
+        $held = DB::table('phone_number_holds')
+            ->where('phone', $phone)
+            ->where('hold_until', '>', now())
+            ->where(fn ($q) => $q->whereNull('user_id')->orWhere('user_id', '!=', $user->id))
+            ->exists();
+        if ($held) {
+            return $this->fail('number_on_hold', 'This number was recently used by another account and is not available yet.', 409);
+        }
+
+        $types = $type === 'both' ? ['phone', 'whatsapp'] : [$type];
+        foreach ($types as $t) {
+            [$column, $verifiedAt, $changedAt] = $this->columns($t);
+            $replacing = $user->{$verifiedAt} && $user->{$column} && $user->{$column} !== $phone;
+            if ($replacing && $user->{$changedAt} && $user->{$changedAt}->copy()->addDays($this->cooldownDays())->isFuture()) {
+                $days = $this->daysUntil($user->{$changedAt});
+
+                return $this->fail('change_cooldown', "You can change this number again in {$days} days.", 429, [
+                    'days_remaining' => $days,
+                    'type' => $t,
+                ]);
+            }
+        }
+
+        return null;
+    }
+
+    private function applyCountryFromPhone(User $user, string $phone): void
+    {
+        $country = $this->countryForPhone($phone);
+        if (! $country || (int) $user->country_id === (int) $country->id) {
+            return;
+        }
+        if ($user->country_id && ! $this->canChangeCountry($user)) {
+            return; // within the 30-day country lock: keep the current country
+        }
+        $user->country_id = $country->id;
+        $user->city_id = null;
+        $user->country_changed_at = now();
+    }
+
+    /** Longest dialling-code match: countries.country_code is stored like "0020", "00970". */
+    private function countryForPhone(string $phone): ?object
+    {
+        $digits = substr($phone, 1);
+        $best = null;
+        $bestLength = 0;
+        foreach (DB::table('countries')->whereNotNull('country_code')->get(['id', 'country_code']) as $country) {
+            $code = ltrim((string) $country->country_code, '+0');
+            if ($code !== '' && str_starts_with($digits, $code) && strlen($code) > $bestLength) {
+                $best = $country;
+                $bestLength = strlen($code);
+            }
+        }
+
+        return $best;
+    }
+
+    private function hold(string $phone, ?int $userId, string $reason, int $days): void
+    {
+        DB::table('phone_number_holds')->insert([
+            'phone' => $phone,
+            'user_id' => $userId,
+            'reason' => $reason,
+            'hold_until' => now()->addDays($days),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+    }
+
+    /** E.164: "+" and 8-15 digits. Accepts "00" prefixes and spaces/dashes. */
+    private function normalize(string $raw): ?string
+    {
+        $raw = trim($raw);
+        $digits = preg_replace('/\D+/', '', $raw);
+        if (str_starts_with($raw, '00')) {
+            $digits = substr($digits, 2);
+        } elseif (! str_starts_with($raw, '+') && str_starts_with($digits, '00')) {
+            $digits = substr($digits, 2);
+        }
+
+        return preg_match('/^[1-9]\d{7,14}$/', $digits) ? '+'.$digits : null;
+    }
+
+    private function columns(string $type): array
+    {
+        return $type === 'whatsapp'
+            ? ['WatsNumber', 'whatsapp_verified_at', 'whatsapp_changed_at']
+            : ['phones', 'phone_verified_at', 'phone_changed_at'];
+    }
+
+    private function statusPayload(User $user): array
+    {
+        return [
+            'method' => \App\Models\AppSetting::get('verification.method', 'sms'),
+            'phones' => $user->phones,
+            'watsNumber' => $user->WatsNumber,
+            'phone_verified' => $user->phone_verified_at !== null,
+            'phone_verified_at' => $user->phone_verified_at?->toISOString(),
+            'whatsapp_verified' => $user->whatsapp_verified_at !== null,
+            'whatsapp_verified_at' => $user->whatsapp_verified_at?->toISOString(),
+            'no_whatsapp' => (bool) $user->no_whatsapp,
+            'days_until_phone_change' => $this->daysUntil($user->phone_changed_at),
+            'days_until_whatsapp_change' => $this->daysUntil($user->whatsapp_changed_at),
+            'country_id' => $user->country_id,
+            'country_changed_at' => $user->country_changed_at?->toISOString(),
+            'can_change_country' => $this->canChangeCountry($user),
+            'days_until_country_change' => $this->daysUntil($user->country_changed_at),
+        ];
+    }
+
+    private function canChangeCountry(User $user): bool
+    {
+        return ! $user->country_changed_at || $user->country_changed_at->copy()->addDays($this->cooldownDays())->isPast();
+    }
+
+    private function daysUntil($changedAt): int
+    {
+        if (! $changedAt) {
+            return 0;
+        }
+        $next = $changedAt->copy()->addDays($this->cooldownDays());
+
+        return $next->isPast() ? 0 : (int) ceil(now()->diffInHours($next) / 24);
+    }
+
+    private function fail(string $code, string $message, int $status, array $extra = []): JsonResponse
+    {
+        return response()->json(['success' => false, 'code' => $code, 'message' => $message] + $extra, $status);
     }
 }

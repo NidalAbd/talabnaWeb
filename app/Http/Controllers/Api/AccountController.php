@@ -65,6 +65,13 @@ class AccountController extends Controller
         // Guideline 5.1.1(v): revoke the Sign in with Apple token when the account is deleted.
         app(\App\Services\Auth\AppleTokenRevoker::class)->forget($user);
 
+        // The account's phone / WhatsApp numbers can't open a new account for 90 days.
+        try {
+            PhoneVerificationController::holdNumbersOfDeletedUser($user);
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('account.destroy: phone hold failed', ['error' => $e->getMessage()]);
+        }
+
         try {
             DB::transaction(function () use ($user) {
                 $this->deletePhotosFor($user);

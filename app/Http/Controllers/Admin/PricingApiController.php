@@ -24,6 +24,14 @@ class PricingApiController extends Controller
                 'daily_media_per_user' => (int) AppSetting::get('ai.daily_media_per_user', config('ai.limits.daily_media_per_user', 30)),
                 'confirm_from' => max(1, (int) AppSetting::get('ai.confirm_from', 1)),
             ],
+            // How phone / WhatsApp numbers are verified (2026-10-04). WhatsApp (Meta Cloud API)
+            // becomes selectable once WHATSAPP_CLOUD_TOKEN is configured.
+            'verification' => [
+                'method' => AppSetting::get('verification.method', 'sms'),
+                'codes_per_day' => (int) AppSetting::get('verification.codes_per_day', 3),
+                'change_cooldown_days' => (int) AppSetting::get('verification.change_cooldown_days', 30),
+                'whatsapp_available' => (bool) config('services.whatsapp_cloud.token'),
+            ],
         ]);
     }
 
@@ -39,7 +47,13 @@ class PricingApiController extends Controller
             'media.extra_points' => 'required|integer|min:0|max:1000',
             'limits.daily_media_per_user' => 'required|integer|min:1|max:500',
             'limits.confirm_from' => 'nullable|integer|min:1|max:1000',
+            'verification.method' => 'nullable|in:sms,whatsapp',
+            'verification.codes_per_day' => 'nullable|integer|min:1|max:10',
+            'verification.change_cooldown_days' => 'nullable|integer|min:1|max:365',
         ]);
+        if (($data['verification']['method'] ?? 'sms') === 'whatsapp' && ! config('services.whatsapp_cloud.token')) {
+            return response()->json(['message' => 'WhatsApp verification needs a Meta WhatsApp Business account first.'], 422);
+        }
         foreach ($data['ai_features'] ?? [] as $f) {
             AiFeature::where('key', $f['key'])->update(['points_cost' => $f['points_cost'], 'enabled' => $f['enabled']]);
         }
@@ -48,6 +62,11 @@ class PricingApiController extends Controller
         }
         AppSetting::put('ai.daily_media_per_user', $data['limits']['daily_media_per_user']);
         AppSetting::put('ai.confirm_from', $data['limits']['confirm_from'] ?? 1);
+        if (isset($data['verification'])) {
+            AppSetting::put('verification.method', $data['verification']['method'] ?? 'sms');
+            AppSetting::put('verification.codes_per_day', $data['verification']['codes_per_day'] ?? 3);
+            AppSetting::put('verification.change_cooldown_days', $data['verification']['change_cooldown_days'] ?? 30);
+        }
         return $this->index();
     }
 }

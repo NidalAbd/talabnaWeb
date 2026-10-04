@@ -43,6 +43,24 @@
         <p class="muted small">1 = always ask before taking points. Actions included in the user's plan are free and never ask.</p>
       </div>
 
+      <div class="panel">
+        <h3>Phone verification</h3>
+        <label class="lim">Method
+          <select v-model="form.verification.method" class="num" style="width:auto">
+            <option value="sms">SMS code (Firebase)</option>
+            <option value="whatsapp" :disabled="!form.verification.whatsapp_available">WhatsApp (Meta){{ form.verification.whatsapp_available ? '' : ' — needs a Meta account' }}</option>
+          </select>
+        </label>
+        <p class="muted small">If phone and WhatsApp are the same number, one code verifies both.</p>
+        <label class="lim" style="margin-top:12px">Codes per user per day
+          <input type="number" min="1" max="10" v-model.number="form.verification.codes_per_day" class="num" />
+        </label>
+        <label class="lim" style="margin-top:12px">Days before a verified number can be changed again
+          <input type="number" min="1" max="365" v-model.number="form.verification.change_cooldown_days" class="num" />
+        </label>
+        <p class="muted small">A replaced number stays reserved 30 days; a deleted account's numbers 90 days.</p>
+      </div>
+
       <div class="actions">
         <span v-if="message" :class="ok ? 'okmsg' : 'errmsg'">{{ message }}</span>
         <button class="save" :disabled="saving" @click="save">{{ saving ? 'Saving…' : 'Save prices' }}</button>
@@ -62,7 +80,7 @@ const loading = ref(true)
 const saving = ref(false)
 const message = ref('')
 const ok = ref(true)
-const form = ref({ ai_features: [], media: { free: 4, max: 10, extra_points: 1 }, limits: { daily_media_per_user: 30, confirm_from: 1 } })
+const form = ref({ ai_features: [], media: { free: 4, max: 10, extra_points: 1 }, limits: { daily_media_per_user: 30, confirm_from: 1 }, verification: { method: 'sms', codes_per_day: 3, change_cooldown_days: 30, whatsapp_available: false } })
 
 async function load() {
   loading.value = true

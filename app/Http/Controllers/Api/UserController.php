@@ -643,6 +643,24 @@ class UserController extends Controller
 
             Log::info('Validated data: ', $validatedData);
 
+            // Verified numbers change only through SMS verification (2026-10-04, /api/phone/*).
+            foreach (['phones' => 'phone_verified_at', 'WatsNumber' => 'whatsapp_verified_at'] as $field => $verifiedAt) {
+                $new = isset($validatedData[$field]) ? trim((string) $validatedData[$field]) : null;
+                if ($new !== null && $new !== '' && $user->{$verifiedAt} && $new !== $user->{$field}) {
+                    return $this->profileFieldError($field, 'verify_required',
+                        'Verify the new number with an SMS code to change it.',
+                        'تحقق من الرقم الجديد برمز SMS لتغييره.');
+                }
+            }
+            // With a verified phone the country follows the 30-day country rule.
+            $newCountryId = (isset($validatedData['country']) && is_array($validatedData['country'])) ? ($validatedData['country']['id'] ?? null) : null;
+            if ($newCountryId && (int) $newCountryId !== (int) $user->country_id && $user->phone_verified_at
+                && $user->country_changed_at && $user->country_changed_at->copy()->addDays(30)->isFuture()) {
+                return $this->profileFieldError('country', 'country_locked',
+                    'You can change your country once every 30 days.',
+                    'يمكنك تغيير دولتك مرة كل 30 يومًا.');
+            }
+
             // A CHANGED username must be 3-30 letters/digits/dots/underscores and unique. An unchanged one is left
             // alone so accounts created earlier with other formats can still save their other details.
             if (isset($validatedData['user_name']) && $validatedData['user_name'] !== $user->user_name) {
@@ -666,6 +684,9 @@ class UserController extends Controller
             $user->fcm_token = $validatedData['device_token'] ?? $user->fcm_token;
 
             if (isset($validatedData['country']) && is_array($validatedData['country']) && isset($validatedData['country']['id'])) {
+                if ((int) $validatedData['country']['id'] !== (int) $user->country_id && $user->phone_verified_at) {
+                    $user->country_changed_at = now();
+                }
                 $user->country_id = $validatedData['country']['id'];
             }
 

@@ -31,7 +31,18 @@ class User extends Authenticatable implements CanResetPasswordContract
      * @var array
      */
     protected $table = 'users';
-    protected $appends = ['pointsBalance'];
+    protected $appends = ['pointsBalance', 'phone_verified', 'whatsapp_verified'];
+
+    /** Badges in the app (2026-10-04): numbers verified by SMS code. */
+    public function getPhoneVerifiedAttribute(): bool
+    {
+        return $this->phone_verified_at !== null;
+    }
+
+    public function getWhatsappVerifiedAttribute(): bool
+    {
+        return $this->whatsapp_verified_at !== null;
+    }
 
     public function Permission()
     {
@@ -73,6 +84,9 @@ class User extends Authenticatable implements CanResetPasswordContract
         'phone_verified_at',
         'whatsapp_verified_at',
         'country_changed_at',
+        'phone_changed_at',
+        'whatsapp_changed_at',
+        'no_whatsapp',
     ];
 
     protected $casts = [
@@ -80,6 +94,9 @@ class User extends Authenticatable implements CanResetPasswordContract
         'phone_verified_at' => 'datetime',
         'whatsapp_verified_at' => 'datetime',
         'country_changed_at' => 'datetime',
+        'phone_changed_at' => 'datetime',
+        'whatsapp_changed_at' => 'datetime',
+        'no_whatsapp' => 'boolean',
         'phone_otp_expires_at' => 'datetime',
         'pointsBalance' => 'integer',
         'data_saver_enabled' => 'boolean',
@@ -94,6 +111,12 @@ class User extends Authenticatable implements CanResetPasswordContract
         'password',
         'remember_token',
         'apple_refresh_token',
+        // Never sent to apps (other users' profiles included): push token and one-time codes.
+        'fcm_token',
+        'phone_otp',
+        'phone_otp_expires_at',
+        'pending_phone',
+        'pending_whatsapp',
     ];
 
     protected static function booted()

@@ -83,6 +83,8 @@ class ServicePostController extends Controller
         $servicePostShow->user_name = $postUser->user_name;
         $servicePostShow->email = $postUser->email;
         $servicePostShow->WatsNumber = $postUser->WatsNumber;
+        $servicePostShow->user_verified = $postUser->phone_verified_at !== null;
+        $servicePostShow->whatsapp_verified = $postUser->whatsapp_verified_at !== null;
         $servicePostShow->phones = $postUser->phones;
 
         // Check if current user has favorited this post
@@ -122,6 +124,8 @@ class ServicePostController extends Controller
             $specificPost->user_name = $postUser->user_name;
             $specificPost->email = $postUser->email;
             $specificPost->WatsNumber = $postUser->WatsNumber;
+            $specificPost->user_verified = $postUser->phone_verified_at !== null;
+            $specificPost->whatsapp_verified = $postUser->whatsapp_verified_at !== null;
             $specificPost->phones = $postUser->phones;
 
             $specificPost->is_favorited = (bool)$specificPost->favorites()
@@ -165,6 +169,8 @@ class ServicePostController extends Controller
             $servicePost->user_name = $postUser->user_name;
             $servicePost->email = $postUser->email;
             $servicePost->WatsNumber = $postUser->WatsNumber;
+            $servicePost->user_verified = $postUser->phone_verified_at !== null;
+            $servicePost->whatsapp_verified = $postUser->whatsapp_verified_at !== null;
             $servicePost->phones = $postUser->phones;
 
             $favorite = $servicePost->favorites()->where('user_id', Auth::id())->first();
@@ -940,6 +946,10 @@ class ServicePostController extends Controller
             // Check if the current user follows the post owner
             $follow = $currentUser->followers()->where('follower_id', $postUser->id)->first();
             $servicePost->is_followed = (bool) $follow;
+
+            // Posts from outside the user's country come after theirs; the app labels them.
+            $servicePost->is_other_country = $userCountryId && (int) $servicePost->country_id !== (int) $userCountryId;
+            $servicePost->user_verified = $postUser->phone_verified_at !== null;
         }
 
         return response()->json(compact('servicePosts'));
@@ -1046,6 +1056,9 @@ class ServicePostController extends Controller
             // Check if the current user follows the service post user
             $follow = $currentUser->followers()->where('follower_id', $postUser->id)->first();
             $servicePost->is_followed = (bool)$follow;
+
+            $servicePost->is_other_country = $userCountryId && (int) $servicePost->country_id !== (int) $userCountryId;
+            $servicePost->user_verified = $postUser->phone_verified_at !== null;
         }
 
         return response()->json(compact('servicePosts'));
