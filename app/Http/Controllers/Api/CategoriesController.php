@@ -84,9 +84,18 @@ class CategoriesController extends Controller
     {
         $user = Auth::user();
 
-        // Base query with photos, non-suspended
+        // posts_count is scoped to the requesting user's own country (not a
+        // global count) — this is a per-user menu endpoint, and a global
+        // count would be misleading here since users only ever browse their
+        // own country's listings from Home/Categories.
         $baseQuery = Categories::with('photos')
-            ->where('isSuspended', false);
+            ->where('isSuspended', false)
+            ->withCount(['servicePosts as posts_count' => function ($q) use ($user) {
+                $q->where('state', 'published')
+                  // No country on the account yet (e.g. a fresh or review account): count all,
+                  // instead of matching country_id = NULL and showing 0 everywhere.
+                  ->when($user->country_id, fn ($q) => $q->where('country_id', $user->country_id));
+            }]);
 
         // Apply direct filtering
         $query = $this->directCategoryFilter($baseQuery, $user);

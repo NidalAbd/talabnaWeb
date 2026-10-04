@@ -32,23 +32,36 @@ class DalleImageService
     }
 
     /**
+     * Shared style suffix for category images — a soft-shadow 3D/isometric
+     * render (rounded geometric shapes, gradient lighting, vibrant color)
+     * instead of the old flat-illustration look, which reads as dated now
+     * that most premium apps have moved to this softer 3D style. Only the
+     * rendering style changes here — each category's actual subject (what
+     * object represents it) is untouched, so the icon stays recognizable.
+     */
+    protected const CATEGORY_STYLE_SUFFIX = 'Modern 3D isometric icon render, soft gradient lighting, '
+        . 'rounded geometric shapes, vibrant color palette, subtle drop shadow, premium app icon style, '
+        . 'centered, white background, no text.';
+
+    /**
      * Category-specific prompt templates.
      * Each produces a clear, instantly recognizable icon.
      */
     protected function getCategoryPrompt(string $nameEn, string $nameAr, int $catId): string
     {
-        $prompts = [
-            1 => "A clean flat illustration of a professional person holding a briefcase and a document, representing '{$nameEn}' job listings. Simple, friendly, modern style. White background. No text.",
-            2 => "A clean flat illustration of various electronic devices grouped together: smartphone, laptop, headphones, camera. Representing '{$nameEn}' category. Simple modern style. White background. No text.",
-            3 => "A clean flat illustration of a modern house with a 'For Sale' sign in front, representing '{$nameEn}' real estate listings. Simple, friendly style. White background. No text.",
-            4 => "A clean flat illustration of a car key with a small car silhouette, representing '{$nameEn}' automotive marketplace. Simple modern style. White background. No text.",
-            5 => "A clean flat illustration of a toolbox with a wrench and a handshake, representing '{$nameEn}' services marketplace. Simple modern style. White background. No text.",
-            6 => "A clean flat illustration of a map pin with a location marker and nearby shops, representing '{$nameEn}' nearby services. Simple modern style. White background. No text.",
-            7 => "A clean flat illustration of a video play button with a film reel, representing '{$nameEn}' video content. Simple modern style. White background. No text.",
-            8 => "A clean flat illustration of a red emergency cross with a megaphone, representing '{$nameEn}' urgent/emergency listings. Simple modern style. White background. No text.",
+        $subjects = [
+            1 => "A professional briefcase with a document and pen beside it, representing '{$nameEn}' job listings.",
+            2 => "Grouped electronic devices — smartphone, laptop, headphones, camera — representing '{$nameEn}' category.",
+            3 => "A stylish modern house with a small 'For Sale' sign, representing '{$nameEn}' real estate listings.",
+            4 => "A car key fob with a subtle car silhouette, representing '{$nameEn}' automotive marketplace.",
+            5 => "A toolbox with a wrench and a handshake, representing '{$nameEn}' services marketplace.",
+            6 => "A location pin with small nearby shop icons around it, representing '{$nameEn}' nearby services.",
+            7 => "A play button with a film reel, representing '{$nameEn}' video content.",
+            8 => "A compassionate emergency-aid symbol — a megaphone beside a medical cross — representing '{$nameEn}' urgent/emergency listings.",
         ];
 
-        return $prompts[$catId] ?? "A clean flat illustration icon representing '{$nameEn}' (Arabic: '{$nameAr}') for a mobile marketplace app. Simple, clear, instantly recognizable. White background. No text, no logo.";
+        $subject = $subjects[$catId] ?? "An icon clearly representing '{$nameEn}' (Arabic: '{$nameAr}') for a mobile marketplace app.";
+        return "{$subject} " . self::CATEGORY_STYLE_SUFFIX;
     }
 
     /**
@@ -180,13 +193,12 @@ class DalleImageService
                 return false;
             }
 
-            $imageUrl = $this->callDalleApi($prompt);
-            if (!$imageUrl) {
+            $imageContents = $this->callImageApi($prompt);
+            if (!$imageContents) {
+                Log::error("Image generation returned no data for category {$category->id}: " . ($this->lastError ?? 'unknown'));
                 return false;
             }
 
-            // Download the image
-            $imageContents = $this->client->get($imageUrl)->getBody()->getContents();
             $fileName = Str::uuid() . '.png';
             $storagePath = "category/{$fileName}";
 
@@ -214,14 +226,15 @@ class DalleImageService
 
             return true;
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-            $responseBody = $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response';
-            $errorData = json_decode($responseBody, true);
-            $this->lastError = $errorData['error']['message'] ?? $responseBody;
-            Log::error("DALL-E API error for category {$category->id}: " . $this->lastError);
+            // callImageApi's own catch already set $this->lastError from this
+            // exact response — re-reading $e->getResponse()->getBody() here
+            // would return an empty string (a PSR-7 stream can only be read
+            // once), which is why every failure used to log an empty error.
+            Log::error("Image API error for category {$category->id}: " . ($this->lastError ?? $e->getMessage()));
             return false;
         } catch (\Exception $e) {
             $this->lastError = $e->getMessage();
-            Log::error("DALL-E generation failed for category {$category->id}: " . $e->getMessage());
+            Log::error("Image generation failed for category {$category->id}: " . $e->getMessage());
             return false;
         }
     }
@@ -247,13 +260,12 @@ class DalleImageService
                 return false;
             }
 
-            $imageUrl = $this->callDalleApi($prompt);
-            if (!$imageUrl) {
+            $imageContents = $this->callImageApi($prompt);
+            if (!$imageContents) {
+                Log::error("Image generation returned no data for subcategory {$subcategory->id}: " . ($this->lastError ?? 'unknown'));
                 return false;
             }
 
-            // Download the image
-            $imageContents = $this->client->get($imageUrl)->getBody()->getContents();
             $fileName = Str::uuid() . '.png';
 
             // Get category name for folder structure
@@ -285,14 +297,11 @@ class DalleImageService
 
             return true;
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-            $responseBody = $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response';
-            $errorData = json_decode($responseBody, true);
-            $this->lastError = $errorData['error']['message'] ?? $responseBody;
-            Log::error("DALL-E API error for subcategory {$subcategory->id}: " . $this->lastError);
+            Log::error("Image API error for subcategory {$subcategory->id}: " . ($this->lastError ?? $e->getMessage()));
             return false;
         } catch (\Exception $e) {
             $this->lastError = $e->getMessage();
-            Log::error("DALL-E generation failed for subcategory {$subcategory->id}: " . $e->getMessage());
+            Log::error("Image generation failed for subcategory {$subcategory->id}: " . $e->getMessage());
             return false;
         }
     }
@@ -345,12 +354,12 @@ class DalleImageService
                 return null;
             }
 
-            $imageUrl = $this->callDalleApi($prompt);
-            if (!$imageUrl) {
+            $imageContents = $this->callImageApi($prompt);
+            if (!$imageContents) {
+                Log::error("Image generation returned no data for post photo: " . ($this->lastError ?? 'unknown'));
                 return null;
             }
 
-            $imageContents = $this->client->get($imageUrl)->getBody()->getContents();
             $fileName = Str::uuid() . '.png';
             $storagePath = "posts/ai/{$fileName}";
 
@@ -358,22 +367,30 @@ class DalleImageService
 
             return 'storage/' . $storagePath;
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-            $responseBody = $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response';
-            $errorData = json_decode($responseBody, true);
-            $this->lastError = $errorData['error']['message'] ?? $responseBody;
-            Log::error("DALL-E post photo error: " . $this->lastError);
+            Log::error("Image API post photo error: " . ($this->lastError ?? $e->getMessage()));
             return null;
         } catch (\Exception $e) {
             $this->lastError = $e->getMessage();
-            Log::error("DALL-E post photo generation failed: " . $e->getMessage());
+            Log::error("Image post photo generation failed: " . $e->getMessage());
             return null;
         }
     }
 
     /**
-     * Call the DALL-E 3 API and return the generated image URL.
+     * Call the OpenAI image generation API and return the raw image bytes.
+     *
+     * Was hardcoded to 'dall-e-3', which OpenAI has since removed from this
+     * account entirely (confirmed via GET /v1/models — a 400
+     * "model does not exist" was the actual failure on every call, though a
+     * separate bug — re-reading an already-consumed PSR-7 response stream in
+     * the callers' catch blocks — was masking it as an empty error message).
+     * gpt-image-1 is the replacement; unlike dall-e-3 it returns base64
+     * image data (b64_json), not a hosted URL, so this decodes that
+     * directly instead of doing a second GET for a url field that no
+     * longer exists in the response. Falls back to the url field too, in
+     * case a future model reintroduces it.
      */
-    protected function callDalleApi(string $prompt): ?string
+    protected function callImageApi(string $prompt): ?string
     {
         try {
             $response = $this->client->post('https://api.openai.com/v1/images/generations', [
@@ -382,22 +399,37 @@ class DalleImageService
                     'Content-Type' => 'application/json',
                 ],
                 'json' => [
-                    'model' => 'dall-e-3',
+                    'model' => 'gpt-image-1',
                     'prompt' => $prompt,
                     'n' => 1,
                     'size' => '1024x1024',
-                    'quality' => 'standard',
+                    'quality' => 'high',
                 ],
             ]);
 
             $body = json_decode($response->getBody()->getContents(), true);
+            $data = $body['data'][0] ?? null;
 
-            return $body['data'][0]['url'] ?? null;
+            if ($data === null) {
+                $this->lastError = 'Unexpected image API response shape: ' . json_encode($body);
+                return null;
+            }
+
+            if (isset($data['b64_json'])) {
+                return base64_decode($data['b64_json']);
+            }
+
+            if (isset($data['url'])) {
+                return $this->client->get($data['url'])->getBody()->getContents();
+            }
+
+            $this->lastError = 'Image API response had neither b64_json nor url: ' . json_encode($data);
+            return null;
         } catch (\GuzzleHttp\Exception\ClientException $e) {
             $responseBody = $e->getResponse() ? $e->getResponse()->getBody()->getContents() : 'No response';
             $errorData = json_decode($responseBody, true);
             $this->lastError = $errorData['error']['message'] ?? $responseBody;
-            Log::error("DALL-E API call failed: " . $this->lastError);
+            Log::error("Image API call failed: " . $this->lastError);
             throw $e;
         }
     }
