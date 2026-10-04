@@ -190,7 +190,7 @@ class JobMatchingService
     {
         $jobsCategoryIds = Categories::where('is_job_category', true)->pluck('id');
 
-        $jobs = ServicePost::with(['jobDetails', 'user:id,user_name,photo'])
+        $jobs = ServicePost::with(['jobDetails', 'user:id,user_name', 'user.photos'])
             ->whereIn('categories_id', $jobsCategoryIds)
             ->where('state', 'published')
             ->whereHas('jobDetails')

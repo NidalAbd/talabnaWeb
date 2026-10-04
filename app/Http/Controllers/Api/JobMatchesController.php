@@ -51,7 +51,8 @@ class JobMatchesController extends Controller
                 'user' => $job->user ? [
                     'id' => $job->user->id,
                     'user_name' => $job->user->user_name,
-                    'photo' => $job->user->photo,
+                    // users have no photo column; the avatar is the first of their photos
+                    'photo' => optional($job->user->photos->first())->src,
                 ] : null,
                 'created_at' => $job->created_at,
             ];
