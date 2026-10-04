@@ -294,6 +294,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('ai/pricing', [App\Http\Controllers\Api\AiController::class, 'pricing']);
     Route::middleware('throttle:20,1')->group(function () {
         Route::post('ai/enhance-post', [App\Http\Controllers\Api\AiController::class, 'enhancePost']);
+        Route::post('ai/enhance-resume', [App\Http\Controllers\Api\AiController::class, 'enhanceResume']);
         Route::post('ai/translate-post', [App\Http\Controllers\Api\AiController::class, 'translatePost']);
         Route::post('ai/suggest-category', [App\Http\Controllers\Api\AiController::class, 'suggestCategory']);
         Route::post('ai/suggest-price', [App\Http\Controllers\Api\AiController::class, 'suggestPrice']);

@@ -69,6 +69,28 @@ class AiController extends Controller
     }
 
     /** POST /api/ai/enhance-post - improve title and description together. */
+    /** Improve the resume headline/summary and suggest skills (feature enhance_resume, paid in points). */
+    public function enhanceResume(Request $request): JsonResponse
+    {
+        $d = $request->validate([
+            'request_id' => 'required|uuid',
+            'headline' => 'nullable|string|max:200',
+            'summary' => 'nullable|string|max:3000',
+            'skills' => 'nullable|array|max:50',
+            'skills.*' => 'string|max:60',
+            'experience_years' => 'nullable|integer|min:0|max:70',
+            'experience_level' => 'nullable|string|max:30',
+            'language' => 'nullable|string|max:10',
+        ]);
+        if (trim(($d['headline'] ?? '').($d['summary'] ?? '')) === '' && empty($d['skills'])) {
+            return response()->json(['error' => 'Write a headline, a summary or some skills first.'], 422);
+        }
+
+        return $this->run($request, 'enhance_resume', $d['request_id'], [],
+            fn () => [$this->text->enhanceResume($d['headline'] ?? '', $d['summary'] ?? '', $d['skills'] ?? [],
+                $d['experience_years'] ?? null, $d['experience_level'] ?? null, $d['language'] ?? ''), null]);
+    }
+
     public function enhancePost(Request $request): JsonResponse
     {
         $d = $request->validate([

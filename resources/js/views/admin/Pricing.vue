@@ -73,7 +73,7 @@
 import { ref, onMounted } from 'vue'
 
 const labels = {
-  enhance_post: 'Improve post text', generate_image: 'Generate image', generate_video: 'Generate video',
+  enhance_post: 'Improve post text', enhance_resume: 'Improve resume', generate_image: 'Generate image', generate_video: 'Generate video',
   suggest_category: 'Suggest category', suggest_price: 'Suggest price', translate_post: 'Translate post',
 }
 const loading = ref(true)

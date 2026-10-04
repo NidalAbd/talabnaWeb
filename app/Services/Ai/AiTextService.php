@@ -66,6 +66,42 @@ class AiTextService
      * @param array<string,mixed> $context
      * @return array{title:string,description:string}
      */
+    /**
+     * Rewrites a job seeker's resume headline and summary and suggests skills (2026-10-04).
+     * Only facts the user gave; never invents employers, degrees, dates or numbers.
+     */
+    public function enhanceResume(string $headline, string $summary, array $skills, ?int $years, ?string $level, string $language): array
+    {
+        $system = 'You improve a job seeker\'s resume in a job marketplace app. '
+            .'Rules: keep the SAME language as the input (language code: '.($language ?: 'same as input').'). '
+            .'Use ONLY facts the user gave; never invent employers, job titles they did not hold, degrees, certificates, dates, '
+            .'numbers or contact details. '
+            .'The headline is one clear line of at most 60 characters naming the role they want or do. '
+            .'The summary is 2 to 4 short, confident, natural sentences (at most 450 characters): what they do, their experience '
+            .'and strengths, and the kind of job they want. No emojis, no hashtags, no quotation marks, no buzzword filler. '
+            .'Also suggest up to 6 short skill keywords (1 to 3 words each, lowercase unless a proper noun) that clearly follow from '
+            .'the text, not already in their list. '
+            .'Answer with JSON only: {"headline": string, "summary": string, "skills": [string]}.';
+        $user = "Headline: {$headline}\nSummary: {$summary}\nSkills: ".implode(', ', $skills)
+            ."\nYears of experience: ".($years ?? 'not given')."\nExperience level: ".($level ?: 'not given');
+
+        $out = $this->json($system, $user, 450);
+        $existing = array_map('mb_strtolower', $skills);
+        $suggested = [];
+        foreach ((array) ($out['skills'] ?? []) as $skill) {
+            $skill = trim($this->plain((string) $skill));
+            if ($skill !== '' && mb_strlen($skill) <= 40 && ! in_array(mb_strtolower($skill), $existing, true)) {
+                $suggested[] = $skill;
+            }
+        }
+
+        return [
+            'headline' => $this->clampWords(trim((string) preg_replace('/\s+/u', ' ', $this->plain($out['headline'] ?? ''))), 60),
+            'summary' => $this->clampSentences($this->plain($out['summary'] ?? ''), 450),
+            'skills' => array_slice(array_values(array_unique($suggested)), 0, 6),
+        ];
+    }
+
     public function translatePost(string $title, string $description, string $from, string $to, array $context = []): array
     {
         $srcLen = mb_strlen(trim($description));
