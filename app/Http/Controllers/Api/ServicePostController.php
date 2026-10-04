@@ -1093,7 +1093,8 @@ class ServicePostController extends Controller
             $locale = app()->getLocale();
 
             $cacheKey = "cities_list_{$countryId}_{$locale}";
-            $cities = Cache::remember($cacheKey, 3600, function () use ($countryId, $locale) {
+            // Cities rarely change; the cold build of the full list takes ~2s, so keep it a day.
+            $cities = Cache::remember($cacheKey, 86400, function () use ($countryId, $locale) {
                 $query = cities::query();
 
                 if ($countryId) {

@@ -223,9 +223,7 @@ class PhoneVerificationController extends Controller
 
     private function checkClaimable(User $user, string $phone, string $type): ?JsonResponse
     {
-        $takenByOther = User::where('id', '!=', $user->id)
-            ->where(fn ($q) => $q->where('phones', $phone)->orWhere('WatsNumber', $phone))
-            ->exists();
+        $takenByOther = $this->numberUsedByOther($user, $phone);
         if ($takenByOther) {
             return $this->fail('number_taken', 'This number is already used by another account.', 409);
         }
@@ -300,6 +298,35 @@ class PhoneVerificationController extends Controller
     }
 
     /** E.164: "+" and 8-15 digits. Accepts "00" prefixes and spaces/dashes. */
+    /**
+     * Profiles store numbers in many formats (00970…, +970…, 0598…), so an exact match misses
+     * the same number written differently. Match on the last 9 digits, then compare normalized.
+     */
+    private function numberUsedByOther(User $user, string $phone): bool
+    {
+        $tail = substr(preg_replace('/\D+/', '', $phone), -9);
+        $candidates = User::where('id', '!=', $user->id)
+            ->where(fn ($q) => $q->where('phones', 'like', "%{$tail}")->orWhere('WatsNumber', 'like', "%{$tail}"))
+            ->get(['id', 'phones', 'WatsNumber', 'country_id']);
+        foreach ($candidates as $other) {
+            foreach ([$other->phones, $other->WatsNumber] as $stored) {
+                if (! $stored) {
+                    continue;
+                }
+                if ($this->normalize($stored) === $phone) {
+                    return true;
+                }
+                // Local format (0598…) with no country code: same number if the rest matches.
+                if (str_starts_with(trim($stored), '0') && ! str_starts_with(trim($stored), '00')
+                    && str_ends_with($phone, ltrim(preg_replace('/\D+/', '', $stored), '0'))) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
     private function normalize(string $raw): ?string
     {
         $raw = trim($raw);

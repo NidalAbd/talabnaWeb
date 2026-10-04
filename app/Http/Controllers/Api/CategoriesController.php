@@ -84,17 +84,15 @@ class CategoriesController extends Controller
     {
         $user = Auth::user();
 
-        // posts_count is scoped to the requesting user's own country (not a
-        // global count) — this is a per-user menu endpoint, and a global
-        // count would be misleading here since users only ever browse their
-        // own country's listings from Home/Categories.
+        // posts_count counts what the category feed actually lists: published posts by
+        // active users in every country (the feed shows the user's own country first,
+        // then others). It used to count only the user's country, so a category said
+        // "4 listings" while its subcategories showed 24 (2026-10-04).
         $baseQuery = Categories::with('photos')
             ->where('isSuspended', false)
-            ->withCount(['servicePosts as posts_count' => function ($q) use ($user) {
+            ->withCount(['servicePosts as posts_count' => function ($q) {
                 $q->where('state', 'published')
-                  // No country on the account yet (e.g. a fresh or review account): count all,
-                  // instead of matching country_id = NULL and showing 0 everywhere.
-                  ->when($user->country_id, fn ($q) => $q->where('country_id', $user->country_id));
+                  ->whereHas('user', fn ($u) => $u->where('is_active', 'active'));
             }]);
 
         // Apply direct filtering
