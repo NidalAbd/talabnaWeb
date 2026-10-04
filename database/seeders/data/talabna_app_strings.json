@@ -1634,6 +1634,10 @@
   "ar": "لديك مسودة محفوظة. هل تريد استعادتها؟",
   "en": "You have a saved draft. Would you like to restore it?"
  },
+ "post.delete_failed_retry": {
+  "ar": "تعذّر حذف المنشور. حاول مجددًا.",
+  "en": "Could not delete the post. Please try again."
+ },
  "post.job.add_skill": {
   "ar": "أضف مهارة مطلوبة — اضغط إدخال",
   "en": "Add a required skill — press enter"
