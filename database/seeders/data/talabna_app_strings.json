@@ -3378,6 +3378,82 @@
   "ar": "حاول التحقق لاحقًا",
   "en": "Try checking back later"
  },
+ "subscription.addon_added": {
+  "ar": "أُضيفت إلى خطتك",
+  "en": "Added to your plan"
+ },
+ "subscription.addon_confirm": {
+  "ar": "شراء {pack} مقابل {points} نقطة؟ تبقى صالحة حتى تجديد خطتك.",
+  "en": "Buy {pack} for {points} points? It lasts until your plan renews."
+ },
+ "subscription.buy": {
+  "ar": "شراء",
+  "en": "Buy"
+ },
+ "subscription.change_scheduled": {
+  "ar": "تمت جدولة تغيير الخطة",
+  "en": "Plan change scheduled"
+ },
+ "subscription.downgrade_message": {
+  "ar": "تحتفظ بخطتك الحالية حتى تنتهي بعد {days} يومًا، ثم تبدأ {plan} مقابل {price} نقطة. لا يُخصم شيء الآن.",
+  "en": "You keep your current plan until it ends in {days} days. Then {plan} starts for {price} points. Nothing is charged now."
+ },
+ "subscription.keep_plan": {
+  "ar": "إبقاء خطتي",
+  "en": "Keep current plan"
+ },
+ "subscription.kept_plan": {
+  "ar": "ستبقى على {plan}",
+  "en": "You will stay on {plan}"
+ },
+ "subscription.pay": {
+  "ar": "ادفع",
+  "en": "Pay"
+ },
+ "subscription.schedule": {
+  "ar": "جدولة التغيير",
+  "en": "Schedule change"
+ },
+ "subscription.scheduled_change": {
+  "ar": "ستتحول إلى {plan} بعد {days} يومًا",
+  "en": "Changes to {plan} in {days} days"
+ },
+ "subscription.starts_at_renewal": {
+  "ar": "تبدأ عند التجديد",
+  "en": "Starts at renewal"
+ },
+ "subscription.switch_at_renewal": {
+  "ar": "التحويل عند التجديد",
+  "en": "Switch at renewal"
+ },
+ "subscription.switch_title": {
+  "ar": "التحويل إلى {plan}",
+  "en": "Switch to {plan}"
+ },
+ "subscription.topups": {
+  "ar": "تحتاج المزيد هذا الشهر؟",
+  "en": "Need more this month?"
+ },
+ "subscription.topups_note": {
+  "ar": "الباقات الإضافية تُضاف إلى خطتك حتى موعد التجديد.",
+  "en": "Top-up packs add to your plan until it renews."
+ },
+ "subscription.upgrade": {
+  "ar": "ترقية",
+  "en": "Upgrade"
+ },
+ "subscription.upgrade_message": {
+  "ar": "سعر {plan} هو {price} نقطة. الجزء غير المستخدم من خطتك الحالية يساوي {credit} نقطة، لذا تدفع {charge} نقطة الآن. تبدأ {plan} اليوم لمدة {days} يومًا.",
+  "en": "{plan} costs {price} points. The unused part of your current plan is worth {credit} points, so you pay {charge} points now. {plan} starts today for {days} days."
+ },
+ "subscription.upgrade_title": {
+  "ar": "الترقية إلى {plan}",
+  "en": "Upgrade to {plan}"
+ },
+ "subscription.upgraded": {
+  "ar": "تمت الترقية إلى {plan}",
+  "en": "Upgraded to {plan}"
+ },
  "term_of_services.and": {
   "ar": " و",
   "en": " and "
