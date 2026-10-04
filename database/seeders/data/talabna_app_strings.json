@@ -803,6 +803,10 @@
   "ar": "غير معروف",
   "en": "Unknown"
  },
+ "categories_tab.view_all": {
+  "ar": "عرض الكل",
+  "en": "View all"
+ },
  "category_dropdown.failed_to_load_categories": {
   "ar": "تعذّر تحميل الأقسام",
   "en": "Failed to load categories"
@@ -3662,9 +3666,69 @@
   "ar": "رقم هاتف موثّق",
   "en": "Verified phone number"
  },
+ "wallet.date": {
+  "ar": "التاريخ",
+  "en": "Date"
+ },
+ "wallet.filter_spent": {
+  "ar": "المصروف",
+  "en": "Spent"
+ },
+ "wallet.from": {
+  "ar": "من",
+  "en": "From"
+ },
+ "wallet.in_this_month": {
+  "ar": "الوارد هذا الشهر",
+  "en": "In this month"
+ },
+ "wallet.no_spent": {
+  "ar": "لا توجد مصروفات بعد",
+  "en": "Nothing spent yet"
+ },
+ "wallet.out_this_month": {
+  "ar": "الصادر هذا الشهر",
+  "en": "Out this month"
+ },
  "wallet.points": {
   "ar": "نقاط",
   "en": "points"
+ },
+ "wallet.reference": {
+  "ar": "المرجع",
+  "en": "Reference"
+ },
+ "wallet.to": {
+  "ar": "إلى",
+  "en": "To"
+ },
+ "wallet.today": {
+  "ar": "اليوم",
+  "en": "Today"
+ },
+ "wallet.type": {
+  "ar": "النوع",
+  "en": "Type"
+ },
+ "wallet.type_grant": {
+  "ar": "هدية",
+  "en": "Gift"
+ },
+ "wallet.type_purchase": {
+  "ar": "شراء",
+  "en": "Purchase"
+ },
+ "wallet.type_transfer": {
+  "ar": "تحويل",
+  "en": "Transfer"
+ },
+ "wallet.type_used": {
+  "ar": "مصروف",
+  "en": "Spent"
+ },
+ "wallet.yesterday": {
+  "ar": "أمس",
+  "en": "Yesterday"
  },
  "watsapp_button.could_not_launch_whatsapp": {
   "ar": "تعذّر فتح واتساب",
