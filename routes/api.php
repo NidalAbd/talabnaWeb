@@ -331,6 +331,11 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('subscriptions/toggle-auto-renew', [App\Http\Controllers\Api\SubscriptionController::class, 'toggleAutoRenew']);
     Route::post('subscriptions/check-feature', [App\Http\Controllers\Api\SubscriptionController::class, 'checkFeature']);
     Route::post('subscriptions/use-feature', [App\Http\Controllers\Api\SubscriptionController::class, 'useFeature']);
+    Route::get('subscriptions/quote', [App\Http\Controllers\Api\SubscriptionController::class, 'quote']);
+    Route::post('subscriptions/change', [App\Http\Controllers\Api\SubscriptionController::class, 'change']);
+    Route::post('subscriptions/cancel-scheduled', [App\Http\Controllers\Api\SubscriptionController::class, 'cancelScheduled']);
+    Route::get('subscriptions/addons', [App\Http\Controllers\Api\SubscriptionController::class, 'addons']);
+    Route::post('subscriptions/addons/buy', [App\Http\Controllers\Api\SubscriptionController::class, 'buyAddon']);
 
     // In-app chat — alongside (not instead of) the external contact sheet
     // (WhatsApp/call/email). Deliberately simple: client polls, no
@@ -391,6 +396,12 @@ Route::middleware(['auth:api'])->group(function () {
         Route::put('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'update']);
         Route::delete('/{id}', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'destroy']);
         Route::post('/{id}/toggle', [App\Http\Controllers\Admin\SubscriptionPlanController::class, 'toggle']);
+    });
+    Route::middleware(['admin'])->prefix('admin/subscription-addons')->group(function () {
+        Route::get('/', [App\Http\Controllers\Admin\SubscriptionAddonController::class, 'index']);
+        Route::post('/', [App\Http\Controllers\Admin\SubscriptionAddonController::class, 'store']);
+        Route::put('/{id}', [App\Http\Controllers\Admin\SubscriptionAddonController::class, 'update']);
+        Route::delete('/{id}', [App\Http\Controllers\Admin\SubscriptionAddonController::class, 'destroy']);
     });
 
     // Badge application routes for service posts

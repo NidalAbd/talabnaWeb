@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\SubscriptionAddon;
 use App\Models\SubscriptionPlan;
 use App\Services\SubscriptionService;
 use Illuminate\Http\JsonResponse;
@@ -62,6 +63,44 @@ class SubscriptionController extends Controller
         }
 
         return response()->json($result, 201);
+    }
+
+    /** What changing to a plan costs now (upgrade) or when it starts (downgrade). */
+    public function quote(Request $request): JsonResponse
+    {
+        $request->validate(['plan_id' => 'required|integer']);
+        $result = $this->subscriptionService->quote(Auth::id(), (int) $request->plan_id);
+        return response()->json($result, $result['success'] ? 200 : 400);
+    }
+
+    /** Upgrade now paying the difference, or schedule a downgrade for the end of the period. */
+    public function change(Request $request): JsonResponse
+    {
+        $request->validate(['plan_id' => 'required|integer|exists:subscription_plans,id']);
+        $result = $this->subscriptionService->change(Auth::id(), (int) $request->plan_id);
+        return response()->json($result, $result['success'] ? 200 : 400);
+    }
+
+    public function cancelScheduled(): JsonResponse
+    {
+        $result = $this->subscriptionService->cancelScheduled(Auth::id());
+        return response()->json($result, $result['success'] ? 200 : 400);
+    }
+
+    /** Top-up packs for plan allowances. */
+    public function addons(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'addons' => SubscriptionAddon::where('is_active', true)->orderBy('sort_order')->orderBy('price_points')->get(),
+        ]);
+    }
+
+    public function buyAddon(Request $request): JsonResponse
+    {
+        $request->validate(['addon_id' => 'required|integer']);
+        $result = $this->subscriptionService->buyAddon(Auth::id(), (int) $request->addon_id);
+        return response()->json($result, $result['success'] ? 200 : 400);
     }
 
     /**

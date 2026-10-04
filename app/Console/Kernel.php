@@ -22,6 +22,7 @@ class Kernel extends ConsoleKernel
         // Run badge expiration check every 15 minutes
         // This ensures badges expire at approximately the same time they were created
         $schedule->command('badges:expire')->everyFifteenMinutes();
+        $schedule->command('subscriptions:process')->everyFifteenMinutes()->withoutOverlapping();
         $schedule->command('purchase-attempts:sweep')->hourly()->withoutOverlapping();
         $schedule->command('purchase-attempts:remind')->everyThirtyMinutes()->withoutOverlapping();
         // Background worker for pushes (QUEUE_CONNECTION=database): drains the

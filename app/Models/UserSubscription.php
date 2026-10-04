@@ -19,7 +19,10 @@ class UserSubscription extends Model
         'status',
         'features_snapshot',
         'usage',
+        'extras',
         'auto_renew',
+        'scheduled_plan_id',
+        'replaced_by_id',
     ];
 
     protected $casts = [
@@ -27,6 +30,7 @@ class UserSubscription extends Model
         'expires_at' => 'datetime',
         'features_snapshot' => 'array',
         'usage' => 'array',
+        'extras' => 'array',
         'auto_renew' => 'boolean',
         'points_paid' => 'integer',
     ];
@@ -63,7 +67,26 @@ class UserSubscription extends Model
      */
     public function getFeature(string $key, $default = null)
     {
-        return $this->features_snapshot[$key] ?? $default;
+        $value = $this->features_snapshot[$key] ?? $default;
+        // Top-up packs add to numeric allowances for the rest of this period.
+        $extra = (int) (($this->extras ?? [])[$key] ?? 0);
+        if ($extra > 0 && (is_int($value) || is_numeric($value) || $value === null || $value === false)) {
+            return (int) $value + $extra;
+        }
+        return $value;
+    }
+
+    public function scheduledPlan()
+    {
+        return $this->belongsTo(SubscriptionPlan::class, 'scheduled_plan_id');
+    }
+
+    /** Fraction of the paid period still unused, 0..1. */
+    public function unusedFraction(): float
+    {
+        $total = max(1, $this->starts_at->diffInSeconds($this->expires_at));
+        $left = max(0, Carbon::now()->diffInSeconds($this->expires_at, false));
+        return min(1.0, $left / $total);
     }
 
     /**

@@ -173,6 +173,8 @@
             </div>
         </div>
 
+        <SubscriptionAddonsPanel />
+
         <!-- Create/Edit Modal -->
         <div class="modal-overlay" v-if="showFormModal" @click="closeFormModal">
             <div class="modal-dialog-advanced" @click.stop>
@@ -341,6 +343,7 @@
 <script setup>
 import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useSubscriptionPlans } from '../../composables/useSubscriptionPlans'
+import SubscriptionAddonsPanel from './SubscriptionAddonsPanel.vue'
 
 const {
     plans,
