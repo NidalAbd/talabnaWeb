@@ -28,7 +28,7 @@ class PricingApiController extends Controller
             // becomes selectable once WHATSAPP_CLOUD_TOKEN is configured.
             'verification' => [
                 'method' => AppSetting::get('verification.method', 'sms'),
-                'codes_per_day' => (int) AppSetting::get('verification.codes_per_day', 3),
+                'codes_per_day' => (int) AppSetting::get('verification.codes_per_day', 5),
                 'change_cooldown_days' => (int) AppSetting::get('verification.change_cooldown_days', 30),
                 'whatsapp_available' => (bool) config('services.whatsapp_cloud.token'),
             ],
@@ -64,7 +64,7 @@ class PricingApiController extends Controller
         AppSetting::put('ai.confirm_from', $data['limits']['confirm_from'] ?? 1);
         if (isset($data['verification'])) {
             AppSetting::put('verification.method', $data['verification']['method'] ?? 'sms');
-            AppSetting::put('verification.codes_per_day', $data['verification']['codes_per_day'] ?? 3);
+            AppSetting::put('verification.codes_per_day', $data['verification']['codes_per_day'] ?? 5);
             AppSetting::put('verification.change_cooldown_days', $data['verification']['change_cooldown_days'] ?? 30);
         }
         return $this->index();

@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
@@ -40,7 +41,7 @@ class PhoneVerificationController extends Controller
 
     private function codesPerDay(): int
     {
-        return max(1, (int) \App\Models\AppSetting::get('verification.codes_per_day', 3));
+        return max(1, (int) \App\Models\AppSetting::get('verification.codes_per_day', 5));
     }
 
     /** POST /api/phone/request-code  { phone, type: phone|whatsapp|both } */
@@ -70,8 +71,37 @@ class PhoneVerificationController extends Controller
         foreach (["phone-code:user:{$user->id}", "phone-code:number:{$phone}"] as $key) {
             RateLimiter::hit($key, 86400);
         }
+        // Lets the app hand this attempt back if Firebase then fails to send the SMS.
+        Cache::put("phone-code:pending:{$user->id}", $phone, now()->addMinutes(10));
 
         return response()->json(['success' => true, 'phone' => $phone]);
+    }
+
+    /**
+     * POST /api/phone/code-failed — Firebase could not send the SMS (reCAPTCHA, network,
+     * device blocked…), so this attempt shouldn't use up the day's codes. Only for the last
+     * requested number, and at most twice a day, so it can't be used to skip the limit.
+     */
+    public function codeFailed(): JsonResponse
+    {
+        $user = Auth::user();
+        $phone = Cache::pull("phone-code:pending:{$user->id}");
+        $refundsKey = "phone-code:refunds:{$user->id}";
+        if (! $phone || RateLimiter::tooManyAttempts($refundsKey, 2)) {
+            return response()->json(['success' => true, 'refunded' => false]);
+        }
+        RateLimiter::hit($refundsKey, 86400);
+        foreach (["phone-code:user:{$user->id}", "phone-code:number:{$phone}"] as $key) {
+            $attempts = RateLimiter::attempts($key);
+            if ($attempts > 0) {
+                RateLimiter::clear($key);
+                for ($i = 1; $i < $attempts; $i++) {
+                    RateLimiter::hit($key, 86400);
+                }
+            }
+        }
+
+        return response()->json(['success' => true, 'refunded' => true]);
     }
 
     /** POST /api/phone/verify  { phone, type: phone|whatsapp|both, firebase_id_token } */

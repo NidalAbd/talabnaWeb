@@ -148,6 +148,7 @@ Route::middleware('auth:api')->group(function () {
 Route::middleware(['auth:api'])->group(function () {
     // Phone verification routes
     Route::post('phone/request-code', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'requestCode'])->middleware('throttle:10,1');
+    Route::post('phone/code-failed', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'codeFailed'])->middleware('throttle:10,1');
     Route::post('phone/no-whatsapp', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'noWhatsapp']);
     Route::post('phone/verify', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'verify'])->middleware('throttle:10,1');
     Route::post('phone/verify-both', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'verifyBoth']);

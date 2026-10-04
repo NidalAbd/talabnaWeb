@@ -80,7 +80,7 @@ const loading = ref(true)
 const saving = ref(false)
 const message = ref('')
 const ok = ref(true)
-const form = ref({ ai_features: [], media: { free: 4, max: 10, extra_points: 1 }, limits: { daily_media_per_user: 30, confirm_from: 1 }, verification: { method: 'sms', codes_per_day: 3, change_cooldown_days: 30, whatsapp_available: false } })
+const form = ref({ ai_features: [], media: { free: 4, max: 10, extra_points: 1 }, limits: { daily_media_per_user: 30, confirm_from: 1 }, verification: { method: 'sms', codes_per_day: 5, change_cooldown_days: 30, whatsapp_available: false } })
 
 async function load() {
   loading.value = true
