@@ -1,4 +1,20 @@
 {
+ "a11y.comments": {
+  "ar": "التعليقات",
+  "en": "Comments"
+ },
+ "a11y.like": {
+  "ar": "إعجاب",
+  "en": "Like"
+ },
+ "a11y.share": {
+  "ar": "مشاركة",
+  "en": "Share"
+ },
+ "a11y.unlike": {
+  "ar": "إلغاء الإعجاب",
+  "en": "Unlike"
+ },
  "about.about": {
   "ar": "حول التطبيق",
   "en": "About"
@@ -91,6 +107,10 @@
   "ar": "لا توجد معاملات مع هذا المستخدم بعد",
   "en": "No transactions with this user yet"
  },
+ "add_point.not_enough_points": {
+  "ar": "رصيدك {balance} نقطة — لا يكفي لإرسال {points}.",
+  "en": "You have {balance} points — not enough to send {points}."
+ },
  "add_point.number_of_points_label": {
   "ar": "عدد النقاط",
   "en": "Number of Points"
@@ -146,6 +166,10 @@
  "add_point.transfer_already_processed": {
   "ar": "تمت معالجة التحويل مسبقًا.",
   "en": "Transfer already processed."
+ },
+ "add_point.transfer_not_sent": {
+  "ar": "لم يتم إرسال النقاط",
+  "en": "Points not sent"
  },
  "add_point.transfer_points_desc": {
   "ar": "أدخل عدد النقاط التي تريد تحويلها إلى المستخدم.",
@@ -719,6 +743,14 @@
   "ar": "عذرًا، تم تعليق حسابك مؤقتًا",
   "en": "Sorry, your account has been temporarily suspended"
  },
+ "billing.cancelled": {
+  "ar": "تم إلغاء الشراء",
+  "en": "Purchase cancelled"
+ },
+ "billing.credit_pending": {
+  "ar": "تمت عملية الدفع لكن لم نتمكن من إضافة نقاطك بعد. سنعيد المحاولة تلقائيًا، وإن أغلقت التطبيق ستُضاف عند فتحه مجددًا.",
+  "en": "Your payment went through but we could not add your points yet. We will keep trying automatically. If you close the app, they are added next time you open it."
+ },
  "billing.purchase_failed": {
   "ar": "فشلت عملية الشراء",
   "en": "Purchase failed"
@@ -726,6 +758,14 @@
  "billing.purchase_not_verified": {
   "ar": "تعذّر التحقق من عملية الشراء",
   "en": "Purchase could not be verified"
+ },
+ "billing.store_unreachable_android": {
+  "ar": "تعذّر الوصول إلى Google Play الآن. تحقّق من الاتصال ثم حاول مجددًا.",
+  "en": "Can't reach Google Play right now. Check your connection, then try again."
+ },
+ "billing.store_unreachable_ios": {
+  "ar": "تعذّر الوصول إلى App Store الآن. تحقّق من الاتصال ومن تسجيل الدخول ثم حاول مجددًا.",
+  "en": "Can't reach the App Store right now. Check your connection and that you're signed in, then try again."
  },
  "block.block_user": {
   "ar": "حظر هذا المستخدم",
@@ -1227,6 +1267,22 @@
   "ar": "حذف",
   "en": "Delete"
  },
+ "comments.delete_body": {
+  "ar": "سيتم حذف الردود عليه أيضًا.",
+  "en": "Replies to it will be removed too."
+ },
+ "comments.delete_title": {
+  "ar": "حذف هذا التعليق؟",
+  "en": "Delete this comment?"
+ },
+ "comments.edit": {
+  "ar": "تعديل",
+  "en": "Edit"
+ },
+ "comments.edit_title": {
+  "ar": "تعديل التعليق",
+  "en": "Edit comment"
+ },
  "comments.error_loading_comments": {
   "ar": "خطأ في تحميل التعليقات",
   "en": "Error loading comments"
@@ -1250,6 +1306,10 @@
  "comments.replying_to": {
   "ar": "الرد على {name}",
   "en": "Replying to {name}"
+ },
+ "comments.save": {
+  "ar": "حفظ",
+  "en": "Save"
  },
  "comments.unknown_user": {
   "ar": "مستخدم",
@@ -1278,6 +1338,10 @@
  "common.load_more": {
   "ar": "تحميل المزيد",
   "en": "Load more"
+ },
+ "common.ok": {
+  "ar": "حسنًا",
+  "en": "OK"
  },
  "contact.copied": {
   "ar": "تم النسخ",
@@ -3306,6 +3370,34 @@
   "ar": "المعلومات الأساسية",
   "en": "Basic Info"
  },
+ "resume.bd_ai": {
+  "ar": "تطابق الملف بالذكاء الاصطناعي",
+  "en": "AI profile match"
+ },
+ "resume.bd_employment": {
+  "ar": "نوع الوظيفة",
+  "en": "Job type"
+ },
+ "resume.bd_experience": {
+  "ar": "الخبرة",
+  "en": "Experience"
+ },
+ "resume.bd_location": {
+  "ar": "الموقع",
+  "en": "Location"
+ },
+ "resume.bd_salary": {
+  "ar": "الراتب",
+  "en": "Salary"
+ },
+ "resume.bd_skills": {
+  "ar": "المهارات",
+  "en": "Skills"
+ },
+ "resume.bd_title": {
+  "ar": "المسمى الوظيفي",
+  "en": "Job title"
+ },
  "resume.build_resume": {
   "ar": "أنشئ سيرتي الذاتية",
   "en": "Build My Resume"
@@ -3470,6 +3562,10 @@
   "ar": "سنوات الخبرة",
   "en": "Years of experience"
  },
+ "reviews.action_failed": {
+  "ar": "حدث خطأ. حاول مرة أخرى.",
+  "en": "Something went wrong. Try again."
+ },
  "reviews.comment_hint": {
   "ar": "شارك تفاصيل تجربتك (اختياري)",
   "en": "Share details of your experience (optional)"
@@ -3477,6 +3573,38 @@
  "reviews.count": {
   "ar": "{count} تقييم",
   "en": "{count} reviews"
+ },
+ "reviews.count_one": {
+  "ar": "تقييم واحد",
+  "en": "1 review"
+ },
+ "reviews.delete": {
+  "ar": "حذف",
+  "en": "Delete"
+ },
+ "reviews.delete_body": {
+  "ar": "سيتم حذف تقييمك وتعليقك.",
+  "en": "Your rating and comment will be removed."
+ },
+ "reviews.delete_title": {
+  "ar": "حذف تقييمك؟",
+  "en": "Delete your review?"
+ },
+ "reviews.deleted": {
+  "ar": "تم حذف التقييم",
+  "en": "Review deleted"
+ },
+ "reviews.edit": {
+  "ar": "تعديل",
+  "en": "Edit"
+ },
+ "reviews.edit_short": {
+  "ar": "تعديل التقييم",
+  "en": "Edit review"
+ },
+ "reviews.edit_title": {
+  "ar": "تعديل تقييمك",
+  "en": "Edit your review"
  },
  "reviews.load_error": {
   "ar": "تعذّر تحميل التقييمات",
@@ -3486,6 +3614,22 @@
   "ar": "لا توجد تقييمات بعد",
   "en": "No reviews yet"
  },
+ "reviews.options": {
+  "ar": "خيارات التقييم",
+  "en": "Review options"
+ },
+ "reviews.posted": {
+  "ar": "شكرًا! تم نشر تقييمك",
+  "en": "Thanks! Your review was posted"
+ },
+ "reviews.save": {
+  "ar": "حفظ التعديلات",
+  "en": "Save changes"
+ },
+ "reviews.stars_n": {
+  "ar": "{n} نجوم",
+  "en": "{n} stars"
+ },
  "reviews.submit": {
   "ar": "إرسال التقييم",
   "en": "Submit review"
@@ -3493,6 +3637,10 @@
  "reviews.unknown_user": {
   "ar": "مستخدم",
   "en": "User"
+ },
+ "reviews.updated": {
+  "ar": "تم تحديث تقييمك",
+  "en": "Your review was updated"
  },
  "reviews.write_review": {
   "ar": "اكتب تقييمًا",
@@ -3721,6 +3869,10 @@
  "service_post_fillter.price_chip": {
   "ar": "السعر: {min}-{max}",
   "en": "Price: {min}-{max}"
+ },
+ "service_post_fillter.price_mixed": {
+  "ar": "هذه الإعلانات بعملات مختلفة ({list}). اختر دولة للتصفية حسب السعر.",
+  "en": "These listings use different currencies ({list}). Choose a country to filter by price."
  },
  "service_post_fillter.price_range": {
   "ar": "نطاق السعر",
@@ -3965,6 +4117,10 @@
  "subscription.downgrade_message": {
   "ar": "تحتفظ بخطتك الحالية حتى تنتهي بعد {days} يومًا، ثم تبدأ {plan} مقابل {price} نقطة. لا يُخصم شيء الآن.",
   "en": "You keep your current plan until it ends in {days} days. Then {plan} starts for {price} points. Nothing is charged now."
+ },
+ "subscription.featured_post_one": {
+  "ar": "منشور مميز واحد",
+  "en": "1 featured post"
  },
  "subscription.keep_plan": {
   "ar": "إبقاء خطتي",

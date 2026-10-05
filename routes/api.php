@@ -180,6 +180,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('users/{user}/follow', [App\Http\Controllers\Api\UserController::class,'follow'])->name('users.follow');
     Route::delete('users/{user}/unfollow', [App\Http\Controllers\Api\UserController::class,'unfollow'])->name('users.unfollow');
     Route::get('users/{user}/follower', [App\Http\Controllers\Api\UserController::class,'doFollowUnFollow'])->name('users.doFollowUnFollow');
+    // Follow/unfollow changes data: POST (the GET above stays for app versions already installed).
+    Route::post('users/{user}/follower', [App\Http\Controllers\Api\UserController::class,'doFollowUnFollow']);
     Route::get('users/{user}/is-following', [App\Http\Controllers\Api\UserController::class, 'isFollowingUser'])->name('users.isFollowing');
     Route::get('users/{user}/reviews', [App\Http\Controllers\Api\ReviewController::class, 'index'])->name('users.reviews');
     Route::post('reviews', [App\Http\Controllers\Api\ReviewController::class, 'store'])->name('reviews.store');

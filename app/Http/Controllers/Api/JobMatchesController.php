@@ -46,7 +46,7 @@ class JobMatchesController extends Controller
                 'experience_level' => $job->jobDetails->experience_level ?? null,
                 'salary_min' => $job->jobDetails->salary_min ?? null,
                 'salary_max' => $job->jobDetails->salary_max ?? null,
-                'salary_currency' => $job->jobDetails->salary_currency ?? null,
+                'salary_currency' => ($job->jobDetails->salary_currency ?? null) ?: ($job->price_currency_code ?? null),
                 'required_skills' => $job->jobDetails->required_skills ?? [],
                 'user' => $job->user ? [
                     'id' => $job->user->id,
