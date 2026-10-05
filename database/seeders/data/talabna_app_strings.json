@@ -935,6 +935,26 @@
   "ar": "تحميل المزيد",
   "en": "Load more"
  },
+ "contact.copied": {
+  "ar": "تم النسخ",
+  "en": "Copied"
+ },
+ "contact.copy": {
+  "ar": "نسخ",
+  "en": "Copy"
+ },
+ "contact.no_mail_app": {
+  "ar": "تعذّر فتح تطبيق البريد",
+  "en": "Couldn't open a mail app"
+ },
+ "contact.no_phone_app": {
+  "ar": "هذا الجهاز لا يدعم الاتصال",
+  "en": "This device can't make calls"
+ },
+ "contact.no_whatsapp": {
+  "ar": "تعذّر فتح واتساب",
+  "en": "Couldn't open WhatsApp"
+ },
  "content_unavailable.chip": {
   "ar": "لم يعد متاحًا",
   "en": "No longer available"
@@ -2482,6 +2502,10 @@
   "ar": "{count} تعليق",
   "en": "{count} Comments"
  },
+ "reels.details": {
+  "ar": "التفاصيل",
+  "en": "Details"
+ },
  "reels.loading_reels": {
   "ar": "جارٍ تحميل المقاطع...",
   "en": "Loading reels..."
@@ -3354,6 +3378,10 @@
   "ar": "سمة التطبيق",
   "en": "App Theme"
  },
+ "settings.app_theme_title": {
+  "ar": "مظهر التطبيق",
+  "en": "App Theme"
+ },
  "settings.appearance_dark": {
   "ar": "داكن",
   "en": "Dark"
@@ -3434,9 +3462,33 @@
   "ar": "إعادة ضبط",
   "en": "Reset"
  },
+ "settings.theme_berry": {
+  "ar": "توتي",
+  "en": "Berry"
+ },
  "settings.theme_default": {
   "ar": "افتراضي",
   "en": "Default"
+ },
+ "settings.theme_emerald": {
+  "ar": "زمردي",
+  "en": "Emerald"
+ },
+ "settings.theme_graphite": {
+  "ar": "رمادي",
+  "en": "Graphite"
+ },
+ "settings.theme_indigo": {
+  "ar": "نيلي",
+  "en": "Indigo"
+ },
+ "settings.theme_navy": {
+  "ar": "نحاسي",
+  "en": "Brass"
+ },
+ "settings.theme_ocean": {
+  "ar": "محيطي",
+  "en": "Ocean"
  },
  "settings.theme_preview_badge": {
   "ar": "مميز",
@@ -3457,6 +3509,22 @@
  "settings.theme_preview_title": {
   "ar": "شقة 3 غرف، العليا",
   "en": "3BR Apartment, Al Olaya"
+ },
+ "settings.theme_rose": {
+  "ar": "وردي",
+  "en": "Rose"
+ },
+ "settings.theme_royalPurple": {
+  "ar": "بنفسجي ملكي",
+  "en": "Royal Purple"
+ },
+ "settings.theme_sky": {
+  "ar": "سماوي",
+  "en": "Sky"
+ },
+ "settings.theme_sunset": {
+  "ar": "غروب",
+  "en": "Sunset"
  },
  "subcategory.failed_to_load_location_data": {
   "ar": "تعذّر تحميل بيانات الموقع",
