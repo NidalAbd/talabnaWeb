@@ -172,7 +172,7 @@ class ConversationController extends Controller
                 'title' => $this->localized($post->title),
                 'price' => $post->price,
                 'currency' => $post->price_currency_code,
-                'photo' => optional($post->photos->first())->src,
+                'photo' => $this->cover($post),
             ];
             // A card for one of our own listings becomes the chat's pinned topic.
             if (in_array($post->user_id, [$conversation->user_one_id, $conversation->user_two_id], true)) {
@@ -233,7 +233,7 @@ class ConversationController extends Controller
             'title' => $this->localized($p->title),
             'price' => $p->price,
             'currency' => $p->price_currency_code,
-            'photo' => optional($p->photos->first())->src,
+            'photo' => $this->cover($p),
             'owner_id' => $p->user_id,
         ];
         $posts = fn ($uid) => ServicePost::with('photos')
@@ -388,6 +388,14 @@ class ConversationController extends Controller
         return $v[app()->getLocale()] ?? $v['en'] ?? $v['ar'] ?? (reset($v) ?: null);
     }
 
+    /** A listing's thumbnail: its first picture; a video only when it has nothing else. */
+    private function cover($post): ?string
+    {
+        $media = $post->photos ?? collect();
+        $isVideo = fn ($m) => $m->isVideo || preg_match('/\.(mp4|mov|m4v|webm|3gp)$/i', (string) $m->src);
+        return optional($media->first(fn ($m) => !$isVideo($m)) ?? $media->first())->src;
+    }
+
     private function isParticipant(Conversation $conversation, int $userId): bool
     {
         return in_array($userId, [$conversation->user_one_id, $conversation->user_two_id], true);
@@ -418,7 +426,7 @@ class ConversationController extends Controller
                 'title' => $this->localized($post->title),
                 'price' => $post->price,
                 'currency' => $post->price_currency_code,
-                'photo' => $post->relationLoaded('photos') ? optional($post->photos->first())->src : null,
+                'photo' => $post->relationLoaded('photos') ? $this->cover($post) : null,
                 'owner_id' => $post->user_id,
             ] : null,
             'last_message_body' => $conversation->last_message_body,
