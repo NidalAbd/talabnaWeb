@@ -859,9 +859,45 @@
   "ar": "أنت",
   "en": "You"
  },
+ "chat2.about_listing": {
+  "ar": "استفسار عن",
+  "en": "Asking about"
+ },
+ "chat2.all_caught_up": {
+  "ar": "لا رسائل غير مقروءة",
+  "en": "You're all caught up"
+ },
+ "chat2.archive": {
+  "ar": "أرشفة",
+  "en": "Archive"
+ },
+ "chat2.archive_hint": {
+  "ar": "اسحب المحادثة لليسار لأرشفتها.",
+  "en": "Swipe a chat left to archive it."
+ },
+ "chat2.archived": {
+  "ar": "المؤرشفة",
+  "en": "Archived"
+ },
+ "chat2.archived_toast": {
+  "ar": "تمت أرشفة المحادثة",
+  "en": "Chat archived"
+ },
  "chat2.attach": {
   "ar": "إرفاق",
   "en": "Attach"
+ },
+ "chat2.back_inbox": {
+  "ar": "العودة إلى المحادثات",
+  "en": "Back to inbox"
+ },
+ "chat2.block": {
+  "ar": "حظر",
+  "en": "Block"
+ },
+ "chat2.buying_hint": {
+  "ar": "افتح إعلانًا واضغط \"تواصل بخصوص هذا الإعلان\".",
+  "en": "Open a listing and tap \"Chat about this\"."
  },
  "chat2.camera": {
   "ar": "كاميرا",
@@ -870,6 +906,14 @@
  "chat2.cancel": {
   "ar": "إلغاء",
   "en": "Cancel"
+ },
+ "chat2.chat_about_post": {
+  "ar": "تواصل بخصوص هذا الإعلان",
+  "en": "Chat about this"
+ },
+ "chat2.clear": {
+  "ar": "مسح",
+  "en": "Clear"
  },
  "chat2.confirm_deal": {
   "ar": "تأكيد الصفقة",
@@ -935,6 +979,22 @@
   "ar": "{name} يقول إنكما أتممتما صفقة",
   "en": "{name} says you made a deal"
  },
+ "chat2.f_all": {
+  "ar": "الكل",
+  "en": "All"
+ },
+ "chat2.f_buying": {
+  "ar": "أشتري",
+  "en": "Buying"
+ },
+ "chat2.f_selling": {
+  "ar": "أبيع",
+  "en": "Selling"
+ },
+ "chat2.f_unread": {
+  "ar": "غير مقروءة",
+  "en": "Unread"
+ },
  "chat2.gallery": {
   "ar": "صورة",
   "en": "Photo"
@@ -946,6 +1006,14 @@
  "chat2.listing": {
   "ar": "الإعلان",
   "en": "Listing"
+ },
+ "chat2.listings": {
+  "ar": "الإعلانات",
+  "en": "Listings"
+ },
+ "chat2.listings_failed": {
+  "ar": "تعذّر تحميل الإعلانات",
+  "en": "Could not load listings"
  },
  "chat2.location": {
   "ar": "الموقع",
@@ -959,6 +1027,14 @@
   "ar": "تمت الصفقة",
   "en": "We made a deal"
  },
+ "chat2.mark_all_read": {
+  "ar": "تعليم الكل كمقروء",
+  "en": "Mark all as read"
+ },
+ "chat2.mark_read": {
+  "ar": "تعليم كمقروء",
+  "en": "Mark as read"
+ },
  "chat2.mic_needed": {
   "ar": "اسمح بالميكروفون لإرسال رسائل صوتية",
   "en": "Allow the microphone to send voice messages"
@@ -967,9 +1043,37 @@
   "ar": "منذ {n} دقيقة",
   "en": "{n} min ago"
  },
+ "chat2.my_listings": {
+  "ar": "إعلاناتي",
+  "en": "My listings"
+ },
+ "chat2.no_archived": {
+  "ar": "لا توجد محادثات مؤرشفة",
+  "en": "No archived chats"
+ },
+ "chat2.no_buying": {
+  "ar": "لا محادثات عن إعلانات تهمك",
+  "en": "No chats about things you want"
+ },
+ "chat2.no_listings": {
+  "ar": "لا توجد إعلانات بعد",
+  "en": "No listings yet"
+ },
+ "chat2.no_results": {
+  "ar": "لا توجد محادثات مطابقة",
+  "en": "No chats match your search"
+ },
+ "chat2.no_selling": {
+  "ar": "لم يسأل أحد عن إعلاناتك بعد",
+  "en": "No one asked about your listings yet"
+ },
  "chat2.online": {
   "ar": "متصل الآن",
   "en": "Online"
+ },
+ "chat2.open_listing": {
+  "ar": "فتح الإعلان",
+  "en": "Open listing"
  },
  "chat2.open_maps": {
   "ar": "افتح في الخرائط",
@@ -978,6 +1082,14 @@
  "chat2.photo": {
   "ar": "صورة",
   "en": "Photo"
+ },
+ "chat2.pick_listing": {
+  "ar": "عن ماذا تريد التحدث؟",
+  "en": "What do you want to talk about?"
+ },
+ "chat2.pin": {
+  "ar": "تثبيت في الأعلى",
+  "en": "Pin to top"
  },
  "chat2.pv_proposed": {
   "ar": "تم اقتراح صفقة",
@@ -999,9 +1111,25 @@
   "ar": "ما هو أفضل سعر؟",
   "en": "What's your best price?"
  },
+ "chat2.r_interested": {
+  "ar": "هل أنت مهتم؟",
+  "en": "Are you interested?"
+ },
+ "chat2.r_need": {
+  "ar": "أحتاج هذه الخدمة",
+  "en": "I need this service"
+ },
+ "chat2.r_offer": {
+  "ar": "يمكنني أن أقدّم لك هذا",
+  "en": "I can offer you this"
+ },
  "chat2.record": {
   "ar": "تسجيل رسالة صوتية",
   "en": "Record voice message"
+ },
+ "chat2.remove_listing": {
+  "ar": "إزالة الإعلان",
+  "en": "Remove listing"
  },
  "chat2.reply": {
   "ar": "رد",
@@ -1010,6 +1138,10 @@
  "chat2.say_hello": {
   "ar": "قل مرحبًا لـ {name}",
   "en": "Say hello to {name}"
+ },
+ "chat2.search": {
+  "ar": "ابحث في المحادثات أو الأشخاص أو الإعلانات",
+  "en": "Search chats, people or listings"
  },
  "chat2.send": {
   "ar": "إرسال",
@@ -1023,6 +1155,10 @@
   "ar": "موقع مُرسل",
   "en": "Shared location"
  },
+ "chat2.their_listings": {
+  "ar": "إعلانات {name}",
+  "en": "{name}'s listings"
+ },
  "chat2.typing": {
   "ar": "يكتب…",
   "en": "typing…"
@@ -1030,6 +1166,22 @@
  "chat2.typing_full": {
   "ar": "{name} يكتب…",
   "en": "{name} is typing…"
+ },
+ "chat2.unarchive": {
+  "ar": "إلغاء الأرشفة",
+  "en": "Unarchive"
+ },
+ "chat2.unarchived": {
+  "ar": "أُعيدت المحادثة إلى البريد",
+  "en": "Chat moved back to your inbox"
+ },
+ "chat2.undo": {
+  "ar": "تراجع",
+  "en": "Undo"
+ },
+ "chat2.unpin": {
+  "ar": "إلغاء التثبيت",
+  "en": "Unpin"
  },
  "chat2.view_profile": {
   "ar": "عرض الملف",
@@ -1042,6 +1194,10 @@
  "chat2.voice_failed": {
   "ar": "تعذّر تشغيل الرسالة الصوتية",
   "en": "Couldn't play this voice message"
+ },
+ "chat2.yesterday": {
+  "ar": "أمس",
+  "en": "Yesterday"
  },
  "chat2.you": {
   "ar": "أنت",
