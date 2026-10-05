@@ -121,7 +121,9 @@ class ConversationController extends Controller
         $page = $query->paginate($perPage);
 
         $other = $conversation->otherUser($userId);
-        $deal = Deal::where('conversation_id', $conversation->id)->orderByDesc('id')->first();
+        // The deal for the listing the chat is about now (a chat can move on to another listing).
+        $deal = Deal::where('conversation_id', $conversation->id)
+            ->where('service_post_id', $conversation->service_post_id)->orderByDesc('id')->first();
 
         return response()->json([
             'data' => $this->withTranslations($page->getCollection(), $userId),
@@ -370,7 +372,8 @@ class ConversationController extends Controller
         if (!$post) {
             return response()->json(['error' => 'Deals can only be confirmed in a chat about a listing'], 422);
         }
-        $existing = Deal::where('conversation_id', $conversation->id)->whereIn('status', ['pending', 'confirmed'])->first();
+        $existing = Deal::where('conversation_id', $conversation->id)->where('service_post_id', $post->id)
+            ->whereIn('status', ['pending', 'confirmed'])->first();
         if ($existing) {
             return response()->json(['deal' => $existing->toPublic()]);
         }
