@@ -835,9 +835,13 @@ class UserController extends Controller
 
     public function changePassword(Request $request, $userId): JsonResponse
     {
-
-        $user = User::findOrFail($userId);
-        if (!Hash::check($request->old_password, $user->password)) {
+        // Only ever the signed-in account (the id in the URL is kept for old app versions).
+        $user = Auth::user();
+        if (!$user || (int) $userId !== (int) $user->id) {
+            return response()->json(['error' => 'Forbidden'], 403);
+        }
+        $request->validate(['new_password' => 'required|string|min:6|max:255']);
+        if (!$user->password || !Hash::check((string) $request->old_password, $user->password)) {
             return response()->json(['error' => 'Old password is incorrect.'], 401);
         }
         $user->password = Hash::make($request->new_password);

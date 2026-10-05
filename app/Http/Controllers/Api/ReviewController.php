@@ -74,31 +74,33 @@ class ReviewController extends Controller
             'reviewed_user_id.not_in' => 'You cannot review yourself.',
         ]);
 
-        $alreadyReviewed = Review::where('reviewer_id', Auth::id())
+        // Reviewing the same person (for the same listing) again edits the earlier review.
+        $existing = Review::where('reviewer_id', Auth::id())
             ->where('reviewed_user_id', $validated['reviewed_user_id'])
             ->where('service_post_id', $validated['service_post_id'] ?? null)
-            ->exists();
+            ->first();
 
-        if ($alreadyReviewed) {
-            return response()->json([
-                'error' => 'already_reviewed',
-                'message' => 'You have already reviewed this user for this listing.',
-            ], 409);
+        if ($existing) {
+            $existing->update([
+                'rating' => $validated['rating'],
+                'comment' => $validated['comment'] ?? null,
+            ]);
+            $review = $existing;
+        } else {
+            $review = Review::create([
+                'reviewer_id' => Auth::id(),
+                'reviewed_user_id' => $validated['reviewed_user_id'],
+                'service_post_id' => $validated['service_post_id'] ?? null,
+                'rating' => $validated['rating'],
+                'comment' => $validated['comment'] ?? null,
+            ]);
         }
-
-        $review = Review::create([
-            'reviewer_id' => Auth::id(),
-            'reviewed_user_id' => $validated['reviewed_user_id'],
-            'service_post_id' => $validated['service_post_id'] ?? null,
-            'rating' => $validated['rating'],
-            'comment' => $validated['comment'] ?? null,
-        ]);
 
         $review->load(['reviewer' => function ($query) {
             $query->select('id', 'user_name', 'name')->with('photos');
         }]);
 
-        return response()->json(['review' => $this->formatReview($review)], 201);
+        return response()->json(['review' => $this->formatReview($review), 'updated' => (bool) $existing], $existing ? 200 : 201);
     }
 
     /**
