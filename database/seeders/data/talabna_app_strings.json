@@ -859,6 +859,194 @@
   "ar": "أنت",
   "en": "You"
  },
+ "chat2.attach": {
+  "ar": "إرفاق",
+  "en": "Attach"
+ },
+ "chat2.camera": {
+  "ar": "كاميرا",
+  "en": "Camera"
+ },
+ "chat2.cancel": {
+  "ar": "إلغاء",
+  "en": "Cancel"
+ },
+ "chat2.confirm_deal": {
+  "ar": "تأكيد الصفقة",
+  "en": "Confirm deal"
+ },
+ "chat2.copy": {
+  "ar": "نسخ",
+  "en": "Copy"
+ },
+ "chat2.deal_confirmed": {
+  "ar": "الصفقة مؤكدة",
+  "en": "Deal confirmed"
+ },
+ "chat2.deal_waiting": {
+  "ar": "بانتظار التأكيد",
+  "en": "Waiting for confirmation"
+ },
+ "chat2.deals_count": {
+  "ar": "{n} صفقات مؤكدة",
+  "en": "{n} confirmed deals"
+ },
+ "chat2.decline": {
+  "ar": "رفض",
+  "en": "Decline"
+ },
+ "chat2.delete": {
+  "ar": "حذف",
+  "en": "Delete"
+ },
+ "chat2.delete_confirm_body": {
+  "ar": "ستُحذف الرسالة لديكما معًا. لا يمكن التراجع عن ذلك.",
+  "en": "The message will be removed for both of you. This can’t be undone."
+ },
+ "chat2.delete_confirm_title": {
+  "ar": "حذف لدى الجميع؟",
+  "en": "Delete for everyone?"
+ },
+ "chat2.delete_everyone": {
+  "ar": "حذف لدى الجميع",
+  "en": "Delete for everyone"
+ },
+ "chat2.deleted": {
+  "ar": "تم حذف هذه الرسالة",
+  "en": "This message was deleted"
+ },
+ "chat2.ev_cancelled": {
+  "ar": "تم إلغاء الصفقة",
+  "en": "Deal cancelled"
+ },
+ "chat2.ev_confirmed": {
+  "ar": "تم تأكيد الصفقة من الطرفين",
+  "en": "Deal confirmed by both sides"
+ },
+ "chat2.ev_declined": {
+  "ar": "تم رفض الصفقة",
+  "en": "Deal declined"
+ },
+ "chat2.ev_proposed_me": {
+  "ar": "سجّلت صفقة — بانتظار التأكيد",
+  "en": "You marked a deal — waiting for confirmation"
+ },
+ "chat2.ev_proposed_other": {
+  "ar": "{name} يقول إنكما أتممتما صفقة",
+  "en": "{name} says you made a deal"
+ },
+ "chat2.gallery": {
+  "ar": "صورة",
+  "en": "Photo"
+ },
+ "chat2.last_seen": {
+  "ar": "آخر ظهور {when}",
+  "en": "Last seen {when}"
+ },
+ "chat2.listing": {
+  "ar": "الإعلان",
+  "en": "Listing"
+ },
+ "chat2.location": {
+  "ar": "الموقع",
+  "en": "Location"
+ },
+ "chat2.location_failed": {
+  "ar": "تعذّر تحديد موقعك",
+  "en": "Couldn't get your location"
+ },
+ "chat2.made_deal": {
+  "ar": "تمت الصفقة",
+  "en": "We made a deal"
+ },
+ "chat2.mic_needed": {
+  "ar": "اسمح بالميكروفون لإرسال رسائل صوتية",
+  "en": "Allow the microphone to send voice messages"
+ },
+ "chat2.min_ago": {
+  "ar": "منذ {n} دقيقة",
+  "en": "{n} min ago"
+ },
+ "chat2.online": {
+  "ar": "متصل الآن",
+  "en": "Online"
+ },
+ "chat2.open_maps": {
+  "ar": "افتح في الخرائط",
+  "en": "Open in Maps"
+ },
+ "chat2.photo": {
+  "ar": "صورة",
+  "en": "Photo"
+ },
+ "chat2.pv_proposed": {
+  "ar": "تم اقتراح صفقة",
+  "en": "Deal proposed"
+ },
+ "chat2.q_available": {
+  "ar": "هل ما زال متاحًا؟",
+  "en": "Is this still available?"
+ },
+ "chat2.q_meet": {
+  "ar": "أين يمكن أن نلتقي؟",
+  "en": "Where can we meet?"
+ },
+ "chat2.q_photos": {
+  "ar": "هل يمكنك إرسال صور أكثر؟",
+  "en": "Can you send more photos?"
+ },
+ "chat2.q_price": {
+  "ar": "ما هو أفضل سعر؟",
+  "en": "What's your best price?"
+ },
+ "chat2.record": {
+  "ar": "تسجيل رسالة صوتية",
+  "en": "Record voice message"
+ },
+ "chat2.reply": {
+  "ar": "رد",
+  "en": "Reply"
+ },
+ "chat2.say_hello": {
+  "ar": "قل مرحبًا لـ {name}",
+  "en": "Say hello to {name}"
+ },
+ "chat2.send": {
+  "ar": "إرسال",
+  "en": "Send"
+ },
+ "chat2.send_voice": {
+  "ar": "إرسال الرسالة الصوتية",
+  "en": "Send voice message"
+ },
+ "chat2.shared_location": {
+  "ar": "موقع مُرسل",
+  "en": "Shared location"
+ },
+ "chat2.typing": {
+  "ar": "يكتب…",
+  "en": "typing…"
+ },
+ "chat2.typing_full": {
+  "ar": "{name} يكتب…",
+  "en": "{name} is typing…"
+ },
+ "chat2.view_profile": {
+  "ar": "عرض الملف",
+  "en": "View profile"
+ },
+ "chat2.voice": {
+  "ar": "رسالة صوتية",
+  "en": "Voice message"
+ },
+ "chat2.voice_failed": {
+  "ar": "تعذّر تشغيل الرسالة الصوتية",
+  "en": "Couldn't play this voice message"
+ },
+ "chat2.you": {
+  "ar": "أنت",
+  "en": "You"
+ },
  "collapsing_profile_header.message": {
   "ar": "مراسلة",
   "en": "Message"
@@ -2109,6 +2297,10 @@
  "privacy_policy.title": {
   "ar": "سياسة الخصوصية",
   "en": "Privacy Policy"
+ },
+ "profile.deals_line": {
+  "ar": "🤝 {n} صفقة مؤكدة · {s} بيع · {b} شراء",
+  "en": "🤝 {n} confirmed deals · {s} sold · {b} bought"
  },
  "profile.email.email_updated_successfully": {
   "ar": "تم تحديث البريد الإلكتروني بنجاح",
