@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\DB;
 class FeedController extends Controller
 {
     private const PER_PAGE = 10;
-    private const SPONSORED_POOL = 10;
 
     public function __construct(private SponsoredPicker $picker)
     {
@@ -53,13 +52,20 @@ class FeedController extends Controller
         };
 
         // Featured posts that match the filters. Cached for a minute and shared by everyone with the same filters.
-        $pool = Cache::remember('feed:sponsored:'.md5(json_encode($d + ['v' => 1], JSON_UNESCAPED_UNICODE)), 60, function () use ($filters) {
+        $pool = Cache::remember('feed:sponsored:'.md5(json_encode($d + ['v' => 2], JSON_UNESCAPED_UNICODE)), 60, function () use ($filters) {
             return $filters(ServicePost::query())
                 ->where('have_badge', '!=', 'عادي')
                 ->where(fn ($q) => $q->whereNull('badge_expires_at')->orWhere('badge_expires_at', '>', now()))
-                ->limit(300)->get(['id', 'have_badge'])->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge])->all();
+                ->limit(300)->get(['id', 'have_badge', 'country_id', 'city_id'])
+                ->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge, 'country_id' => $p->country_id, 'city_id' => $p->city_id])->all();
         });
-        $picked = $this->picker->pick($pool, self::SPONSORED_POOL, $me->id.'|'.now()->format('YmdH'));
+        // Each page picks from the featured posts this user may still see today (frequency cap), so a visit
+        // doesn't open on the same ones as the last.
+        $picked = $this->picker->pick($pool, count(SponsoredPicker::SLOTS), SponsoredPicker::sessionSeed($me->id).'|'.$page, [
+            'country_id' => $me->country_id, 'city_id' => $me->city_id,
+            'seen' => $this->picker->seenToday($me->id),
+            'shown' => $this->picker->impressionsToday(array_column($pool, 'id')),
+        ]);
 
         $with = ['subCategory', 'category', 'user.photos'];
         if (! $me->data_saver_enabled) {
@@ -67,15 +73,17 @@ class FeedController extends Controller
         }
         $load = fn ($q) => $q->withCount(['comments', 'favorites'])->with($with);
 
+        // Featured posts only come through their slots here (keeps pages stable while they rotate).
+        $poolIds = array_column($pool, 'id');
         $organic = $load($filters(ServicePost::query()))
-            ->when($picked, fn ($q) => $q->whereNotIn('id', $picked))
+            ->when($poolIds, fn ($q) => $q->whereNotIn('id', $poolIds))
             ->orderByDesc('created_at')->orderByDesc('id')
             ->paginate(self::PER_PAGE, ['*'], 'page', $page);
 
-        $slice = array_slice($picked, max(0, ($page - 1) * count(SponsoredPicker::SLOTS)), count(SponsoredPicker::SLOTS));
-        $sponsored = $slice ? $load(ServicePost::query())->whereIn('id', $slice)->get()->keyBy('id')->all() : [];
+        $sponsored = $picked ? $load(ServicePost::query())->whereIn('id', $picked)->get()->keyBy('id')->all() : [];
 
-        $items = $this->picker->mix($organic->items(), $sponsored, $picked, $page);
+        $items = $this->picker->mix($organic->items(), $sponsored, $picked, 1);
+        $this->picker->recordShown($me->id, array_keys($sponsored));
         $this->enrich($items, $me);
         $organic->setCollection(collect($items));
 

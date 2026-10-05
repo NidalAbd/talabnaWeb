@@ -819,17 +819,23 @@ class ServicePostController extends Controller
         $picker = new \App\Services\Feed\SponsoredPicker();
         $base = clone $query; // all the filters, none of the exclusions below
 
-        $pool = (clone $base)->reorder()->setEagerLoads([])->select('service_posts.id', 'service_posts.have_badge')
+        $pool = (clone $base)->reorder()->setEagerLoads([])->select('service_posts.id', 'service_posts.have_badge', 'service_posts.country_id', 'service_posts.city_id')
             ->where('service_posts.have_badge', '!=', 'عادي')
             ->where(fn ($w) => $w->whereNull('service_posts.badge_expires_at')->orWhere('service_posts.badge_expires_at', '>', now()))
-            ->limit(300)->get()->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge])->all();
-        $picked = $picker->pick($pool, 10, $userId.'|'.now()->format('YmdH'));
+            ->limit(300)->get()->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge, 'country_id' => $p->country_id, 'city_id' => $p->city_id])->all();
+        // Browsing a category on purpose: every featured post can show (no frequency cap), weighted and paced.
+        $me = \App\Models\User::find($userId);
+        $picked = $picker->pick($pool, 10, \App\Services\Feed\SponsoredPicker::sessionSeed($userId), [
+            'country_id' => $me?->country_id, 'city_id' => $me?->city_id,
+            'shown' => $picker->impressionsToday(array_column($pool, 'id')),
+        ]);
 
         $paginator = $query->when($picked, fn ($q) => $q->whereNotIn('service_posts.id', $picked))->paginate(10);
 
         $slice = array_slice($picked, max(0, ($page - 1) * count(\App\Services\Feed\SponsoredPicker::SLOTS)), count(\App\Services\Feed\SponsoredPicker::SLOTS));
         $sponsored = $slice ? (clone $base)->reorder()->whereIn('service_posts.id', $slice)->get()->keyBy('id')->all() : [];
         $paginator->setCollection(collect($picker->mix($paginator->items(), $sponsored, $picked, $page)));
+        $picker->recordShown($userId, array_keys($sponsored));
 
         return $paginator;
     }

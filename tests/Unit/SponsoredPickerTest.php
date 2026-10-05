@@ -111,4 +111,49 @@ class SponsoredPickerTest extends TestCase
         $out = $p->mix(['o1', 'o2'], [1 => 's1', 2 => 's2'], [1, 2], 1);
         $this->assertSame(['o1', 's1', 'o2', 's2'], $out);
     }
+
+    public function test_frequency_cap_hides_posts_seen_twice_today_or_within_the_cooldown(): void
+    {
+        $p = new SponsoredPicker();
+        $pool = $this->pool(3, 0); // ids 1, 2, 3
+        $now = 1_800_000_000;
+        $seen = [
+            1 => [SponsoredPicker::CAP_PER_DAY, $now - 10 * 3600], // shown enough today
+            2 => [1, $now - 600],                                    // shown 10 minutes ago
+        ];
+
+        $this->assertSame([3], $p->pick($pool, 3, 'u1|s', ['seen' => $seen, 'now' => $now]));
+
+        $later = $now + SponsoredPicker::COOLDOWN_HOURS * 3600;
+        $this->assertEqualsCanonicalizing([2, 3], $p->pick($pool, 3, 'u1|s', ['seen' => $seen, 'now' => $later]),
+            'after the cooldown a post seen once may come back; one seen CAP_PER_DAY times waits for tomorrow');
+    }
+
+    public function test_pacing_lets_posts_shown_less_today_catch_up(): void
+    {
+        $p = new SponsoredPicker();
+        $pool = $this->pool(2, 0); // ids 1, 2 - same tier
+        $shown = [1 => 500, 2 => 0];
+        $first = [1 => 0, 2 => 0];
+        for ($u = 1; $u <= 300; $u++) {
+            $first[$p->pick($pool, 1, "user$u|s", ['shown' => $shown])[0]]++;
+        }
+
+        $this->assertGreaterThan($first[1] * 2, $first[2], 'the post shown less today leads more often');
+    }
+
+    public function test_viewers_city_is_preferred(): void
+    {
+        $p = new SponsoredPicker();
+        $pool = [
+            ['id' => 1, 'have_badge' => 'ذهبي', 'country_id' => 1, 'city_id' => 10],
+            ['id' => 2, 'have_badge' => 'ذهبي', 'country_id' => 2, 'city_id' => 20],
+        ];
+        $first = [1 => 0, 2 => 0];
+        for ($u = 1; $u <= 400; $u++) {
+            $first[$p->pick($pool, 1, "user$u|s", ['country_id' => 1, 'city_id' => 10])[0]]++;
+        }
+
+        $this->assertGreaterThan($first[2], $first[1]);
+    }
 }
