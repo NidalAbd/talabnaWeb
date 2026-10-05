@@ -430,13 +430,21 @@ class ServicePostController extends Controller
             $title = $request->title;
             $description = $request->description;
 
-            // If sent as plain string, wrap in locale JSON
-            if (is_string($title)) {
-                $title = [$userLang => $title];
-            }
-            if (is_string($description)) {
-                $description = [$userLang => $description];
-            }
+            // The app sends {"en": "...", "ar": "..."} as a JSON string (multipart); a bare string
+            // is filed under the request language. Language codes are trimmed to e.g. "en".
+            $userLang = strtolower(substr((string) $userLang, 0, 2)) ?: 'ar';
+            $decodeLocales = function ($value) use ($userLang) {
+                if (is_string($value)) {
+                    $decoded = json_decode($value, true);
+                    if (is_array($decoded) && $decoded !== [] && ! array_is_list($decoded)) {
+                        return array_filter(array_map(fn ($v) => is_string($v) ? trim($v) : $v, $decoded), fn ($v) => $v !== '' && $v !== null);
+                    }
+                    return [$userLang => $value];
+                }
+                return $value;
+            };
+            $title = $decodeLocales($title);
+            $description = $decodeLocales($description);
 
             // Create service post
             Log::info('Creating service post');
@@ -1284,9 +1292,18 @@ class ServicePostController extends Controller
             }
 
             // Normalize title and description to JSON locale format
-            $userLang = $request->header('Accept-Language', 'ar');
+            $userLang = strtolower(substr((string) $request->header('Accept-Language', 'ar'), 0, 2)) ?: 'ar';
             $title = $validatedData['title'];
             $description = $validatedData['description'];
+            // The app now sends every edited language as a JSON object string: take it as is.
+            foreach (['title', 'description'] as $field) {
+                if (is_string($$field)) {
+                    $decoded = json_decode($$field, true);
+                    if (is_array($decoded) && $decoded !== [] && ! array_is_list($decoded)) {
+                        $$field = array_filter($decoded, fn ($v) => is_string($v) && trim($v) !== '');
+                    }
+                }
+            }
 
             if (is_string($title)) {
                 // Merge with existing translations instead of replacing

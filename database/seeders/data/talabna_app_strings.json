@@ -1902,6 +1902,10 @@
   "ar": "تعذّر حذف المنشور. حاول مجددًا.",
   "en": "Could not delete the post. Please try again."
  },
+ "post.field_title": {
+  "ar": "العنوان",
+  "en": "Title"
+ },
  "post.job.add_skill": {
   "ar": "أضف مهارة مطلوبة — اضغط إدخال",
   "en": "Add a required skill — press enter"
@@ -2498,13 +2502,29 @@
   "ar": "كن أول من يعلّق!",
   "en": "Be the first to comment!"
  },
+ "reels.call": {
+  "ar": "اتصال",
+  "en": "Call"
+ },
+ "reels.chat": {
+  "ar": "محادثة",
+  "en": "Chat"
+ },
  "reels.comments_count": {
   "ar": "{count} تعليق",
   "en": "{count} Comments"
  },
+ "reels.contact_seller": {
+  "ar": "التواصل",
+  "en": "Contact"
+ },
  "reels.details": {
   "ar": "التفاصيل",
   "en": "Details"
+ },
+ "reels.email": {
+  "ar": "بريد",
+  "en": "Email"
  },
  "reels.loading_reels": {
   "ar": "جارٍ تحميل المقاطع...",
@@ -2517,6 +2537,10 @@
  "reels.replying_to": {
   "ar": "الرد على {name}",
   "en": "Replying to {name}"
+ },
+ "reels.whatsapp": {
+  "ar": "واتساب",
+  "en": "WhatsApp"
  },
  "reels_screen.add_a_comment": {
   "ar": "أضف تعليقًا...",
