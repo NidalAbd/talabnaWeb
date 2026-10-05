@@ -15,6 +15,16 @@ class LogApiRequest
 
         $response = $next($request);
 
+        // "Last seen" for chat, written at most once a minute per user.
+        try {
+            $uid = Auth::id();
+            if ($uid && \Illuminate\Support\Facades\Cache::add("seen:{$uid}", 1, 60)) {
+                DB::table('users')->where('id', $uid)->update(['last_seen_at' => now()]);
+            }
+        } catch (\Throwable $e) {
+            // never block a request over presence
+        }
+
         $responseTimeMs = (int) ((microtime(true) - $startTime) * 1000);
 
         try {

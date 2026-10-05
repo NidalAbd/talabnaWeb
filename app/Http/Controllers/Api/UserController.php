@@ -344,6 +344,8 @@ class UserController extends Controller
                 'reviewsReceived as reviews_count',
             ])->load('photos', 'country', 'city', 'roles');
             $userData->average_rating = round((float) $userData->reviewsReceived()->avg('rating'), 2);
+            // Trust: sales/purchases both sides confirmed in chat (2026-10-05).
+            $userData->deals = \App\Models\Deal::statsFor((int) $userData->id);
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }

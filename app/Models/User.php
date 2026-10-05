@@ -92,6 +92,7 @@ class User extends Authenticatable implements CanResetPasswordContract
     protected $casts = [
         'email_verified_at' => 'datetime',
         'phone_verified_at' => 'datetime',
+        'last_seen_at' => 'datetime',
         'whatsapp_verified_at' => 'datetime',
         'country_changed_at' => 'datetime',
         'phone_changed_at' => 'datetime',

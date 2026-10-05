@@ -348,6 +348,12 @@ Route::middleware(['auth:api'])->group(function () {
     Route::get('conversations/{conversation}/messages', [App\Http\Controllers\Api\ConversationController::class, 'messages']);
     Route::post('conversations/{conversation}/messages', [App\Http\Controllers\Api\ConversationController::class, 'sendMessage']);
     Route::post('conversations/{conversation}/read', [App\Http\Controllers\Api\ConversationController::class, 'markRead']);
+    Route::get('conversations/{conversation}', [App\Http\Controllers\Api\ConversationController::class, 'show']);
+    Route::post('conversations/{conversation}/typing', [App\Http\Controllers\Api\ConversationController::class, 'typing'])->middleware('throttle:60,1');
+    Route::post('conversations/{conversation}/deal', [App\Http\Controllers\Api\ConversationController::class, 'proposeDeal']);
+    Route::post('deals/{deal}/answer', [App\Http\Controllers\Api\ConversationController::class, 'answerDeal']);
+    Route::post('messages/{message}/react', [App\Http\Controllers\Api\ConversationController::class, 'react']);
+    Route::delete('messages/{message}', [App\Http\Controllers\Api\ConversationController::class, 'destroyMessage']);
 
     Route::get('statistics}',[App\Http\Controllers\dashboard::class, 'index']);
 
