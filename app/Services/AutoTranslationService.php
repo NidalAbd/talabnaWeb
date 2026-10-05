@@ -472,6 +472,37 @@ class AutoTranslationService
         ];
     }
 
+    /**
+     * Models sometimes put raw line breaks / tabs inside JSON strings, which
+     * json_decode rejects ("Control character error") and the whole batch was
+     * dropped. Escape control characters that appear inside string literals only.
+     */
+    protected function escapeControlCharsInStrings(string $json): string
+    {
+        $out = '';
+        $inString = false;
+        $escaped = false;
+        $len = strlen($json);
+        for ($i = 0; $i < $len; $i++) {
+            $c = $json[$i];
+            if ($inString) {
+                if ($escaped) { $escaped = false; $out .= $c; continue; }
+                if ($c === '\\') { $escaped = true; $out .= $c; continue; }
+                if ($c === '"') { $inString = false; $out .= $c; continue; }
+                $o = ord($c);
+                if ($o < 0x20) {
+                    $out .= match ($c) { "\n" => '\\n', "\r" => '\\r', "\t" => '\\t', default => sprintf('\\u%04x', $o) };
+                    continue;
+                }
+                $out .= $c;
+            } else {
+                if ($c === '"') $inString = true;
+                $out .= $c;
+            }
+        }
+        return $out;
+    }
+
     protected function parseResponse($response, string $label): ?array
     {
         try {
@@ -487,6 +518,9 @@ class AutoTranslationService
             $content = trim($content);
 
             $translated = json_decode($content, true);
+            if (json_last_error() === JSON_ERROR_CTRL_CHAR) {
+                $translated = json_decode($this->escapeControlCharsInStrings($content), true);
+            }
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::error("Failed to parse batch {$label}: " . json_last_error_msg());
                 return null;
