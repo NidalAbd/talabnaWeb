@@ -83,3 +83,13 @@
     # Enable Keep-Alive
     Header set Connection keep-alive
 </IfModule>
+
+# Chat voice notes / media: correct types so iOS/Android players can stream (and never gzip them)
+<IfModule mod_mime.c>
+    AddType audio/mp4 .m4a
+    AddType audio/aac .aac
+    AddType audio/mpeg .mp3
+    AddType audio/ogg .ogg .oga
+    AddType audio/webm .weba
+    AddType video/mp4 .mp4
+</IfModule>
