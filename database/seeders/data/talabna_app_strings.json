@@ -7,6 +7,14 @@
   "ar": "إعجاب",
   "en": "Like"
  },
+ "a11y.send_comment": {
+  "ar": "إرسال التعليق",
+  "en": "Send comment"
+ },
+ "a11y.send_reply": {
+  "ar": "إرسال الرد",
+  "en": "Send reply"
+ },
  "a11y.share": {
   "ar": "مشاركة",
   "en": "Share"
@@ -895,6 +903,10 @@
   "ar": "اكتب رسالة…",
   "en": "Type a message…"
  },
+ "chat.type_message": {
+  "ar": "اكتب رسالة…",
+  "en": "Type a message…"
+ },
  "chat.you": {
   "ar": "أنت",
   "en": "You"
@@ -926,6 +938,10 @@
  "chat2.attach": {
   "ar": "إرفاق",
   "en": "Attach"
+ },
+ "chat2.auto_translate_points_hint": {
+  "ar": "ترجمة تلقائية: الرسائل بلغة أخرى تظهر بلغتك · نقطة واحدة = {n} رسالة",
+  "en": "Auto-translate: messages in another language appear in yours · 1 point = {n} messages"
  },
  "chat2.back_inbox": {
   "ar": "العودة إلى المحادثات",
@@ -1038,6 +1054,10 @@
  "chat2.gallery": {
   "ar": "صورة",
   "en": "Photo"
+ },
+ "chat2.get_points": {
+  "ar": "شراء نقاط",
+  "en": "Get points"
  },
  "chat2.last_seen": {
   "ar": "آخر ظهور {when}",
@@ -1195,9 +1215,21 @@
   "ar": "موقع مُرسل",
   "en": "Shared location"
  },
+ "chat2.show_translation": {
+  "ar": "عرض الترجمة",
+  "en": "Show translation"
+ },
  "chat2.their_listings": {
   "ar": "إعلانات {name}",
   "en": "{name}'s listings"
+ },
+ "chat2.translate_needs_points": {
+  "ar": "الترجمة تستخدم النقاط: نقطة واحدة تترجم {n} رسالة.",
+  "en": "Translation uses points: 1 point translates {n} messages."
+ },
+ "chat2.translated_show_original": {
+  "ar": "مترجمة · عرض الأصل",
+  "en": "Translated · Show original"
  },
  "chat2.typing": {
   "ar": "يكتب…",
