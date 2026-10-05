@@ -290,6 +290,8 @@ Route::middleware(['auth:api'])->group(function () {
     Route::put('service_posts/ChangeBadge/{service_posts}', [ServicePostController::class, 'changeBadge']);
     Route::put('service_posts/incrementView/{service_posts}', [ServicePostController::class, 'viewAdd']);
     Route::post('reports/reported/{reported}/reportedId/{reportedId}/reason/{reason}', [App\Http\Controllers\Api\ReportController::class, 'store']);
+    Route::get('reports/mine', [App\Http\Controllers\Api\ReportController::class, 'mine']);
+    Route::delete('reports/{id}', [App\Http\Controllers\Api\ReportController::class, 'withdraw'])->whereNumber('id');
 
     // AI helpers for post creation, paid in points (price from the ai_features table)
     Route::get('ai/pricing', [App\Http\Controllers\Api\AiController::class, 'pricing']);

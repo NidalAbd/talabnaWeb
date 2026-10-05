@@ -77,7 +77,10 @@ class ReportController extends Controller
             $notification = new Notification([
                 'message' => $message,
                 'user_id' => Auth::id(),
-                'type'    => 'report'
+                'type'    => 'report',
+                // Tapping it opens "My reports" on this report (2026-10-05).
+                'target_type' => 'report',
+                'target_id' => $report->id,
             ]);
 
             $notification->save();
@@ -87,6 +90,62 @@ class ReportController extends Controller
             Log::info("Exception: {$exception}");
             return response()->json(['error' => true, 'Exception' => $exception->getMessage()]);
         }
+    }
+
+    /** GET /api/reports/mine — what I reported, its status, and whether I can still withdraw it. */
+    public function mine(): \Illuminate\Http\JsonResponse
+    {
+        $labels = [
+            'Spam' => ['en' => 'Spam', 'ar' => 'محتوى مزعج'],
+            'inappropriate content' => ['en' => 'Inappropriate content', 'ar' => 'محتوى غير لائق'],
+            'Harassment' => ['en' => 'Harassment', 'ar' => 'مضايقة'],
+            'false information' => ['en' => 'False information', 'ar' => 'معلومات كاذبة'],
+        ];
+        $reports = Report::where('user_id', Auth::id())->orderByDesc('id')->limit(100)->get();
+        $data = $reports->map(function (Report $r) use ($labels) {
+            $isPost = $r->reportable_type === ServicePost::class;
+            $target = $isPost ? ServicePost::with('photos')->find($r->reportable_id) : User::with('photos')->find($r->reportable_id);
+            $title = null;
+            if ($target && $isPost) {
+                $t = is_string($target->title) ? json_decode($target->title, true) : $target->title;
+                $title = is_array($t) ? ($t[app()->getLocale()] ?? $t['en'] ?? $t['ar'] ?? reset($t)) : $target->title;
+            } elseif ($target) {
+                $title = $target->name ?: $target->user_name;
+            }
+            $reason = (string) $r->reason;
+            return [
+                'id' => $r->id,
+                'type' => $isPost ? 'post' : 'user',
+                'target_id' => $r->reportable_id,
+                'target_available' => (bool) $target,
+                'title' => $title,
+                'photo' => optional($target?->photos?->first())->src,
+                'reason' => $labels[$reason][app()->getLocale()] ?? $labels[$reason]['en'] ?? $reason,
+                'status' => $r->status ?? 'pending',
+                'can_withdraw' => ($r->status ?? 'pending') === 'pending',
+                'created_at' => $r->created_at?->toIso8601String(),
+            ];
+        });
+
+        return response()->json(['reports' => $data]);
+    }
+
+    /** DELETE /api/reports/{id} — withdraw my own report while it is still pending. */
+    public function withdraw($id): \Illuminate\Http\JsonResponse
+    {
+        $report = Report::where('id', $id)->where('user_id', Auth::id())->first();
+        if (! $report) {
+            return response()->json(['success' => false, 'message' => 'Report not found'], 404);
+        }
+        if (($report->status ?? 'pending') !== 'pending') {
+            return response()->json(['success' => false, 'message' => 'This report was already reviewed'], 422);
+        }
+        if ($report->reportable_type === ServicePost::class) {
+            ServicePost::where('id', $report->reportable_id)->where('report_count', '>', 0)->decrement('report_count');
+        }
+        $report->delete();
+
+        return response()->json(['success' => true]);
     }
 
     /**

@@ -45,6 +45,7 @@ class Notification extends DatabaseNotification
             return ['type' => 'post', 'id' => (int) $m[1]];
         }
         if (in_array($type, self::POINT_TYPES, true)) return ['type' => 'points', 'id' => null];
+        if ($type === 'report') return ['type' => 'report', 'id' => null];
         if ($type === 'password') return ['type' => 'password', 'id' => null];
         if ($type === 'email') return ['type' => 'email', 'id' => null];
         return ['type' => 'notifications', 'id' => null];
