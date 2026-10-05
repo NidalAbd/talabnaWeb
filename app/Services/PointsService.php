@@ -77,8 +77,13 @@ class PointsService
             throw new \InvalidArgumentException('Cannot transfer points to yourself');
         }
 
+        // Admins send to anyone, any country, any amount (PIN still required).
+        $isAdmin = $fromUser->hasRole('admin');
+
         // Validate same country
-        $this->validateSameCountry($fromUser, $toUser);
+        if (!$isAdmin) {
+            $this->validateSameCountry($fromUser, $toUser);
+        }
 
         // Validate PIN
         if (!$this->pinService->hasPin($fromUser)) {
@@ -95,7 +100,9 @@ class PointsService
         }
 
         // Validate transfer limits
-        $this->validateTransferLimits($fromUser, $amount);
+        if (!$isAdmin) {
+            $this->validateTransferLimits($fromUser, $amount);
+        }
 
         // Perform the transfer within a transaction with row locking
         return DB::transaction(function () use ($fromUser, $toUser, $amount, $idempotencyKey, $ipAddress, $userAgent) {
@@ -728,6 +735,11 @@ class PointsService
                 'reason' => 'user_not_found',
                 'message' => 'One or both users not found',
             ];
+        }
+
+        // Admins can send to anyone.
+        if ($fromUser->hasRole('admin')) {
+            return ['can_transfer' => true, 'reason' => null, 'message' => null];
         }
 
         // Check if sender's country allows transfers

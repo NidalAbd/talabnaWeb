@@ -41,9 +41,11 @@ class PointsController extends Controller
      */
     public function transfer(TransferPointsRequest $request): JsonResponse
     {
-        // Block transfers if phone not verified
+        // Block transfers if phone not verified (admins can always send: owner
+        // request 2026-10-06 - an admin sends points to anyone, no restrictions)
         $user = $request->user();
-        if (!$user->phone_verified_at) {
+        $isAdmin = $user->hasRole('admin');
+        if (!$isAdmin && !$user->phone_verified_at) {
             return response()->json([
                 'success' => false,
                 'error' => 'phone_not_verified',
@@ -52,7 +54,7 @@ class PointsController extends Controller
         }
 
         // Block transfers for 7 days after country change
-        if ($user->country_changed_at && $user->country_changed_at->addDays(7)->isFuture()) {
+        if (!$isAdmin && $user->country_changed_at && $user->country_changed_at->addDays(7)->isFuture()) {
             $days = (int) now()->diffInDays($user->country_changed_at->addDays(7));
             return response()->json([
                 'success' => false,
