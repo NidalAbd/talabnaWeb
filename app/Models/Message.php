@@ -48,7 +48,7 @@ class Message extends Model
             'image' => '📷 Photo' . ($this->body ? ': ' . $this->body : ''),
             'voice' => '🎤 Voice message',
             'location' => '📍 Location',
-            'post' => '🔗 ' . ($this->meta['title'] ?? 'Listing'),
+            'post' => '🔗 ' . ($this->meta['title'] ?? 'Listing') . ($this->body ? ' — ' . $this->body : ''),
             'system' => (string) $this->body,
             default => (string) $this->body,
         };

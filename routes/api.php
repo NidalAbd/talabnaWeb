@@ -347,6 +347,7 @@ Route::middleware(['auth:api'])->group(function () {
     Route::post('conversations', [App\Http\Controllers\Api\ConversationController::class, 'store']);
     Route::get('conversations/{conversation}/messages', [App\Http\Controllers\Api\ConversationController::class, 'messages']);
     Route::post('conversations/{conversation}/messages', [App\Http\Controllers\Api\ConversationController::class, 'sendMessage']);
+    Route::get('conversations/{conversation}/listings', [App\Http\Controllers\Api\ConversationController::class, 'listings']);
     Route::post('conversations/{conversation}/read', [App\Http\Controllers\Api\ConversationController::class, 'markRead']);
     Route::get('conversations/{conversation}', [App\Http\Controllers\Api\ConversationController::class, 'show']);
     Route::post('conversations/{conversation}/typing', [App\Http\Controllers\Api\ConversationController::class, 'typing'])->middleware('throttle:60,1');

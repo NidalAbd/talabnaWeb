@@ -59,11 +59,30 @@ class Conversation extends Model
     public static function between(int $userA, int $userB, ?int $servicePostId = null): self
     {
         [$one, $two] = $userA < $userB ? [$userA, $userB] : [$userB, $userA];
+        $pair = static::where('user_one_id', $one)->where('user_two_id', $two);
 
-        return static::firstOrCreate([
-            'user_one_id' => $one,
-            'user_two_id' => $two,
-            'service_post_id' => $servicePostId,
-        ]);
+        // One direct chat per pair of people. The listing they're talking about is just
+        // the chat's current topic (and is sent as a card), not a separate thread.
+        if ($servicePostId && ($same = (clone $pair)->where('service_post_id', $servicePostId)->first())) {
+            return $same;
+        }
+        $latest = (clone $pair)->orderByDesc('last_message_at')->orderByDesc('id')->first();
+        if (!$latest) {
+            return static::create(['user_one_id' => $one, 'user_two_id' => $two, 'service_post_id' => $servicePostId]);
+        }
+        if ($servicePostId) {
+            $latest->update(['service_post_id' => $servicePostId]);
+        }
+
+        return $latest;
+    }
+
+    /** Make [$servicePostId] the chat's topic, unless another chat of this pair already uses it. */
+    public function switchTopic(int $servicePostId): void
+    {
+        if ($this->service_post_id === $servicePostId) return;
+        $taken = static::where('user_one_id', $this->user_one_id)->where('user_two_id', $this->user_two_id)
+            ->where('service_post_id', $servicePostId)->where('id', '!=', $this->id)->exists();
+        if (!$taken) $this->update(['service_post_id' => $servicePostId]);
     }
 }

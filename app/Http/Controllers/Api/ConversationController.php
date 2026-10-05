@@ -173,6 +173,10 @@ class ConversationController extends Controller
                 'currency' => $post->price_currency_code,
                 'photo' => optional($post->photos->first())->src,
             ];
+            // A card for one of our own listings becomes the chat's pinned topic.
+            if (in_array($post->user_id, [$conversation->user_one_id, $conversation->user_two_id], true)) {
+                $conversation->switchTopic($post->id);
+            }
         }
 
         $replyTo = null;
@@ -210,6 +214,34 @@ class ConversationController extends Controller
         }
 
         return response()->json(['message' => $message->toPublic()], 201);
+    }
+
+    /**
+     * Listings either person can bring into the chat ("I need this service"): both
+     * participants' published posts, newest first, lightweight.
+     */
+    public function listings(Conversation $conversation): JsonResponse
+    {
+        $userId = Auth::id();
+        if (!$this->isParticipant($conversation, $userId)) {
+            return response()->json(['error' => 'Not a participant in this conversation'], 403);
+        }
+        $otherId = $conversation->user_one_id === $userId ? $conversation->user_two_id : $conversation->user_one_id;
+        $map = fn ($p) => [
+            'id' => $p->id,
+            'title' => $this->localized($p->title),
+            'price' => $p->price,
+            'currency' => $p->price_currency_code,
+            'photo' => optional($p->photos->first())->src,
+            'owner_id' => $p->user_id,
+        ];
+        $posts = fn ($uid) => ServicePost::with('photos')
+            ->where('user_id', $uid)->where('state', 'published')
+            ->orderByDesc('id')->limit(50)
+            ->get(['id', 'user_id', 'title', 'price', 'price_currency_code'])
+            ->map($map)->values();
+
+        return response()->json(['theirs' => $posts($otherId), 'mine' => $posts($userId)]);
     }
 
     /** Toggle my reaction (one emoji per person). */
