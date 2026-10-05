@@ -173,6 +173,9 @@ jobs:
           // Step 3: Clear Laravel caches
           echo "🧹 Step 3: Clearing Laravel caches...\n";
           $cacheCommands = [
+              // New code and its database changes go live together (2026-10-05: chat
+              // translation code ran for minutes before its migration -> 73 errors).
+              'php artisan migrate --force',
               'php artisan config:clear',
               'php artisan cache:clear',
               'php artisan view:clear',
