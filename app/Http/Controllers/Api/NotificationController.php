@@ -14,6 +14,25 @@ class NotificationController extends Controller
     {
         // Only your own notifications, whatever id is in the URL.
         $notifications = Notification::where('user_id', Auth::id())->orderBy('created_at', 'desc')->paginate(10);
+
+        // Whether what each notification points at still exists, so the app can show
+        // "No longer available" instead of opening a broken screen (2026-10-05).
+        $targets = $notifications->getCollection()->map->target;
+        $postIds = $targets->where('type', 'post')->pluck('id')->filter()->unique()->values();
+        $userIds = $targets->where('type', 'user')->pluck('id')->filter()->unique()->values();
+        $livePosts = $postIds->isEmpty() ? collect() : \App\Models\ServicePost::whereIn('id', $postIds)
+            ->where('state', 'published')->pluck('id')->flip();
+        $liveUsers = $userIds->isEmpty() ? collect() : \App\Models\User::whereIn('id', $userIds)
+            ->where('is_active', 'active')->pluck('id')->flip();
+        $notifications->getCollection()->each(function ($n) use ($livePosts, $liveUsers) {
+            $t = $n->target;
+            $n->setAttribute('target_available', match ($t['type'] ?? null) {
+                'post' => $t['id'] ? $livePosts->has($t['id']) : false,
+                'user' => $t['id'] ? $liveUsers->has($t['id']) : false,
+                default => true,
+            });
+        });
+
         return response()->json($notifications);
     }
 
