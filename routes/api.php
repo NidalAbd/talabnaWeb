@@ -145,7 +145,10 @@ Route::middleware('auth:api')->group(function () {
     Route::get('user/check_token', [UserController::class, 'check_token']);
 });
 
-Route::middleware(['auth:api'])->group(function () {
+// check.user.ban: a banned account (or a device it used) gets 403 {banned:true} on
+// every call, so the app shows the "you are banned" screen right away. It was
+// registered but never attached, so bans only showed after the app's periodic check.
+Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     // Phone verification routes
     Route::post('phone/request-code', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'requestCode'])->middleware('throttle:10,1');
     Route::post('phone/code-failed', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'codeFailed'])->middleware('throttle:10,1');
