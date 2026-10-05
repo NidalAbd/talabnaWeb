@@ -20,7 +20,9 @@ class AiMediaService
     public function generateImage(string $prompt, string $uuid): string
     {
         try {
-            $response = $this->openai->http(120)->post(OpenAiClient::BASE.'/images/generations', [
+            // 90 s: under the web server's own limit, so a slow answer fails cleanly here and the points go
+            // back at once (at 120 s the request was cut off first and the refund waited for the settler).
+            $response = $this->openai->http(90)->post(OpenAiClient::BASE.'/images/generations', [
                 'model' => config('ai.image_model', 'gpt-image-1'),
                 'prompt' => 'Realistic, well-lit photo-style picture for a classified ad. No text, no watermark, no logos. '.$prompt,
                 'size' => config('ai.image_size', '1024x1024'),

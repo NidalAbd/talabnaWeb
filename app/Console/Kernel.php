@@ -17,6 +17,8 @@ class Kernel extends ConsoleKernel
     {
         // Paid AI: finish or refund unfinished requests every minute, so nobody stays charged for a failure.
         $schedule->command('ai-points:settle')->everyMinute()->withoutOverlapping(5);
+        // Tell admins about failed refunds / stuck AI requests / unfinished purchases.
+        $schedule->command('admin:alerts')->everyTenMinutes()->withoutOverlapping(5);
         $schedule->command('ai-points:settle --prune')->dailyAt('04:30');
 
         // Run badge expiration check every 15 minutes

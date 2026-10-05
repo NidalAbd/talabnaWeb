@@ -629,6 +629,10 @@ Route::middleware(['auth'])->prefix('admin')->group(function () {
     Route::get('/purchase-attempts', [HomeController::class, 'index'])
         ->name('purchase_attempts.index');
 
+    // AI requests (paid AI actions and their outcome) - Vue SPA
+    Route::get('/ai-requests', [HomeController::class, 'index'])
+        ->name('ai_requests.index');
+
     // Point Transactions - Vue SPA
     Route::get('/point-transactions', [HomeController::class, 'index'])
         ->name('point_transactions.index');
@@ -871,6 +875,10 @@ Route::middleware(['auth', 'admin'])->group(function () {
             // Purchase attempts (store Buy taps and their outcome)
             Route::get('/purchase-attempts/stats', [\App\Http\Controllers\Admin\PurchaseAttemptsApiController::class, 'stats'])->name('api.admin.purchase-attempts.stats');
             Route::get('/purchase-attempts', [\App\Http\Controllers\Admin\PurchaseAttemptsApiController::class, 'index'])->name('api.admin.purchase-attempts.index');
+
+            // AI requests: charged, succeeded, failed + refunded, stuck
+            Route::get('/ai-requests/stats', [\App\Http\Controllers\Admin\AiRequestsApiController::class, 'stats'])->name('api.admin.ai-requests.stats');
+            Route::get('/ai-requests', [\App\Http\Controllers\Admin\AiRequestsApiController::class, 'index'])->name('api.admin.ai-requests.index');
 
             // Point Purchase Requests
             Route::get('/point-purchase-requests/stats', [\App\Http\Controllers\Admin\PointPurchaseRequestsApiController::class, 'getStats'])->name('api.admin.point-purchase-requests.stats');
