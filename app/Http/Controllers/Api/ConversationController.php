@@ -34,6 +34,7 @@ class ConversationController extends Controller
         $conversations = Conversation::where(fn ($q) => $q->where('user_one_id', $userId)->orWhere('user_two_id', $userId))
             ->when($blocked, fn ($q) => $q->whereNotIn('user_one_id', $blocked)->whereNotIn('user_two_id', $blocked))
             ->with(['userOne.photos', 'userTwo.photos', 'servicePost.photos'])
+            ->withCount(['messages as unread_for_me' => fn ($q) => $q->where('sender_id', '!=', $userId)->whereNull('read_at')])
             ->orderByDesc('last_message_at')
             ->orderByDesc('created_at')
             ->paginate(20);
@@ -395,7 +396,7 @@ class ConversationController extends Controller
     private function formatConversation(Conversation $conversation, int $userId): array
     {
         $other = $conversation->otherUser($userId);
-        $unread = Message::where('conversation_id', $conversation->id)
+        $unread = isset($conversation->unread_for_me) ? (int) $conversation->unread_for_me : Message::where('conversation_id', $conversation->id)
             ->where('sender_id', '!=', $userId)
             ->whereNull('read_at')
             ->count();
