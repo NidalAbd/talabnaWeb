@@ -127,7 +127,10 @@ class AiTextService
      */
     public function suggestCategory(string $title, string $description, bool $job = false, array $context = []): array
     {
-        $categories = Categories::with('sub_categories')->get()->filter(fn ($c) => (bool) $c->is_job_category === $job);
+        // Every category is offered: the app sends job=true when the form still has a job category selected,
+        // and limiting the list to job categories then forced a car ad into "Jobs" (2026-10-06). The flag is only
+        // a hint now. "Near" and "Reels" are views, not places to file an ad.
+        $categories = Categories::with('sub_categories')->get()->filter(fn ($c) => ! in_array((int) $c->id, [6, 7], true));
         $lines = [];
         $valid = [];
         foreach ($categories as $c) {
@@ -142,7 +145,9 @@ class AiTextService
             throw new AiProviderException('no_categories', 'No categories to choose from.', 422);
         }
 
-        $system = 'Pick the single best category for a classified ad from the list. '.$this->voice($context, categoryOfItem: true).' Lines are "categoryId: name" and, indented, '
+        $system = 'Pick the single best category for a classified ad from the list, judged by WHAT the ad offers or asks '
+            .'for (a car for sale goes under cars, not jobs; only job offers or people seeking work go under jobs). '
+            .($job ? 'The user started in the jobs section, but follow the ad text. ' : '').$this->voice($context, categoryOfItem: true).' Lines are "categoryId: name" and, indented, '
             .'"categoryId.subId: name". Choose only ids that appear in the list. Answer with JSON only: '
             .'{"category_id": number, "sub_category_id": number|null}.';
         $out = $this->json($system, "Ad title: {$title}\nAd description: {$description}\n\nList:\n".implode("\n", $lines), 60);
