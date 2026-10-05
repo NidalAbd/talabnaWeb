@@ -20,6 +20,8 @@ class Message extends Model
         'reply_to_id',
         'reactions',
         'deleted_at',
+        'lang',
+        'translations',
     ];
 
     protected $casts = [
@@ -28,6 +30,8 @@ class Message extends Model
         'meta' => 'array',
         'reactions' => 'array',
         'body' => \App\Casts\EncryptedText::class,
+        // JSON map {lang: text}, encrypted like the body.
+        'translations' => \App\Casts\EncryptedText::class,
     ];
 
     public function conversation(): BelongsTo
@@ -54,7 +58,24 @@ class Message extends Model
         };
     }
 
-    public function toPublic(): array
+    /** Cached translation of the body into [lang], if any. */
+    public function translationIn(string $lang): ?string
+    {
+        $map = json_decode((string) ($this->translations ?? ''), true);
+        return is_array($map) && isset($map[$lang]) ? (string) $map[$lang] : null;
+    }
+
+    public function rememberTranslation(string $lang, string $text): void
+    {
+        $map = json_decode((string) ($this->translations ?? ''), true);
+        $map = is_array($map) ? $map : [];
+        $map[$lang] = $text;
+        $this->translations = json_encode($map, JSON_UNESCAPED_UNICODE);
+        $this->saveQuietly();
+    }
+
+    /** [translation] is the body in the reader's language, when it differs from theirs. */
+    public function toPublic(?string $translation = null): array
     {
         $deleted = (bool) $this->deleted_at;
         $reply = $this->relationLoaded('replyTo') ? $this->replyTo : null;
@@ -73,6 +94,8 @@ class Message extends Model
                 'type' => $reply->type ?? 'text',
                 'preview' => $reply->preview(),
             ] : null,
+            'lang' => $this->lang && $this->lang !== '-' ? $this->lang : null,
+            'translation' => $deleted ? null : $translation,
             'reactions' => $this->reactions ?: (object) [],
             'read_at' => $this->read_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),

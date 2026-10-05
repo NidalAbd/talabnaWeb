@@ -8,9 +8,11 @@ use App\Models\Deal;
 use App\Models\Message;
 use App\Models\ServicePost;
 use App\Notifications\ChatMessageFcmNotification;
+use App\Services\Chat\ChatLanguageService;
 use App\Support\Blocks;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -24,6 +26,10 @@ use Illuminate\Support\Facades\Validator;
  */
 class ConversationController extends Controller
 {
+    public function __construct(private readonly ChatLanguageService $lang)
+    {
+    }
+
     /** List the authenticated user's conversations, most recent first. */
     public function index(): JsonResponse
     {
@@ -110,7 +116,7 @@ class ConversationController extends Controller
         $deal = Deal::where('conversation_id', $conversation->id)->orderByDesc('id')->first();
 
         return response()->json([
-            'data' => $page->getCollection()->map->toPublic()->values(),
+            'data' => $this->withTranslations($page->getCollection(), $userId),
             'current_page' => $page->currentPage(),
             'last_page' => $page->lastPage(),
             'state' => [
@@ -185,10 +191,14 @@ class ConversationController extends Controller
             $replyTo = Message::where('id', $request->reply_to_id)->where('conversation_id', $conversation->id)->value('id');
         }
 
+        $body = (string) ($request->body ?? '');
         $message = $conversation->messages()->create([
             'sender_id' => $userId,
             'type' => $type,
-            'body' => (string) ($request->body ?? ''),
+            'body' => $body,
+            // Written-in language, so the other person can read it translated.
+            'lang' => in_array($type, ['text', 'post'], true) && $body !== ''
+                ? ($this->lang->detect($body) ?? '-') : null,
             'meta' => $meta,
             'reply_to_id' => $replyTo,
         ]);
@@ -394,6 +404,42 @@ class ConversationController extends Controller
         $media = $post->photos ?? collect();
         $isVideo = fn ($m) => $m->isVideo || preg_match('/\.(mp4|mov|m4v|webm|3gp)$/i', (string) $m->src);
         return optional($media->first(fn ($m) => !$isVideo($m)) ?? $media->first())->src;
+    }
+
+    /** Messages translated per request; the rest follow on the next load. */
+    private const TRANSLATE_BUDGET = 8;
+
+    /**
+     * Present messages for [userId], adding the body in the reader's app language
+     * when the other person wrote in a different one. Translations are cached on
+     * the message, so each one is paid for once per language.
+     */
+    private function withTranslations($messages, int $userId)
+    {
+        $myLang = ChatLanguageService::base(App::getLocale() ?: Auth::user()->locale);
+        $budget = self::TRANSLATE_BUDGET;
+        return $messages->map(function (Message $m) use ($userId, $myLang, &$budget) {
+            $translation = null;
+            $body = (string) $m->body;
+            if ($m->sender_id !== $userId && !$m->deleted_at && $body !== ''
+                && in_array($m->type ?? 'text', ['text', 'post'], true)) {
+                // Messages from before translation existed: detect once.
+                if ($m->lang === null && $budget > 0) {
+                    $local = ChatLanguageService::detectByScript($body);
+                    if ($local === null) $budget--;
+                    $m->lang = $local ?? $this->lang->detect($body) ?? '-';
+                    $m->saveQuietly();
+                }
+                if ($m->lang && $m->lang !== '-' && $m->lang !== $myLang) {
+                    $translation = $m->translationIn($myLang);
+                    if ($translation === null && $budget-- > 0 && ($t = $this->lang->translate($body, $myLang))) {
+                        $m->rememberTranslation($myLang, $t);
+                        $translation = $t;
+                    }
+                }
+            }
+            return $m->toPublic($translation);
+        })->values();
     }
 
     private function isParticipant(Conversation $conversation, int $userId): bool
