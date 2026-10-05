@@ -923,6 +923,10 @@
   "ar": "اكتب ردًا...",
   "en": "Write a reply..."
  },
+ "common.cancel": {
+  "ar": "إلغاء",
+  "en": "Cancel"
+ },
  "common.copied": {
   "ar": "تم النسخ",
   "en": "Copied"
@@ -930,6 +934,42 @@
  "common.load_more": {
   "ar": "تحميل المزيد",
   "en": "Load more"
+ },
+ "content_unavailable.chip": {
+  "ar": "لم يعد متاحًا",
+  "en": "No longer available"
+ },
+ "content_unavailable.comment_title": {
+  "ar": "تم حذف هذا التعليق",
+  "en": "This comment was removed"
+ },
+ "content_unavailable.generic_body": {
+  "ar": "تم حذفه أو لم يعد ظاهرًا.",
+  "en": "It was deleted or is no longer visible."
+ },
+ "content_unavailable.generic_title": {
+  "ar": "هذا المحتوى لم يعد متاحًا",
+  "en": "This content is no longer available"
+ },
+ "content_unavailable.ok": {
+  "ar": "حسنًا",
+  "en": "Got it"
+ },
+ "content_unavailable.post_body": {
+  "ar": "ربما حذفه صاحبه، أو تمت إزالته لمخالفته القواعد.",
+  "en": "The owner may have deleted it, or it was removed for breaking our rules."
+ },
+ "content_unavailable.post_title": {
+  "ar": "هذا المنشور لم يعد متاحًا",
+  "en": "This post is no longer available"
+ },
+ "content_unavailable.user_body": {
+  "ar": "تم حذف الحساب أو إيقافه.",
+  "en": "The account was deleted or suspended."
+ },
+ "content_unavailable.user_title": {
+  "ar": "هذا الحساب لم يعد متاحًا",
+  "en": "This account is no longer available"
  },
  "deep_link.failed_to_load_post": {
   "ar": "تعذّر تحميل المنشور",
@@ -1123,6 +1163,10 @@
   "ar": "كيفية تحديث معلومات الملف الشخصي",
   "en": "How to update profile information"
  },
+ "home.all": {
+  "ar": "الكل",
+  "en": "All"
+ },
  "home.all_feed_empty": {
   "ar": "لا يوجد ما يُعرض بعد",
   "en": "Nothing to show yet"
@@ -1306,6 +1350,86 @@
  "modern_user_info.user": {
   "ar": "مستخدم",
   "en": "user"
+ },
+ "my_reports.account": {
+  "ar": "حساب",
+  "en": "Account"
+ },
+ "my_reports.empty": {
+  "ar": "لم تقم بأي بلاغ.",
+  "en": "You haven't reported anything."
+ },
+ "my_reports.load_failed": {
+  "ar": "تعذّر تحميل بلاغاتك.",
+  "en": "Could not load your reports."
+ },
+ "my_reports.post": {
+  "ar": "منشور",
+  "en": "Post"
+ },
+ "my_reports.reason_false_info": {
+  "ar": "معلومات كاذبة",
+  "en": "False information"
+ },
+ "my_reports.reason_harassment": {
+  "ar": "مضايقة",
+  "en": "Harassment"
+ },
+ "my_reports.reason_inappropriate": {
+  "ar": "محتوى غير لائق",
+  "en": "Inappropriate content"
+ },
+ "my_reports.reason_spam": {
+  "ar": "محتوى مزعج",
+  "en": "Spam"
+ },
+ "my_reports.removed_post": {
+  "ar": "المنشور لم يعد متاحًا",
+  "en": "Post no longer available"
+ },
+ "my_reports.removed_user": {
+  "ar": "الحساب لم يعد متاحًا",
+  "en": "Account no longer available"
+ },
+ "my_reports.status_dismissed": {
+  "ar": "مغلق",
+  "en": "Closed"
+ },
+ "my_reports.status_pending": {
+  "ar": "قيد المراجعة",
+  "en": "Under review"
+ },
+ "my_reports.status_reviewed": {
+  "ar": "تمت المراجعة",
+  "en": "Reviewed"
+ },
+ "my_reports.title": {
+  "ar": "بلاغاتي",
+  "en": "My reports"
+ },
+ "my_reports.view": {
+  "ar": "عرض",
+  "en": "View"
+ },
+ "my_reports.withdraw": {
+  "ar": "سحب البلاغ",
+  "en": "Withdraw"
+ },
+ "my_reports.withdraw_body": {
+  "ar": "لن يقوم فريقنا بمراجعته بعد الآن.",
+  "en": "Our team will no longer review it."
+ },
+ "my_reports.withdraw_failed": {
+  "ar": "لم يعد بالإمكان سحب هذا البلاغ.",
+  "en": "This report can no longer be withdrawn."
+ },
+ "my_reports.withdraw_title": {
+  "ar": "سحب هذا البلاغ؟",
+  "en": "Withdraw this report?"
+ },
+ "my_reports.withdrawn": {
+  "ar": "تم سحب البلاغ",
+  "en": "Report withdrawn"
  },
  "nav.categories": {
   "ar": "الأقسام",

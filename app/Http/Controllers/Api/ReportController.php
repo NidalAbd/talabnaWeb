@@ -121,6 +121,8 @@ class ReportController extends Controller
                 'title' => $title,
                 'photo' => optional($target?->photos?->first())->src,
                 'reason' => $labels[$reason][app()->getLocale()] ?? $labels[$reason]['en'] ?? $reason,
+                // Stable key; the app shows it through its own translations (all languages).
+                'reason_key' => ['Spam' => 'spam', 'inappropriate content' => 'inappropriate', 'Harassment' => 'harassment', 'false information' => 'false_info'][$reason] ?? 'other',
                 'status' => $r->status ?? 'pending',
                 'can_withdraw' => ($r->status ?? 'pending') === 'pending',
                 'created_at' => $r->created_at?->toIso8601String(),
