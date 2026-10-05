@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\ServicePost;
 use App\Notifications\ChatMessageFcmNotification;
 use App\Services\Chat\ChatLanguageService;
+use App\Services\Chat\ChatTranslationQuota;
 use App\Support\Blocks;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,9 +27,14 @@ use Illuminate\Support\Facades\Validator;
  */
 class ConversationController extends Controller
 {
-    public function __construct(private readonly ChatLanguageService $lang)
-    {
+    public function __construct(
+        private readonly ChatLanguageService $lang,
+        private readonly ChatTranslationQuota $quota,
+    ) {
     }
+
+    /** Set by withTranslations(): a message needed translating but the reader has no points. */
+    private bool $translationNeedsPoints = false;
 
     /** List the authenticated user's conversations, most recent first. */
     public function index(): JsonResponse
@@ -126,6 +132,12 @@ class ConversationController extends Controller
                 'other_read_up_to' => Message::where('conversation_id', $conversation->id)
                     ->where('sender_id', $userId)->whereNotNull('read_at')->max('id'),
                 'deal' => $deal?->toPublic(),
+                // Translation is paid with points: 1 point = MESSAGES_PER_POINT messages.
+                'translation' => [
+                    'remaining' => $this->quota->remaining($userId),
+                    'per_point' => ChatTranslationQuota::MESSAGES_PER_POINT,
+                    'needs_points' => $this->translationNeedsPoints,
+                ],
             ],
         ]);
     }
@@ -412,34 +424,58 @@ class ConversationController extends Controller
     /**
      * Present messages for [userId], adding the body in the reader's app language
      * when the other person wrote in a different one. Translations are cached on
-     * the message, so each one is paid for once per language.
+     * the message, so each one is paid for once (from the reader's points bundle,
+     * see ChatTranslationQuota).
      */
     private function withTranslations($messages, int $userId)
     {
         $myLang = ChatLanguageService::base(App::getLocale() ?: Auth::user()->locale);
         $budget = self::TRANSLATE_BUDGET;
-        return $messages->map(function (Message $m) use ($userId, $myLang, &$budget) {
-            $translation = null;
+        $translations = [];
+        $todo = []; // message id => body, translated together in one call
+
+        foreach ($messages as $m) {
             $body = (string) $m->body;
-            if ($m->sender_id !== $userId && !$m->deleted_at && $body !== ''
-                && in_array($m->type ?? 'text', ['text', 'post'], true)) {
-                // Messages from before translation existed: detect once.
-                if ($m->lang === null && $budget > 0) {
-                    $local = ChatLanguageService::detectByScript($body);
-                    if ($local === null) $budget--;
-                    $m->lang = $local ?? $this->lang->detect($body) ?? '-';
-                    $m->saveQuietly();
-                }
-                if ($m->lang && $m->lang !== '-' && $m->lang !== $myLang) {
-                    $translation = $m->translationIn($myLang);
-                    if ($translation === null && $budget-- > 0 && ($t = $this->lang->translate($body, $myLang))) {
-                        $m->rememberTranslation($myLang, $t);
-                        $translation = $t;
-                    }
+            if ($m->sender_id === $userId || $m->deleted_at || $body === ''
+                || !in_array($m->type ?? 'text', ['text', 'post'], true)) {
+                continue;
+            }
+            // Messages from before translation existed: detect once.
+            if ($m->lang === null && $budget > 0) {
+                $local = ChatLanguageService::detectByScript($body);
+                if ($local === null) $budget--;
+                $m->lang = $local ?? $this->lang->detect($body) ?? '-';
+                $m->saveQuietly();
+            }
+            if (!$m->lang || $m->lang === '-' || $m->lang === $myLang) continue;
+
+            // Already translated for this reader: free. A new translation uses one
+            // message of the reader's points bundle.
+            if (($cached = $m->translationIn($myLang)) !== null) {
+                $translations[$m->id] = $cached;
+            } elseif ($budget > 0) {
+                if ($this->quota->take($userId)) {
+                    $budget--;
+                    $todo[$m->id] = $body;
+                } else {
+                    $this->translationNeedsPoints = true;
                 }
             }
-            return $m->toPublic($translation);
-        })->values();
+        }
+
+        if ($todo) {
+            $done = $this->lang->translateMany($todo, $myLang);
+            foreach ($todo as $id => $_) {
+                if (isset($done[$id])) {
+                    $translations[$id] = $done[$id];
+                    $messages->firstWhere('id', $id)?->rememberTranslation($myLang, $done[$id]);
+                } else {
+                    $this->quota->refund($userId);
+                }
+            }
+        }
+
+        return $messages->map(fn (Message $m) => $m->toPublic($translations[$m->id] ?? null))->values();
     }
 
     private function isParticipant(Conversation $conversation, int $userId): bool

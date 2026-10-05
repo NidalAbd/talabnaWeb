@@ -81,6 +81,52 @@ class ChatLanguageService
         }
     }
 
+    /**
+     * Translate several messages into one language with a single call (opening a
+     * chat used to make one call per message, one after another).
+     *
+     * @param  array<int|string, string>  $texts  keyed by message id
+     * @return array<int|string, string>  translations for the keys that worked
+     */
+    public function translateMany(array $texts, string $targetCode): array
+    {
+        $texts = array_filter(array_map('trim', $texts), fn ($t) => $t !== '');
+        if (!$texts) return [];
+        if (count($texts) === 1) {
+            $k = array_key_first($texts);
+            $t = $this->translate($texts[$k], $targetCode);
+            return $t === null ? [] : [$k => $t];
+        }
+        $key = (string) config('services.openai.key', '');
+        if ($key === '') return [];
+        $target = config("languages.supported.{$targetCode}.name") ?? $targetCode;
+        $items = [];
+        foreach ($texts as $id => $text) $items[] = ['id' => (string) $id, 'text' => $text];
+        try {
+            $r = Http::withToken($key)->timeout(25)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => self::MODEL, 'temperature' => 0.2, 'max_tokens' => 3000,
+                'response_format' => ['type' => 'json_object'],
+                'messages' => [
+                    ['role' => 'system', 'content' => "You are a translator for a marketplace chat. Translate each item's text into {$target}. Keep meaning, tone, prices, numbers, names and emoji. Reply with JSON only: {\"items\":[{\"id\":\"…\",\"text\":\"…\"}]} with the same ids."],
+                    ['role' => 'user', 'content' => json_encode(['items' => $items], JSON_UNESCAPED_UNICODE)],
+                ],
+            ]);
+            $out = json_decode((string) data_get($r->json(), 'choices.0.message.content', ''), true);
+            $result = [];
+            foreach ((array) ($out['items'] ?? []) as $row) {
+                $id = (string) ($row['id'] ?? '');
+                $text = trim((string) ($row['text'] ?? ''));
+                foreach (array_keys($texts) as $k) {
+                    if ((string) $k === $id && $text !== '') $result[$k] = $text;
+                }
+            }
+            return $result;
+        } catch (\Throwable $e) {
+            Log::warning('chat batch translate failed: ' . $e->getMessage());
+            return [];
+        }
+    }
+
     /** Base language code ("ar-EG" → "ar"). */
     public static function base(?string $code): string
     {
