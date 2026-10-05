@@ -344,8 +344,12 @@ class UserController extends Controller
                 'reviewsReceived as reviews_count',
             ])->load('photos', 'country', 'city', 'roles');
             $userData->average_rating = round((float) $userData->reviewsReceived()->avg('rating'), 2);
-            // Trust: sales/purchases both sides confirmed in chat (2026-10-05).
-            $userData->deals = \App\Models\Deal::statsFor((int) $userData->id);
+            // Trust: sales/purchases both sides confirmed in chat (2026-10-05). The owner
+            // can hide them from others (privacy); they always see their own.
+            $isMe = (int) Auth::id() === (int) $userData->id;
+            $userData->deals = ($isMe || ($userData->show_deals ?? true))
+                ? \App\Models\Deal::statsFor((int) $userData->id)
+                : null;
         } catch (\Exception $e) {
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -353,6 +357,15 @@ class UserController extends Controller
         return response()->json(compact('userData'));
     }
 
+
+    /** PUT /api/user/privacy/deals {show: bool} - show or hide my sold/bought counts to others. */
+    public function setShowDeals(Request $request): JsonResponse
+    {
+        $data = $request->validate(['show' => 'required|boolean']);
+        DB::table('users')->where('id', Auth::id())->update(['show_deals' => $data['show']]);
+
+        return response()->json(['show_deals' => (bool) $data['show']]);
+    }
 
 // Add this method to your UserController class
     public function banUser(Request $request, $userId): JsonResponse

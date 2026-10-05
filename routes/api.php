@@ -174,6 +174,7 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     Route::put('user/{userId}/change-password', [App\Http\Controllers\Api\UserController::class, 'changePassword']);
     Route::post('user/{userId}/update-profile-photo', [App\Http\Controllers\Api\UserController::class, 'updateProfilePhoto']);
     Route::get('user/profile/{user}', [App\Http\Controllers\Api\UserController::class,'UserProfile'])->name('getUserData');
+    Route::put('user/privacy/deals', [App\Http\Controllers\Api\UserController::class, 'setShowDeals']);
     Route::get('user/check_token', [App\Http\Controllers\Api\UserController::class,'check_token'])->name('check_token');
     Route::get('user/follower/{user}', [App\Http\Controllers\Api\UserController::class,'UserFollower'])->name('getUserFollower');
     Route::get('user/following/{user}', [App\Http\Controllers\Api\UserController::class,'UserFollowing'])->name('getUserFollowing');

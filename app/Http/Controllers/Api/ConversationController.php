@@ -536,7 +536,7 @@ class ConversationController extends Controller
                 'avatar' => optional($other->photos->first())->src,
                 'verified' => (bool) $other->phone_verified_at,
                 'last_seen_at' => optional($other->last_seen_at)->toIso8601String(),
-                'deals' => Deal::statsFor((int) $other->id),
+                'deals' => ($other->show_deals ?? true) ? Deal::statsFor((int) $other->id) : null,
             ],
             'service_post' => $post ? [
                 'id' => $post->id,
