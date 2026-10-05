@@ -22,6 +22,7 @@ class Message extends Model
         'deleted_at',
         'lang',
         'translations',
+        'translate_to',
     ];
 
     protected $casts = [
@@ -96,6 +97,8 @@ class Message extends Model
             ] : null,
             'lang' => $this->lang && $this->lang !== '-' ? $this->lang : null,
             'translation' => $deleted ? null : $translation,
+            // Being translated in the next batch: the app fetches it again shortly.
+            'translation_pending' => !$deleted && $translation === null && $this->translate_to !== null,
             'reactions' => $this->reactions ?: (object) [],
             'read_at' => $this->read_at?->toIso8601String(),
             'created_at' => $this->created_at?->toIso8601String(),

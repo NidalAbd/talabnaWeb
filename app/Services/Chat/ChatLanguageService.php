@@ -127,6 +127,46 @@ class ChatLanguageService
         }
     }
 
+    /**
+     * One API call for messages from many chats, each with its own target language.
+     *
+     * @param  array<int, array{text: string, to: string}>  $items  keyed by message id
+     * @return array<int, string>  translations for the ids that worked
+     */
+    public function translateBatch(array $items): array
+    {
+        $key = (string) config('services.openai.key', '');
+        $rows = [];
+        foreach ($items as $id => $it) {
+            $text = trim((string) ($it['text'] ?? ''));
+            if ($text === '') continue;
+            $to = (string) $it['to'];
+            $rows[] = ['id' => (string) $id, 'to' => config("languages.supported.{$to}.name") ?? $to, 'text' => $text];
+        }
+        if (!$rows || $key === '') return [];
+        try {
+            $r = Http::withToken($key)->timeout(40)->post('https://api.openai.com/v1/chat/completions', [
+                'model' => self::MODEL, 'temperature' => 0.2, 'max_tokens' => 6000,
+                'response_format' => ['type' => 'json_object'],
+                'messages' => [
+                    ['role' => 'system', 'content' => 'You are a translator for a marketplace chat. Translate each item\'s "text" into the language named in its "to". Items are unrelated messages from different chats. Keep meaning, tone, prices, numbers, names and emoji. Reply with JSON only: {"items":[{"id":"…","text":"…"}]} with the same ids.'],
+                    ['role' => 'user', 'content' => json_encode(['items' => $rows], JSON_UNESCAPED_UNICODE)],
+                ],
+            ]);
+            $out = json_decode((string) data_get($r->json(), 'choices.0.message.content', ''), true);
+            $result = [];
+            foreach ((array) ($out['items'] ?? []) as $row) {
+                $id = (int) ($row['id'] ?? 0);
+                $text = trim((string) ($row['text'] ?? ''));
+                if ($id && $text !== '' && isset($items[$id])) $result[$id] = $text;
+            }
+            return $result;
+        } catch (\Throwable $e) {
+            Log::warning('chat batch translate failed: ' . $e->getMessage());
+            return [];
+        }
+    }
+
     /** Base language code ("ar-EG" → "ar"). */
     public static function base(?string $code): string
     {

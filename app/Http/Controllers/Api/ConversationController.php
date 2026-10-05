@@ -9,6 +9,7 @@ use App\Models\Message;
 use App\Models\ServicePost;
 use App\Notifications\ChatMessageFcmNotification;
 use App\Services\Chat\ChatLanguageService;
+use App\Services\Chat\ChatTranslationBatcher;
 use App\Services\Chat\ChatTranslationQuota;
 use App\Support\Blocks;
 use Illuminate\Http\JsonResponse;
@@ -30,6 +31,7 @@ class ConversationController extends Controller
     public function __construct(
         private readonly ChatLanguageService $lang,
         private readonly ChatTranslationQuota $quota,
+        private readonly ChatTranslationBatcher $batcher,
     ) {
     }
 
@@ -216,12 +218,29 @@ class ConversationController extends Controller
         ]);
         $message->load('replyTo');
 
+        // The other person reads another language: translate it for them in the next
+        // batch (messages from all chats go to the API together), paid from their
+        // points bundle. Without points it stays as written.
+        $queued = false;
+        $target = $other?->locale ? ChatLanguageService::base($other->locale) : null;
+        if ($target && $message->lang && $message->lang !== '-' && $message->lang !== $target
+            && $this->quota->take($other->id)) {
+            $message->translate_to = $target;
+            $message->saveQuietly();
+            $queued = true;
+        }
+
         $conversation->update([
             'last_message_body' => $message->preview(),
             'last_message_sender_id' => $userId,
             'last_message_at' => $message->created_at,
         ]);
         Cache::forget("chat:typing:{$conversation->id}:{$userId}");
+
+        if ($queued) {
+            $batcher = $this->batcher;
+            dispatch(fn () => $batcher->flushSoon())->afterResponse();
+        }
 
         // Push to the other person right after the response (no minute-long queue wait).
         if ($other) {
@@ -433,6 +452,7 @@ class ConversationController extends Controller
         $budget = self::TRANSLATE_BUDGET;
         $translations = [];
         $todo = []; // message id => body, translated together in one call
+        $paid = []; // already paid at send time (no refund on failure)
 
         foreach ($messages as $m) {
             $body = (string) $m->body;
@@ -453,6 +473,14 @@ class ConversationController extends Controller
             // message of the reader's points bundle.
             if (($cached = $m->translationIn($myLang)) !== null) {
                 $translations[$m->id] = $cached;
+            } elseif ($m->translate_to === $myLang) {
+                // Paid when sent and waiting for its batch. If the batch missed it
+                // (lock race), translate it here without charging again.
+                if ($m->created_at && $m->created_at->lt(now()->subSeconds(15)) && $budget > 0) {
+                    $budget--;
+                    $todo[$m->id] = $body;
+                    $paid[$m->id] = true;
+                }
             } elseif ($budget > 0) {
                 if ($this->quota->take($userId)) {
                     $budget--;
@@ -466,10 +494,14 @@ class ConversationController extends Controller
         if ($todo) {
             $done = $this->lang->translateMany($todo, $myLang);
             foreach ($todo as $id => $_) {
+                $m = $messages->firstWhere('id', $id);
                 if (isset($done[$id])) {
                     $translations[$id] = $done[$id];
-                    $messages->firstWhere('id', $id)?->rememberTranslation($myLang, $done[$id]);
-                } else {
+                    if ($m) {
+                        $m->translate_to = null;
+                        $m->rememberTranslation($myLang, $done[$id]);
+                    }
+                } elseif (empty($paid[$id])) {
                     $this->quota->refund($userId);
                 }
             }
