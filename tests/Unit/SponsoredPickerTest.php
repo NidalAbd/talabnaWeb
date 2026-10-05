@@ -91,13 +91,13 @@ class SponsoredPickerTest extends TestCase
 
         $page1 = $p->mix($organic, $sponsored, $picked, 1);
         $this->assertCount(12, $page1);
-        $this->assertSame('s101', $page1[1]);
-        $this->assertSame('s102', $page1[6 + 1]);
+        $this->assertSame('s101', $page1[2], 'third card, never the first two');
+        $this->assertSame('s102', $page1[7 + 1]);
         $this->assertSame('o1', $page1[0], 'the newest organic post is still first');
 
         $page2 = $p->mix($organic, $sponsored, $picked, 2);
-        $this->assertSame('s103', $page2[1]);
-        $this->assertSame('s104', $page2[7]);
+        $this->assertSame('s103', $page2[2]);
+        $this->assertSame('s104', $page2[8]);
 
         $page3 = $p->mix($organic, $sponsored, $picked, 3);
         $this->assertSame($organic, $page3, 'once the picked list is used up, only organic posts');
@@ -109,7 +109,7 @@ class SponsoredPickerTest extends TestCase
     {
         $p = new SponsoredPicker();
         $out = $p->mix(['o1', 'o2'], [1 => 's1', 2 => 's2'], [1, 2], 1);
-        $this->assertSame(['o1', 's1', 'o2', 's2'], $out);
+        $this->assertSame(['o1', 'o2', 's1', 's2'], $out);
     }
 
     public function test_frequency_cap_hides_posts_seen_twice_today_or_within_the_cooldown(): void
