@@ -1739,6 +1739,10 @@
   "ar": "خطأ في تحميل الفيديو",
   "en": "Error loading video"
  },
+ "filters.empty_hint": {
+  "ar": "جرّب تخفيف الفلاتر ({filters}) أو عُد لاحقًا.",
+  "en": "Try loosening your filters ({filters}) or check back later."
+ },
  "follow.following_tab": {
   "ar": "متابع",
   "en": "Following"
@@ -2106,6 +2110,10 @@
  "map.title": {
   "ar": "إعلانات بالقرب منك",
   "en": "Posts near you"
+ },
+ "media.add_hint": {
+  "ar": "أضف حتى {n} صور أو فيديو (دقيقة واحدة كحد أقصى)",
+  "en": "Add up to {n} photos or a video (1 min max)"
  },
  "media_viewer.video_failed": {
   "ar": "لا يمكن تشغيل هذا الفيديو الآن.",
