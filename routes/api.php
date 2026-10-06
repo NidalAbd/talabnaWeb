@@ -283,6 +283,8 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     // Release A: owner marks a post available / reserved / sold, and renews it.
     Route::post('service_posts/{servicePost}/sale-status', [App\Http\Controllers\Api\PostLifecycleController::class, 'saleStatus'])->middleware('throttle:30,1');
     Route::post('service_posts/{servicePost}/renew', [App\Http\Controllers\Api\PostLifecycleController::class, 'renew'])->middleware('throttle:30,1');
+    // Release A: similar posts and more from this seller, for the post page.
+    Route::get('service_posts/{servicePost}/related', [App\Http\Controllers\Api\RelatedPostsController::class, 'show'])->middleware('throttle:120,1');
     // Release A: saved searches with alerts.
     Route::get('saved-searches', [App\Http\Controllers\Api\SavedSearchController::class, 'index']);
     Route::post('saved-searches', [App\Http\Controllers\Api\SavedSearchController::class, 'store'])->middleware('throttle:20,1');
