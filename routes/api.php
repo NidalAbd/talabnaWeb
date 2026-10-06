@@ -388,7 +388,9 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
 
     // App Version / force-update config (Admin) — bump minimum_build_number
     // and set is_mandatory=true to force everyone below it to update.
-    Route::put('admin/app-version', [App\Http\Controllers\Api\AppVersionController::class, 'update']);
+    // Admins only (2026-10-06: it sat in the signed-in-user group, so any user could force everyone onto the
+    // update screen).
+    Route::put('admin/app-version', [App\Http\Controllers\Api\AppVersionController::class, 'update'])->middleware('admin');
 
     // Badge Type Management Routes (Admin)
     Route::middleware(['admin'])->prefix('admin/badge-types')->group(function () {

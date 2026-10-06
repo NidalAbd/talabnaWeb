@@ -296,6 +296,9 @@ Route::get('/api/user', function () {
 Route::group(['middleware' => ['auth', 'admin']], function() {
     // Dashboard
     Route::get('/dashboard', [HomeController::class, 'index'])->name('dashboard');
+    // Force-update config from the admin panel session (same handler as PUT /api/admin/app-version).
+    Route::get('admin/app-version/{platform}', fn (string $platform) => response()->json(\App\Models\AppVersion::where('platform', $platform)->first()));
+    Route::put('admin/app-version', [App\Http\Controllers\Api\AppVersionController::class, 'update']);
     Route::get('statistics', [App\Http\Controllers\dashboard::class, 'index'])->name('statistics.index');
 
     /*
