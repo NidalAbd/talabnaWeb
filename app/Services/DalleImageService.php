@@ -67,6 +67,8 @@ class DalleImageService
     /**
      * Subcategory-specific prompt builder.
      * Handles brands (car logos, device products) and job types differently.
+     * Every subcategory uses the same 3D style as the categories (2026-10-06: they were still "clean flat
+     * illustration" and looked dated next to the 3D category icons). Car brands stay their real logo.
      */
     protected function getSubcategoryPrompt(string $nameEn, string $nameAr, int $catId, ?string $categoryNameEn): string
     {
@@ -87,12 +89,12 @@ class DalleImageService
                 return "The official {$nameEn} car brand logo, clean and recognizable, on a white background. High quality, sharp, centered. No extra decoration, no car image, just the brand emblem/logo.";
             }
             // Non-brand car subcategories (Spare Parts, Rental, etc.)
-            return "A clean flat illustration representing '{$nameEn}' in automotive context. Simple, clear icon style. White background. No text.";
+            return "An object clearly representing '{$nameEn}' in an automotive context. " . self::CATEGORY_STYLE_SUFFIX;
         }
 
         // Devices category (id=2)
         if ($catId === 2) {
-            return "A clean, realistic photo-style image of a single {$nameEn} product on a white background. Simple, centered, high quality product photography style. No text, no logo.";
+            return "A single {$nameEn} product, no brand logo. " . self::CATEGORY_STYLE_SUFFIX;
         }
 
         // Jobs category (id=1)
@@ -136,7 +138,7 @@ class DalleImageService
                 'Decoration and Beauty' => 'a mirror with a lipstick',
             ];
             $icon = $jobIcons[$nameEn] ?? "a person working as {$nameEn}";
-            return "A clean flat illustration of {$icon}, representing the job category '{$nameEn}'. Simple, friendly, instantly recognizable. White background. No text.";
+            return "{$icon}, representing the job category '{$nameEn}', instantly recognizable. " . self::CATEGORY_STYLE_SUFFIX;
         }
 
         // Houses category (id=3)
@@ -163,16 +165,16 @@ class DalleImageService
                 'Traditional House' => 'a traditional Arabic house',
             ];
             $icon = $houseIcons[$nameEn] ?? "a building representing {$nameEn}";
-            return "A clean flat illustration of {$icon}, representing '{$nameEn}' in real estate. Simple, clear, friendly style. White background. No text.";
+            return "{$icon}, representing '{$nameEn}' in real estate. " . self::CATEGORY_STYLE_SUFFIX;
         }
 
         // Urgent/Emergency category (id=8)
         if ($catId === 8) {
-            return "A clean flat illustration representing '{$nameEn}' in an emergency/humanitarian context. Simple, clear, compassionate style. White background. No text.";
+            return "An object clearly representing '{$nameEn}' in an emergency/humanitarian context, compassionate. " . self::CATEGORY_STYLE_SUFFIX;
         }
 
         // Services category (id=5) and others
-        return "A clean flat illustration clearly representing '{$nameEn}' service. Simple, instantly recognizable icon for a mobile app. White background. No text, no logo.";
+        return "An object clearly representing the '{$nameEn}' service, instantly recognizable. No logo. " . self::CATEGORY_STYLE_SUFFIX;
     }
 
     /**
