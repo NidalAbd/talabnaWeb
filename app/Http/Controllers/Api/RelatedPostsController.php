@@ -19,7 +19,7 @@ class RelatedPostsController extends Controller
     public function show(Request $request, ServicePost $servicePost): JsonResponse
     {
         $data = Cache::remember("related_posts:{$servicePost->id}", 600, function () use ($servicePost) {
-            $card = fn ($q) => $q->with(['photos' => fn ($p) => $p->limit(1), 'category', 'subCategory'])
+            $card = fn ($q) => $q->with(['photos', 'category', 'subCategory']) // Laravel 10: a limit here would apply to all posts together
                 ->get(['id', 'user_id', 'title', 'price', 'price_type', 'price_max', 'price_currency_code', 'type', 'have_badge',
                     'state', 'reserved_at', 'categories_id', 'sub_categories_id', 'country_id', 'created_at']);
 
