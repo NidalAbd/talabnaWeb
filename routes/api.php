@@ -373,6 +373,9 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     Route::get('conversations/{conversation}', [App\Http\Controllers\Api\ConversationController::class, 'show']);
     Route::post('conversations/{conversation}/typing', [App\Http\Controllers\Api\ConversationController::class, 'typing'])->middleware('throttle:60,1');
     Route::post('conversations/{conversation}/deal', [App\Http\Controllers\Api\ConversationController::class, 'proposeDeal']);
+    // Release C: 360° view.
+    Route::get('service_posts/{servicePost}/spin', [App\Http\Controllers\Api\SpinController::class, 'show']);
+    Route::post('service_posts/{servicePost}/spin', [App\Http\Controllers\Api\SpinController::class, 'store'])->middleware('throttle:10,1');
     // Release C: shop page.
     Route::get('users/{id}/shop', [App\Http\Controllers\Api\ShopController::class, 'show'])->whereNumber('id');
     Route::get('me/shop', [App\Http\Controllers\Api\ShopController::class, 'mine']);
