@@ -208,6 +208,10 @@ class ConversationController extends Controller
         }
 
         $body = (string) ($request->body ?? '');
+        // Release C: looks like a common scam (codes, paying first, gift cards, payment links)? The receiver sees a warning.
+        if ($type === 'text' && ($warning = \App\Services\ChatSafety::warningFor($body))) {
+            $meta = array_merge((array) ($meta ?? []), ['warning' => $warning]);
+        }
         $message = $conversation->messages()->create([
             'sender_id' => $userId,
             'type' => $type,
@@ -412,6 +416,98 @@ class ConversationController extends Controller
         $this->systemMessage($conversation, $userId, 'deal_' . $deal->status, $deal);
 
         return response()->json(['deal' => $deal->toPublic()]);
+    }
+
+    /**
+     * Release C: POST /api/conversations/{conversation}/offer {amount}: the buyer offers a price for the listing.
+     * Any earlier pending offer in this chat is withdrawn; the seller gets a push.
+     */
+    public function makeOffer(Request $request, Conversation $conversation): JsonResponse
+    {
+        $userId = Auth::id();
+        if (! $this->isParticipant($conversation, $userId)) {
+            return response()->json(['error' => 'Not a participant in this conversation'], 403);
+        }
+        $post = $conversation->servicePost;
+        if (! $post) {
+            return response()->json(['error' => 'Offers are made in a chat about a listing'], 422);
+        }
+        if ((int) $post->user_id === (int) $userId) {
+            return response()->json(['error' => 'The seller can counter an offer, not make one'], 422);
+        }
+        $d = $request->validate(['amount' => 'required|numeric|min:1|max:999999999']);
+        \App\Models\Offer::where('conversation_id', $conversation->id)->where('status', 'pending')->update(['status' => 'withdrawn']);
+        $offer = \App\Models\Offer::create([
+            'conversation_id' => $conversation->id, 'service_post_id' => $post->id,
+            'seller_id' => (int) $post->user_id, 'buyer_id' => (int) $userId, 'from_user_id' => (int) $userId,
+            'amount' => $d['amount'], 'currency' => $post->price_currency_code, 'status' => 'pending',
+        ]);
+        $this->offerEvent($conversation, $userId, 'offer_made', $offer);
+
+        return response()->json(['offer' => $offer->toPublic()], 201);
+    }
+
+    /** POST /api/offers/{offer}/answer {action: accept|decline|counter|withdraw, amount (counter)} */
+    public function answerOffer(Request $request, \App\Models\Offer $offer): JsonResponse
+    {
+        $userId = (int) Auth::id();
+        $conversation = Conversation::find($offer->conversation_id);
+        if (! $conversation || ! $this->isParticipant($conversation, $userId) || $offer->status !== 'pending') {
+            return response()->json(['error' => 'Not allowed'], 403);
+        }
+        $d = $request->validate(['action' => 'required|in:accept,decline,counter,withdraw', 'amount' => 'required_if:action,counter|nullable|numeric|min:1']);
+        $mine = (int) $offer->from_user_id === $userId;
+        if (($d['action'] === 'withdraw') !== $mine) {
+            return response()->json(['error' => 'Not allowed'], 403);
+        }
+        if ($d['action'] === 'counter') {
+            $offer->update(['status' => 'countered']);
+            $counter = \App\Models\Offer::create([
+                'conversation_id' => $offer->conversation_id, 'service_post_id' => $offer->service_post_id,
+                'seller_id' => $offer->seller_id, 'buyer_id' => $offer->buyer_id, 'from_user_id' => $userId,
+                'amount' => $d['amount'], 'currency' => $offer->currency, 'status' => 'pending', 'parent_id' => $offer->id,
+            ]);
+            $this->offerEvent($conversation, $userId, 'offer_countered', $counter);
+
+            return response()->json(['offer' => $counter->toPublic()]);
+        }
+        $offer->update(['status' => ['accept' => 'accepted', 'decline' => 'declined', 'withdraw' => 'withdrawn'][$d['action']]]);
+        if ($offer->status === 'accepted') {
+            // The seller agreed a price: the listing shows as reserved (the seller can change it any time).
+            $post = \App\Models\ServicePost::find($offer->service_post_id);
+            if ($post && $post->state === 'published' && ! $post->reserved_at) {
+                $post->forceFill(['reserved_at' => now()])->save();
+            }
+        }
+        $this->offerEvent($conversation, $userId, 'offer_'.$offer->status, $offer);
+
+        return response()->json(['offer' => $offer->toPublic()]);
+    }
+
+    private function offerEvent(Conversation $conversation, int $userId, string $event, \App\Models\Offer $offer): void
+    {
+        $message = $conversation->messages()->create([
+            'sender_id' => $userId,
+            'type' => 'system',
+            'body' => $event,
+            'meta' => ['event' => $event, 'offer' => $offer->toPublic()],
+        ]);
+        $conversation->update(['last_message_body' => $event, 'last_message_sender_id' => $userId, 'last_message_at' => $message->created_at]);
+        try {
+            $other = $conversation->otherUser($userId);
+            $sender = \App\Models\User::find($userId);
+            $amount = rtrim(rtrim(number_format((float) $offer->amount, 2, '.', ','), '0'), '.').' '.($offer->currency ?? '');
+            $other?->notify(new \App\Notifications\ChatMessageFcmNotification($conversation->id, $sender?->user_name ?? $sender?->name ?? 'Talabna',
+                match ($event) {
+                    'offer_made' => "Offer: {$amount}",
+                    'offer_countered' => "Counter-offer: {$amount}",
+                    'offer_accepted' => "Offer accepted: {$amount}",
+                    'offer_declined' => 'Offer declined',
+                    default => 'Offer withdrawn',
+                }));
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::warning('offer push failed', ['offer' => $offer->id, 'error' => $e->getMessage()]);
+        }
     }
 
     private function systemMessage(Conversation $conversation, int $userId, string $event, Deal $deal): void
