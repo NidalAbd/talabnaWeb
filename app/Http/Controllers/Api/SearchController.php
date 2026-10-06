@@ -46,12 +46,20 @@ class SearchController extends Controller
         }
         // Search for posts
         // Live posts only (the old query had no state filter and an ungrouped OR), newest first; optional filters.
-        $posts = \App\Services\PostSearch::query($query, (array) $request->input('filters', []))
+        $filters = (array) $request->input('filters', []);
+        $posts = \App\Services\PostSearch::query($query, $filters)
             ->orderByDesc('created_at')
             ->with('photos')
             ->with('subCategory')
             ->with('category')
             ->paginate(10);
+        // Release C: nothing for the whole phrase? Show posts matching any of its longer words, and say so.
+        $broadened = false;
+        if ($posts->total() === 0 && ($words = \App\Services\PostSearch::words((string) $query))) {
+            $posts = \App\Services\PostSearch::anyWord($words, $filters)
+                ->orderByDesc('created_at')->with('photos')->with('subCategory')->with('category')->paginate(10);
+            $broadened = $posts->total() > 0;
+        }
 
         foreach ($posts as $servicePost) {
             $postUser = User::with('photos')->find($servicePost->user_id);
@@ -73,6 +81,7 @@ class SearchController extends Controller
         return response()->json([
             'users' => $users,
             'posts' => $posts,
+            'broadened' => $broadened,
         ]);
     }
 

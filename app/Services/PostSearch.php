@@ -53,6 +53,30 @@ class PostSearch
         return $q;
     }
 
+    /** Words worth searching on their own (3+ letters), for the "any word" fallback; null when there is only one. */
+    public static function words(string $text): ?array
+    {
+        $w = array_values(array_unique(array_filter(preg_split('/\s+/u', trim($text)) ?: [], fn ($x) => mb_strlen($x) >= 3)));
+
+        return count($w) >= 2 ? array_slice($w, 0, 6) : null;
+    }
+
+    /** Live posts matching any of [words] (each like a normal search), with the same filters. */
+    public static function anyWord(array $words, array $filters = []): Builder
+    {
+        $base = self::query(null, $filters);
+        $base->where(function ($w) use ($words) {
+            foreach ($words as $word) {
+                $plain = '%'.addcslashes($word, '%_\\').'%';
+                $escaped = '%'.addcslashes(trim(json_encode($word), '"'), '%_\\').'%';
+                $w->orWhere('title', 'LIKE', $plain)->orWhere('description', 'LIKE', $plain)
+                    ->orWhere('title', 'LIKE', $escaped)->orWhere('description', 'LIKE', $escaped);
+            }
+        });
+
+        return $base;
+    }
+
     /** Only the known filter keys, without empty values (what a saved search stores). */
     public static function cleanFilters(array $filters): array
     {
