@@ -133,11 +133,13 @@ class AiTextService
         $categories = Categories::with('sub_categories')->get()->filter(fn ($c) => ! in_array((int) $c->id, [6, 7], true));
         $lines = [];
         $valid = [];
+        $parentOf = [];
         foreach ($categories as $c) {
-            $lines[] = "{$c->id}: ".$this->label($c->name);
+            $lines[] = "CATEGORY {$c->id}: ".$this->label($c->name);
             foreach ($c->sub_categories as $s) {
-                $lines[] = "  {$c->id}.{$s->id}: ".$this->label($s->name);
+                $lines[] = "  - SUB {$s->id}: ".$this->label($s->name);
                 $valid[$c->id][$s->id] = true;
+                $parentOf[$s->id] = (int) $c->id;
             }
             $valid[$c->id] ??= [];
         }
@@ -145,20 +147,50 @@ class AiTextService
             throw new AiProviderException('no_categories', 'No categories to choose from.', 422);
         }
 
-        $system = 'Pick the single best category for a classified ad from the list, judged by WHAT the ad offers or asks '
+        // The subcategory used to be listed as "categoryId.subId"; the model often answered with that same "3.12",
+        // which (int) turned into 3, so the subcategory was dropped and the app fell back to the first one in the list
+        // (2026-10-06). Subcategories now have their own plain ids, and the answer is parsed defensively.
+        $system = 'Pick the single best category AND subcategory for a classified ad from the list, judged by WHAT the ad offers or asks '
             .'for (a car for sale goes under cars, not jobs; only job offers or people seeking work go under jobs). '
-            .($job ? 'The user started in the jobs section, but follow the ad text. ' : '').$this->voice($context, categoryOfItem: true).' Lines are "categoryId: name" and, indented, '
-            .'"categoryId.subId: name". Choose only ids that appear in the list. Answer with JSON only: '
+            .($job ? 'The user started in the jobs section, but follow the ad text. ' : '').$this->voice($context, categoryOfItem: true)
+            .' Lines are "CATEGORY id: name" followed by its subcategories as "- SUB id: name". The subcategory must be one listed '
+            .'under the category you chose; when that category has subcategories you must pick the closest one (never null). '
+            .'Use null only when the category has no subcategories. Answer with JSON only: '
             .'{"category_id": number, "sub_category_id": number|null}.';
         $out = $this->json($system, "Ad title: {$title}\nAd description: {$description}\n\nList:\n".implode("\n", $lines), 60);
 
-        $cid = (int) ($out['category_id'] ?? 0);
-        $sid = isset($out['sub_category_id']) ? (int) $out['sub_category_id'] : null;
+        $cid = $this->idFrom($out['category_id'] ?? null, last: false);
+        $sid = $this->idFrom($out['sub_category_id'] ?? null, last: true);
+        // A valid subcategory is the more specific answer: if it sits under another category, follow it.
+        if ($sid !== null && isset($parentOf[$sid]) && ! isset($valid[$cid][$sid])) {
+            $cid = $parentOf[$sid];
+        }
         if (! isset($valid[$cid])) {
             throw new AiProviderException('bad_answer', 'The AI could not pick a category.', 502);
         }
+        if ($sid === null || ! isset($valid[$cid][$sid])) {
+            // Only one choice: no need to guess.
+            $sid = count($valid[$cid]) === 1 ? (int) array_key_first($valid[$cid]) : null;
+        }
 
-        return ['category_id' => $cid, 'sub_category_id' => ($sid && isset($valid[$cid][$sid])) ? $sid : null];
+        return ['category_id' => $cid, 'sub_category_id' => $sid];
+    }
+
+    /** An id from the model's answer: 12, "12", "SUB 12", or the old "3.12" form (the last part is the sub id). */
+    private function idFrom(mixed $value, bool $last): ?int
+    {
+        if (is_int($value)) {
+            return $value;
+        }
+        if (! is_string($value) && ! is_float($value)) {
+            return null;
+        }
+        preg_match_all('/\d+/', (string) $value, $m);
+        if (! $m[0]) {
+            return null;
+        }
+
+        return (int) ($last ? end($m[0]) : $m[0][0]);
     }
 
     /** @return array{low:int,typical:int,high:int,note:string} a rough estimate, never market data */
