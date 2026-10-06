@@ -13,7 +13,8 @@ class Photos extends Model
     protected $fillable = [
         'src',
         'isVideo',
-        'is_external'
+        'is_external',
+        'ai_enhanced',
     ];
     public function photoable(): MorphTo
     {

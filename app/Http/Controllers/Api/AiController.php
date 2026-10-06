@@ -219,6 +219,60 @@ class AiController extends Controller
             }, usesMedia: true);
     }
 
+    /**
+     * Release B: AI Photo Studio on the seller's own photo. POST /api/ai/studio (multipart)
+     * mode: light | background | scene (+ style) | cinematic. Presentation only: the item stays exactly as it is.
+     */
+    public function studio(Request $request): JsonResponse
+    {
+        $d = $request->validate([
+            'request_id' => 'required|uuid',
+            'mode' => 'required|in:light,background,scene,cinematic',
+            'style' => 'nullable|in:living_room,outdoor,desk,kitchen,showroom,nature',
+            'image' => 'required|file|mimes:jpeg,jpg,png,webp|max:10240',
+        ]);
+        $file = $request->file('image');
+        $bytes = (string) file_get_contents($file->getRealPath());
+        $mime = $file->getMimeType() ?: 'image/jpeg';
+        $keep = ' Keep the item exactly as it is: same shape, colours, text, labels, wear and any marks or damage. '
+            .'Do not add, remove or change anything on the item. No text, no watermark.';
+        $scenes = [
+            'living_room' => 'a bright modern living room',
+            'outdoor' => 'an outdoor setting in soft daylight',
+            'desk' => 'a clean modern desk',
+            'kitchen' => 'a bright modern kitchen counter',
+            'showroom' => 'an elegant showroom',
+            'nature' => 'a natural setting with soft greenery',
+        ];
+        [$prompt, $quality] = match ($d['mode']) {
+            'light' => ['Improve this product photo: correct exposure, white balance and sharpness. Keep the same background and framing.'.$keep, 'medium'],
+            'background' => ['Place this exact item on a clean seamless light studio backdrop with a soft natural shadow, centred, product-photography lighting.'.$keep, 'medium'],
+            'scene' => ['Place this exact item naturally in '.($scenes[$d['style'] ?? 'living_room'] ?? $scenes['living_room']).', realistic scale, matching light and shadows.'.$keep, 'medium'],
+            'cinematic' => ['Turn this into a cinematic advertising shot of this exact item: dramatic but natural lighting, shallow depth of field, premium look.'.$keep, 'high'],
+        };
+
+        return $this->run($request, 'studio_'.$d['mode'], $d['request_id'], ['mode' => $d['mode'], 'style' => $d['style'] ?? null, 'provider' => 'openai'],
+            fn (AiRequest $r) => [['mode' => $d['mode'], 'ai_enhanced' => true], $this->media->editImage($bytes, $mime, $prompt, $r->uuid, $quality)],
+            usesMedia: true);
+    }
+
+    /** Release B: Snap to sell. POST /api/ai/snap (multipart image) -> title, description, category, price. */
+    public function snapToSell(Request $request): JsonResponse
+    {
+        $d = $request->validate([
+            'request_id' => 'required|uuid',
+            'image' => 'required|file|mimes:jpeg,jpg,png,webp|max:10240',
+            'language' => 'nullable|string|max:8',
+            'currency' => 'nullable|string|max:10',
+        ]);
+        $file = $request->file('image');
+        $bytes = (string) file_get_contents($file->getRealPath());
+        $mime = $file->getMimeType() ?: 'image/jpeg';
+
+        return $this->run($request, 'snap_to_sell', $d['request_id'], [],
+            fn () => [$this->text->snapToSell($bytes, $mime, $d['language'] ?? 'en', $d['currency'] ?? null), null]);
+    }
+
     /** POST /api/ai/generate-video - starts a job; the app polls GET /ai/requests/{id}. */
     public function generateVideo(Request $request): JsonResponse
     {
@@ -388,13 +442,17 @@ class AiController extends Controller
         if (! $configured) {
             return response()->json(['error' => 'AI is not available right now, try again later.'], 503);
         }
+        // Studio edits are image jobs too: same concurrency and daily limits.
+        if (str_starts_with($feature, 'studio_')) {
+            $feature = 'generate_image';
+        }
         if (in_array($feature, ['generate_image', 'generate_video'], true)) {
             $global = $feature === 'generate_video' ? (int) config('ai.limits.parallel_video', 6) : (int) config('ai.limits.parallel_image', 4);
             if ($global > 0 && AiRequest::where('feature', $feature)->where('status', AiRequest::PROCESSING)->count() >= $global) {
                 return response()->json(['error' => 'Lots of people are creating right now. Try again in a minute; you were not charged.', 'code' => 'busy'], 503);
             }
             $daily = (int) \App\Models\AppSetting::get('ai.daily_media_per_user', config('ai.limits.daily_media_per_user', 30));
-            if ($daily > 0 && AiRequest::where('user_id', $userId)->whereIn('feature', ['generate_image', 'generate_video'])
+            if ($daily > 0 && AiRequest::where('user_id', $userId)->where(fn ($q) => $q->whereIn('feature', ['generate_image', 'generate_video'])->orWhere('feature', 'like', 'studio\\_%'))
                 ->where('created_at', '>=', now()->subDay())->where('status', '!=', AiRequest::FAILED)->count() >= $daily) {
                 return response()->json(['error' => 'You reached today\'s limit for AI images and videos. Try again tomorrow.', 'code' => 'daily_limit'], 429);
             }

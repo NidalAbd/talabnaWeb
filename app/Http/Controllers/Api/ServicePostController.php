@@ -514,10 +514,11 @@ class ServicePostController extends Controller
                     // Check if the file is a video (MP4)
                     $isVideo = $photo->getClientOriginalExtension() === 'mp4';
 
-                    // Create photo record
+                    // Create photo record (ai_enhanced: made or edited by the AI Studio, labelled in the app)
                     $photoRecord = $servicePost->photos()->create([
                         'src' => $databasePath,
                         'isVideo' => $isVideo ? 1 : 0,
+                        'ai_enhanced' => in_array((string) $index, array_map('trim', explode(',', (string) $request->input('ai_photo_indexes', ''))), true),
                     ]);
 
                     Log::info('Photo record created', [
@@ -1225,13 +1226,15 @@ class ServicePostController extends Controller
         if (! $request->hasFile('images')) {
             return;
         }
-        foreach ($request->file('images') as $photo) {
+        $aiIndexes = array_map('trim', explode(',', (string) $request->input('ai_photo_indexes', '')));
+        foreach ($request->file('images') as $index => $photo) {
             // Store without 'storage/' in the path
             $photoPath = $photo->store('photos/posts', 'public');
 
             $servicePost->photos()->create([
                 'src' => 'storage/'.$photoPath,
                 'isVideo' => $photo->getClientOriginalExtension() === 'mp4' ? 1 : 0,
+                'ai_enhanced' => in_array((string) $index, $aiIndexes, true),
             ]);
         }
     }

@@ -125,6 +125,75 @@ class AiTextService
      *
      * @return array{category_id:int,sub_category_id:?int}
      */
+    /**
+     * Release B, Snap to sell: one product photo becomes a post draft (title, description in the user's language,
+     * category, subcategory and a rough price). Uses the vision model on a downscaled copy of the photo.
+     * @return array{title:string,description:string,category_id:?int,sub_category_id:?int,price:?int,condition:?string}
+     */
+    public function snapToSell(string $imageBytes, string $mime, string $language, ?string $currency, array $context = []): array
+    {
+        $categories = Categories::with('sub_categories')->get()->filter(fn ($c) => ! in_array((int) $c->id, [6, 7], true));
+        $lines = [];
+        $valid = [];
+        foreach ($categories as $c) {
+            $lines[] = "CATEGORY {$c->id}: ".$this->label($c->name);
+            foreach ($c->sub_categories as $s) {
+                $lines[] = "  - SUB {$s->id}: ".$this->label($s->name);
+                $valid[$c->id][$s->id] = true;
+            }
+            $valid[$c->id] ??= [];
+        }
+        $system = 'You turn one photo of an item for sale into a classified ad. Describe only what is visible; do not invent '
+            .'brands, specs or condition you cannot see. Write the title (max 60 characters) and a helpful description '
+            .'(2-4 short sentences, mention visible condition honestly) in language code '.($language ?: 'en').'. '
+            .'Pick the category and subcategory from the list ("CATEGORY id" / "- SUB id"). '
+            .($currency ? "Give a rough typical second-hand price in {$currency} as a whole number, or null if you cannot judge. " : 'Price: null. ')
+            .'Answer with JSON only: {"title": string, "description": string, "category_id": number, "sub_category_id": number|null, '
+            .'"price": number|null, "condition": "new"|"like_new"|"used"|"for_parts"|null}.';
+        try {
+            $response = $this->openai->http(60)->post(OpenAiClient::BASE.'/chat/completions', [
+                'model' => config('ai.vision_model', 'gpt-4o-mini'),
+                'messages' => [
+                    ['role' => 'system', 'content' => $system],
+                    ['role' => 'user', 'content' => [
+                        ['type' => 'text', 'text' => "Categories:\n".implode("\n", $lines)],
+                        ['type' => 'image_url', 'image_url' => ['url' => 'data:'.$mime.';base64,'.base64_encode($imageBytes), 'detail' => 'low']],
+                    ]],
+                ],
+                'response_format' => ['type' => 'json_object'],
+                'temperature' => 0.3,
+                'max_tokens' => 500,
+            ]);
+        } catch (\Throwable $e) {
+            $this->openai->unreachable($e, 'text');
+        }
+        if (! $response->successful()) {
+            $this->openai->fail($response, 'text');
+        }
+        $out = json_decode((string) $response->json('choices.0.message.content'), true);
+        if (! is_array($out) || trim((string) ($out['title'] ?? '')) === '') {
+            throw new AiProviderException('bad_answer', 'The AI could not read this photo. Try a clearer one.', 502);
+        }
+        $cid = (int) ($out['category_id'] ?? 0);
+        $sid = isset($out['sub_category_id']) ? (int) $out['sub_category_id'] : null;
+        if (! isset($valid[$cid])) {
+            $cid = null;
+            $sid = null;
+        } elseif ($sid !== null && ! isset($valid[$cid][$sid])) {
+            $sid = null;
+        }
+        $price = isset($out['price']) && is_numeric($out['price']) && $out['price'] > 0 ? (int) round($out['price']) : null;
+
+        return [
+            'title' => $this->clean($out['title'], 60),
+            'description' => $this->clean($out['description'] ?? '', 1500),
+            'category_id' => $cid,
+            'sub_category_id' => $sid,
+            'price' => $price,
+            'condition' => in_array($out['condition'] ?? null, ['new', 'like_new', 'used', 'for_parts'], true) ? $out['condition'] : null,
+        ];
+    }
+
     public function suggestCategory(string $title, string $description, bool $job = false, array $context = []): array
     {
         // Every category is offered: the app sends job=true when the form still has a job category selected,

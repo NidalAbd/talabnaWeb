@@ -102,6 +102,12 @@ class AiLedger
      */
     private const PLAN_COVERS = [
         'generate_image' => ['ai_images_per_month', 'ai_images_used'],
+        // Release B: the Photo Studio spends the same monthly image credits; Snap to sell comes with Pro/Business.
+        'studio_light' => ['ai_images_per_month', 'ai_images_used'],
+        'studio_background' => ['ai_images_per_month', 'ai_images_used'],
+        'studio_scene' => ['ai_images_per_month', 'ai_images_used'],
+        'studio_cinematic' => ['ai_images_per_month', 'ai_images_used'],
+        'snap_to_sell' => ['snap_to_sell', null],
         'translate_post' => ['auto_translate_posts', null],
     ];
 

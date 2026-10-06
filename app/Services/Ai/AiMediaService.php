@@ -46,6 +46,40 @@ class AiMediaService
         return $this->store($uuid.'.jpg', $bytes);
     }
 
+    /**
+     * Release B: edits the seller's own photo (Photo Studio). input_fidelity=high keeps the item as it is.
+     * @return string storage path
+     */
+    public function editImage(string $imageBytes, string $mime, string $prompt, string $uuid, string $quality = 'medium'): string
+    {
+        $ext = str_contains($mime, 'png') ? 'png' : (str_contains($mime, 'webp') ? 'webp' : 'jpg');
+        try {
+            $response = $this->openai->http(90)
+                ->attach('image', $imageBytes, 'photo.'.$ext, ['Content-Type' => $mime])
+                ->post(OpenAiClient::BASE.'/images/edits', [
+                    'model' => config('ai.image_model', 'gpt-image-1'),
+                    'prompt' => $prompt,
+                    'size' => 'auto',
+                    'quality' => $quality,
+                    'input_fidelity' => 'high',
+                    'output_format' => 'jpeg',
+                    'output_compression' => '85',
+                    'n' => '1',
+                ]);
+        } catch (\Throwable $e) {
+            $this->openai->unreachable($e, 'image');
+        }
+        if (! $response->successful()) {
+            $this->openai->fail($response, 'image');
+        }
+        $bytes = base64_decode((string) $response->json('data.0.b64_json'), true);
+        if ($bytes === false || strlen($bytes) < 1000) {
+            throw new AiProviderException('bad_answer', 'The AI returned no image.', 502);
+        }
+
+        return $this->store($uuid.'.jpg', $bytes);
+    }
+
     /** Starts a video job. @return string the provider job id */
     public function startVideo(string $prompt): string
     {
