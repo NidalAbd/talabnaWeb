@@ -150,7 +150,19 @@ class ServicePostController extends Controller
             return response()->json(compact('servicePosts'));
         }
 
-        // Default behavior for getting general reels - only posts with photos
+        // Default behavior for getting general reels - only posts with photos.
+        // Seen posts (2026-10-06, same as the Home feed): reels the user has not seen come first. Apps that report
+        // what was on screen send seen_before (their scroll session); older apps get a server-kept session that
+        // starts on page 1, and the reels sent to them count as seen.
+        $page = max(1, (int) $request->input('page', 1));
+        $reportsSeen = $request->filled('seen_before');
+        $sessionKey = "reels:session:{$currentUser->id}";
+        if (! $reportsSeen && $page === 1) {
+            \Illuminate\Support\Facades\Cache::put($sessionKey, now()->timestamp, now()->addHours(6));
+        }
+        $since = $reportsSeen ? (int) $request->input('seen_before') : (int) \Illuminate\Support\Facades\Cache::get($sessionKey, now()->timestamp);
+        $seenBefore = now()->setTimestamp(min($since, now()->timestamp));
+
         $servicePosts = ServicePost::where('state', 'published')
             ->whereHas('photos') // Only include posts with photos
             ->with(['photos' => function ($query) {
@@ -160,8 +172,16 @@ class ServicePostController extends Controller
             ->withCount('comments')
             ->with('subCategory')
             ->with('category')
+            ->orderByRaw('EXISTS (SELECT 1 FROM feed_seen fs WHERE fs.user_id = ? AND fs.service_post_id = service_posts.id AND fs.seen_at < ?) ASC',
+                [$currentUser->id, $seenBefore])
             ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
             ->paginate(10);
+
+        if (! $reportsSeen && $servicePosts->count()) {
+            $now = now();
+            DB::table('feed_seen')->insertOrIgnore($servicePosts->getCollection()
+                ->map(fn ($p) => ['user_id' => $currentUser->id, 'service_post_id' => $p->id, 'seen_at' => $now])->all());
+        }
 
         foreach ($servicePosts as $servicePost) {
             $postUser = User::with('photos')->find($servicePost->user_id);
