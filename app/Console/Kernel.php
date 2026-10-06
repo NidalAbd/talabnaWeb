@@ -24,6 +24,8 @@ class Kernel extends ConsoleKernel
             ->where('seen_at', '<', now()->subDays(\App\Http\Controllers\Api\FeedController::SEEN_DAYS))->delete())
             ->name('feed:prune-seen')->dailyAt('04:10')->withoutOverlapping();
         $schedule->command('ai-points:settle --prune')->dailyAt('04:30');
+        // Posts: expiry reminders, automatic renewals (Pro/Business) and ending expired posts.
+        $schedule->command('posts:lifecycle')->dailyAt('09:15')->withoutOverlapping(30);
         // New app texts (a migration sets the flag): translate them into every language; the app loads them from
         // the server. Runs in the background - one AI call per language takes minutes.
         $schedule->command('translate:all --tier=1')

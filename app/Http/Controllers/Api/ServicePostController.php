@@ -309,6 +309,8 @@ class ServicePostController extends Controller
             'title' => 'required',         // accepts string or JSON object {"ar":"...","en":"..."}
             'description' => 'required',   // accepts string or JSON object {"ar":"...","en":"..."}
             'price' => 'nullable|numeric',
+            'price_type' => 'nullable|in:'.implode(',', ServicePost::PRICE_TYPES),
+            'price_max' => 'nullable|numeric|min:0',
             'priceCurrency' => 'nullable', // Optional override
             'locationLatitudes' => 'required|numeric',
             'locationLongitudes' => 'required|numeric',
@@ -476,7 +478,10 @@ class ServicePostController extends Controller
                 'sub_categories_id' => $request->sub_categories_id,
                 'title' => $title,
                 'description' => $description,
-                'price' => $request->price ?? 0,
+                'price' => in_array($request->input('price_type'), ServicePost::PRICE_TYPES_WITHOUT_AMOUNT, true) ? 0 : ($request->price ?? 0),
+                'price_type' => $request->input('price_type') ?: ((float) ($request->price ?? 0) > 0 ? 'fixed' : 'none'),
+                'price_max' => $request->input('price_type') === 'salary' ? $request->input('price_max') : null,
+                'expires_at' => now()->addDays(\App\Services\PostLifecycle::expiryDays()),
                 'price_currency_code' => $currencyCode,
                 'price_currency_name' => $currencyName,
                 'location_latitudes' => $request->locationLatitudes ?? $defaultLatitude,
@@ -681,8 +686,11 @@ class ServicePostController extends Controller
     public function servicePostUserId(Request $request, $user): JsonResponse
     {
         $currentUser = Auth::user();
+        // Owner: live, ended and sold posts (to renew or relist). Others: live and sold (a "Sold" label builds trust).
+        $states = (int) $user === (int) $currentUser?->id ? ['published', 'expired', 'sold'] : ['published', 'sold'];
         $servicePosts = ServicePost::where('user_id', $user)
-            ->where('state', 'published')
+            ->whereIn('state', $states)
+            ->orderByRaw("FIELD(state, 'published', 'expired', 'sold')")
             ->withCount('favorites')
             ->withCount('comments')
             ->with('subCategory')
@@ -1244,6 +1252,8 @@ class ServicePostController extends Controller
             'categories_id' => 'required',
             'sub_categories_id' => 'required|exists:sub_categories,id',
             'price' => 'nullable|numeric',
+            'price_type' => 'nullable|in:'.implode(',', ServicePost::PRICE_TYPES),
+            'price_max' => 'nullable|numeric|min:0',
             'priceCurrency' => 'nullable',
             'locationLatitudes' => 'required|numeric',
             'locationLongitudes' => 'required|numeric',
@@ -1353,7 +1363,11 @@ class ServicePostController extends Controller
                 'description' => $description,
                 'categories_id' => $validatedData['categories_id'],
                 'sub_categories_id' => $validatedData['sub_categories_id'],
-                'price' => $validatedData['price'] ?? $servicePost->price,
+                'price' => in_array($validatedData['price_type'] ?? $servicePost->price_type, ServicePost::PRICE_TYPES_WITHOUT_AMOUNT, true)
+                    ? 0 : ($validatedData['price'] ?? $servicePost->price),
+                'price_type' => $validatedData['price_type'] ?? $servicePost->price_type ?? 'fixed',
+                'price_max' => ($validatedData['price_type'] ?? $servicePost->price_type) === 'salary'
+                    ? ($validatedData['price_max'] ?? $servicePost->price_max) : null,
                 'price_currency_code' => $currencyCode,
                 'price_currency_name' => $currencyName,
                 'location_latitudes' => $validatedData['locationLatitudes'] ?? $defaultLatitude,
@@ -1371,7 +1385,10 @@ class ServicePostController extends Controller
                 return response()->json(['error' => 'Not enough points for the extra photos/videos.', 'required' => $mediaCost, 'balance' => (int) $user->pointsBalance], 402);
             }
 
+            $oldPrice = (float) $servicePost->price;
             $servicePost->update($updateData);
+            // People who saved this post hear about a lower price.
+            \App\Services\PostLifecycle::notifyPriceDrop($servicePost, $oldPrice);
 
             $this->saveJobDetails($servicePost, $request);
 

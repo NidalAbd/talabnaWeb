@@ -280,6 +280,9 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     Route::get('service_posts/user/{user}', [ServicePostController::class, 'servicePostUserId']);
     Route::get('feed', [App\Http\Controllers\Api\FeedController::class, 'all'])->middleware('throttle:120,1');
     Route::post('feed/seen', [App\Http\Controllers\Api\FeedController::class, 'seen'])->middleware('throttle:60,1');
+    // Release A: owner marks a post available / reserved / sold, and renews it.
+    Route::post('service_posts/{servicePost}/sale-status', [App\Http\Controllers\Api\PostLifecycleController::class, 'saleStatus'])->middleware('throttle:30,1');
+    Route::post('service_posts/{servicePost}/renew', [App\Http\Controllers\Api\PostLifecycleController::class, 'renew'])->middleware('throttle:30,1');
     Route::get('service_posts/categories/{categories}', [ServicePostController::class, 'servicePostCategory']);
     Route::get('service_posts/reels', [ServicePostController::class, 'showFromReel']);
     Route::apiResource('service_posts',ServicePostController::class);

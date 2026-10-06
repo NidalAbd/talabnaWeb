@@ -26,6 +26,8 @@ class ServicePost extends Model
         'title',
         'description',
         'price',
+        'price_type',
+        'price_max',
         'price_currency_code',
         'price_currency_name',
         'location_latitudes',
@@ -43,13 +45,27 @@ class ServicePost extends Model
         'sub_categories_id',
         'country_id',
         'city_id',
+        'expires_at',
+        'expiry_reminded_at',
+        'reserved_at',
+        'sold_at',
     ];
+
+    /** How a post shows its price (Release A, 2026-10-07). */
+    public const PRICE_TYPES = ['fixed', 'negotiable', 'free', 'on_request', 'none', 'salary'];
+
+    /** Types that carry no amount; their price is stored as 0. */
+    public const PRICE_TYPES_WITHOUT_AMOUNT = ['free', 'on_request', 'none'];
 
     protected $casts = [
         'title' => 'array',
         'description' => 'array',
         'price_currency_name' => 'array',
         'badge_expires_at' => 'datetime',
+        'expires_at' => 'datetime',
+        'expiry_reminded_at' => 'datetime',
+        'reserved_at' => 'datetime',
+        'sold_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
