@@ -1231,6 +1231,22 @@
   "ar": "ما هو أفضل سعر؟",
   "en": "What's your best price?"
  },
+ "chat2.q_s_available": {
+  "ar": "نعم، ما زال متاحًا",
+  "en": "Yes, it's available"
+ },
+ "chat2.q_s_final": {
+  "ar": "السعر نهائي",
+  "en": "The price is final"
+ },
+ "chat2.q_s_sold": {
+  "ar": "عذرًا، تم بيعه",
+  "en": "Sorry, it has been sold"
+ },
+ "chat2.q_s_when": {
+  "ar": "متى يمكنك الحضور؟",
+  "en": "When can you come?"
+ },
  "chat2.r_interested": {
   "ar": "هل أنت مهتم؟",
   "en": "Are you interested?"
@@ -1511,6 +1527,142 @@
   "ar": "حاول مجددًا",
   "en": "Try Again"
  },
+ "details.area": {
+  "ar": "المساحة",
+  "en": "Area"
+ },
+ "details.at_least": {
+  "ar": "على الأقل",
+  "en": "At least"
+ },
+ "details.at_most": {
+  "ar": "حتى",
+  "en": "At most"
+ },
+ "details.automatic": {
+  "ar": "أوتوماتيك",
+  "en": "Automatic"
+ },
+ "details.bathrooms": {
+  "ar": "الحمامات",
+  "en": "Bathrooms"
+ },
+ "details.brand": {
+  "ar": "الماركة",
+  "en": "Brand"
+ },
+ "details.condition": {
+  "ar": "الحالة",
+  "en": "Condition"
+ },
+ "details.diesel": {
+  "ar": "ديزل",
+  "en": "Diesel"
+ },
+ "details.electric": {
+  "ar": "كهربائي",
+  "en": "Electric"
+ },
+ "details.filter_title": {
+  "ar": "التفاصيل",
+  "en": "Details"
+ },
+ "details.for_parts": {
+  "ar": "لقطع الغيار",
+  "en": "For parts"
+ },
+ "details.from": {
+  "ar": "من",
+  "en": "From"
+ },
+ "details.fuel": {
+  "ar": "الوقود",
+  "en": "Fuel"
+ },
+ "details.furnished": {
+  "ar": "مفروش",
+  "en": "Furnished"
+ },
+ "details.gas": {
+  "ar": "غاز",
+  "en": "Gas"
+ },
+ "details.hint": {
+  "ar": "يبحث المشترون بهذه التفاصيل، فتظهر الإعلانات المكتملة أكثر.",
+  "en": "Buyers filter by these, so posts with details are found more."
+ },
+ "details.hybrid": {
+  "ar": "هايبرد",
+  "en": "Hybrid"
+ },
+ "details.like_new": {
+  "ar": "كالجديد",
+  "en": "Like new"
+ },
+ "details.listing": {
+  "ar": "الغرض",
+  "en": "For"
+ },
+ "details.manual": {
+  "ar": "يدوي",
+  "en": "Manual"
+ },
+ "details.mileage": {
+  "ar": "المسافة المقطوعة",
+  "en": "Mileage"
+ },
+ "details.new": {
+  "ar": "جديد",
+  "en": "New"
+ },
+ "details.no": {
+  "ar": "لا",
+  "en": "No"
+ },
+ "details.petrol": {
+  "ar": "بنزين",
+  "en": "Petrol"
+ },
+ "details.rent": {
+  "ar": "إيجار",
+  "en": "Rent"
+ },
+ "details.rooms": {
+  "ar": "الغرف",
+  "en": "Rooms"
+ },
+ "details.sale": {
+  "ar": "بيع",
+  "en": "Sale"
+ },
+ "details.storage": {
+  "ar": "السعة",
+  "en": "Storage"
+ },
+ "details.title": {
+  "ar": "التفاصيل (اختياري)",
+  "en": "Details (optional)"
+ },
+ "details.to": {
+  "ar": "إلى",
+  "en": "To"
+ },
+ "details.transmission": {
+  "ar": "ناقل الحركة",
+  "en": "Gearbox"
+ },
+ "details.used": {
+  "ar": "مستعمل",
+  "en": "Used"
+ },
+ "details.year": {
+  "ar": "سنة الصنع",
+  "en": "Year"
+ },
+ "details.yes": {
+  "ar": "نعم",
+  "en": "Yes"
+ },
  "duration_chip_selector.duration": {
   "ar": "المدة",
   "en": "Duration"
@@ -1763,6 +1915,126 @@
   "ar": "خطأ في معالجة الفيديو: {error}",
   "en": "Error processing video: {error}"
  },
+ "insights.adv_body": {
+  "ar": "مدن المشاهدين، وأفضل يوم وساعة للنشر، والتصدير إلى جدول. مشمولة في باقة الأعمال.",
+  "en": "Viewer cities, the best day and hour to post, and export to a spreadsheet. Included in Business."
+ },
+ "insights.adv_title": {
+  "ar": "إحصائيات متقدمة",
+  "en": "Advanced insights"
+ },
+ "insights.adv_unlock": {
+  "ar": "30 يومًا · {n} نقطة",
+  "en": "30 days · {n} pts"
+ },
+ "insights.best_time": {
+  "ar": "الأكثر نشاطًا: {day} حوالي {hour}. جدّد إعلانك أو شاركه قبلها بقليل.",
+  "en": "Busiest: {day} around {hour}. Renew or share your post just before."
+ },
+ "insights.chats": {
+  "ar": "محادثات",
+  "en": "Chats"
+ },
+ "insights.cities": {
+  "ar": "من أين المشاهدون",
+  "en": "Where viewers are"
+ },
+ "insights.csv_metric": {
+  "ar": "المؤشر",
+  "en": "Metric"
+ },
+ "insights.csv_value": {
+  "ar": "القيمة",
+  "en": "Value"
+ },
+ "insights.export": {
+  "ar": "تصدير (CSV)",
+  "en": "Export (CSV)"
+ },
+ "insights.fri": {
+  "ar": "الجمعة",
+  "en": "Friday"
+ },
+ "insights.impressions": {
+  "ar": "ظهر في الصفحات",
+  "en": "Seen in feeds"
+ },
+ "insights.last_14": {
+  "ar": "آخر 14 يومًا",
+  "en": "Last 14 days"
+ },
+ "insights.locked_body": {
+  "ar": "كم شخصًا رآه وفتحه وحفظه وراسلك وقدّم عرضًا، يومًا بيوم.",
+  "en": "How many saw it, opened it, saved it, chatted and made offers, day by day."
+ },
+ "insights.locked_title": {
+  "ar": "اعرف أداء إعلانك",
+  "en": "See how your post is doing"
+ },
+ "insights.mon": {
+  "ar": "الاثنين",
+  "en": "Monday"
+ },
+ "insights.offers": {
+  "ar": "عروض",
+  "en": "Offers"
+ },
+ "insights.sat": {
+  "ar": "السبت",
+  "en": "Saturday"
+ },
+ "insights.saves": {
+  "ar": "حفظ",
+  "en": "Saved"
+ },
+ "insights.sun": {
+  "ar": "الأحد",
+  "en": "Sunday"
+ },
+ "insights.thu": {
+  "ar": "الخميس",
+  "en": "Thursday"
+ },
+ "insights.title": {
+  "ar": "إحصائيات الإعلان",
+  "en": "Post insights"
+ },
+ "insights.tue": {
+  "ar": "الثلاثاء",
+  "en": "Tuesday"
+ },
+ "insights.unlock_all": {
+  "ar": "كل إعلاناتي لمدة 30 يومًا · {n} نقطة",
+  "en": "All my posts for 30 days · {n} pts"
+ },
+ "insights.unlock_post": {
+  "ar": "هذا الإعلان · {n} نقطة",
+  "en": "This post · {n} pts"
+ },
+ "insights.viewers": {
+  "ar": "أشخاص",
+  "en": "People"
+ },
+ "insights.views": {
+  "ar": "مرات الفتح",
+  "en": "Opened"
+ },
+ "insights.wed": {
+  "ar": "الأربعاء",
+  "en": "Wednesday"
+ },
+ "insights.when": {
+  "ar": "متى يشاهد الناس",
+  "en": "When people look"
+ },
+ "insights.when_empty": {
+  "ar": "لا توجد مشاهدات كافية بعد.",
+  "en": "Not enough views yet."
+ },
+ "insights.with_pro": {
+  "ar": "مشمول في برو والأعمال",
+  "en": "Included in Pro and Business"
+ },
  "location.number_cannot_start_with_0": {
   "ar": "لا يمكن أن يبدأ الرقم بـ 0",
   "en": "Number cannot start with 0"
@@ -1810,6 +2082,30 @@
  "location_picker.tap_on_the_map_to": {
   "ar": "اضغط على الخريطة لاختيار الموقع أو اسحب العلامة",
   "en": "Tap on the map to select location or drag the marker"
+ },
+ "map.all": {
+  "ar": "الكل",
+  "en": "Everything"
+ },
+ "map.empty": {
+  "ar": "لا توجد إعلانات هنا. صغّر الخريطة أو حرّكها.",
+  "en": "No posts here. Zoom out or move the map."
+ },
+ "map.filter": {
+  "ar": "عرض",
+  "en": "Show"
+ },
+ "map.offers": {
+  "ar": "عروض",
+  "en": "Offers"
+ },
+ "map.requests": {
+  "ar": "طلبات",
+  "en": "Requests"
+ },
+ "map.title": {
+  "ar": "إعلانات بالقرب منك",
+  "en": "Posts near you"
  },
  "media_viewer.video_failed": {
   "ar": "لا يمكن تشغيل هذا الفيديو الآن.",
@@ -2077,6 +2373,66 @@
  "notification.yesterday": {
   "ar": "أمس",
   "en": "YESTERDAY"
+ },
+ "offer.accept": {
+  "ar": "قبول",
+  "en": "Accept"
+ },
+ "offer.accepted": {
+  "ar": "تم قبول العرض",
+  "en": "Offer accepted"
+ },
+ "offer.amount": {
+  "ar": "سعرك",
+  "en": "Your price"
+ },
+ "offer.counter": {
+  "ar": "عرض مضاد",
+  "en": "Counter-offer"
+ },
+ "offer.counter_short": {
+  "ar": "عرض مضاد",
+  "en": "Counter"
+ },
+ "offer.decline": {
+  "ar": "رفض",
+  "en": "Decline"
+ },
+ "offer.declined": {
+  "ar": "تم رفض العرض",
+  "en": "Offer declined"
+ },
+ "offer.make": {
+  "ar": "قدّم عرضًا",
+  "en": "Make an offer"
+ },
+ "offer.send": {
+  "ar": "إرسال العرض",
+  "en": "Send offer"
+ },
+ "offer.they_countered": {
+  "ar": "{name} قدّم عرضًا مضادًا",
+  "en": "{name} countered"
+ },
+ "offer.they_offered": {
+  "ar": "{name} عرض",
+  "en": "{name} offered"
+ },
+ "offer.withdraw": {
+  "ar": "سحب العرض",
+  "en": "Withdraw"
+ },
+ "offer.withdrawn": {
+  "ar": "تم سحب العرض",
+  "en": "Offer withdrawn"
+ },
+ "offer.you_countered": {
+  "ar": "قدّمت عرضًا مضادًا",
+  "en": "You countered"
+ },
+ "offer.you_offered": {
+  "ar": "عرضت",
+  "en": "You offered"
  },
  "offline.back_online": {
   "ar": "عاد الاتصال",
@@ -3966,6 +4322,26 @@
   "ar": "منشور",
   "en": "Service Post"
  },
+ "safety.advance": {
+  "ar": "انتبه: لا تدفع قبل أن ترى المنتج.",
+  "en": "Be careful: avoid paying before you see the item."
+ },
+ "safety.code": {
+  "ar": "لا تشارك أي رمز يصلك على هاتفك أبدًا. طلبنا لا يطلبه منك.",
+  "en": "Never share a code sent to your phone. Talabna never asks for it."
+ },
+ "safety.link": {
+  "ar": "انتبه من روابط الدفع. لا تُدخل بيانات بطاقتك.",
+  "en": "Be careful with payment links. Do not enter card details."
+ },
+ "safety.transfer": {
+  "ar": "انتبه: بطاقات الهدايا والحوالات والعملات الرقمية شائعة في الاحتيال.",
+  "en": "Be careful: gift cards, transfers and crypto are common in scams."
+ },
+ "saved_search.add_pack": {
+  "ar": "+5 مقابل 2 نقطة",
+  "en": "+5 for 2 pts"
+ },
  "saved_search.count": {
   "ar": "{n} من {limit} محفوظة",
   "en": "{n} of {limit} saved"
@@ -4009,6 +4385,10 @@
  "saved_search.view": {
   "ar": "عرض",
   "en": "View"
+ },
+ "search.broadened": {
+  "ar": "لا توجد نتائج مطابقة تمامًا. نعرض إعلانات تحتوي بعض كلماتك.",
+  "en": "No exact matches. Showing posts with some of your words."
  },
  "search_screen.clear_all": {
   "ar": "مسح الكل",
@@ -4382,6 +4762,50 @@
   "ar": "غروب",
   "en": "Sunset"
  },
+ "shop.about": {
+  "ar": "نبذة",
+  "en": "About"
+ },
+ "shop.hours": {
+  "ar": "مواعيد العمل",
+  "en": "Opening hours"
+ },
+ "shop.logo": {
+  "ar": "الشعار",
+  "en": "Logo"
+ },
+ "shop.name": {
+  "ar": "اسم المتجر",
+  "en": "Shop name"
+ },
+ "shop.pitch_body": {
+  "ar": "شعار واسم ومواعيد عمل ونبذة قصيرة تظهر فوق إعلاناتك. وأضف شعارك على الصور مجانًا من استوديو الصور.",
+  "en": "Logo, name, opening hours and a short about, shown above your posts. Add your logo to photos for free in the Photo Studio."
+ },
+ "shop.pitch_title": {
+  "ar": "صفحة متجرك الخاصة",
+  "en": "Your own shop page"
+ },
+ "shop.save": {
+  "ar": "حفظ المتجر",
+  "en": "Save shop"
+ },
+ "shop.saved": {
+  "ar": "تم حفظ المتجر",
+  "en": "Shop saved"
+ },
+ "shop.title": {
+  "ar": "متجري",
+  "en": "My shop"
+ },
+ "shop.unlock": {
+  "ar": "30 يومًا · {n} نقطة",
+  "en": "30 days · {n} pts"
+ },
+ "shop.with_business": {
+  "ar": "مشمول في خطة الأعمال",
+  "en": "Included in Business"
+ },
  "snap.camera": {
   "ar": "التقط صورة",
   "en": "Take a photo"
@@ -4409,6 +4833,50 @@
  "snap.working": {
   "ar": "جارٍ قراءة صورتك…",
   "en": "Reading your photo…"
+ },
+ "spin.add": {
+  "ar": "إضافة عرض 360°",
+  "en": "Add 360° view"
+ },
+ "spin.add_hint": {
+  "ar": "من فيديو قصير حول المنتج",
+  "en": "From a short walk-around video"
+ },
+ "spin.done": {
+  "ar": "تمت إضافة العرض 360°",
+  "en": "360° view added"
+ },
+ "spin.drag": {
+  "ar": "اسحب للتدوير",
+  "en": "Drag to turn"
+ },
+ "spin.how": {
+  "ar": "امشِ ببطء حول المنتج دورة كاملة مع إبقائه في المنتصف (10–20 ثانية).",
+  "en": "Walk slowly around the item once, keeping it in the middle (10–20 seconds)."
+ },
+ "spin.making": {
+  "ar": "جارٍ إنشاء العرض 360°…",
+  "en": "Making the 360° view…"
+ },
+ "spin.pick": {
+  "ar": "اختر فيديو",
+  "en": "Choose a video"
+ },
+ "spin.record": {
+  "ar": "صوّر الآن",
+  "en": "Record now"
+ },
+ "spin.too_short": {
+  "ar": "الفيديو قصير جدًا. صوّر 5 ثوانٍ على الأقل.",
+  "en": "The video is too short. Film at least 5 seconds."
+ },
+ "spin.view": {
+  "ar": "عرض 360°",
+  "en": "View in 360°"
+ },
+ "studio.add_logo": {
+  "ar": "إضافة شعار متجري",
+  "en": "Add my shop logo"
  },
  "studio.after": {
   "ar": "بعد",
@@ -4566,9 +5034,17 @@
   "ar": "استخدمها",
   "en": "Use it"
  },
+ "studio.video": {
+  "ar": "فيديو سينمائي (4 ث)",
+  "en": "Cinematic video (4 s)"
+ },
  "studio.working": {
   "ar": "جارٍ تجهيز صورتك… حوالي دقيقة",
   "en": "Working on your photo… about a minute"
+ },
+ "studio.working_video": {
+  "ar": "جارٍ إنشاء الفيديو… بضع دقائق. أبقِ هذه الصفحة مفتوحة.",
+  "en": "Making your video… a few minutes. Keep this open."
  },
  "subcategory.failed_to_load_location_data": {
   "ar": "تعذّر تحميل بيانات الموقع",
@@ -4873,6 +5349,10 @@
  "transfer.to": {
   "ar": "إلى",
   "en": "To"
+ },
+ "unlock.not_enough": {
+  "ar": "نقاطك لا تكفي. لديك {b} والمطلوب {r}.",
+  "en": "Not enough points. You have {b}, this needs {r}."
  },
  "upload_progress.error_occurred": {
   "ar": "حدث خطأ",
