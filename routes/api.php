@@ -372,6 +372,10 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     Route::get('conversations/{conversation}', [App\Http\Controllers\Api\ConversationController::class, 'show']);
     Route::post('conversations/{conversation}/typing', [App\Http\Controllers\Api\ConversationController::class, 'typing'])->middleware('throttle:60,1');
     Route::post('conversations/{conversation}/deal', [App\Http\Controllers\Api\ConversationController::class, 'proposeDeal']);
+    // Release C: shop page.
+    Route::get('users/{id}/shop', [App\Http\Controllers\Api\ShopController::class, 'show'])->whereNumber('id');
+    Route::get('me/shop', [App\Http\Controllers\Api\ShopController::class, 'mine']);
+    Route::post('me/shop', [App\Http\Controllers\Api\ShopController::class, 'save'])->middleware('throttle:20,1');
     // Release C: features bought one by one with points, and seller insights.
     Route::get('unlocks', [App\Http\Controllers\Api\UnlockController::class, 'index']);
     Route::post('unlocks', [App\Http\Controllers\Api\UnlockController::class, 'store'])->middleware('throttle:20,1');
