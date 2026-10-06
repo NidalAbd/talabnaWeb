@@ -371,6 +371,10 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     Route::get('conversations/{conversation}', [App\Http\Controllers\Api\ConversationController::class, 'show']);
     Route::post('conversations/{conversation}/typing', [App\Http\Controllers\Api\ConversationController::class, 'typing'])->middleware('throttle:60,1');
     Route::post('conversations/{conversation}/deal', [App\Http\Controllers\Api\ConversationController::class, 'proposeDeal']);
+    // Release C: features bought one by one with points, and seller insights.
+    Route::get('unlocks', [App\Http\Controllers\Api\UnlockController::class, 'index']);
+    Route::post('unlocks', [App\Http\Controllers\Api\UnlockController::class, 'store'])->middleware('throttle:20,1');
+    Route::get('service_posts/{servicePost}/insights', [App\Http\Controllers\Api\UnlockController::class, 'insights'])->middleware('throttle:60,1');
     // Release C: price offers in a listing chat.
     Route::post('conversations/{conversation}/offer', [App\Http\Controllers\Api\ConversationController::class, 'makeOffer'])->middleware('throttle:20,1');
     Route::post('offers/{offer}/answer', [App\Http\Controllers\Api\ConversationController::class, 'answerOffer'])->middleware('throttle:30,1');

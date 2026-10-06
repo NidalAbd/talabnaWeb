@@ -23,12 +23,20 @@ class SavedSearchAlerts
         } catch (\Throwable) {
         }
 
-        return match ($slug) {
+        [$limit, $instant] = match ($slug) {
             'business' => [0, true],
             'pro' => [(int) AppSetting::get('saved_searches.pro', 20), true],
             'basic' => [(int) AppSetting::get('saved_searches.basic', 5), false],
             default => [(int) AppSetting::get('saved_searches.free', 3), false],
         };
+        // Release C: each "saved searches pack" bought with points adds 5 searches and instant alerts for 30 days.
+        $packs = FeatureUnlocks::activeCount($userId, 'saved_searches_pack');
+        if ($packs > 0 && $limit > 0) {
+            $limit += 5 * $packs;
+            $instant = true;
+        }
+
+        return [$limit, $instant];
     }
 
     /** Check searches and push "N new posts match ...". $instantOnly: the frequent run; otherwise the daily digest. */
