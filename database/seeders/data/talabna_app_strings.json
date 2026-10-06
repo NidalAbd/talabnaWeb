@@ -99,6 +99,10 @@
   "ar": "إعادة الإرسال بعد {s} ث",
   "en": "Resend code in {s}s"
  },
+ "reels.refresh": {
+  "ar": "تحديث",
+  "en": "Refresh"
+ },
  "settings.save_failed": {
   "ar": "تعذّر الحفظ. حاول مرة أخرى.",
   "en": "Could not save. Please try again."
