@@ -46,7 +46,16 @@ class FeedController extends Controller
         ]);
         $me = $request->user();
         $page = (int) ($d['page'] ?? 1);
-        $seenBefore = now()->setTimestamp(min((int) ($d['seen_before'] ?? now()->timestamp), now()->timestamp));
+        // App versions before 1.5.7 neither report what was on screen nor send seen_before. For them the server keeps
+        // the scroll session (it starts on page 1) and counts the posts it sends as seen, so they get the same
+        // "new posts first" feed. Newer apps report posts that really stayed on screen.
+        $reportsSeen = isset($d['seen_before']);
+        $sessionKey = "feed:session:{$me->id}";
+        if (! $reportsSeen && $page === 1) {
+            Cache::put($sessionKey, now()->timestamp, now()->addHours(6));
+        }
+        $since = $reportsSeen ? (int) $d['seen_before'] : (int) Cache::get($sessionKey, now()->timestamp);
+        $seenBefore = now()->setTimestamp(min($since, now()->timestamp));
 
         $filters = function ($q) use ($d) {
             $q->where('state', 'published')
@@ -98,6 +107,10 @@ class FeedController extends Controller
         $this->picker->recordShown($me->id, array_keys($sponsored));
         $this->enrich($items, $me);
         $organic->setCollection(collect($items));
+        if (! $reportsSeen && $items) {
+            $now = now();
+            DB::table('feed_seen')->insertOrIgnore(array_map(fn ($p) => ['user_id' => $me->id, 'service_post_id' => $p->id, 'seen_at' => $now], $items));
+        }
 
         return response()->json(['servicePosts' => $organic]);
     }
