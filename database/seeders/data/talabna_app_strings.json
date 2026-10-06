@@ -1803,6 +1803,14 @@
   "ar": "اضغط على الخريطة لاختيار الموقع أو اسحب العلامة",
   "en": "Tap on the map to select location or drag the marker"
  },
+ "media_viewer.video_failed": {
+  "ar": "لا يمكن تشغيل هذا الفيديو الآن.",
+  "en": "This video can't be played right now."
+ },
+ "media_viewer.watch_in_reels": {
+  "ar": "شاهد في الفيديو",
+  "en": "Watch in Reels"
+ },
  "modern_badge_card.plus_percent_views": {
   "ar": "+{percent}% مشاهدات",
   "en": "+{percent}% views"
