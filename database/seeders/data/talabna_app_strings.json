@@ -1,116 +1,4 @@
 {
- "admin.action_failed": {
-  "ar": "تعذّر التنفيذ. حاول مرة أخرى.",
-  "en": "Could not complete. Please try again."
- },
- "admin.ban": {
-  "ar": "حظر",
-  "en": "Ban"
- },
- "admin.ban_done": {
-  "ar": "تم حظر المستخدم",
-  "en": "User banned"
- },
- "admin.ban_or_unban": {
-  "ar": "حظر / إلغاء حظر هذا المستخدم",
-  "en": "Ban / unban this user"
- },
- "admin.ban_user_body": {
-  "ar": "سيتم إخراجه ولن يتمكن من استخدام التطبيق.",
-  "en": "They are signed out and can no longer use the app."
- },
- "admin.ban_user_q": {
-  "ar": "حظر {name}؟",
-  "en": "Ban {name}?"
- },
- "admin.title": {
-  "ar": "المشرف",
-  "en": "Admin"
- },
- "admin.unban": {
-  "ar": "إلغاء الحظر",
-  "en": "Unban"
- },
- "admin.unban_done": {
-  "ar": "تم إلغاء الحظر",
-  "en": "User unbanned"
- },
- "admin.unban_user_body": {
-  "ar": "سيتمكن من استخدام التطبيق مجددًا.",
-  "en": "They can use the app again."
- },
- "admin.unban_user_q": {
-  "ar": "إلغاء حظر {name}؟",
-  "en": "Unban {name}?"
- },
- "chat2.no_photos": {
-  "ar": "لا توجد صور في هذه المحادثة بعد",
-  "en": "No photos in this chat yet"
- },
- "chat2.photos": {
-  "ar": "الصور",
-  "en": "Photos"
- },
- "errors.generic": {
-  "ar": "حدث خطأ ما. حاول مرة أخرى.",
-  "en": "Something went wrong. Please try again."
- },
- "phone_verify.err_cancelled": {
-  "ar": "لم يكتمل التحقق. حاول مجددًا.",
-  "en": "The check was not completed. Please try again."
- },
- "phone_verify.err_confirm": {
-  "ar": "تعذّر تأكيد الرمز. حاول مجددًا.",
-  "en": "The code couldn't be confirmed. Please try again."
- },
- "phone_verify.err_expired": {
-  "ar": "انتهت صلاحية الرمز. اطلب رمزًا جديدًا.",
-  "en": "The code has expired. Request a new one."
- },
- "phone_verify.err_invalid_number": {
-  "ar": "رقم الهاتف غير صحيح. تحقق منه وأضف رمز الدولة.",
-  "en": "This phone number is not valid. Check it and include the country code."
- },
- "phone_verify.err_network": {
-  "ar": "لا يوجد اتصال. تحقق من الإنترنت وحاول مجددًا.",
-  "en": "No connection. Check your internet and try again."
- },
- "phone_verify.err_region": {
-  "ar": "لا يمكننا إرسال رمز إلى دولة هذا الرقم حاليًا. جرّب رقمًا آخر أو تواصل مع الدعم.",
-  "en": "We can't send a code to this number's country right now. Try another number or contact support."
- },
- "phone_verify.err_send": {
-  "ar": "تعذّر إرسال الرمز الآن. حاول مجددًا بعد قليل.",
-  "en": "We couldn't send the code right now. Please try again in a moment."
- },
- "phone_verify.err_too_many": {
-  "ar": "محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.",
-  "en": "Too many attempts. Please wait a while and try again."
- },
- "phone_verify.err_wrong_code": {
-  "ar": "الرمز غير صحيح.",
-  "en": "The code is not correct."
- },
- "phone_verify.resend": {
-  "ar": "إعادة إرسال الرمز",
-  "en": "Resend code"
- },
- "phone_verify.resend_in": {
-  "ar": "إعادة الإرسال بعد {s} ث",
-  "en": "Resend code in {s}s"
- },
- "reels.refresh": {
-  "ar": "تحديث",
-  "en": "Refresh"
- },
- "settings.save_failed": {
-  "ar": "تعذّر الحفظ. حاول مرة أخرى.",
-  "en": "Could not save. Please try again."
- },
- "settings.show_my_deals": {
-  "ar": "إظهار صفقاتي في ملفي",
-  "en": "Show my deals on my profile"
- },
  "a11y.comments": {
   "ar": "التعليقات",
   "en": "Comments"
@@ -342,6 +230,50 @@
  "add_point.your_recent_transactions": {
   "ar": "معاملاتك الأخيرة",
   "en": "Your Recent Transactions"
+ },
+ "admin.action_failed": {
+  "ar": "تعذّر التنفيذ. حاول مرة أخرى.",
+  "en": "Could not complete. Please try again."
+ },
+ "admin.ban": {
+  "ar": "حظر",
+  "en": "Ban"
+ },
+ "admin.ban_done": {
+  "ar": "تم حظر المستخدم",
+  "en": "User banned"
+ },
+ "admin.ban_or_unban": {
+  "ar": "حظر / إلغاء حظر هذا المستخدم",
+  "en": "Ban / unban this user"
+ },
+ "admin.ban_user_body": {
+  "ar": "سيتم إخراجه ولن يتمكن من استخدام التطبيق.",
+  "en": "They are signed out and can no longer use the app."
+ },
+ "admin.ban_user_q": {
+  "ar": "حظر {name}؟",
+  "en": "Ban {name}?"
+ },
+ "admin.title": {
+  "ar": "المشرف",
+  "en": "Admin"
+ },
+ "admin.unban": {
+  "ar": "إلغاء الحظر",
+  "en": "Unban"
+ },
+ "admin.unban_done": {
+  "ar": "تم إلغاء الحظر",
+  "en": "User unbanned"
+ },
+ "admin.unban_user_body": {
+  "ar": "سيتمكن من استخدام التطبيق مجددًا.",
+  "en": "They can use the app again."
+ },
+ "admin.unban_user_q": {
+  "ar": "إلغاء حظر {name}؟",
+  "en": "Unban {name}?"
  },
  "ai.a_4_second_clip_usually_ready_in_1_3_minutes_you": {
   "ar": "مقطع مدته 4 ثوانٍ. يكون جاهزًا عادةً خلال 1–3 دقائق ويمكنك متابعة التعديل خلال ذلك.",
@@ -1231,6 +1163,10 @@
   "ar": "لا توجد إعلانات بعد",
   "en": "No listings yet"
  },
+ "chat2.no_photos": {
+  "ar": "لا توجد صور في هذه المحادثة بعد",
+  "en": "No photos in this chat yet"
+ },
  "chat2.no_results": {
   "ar": "لا توجد محادثات مطابقة",
   "en": "No chats match your search"
@@ -1254,6 +1190,10 @@
  "chat2.photo": {
   "ar": "صورة",
   "en": "Photo"
+ },
+ "chat2.photos": {
+  "ar": "الصور",
+  "en": "Photos"
  },
  "chat2.pick_listing": {
   "ar": "عن ماذا تريد التحدث؟",
@@ -1578,6 +1518,10 @@
  "email_button.no_email_available": {
   "ar": "لا يوجد بريد إلكتروني",
   "en": "No email available"
+ },
+ "errors.generic": {
+  "ar": "حدث خطأ ما. حاول مرة أخرى.",
+  "en": "Something went wrong. Please try again."
  },
  "exit_confirmation.discard": {
   "ar": "تجاهل",
@@ -2210,6 +2154,42 @@
   "ar": "أدخل الرقم مع رمز الدولة، مثل +201001234567.",
   "en": "Enter the number with its country code, e.g. +201001234567."
  },
+ "phone_verify.err_cancelled": {
+  "ar": "لم يكتمل التحقق. حاول مجددًا.",
+  "en": "The check was not completed. Please try again."
+ },
+ "phone_verify.err_confirm": {
+  "ar": "تعذّر تأكيد الرمز. حاول مجددًا.",
+  "en": "The code couldn't be confirmed. Please try again."
+ },
+ "phone_verify.err_expired": {
+  "ar": "انتهت صلاحية الرمز. اطلب رمزًا جديدًا.",
+  "en": "The code has expired. Request a new one."
+ },
+ "phone_verify.err_invalid_number": {
+  "ar": "رقم الهاتف غير صحيح. تحقق منه وأضف رمز الدولة.",
+  "en": "This phone number is not valid. Check it and include the country code."
+ },
+ "phone_verify.err_network": {
+  "ar": "لا يوجد اتصال. تحقق من الإنترنت وحاول مجددًا.",
+  "en": "No connection. Check your internet and try again."
+ },
+ "phone_verify.err_region": {
+  "ar": "لا يمكننا إرسال رمز إلى دولة هذا الرقم حاليًا. جرّب رقمًا آخر أو تواصل مع الدعم.",
+  "en": "We can't send a code to this number's country right now. Try another number or contact support."
+ },
+ "phone_verify.err_send": {
+  "ar": "تعذّر إرسال الرمز الآن. حاول مجددًا بعد قليل.",
+  "en": "We couldn't send the code right now. Please try again in a moment."
+ },
+ "phone_verify.err_too_many": {
+  "ar": "محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.",
+  "en": "Too many attempts. Please wait a while and try again."
+ },
+ "phone_verify.err_wrong_code": {
+  "ar": "الرمز غير صحيح.",
+  "en": "The code is not correct."
+ },
  "phone_verify.failed": {
   "ar": "فشل التحقق. حاول مجددًا.",
   "en": "Verification failed. Please try again."
@@ -2233,6 +2213,14 @@
  "phone_verify.phone": {
   "ar": "رقم الهاتف",
   "en": "Phone number"
+ },
+ "phone_verify.resend": {
+  "ar": "إعادة إرسال الرمز",
+  "en": "Resend code"
+ },
+ "phone_verify.resend_in": {
+  "ar": "إعادة الإرسال بعد {s} ث",
+  "en": "Resend code in {s}s"
  },
  "phone_verify.same_note": {
   "ar": "رمز واحد يوثّق هاتفك وواتسابك.",
@@ -2978,6 +2966,10 @@
   "ar": "مقبول",
   "en": "Approved"
  },
+ "purchase.buy_packs": {
+  "ar": "شراء {points} نقطة ({n} × {price})",
+  "en": "Buy {points} points ({n} × {price})"
+ },
  "purchase.buy_productpointsamount_points_productprice": {
   "ar": "شراء {points_amount} نقطة - {price}",
   "en": "Buy {points_amount} points - {price}"
@@ -2989,6 +2981,10 @@
  "purchase.checking_store": {
   "ar": "جارٍ التحقق من المتجر…",
   "en": "Checking the store…"
+ },
+ "purchase.how_many": {
+  "ar": "كم حزمة؟",
+  "en": "How many packs?"
  },
  "purchase.loading": {
   "ar": "جارٍ التحميل...",
@@ -3089,6 +3085,10 @@
  "reels.loading_video": {
   "ar": "جارٍ تحميل الفيديو...",
   "en": "Loading video..."
+ },
+ "reels.refresh": {
+  "ar": "تحديث",
+  "en": "Refresh"
  },
  "reels.replying_to": {
   "ar": "الرد على {name}",
@@ -4129,6 +4129,14 @@
  "settings.reset": {
   "ar": "إعادة ضبط",
   "en": "Reset"
+ },
+ "settings.save_failed": {
+  "ar": "تعذّر الحفظ. حاول مرة أخرى.",
+  "en": "Could not save. Please try again."
+ },
+ "settings.show_my_deals": {
+  "ar": "إظهار صفقاتي في ملفي",
+  "en": "Show my deals on my profile"
  },
  "settings.theme_berry": {
   "ar": "توتي",
