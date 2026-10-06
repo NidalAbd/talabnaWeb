@@ -1963,6 +1963,10 @@
   "ar": "الرئيسية",
   "en": "Home"
  },
+ "nav.me": {
+  "ar": "حسابي",
+  "en": "Me"
+ },
  "nav.post": {
   "ar": "منشور",
   "en": "Post"
@@ -2602,6 +2606,50 @@
   "ar": "لديك تغييرات غير محفوظة على هذا المنشور. هل تريد استعادتها؟",
   "en": "You have unsaved changes to this post. Would you like to restore them?"
  },
+ "post_life.ended_note": {
+  "ar": "انتهى هذا الإعلان وأصبح مخفيًا عن الآخرين.",
+  "en": "This post has ended and is hidden from others."
+ },
+ "post_life.ends_in": {
+  "ar": "ينتهي خلال {days} يوم",
+  "en": "Ends in {days} days"
+ },
+ "post_life.mark_available": {
+  "ar": "إعادة كمتاح",
+  "en": "Mark as available again"
+ },
+ "post_life.mark_reserved": {
+  "ar": "تحديد كمحجوز",
+  "en": "Mark as reserved"
+ },
+ "post_life.mark_sold": {
+  "ar": "تحديد كمباع",
+  "en": "Mark as sold"
+ },
+ "post_life.mark_sold_hint": {
+  "ar": "يُخفى من الصفحة الرئيسية ويبقى في ملفك",
+  "en": "Hidden from the feed; stays on your profile"
+ },
+ "post_life.marked_available": {
+  "ar": "أصبح متاحًا مجددًا",
+  "en": "Available again"
+ },
+ "post_life.marked_reserved": {
+  "ar": "تم التحديد كمحجوز",
+  "en": "Marked as reserved"
+ },
+ "post_life.marked_sold": {
+  "ar": "تم التحديد كمباع",
+  "en": "Marked as sold"
+ },
+ "post_life.renew": {
+  "ar": "تجديد الإعلان",
+  "en": "Renew post"
+ },
+ "post_life.renewed": {
+  "ar": "تم تجديد الإعلان",
+  "en": "Post renewed"
+ },
  "post_preview.badge_duration_days": {
   "ar": "{duration} أيام",
   "en": "{duration} days"
@@ -2613,6 +2661,18 @@
  "post_preview.review_and_publish": {
   "ar": "راجع التفاصيل واضغط \"نشر\" للمتابعة",
   "en": "Review the details and tap \"Publish\" to continue"
+ },
+ "post_status.ended": {
+  "ar": "منتهي",
+  "en": "Ended"
+ },
+ "post_status.reserved": {
+  "ar": "محجوز",
+  "en": "Reserved"
+ },
+ "post_status.sold": {
+  "ar": "تم البيع",
+  "en": "Sold"
  },
  "premium.diamond": {
   "ar": "ماسي",
@@ -2637,6 +2697,58 @@
  "premium.your_post_will_be_displayed": {
   "ar": "سيظهر منشورك بشارة {badge_type_text} المميزة كما هو موضح أدناه، مما يزيد ظهوره ويجذب مشاهدات أكثر.",
   "en": "Your post will be displayed with a premium {badge_type_text} badge as shown below, increasing its visibility and attracting more views."
+ },
+ "price.free": {
+  "ar": "مجانًا",
+  "en": "Free"
+ },
+ "price.negotiable": {
+  "ar": "قابل للتفاوض",
+  "en": "Negotiable"
+ },
+ "price.on_request": {
+  "ar": "السعر عند الطلب",
+  "en": "Price on request"
+ },
+ "price.salary": {
+  "ar": "{amount} {currency} / شهريًا",
+  "en": "{amount} {currency} / month"
+ },
+ "price_type.budget": {
+  "ar": "الميزانية",
+  "en": "Budget"
+ },
+ "price_type.fixed": {
+  "ar": "سعر محدد",
+  "en": "Fixed price"
+ },
+ "price_type.free": {
+  "ar": "مجانًا",
+  "en": "Free"
+ },
+ "price_type.negotiable": {
+  "ar": "قابل للتفاوض",
+  "en": "Negotiable"
+ },
+ "price_type.none": {
+  "ar": "بدون سعر",
+  "en": "No price"
+ },
+ "price_type.on_request": {
+  "ar": "السعر عند الطلب",
+  "en": "Ask for price"
+ },
+ "price_type.salary": {
+  "ar": "نطاق الراتب",
+  "en": "Salary range"
+ },
+ "price_type.salary_order": {
+  "ar": "يجب ألا يقل عن المبلغ الأول",
+  "en": "Must be at least the starting amount"
+ },
+ "price_type.salary_to": {
+  "ar": "حتى (اختياري)",
+  "en": "Up to (optional)"
  },
  "privacy.could_not_open_email_app": {
   "ar": "تعذّر فتح تطبيق البريد",
@@ -3310,6 +3422,14 @@
   "ar": "دعواتك",
   "en": "Your Referrals"
  },
+ "related.seller": {
+  "ar": "المزيد من هذا البائع",
+  "en": "More from this seller"
+ },
+ "related.similar": {
+  "ar": "إعلانات مشابهة",
+  "en": "Similar posts"
+ },
  "request_monitor_screen.avg_response": {
   "ar": "متوسط الاستجابة",
   "en": "Avg Response"
@@ -3837,6 +3957,50 @@
  "routes.service_post": {
   "ar": "منشور",
   "en": "Service Post"
+ },
+ "saved_search.count": {
+  "ar": "{n} من {limit} محفوظة",
+  "en": "{n} of {limit} saved"
+ },
+ "saved_search.daily_note": {
+  "ar": "يصلك ملخص واحد يوميًا. خطة برو ترسل التنبيهات خلال دقائق.",
+  "en": "You get one summary a day. Pro sends alerts within minutes."
+ },
+ "saved_search.empty": {
+  "ar": "ابحث عن شيء ثم اضغط \"حفظ البحث\" ليصلك كل جديد.",
+  "en": "Search for something, then tap \"Save search\" to hear about new posts."
+ },
+ "saved_search.instant_note": {
+  "ar": "تصلك الإعلانات الجديدة خلال دقائق.",
+  "en": "You hear about new posts within minutes."
+ },
+ "saved_search.limit": {
+  "ar": "يمكنك الاحتفاظ بـ {n} عمليات بحث. احذف واحدة أو رقِّ خطتك للمزيد.",
+  "en": "You can keep {n} saved searches. Remove one or upgrade your plan for more."
+ },
+ "saved_search.muted": {
+  "ar": "التنبيهات متوقفة",
+  "en": "Alerts off"
+ },
+ "saved_search.retry": {
+  "ar": "تعذّر التحميل. اضغط للمحاولة مجددًا.",
+  "en": "Could not load. Tap to try again."
+ },
+ "saved_search.save": {
+  "ar": "حفظ البحث · تلقي التنبيهات",
+  "en": "Save search · get alerts"
+ },
+ "saved_search.saved": {
+  "ar": "تم الحفظ. سنخبرك بالإعلانات الجديدة.",
+  "en": "Saved. We will tell you about new posts."
+ },
+ "saved_search.title": {
+  "ar": "عمليات البحث المحفوظة",
+  "en": "Saved searches"
+ },
+ "saved_search.view": {
+  "ar": "عرض",
+  "en": "View"
  },
  "search_screen.clear_all": {
   "ar": "مسح الكل",
