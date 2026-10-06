@@ -324,6 +324,7 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
         Route::post('ai/generate-image', [App\Http\Controllers\Api\AiController::class, 'generateImage']);
         Route::post('ai/studio', [App\Http\Controllers\Api\AiController::class, 'studio']);
         Route::post('ai/snap', [App\Http\Controllers\Api\AiController::class, 'snapToSell']);
+        Route::post('ai/studio-video', [App\Http\Controllers\Api\AiController::class, 'studioVideo']);
         Route::post('ai/generate-video', [App\Http\Controllers\Api\AiController::class, 'generateVideo']);
     });
     Route::get('ai/creations', [App\Http\Controllers\Api\AiController::class, 'creations']);

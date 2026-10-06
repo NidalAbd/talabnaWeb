@@ -256,6 +256,50 @@ class AiController extends Controller
             usesMedia: true);
     }
 
+    /**
+     * Release C: cinematic video from the seller's photo. POST /api/ai/studio-video (multipart image, seconds 4|8).
+     * Starts a job like generate-video; the app polls GET /ai/requests/{id}.
+     */
+    public function studioVideo(Request $request): JsonResponse
+    {
+        $d = $request->validate([
+            'request_id' => 'required|uuid',
+            'image' => 'required|file|mimes:jpeg,jpg,png,webp|max:10240',
+            'seconds' => 'nullable|in:4,8',
+        ]);
+        $user = $request->user();
+        if ($early = $this->precheck($user->id, 'studio_video', true)) {
+            return $early;
+        }
+        try {
+            $reference = \App\Services\Ai\AiMediaService::fitForVideo((string) file_get_contents($request->file('image')->getRealPath()));
+        } catch (AiProviderException $e) {
+            return response()->json(['error' => $e->getMessage()], $e->httpStatus);
+        }
+        try {
+            $ai = $this->ledger->start($user->id, 'studio_video', $d['request_id'], ['provider' => 'openai', 'seconds' => $d['seconds'] ?? '4', 'ip' => $request->ip()]);
+        } catch (InsufficientBalanceException $e) {
+            return $this->notEnough($e, 'studio_video');
+        } catch (AiProviderException $e) {
+            return response()->json(['error' => $e->getMessage()], $e->httpStatus);
+        }
+        if (! $ai->wasRecentlyCreated) {
+            return $this->respond($ai);
+        }
+        try {
+            $prompt = 'Cinematic, slow and smooth camera move around this exact item, soft natural light, premium advert feel. '
+                .'Keep the item exactly as it is (shape, colour, condition). No people, no text.';
+            $ai->update(['provider_job_id' => $this->media->startVideo($prompt, $reference, $d['seconds'] ?? '4')]);
+        } catch (AiProviderException $e) {
+            $this->ledger->fail($ai, $e->errorCode, $e->getMessage());
+        } catch (\Throwable $e) {
+            Log::error('ai.studio_video.start_crashed', ['message' => $e->getMessage()]);
+            $this->ledger->fail($ai, 'unexpected', 'Something went wrong.');
+        }
+
+        return $this->respond($ai->refresh());
+    }
+
     /** Release B: Snap to sell. POST /api/ai/snap (multipart image) -> title, description, category, price. */
     public function snapToSell(Request $request): JsonResponse
     {
@@ -442,8 +486,10 @@ class AiController extends Controller
         if (! $configured) {
             return response()->json(['error' => 'AI is not available right now, try again later.'], 503);
         }
-        // Studio edits are image jobs too: same concurrency and daily limits.
-        if (str_starts_with($feature, 'studio_')) {
+        // Studio edits are image jobs too, a studio video is a video job: same concurrency and daily limits.
+        if ($feature === 'studio_video') {
+            $feature = 'generate_video';
+        } elseif (str_starts_with($feature, 'studio_')) {
             $feature = 'generate_image';
         }
         if (in_array($feature, ['generate_image', 'generate_video'], true)) {

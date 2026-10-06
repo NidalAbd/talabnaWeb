@@ -29,8 +29,8 @@ class AiRequest extends Model
     public function kind(): string
     {
         return match ($this->feature) {
-            'generate_video' => 'video',
-            'generate_image' => 'image',
+            'generate_video', 'studio_video' => 'video',
+            'generate_image', 'studio_light', 'studio_background', 'studio_scene', 'studio_cinematic' => 'image',
             default => 'text',
         };
     }

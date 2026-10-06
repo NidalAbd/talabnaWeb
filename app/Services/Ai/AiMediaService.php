@@ -80,16 +80,23 @@ class AiMediaService
         return $this->store($uuid.'.jpg', $bytes);
     }
 
-    /** Starts a video job. @return string the provider job id */
-    public function startVideo(string $prompt): string
+    /**
+     * Starts a video job. With [referenceJpeg] (Release C, cinematic video from the seller's photo) the clip starts
+     * from that photo; it must already be the video's exact size (see fitForVideo). @return string the provider job id
+     */
+    public function startVideo(string $prompt, ?string $referenceJpeg = null, ?string $seconds = null): string
     {
+        $parts = [
+            ['name' => 'model', 'contents' => (string) config('ai.video_model', 'sora-2')],
+            ['name' => 'prompt', 'contents' => 'Short clip for a classified ad, steady camera, no text or logos. '.$prompt],
+            ['name' => 'seconds', 'contents' => $seconds ?? (string) config('ai.video_seconds', '4')],
+            ['name' => 'size', 'contents' => (string) config('ai.video_size', '720x1280')],
+        ];
+        if ($referenceJpeg !== null) {
+            $parts[] = ['name' => 'input_reference', 'contents' => $referenceJpeg, 'filename' => 'reference.jpg', 'headers' => ['Content-Type' => 'image/jpeg']];
+        }
         try {
-            $response = $this->openai->http(40)->asMultipart()->post(OpenAiClient::BASE.'/videos', [
-                ['name' => 'model', 'contents' => (string) config('ai.video_model', 'sora-2')],
-                ['name' => 'prompt', 'contents' => 'Short clip for a classified ad, steady camera, no text or logos. '.$prompt],
-                ['name' => 'seconds', 'contents' => (string) config('ai.video_seconds', '4')],
-                ['name' => 'size', 'contents' => (string) config('ai.video_size', '720x1280')],
-            ]);
+            $response = $this->openai->http(40)->asMultipart()->post(OpenAiClient::BASE.'/videos', $parts);
         } catch (\Throwable $e) {
             $this->openai->unreachable($e, 'video');
         }
@@ -102,6 +109,40 @@ class AiMediaService
         }
 
         return $id;
+    }
+
+    /** The photo centred on a canvas of the video's size (config ai.video_size), soft-blurred copy behind it. */
+    public static function fitForVideo(string $imageBytes): string
+    {
+        [$w, $h] = array_map('intval', explode('x', (string) config('ai.video_size', '720x1280')));
+        $src = @imagecreatefromstring($imageBytes);
+        if (! $src) {
+            throw new AiProviderException('bad_image', 'This photo could not be read.', 422);
+        }
+        $sw = imagesx($src);
+        $sh = imagesy($src);
+        $canvas = imagecreatetruecolor($w, $h);
+        // Background: the photo scaled to cover, blurred.
+        $cover = max($w / $sw, $h / $sh);
+        $bw = (int) ceil($sw * $cover);
+        $bh = (int) ceil($sh * $cover);
+        imagecopyresampled($canvas, $src, (int) (($w - $bw) / 2), (int) (($h - $bh) / 2), 0, 0, $bw, $bh, $sw, $sh);
+        for ($i = 0; $i < 12; $i++) {
+            imagefilter($canvas, IMG_FILTER_GAUSSIAN_BLUR);
+        }
+        imagefilter($canvas, IMG_FILTER_BRIGHTNESS, -25);
+        // Foreground: the whole photo, contained.
+        $fit = min($w / $sw, $h / $sh);
+        $fw = (int) round($sw * $fit);
+        $fh = (int) round($sh * $fit);
+        imagecopyresampled($canvas, $src, (int) (($w - $fw) / 2), (int) (($h - $fh) / 2), 0, 0, $fw, $fh, $sw, $sh);
+        ob_start();
+        imagejpeg($canvas, null, 90);
+        $out = (string) ob_get_clean();
+        imagedestroy($canvas);
+        imagedestroy($src);
+
+        return $out;
     }
 
     /**

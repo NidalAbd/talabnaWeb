@@ -108,6 +108,9 @@ class AiLedger
         'studio_scene' => ['ai_images_per_month', 'ai_images_used'],
         'studio_cinematic' => ['ai_images_per_month', 'ai_images_used'],
         'snap_to_sell' => ['snap_to_sell', null],
+        // Release C: Business includes 2 AI videos a month (from a prompt or from a photo).
+        'generate_video' => ['ai_videos_per_month', 'ai_videos_used'],
+        'studio_video' => ['ai_videos_per_month', 'ai_videos_used'],
         'translate_post' => ['auto_translate_posts', null],
     ];
 
