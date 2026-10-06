@@ -14,10 +14,18 @@ use Illuminate\Support\Facades\DB;
  * GET /api/feed - the Home "All" feed in ONE request (the app used to ask every category separately, about ten requests
  * per scroll). Fresh posts come first; featured (badge) posts are spread through the pages instead of pinned on top.
  * Filters: type, min_price, max_price, country_id, city_id, categories[].
+ *
+ * Seen posts (2026-10-06): the app reports posts that stayed on screen (POST /api/feed/seen); the feed puts posts the
+ * user has not seen yet first and the seen ones after them, so every visit starts with something new. `seen_before`
+ * (unix time, sent by the app with every page of one scroll session) freezes what counts as seen, so posts marked
+ * while scrolling don't reshuffle the next pages.
  */
 class FeedController extends Controller
 {
     private const PER_PAGE = 10;
+
+    /** Seen rows older than this are deleted (feed:prune-seen), so old posts can come back eventually. */
+    public const SEEN_DAYS = 30;
 
     public function __construct(private SponsoredPicker $picker)
     {
@@ -34,9 +42,11 @@ class FeedController extends Controller
             'city_id' => 'nullable|integer',
             'categories' => 'nullable|array',
             'categories.*' => 'integer',
+            'seen_before' => 'nullable|integer|min:0',
         ]);
         $me = $request->user();
         $page = (int) ($d['page'] ?? 1);
+        $seenBefore = now()->setTimestamp(min((int) ($d['seen_before'] ?? now()->timestamp), now()->timestamp));
 
         $filters = function ($q) use ($d) {
             $q->where('state', 'published')
@@ -77,6 +87,8 @@ class FeedController extends Controller
         $poolIds = array_column($pool, 'id');
         $organic = $load($filters(ServicePost::query()))
             ->when($poolIds, fn ($q) => $q->whereNotIn('id', $poolIds))
+            ->orderByRaw('EXISTS (SELECT 1 FROM feed_seen fs WHERE fs.user_id = ? AND fs.service_post_id = service_posts.id AND fs.seen_at < ?) ASC',
+                [$me->id, $seenBefore])
             ->orderByDesc('created_at')->orderByDesc('id')
             ->paginate(self::PER_PAGE, ['*'], 'page', $page);
 
@@ -88,6 +100,18 @@ class FeedController extends Controller
         $organic->setCollection(collect($items));
 
         return response()->json(['servicePosts' => $organic]);
+    }
+
+    /** POST /api/feed/seen {ids: [..]} - posts that stayed on screen in the feed. The first time counts (stable order). */
+    public function seen(Request $request): JsonResponse
+    {
+        $d = $request->validate(['ids' => 'required|array|max:200', 'ids.*' => 'integer|min:1']);
+        $uid = $request->user()->id;
+        $ids = ServicePost::whereIn('id', array_unique($d['ids']))->pluck('id');
+        $now = now();
+        DB::table('feed_seen')->insertOrIgnore($ids->map(fn ($id) => ['user_id' => $uid, 'service_post_id' => $id, 'seen_at' => $now])->all());
+
+        return response()->json(['ok' => true, 'count' => $ids->count()]);
     }
 
     /** The per-post extras the app shows, computed for the whole page with a few queries instead of a few per post. */

@@ -19,6 +19,10 @@ class Kernel extends ConsoleKernel
         $schedule->command('ai-points:settle')->everyMinute()->withoutOverlapping(5);
         // Tell admins about failed refunds / stuck AI requests / unfinished purchases.
         $schedule->command('admin:alerts')->everyTenMinutes()->withoutOverlapping(5);
+        // Forget feed "seen" marks after FeedController::SEEN_DAYS so old posts can come back.
+        $schedule->call(fn () => \Illuminate\Support\Facades\DB::table('feed_seen')
+            ->where('seen_at', '<', now()->subDays(\App\Http\Controllers\Api\FeedController::SEEN_DAYS))->delete())
+            ->name('feed:prune-seen')->dailyAt('04:10')->withoutOverlapping();
         $schedule->command('ai-points:settle --prune')->dailyAt('04:30');
 
         // Run badge expiration check every 15 minutes

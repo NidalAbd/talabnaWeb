@@ -279,6 +279,7 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     Route::get('service_posts/users/{user}/favorite', [ServicePostController::class, 'servicePostFavorite']);
     Route::get('service_posts/user/{user}', [ServicePostController::class, 'servicePostUserId']);
     Route::get('feed', [App\Http\Controllers\Api\FeedController::class, 'all'])->middleware('throttle:120,1');
+    Route::post('feed/seen', [App\Http\Controllers\Api\FeedController::class, 'seen'])->middleware('throttle:60,1');
     Route::get('service_posts/categories/{categories}', [ServicePostController::class, 'servicePostCategory']);
     Route::get('service_posts/reels', [ServicePostController::class, 'showFromReel']);
     Route::apiResource('service_posts',ServicePostController::class);
