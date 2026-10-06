@@ -108,7 +108,11 @@ class AppleIapVerificationService
             return ['verified' => false, 'error' => $error, 'transient' => false];
         }
 
-        return ['verified' => true, 'transaction_id' => (string) $result['payload']['transactionId']];
+        return [
+            'verified' => true,
+            'transaction_id' => (string) $result['payload']['transactionId'],
+            'quantity' => GooglePlayVerificationService::clampQuantity($result['payload']['quantity'] ?? 1),
+        ];
     }
 
     private function post(string $url, array $payload): array

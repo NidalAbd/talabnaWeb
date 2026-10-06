@@ -17,7 +17,21 @@ class GooglePlayVerificationService
         'points_25' => 25,
         'points_50' => 50,
         'points_100' => 100,
+        'points_250' => 250,
+        'points_500' => 500,
     ];
+
+    /**
+     * Packs can be bought several at once (Play multi-quantity / StoreKit quantity, 2026-10-06), which is how users
+     * get 1,000 or 2,000 points: Play caps one product at about USD 400. The quantity comes from Google's or Apple's
+     * verified record, never from the app.
+     */
+    public const MAX_QUANTITY = 10;
+
+    public static function clampQuantity(mixed $q): int
+    {
+        return max(1, min(self::MAX_QUANTITY, (int) ($q ?: 1)));
+    }
 
     /**
      * Verify a Google Play purchase using the Android Publisher API
@@ -76,6 +90,7 @@ class GooglePlayVerificationService
                 'purchase_time' => $data['purchaseTimeMillis'] ?? null,
                 'consumption_state' => $data['consumptionState'] ?? 0,
                 'acknowledgement_state' => $data['acknowledgementState'] ?? 0,
+                'quantity' => self::clampQuantity($data['quantity'] ?? 1),
             ];
         } catch (\Exception $e) {
             Log::error('Google Play verification exception: ' . $e->getMessage());

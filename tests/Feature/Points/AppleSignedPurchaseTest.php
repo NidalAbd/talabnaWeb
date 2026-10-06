@@ -64,6 +64,20 @@ class AppleSignedPurchaseTest extends TestCase
         Http::assertNothingSent();
     }
 
+    public function test_several_packs_in_one_purchase_credit_pack_times_quantity(): void
+    {
+        // 4 × 500 = 2,000 points: how big amounts are bought (one product is capped at about USD 400 on Play).
+        $jws = $this->jws(['productId' => 'points_500', 'transactionId' => '2000000900', 'quantity' => 4]);
+        $this->buy($jws, 'points_500', '2000000900')->assertOk()->assertJsonPath('points', 2000);
+        $this->assertSame(2000, $this->balance());
+    }
+
+    public function test_quantity_is_capped(): void
+    {
+        $jws = $this->jws(['productId' => 'points_100', 'transactionId' => '2000000901', 'quantity' => 99]);
+        $this->buy($jws, 'points_100', '2000000901')->assertOk()->assertJsonPath('points', 1000);
+    }
+
     public function test_replaying_the_same_signed_transaction_credits_once(): void
     {
         $this->buy($this->jws())->assertOk();

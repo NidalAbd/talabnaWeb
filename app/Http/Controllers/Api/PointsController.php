@@ -451,6 +451,9 @@ class PointsController extends Controller
             ], $this->verificationStatus($verification));
         }
 
+        // Several packs in one purchase: credit them all.
+        $pointsAmount *= (int) ($verification['quantity'] ?? 1);
+
         try {
             // Credit points via the existing service
             $this->pointsService->creditGooglePlayPurchase(
@@ -540,6 +543,8 @@ class PointsController extends Controller
                 'retry' => (bool) ($verification['transient'] ?? false),
             ], $this->verificationStatus($verification));
         }
+
+        $pointsAmount *= (int) ($verification['quantity'] ?? 1);
 
         try {
             $this->pointsService->creditApplePurchase($user->id, $pointsAmount, $data['product_id'], $verification['transaction_id']);
