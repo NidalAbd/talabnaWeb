@@ -24,6 +24,14 @@ class Kernel extends ConsoleKernel
             ->where('seen_at', '<', now()->subDays(\App\Http\Controllers\Api\FeedController::SEEN_DAYS))->delete())
             ->name('feed:prune-seen')->dailyAt('04:10')->withoutOverlapping();
         $schedule->command('ai-points:settle --prune')->dailyAt('04:30');
+        // New app texts (a migration sets the flag): translate them into every language; the app loads them from
+        // the server. Runs in the background - one AI call per language takes minutes.
+        $schedule->command('translate:all --tier=1')
+            ->everyMinute()
+            ->when(fn () => \Illuminate\Support\Facades\Cache::has('i18n:translate-pending'))
+            ->before(fn () => \Illuminate\Support\Facades\Cache::forget('i18n:translate-pending'))
+            ->name('i18n:translate-pending')->withoutOverlapping(60)->runInBackground()
+            ->appendOutputTo(storage_path('logs/translate-all.log'));
 
         // Run badge expiration check every 15 minutes
         // This ensures badges expire at approximately the same time they were created

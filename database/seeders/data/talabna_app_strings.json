@@ -1,4 +1,112 @@
 {
+ "admin.action_failed": {
+  "ar": "تعذّر التنفيذ. حاول مرة أخرى.",
+  "en": "Could not complete. Please try again."
+ },
+ "admin.ban": {
+  "ar": "حظر",
+  "en": "Ban"
+ },
+ "admin.ban_done": {
+  "ar": "تم حظر المستخدم",
+  "en": "User banned"
+ },
+ "admin.ban_or_unban": {
+  "ar": "حظر / إلغاء حظر هذا المستخدم",
+  "en": "Ban / unban this user"
+ },
+ "admin.ban_user_body": {
+  "ar": "سيتم إخراجه ولن يتمكن من استخدام التطبيق.",
+  "en": "They are signed out and can no longer use the app."
+ },
+ "admin.ban_user_q": {
+  "ar": "حظر {name}؟",
+  "en": "Ban {name}?"
+ },
+ "admin.title": {
+  "ar": "المشرف",
+  "en": "Admin"
+ },
+ "admin.unban": {
+  "ar": "إلغاء الحظر",
+  "en": "Unban"
+ },
+ "admin.unban_done": {
+  "ar": "تم إلغاء الحظر",
+  "en": "User unbanned"
+ },
+ "admin.unban_user_body": {
+  "ar": "سيتمكن من استخدام التطبيق مجددًا.",
+  "en": "They can use the app again."
+ },
+ "admin.unban_user_q": {
+  "ar": "إلغاء حظر {name}؟",
+  "en": "Unban {name}?"
+ },
+ "chat2.no_photos": {
+  "ar": "لا توجد صور في هذه المحادثة بعد",
+  "en": "No photos in this chat yet"
+ },
+ "chat2.photos": {
+  "ar": "الصور",
+  "en": "Photos"
+ },
+ "errors.generic": {
+  "ar": "حدث خطأ ما. حاول مرة أخرى.",
+  "en": "Something went wrong. Please try again."
+ },
+ "phone_verify.err_cancelled": {
+  "ar": "لم يكتمل التحقق. حاول مجددًا.",
+  "en": "The check was not completed. Please try again."
+ },
+ "phone_verify.err_confirm": {
+  "ar": "تعذّر تأكيد الرمز. حاول مجددًا.",
+  "en": "The code couldn't be confirmed. Please try again."
+ },
+ "phone_verify.err_expired": {
+  "ar": "انتهت صلاحية الرمز. اطلب رمزًا جديدًا.",
+  "en": "The code has expired. Request a new one."
+ },
+ "phone_verify.err_invalid_number": {
+  "ar": "رقم الهاتف غير صحيح. تحقق منه وأضف رمز الدولة.",
+  "en": "This phone number is not valid. Check it and include the country code."
+ },
+ "phone_verify.err_network": {
+  "ar": "لا يوجد اتصال. تحقق من الإنترنت وحاول مجددًا.",
+  "en": "No connection. Check your internet and try again."
+ },
+ "phone_verify.err_region": {
+  "ar": "لا يمكننا إرسال رمز إلى دولة هذا الرقم حاليًا. جرّب رقمًا آخر أو تواصل مع الدعم.",
+  "en": "We can't send a code to this number's country right now. Try another number or contact support."
+ },
+ "phone_verify.err_send": {
+  "ar": "تعذّر إرسال الرمز الآن. حاول مجددًا بعد قليل.",
+  "en": "We couldn't send the code right now. Please try again in a moment."
+ },
+ "phone_verify.err_too_many": {
+  "ar": "محاولات كثيرة. انتظر قليلًا ثم حاول مجددًا.",
+  "en": "Too many attempts. Please wait a while and try again."
+ },
+ "phone_verify.err_wrong_code": {
+  "ar": "الرمز غير صحيح.",
+  "en": "The code is not correct."
+ },
+ "phone_verify.resend": {
+  "ar": "إعادة إرسال الرمز",
+  "en": "Resend code"
+ },
+ "phone_verify.resend_in": {
+  "ar": "إعادة الإرسال بعد {s} ث",
+  "en": "Resend code in {s}s"
+ },
+ "settings.save_failed": {
+  "ar": "تعذّر الحفظ. حاول مرة أخرى.",
+  "en": "Could not save. Please try again."
+ },
+ "settings.show_my_deals": {
+  "ar": "إظهار صفقاتي في ملفي",
+  "en": "Show my deals on my profile"
+ },
  "a11y.comments": {
   "ar": "التعليقات",
   "en": "Comments"
