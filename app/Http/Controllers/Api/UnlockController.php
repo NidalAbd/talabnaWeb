@@ -52,11 +52,13 @@ class UnlockController extends Controller
         if ((int) $servicePost->user_id !== $uid) {
             return response()->json(['message' => 'Only the owner can see insights.'], 403);
         }
-        if (! FeatureUnlocks::has($uid, 'insights_post', $servicePost->id) && ! FeatureUnlocks::has($uid, 'insights_all')) {
+        $advanced = FeatureUnlocks::has($uid, 'advanced_insights');
+        if (! $advanced && ! FeatureUnlocks::has($uid, 'insights_post', $servicePost->id) && ! FeatureUnlocks::has($uid, 'insights_all')) {
             return response()->json([
                 'locked' => true,
                 'price_post' => FeatureUnlocks::price('insights_post'),
                 'price_all' => FeatureUnlocks::price('insights_all'),
+                'price_advanced' => FeatureUnlocks::price('advanced_insights'),
             ], 200);
         }
         $id = $servicePost->id;
@@ -89,6 +91,30 @@ class UnlockController extends Controller
                 'offers' => DB::table('offers')->where('service_post_id', $id)->whereNull('parent_id')->count(),
             ],
             'daily' => collect($daily)->map(fn ($v, $d) => ['date' => $d] + $v)->values(),
+            'advanced' => $advanced ? $this->advanced($id) : null,
+            'price_advanced' => FeatureUnlocks::price('advanced_insights'),
         ]);
+    }
+
+    /**
+     * Business insights: where the viewers are and when they look. heat is 7 x 24 (weekday 0 = Sunday, hour) in UTC;
+     * the app moves it to the phone's time zone. Only counts, never who.
+     */
+    private function advanced(int $postId): array
+    {
+        $heat = array_fill(0, 7, array_fill(0, 24, 0));
+        foreach (DB::table('post_views')->where('service_post_id', $postId)
+            ->selectRaw('DAYOFWEEK(viewed_at) - 1 wd, HOUR(viewed_at) h, COUNT(*) n')->groupBy('wd', 'h')->get() as $r) {
+            $heat[(int) $r->wd][(int) $r->h] = (int) $r->n;
+        }
+        $cities = DB::table('post_views')->where('post_views.service_post_id', $postId)
+            ->join('users', 'users.id', '=', 'post_views.user_id')
+            ->join('cities', 'cities.id', '=', 'users.city_id')
+            ->selectRaw('cities.id, cities.name, COUNT(*) n')->groupBy('cities.id', 'cities.name')
+            ->orderByDesc('n')->limit(8)->get()
+            ->map(fn ($r) => ['id' => (int) $r->id, 'name' => json_decode($r->name, true) ?: ['en' => (string) $r->name], 'viewers' => (int) $r->n])
+            ->values();
+
+        return ['heat_utc' => $heat, 'cities' => $cities];
     }
 }
