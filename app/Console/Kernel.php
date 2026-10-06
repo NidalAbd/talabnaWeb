@@ -26,6 +26,9 @@ class Kernel extends ConsoleKernel
         $schedule->command('ai-points:settle --prune')->dailyAt('04:30');
         // Posts: expiry reminders, automatic renewals (Pro/Business) and ending expired posts.
         $schedule->command('posts:lifecycle')->dailyAt('09:15')->withoutOverlapping(30);
+        // Saved searches: Pro/Business every 15 minutes, everyone else once a day.
+        $schedule->command('saved-searches:alerts --instant')->everyFifteenMinutes()->withoutOverlapping(14);
+        $schedule->command('saved-searches:alerts')->dailyAt('18:05')->withoutOverlapping(60);
         // New app texts (a migration sets the flag): translate them into every language; the app loads them from
         // the server. Runs in the background - one AI call per language takes minutes.
         $schedule->command('translate:all --tier=1')

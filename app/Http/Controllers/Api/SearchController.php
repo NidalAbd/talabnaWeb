@@ -45,8 +45,9 @@ class SearchController extends Controller
             $following->city_name = $city ? $city->name : $defaultCity;
         }
         // Search for posts
-        $posts = ServicePost::where('title', 'LIKE', '%' . $query . '%')
-            ->orWhere('description', 'LIKE', '%'.$query.'%')
+        // Live posts only (the old query had no state filter and an ungrouped OR), newest first; optional filters.
+        $posts = \App\Services\PostSearch::query($query, (array) $request->input('filters', []))
+            ->orderByDesc('created_at')
             ->with('photos')
             ->with('subCategory')
             ->with('category')
