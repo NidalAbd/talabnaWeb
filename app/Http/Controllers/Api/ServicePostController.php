@@ -482,6 +482,7 @@ class ServicePostController extends Controller
                 'price_type' => $request->input('price_type') ?: ((float) ($request->price ?? 0) > 0 ? 'fixed' : 'none'),
                 'price_max' => $request->input('price_type') === 'salary' ? $request->input('price_max') : null,
                 'expires_at' => now()->addDays(\App\Services\PostLifecycle::expiryDays()),
+                'details' => \App\Services\PostAttributes::clean((int) $request->categories_id, $request->input('details')),
                 'price_currency_code' => $currencyCode,
                 'price_currency_name' => $currencyName,
                 'location_latitudes' => $request->locationLatitudes ?? $defaultLatitude,
@@ -909,6 +910,8 @@ class ServicePostController extends Controller
         if ($request->has('max_price') && is_numeric($request->max_price)) {
             $servicePosts->where('price', '<=', (float)$request->max_price);
         }
+        // Release C: category details (year, mileage, rooms, area, condition...).
+        \App\Services\PostAttributes::applyFilters($servicePosts, (int) ($categories ?? $category ?? 0), $request->all());
 
         // ADD COUNTRY AND CITY FILTERS
         if ($request->has('country_id') && is_numeric($request->country_id)) {
@@ -1036,6 +1039,8 @@ class ServicePostController extends Controller
         if ($request->has('max_price') && is_numeric($request->max_price)) {
             $servicePosts->where('price', '<=', (float)$request->max_price);
         }
+        // Release C: category details (year, mileage, rooms, area, condition...).
+        \App\Services\PostAttributes::applyFilters($servicePosts, (int) ($categories ?? $category ?? 0), $request->all());
 
         // ADD COUNTRY AND CITY FILTERS
         if ($request->has('country_id') && is_numeric($request->country_id)) {
@@ -1369,6 +1374,9 @@ class ServicePostController extends Controller
                 'price' => in_array($validatedData['price_type'] ?? $servicePost->price_type, ServicePost::PRICE_TYPES_WITHOUT_AMOUNT, true)
                     ? 0 : ($validatedData['price'] ?? $servicePost->price),
                 'price_type' => $validatedData['price_type'] ?? $servicePost->price_type ?? 'fixed',
+                'details' => $request->has('details')
+                    ? \App\Services\PostAttributes::clean((int) ($request->categories_id ?? $servicePost->categories_id), $request->input('details'))
+                    : $servicePost->details,
                 'price_max' => ($validatedData['price_type'] ?? $servicePost->price_type) === 'salary'
                     ? ($validatedData['price_max'] ?? $servicePost->price_max) : null,
                 'price_currency_code' => $currencyCode,

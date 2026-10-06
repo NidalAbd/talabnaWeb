@@ -49,6 +49,7 @@ class ServicePost extends Model
         'expiry_reminded_at',
         'reserved_at',
         'sold_at',
+        'details',
     ];
 
     /** How a post shows its price (Release A, 2026-10-07). */
@@ -66,6 +67,7 @@ class ServicePost extends Model
         'expiry_reminded_at' => 'datetime',
         'reserved_at' => 'datetime',
         'sold_at' => 'datetime',
+        'details' => 'array',
         'created_at' => 'datetime',
         'updated_at' => 'datetime',
     ];
