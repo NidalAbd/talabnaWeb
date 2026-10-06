@@ -419,6 +419,10 @@
   "ar": "منخفض",
   "en": "Low"
  },
+ "ai.n_points": {
+  "ar": "{n} نقطة",
+  "en": "{n} pts"
+ },
  "ai.no_photo_create_one_with_ai": {
   "ar": "لا توجد صورة؟ أنشئ واحدة بالذكاء الاصطناعي",
   "en": "No photo? Create one with AI"
@@ -434,6 +438,10 @@
  "ai.nothing_yet_create_an_image_or_video_first": {
   "ar": "لا شيء بعد. أنشئ صورة أو فيديو أولاً.",
   "en": "Nothing yet. Create an image or video first."
+ },
+ "ai.one_point": {
+  "ar": "1 نقطة",
+  "en": "1 pt"
  },
  "ai.publish_cost": {
   "ar": "انشر (−{cost})",
@@ -4373,6 +4381,194 @@
  "settings.theme_sunset": {
   "ar": "غروب",
   "en": "Sunset"
+ },
+ "snap.camera": {
+  "ar": "التقط صورة",
+  "en": "Take a photo"
+ },
+ "snap.filled": {
+  "ar": "تم الملء من صورتك. راجع التفاصيل وعدّل ما تريد.",
+  "en": "Filled from your photo. Check the details and edit anything."
+ },
+ "snap.gallery": {
+  "ar": "اختر من المعرض",
+  "en": "Choose from gallery"
+ },
+ "snap.included": {
+  "ar": "مشمول",
+  "en": "Included"
+ },
+ "snap.subtitle": {
+  "ar": "صورة واحدة تملأ العنوان والوصف والقسم والسعر.",
+  "en": "One photo fills the title, description, category and a price."
+ },
+ "snap.title": {
+  "ar": "صوّر وبِع",
+  "en": "Snap to sell"
+ },
+ "snap.working": {
+  "ar": "جارٍ قراءة صورتك…",
+  "en": "Reading your photo…"
+ },
+ "studio.after": {
+  "ar": "بعد",
+  "en": "After"
+ },
+ "studio.ai_label": {
+  "ar": "محسّنة بالذكاء الاصطناعي",
+  "en": "AI-enhanced"
+ },
+ "studio.ai_note": {
+  "ar": "يحسّن الذكاء الاصطناعي عرض المنتج في الصورة، ولا يغيّر حالته أبدًا.",
+  "en": "AI improves how the item looks in the photo, never its condition."
+ },
+ "studio.ai_tools": {
+  "ar": "استوديو الذكاء الاصطناعي",
+  "en": "AI Studio"
+ },
+ "studio.angle_back": {
+  "ar": "الخلف",
+  "en": "Back"
+ },
+ "studio.angle_detail": {
+  "ar": "لقطة قريبة",
+  "en": "Close-up"
+ },
+ "studio.angle_front": {
+  "ar": "الأمام",
+  "en": "Front"
+ },
+ "studio.angle_side": {
+  "ar": "الجانب",
+  "en": "Side"
+ },
+ "studio.apply": {
+  "ar": "تطبيق",
+  "en": "Apply"
+ },
+ "studio.background": {
+  "ar": "خلفية استوديو",
+  "en": "Studio background"
+ },
+ "studio.before": {
+  "ar": "قبل",
+  "en": "Before"
+ },
+ "studio.blur": {
+  "ar": "إخفاء وجوه أو أرقام",
+  "en": "Blur faces or numbers"
+ },
+ "studio.blur_hint": {
+  "ar": "اسحب فوق كل جزء تريد إخفاءه.",
+  "en": "Drag over each part to hide."
+ },
+ "studio.checking": {
+  "ar": "جارٍ فحص الصورة…",
+  "en": "Checking the photo…"
+ },
+ "studio.cinematic": {
+  "ar": "لقطة سينمائية (عالية الدقة)",
+  "en": "Cinematic shot (HD)"
+ },
+ "studio.crop_feed": {
+  "ar": "قص للصفحة الرئيسية",
+  "en": "Crop for feed"
+ },
+ "studio.crop_reels": {
+  "ar": "قص للفيديو",
+  "en": "Crop for Reels"
+ },
+ "studio.crop_square": {
+  "ar": "مربع",
+  "en": "Square"
+ },
+ "studio.done": {
+  "ar": "تم",
+  "en": "Done"
+ },
+ "studio.free_tools": {
+  "ar": "أدوات مجانية",
+  "en": "Free tools"
+ },
+ "studio.guided_title": {
+  "ar": "أفضل الصور: اضغط ✨ على أي صورة للأدوات المجانية وأدوات الذكاء الاصطناعي",
+  "en": "Best photos: tap ✨ on a photo for the free and AI tools"
+ },
+ "studio.has_ai_photos": {
+  "ar": "صور محسّنة بالذكاء الاصطناعي",
+  "en": "AI-enhanced photos"
+ },
+ "studio.keep_original": {
+  "ar": "الإبقاء على الأصلية",
+  "en": "Keep the original"
+ },
+ "studio.light": {
+  "ar": "تحسين الإضاءة والألوان",
+  "en": "Fix light & colour"
+ },
+ "studio.looks_good": {
+  "ar": "الصورة جيدة.",
+  "en": "Photo looks good."
+ },
+ "studio.scene": {
+  "ar": "مشهد واقعي",
+  "en": "Lifestyle scene"
+ },
+ "studio.scene_desk": {
+  "ar": "مكتب",
+  "en": "Desk"
+ },
+ "studio.scene_go": {
+  "ar": "ضعه في هذا المشهد",
+  "en": "Place it in this scene"
+ },
+ "studio.scene_kitchen": {
+  "ar": "مطبخ",
+  "en": "Kitchen"
+ },
+ "studio.scene_living_room": {
+  "ar": "غرفة معيشة",
+  "en": "Living room"
+ },
+ "studio.scene_nature": {
+  "ar": "طبيعة",
+  "en": "Nature"
+ },
+ "studio.scene_outdoor": {
+  "ar": "في الخارج",
+  "en": "Outdoors"
+ },
+ "studio.scene_showroom": {
+  "ar": "صالة عرض",
+  "en": "Showroom"
+ },
+ "studio.tip_blurry": {
+  "ar": "تبدو مهزوزة: ثبّت الهاتف أو اضغط للتركيز.",
+  "en": "Looks blurry: hold still or tap to focus."
+ },
+ "studio.tip_bright": {
+  "ar": "الصورة ساطعة جدًا: تجنّب الشمس المباشرة أو الفلاش.",
+  "en": "Too bright: avoid direct sun or flash."
+ },
+ "studio.tip_dark": {
+  "ar": "الصورة داكنة قليلًا: جرّب ضوء النهار أو تحسين الإضاءة.",
+  "en": "A bit dark: try daylight or the light fix."
+ },
+ "studio.title": {
+  "ar": "استوديو الصور",
+  "en": "Photo Studio"
+ },
+ "studio.undo": {
+  "ar": "تراجع",
+  "en": "Undo"
+ },
+ "studio.use_it": {
+  "ar": "استخدمها",
+  "en": "Use it"
+ },
+ "studio.working": {
+  "ar": "جارٍ تجهيز صورتك… حوالي دقيقة",
+  "en": "Working on your photo… about a minute"
  },
  "subcategory.failed_to_load_location_data": {
   "ar": "تعذّر تحميل بيانات الموقع",
