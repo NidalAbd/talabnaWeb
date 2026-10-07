@@ -42,7 +42,7 @@ class SeoController extends Controller
         }
 
         // Cache SEO data for 5 minutes to improve performance
-        $cacheKey = 'seo_v3_' . md5($path . $locale); // v3: 72 web locales, listing hreflang = translated only // v2: hreflang limited to web locales
+        $cacheKey = 'seo_v4_' . md5($path . $locale); // v3: 72 web locales, listing hreflang = translated only // v2: hreflang limited to web locales
 
         return Cache::remember($cacheKey, 1800, function () use ($path, $locale) {
             return $this->generateSeoData($path, $locale);
@@ -293,7 +293,7 @@ class SeoController extends Controller
         $seo['og']['description'] = $seo['description'];
         if ($listing->photos->count() > 0) {
             $photo = $listing->photos->first();
-            $seo['og']['image'] = $photo->is_external ? $photo->src : "{$baseUrl}/storage/{$photo->src}";
+            $seo['og']['image'] = $this->photoUrl($photo, $baseUrl);
         }
 
         // Twitter
@@ -688,37 +688,8 @@ class SeoController extends Controller
             'itemListElement' => $breadcrumbItems,
         ];
 
-        // FAQ Schema for common questions
-        $seo['jsonLd'][] = [
-            '@context' => 'https://schema.org',
-            '@type' => 'FAQPage',
-            'mainEntity' => [
-                [
-                    '@type' => 'Question',
-                    'name' => $locale === 'ar'
-                        ? "كيف أجد {$categoryName} في {$location}؟"
-                        : "How do I find {$categoryName} in {$location}?",
-                    'acceptedAnswer' => [
-                        '@type' => 'Answer',
-                        'text' => $locale === 'ar'
-                            ? "يمكنك تصفح {$listingCount} إعلان {$categoryName} في {$location} على منصة طلبنا. استخدم الفلاتر للعثور على ما تبحث عنه."
-                            : "You can browse {$listingCount} {$categoryName} listings in {$location} on Talabna. Use filters to find what you're looking for.",
-                    ],
-                ],
-                [
-                    '@type' => 'Question',
-                    'name' => $locale === 'ar'
-                        ? "هل النشر مجاني على طلبنا؟"
-                        : "Is posting free on Talabna?",
-                    'acceptedAnswer' => [
-                        '@type' => 'Answer',
-                        'text' => $locale === 'ar'
-                            ? "نعم، يمكنك نشر إعلاناتك مجاناً على منصة طلبنا. كما تتوفر خيارات مميزة لإبراز إعلانك."
-                            : "Yes, you can post your ads for free on Talabna. Premium options are also available to highlight your listing.",
-                    ],
-                ],
-            ],
-        ];
+        // No FAQPage here: the questions were not shown on the page (Google requires marked-up content to be visible)
+        // and an empty category name produced "How do I find  in X?" (2026-10-08).
 
         return $seo;
     }
@@ -840,6 +811,21 @@ class SeoController extends Controller
             : "Browse all classified ads on Talabna. {$totalListings} listings in cars, real estate, jobs, phones and more. Filter by location and price.";
 
         return $seo;
+    }
+
+    /**
+     * Public URL of a post photo. Some src values already start with "storage/", which made ".../storage/storage/..."
+     * (404) for the share image and the Product schema (2026-10-08).
+     */
+    private function photoUrl($photo, string $baseUrl): string
+    {
+        $src = (string) $photo->src;
+        if (($photo->is_external ?? false) || preg_match('#^https?://#i', $src)) {
+            return $src;
+        }
+        $src = preg_replace('#^/?(storage/)+#', '', ltrim($src, '/'));
+
+        return rtrim($baseUrl, '/') . '/storage/' . $src;
     }
 
     /**
@@ -1038,9 +1024,7 @@ class SeoController extends Controller
         $seo['og']['type'] = 'article';
         if ($post->photos && $post->photos->count() > 0) {
             $photo = $post->photos->first();
-            $seo['og']['image'] = ($photo->is_external ?? false)
-                ? $photo->src
-                : $baseUrl . '/storage/' . $photo->src;
+            $seo['og']['image'] = $this->photoUrl($photo, $baseUrl);
         }
 
         // Breadcrumbs
