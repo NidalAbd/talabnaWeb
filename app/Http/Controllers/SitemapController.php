@@ -96,7 +96,7 @@ class SitemapController extends Controller
     {
         if ($static = $this->tryStaticFile('sitemap.xml')) return $static;
         try {
-        $content = Cache::remember('sitemap-index-v7', 3600, function () {
+        $content = Cache::remember('sitemap-index-v8', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
             $now = now()->toIso8601String();
@@ -156,7 +156,7 @@ class SitemapController extends Controller
     public function pages()
     {
         if ($static = $this->tryStaticFile('sitemap-pages.xml')) return $static;
-        $content = Cache::remember('sitemap-pages-v5', 3600, function () {
+        $content = Cache::remember('sitemap-pages-v6', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
@@ -199,7 +199,7 @@ class SitemapController extends Controller
     {
         if ($static = $this->tryStaticFile('sitemap-categories.xml')) return $static;
         try {
-        $content = Cache::remember('sitemap-categories-v5', 3600, function () {
+        $content = Cache::remember('sitemap-categories-v6', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
@@ -255,7 +255,7 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-locations-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-locations-v8-{$page}";
+        $cacheKey = "sitemap-locations-v9-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationRecords();
             $offset = ($page - 1) * self::LOCATIONS_PER_PAGE;
@@ -342,7 +342,7 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-location-categories-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-location-categories-v7-{$page}";
+        $cacheKey = "sitemap-location-categories-v8-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationCategoryRecords();
             $offset = ($page - 1) * self::LOC_CAT_PER_PAGE;
@@ -414,7 +414,7 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-listings-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-listings-v6-{$page}";
+        $cacheKey = "sitemap-listings-v7-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::LISTINGS_PER_PAGE;
@@ -462,7 +462,7 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-users-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-users-v6-{$page}";
+        $cacheKey = "sitemap-users-v7-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::USERS_PER_PAGE;
@@ -661,12 +661,9 @@ class SitemapController extends Controller
             $urls[$lang->code] = $this->localizedUrl($pathBuilder($lang->code), $lang->code, $defaultLocale);
         }
 
-        $alternates = '';
-        foreach ($urls as $code => $url) {
-            $alternates .= '<xhtml:link rel="alternate" hreflang="' . $code . '" href="' . htmlspecialchars($url, ENT_XML1) . '"/>';
-        }
-        $defaultUrl = $urls[$defaultLocale] ?? (array_values($urls)[0] ?? '');
-        $alternates .= '<xhtml:link rel="alternate" hreflang="x-default" href="' . htmlspecialchars($defaultUrl, ENT_XML1) . '"/>';
+        // No <xhtml:link> alternates here: with 72 web locales every <url> would carry 73 links (sitemaps of several GB).
+        // Each page already lists its translations in its own <link rel="alternate" hreflang> tags, which Google
+        // reads the same way.
 
         // One <url> block per locale — each self-canonicalizes to its own URL.
         $xml = '';
@@ -676,7 +673,6 @@ class SitemapController extends Controller
             $xml .= '<lastmod>' . $lastmod . '</lastmod>';
             $xml .= '<changefreq>' . $changefreq . '</changefreq>';
             $xml .= '<priority>' . $priority . '</priority>';
-            $xml .= $alternates;
             $xml .= '</url>';
         }
         return $xml;

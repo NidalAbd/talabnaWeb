@@ -65,11 +65,17 @@ class Language extends Model
      * Get all active languages ordered
      */
     /**
-     * Locales the website serves under /{code}/ (routes/web.php builds its {locale} pattern from this list). More
-     * languages are active for the app; a web URL in any of those was a 404, and the sitemaps and hreflang tags listed
-     * them all (2026-10-08: about two thirds of the sitemap URLs were 404s).
+     * Locales the website serves under /{code}/ (routes/web.php builds its {locale} pattern from this list): every
+     * language active for the app, all of which have the site's UI strings (2026-10-08). Kept as a constant so route
+     * compilation never touches the DB; add a code here when a new language is activated.
      */
-    public const WEB_LOCALES = ['en', 'tr', 'fr', 'es', 'hi', 'ur', 'bn', 'pt', 'ru', 'id', 'de', 'zh', 'ku', 'fa', 'sw', 'ms'];
+    public const WEB_LOCALES = [
+        'en', 'tr', 'fr', 'es', 'hi', 'ur', 'bn', 'pt', 'ru', 'id', 'de', 'zh', 'ku', 'fa', 'sw', 'ms',
+        'af', 'am', 'az', 'be', 'bg', 'ca', 'cs', 'da', 'el', 'et', 'eu', 'fi', 'fil', 'gl', 'gu', 'he',
+        'hr', 'hu', 'hy', 'is', 'it', 'ja', 'ka', 'kk', 'km', 'kn', 'ko', 'ky', 'lo', 'lt', 'lv', 'mk',
+        'ml', 'mn', 'mr', 'my', 'ne', 'nl', 'no', 'pa', 'pl', 'rm', 'ro', 'si', 'sk', 'sl', 'sq', 'sr',
+        'sv', 'ta', 'te', 'th', 'uk', 'vi', 'zu',
+    ];
 
     /** Active languages the website has URLs for (the default one included): for sitemaps and hreflang. */
     public static function getWebOrdered()

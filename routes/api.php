@@ -74,6 +74,18 @@ Route::prefix('public')->group(function () {
     // SEO Data endpoint
     Route::get('/seo', [\App\Http\Controllers\SeoController::class, 'getSeoData']);
 
+    // Suggestions for a place or category page (other cities, categories, newest listings nearby). The web page shows
+    // them when a place has no listings yet, from the same data the server puts in the page for crawlers.
+    Route::get('/suggestions', function (\Illuminate\Http\Request $request) {
+        $locale = (string) $request->query('locale', 'ar');
+        if ($locale !== 'ar' && ! in_array($locale, \App\Models\Language::WEB_LOCALES, true)) {
+            $locale = 'ar';
+        }
+        $path = '/' . ltrim((string) $request->query('path', '/'), '/');
+
+        return response()->json(['data' => app(\App\Http\Controllers\SeoController::class)->getCrawlContent(mb_substr($path, 0, 500), $locale)]);
+    })->middleware('throttle:60,1');
+
     // User Profile
     Route::get('/users/{id}', [PublicController::class, 'userProfile']);
 

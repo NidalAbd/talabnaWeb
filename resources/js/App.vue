@@ -282,6 +282,14 @@
                 <i class="mdi mdi-google-play"></i>
                 Google Play
               </a>
+              <a v-if="APP_STORE_URL" :href="APP_STORE_URL" target="_blank" class="btn btn-outline btn-sm justify-start">
+                <i class="mdi mdi-apple"></i>
+                App Store
+              </a>
+              <span v-else class="btn btn-outline btn-sm justify-start" style="opacity: .7; cursor: default;">
+                <i class="mdi mdi-apple"></i>
+                App Store · {{ comingSoon(appStore.locale) }}
+              </span>
             </div>
             <div class="mt-4">
               <h4 class="text-subtitle-2 font-weight-bold mb-2">{{ appStore.t('nav.contact') }}</h4>
@@ -307,6 +315,7 @@
 </template>
 
 <script setup>
+import { APP_STORE_URL, comingSoon } from '@/utils/stores'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'

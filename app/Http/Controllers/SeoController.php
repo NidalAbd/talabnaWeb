@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Cache;
 
 class SeoController extends Controller
 {
+    use Concerns\BuildsCrawlContent;
+
     /**
      * Get SEO data for a specific page/route (API endpoint)
      */
@@ -40,7 +42,7 @@ class SeoController extends Controller
         }
 
         // Cache SEO data for 5 minutes to improve performance
-        $cacheKey = 'seo_v2_' . md5($path . $locale); // v2: hreflang limited to web locales
+        $cacheKey = 'seo_v3_' . md5($path . $locale); // v3: 72 web locales, listing hreflang = translated only // v2: hreflang limited to web locales
 
         return Cache::remember($cacheKey, 1800, function () use ($path, $locale) {
             return $this->generateSeoData($path, $locale);
@@ -145,10 +147,14 @@ class SeoController extends Controller
      * services). Returns alternates in the same shape as
      * buildAlternatesFromCanonical.
      */
-    private function buildPerLocaleAlternates(callable $pathBuilder, string $baseUrl, string $defaultLocale): array
+    private function buildPerLocaleAlternates(callable $pathBuilder, string $baseUrl, string $defaultLocale, ?array $onlyLocales = null): array
     {
         $alternates = [];
         foreach (\App\Models\Language::getWebOrdered() as $lang) {
+            // A listing's untranslated locale pages are noindex: hreflang must not point at them.
+            if ($onlyLocales !== null && !in_array($lang->code, $onlyLocales, true)) {
+                continue;
+            }
             $alternates[] = [
                 'hreflang' => $lang->code,
                 'href' => $this->localizedUrl($baseUrl, $pathBuilder($lang->code), $lang->code, $defaultLocale),
@@ -277,7 +283,7 @@ class SeoController extends Controller
         // assumes one locale-agnostic path.)
         $seo['alternates'] = $this->buildPerLocaleAlternates(
             fn(string $loc) => SlugResolver::buildPostUrl($listing, $loc),
-            $baseUrl, $this->defaultLocale()
+            $baseUrl, $this->defaultLocale(), $completedLocales
         );
         $seo['_alternates_locked'] = true;
 
@@ -790,6 +796,18 @@ class SeoController extends Controller
             ],
         ];
 
+        // The app itself, so Google can show it as available on Google Play (the iPhone app is not on the App Store yet).
+        $seo['jsonLd'][] = [
+            '@context' => 'https://schema.org',
+            '@type' => 'MobileApplication',
+            'name' => 'Talabna - طلبنا',
+            'operatingSystem' => 'Android',
+            'applicationCategory' => 'ShoppingApplication',
+            'url' => $baseUrl,
+            'installUrl' => 'https://play.google.com/store/apps/details?id=com.talabna.talabna',
+            'offers' => ['@type' => 'Offer', 'price' => '0', 'priceCurrency' => 'USD'],
+        ];
+
         return $seo;
     }
 
@@ -968,7 +986,7 @@ class SeoController extends Controller
     private function getSlugPostSeo(string $countrySlug, string $citySlug, string $catSlug, string $subSlug, int $postId, string $locale, array $seo, string $baseUrl, string $path): array
     {
         $post = ServicePost::with(['photos', 'category', 'subCategory', 'user'])->find($postId);
-        if (!$post) { $seo['notFound'] = true; return $seo; }
+        if (!$post || $post->state !== 'published') { $seo['notFound'] = true; return $seo; }
 
         // Translation gating — see getListingSeo for rationale.
         $completedLocales = array_unique(array_merge(
@@ -991,7 +1009,14 @@ class SeoController extends Controller
 
         $seo['title'] = "{$title} - {$cityName}, {$countryName} | Talabna";
         $seo['description'] = mb_substr(strip_tags($description), 0, 160);
-        $seo['canonical'] = $this->localizedUrl($baseUrl, $path, $locale, $this->defaultLocale());
+        // Canonical and hreflang from the post's own per-locale slugs (the same URLs the sitemap lists), so any older
+        // slug spelling consolidates onto one URL and hreflang only names translated, indexable locales.
+        $seo['canonical'] = $this->localizedUrl($baseUrl, SlugResolver::buildPostUrl($post, $locale), $locale, $this->defaultLocale());
+        $seo['alternates'] = $this->buildPerLocaleAlternates(
+            fn(string $loc) => SlugResolver::buildPostUrl($post, $loc),
+            $baseUrl, $this->defaultLocale(), $completedLocales
+        );
+        $seo['_alternates_locked'] = true;
 
         // OpenGraph
         $seo['og']['type'] = 'article';

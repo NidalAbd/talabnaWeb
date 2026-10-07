@@ -42,6 +42,14 @@
               <i class="mdi mdi-google-play mr-2" :style="{ fontSize: '20px' }"></i>
               {{ t('home.get_app') }}
             </a>
+            <a v-if="APP_STORE_URL" :href="APP_STORE_URL" target="_blank" class="btn-hero-secondary">
+              <i class="mdi mdi-apple mr-2" :style="{ fontSize: '20px' }"></i>
+              App Store
+            </a>
+            <span v-else class="btn-hero-secondary" style="opacity: .75; cursor: default;">
+              <i class="mdi mdi-apple mr-2" :style="{ fontSize: '20px' }"></i>
+              App Store · {{ comingSoon(appStore.locale) }}
+            </span>
           </div>
         </div>
         <div class="hero-stats">
@@ -191,6 +199,14 @@
                 <i class="mdi mdi-google-play mr-2"></i>
                 Google Play
               </a>
+              <a v-if="APP_STORE_URL" :href="APP_STORE_URL" target="_blank" class="btn-download" style="margin-inline-start: 8px;">
+                <i class="mdi mdi-apple mr-2"></i>
+                App Store
+              </a>
+              <span v-else class="btn-download" style="margin-inline-start: 8px; opacity: .75; cursor: default;">
+                <i class="mdi mdi-apple mr-2"></i>
+                App Store · {{ comingSoon(appStore.locale) }}
+              </span>
             </div>
             <div class="col-12 col-md-5 text-center d-none d-md-block">
               <i class="mdi mdi-cellphone-arrow-down" :style="{ fontSize: '140px', opacity: 0.2, color: '#fff' }"></i>
@@ -203,6 +219,7 @@
 </template>
 
 <script setup>
+import { APP_STORE_URL, comingSoon } from '@/utils/stores'
 import { ref, computed, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'

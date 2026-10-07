@@ -135,10 +135,22 @@
       </div>
 
       <!-- No Results -->
-      <div v-else-if="listings.length === 0" class="card pa-8 text-center">
-        <i class="mdi mdi-magnify-close" style="font-size: 64px; color: var(--color-text-muted);"></i>
-        <h3 class="text-h6 mt-4">{{ t('services.no_listings') }}</h3>
-        <p class="text-muted">{{ t('services.try_change') }}</p>
+      <div v-else-if="listings.length === 0">
+        <div class="card pa-8 text-center">
+          <i class="mdi mdi-magnify-close" style="font-size: 64px; color: var(--color-text-muted);"></i>
+          <h3 class="text-h6 mt-4">{{ t('services.no_listings') }}</h3>
+          <p class="text-muted">{{ suggestions?.intro || t('services.try_change') }}</p>
+        </div>
+        <!-- Never a dead end: the same category in other cities, newest listings in the country, other categories. -->
+        <div v-for="section in (suggestions?.sections || [])" :key="section.title" class="card pa-4 mt-4">
+          <h3 class="text-body-1 font-weight-bold mb-3">{{ section.title }}</h3>
+          <div class="d-flex flex-wrap" style="gap: 8px;">
+            <a v-for="link in section.links" :key="link.url" :href="link.url" class="city-chip" style="text-decoration: none;">
+              <span class="city-chip-name">{{ link.label }}</span>
+              <span v-if="link.count" class="city-chip-count">{{ link.count }}</span>
+            </a>
+          </div>
+        </div>
       </div>
 
       <!-- Grid View -->
@@ -437,6 +449,8 @@ async function loadData() {
       citySearch.value = ''
       fetchCities(true)
       stats.value = data.stats || stats.value
+      suggestions.value = null
+      if (listings.value.length === 0) loadSuggestions()
       pagination.value = {
         currentPage: data.listings?.current_page || 1,
         lastPage: data.listings?.last_page || 1,
@@ -451,6 +465,19 @@ async function loadData() {
     console.error('Error loading services:', error)
   } finally {
     loading.value = false
+  }
+}
+
+const suggestions = ref(null)
+
+async function loadSuggestions() {
+  try {
+    // The page path without a locale prefix; the server builds the links for the current language.
+    const path = route.path.replace(new RegExp(`^/${appStore.locale}(?=/)`), '')
+    const res = await fetch(`/api/public/suggestions?path=${encodeURIComponent(path)}&locale=${encodeURIComponent(appStore.locale || 'ar')}`)
+    if (res.ok) suggestions.value = (await res.json()).data || null
+  } catch (e) {
+    suggestions.value = null
   }
 }
 

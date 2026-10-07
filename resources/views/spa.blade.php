@@ -174,8 +174,9 @@
         <div class="loader-spinner"></div>
     </div>
 
-    <!-- Vue App Mount Point -->
-    <div id="app"></div>
+    <!-- Vue App Mount Point. Until Vue mounts (and for crawlers), it holds the page's real content: heading, listings
+         and links to related places and categories (SeoController::getCrawlContent). Vue replaces it on mount. -->
+    <div id="app">@if(empty($seoData['notFound']) && ($crawl = $seoController->getCrawlContent($seoPath, $locale)))@include('partials.crawl-content', ['crawl' => $crawl])@endif</div>
 
     <script>
         // Remove loader when Vue app is ready
