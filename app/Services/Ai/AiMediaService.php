@@ -2,6 +2,8 @@
 
 namespace App\Services\Ai;
 
+use Illuminate\Support\Facades\Log;
+
 use Illuminate\Support\Facades\Storage;
 
 /** Image (gpt-image-1) and video (Sora) generation. Files go to the private "local" disk under ai-results/. */
@@ -85,14 +87,16 @@ class AiMediaService
      * Starts a video job. With [referenceJpeg] (Release C, cinematic video from the seller's photo) the clip starts
      * from that photo; it must already be the video's exact size (see fitForVideo). @return string the provider job id
      */
-    public function startVideo(string $prompt, ?string $referenceJpeg = null, ?string $seconds = null): string
+    public function startVideo(string $prompt, ?string $referenceJpeg = null, ?string $seconds = null, ?string $model = null, ?string $size = null): string
     {
+        $model ??= (string) config('ai.video_model', 'sora-2');
+        $size ??= (string) config('ai.video_size', '720x1280');
         $parts = [
-            ['name' => 'model', 'contents' => (string) config('ai.video_model', 'sora-2')],
+            ['name' => 'model', 'contents' => $model],
             ['name' => 'prompt', 'contents' => 'Premium vertical product commercial, 2026 look. Smooth gimbal camera, cinematic '
                 .'shallow depth of field, clean modern colour grade, crisp detail. No text, captions, logos or watermarks. '.$prompt],
             ['name' => 'seconds', 'contents' => $seconds ?? (string) config('ai.video_seconds', '4')],
-            ['name' => 'size', 'contents' => (string) config('ai.video_size', '720x1280')],
+            ['name' => 'size', 'contents' => $size],
         ];
         if ($referenceJpeg !== null) {
             $parts[] = ['name' => 'input_reference', 'contents' => $referenceJpeg, 'filename' => 'reference.jpg', 'headers' => ['Content-Type' => 'image/jpeg']];
@@ -101,6 +105,13 @@ class AiMediaService
             $response = $this->openai->http(40)->asMultipart()->post(OpenAiClient::BASE.'/videos', $parts);
         } catch (\Throwable $e) {
             $this->openai->unreachable($e, 'video');
+        }
+        // The pro model needs extra access on the OpenAI account (404 without it): fall back to sora-2 at 720p, same
+        // length, first frame and brief, instead of failing.
+        if ($response->status() === 404 && $model !== 'sora-2') {
+            Log::warning('ai.video.pro_unavailable_fallback', ['model' => $model]);
+
+            return $this->startVideo($prompt, $referenceJpeg !== null ? self::coverToVideoSize($referenceJpeg, '720x1280') : null, $seconds, 'sora-2', '720x1280');
         }
         if (! $response->successful()) {
             $this->openai->fail($response, 'video');
@@ -148,9 +159,9 @@ class AiMediaService
     }
 
     /** Scales an image to cover the video size (config ai.video_size) and crops the centre. */
-    public static function coverToVideoSize(string $imageBytes): string
+    public static function coverToVideoSize(string $imageBytes, ?string $size = null): string
     {
-        [$w, $h] = array_map('intval', explode('x', (string) config('ai.video_size', '1024x1792')));
+        [$w, $h] = array_map('intval', explode('x', $size ?? (string) config('ai.video_size', '1024x1792')));
         $src = @imagecreatefromstring($imageBytes);
         if (! $src) {
             throw new AiProviderException('bad_image', 'This photo could not be read.', 422);
