@@ -199,7 +199,7 @@ class SitemapController extends Controller
     {
         if ($static = $this->tryStaticFile('sitemap-categories.xml')) return $static;
         try {
-        $content = Cache::remember('sitemap-categories-v6', 3600, function () {
+        $content = Cache::remember('sitemap-categories-v7', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
@@ -209,7 +209,9 @@ class SitemapController extends Controller
             // locales (verified) — no per-record gating needed.
             $allLocales = $activeLanguages->pluck('code')->all();
 
-            $categories = Categories::where('isSuspended', false)->get();
+            // Only categories/subcategories with a real (non-bot) listing; the others are noindex on the page.
+            $categories = Categories::where('isSuspended', false)
+                ->whereIn('id', ServicePost::indexable()->select('categories_id')->distinct())->get();
             foreach ($categories as $category) {
                 $xml .= $this->multiLocaleUrlBlock(
                     fn(string $loc) => "/category/{$category->id}/" . $this->slugify($category->name, $loc),
@@ -220,6 +222,7 @@ class SitemapController extends Controller
             }
 
             $subcategories = Sub_categories::where('isSuspended', false)
+                ->whereIn('id', ServicePost::indexable()->whereNotNull('sub_categories_id')->select('sub_categories_id')->distinct())
                 ->with('category')->get();
             foreach ($subcategories as $sub) {
                 if ($sub->category && !$sub->category->isSuspended) {
