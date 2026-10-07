@@ -18,7 +18,7 @@ return [
     'video_size' => env('AI_VIDEO_SIZE', '1024x1792'),
 
     // A request still "processing" after this long is given up on and refunded.
-    'stale_minutes' => ['text' => 3, 'image' => 6, 'video' => 20],
+    'stale_minutes' => ['text' => 3, 'image' => 6, 'video' => 30], // sora-2-pro HD clips can take 10+ min
 
     // Extra photos/videos on a post: the first `free_media` are free, up to `max_media` in total, and each one beyond the
     // free ones costs `extra_media_points`. Charged when the post is saved, in the same transaction as the post.
