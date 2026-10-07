@@ -1314,8 +1314,10 @@ class ServicePostController extends Controller
             // Check if badge is changing
             $isBadgeChanging = false;
             if ($badgeTypeModel && !$badgeTypeModel->is_default) {
-                $isBadgeChanging = $servicePost->badge_type_id !== $badgeTypeModel->id ||
-                                   $servicePost->badge_duration !== $badgeDuration;
+                // Compare as numbers: the database gives strings ("1") and the request ints (1), so the strict
+                // comparison always saw a change and every edit charged the badge again.
+                $isBadgeChanging = (int) $servicePost->badge_type_id !== (int) $badgeTypeModel->id ||
+                                   (int) $servicePost->badge_duration !== (int) $badgeDuration;
             } elseif (!$badgeTypeModel || $badgeTypeModel->is_default) {
                 // Changing to default/normal badge
                 $isBadgeChanging = $servicePost->badge_type_id !== null &&
