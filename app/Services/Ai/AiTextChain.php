@@ -138,7 +138,7 @@ class AiTextChain
         ])->acceptJson()->connectTimeout(5)->timeout($timeout)->post('https://api.anthropic.com/v1/messages', [
             'model' => $model,
             'max_tokens' => $maxTokens,
-            'temperature' => $temperature,
+            // No temperature: the 5.x models refuse it ("`temperature` is deprecated for this model").
             'system' => $json ? $system."\nAnswer with the JSON object only: no code fences, no other text." : $system,
             'messages' => [['role' => 'user', 'content' => $content]],
         ]));

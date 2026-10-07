@@ -59,7 +59,7 @@ class AiTextChainTest extends TestCase
 
         $this->assertSame(['title' => 'Bike'], $chain->completeJson('standard', 'sys', 'a bike'));
         Http::assertSent(fn ($r) => str_contains($r->url(), 'anthropic') && $r['model'] === 'claude-haiku-5-5'
-            && $r->hasHeader('x-api-key', 'a') && str_contains($r['system'], 'JSON object only'));
+            && $r->hasHeader('x-api-key', 'a') && str_contains($r['system'], 'JSON object only') && ! isset($r['temperature']));
         $this->assertTrue($chain->isDown('openai'));
 
         Http::swap(new Factory());
