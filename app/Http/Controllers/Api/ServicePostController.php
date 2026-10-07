@@ -213,6 +213,10 @@ class ServicePostController extends Controller
     public function viewAdd(Request $request, $servicePost): JsonResponse
     {
         $servicePostShow = ServicePost::find($servicePost);
+        if (! $servicePostShow) {
+            // A deleted post can still be open on a phone (or in a feed cache): not a server error.
+            return response()->json(['message' => 'Post not found'], 404);
+        }
         $servicePostShow->increment('view_count');
 
         // Track which user viewed this post

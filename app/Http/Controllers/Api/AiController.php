@@ -279,7 +279,7 @@ class AiController extends Controller
                 .'Overall exposure bright and clean, not dark or moody, natural colours.'.$keep, 'high'],
         };
 
-        return $this->run($request, 'studio_'.$d['mode'], $d['request_id'], ['mode' => $d['mode'], 'style' => $d['style'] ?? null, 'provider' => 'openai'],
+        return $this->run($request, 'studio_'.$d['mode'], $d['request_id'], ['prompt' => $prompt, 'provider' => 'openai'], // the mode is in the feature name; ai_requests has no mode/style columns
             fn (AiRequest $r) => [['mode' => $d['mode'], 'ai_enhanced' => true], $this->media->editImage($bytes, $mime, $prompt, $r->uuid, $quality)],
             usesMedia: true);
     }
