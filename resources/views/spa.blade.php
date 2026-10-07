@@ -20,7 +20,7 @@
     // If the SEO controller flagged the resource as missing, return HTTP 404
     // so Google sees the proper status instead of a soft 404.
     if (!empty($seoData['notFound'])) {
-        http_response_code(404);
+        app()->instance('seo.not_found', true); // spa_page() (routes/web.php) answers 404
     }
 @endphp
 <!DOCTYPE html>

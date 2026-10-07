@@ -49,6 +49,19 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+if (! function_exists('spa_page')) {
+    /**
+     * The SPA shell with the right status: spa.blade.php marks a missing listing/category/user as not found, but a
+     * status set from inside a view is overwritten by the response, so those pages answered 200 (soft 404s).
+     */
+    function spa_page()
+    {
+        $html = view('spa')->render();
+
+        return response($html, app()->bound('seo.not_found') ? 404 : 200);
+    }
+}
+
 // Contact form (public, no auth required)
 Route::post('/api/contact', [\App\Http\Controllers\Api\ContactController::class, 'submit'])->middleware('throttle:5,1');
 
@@ -77,7 +90,7 @@ Route::get('/img/{path}', [ImageController::class, 'serve'])->where('path', '.*'
 
 // Legacy Policy Route (redirect to SPA)
 Route::get('/policy', function() {
-    return view('spa');
+    return spa_page();
 })->name('policy.index');
 
 // Test routes for comment replies (REMOVE AFTER TESTING)
@@ -150,48 +163,48 @@ Route::get('/test-add-reply/{parentCommentId}', function($parentCommentId) {
 */
 $spaRoutes = function () {
     Route::get('/', function() {
-        return view('spa');
+        return spa_page();
     })->name('landing');
 
     Route::get('/browse', function() {
-        return view('spa');
+        return spa_page();
     })->name('browse');
 
     Route::get('/category/{id}/{slug?}', function() {
-        return view('spa');
+        return spa_page();
     })->name('category.show');
 
     // Subcategory pages: the sitemap and the Vue router had them, the server did not (404 for Google, 2026-10-08).
     Route::get('/category/{id}/{slug}/subcategory/{subId}/{subSlug?}', function() {
-        return view('spa');
+        return spa_page();
     })->where(['id' => '[0-9]+', 'subId' => '[0-9]+'])->name('subcategory.show');
 
     Route::get('/listing/{id}/{slug?}', function() {
-        return view('spa');
+        return spa_page();
     })->name('listing.show');
 
     Route::get('/search', function() {
-        return view('spa');
+        return spa_page();
     })->name('search');
 
     Route::get('/user/{id}', function() {
-        return view('spa');
+        return spa_page();
     })->where('id', '[0-9]+')->name('user.public.profile');
 
     Route::get('/about', function() {
-        return view('spa');
+        return spa_page();
     })->name('about');
 
     Route::get('/contact', function() {
-        return view('spa');
+        return spa_page();
     })->name('contact');
 
     Route::get('/privacy', function() {
-        return view('spa');
+        return spa_page();
     })->name('privacy');
 
     Route::get('/terms', function() {
-        return view('spa');
+        return spa_page();
     })->name('terms');
 
     // Public, no-login-required page describing how to delete an account —
@@ -199,42 +212,42 @@ $spaRoutes = function () {
     // safety > Account deletion) so the request path works even for someone
     // who has uninstalled the app.
     Route::get('/delete-account', function() {
-        return view('spa');
+        return spa_page();
     })->name('delete-account');
 
     // Numeric-id services routes
     Route::get('/services/{countryId}/{countrySlug?}', function() {
-        return view('spa');
+        return spa_page();
     })->where('countryId', '[0-9]+')->name('services.country');
 
     Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug?}', function() {
-        return view('spa');
+        return spa_page();
     })->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+'])->name('services.city');
 
     Route::get('/services/{countryId}/{countrySlug}/{cityId}/{citySlug}/{categoryId}/{categorySlug?}', function() {
-        return view('spa');
+        return spa_page();
     })->where(['countryId' => '[0-9]+', 'cityId' => '[0-9]+', 'categoryId' => '[0-9]+'])->name('services.category');
 
     // Slug-based SEO URLs (no numeric IDs). First segment must not be purely
     // numeric — those go to the numeric routes above.
     Route::get('/services/{country}', function() {
-        return view('spa');
+        return spa_page();
     })->where('country', '(?!\d+$)[A-Za-z0-9%\-]+')->name('services.slug.country');
 
     Route::get('/services/{country}/{city}', function() {
-        return view('spa');
+        return spa_page();
     })->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+', 'city' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.city');
 
     Route::get('/services/{country}/{city}/{category}', function() {
-        return view('spa');
+        return spa_page();
     })->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.category');
 
     Route::get('/services/{country}/{city}/{category}/{subcategory}', function() {
-        return view('spa');
+        return spa_page();
     })->where(['country' => '(?!\d+$)[A-Za-z0-9%\-]+'])->name('services.slug.subcategory');
 
     Route::get('/services/{country}/{city}/{category}/{subcategory}/{post}', function() {
-        return view('spa');
+        return spa_page();
     })->where([
         'country' => '(?!\d+$)[A-Za-z0-9%\-]+',
         'post' => '[A-Za-z0-9%\-]+-\d+',

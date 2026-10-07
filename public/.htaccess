@@ -5,6 +5,10 @@
 
     RewriteEngine On
 
+    # One host: www.talbna.cloud served a full duplicate of the site (200). 301 it to the bare domain.
+    RewriteCond %{HTTP_HOST} ^www\.talbna\.cloud$ [NC]
+    RewriteRule ^ https://talbna.cloud%{REQUEST_URI} [L,R=301]
+
     # Handle Authorization Header
     RewriteCond %{HTTP:Authorization} .
     RewriteRule .* - [E=HTTP_AUTHORIZATION:%{HTTP:Authorization}]
