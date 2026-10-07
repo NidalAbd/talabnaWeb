@@ -54,7 +54,8 @@ class AiMediaService
     {
         $ext = str_contains($mime, 'png') ? 'png' : (str_contains($mime, 'webp') ? 'webp' : 'jpg');
         try {
-            $response = $this->openai->http(90)
+            // High-quality edits (cinematic) often take over 90 s; the request itself may run 170 s (AiController::run).
+            $response = $this->openai->http(150)
                 ->attach('image', $imageBytes, 'photo.'.$ext, ['Content-Type' => $mime])
                 ->post(OpenAiClient::BASE.'/images/edits', [
                     'model' => config('ai.image_model', 'gpt-image-1'),
