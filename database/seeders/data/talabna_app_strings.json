@@ -779,6 +779,18 @@
   "ar": "اختر شارة جديدة",
   "en": "Select New Badge"
  },
+ "badges.diamond": {
+  "ar": "ماسي",
+  "en": "Diamond"
+ },
+ "badges.gold": {
+  "ar": "ذهبي",
+  "en": "Gold"
+ },
+ "badges.normal": {
+  "ar": "عادي",
+  "en": "Normal"
+ },
  "banned.account_suspended": {
   "ar": "تم تعليق الحساب",
   "en": "Account Suspended"
@@ -1663,6 +1675,46 @@
   "ar": "نعم",
   "en": "Yes"
  },
+ "drafts.days": {
+  "ar": "قبل {n} يوم",
+  "en": "{n} days ago"
+ },
+ "drafts.delete": {
+  "ar": "حذف المسودة",
+  "en": "Delete draft"
+ },
+ "drafts.hours": {
+  "ar": "قبل {n} ساعة",
+  "en": "{n} h ago"
+ },
+ "drafts.just_now": {
+  "ar": "الآن",
+  "en": "Just now"
+ },
+ "drafts.keep_current": {
+  "ar": "متابعة هذا الإعلان",
+  "en": "Keep writing this post"
+ },
+ "drafts.minutes": {
+  "ar": "قبل {n} دقيقة",
+  "en": "{n} min ago"
+ },
+ "drafts.new_post": {
+  "ar": "إعلان جديد",
+  "en": "New post"
+ },
+ "drafts.subtitle": {
+  "ar": "محفوظة على هذا الهاتف فقط. أكمل واحدة أو ابدأ إعلانًا جديدًا.",
+  "en": "Saved on this phone only. Continue one or start a new post."
+ },
+ "drafts.title": {
+  "ar": "مسوداتك",
+  "en": "Your drafts"
+ },
+ "drafts.untitled": {
+  "ar": "بدون عنوان",
+  "en": "Untitled"
+ },
  "duration_chip_selector.duration": {
   "ar": "المدة",
   "en": "Duration"
@@ -2091,6 +2143,10 @@
   "ar": "الكل",
   "en": "Everything"
  },
+ "map.clear": {
+  "ar": "مسح",
+  "en": "Clear"
+ },
  "map.empty": {
   "ar": "لا توجد إعلانات هنا. صغّر الخريطة أو حرّكها.",
   "en": "No posts here. Zoom out or move the map."
@@ -2103,13 +2159,49 @@
   "ar": "عروض",
   "en": "Offers"
  },
+ "map.place_not_found": {
+  "ar": "لم نجد هذا المكان. جرّب اسم مدينة أو منطقة.",
+  "en": "Could not find that place. Try a city or area name."
+ },
  "map.requests": {
   "ar": "طلبات",
   "en": "Requests"
  },
+ "map.search": {
+  "ar": "بحث",
+  "en": "Search"
+ },
+ "map.search_mode": {
+  "ar": "البحث عن",
+  "en": "Search for"
+ },
+ "map.search_place_hint": {
+  "ar": "ابحث عن مدينة أو منطقة",
+  "en": "Search a city or area"
+ },
+ "map.search_places": {
+  "ar": "مكان",
+  "en": "A place"
+ },
+ "map.search_posts": {
+  "ar": "إعلانات على الخريطة",
+  "en": "Posts on the map"
+ },
+ "map.search_posts_hint": {
+  "ar": "ابحث في الإعلانات هنا، مثل آيفون",
+  "en": "Search posts here, e.g. iPhone"
+ },
  "map.title": {
   "ar": "إعلانات بالقرب منك",
   "en": "Posts near you"
+ },
+ "map.zoom_in": {
+  "ar": "تكبير",
+  "en": "Zoom in"
+ },
+ "map.zoom_out": {
+  "ar": "تصغير",
+  "en": "Zoom out"
  },
  "media.add_hint": {
   "ar": "أضف حتى {n} صور أو فيديو (دقيقة واحدة كحد أقصى)",
@@ -4922,6 +5014,10 @@
   "ar": "تطبيق",
   "en": "Apply"
  },
+ "studio.apply_price": {
+  "ar": "تطبيق · {p}",
+  "en": "Apply · {p}"
+ },
  "studio.background": {
   "ar": "خلفية استوديو",
   "en": "Studio background"
@@ -4945,6 +5041,10 @@
  "studio.cinematic": {
   "ar": "لقطة سينمائية (عالية الدقة)",
   "en": "Cinematic shot (HD)"
+ },
+ "studio.close": {
+  "ar": "إغلاق",
+  "en": "Close"
  },
  "studio.crop_feed": {
   "ar": "قص للصفحة الرئيسية",
@@ -4974,6 +5074,10 @@
   "ar": "صور محسّنة بالذكاء الاصطناعي",
   "en": "AI-enhanced photos"
  },
+ "studio.hold_compare": {
+  "ar": "اضغط مطولًا للمقارنة",
+  "en": "Hold to compare"
+ },
  "studio.keep_original": {
   "ar": "الإبقاء على الأصلية",
   "en": "Keep the original"
@@ -4985,6 +5089,26 @@
  "studio.looks_good": {
   "ar": "الصورة جيدة.",
   "en": "Photo looks good."
+ },
+ "studio.not_now": {
+  "ar": "ليس الآن",
+  "en": "Not now"
+ },
+ "studio.original": {
+  "ar": "الأصلية",
+  "en": "Original"
+ },
+ "studio.restore_original": {
+  "ar": "استعادة الأصلية",
+  "en": "Restore the original"
+ },
+ "studio.rules_ai": {
+  "ar": "استخدام عادل: لا يغيّر الذكاء الاصطناعي حالة المنتج أو حجمه أو لونه أو عيوبه. تُعلَّم الصورة بـ«محسّنة بالذكاء الاصطناعي» للمشترين. تُرسَل صورتك بأمان للمعالجة ولا تُحفظ. إن فشلت العملية تُعاد النقاط.",
+  "en": "Fair use: AI never changes the item’s condition, size, colour or defects. The photo is marked “AI-enhanced” for buyers. Your photo is sent securely for processing and not kept. If it fails, the points come back."
+ },
+ "studio.rules_free": {
+  "ar": "مجانية وتتم على هاتفك. لا يُرفع أي شيء. يمكنك التراجع في أي وقت.",
+  "en": "Free and done on your phone. Nothing is uploaded. You can undo it any time."
  },
  "studio.scene": {
   "ar": "مشهد واقعي",
@@ -5038,13 +5162,61 @@
   "ar": "تراجع",
   "en": "Undo"
  },
+ "studio.undo_edit": {
+  "ar": "تراجع",
+  "en": "Undo"
+ },
  "studio.use_it": {
   "ar": "استخدمها",
   "en": "Use it"
  },
+ "studio.version": {
+  "ar": "النسخة {n}",
+  "en": "Version {n}"
+ },
  "studio.video": {
   "ar": "فيديو سينمائي (4 ث)",
   "en": "Cinematic video (4 s)"
+ },
+ "studio.what_background": {
+  "ar": "يفصل المنتج ويضعه على خلفية استوديو بيضاء نظيفة مع ظل خفيف. الأفضل للمنتجات.",
+  "en": "Cuts the item out and places it on a clean white studio background with a soft shadow. Best for products."
+ },
+ "studio.what_blur": {
+  "ar": "ارسم فوق الوجوه أو لوحات السيارات أو أرقام الهواتف والمنازل لإخفائها قبل النشر.",
+  "en": "Draw over faces, number plates or phone and house numbers to hide them before posting."
+ },
+ "studio.what_cinematic": {
+  "ar": "لقطة عالية الدقة بمظهر احترافي للمنتج نفسه مع إضاءة درامية، كأنها إعلان.",
+  "en": "A high-resolution, professional-looking shot of the same item with dramatic light, like an advert."
+ },
+ "studio.what_crop_feed": {
+  "ar": "يقص الصورة بنسبة 4:5، الشكل الذي يملأ الصفحة الرئيسية، مع الإبقاء على منتصفها.",
+  "en": "Crops to 4:5, the shape that fills the feed, keeping the middle of the photo."
+ },
+ "studio.what_crop_reels": {
+  "ar": "يقص الصورة طوليًا بنسبة 9:16 للريلز والعرض بملء الشاشة.",
+  "en": "Crops to tall 9:16 for Reels and full-screen viewing."
+ },
+ "studio.what_crop_square": {
+  "ar": "يقص الصورة مربعة 1:1، مناسبة للشبكات والصور المصغّرة.",
+  "en": "Crops to a 1:1 square, good for grids and thumbnails."
+ },
+ "studio.what_light": {
+  "ar": "يوازن الإضاءة والألوان ويوضّح التفاصيل كأنها صورة بإضاءة جيدة. يبقى المنتج والخلفية كما هما.",
+  "en": "Balances light and colour and sharpens details, like a well-lit photo. The item and the background stay the same."
+ },
+ "studio.what_logo": {
+  "ar": "يضيف شعار متجرك في الزاوية، لتبقى الصورة منسوبة لك عند مشاركتها.",
+  "en": "Adds your shop logo in the corner, so the photo stays yours when shared."
+ },
+ "studio.what_scene": {
+  "ar": "يضع المنتج في مشهد واقعي ({scene}) ليتخيّل المشتري استخدامه. لا يتغيّر المنتج نفسه.",
+  "en": "Places the item in a realistic setting ({scene}) so buyers can picture it in use. The item itself is not changed."
+ },
+ "studio.what_video": {
+  "ar": "فيديو مدته 4 ثوانٍ بحركة كاميرا بطيئة حول هذه الصورة، يُضاف إلى إعلانك كفيديو. يستغرق بضع دقائق.",
+  "en": "A 4-second video with a slow camera move around this photo, added to your post as a video. Takes a few minutes."
  },
  "studio.working": {
   "ar": "جارٍ تجهيز صورتك… حوالي دقيقة",
