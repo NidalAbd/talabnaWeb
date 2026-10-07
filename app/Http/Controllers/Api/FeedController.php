@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\ServicePost;
+use App\Services\Feed\NearestCountries;
 use App\Services\Feed\SponsoredPicker;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -19,6 +20,10 @@ use Illuminate\Support\Facades\DB;
  * user has not seen yet first and the seen ones after them, so every visit starts with something new. `seen_before`
  * (unix time, sent by the app with every page of one scroll session) freezes what counts as seen, so posts marked
  * while scrolling don't reshuffle the next pages.
+ *
+ * Nearest country (2026-10-08): without a country filter the user's own country comes first, then the other countries
+ * by distance. A country filter on a country with no posts shows the nearest country that has some instead of an
+ * empty feed (`fallback_country_id` in the answer says which).
  */
 class FeedController extends Controller
 {
@@ -56,6 +61,15 @@ class FeedController extends Controller
         }
         $since = $reportsSeen ? (int) $d['seen_before'] : (int) Cache::get($sessionKey, now()->timestamp);
         $seenBefore = now()->setTimestamp(min($since, now()->timestamp));
+
+        // A chosen country with no matching posts: use the nearest country that has some (not for a city filter).
+        $fallbackCountry = null;
+        if (isset($d['country_id']) && ! isset($d['city_id'])) {
+            $fallbackCountry = $this->nearestCountryWithPosts((int) $d['country_id'], $d);
+            if ($fallbackCountry !== null) {
+                $d['country_id'] = $fallbackCountry;
+            }
+        }
 
         $filters = function ($q) use ($d) {
             $q->where('state', 'published')
@@ -98,6 +112,13 @@ class FeedController extends Controller
             ->when($poolIds, fn ($q) => $q->whereNotIn('id', $poolIds))
             ->orderByRaw('EXISTS (SELECT 1 FROM feed_seen fs WHERE fs.user_id = ? AND fs.service_post_id = service_posts.id AND fs.seen_at < ?) ASC',
                 [$me->id, $seenBefore])
+            ->when(! isset($d['country_id']) && $me->country_id, function ($q) use ($me) {
+                // Own country first, then the nearest ones.
+                $order = NearestCountries::ids((int) $me->country_id);
+                if ($order) {
+                    $q->orderByRaw('FIELD(service_posts.country_id, ' . implode(',', array_reverse($order)) . ') DESC');
+                }
+            })
             ->orderByDesc('created_at')->orderByDesc('id')
             ->paginate(self::PER_PAGE, ['*'], 'page', $page);
 
@@ -112,8 +133,33 @@ class FeedController extends Controller
             DB::table('feed_seen')->insertOrIgnore(array_map(fn ($p) => ['user_id' => $me->id, 'service_post_id' => $p->id, 'seen_at' => $now], $items));
         }
 
-        return response()->json(['servicePosts' => $organic]);
+        return response()->json(['servicePosts' => $organic] + ($fallbackCountry ? ['fallback_country_id' => $fallbackCountry] : []));
     }
+
+    /** The nearest country (not $countryId) with posts matching the other filters, or null when $countryId has some. */
+    private function nearestCountryWithPosts(int $countryId, array $d): ?int
+    {
+        $match = function (int $id) use ($d) {
+            $q = ServicePost::query()->where('state', 'published')->where('country_id', $id);
+            empty($d['categories']) ? $q->whereNotIn('categories_id', [6, 7]) : $q->whereIn('categories_id', $d['categories']);
+            isset($d['type']) && $q->where('type', $d['type']);
+            isset($d['min_price']) && $q->where('price', '>=', (float) $d['min_price']);
+            isset($d['max_price']) && $q->where('price', '<=', (float) $d['max_price']);
+
+            return $q->exists();
+        };
+        if ($match($countryId)) {
+            return null;
+        }
+        foreach (NearestCountries::ids($countryId) as $id) {
+            if ($id !== $countryId && $match($id)) {
+                return $id;
+            }
+        }
+
+        return null;
+    }
+
 
     /** POST /api/feed/seen {ids: [..]} - posts that stayed on screen in the feed. The first time counts (stable order). */
     public function seen(Request $request): JsonResponse

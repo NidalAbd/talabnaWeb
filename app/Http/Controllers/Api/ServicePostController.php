@@ -950,8 +950,13 @@ class ServicePostController extends Controller
             ELSE 3
         END",
                 [$userCountryId, $userCityId, $userCountryId]
-            )
-                ->orderBy('created_at', 'DESC');
+            );
+            // Then the other countries nearest first (2026-10-08), so a user whose country has no posts sees the
+            // closest ones.
+            if ($userCountryId && ($near = \App\Services\Feed\NearestCountries::ids((int) $userCountryId))) {
+                $servicePosts->orderByRaw('FIELD(service_posts.country_id, ' . implode(',', array_reverse($near)) . ') DESC');
+            }
+            $servicePosts->orderBy('created_at', 'DESC');
 
             $servicePosts->where('categories_id', $category);
         }
