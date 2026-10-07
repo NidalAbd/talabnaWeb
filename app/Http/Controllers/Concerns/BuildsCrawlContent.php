@@ -25,7 +25,7 @@ trait BuildsCrawlContent
     {
         $path = '/' . ltrim(urldecode($path), '/');
 
-        return Cache::remember('seo_crawl_v1_' . md5($path . $locale), 1800, function () use ($path, $locale) {
+        return Cache::remember('seo_crawl_v2_' . md5($path . $locale), 1800, function () use ($path, $locale) {
             try {
                 return $this->buildCrawlContent($path, $locale);
             } catch (\Throwable $e) {
@@ -36,10 +36,13 @@ trait BuildsCrawlContent
         });
     }
 
-    private function buildCrawlContent(string $path, string $locale): ?array
+    /**
+     * What a public path shows: ['home'] | ['post' => ServicePost|null] | ['place' => [country, city, category, sub]]
+     * | null for paths without listings.
+     */
+    private function resolvePageContext(string $path): ?array
     {
         $country = $city = $category = $sub = null;
-        $post = null;
 
         if (preg_match('#^/services/(\d+)/[^/]+(?:/(\d+)/[^/]+)?(?:/(\d+)/[^/]+)?/?$#u', $path, $m)) {
             $country = countries::find($m[1]);
@@ -47,31 +50,77 @@ trait BuildsCrawlContent
             $category = !empty($m[3]) ? Categories::find($m[3]) : null;
         } elseif (preg_match('#^/services/([^/]+)(?:/([^/]+))?(?:/([^/]+))?(?:/([^/]+))?(?:/([^/]+-(\d+)))?/?$#u', $path, $m)) {
             if (!empty($m[6])) {
-                $post = ServicePost::find((int) $m[6]);
-            } else {
-                $country = SlugResolver::resolveCountry($m[1]);
-                $city = $country && !empty($m[2]) ? SlugResolver::resolveCity($m[2], $country->id) : null;
-                $category = !empty($m[3]) ? SlugResolver::resolveCategory($m[3]) : null;
-                $sub = $category && !empty($m[4]) ? SlugResolver::resolveSubcategory($m[4], $category->id) : null;
+                return ['post' => ServicePost::find((int) $m[6])];
             }
+            $country = SlugResolver::resolveCountry($m[1]);
+            $city = $country && !empty($m[2]) ? SlugResolver::resolveCity($m[2], $country->id) : null;
+            $category = !empty($m[3]) ? SlugResolver::resolveCategory($m[3]) : null;
+            $sub = $category && !empty($m[4]) ? SlugResolver::resolveSubcategory($m[4], $category->id) : null;
         } elseif (preg_match('#^/listing/(\d+)#', $path, $m)) {
-            $post = ServicePost::find((int) $m[1]);
+            return ['post' => ServicePost::find((int) $m[1])];
         } elseif (preg_match('#^/category/(\d+)(?:/[^/]+/subcategory/(\d+))?#u', $path, $m)) {
             $category = Categories::find($m[1]);
             $sub = $category && !empty($m[2]) ? Sub_categories::where('categories_id', $category->id)->find($m[2]) : null;
         } elseif ($path === '/' || $path === '/browse') {
-            return $this->homeCrawl($locale);
+            return ['home' => true];
         } else {
             return null;
         }
 
+        return ($country || $category) ? ['place' => [$country, $city, $category, $sub]] : null;
+    }
+
+    /**
+     * True when Google should not index this page (2026-10-08): a post from a bot account, or a place/category with
+     * no listing from a real account. Users still see these pages (with suggestions); they open up to Google
+     * by themselves once a real listing arrives.
+     */
+    public function isThinOrBotPage(string $path): bool
+    {
+        $path = '/' . ltrim(urldecode($path), '/');
+
+        return Cache::remember('seo_thin_v1_' . md5($path), 1800, function () use ($path) {
+            $ctx = $this->resolvePageContext($path);
+            if ($ctx === null || isset($ctx['home'])) {
+                return false;
+            }
+            if (array_key_exists('post', $ctx)) {
+                return $ctx['post'] !== null && $ctx['post']->isBotPost();
+            }
+            [$country, $city, $category, $sub] = $ctx['place'];
+
+            return !$this->placeScope(ServicePost::indexable(), $country, $city, $category, $sub)->exists();
+        });
+    }
+
+    private function placeScope($q, ?countries $country, ?cities $city, ?Categories $category, ?Sub_categories $sub)
+    {
+        if ($country) $q->where('country_id', $country->id);
+        if ($city) $q->where('city_id', $city->id);
+        if ($category) $q->where('categories_id', $category->id);
+        if ($sub) $q->where('sub_categories_id', $sub->id);
+
+        return $q;
+    }
+
+    private function buildCrawlContent(string $path, string $locale): ?array
+    {
+        $ctx = $this->resolvePageContext($path);
+        if ($ctx === null) {
+            return null;
+        }
+        if (isset($ctx['home'])) {
+            return $this->homeCrawl($locale);
+        }
+        $post = $ctx['post'] ?? null;
+        if (array_key_exists('post', $ctx) && !$post) {
+            return null;
+        }
+        [$country, $city, $category, $sub] = $ctx['place'] ?? [null, null, null, null];
+
         if ($post) {
             return $post->state === 'published' ? $this->postCrawl($post, $locale) : null;
         }
-        if (!$country && !$category) {
-            return null;
-        }
-
         return $this->placeCrawl($country, $city, $category, $sub, $locale);
     }
 
@@ -193,7 +242,10 @@ trait BuildsCrawlContent
         $links = [];
         foreach ($cats as $cat) {
             $url = $country ? $this->placeUrl($country, $city, $cat, $locale) : $this->categoryUrl($cat, $locale);
-            $links[] = $this->link($this->name($cat->name, $locale), $url, $counts[$cat->id] ?? 0);
+            if (empty($counts[$cat->id])) {
+                continue; // no real listings: the page is noindex, don't send crawlers there
+            }
+            $links[] = $this->link($this->name($cat->name, $locale), $url, $counts[$cat->id]);
         }
         // With listings first, so the strongest links lead.
         usort($links, fn ($a, $b) => ($b['count'] ?? 0) <=> ($a['count'] ?? 0));
@@ -223,9 +275,10 @@ trait BuildsCrawlContent
             ->select($column, DB::raw('count(*) as n'))->groupBy($column)->pluck('n', $column)->map(fn ($n) => (int) $n)->all();
     }
 
+    /** Listings shown to crawlers and counted in the links: real accounts only (bot posts are noindex). */
     private function published()
     {
-        return ServicePost::query()->where('state', 'published');
+        return ServicePost::query()->indexable();
     }
 
     private function listingItems($posts, string $locale): array

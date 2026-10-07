@@ -14,6 +14,28 @@ use Carbon\Carbon;
 
 class ServicePost extends Model
 {
+    /** Accounts made by `php artisan ai:seed` (GenerateAiBotUsers): their posts are AI-generated sample content. */
+    public const BOT_EMAIL_DOMAIN = '@bot.talabna.com';
+
+    /**
+     * Posts Google may index: published and written by a real account (2026-10-08). 81% of published posts came
+     * from the bot accounts, which is "scaled content" under Google's spam policies and puts the whole site at risk;
+     * they stay visible in the app and on the site but are noindex and kept out of the sitemaps.
+     */
+    public function scopeIndexable($query)
+    {
+        return $query->where('service_posts.state', 'published')
+            ->whereNotIn('service_posts.user_id', function ($q) {
+                $q->select('id')->from('users')->where('email', 'like', '%' . self::BOT_EMAIL_DOMAIN);
+            });
+    }
+
+    public function isBotPost(): bool
+    {
+        return \Illuminate\Support\Facades\DB::table('users')->where('id', $this->user_id)
+            ->where('email', 'like', '%' . self::BOT_EMAIL_DOMAIN)->exists();
+    }
+
     use HasFactory, HasTranslations;
 
     /**

@@ -62,7 +62,7 @@ class GenerateSitemap extends Command
         $write('sitemap-categories.xml', $controller->categories()->getContent());
 
         $this->info('Generating listings (paginated)...');
-        $listingsTotal = ServicePost::where('state', 'published')->count();
+        $listingsTotal = ServicePost::indexable()->count();
         $listingsChunks = max(1, (int) ceil($listingsTotal / SitemapController::listingsPerPage()));
         for ($i = 1; $i <= $listingsChunks; $i++) {
             $write("sitemap-listings-{$i}.xml", $controller->listings($i)->getContent());
@@ -84,7 +84,7 @@ class GenerateSitemap extends Command
 
         $this->info('Generating users (paginated)...');
         $usersTotal = User::where('is_active', '!=', 'banned')
-            ->whereHas('servicePosts', fn($q) => $q->where('state', 'published'))
+            ->whereHas('servicePosts', fn($q) => $q->indexable())
             ->count();
         $usersChunks = max(1, (int) ceil($usersTotal / SitemapController::usersPerPage()));
         for ($i = 1; $i <= $usersChunks; $i++) {

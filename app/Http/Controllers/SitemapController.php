@@ -96,7 +96,7 @@ class SitemapController extends Controller
     {
         if ($static = $this->tryStaticFile('sitemap.xml')) return $static;
         try {
-        $content = Cache::remember('sitemap-index-v8', 3600, function () {
+        $content = Cache::remember('sitemap-index-v9', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
             $now = now()->toIso8601String();
@@ -119,7 +119,7 @@ class SitemapController extends Controller
             }
 
             // Listings sitemap (paginated)
-            $totalListings = ServicePost::where('state', 'published')->count();
+            $totalListings = ServicePost::indexable()->count(); // real accounts only (no bot posts)
             $listingPages = max(1, (int) ceil($totalListings / self::LISTINGS_PER_PAGE));
             for ($i = 1; $i <= $listingPages; $i++) {
                 $xml .= '<sitemap><loc>' . url("/sitemap-listings-{$i}.xml") . '</loc><lastmod>' . $now . '</lastmod></sitemap>';
@@ -130,7 +130,7 @@ class SitemapController extends Controller
             // to flag them as "Crawled - currently not indexed".
             $totalUsers = User::where('is_active', '!=', 'banned')
                 ->whereHas('servicePosts', function ($q) {
-                    $q->where('state', 'published');
+                    $q->indexable();
                 })
                 ->count();
             $userPages = max(1, (int) ceil($totalUsers / self::USERS_PER_PAGE));
@@ -255,7 +255,7 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-locations-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-locations-v9-{$page}";
+        $cacheKey = "sitemap-locations-v10-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationRecords();
             $offset = ($page - 1) * self::LOCATIONS_PER_PAGE;
@@ -297,13 +297,10 @@ class SitemapController extends Controller
      */
     private function locationRecords(): array
     {
-        return Cache::remember('location-records-v2', 3600, function () {
+        // Only places with at least one real (non-bot) listing; the rest are noindex on the page (SeoController).
+        return Cache::remember('location-records-v3', 3600, function () {
             $records = [];
-            $countries = countries::whereHas('cities', function($q) {
-                $q->whereHas('servicePosts', fn($sq) => $sq->where('state', 'published'));
-            })->orWhereIn('id', function($q) {
-                $q->select('country_id')->from('service_posts')->where('state', 'published')->distinct();
-            })->get();
+            $countries = countries::whereIn('id', ServicePost::indexable()->select('country_id')->distinct())->get();
 
             foreach ($countries as $country) {
                 // Store the raw multilingual JSON name so per-locale slugs
@@ -316,10 +313,7 @@ class SitemapController extends Controller
                     'priority' => '0.8',
                 ];
                 $cities = cities::where('country_id', $country->id)
-                    ->whereIn('id', function($q) {
-                        $q->select('city_id')->from('service_posts')
-                            ->where('state', 'published')->whereNotNull('city_id')->distinct();
-                    })->get();
+                    ->whereIn('id', ServicePost::indexable()->whereNotNull('city_id')->select('city_id')->distinct())->get();
                 foreach ($cities as $city) {
                     $records[] = [
                         'type' => 'city',
@@ -342,7 +336,7 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-location-categories-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-location-categories-v8-{$page}";
+        $cacheKey = "sitemap-location-categories-v9-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationCategoryRecords();
             $offset = ($page - 1) * self::LOC_CAT_PER_PAGE;
@@ -375,20 +369,17 @@ class SitemapController extends Controller
 
     private function locationCategoryRecords(): array
     {
-        return Cache::remember('location-category-records-v2', 3600, function () {
+        return Cache::remember('location-category-records-v3', 3600, function () {
             $records = [];
             $categories = Categories::where('isSuspended', false)->get();
-            $cities = cities::whereIn('id', function($q) {
-                $q->select('city_id')->from('service_posts')
-                    ->where('state', 'published')->whereNotNull('city_id')->distinct();
-            })->with('country')->get();
+            $cities = cities::whereIn('id', ServicePost::indexable()->whereNotNull('city_id')->select('city_id')->distinct())->with('country')->get();
 
             foreach ($cities as $city) {
                 if (!$city->country) continue;
                 $countryRaw = $city->country->getAttributes()['name'] ?? $city->country->name;
                 $cityRaw = $city->getAttributes()['name'] ?? $city->name;
                 foreach ($categories as $cat) {
-                    $hasServices = ServicePost::where('state', 'published')
+                    $hasServices = ServicePost::indexable()
                         ->where('city_id', $city->id)
                         ->where('categories_id', $cat->id)
                         ->exists();
@@ -414,13 +405,13 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-listings-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-listings-v7-{$page}";
+        $cacheKey = "sitemap-listings-v8-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::LISTINGS_PER_PAGE;
             $offset = ($page - 1) * $perPage;
 
-            $listings = ServicePost::where('state', 'published')
+            $listings = ServicePost::indexable()
                 ->orderBy('id')
                 ->skip($offset)
                 ->take($perPage)
@@ -462,7 +453,7 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-users-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-users-v7-{$page}";
+        $cacheKey = "sitemap-users-v8-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::USERS_PER_PAGE;
@@ -470,7 +461,7 @@ class SitemapController extends Controller
 
             $users = User::where('is_active', '!=', 'banned')
                 ->whereHas('servicePosts', function ($q) {
-                    $q->where('state', 'published');
+                    $q->indexable();
                 })
                 ->orderBy('id')
                 ->skip($offset)

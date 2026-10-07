@@ -42,7 +42,7 @@ class SeoController extends Controller
         }
 
         // Cache SEO data for 5 minutes to improve performance
-        $cacheKey = 'seo_v4_' . md5($path . $locale); // v3: 72 web locales, listing hreflang = translated only // v2: hreflang limited to web locales
+        $cacheKey = 'seo_v5_' . md5($path . $locale); // v3: 72 web locales, listing hreflang = translated only // v2: hreflang limited to web locales
 
         return Cache::remember($cacheKey, 1800, function () use ($path, $locale) {
             return $this->generateSeoData($path, $locale);
@@ -127,6 +127,15 @@ class SeoController extends Controller
             $seo = $this->getHomeSeo($locale, $seo, $baseUrl);
         } elseif ($path === '/browse') {
             $seo = $this->getBrowseSeo($locale, $seo, $baseUrl);
+        }
+
+        // Bot-made posts and places/categories/profiles without a real listing: noindex (still shown to users).
+        if (empty($seo['notFound'])) {
+            if (preg_match('#^/user/(\d+)#', $path, $um)) {
+                $seo['noindex'] = !ServicePost::indexable()->where('user_id', (int) $um[1])->exists();
+            } elseif ($this->isThinOrBotPage($path)) {
+                $seo['noindex'] = true;
+            }
         }
 
         // Re-derive hreflang alternates from the FINAL canonical URL after
