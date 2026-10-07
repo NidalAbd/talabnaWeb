@@ -1039,6 +1039,10 @@
   "ar": "مسح",
   "en": "Clear"
  },
+ "chat2.confirm": {
+  "ar": "تأكيد",
+  "en": "Confirm"
+ },
  "chat2.confirm_deal": {
   "ar": "تأكيد الصفقة",
   "en": "Confirm deal"
@@ -1051,9 +1055,21 @@
   "ar": "الصفقة مؤكدة",
   "en": "Deal confirmed"
  },
+ "chat2.deal_done": {
+  "ar": "تمت الصفقة",
+  "en": "Deal done"
+ },
+ "chat2.deal_short": {
+  "ar": "صفقة",
+  "en": "Deal"
+ },
  "chat2.deal_waiting": {
   "ar": "بانتظار التأكيد",
   "en": "Waiting for confirmation"
+ },
+ "chat2.deal_waiting_short": {
+  "ar": "بانتظار",
+  "en": "Waiting"
  },
  "chat2.deals_count": {
   "ar": "{n} صفقات مؤكدة",
@@ -1226,6 +1242,14 @@
  "chat2.pin": {
   "ar": "تثبيت في الأعلى",
   "en": "Pin to top"
+ },
+ "chat2.pv_counter": {
+  "ar": "عرض مقابل",
+  "en": "Counter-offer"
+ },
+ "chat2.pv_offer": {
+  "ar": "عرض سعر",
+  "en": "Price offer"
  },
  "chat2.pv_proposed": {
   "ar": "تم اقتراح صفقة",
@@ -2566,6 +2590,10 @@
   "ar": "تم رفض العرض",
   "en": "Offer declined"
  },
+ "offer.listed_at": {
+  "ar": "السعر المعروض {price}",
+  "en": "Listed at {price}"
+ },
  "offer.make": {
   "ar": "قدّم عرضًا",
   "en": "Make an offer"
@@ -2573,6 +2601,30 @@
  "offer.send": {
   "ar": "إرسال العرض",
   "en": "Send offer"
+ },
+ "offer.short": {
+  "ar": "عرض سعر",
+  "en": "Offer"
+ },
+ "offer.status_accepted": {
+  "ar": "مقبول",
+  "en": "Accepted"
+ },
+ "offer.status_countered": {
+  "ar": "تم الرد بعرض",
+  "en": "Countered"
+ },
+ "offer.status_declined": {
+  "ar": "مرفوض",
+  "en": "Declined"
+ },
+ "offer.status_open": {
+  "ar": "مفتوح",
+  "en": "Open"
+ },
+ "offer.status_withdrawn": {
+  "ar": "مسحوب",
+  "en": "Withdrawn"
  },
  "offer.they_countered": {
   "ar": "{name} قدّم عرضًا مضادًا",
