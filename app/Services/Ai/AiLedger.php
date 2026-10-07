@@ -167,7 +167,7 @@ class AiLedger
     /** @return bool false when the request was already settled (e.g. refunded as too slow) */
     public function succeed(AiRequest $request, array $result = [], ?string $path = null): bool
     {
-        return DB::transaction(function () use ($request, $result, $path) {
+        $done = DB::transaction(function () use ($request, $result, $path) {
             $row = AiRequest::whereKey($request->id)->lockForUpdate()->first();
             if (! $row || $row->status !== AiRequest::PROCESSING) {
                 return false;
@@ -182,6 +182,28 @@ class AiLedger
 
             return true;
         });
+        if ($done && $path) {
+            $this->notifyReady($request->refresh());
+        }
+
+        return $done;
+    }
+
+    /**
+     * A finished picture/video the user may no longer be waiting for: always for videos (minutes), for pictures only
+     * when they took over a minute (the user has probably left the screen).
+     */
+    private function notifyReady(AiRequest $r): void
+    {
+        $kind = $r->kind();
+        if (! in_array($kind, ['video', 'image'], true) || ($kind === 'image' && (int) $r->duration_ms < 60000)) {
+            return;
+        }
+        try {
+            $r->user?->notify(new \App\Notifications\AiReadyNotification($kind, (string) $r->uuid));
+        } catch (\Throwable $e) {
+            Log::warning('ai.ready_notification_failed', ['request' => $r->uuid, 'message' => $e->getMessage()]);
+        }
     }
 
     /** Return the points and close the request as failed. Safe to call any number of times. */

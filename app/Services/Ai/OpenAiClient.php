@@ -26,7 +26,8 @@ class OpenAiClient
     public function fail(Response $response, string $what): never
     {
         $body = (string) $response->json('error.code') ?: (string) $response->json('error.type');
-        Log::warning("ai.{$what}.rejected", ['status' => $response->status(), 'code' => $body, 'message' => mb_substr((string) $response->json('error.message'), 0, 200)]);
+        // Error level: these mean a paid feature failed for a user and must be seen (admin > Server errors).
+        Log::error("ai.{$what}.rejected", ['status' => $response->status(), 'code' => $body, 'message' => mb_substr((string) $response->json('error.message'), 0, 200)]);
 
         if ($response->status() === 400 && (str_contains($body, 'moderation') || str_contains($body, 'content_policy') || str_contains((string) $response->json('error.message'), 'safety'))) {
             throw new AiProviderException('blocked', 'This request was blocked by the AI safety rules. Try a different description.', 422);
