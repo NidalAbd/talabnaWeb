@@ -89,7 +89,8 @@ class AiMediaService
     {
         $parts = [
             ['name' => 'model', 'contents' => (string) config('ai.video_model', 'sora-2')],
-            ['name' => 'prompt', 'contents' => 'Short clip for a classified ad, steady camera, no text or logos. '.$prompt],
+            ['name' => 'prompt', 'contents' => 'Premium vertical product commercial, 2026 look. Smooth gimbal camera, cinematic '
+                .'shallow depth of field, clean modern colour grade, crisp detail. No text, captions, logos or watermarks. '.$prompt],
             ['name' => 'seconds', 'contents' => $seconds ?? (string) config('ai.video_seconds', '4')],
             ['name' => 'size', 'contents' => (string) config('ai.video_size', '720x1280')],
         ];
@@ -110,6 +111,64 @@ class AiMediaService
         }
 
         return $id;
+    }
+
+    /**
+     * The first frame of a photo video (2026-10-07): the seller's photo recomposed by the image model into a clean,
+     * full-bleed vertical product shot, then fitted to the video size. The old frame (photo on a darkened, blurred copy
+     * of itself) made the clip look cheap. Falls back to [fitForVideo] if the edit fails.
+     */
+    public function heroFrameForVideo(string $imageBytes, string $mime, ?string $subject, string $uuid): string
+    {
+        $prompt = 'Recompose this photo as a vertical premium product shot: the exact same item'.($subject ? " ({$subject})" : '')
+            .' centred and filling about 60% of the frame, sharp, lit by soft studio key light with a gentle rim light, '
+            .'on a tasteful softly blurred setting that suits it. Keep the item exactly as it is: same shape, colours, text, '
+            .'labels, wear and marks. Never replace or invent the item. No text, no watermark.';
+        $ext = str_contains($mime, 'png') ? 'png' : (str_contains($mime, 'webp') ? 'webp' : 'jpg');
+        $response = $this->openai->http(150)
+            ->attach('image', $imageBytes, 'photo.'.$ext, ['Content-Type' => $mime])
+            ->post(OpenAiClient::BASE.'/images/edits', [
+                'model' => config('ai.image_model', 'gpt-image-1'),
+                'prompt' => $prompt,
+                'size' => '1024x1536',
+                'quality' => 'high',
+                'input_fidelity' => 'high',
+                'output_format' => 'jpeg',
+                'n' => '1',
+            ]);
+        if (! $response->successful()) {
+            throw new AiProviderException('provider_error', 'hero frame failed', 502);
+        }
+        $bytes = base64_decode((string) $response->json('data.0.b64_json'), true);
+        if ($bytes === false || strlen($bytes) < 1000) {
+            throw new AiProviderException('bad_answer', 'hero frame empty', 502);
+        }
+
+        return self::coverToVideoSize($bytes);
+    }
+
+    /** Scales an image to cover the video size (config ai.video_size) and crops the centre. */
+    public static function coverToVideoSize(string $imageBytes): string
+    {
+        [$w, $h] = array_map('intval', explode('x', (string) config('ai.video_size', '1024x1792')));
+        $src = @imagecreatefromstring($imageBytes);
+        if (! $src) {
+            throw new AiProviderException('bad_image', 'This photo could not be read.', 422);
+        }
+        $sw = imagesx($src);
+        $sh = imagesy($src);
+        $canvas = imagecreatetruecolor($w, $h);
+        $cover = max($w / $sw, $h / $sh);
+        $bw = (int) ceil($sw * $cover);
+        $bh = (int) ceil($sh * $cover);
+        imagecopyresampled($canvas, $src, (int) (($w - $bw) / 2), (int) (($h - $bh) / 2), 0, 0, $bw, $bh, $sw, $sh);
+        ob_start();
+        imagejpeg($canvas, null, 92);
+        $out = (string) ob_get_clean();
+        imagedestroy($canvas);
+        imagedestroy($src);
+
+        return $out;
     }
 
     /** The photo centred on a canvas of the video's size (config ai.video_size), soft-blurred copy behind it. */

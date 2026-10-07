@@ -293,19 +293,34 @@ class AiController extends Controller
         $d = $request->validate([
             'request_id' => 'required|uuid',
             'image' => 'required|file|mimes:jpeg,jpg,png,webp|max:10240',
-            'seconds' => 'nullable|in:4,8',
+            'seconds' => 'nullable|in:4,8,12',
         ]);
         $user = $request->user();
         if ($early = $this->precheck($user->id, 'studio_video', true)) {
             return $early;
         }
         try {
-            $reference = \App\Services\Ai\AiMediaService::fitForVideo((string) file_get_contents($request->file('image')->getRealPath()));
+            $photoBytes = (string) file_get_contents($request->file('image')->getRealPath());
+            $photoMime = $request->file('image')->getMimeType() ?: 'image/jpeg';
+            $reference = \App\Services\Ai\AiMediaService::fitForVideo($photoBytes); // fallback first frame
         } catch (AiProviderException $e) {
             return response()->json(['error' => $e->getMessage()], $e->httpStatus);
         }
+        // Like the other studio tools: a photo with no clear item is refused before any charge.
+        $subject = null;
+        if ($this->text->isConfigured()) {
+            try {
+                $check = $this->text->photoSubject($photoBytes, $photoMime);
+                if (! $check['has_item']) {
+                    return response()->json(['error' => 'This photo has no clear item to feature. Use a photo of the item you are selling. You were not charged.', 'code' => 'no_item'], 422);
+                }
+                $subject = $check['item'];
+            } catch (\Throwable $e) {
+                Log::warning('ai.studio_video.subject_check_failed', ['message' => $e->getMessage()]);
+            }
+        }
         try {
-            $ai = $this->ledger->start($user->id, 'studio_video', $d['request_id'], ['provider' => 'openai', 'seconds' => $d['seconds'] ?? '4', 'ip' => $request->ip()]);
+            $ai = $this->ledger->start($user->id, 'studio_video', $d['request_id'], ['provider' => 'openai', 'ip' => $request->ip()]);
         } catch (InsufficientBalanceException $e) {
             return $this->notEnough($e, 'studio_video');
         } catch (AiProviderException $e) {
@@ -315,9 +330,20 @@ class AiController extends Controller
             return $this->respond($ai);
         }
         try {
-            $prompt = 'Cinematic, slow and smooth camera move around this exact item, soft natural light, premium advert feel. '
-                .'Keep the item exactly as it is (shape, colour, condition). No people, no text.';
-            $ai->update(['provider_job_id' => $this->media->startVideo($prompt, $reference, $d['seconds'] ?? '4')]);
+            // A real first frame (paid already): the photo recomposed as a vertical hero shot. The phone may stop waiting
+            // (it then asks for the outcome); finish anyway.
+            ignore_user_abort(true);
+            @set_time_limit(240);
+            try {
+                $reference = $this->media->heroFrameForVideo($photoBytes, $photoMime, $subject, $ai->uuid);
+            } catch (\Throwable $e) {
+                Log::warning('ai.studio_video.hero_frame_fallback', ['message' => $e->getMessage()]);
+            }
+            $prompt = 'Shot list: slow dolly-in toward the item with a subtle parallax, a soft light sweep gliding across its '
+                .'surface to reveal texture and detail, gentle 10-degree orbit, then settle on a clean hero framing for the last second. '
+                .'The item stays exactly as in the first frame (shape, colours, labels, condition), sharp and well lit, never morphing. '
+                .'No people, no hands, no text.';
+            $ai->update(['provider_job_id' => $this->media->startVideo($prompt, $reference, $d['seconds'] ?? null)]);
         } catch (AiProviderException $e) {
             $this->ledger->fail($ai, $e->errorCode, $e->getMessage());
         } catch (\Throwable $e) {

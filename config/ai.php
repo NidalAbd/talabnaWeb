@@ -12,9 +12,10 @@ return [
     'image_model' => env('AI_IMAGE_MODEL', 'gpt-image-1'),
     'image_quality' => env('AI_IMAGE_QUALITY', 'medium'),
     'image_size' => env('AI_IMAGE_SIZE', '1024x1024'),
-    'video_model' => env('AI_VIDEO_MODEL', 'sora-2'),
-    'video_seconds' => env('AI_VIDEO_SECONDS', '4'),
-    'video_size' => env('AI_VIDEO_SIZE', '720x1280'),
+    // 2026-10-07: pro model, vertical HD, 8 s (sora-2 at 720p/4 s looked dated). About $4 per clip.
+    'video_model' => env('AI_VIDEO_MODEL', 'sora-2-pro'),
+    'video_seconds' => env('AI_VIDEO_SECONDS', '8'),
+    'video_size' => env('AI_VIDEO_SIZE', '1024x1792'),
 
     // A request still "processing" after this long is given up on and refunded.
     'stale_minutes' => ['text' => 3, 'image' => 6, 'video' => 20],
