@@ -235,7 +235,10 @@ class AiController extends Controller
         $bytes = (string) file_get_contents($file->getRealPath());
         $mime = $file->getMimeType() ?: 'image/jpeg';
         $keep = ' Keep the item exactly as it is: same shape, colours, text, labels, wear and any marks or damage. '
-            .'Do not add, remove or change anything on the item. No text, no watermark.';
+            .'Do not add, remove or change anything on the item. No text, no watermark.'
+            // A photo without one clear item (a field of flowers) came back as an unrelated product.
+            .' Use only what is in this photo: never invent, replace or swap the item for another object. '
+            .'If there is no single clear item, keep the whole photo as it is and only improve light and colour.';
         $scenes = [
             'living_room' => 'a bright modern living room',
             'outdoor' => 'an outdoor setting in soft daylight',
