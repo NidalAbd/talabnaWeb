@@ -31,7 +31,8 @@ class AiActionsTest extends TestCase
         parent::setUp();
         $this->migrateTolerantly();
         DB::statement('PRAGMA foreign_keys = OFF');
-        config(['services.openai.key' => 'test-key', 'services.gemini.key' => 'test-gemini-key']);
+        // Text tests fake OpenAI only; the backup chain has its own tests (AiTextChainTest).
+        config(['services.openai.key' => 'test-key', 'services.gemini.key' => 'test-gemini-key', 'ai.text_providers' => ['openai']]);
         Storage::fake('local');
 
         // The ledger exactly as production had it: type is an enum WITHOUT 'refund' (SQLite enforces it as a CHECK).

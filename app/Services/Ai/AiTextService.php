@@ -11,13 +11,13 @@ use Illuminate\Support\Facades\Log;
  */
 class AiTextService
 {
-    public function __construct(private OpenAiClient $openai)
+    public function __construct(private AiTextChain $chain)
     {
     }
 
     public function isConfigured(): bool
     {
-        return $this->openai->isConfigured();
+        return $this->chain->isConfigured();
     }
 
     public const TITLE_MAX = 50;
@@ -150,28 +150,8 @@ class AiTextService
             .($currency ? "Give a rough typical second-hand price in {$currency} as a whole number, or null if you cannot judge. " : 'Price: null. ')
             .'Answer with JSON only: {"title": string, "description": string, "category_id": number, "sub_category_id": number|null, '
             .'"price": number|null, "condition": "new"|"like_new"|"used"|"for_parts"|null}.';
-        try {
-            $response = $this->openai->http(60)->post(OpenAiClient::BASE.'/chat/completions', [
-                'model' => config('ai.vision_model', 'gpt-4o-mini'),
-                'messages' => [
-                    ['role' => 'system', 'content' => $system],
-                    ['role' => 'user', 'content' => [
-                        ['type' => 'text', 'text' => "Categories:\n".implode("\n", $lines)],
-                        ['type' => 'image_url', 'image_url' => ['url' => 'data:'.$mime.';base64,'.base64_encode($imageBytes), 'detail' => 'low']],
-                    ]],
-                ],
-                'response_format' => ['type' => 'json_object'],
-                'temperature' => 0.3,
-                'max_tokens' => 500,
-            ]);
-        } catch (\Throwable $e) {
-            $this->openai->unreachable($e, 'text');
-        }
-        if (! $response->successful()) {
-            $this->openai->fail($response, 'text');
-        }
-        $out = json_decode((string) $response->json('choices.0.message.content'), true);
-        if (! is_array($out) || trim((string) ($out['title'] ?? '')) === '') {
+        $out = $this->chain->completeJson('standard', $system, "Categories:\n".implode("\n", $lines), ['bytes' => $imageBytes, 'mime' => $mime], 500, 0.3, 60);
+        if (trim((string) ($out['title'] ?? '')) === '') {
             throw new AiProviderException('bad_answer', 'The AI could not read this photo. Try a clearer one.', 502);
         }
         $cid = (int) ($out['category_id'] ?? 0);
@@ -201,25 +181,11 @@ class AiTextService
      */
     public function photoSubject(string $imageBytes, string $mime): array
     {
-        $response = $this->openai->http(30)->post(OpenAiClient::BASE.'/chat/completions', [
-            'model' => config('ai.vision_model', 'gpt-4o-mini'),
-            'messages' => [
-                ['role' => 'system', 'content' => 'You check photos for a classifieds app. Say whether the photo shows one clear, '
-                    .'specific item or object that someone could be selling (a product, vehicle, device, furniture, property...). '
-                    .'A landscape, sky, crowd, plain texture or random scene with no main item is NOT an item. '
-                    .'Answer JSON only: {"has_item": boolean, "item": short English name of the item or null}.'],
-                ['role' => 'user', 'content' => [
-                    ['type' => 'image_url', 'image_url' => ['url' => 'data:'.$mime.';base64,'.base64_encode($imageBytes), 'detail' => 'low']],
-                ]],
-            ],
-            'response_format' => ['type' => 'json_object'],
-            'temperature' => 0,
-            'max_tokens' => 60,
-        ]);
-        if (! $response->successful()) {
-            throw new AiProviderException('provider_error', 'check failed', 502);
-        }
-        $out = json_decode((string) $response->json('choices.0.message.content'), true);
+        $system = 'You check photos for a classifieds app. Say whether the photo shows one clear, '
+            .'specific item or object that someone could be selling (a product, vehicle, device, furniture, property...). '
+            .'A landscape, sky, crowd, plain texture or random scene with no main item is NOT an item. '
+            .'Answer JSON only: {"has_item": boolean, "item": short English name of the item or null}.';
+        $out = $this->chain->completeJson('light', $system, '', ['bytes' => $imageBytes, 'mime' => $mime], 60, 0, 30);
         $item = is_array($out) ? trim((string) ($out['item'] ?? '')) : '';
 
         return ['has_item' => is_array($out) && ($out['has_item'] ?? false) === true, 'item' => $item !== '' ? mb_substr($item, 0, 80) : null];
@@ -315,28 +281,7 @@ class AiTextService
     /** @return array<string,mixed> */
     private function json(string $system, string $user, int $maxTokens): array
     {
-        try {
-            $response = $this->openai->http(40)->post(OpenAiClient::BASE.'/chat/completions', [
-                'model' => config('ai.text_model', 'gpt-4o-mini'),
-                'messages' => [['role' => 'system', 'content' => $system], ['role' => 'user', 'content' => $user]],
-                'response_format' => ['type' => 'json_object'],
-                'temperature' => 0.3,
-                'max_tokens' => $maxTokens,
-            ]);
-        } catch (\Throwable $e) {
-            $this->openai->unreachable($e, 'text');
-        }
-        if (! $response->successful()) {
-            $this->openai->fail($response, 'text');
-        }
-
-        $decoded = json_decode((string) $response->json('choices.0.message.content'), true);
-        if (! is_array($decoded)) {
-            Log::warning('ai.text.bad_json');
-            throw new AiProviderException('bad_answer', 'The AI returned something unusable.', 502);
-        }
-
-        return $decoded;
+        return $this->chain->completeJson('standard', $system, $user, null, $maxTokens);
     }
 
     private function clean(mixed $text, int $max): string

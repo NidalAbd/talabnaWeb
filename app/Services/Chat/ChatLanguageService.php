@@ -2,18 +2,25 @@
 
 namespace App\Services\Chat;
 
+use App\Services\Ai\AiTextChain;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
 /**
  * Language detection and translation for user-to-user chat, so two people with
  * different app languages each read the other in their own (same approach as
- * AI Compass chat). Cheap gpt-4o-mini calls; scripts that name their language
- * (Arabic, Chinese…) are detected locally without a call.
+ * AI Compass chat). Scripts that name their language (Arabic, Chinese…) are
+ * detected locally without a call; the rest goes through AiTextChain (small
+ * models, Claude/Gemini answer at once when OpenAI fails).
  */
 class ChatLanguageService
 {
     private const MODEL = 'gpt-4o-mini';
+
+    private function chain(): AiTextChain
+    {
+        return app(AiTextChain::class);
+    }
 
     public function detect(string $text): ?string
     {
@@ -22,17 +29,12 @@ class ChatLanguageService
         // Emoji / numbers / links only: nothing to translate.
         if (!preg_match('/\p{L}{2,}/u', preg_replace('~https?://\S+~', '', $text))) return null;
         if (($local = self::detectByScript($text)) !== null) return $local;
-        $key = (string) config('services.openai.key', '');
-        if ($key === '') return null;
+        if (!$this->chain()->isConfigured()) return null;
         try {
-            $r = Http::withToken($key)->timeout(10)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => self::MODEL, 'temperature' => 0, 'max_tokens' => 8,
-                'messages' => [
-                    ['role' => 'system', 'content' => 'Identify the language of the user message. Reply with ONLY the lowercase ISO 639-1 code (e.g. en, ar, fr). For Chinese use zh.'],
-                    ['role' => 'user', 'content' => mb_substr($text, 0, 400)],
-                ],
-            ]);
-            $out = preg_replace('/[^a-z\-]/', '', strtolower(trim((string) data_get($r->json(), 'choices.0.message.content', ''))));
+            $answer = $this->chain()->complete('light',
+                'Identify the language of the user message. Reply with ONLY the lowercase ISO 639-1 code (e.g. en, ar, fr). For Chinese use zh.',
+                mb_substr($text, 0, 400), null, false, 8, 0, 10);
+            $out = preg_replace('/[^a-z\-]/', '', strtolower(trim($answer)));
             return $out !== '' ? explode('-', $out)[0] : null;
         } catch (\Throwable $e) {
             Log::warning('chat detect failed: ' . $e->getMessage());
@@ -62,18 +64,12 @@ class ChatLanguageService
     public function translate(string $text, string $targetCode): ?string
     {
         $text = trim($text);
-        $key = (string) config('services.openai.key', '');
-        if ($text === '' || $key === '') return null;
+        if ($text === '' || !$this->chain()->isConfigured()) return null;
         $target = config("languages.supported.{$targetCode}.name") ?? $targetCode;
         try {
-            $r = Http::withToken($key)->timeout(15)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => self::MODEL, 'temperature' => 0.2, 'max_tokens' => 1000,
-                'messages' => [
-                    ['role' => 'system', 'content' => "You are a translator for a marketplace chat. Translate the user's message into {$target}. Output ONLY the translation. Keep meaning, tone, prices, numbers, names and emoji."],
-                    ['role' => 'user', 'content' => $text],
-                ],
-            ]);
-            $out = trim((string) data_get($r->json(), 'choices.0.message.content', ''));
+            $out = trim($this->chain()->complete('standard',
+                "You are a translator for a marketplace chat. Translate the user's message into {$target}. Output ONLY the translation. Keep meaning, tone, prices, numbers, names and emoji.",
+                $text, null, false, 1000, 0.2, 15));
             return $out === '' ? null : $out;
         } catch (\Throwable $e) {
             Log::warning('chat translate failed: ' . $e->getMessage());
@@ -97,21 +93,14 @@ class ChatLanguageService
             $t = $this->translate($texts[$k], $targetCode);
             return $t === null ? [] : [$k => $t];
         }
-        $key = (string) config('services.openai.key', '');
-        if ($key === '') return [];
+        if (!$this->chain()->isConfigured()) return [];
         $target = config("languages.supported.{$targetCode}.name") ?? $targetCode;
         $items = [];
         foreach ($texts as $id => $text) $items[] = ['id' => (string) $id, 'text' => $text];
         try {
-            $r = Http::withToken($key)->timeout(25)->post('https://api.openai.com/v1/chat/completions', [
-                'model' => self::MODEL, 'temperature' => 0.2, 'max_tokens' => 3000,
-                'response_format' => ['type' => 'json_object'],
-                'messages' => [
-                    ['role' => 'system', 'content' => "You are a translator for a marketplace chat. Translate each item's text into {$target}. Keep meaning, tone, prices, numbers, names and emoji. Reply with JSON only: {\"items\":[{\"id\":\"…\",\"text\":\"…\"}]} with the same ids."],
-                    ['role' => 'user', 'content' => json_encode(['items' => $items], JSON_UNESCAPED_UNICODE)],
-                ],
-            ]);
-            $out = json_decode((string) data_get($r->json(), 'choices.0.message.content', ''), true);
+            $out = $this->chain()->completeJson('standard',
+                "You are a translator for a marketplace chat. Translate each item's text into {$target}. Keep meaning, tone, prices, numbers, names and emoji. Reply with JSON only: {\"items\":[{\"id\":\"…\",\"text\":\"…\"}]} with the same ids.",
+                json_encode(['items' => $items], JSON_UNESCAPED_UNICODE), null, 3000, 0.2, 25);
             $result = [];
             foreach ((array) ($out['items'] ?? []) as $row) {
                 $id = (string) ($row['id'] ?? '');
@@ -138,13 +127,18 @@ class ChatLanguageService
     public function translateBatch(array $items): array
     {
         $key = (string) config('services.openai.key', '');
-        if ($key === '') return [];
+        if (!$this->chain()->isConfigured()) return [];
         $groups = [];
         foreach ($items as $id => $it) {
             $text = trim((string) ($it['text'] ?? ''));
             if ($text !== '') $groups[(string) $it['to']][] = ['id' => (string) $id, 'text' => $text];
         }
         if (!$groups) return [];
+
+        // OpenAI down or no key: one backup call per language through the chain.
+        if ($key === '' || $this->chain()->isDown('openai')) {
+            return $this->translateGroupsViaChain($groups, $items);
+        }
 
         try {
             $responses = Http::pool(function ($pool) use ($groups, $key) {
@@ -164,16 +158,45 @@ class ChatLanguageService
             });
         } catch (\Throwable $e) {
             Log::warning('chat batch translate failed: ' . $e->getMessage());
-            return [];
+            return $this->translateGroupsViaChain($groups, $items);
         }
 
         $result = [];
+        $failed = [];
         foreach ($responses as $to => $r) {
             if (!$r instanceof \Illuminate\Http\Client\Response || !$r->successful()) {
                 Log::warning('chat batch translate failed for ' . $to);
+                $failed[$to] = $groups[$to];
                 continue;
             }
             $out = json_decode((string) data_get($r->json(), 'choices.0.message.content', ''), true);
+            foreach ((array) ($out['items'] ?? []) as $row) {
+                $id = (int) ($row['id'] ?? 0);
+                $text = trim((string) ($row['text'] ?? ''));
+                if ($id && $text !== '' && isset($items[$id])) $result[$id] = $text;
+            }
+        }
+        // The languages OpenAI failed on go to the backup at once.
+        return $failed ? $result + $this->translateGroupsViaChain($failed, $items) : $result;
+    }
+
+    /**
+     * @param  array<string, array<int, array{id: string, text: string}>>  $groups  rows per target language
+     * @return array<int, string>
+     */
+    private function translateGroupsViaChain(array $groups, array $items): array
+    {
+        $result = [];
+        foreach ($groups as $to => $rows) {
+            $target = config("languages.supported.{$to}.name") ?? $to;
+            try {
+                $out = $this->chain()->completeJson('standard',
+                    "You are a translator for a marketplace chat. Translate the \"text\" of every item into {$target}. Items are unrelated messages from different chats. Keep meaning, tone, prices, numbers, names and emoji. Reply with JSON only: {\"items\":[{\"id\":\"…\",\"text\":\"…\"}]} with the same ids.",
+                    json_encode(['items' => $rows], JSON_UNESCAPED_UNICODE), null, 6000, 0.2, 40);
+            } catch (\Throwable $e) {
+                Log::warning('chat batch translate backup failed for ' . $to . ': ' . $e->getMessage());
+                continue;
+            }
             foreach ((array) ($out['items'] ?? []) as $row) {
                 $id = (int) ($row['id'] ?? 0);
                 $text = trim((string) ($row['text'] ?? ''));

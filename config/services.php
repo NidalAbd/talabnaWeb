@@ -66,6 +66,11 @@ return [
         'key' => env('OPENAI_API_KEY'),
     ],
 
+    // Anthropic Claude: text backup (Talabna's own workspace).
+    'anthropic' => [
+        'key' => env('ANTHROPIC_API_KEY'),
+    ],
+
     // Google Gemini API: Veo video (the backup since OpenAI shut Sora down on 2026-09-24).
     'gemini' => [
         'key' => env('GEMINI_API_KEY'),

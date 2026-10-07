@@ -9,6 +9,18 @@ return [
     'confirm_from' => (int) env('AI_CONFIRM_FROM', 3),
 
     'text_model' => env('AI_TEXT_MODEL', 'gpt-4o-mini'),
+
+    // Text/vision (AiTextChain, 2026-10-08): providers in the order they are tried; a failing one is skipped for a few
+    // minutes and the next answers at once. Each request names a tier so small jobs use small models.
+    'text_providers' => explode(',', env('AI_TEXT_PROVIDERS', 'openai,claude,gemini')),
+    'tiers' => [
+        // Language check, "is there an item in this photo".
+        'light' => ['openai' => 'gpt-4.1-nano', 'claude' => 'claude-haiku-5-5', 'gemini' => 'gemini-3.1-flash-lite'],
+        // Post writing, translation, category, price, photo-to-ad, video brief.
+        'standard' => ['openai' => env('AI_TEXT_MODEL', 'gpt-4o-mini'), 'claude' => 'claude-haiku-5-5', 'gemini' => 'gemini-3.1-flash-lite'],
+        // Kept for larger jobs; nothing uses it yet.
+        'heavy' => ['openai' => 'gpt-4.1', 'claude' => 'claude-sonnet-5-5', 'gemini' => 'gemini-2.5-flash'],
+    ],
     'image_model' => env('AI_IMAGE_MODEL', 'gpt-image-1'),
     'image_quality' => env('AI_IMAGE_QUALITY', 'medium'),
     'image_size' => env('AI_IMAGE_SIZE', '1024x1024'),
