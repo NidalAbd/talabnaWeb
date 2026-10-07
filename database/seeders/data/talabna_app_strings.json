@@ -5598,6 +5598,10 @@
   "ar": "المرجع",
   "en": "Reference"
  },
+ "wallet.refund_title": {
+  "ar": "نقاط مُعادة",
+  "en": "Points returned"
+ },
  "wallet.to": {
   "ar": "إلى",
   "en": "To"
@@ -5617,6 +5621,10 @@
  "wallet.type_purchase": {
   "ar": "شراء",
   "en": "Purchase"
+ },
+ "wallet.type_refund": {
+  "ar": "استرداد",
+  "en": "Refund"
  },
  "wallet.type_transfer": {
   "ar": "تحويل",
