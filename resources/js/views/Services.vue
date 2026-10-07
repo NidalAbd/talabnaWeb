@@ -474,7 +474,7 @@ async function loadSuggestions() {
   try {
     // The page path without a locale prefix; the server builds the links for the current language.
     const path = route.path.replace(new RegExp(`^/${appStore.locale}(?=/)`), '')
-    const res = await fetch(`/api/public/suggestions?path=${encodeURIComponent(path)}&locale=${encodeURIComponent(appStore.locale || 'ar')}`)
+    const res = await fetch(`/api/public/suggestions?path=${encodeURIComponent(path)}&lang=${encodeURIComponent(appStore.locale || 'ar')}`)
     if (res.ok) suggestions.value = (await res.json()).data || null
   } catch (e) {
     suggestions.value = null
