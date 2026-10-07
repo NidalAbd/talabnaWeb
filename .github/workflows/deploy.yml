@@ -14,6 +14,11 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Stop the deploy before upload if any PHP file has a syntax error (the runner has PHP; the dev Mac may not).
+      - name: PHP syntax check
+        run: |
+          git ls-files '*.php' | grep -v '^vendor/' | xargs -n 50 -P 4 php -l -d display_errors=1 > /tmp/lint.txt || { grep -v '^No syntax errors' /tmp/lint.txt; exit 1; }
+
       - name: Setup Node
         uses: actions/setup-node@v4
         with:

@@ -112,6 +112,9 @@ class ConversationController extends Controller
             return response()->json(['error' => 'Not a participant in this conversation'], 403);
         }
 
+        // The app polls every few seconds while the chat is on screen: no push for this chat meanwhile.
+        ChatMessageFcmNotification::markViewing($conversation->id, $userId);
+
         $perPage = min(50, (int) $request->input('per_page', 30));
         $query = $conversation->messages()->with('replyTo')->orderByDesc('id');
         // Cheap polling: only what is new since the last message the app has.
