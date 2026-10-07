@@ -247,11 +247,36 @@ class AiController extends Controller
             'showroom' => 'an elegant showroom',
             'nature' => 'a natural setting with soft greenery',
         ];
+        // Background, scene and cinematic rebuild the picture around the item: first make sure there is one (free; no
+        // charge when there is not). Light only adjusts the photo as it is.
+        $subject = null;
+        if ($d['mode'] !== 'light' && $this->text->isConfigured()) {
+            try {
+                $check = $this->text->photoSubject($bytes, $mime);
+                if (! $check['has_item']) {
+                    return response()->json([
+                        'error' => 'This photo has no clear item to feature. Use a photo of the item you are selling. You were not charged.',
+                        'code' => 'no_item',
+                    ], 422);
+                }
+                $subject = $check['item'];
+            } catch (\Throwable $e) {
+                Log::warning('ai.studio.subject_check_failed', ['message' => $e->getMessage()]);
+            }
+        }
+        if ($subject) {
+            $keep = ' The item is: '.$subject.'.'.$keep;
+        }
+
         [$prompt, $quality] = match ($d['mode']) {
             'light' => ['Improve this product photo: correct exposure, white balance and sharpness. Keep the same background and framing.'.$keep, 'medium'],
             'background' => ['Place this exact item on a clean seamless light studio backdrop with a soft natural shadow, centred, product-photography lighting.'.$keep, 'medium'],
             'scene' => ['Place this exact item naturally in '.($scenes[$d['style'] ?? 'living_room'] ?? $scenes['living_room']).', realistic scale, matching light and shadows.'.$keep, 'medium'],
-            'cinematic' => ['Turn this into a cinematic advertising shot of this exact item: dramatic but natural lighting, shallow depth of field, premium look.'.$keep, 'high'],
+            // Was "dramatic lighting": results came out dark with the eye drawn to the background.
+            'cinematic' => ['Turn this into a bright, premium advertising photo of this exact item. The item is the hero: sharp '
+                .'focus on it, it is the brightest and clearest part of the frame, lit by soft key light with a gentle rim light. '
+                .'Background softly blurred (shallow depth of field) and slightly darker than the item, never brighter. '
+                .'Overall exposure bright and clean, not dark or moody, natural colours.'.$keep, 'high'],
         };
 
         return $this->run($request, 'studio_'.$d['mode'], $d['request_id'], ['mode' => $d['mode'], 'style' => $d['style'] ?? null, 'provider' => 'openai'],

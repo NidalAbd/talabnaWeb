@@ -194,6 +194,37 @@ class AiTextService
         ];
     }
 
+/**
+     * Photo Studio guard: is there one clear item to sell in this photo, and what is it? Cheap (small vision model,
+     * low detail). A landscape with no item came back from "cinematic" as an invented product (a bottle).
+     * @return array{has_item: bool, item: ?string}
+     */
+    public function photoSubject(string $imageBytes, string $mime): array
+    {
+        $response = $this->openai->http(30)->post(OpenAiClient::BASE.'/chat/completions', [
+            'model' => config('ai.vision_model', 'gpt-4o-mini'),
+            'messages' => [
+                ['role' => 'system', 'content' => 'You check photos for a classifieds app. Say whether the photo shows one clear, '
+                    .'specific item or object that someone could be selling (a product, vehicle, device, furniture, property...). '
+                    .'A landscape, sky, crowd, plain texture or random scene with no main item is NOT an item. '
+                    .'Answer JSON only: {"has_item": boolean, "item": short English name of the item or null}.'],
+                ['role' => 'user', 'content' => [
+                    ['type' => 'image_url', 'image_url' => ['url' => 'data:'.$mime.';base64,'.base64_encode($imageBytes), 'detail' => 'low']],
+                ]],
+            ],
+            'response_format' => ['type' => 'json_object'],
+            'temperature' => 0,
+            'max_tokens' => 60,
+        ]);
+        if (! $response->successful()) {
+            throw new AiProviderException('provider_error', 'check failed', 502);
+        }
+        $out = json_decode((string) $response->json('choices.0.message.content'), true);
+        $item = is_array($out) ? trim((string) ($out['item'] ?? '')) : '';
+
+        return ['has_item' => is_array($out) && ($out['has_item'] ?? false) === true, 'item' => $item !== '' ? mb_substr($item, 0, 80) : null];
+    }
+
     public function suggestCategory(string $title, string $description, bool $job = false, array $context = []): array
     {
         // Every category is offered: the app sends job=true when the form still has a job category selected,
