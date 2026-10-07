@@ -40,15 +40,18 @@ class GenerateSitemap extends Command
         $controller = app(SitemapController::class);
 
         $write = function (string $name, string $xml) use ($disk, $dir) {
+            $gz = gzencode($xml, 6);
             $disk->put("{$dir}/{$name}", $xml);
-            $disk->put("{$dir}/{$name}.gz", gzencode($xml, 6));
+            $disk->put("{$dir}/{$name}.gz", $gz);
             // Force 0644 — default umask sometimes leaves files at 0600
             // which Hostinger's web layer translates to 403 for Googlebot
             // during burst fetches.
             @chmod($disk->path("{$dir}/{$name}"), 0644);
             @chmod($disk->path("{$dir}/{$name}.gz"), 0644);
             $this->line(sprintf('  wrote %-45s xml=%-9s gz=%-7s',
-                $name, $disk->size("{$dir}/{$name}"), $disk->size("{$dir}/{$name}.gz")));
+                // Sizes from memory: reading them back from the disk right after writing sometimes failed and
+                // stopped the whole run ("Unable to retrieve the file_size").
+                $name, strlen($xml), strlen((string) $gz)));
         };
 
         $this->info('Generating sitemap index...');
