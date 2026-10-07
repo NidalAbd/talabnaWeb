@@ -31,7 +31,7 @@ class AiActionsTest extends TestCase
         parent::setUp();
         $this->migrateTolerantly();
         DB::statement('PRAGMA foreign_keys = OFF');
-        config(['services.openai.key' => 'test-key']);
+        config(['services.openai.key' => 'test-key', 'services.gemini.key' => 'test-gemini-key']);
         Storage::fake('local');
 
         // The ledger exactly as production had it: type is an enum WITHOUT 'refund' (SQLite enforces it as a CHECK).
@@ -320,17 +320,18 @@ class AiActionsTest extends TestCase
     public function test_video_is_charged_at_start_and_delivered_when_the_job_completes(): void
     {
         $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
-            'api.openai.com/v1/videos/video_123/content' => Http::response(str_repeat('V', 5000), 200, ['Content-Type' => 'video/mp4']),
-            'api.openai.com/v1/videos/video_123' => Http::sequence()
-                ->push(['id' => 'video_123', 'status' => 'in_progress'])
-                ->push(['id' => 'video_123', 'status' => 'completed']),
-            'api.openai.com/v1/videos' => Http::response(['id' => 'video_123', 'status' => 'queued']),
+            'generativelanguage.googleapis.com/v1beta/files/f123:download*' => Http::response(str_repeat('V', 5000), 200, ['Content-Type' => 'video/mp4']),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview/operations/op123' => Http::sequence()
+                ->push(['name' => 'op123'])
+                ->push(['name' => 'op123', 'done' => true, 'response' => ['generateVideoResponse' => ['generatedSamples' => [['video' => ['uri' => 'https://generativelanguage.googleapis.com/v1beta/files/f123:download?alt=media']]]]]]),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['name' => 'models/veo-3.1-generate-preview/operations/op123']),
         ]);
 
         $id = $this->id();
         $this->postJson('/api/ai/generate-video', ['request_id' => $id, 'prompt' => 'a bicycle rotating slowly'])
             ->assertStatus(202)->assertJsonPath('status', 'processing')->assertJsonPath('points_charged', 20)->assertJsonPath('balance', 10);
-        $this->assertSame('video_123', AiRequest::where('uuid', $id)->value('provider_job_id'));
+        $this->assertSame('veo:models/veo-3.1-generate-preview/operations/op123', AiRequest::where('uuid', $id)->value('provider_job_id'));
+        Http::assertNotSent(fn ($r) => str_contains($r->url(), 'api.openai.com/v1/videos')); // Sora is shut down
 
         $this->getJson("/api/ai/requests/$id")->assertStatus(202)->assertJsonPath('status', 'processing');
         $this->getJson("/api/ai/requests/$id")->assertOk()->assertJsonPath('status', 'succeeded')->assertJsonPath('file_type', 'video');
@@ -343,8 +344,8 @@ class AiActionsTest extends TestCase
     public function test_a_video_that_fails_at_the_provider_is_refunded_when_the_app_checks(): void
     {
         $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
-            'api.openai.com/v1/videos/video_9' => Http::response(['status' => 'failed', 'error' => ['code' => 'moderation_blocked']]),
-            'api.openai.com/v1/videos' => Http::response(['id' => 'video_9']),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview/operations/op9' => Http::response(['done' => true, 'response' => ['generateVideoResponse' => ['raiMediaFilteredCount' => 1, 'raiMediaFilteredReasons' => ['blocked']]]]),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['name' => 'models/veo-3.1-generate-preview/operations/op9']),
         ]);
         $id = $this->id();
         $this->postJson('/api/ai/generate-video', ['request_id' => $id, 'prompt' => 'a bicycle rotating slowly'])->assertStatus(202);
@@ -356,18 +357,45 @@ class AiActionsTest extends TestCase
 
     public function test_a_video_that_cannot_be_started_is_refunded_immediately(): void
     {
-        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + ['api.openai.com/v1/videos' => Http::response(['error' => ['message' => 'no access']], 404)]);
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + ['generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['error' => ['message' => 'not found']], 404)]);
 
         $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'a bicycle rotating slowly'])
-            ->assertStatus(502)->assertJsonPath('refunded', true)->assertJsonPath('code', 'provider_no_access');
+            ->assertStatus(502)->assertJsonPath('refunded', true)->assertJsonPath('code', 'provider_error');
         $this->assertSame(30, $this->balance());
+    }
+
+    public function test_before_soras_shutdown_a_sora_failure_falls_back_to_veo(): void
+    {
+        $this->travelTo('2026-09-01 12:00:00');
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
+            'api.openai.com/v1/videos' => Http::response(['error' => ['message' => 'no access']], 404),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['name' => 'models/veo-3.1-generate-preview/operations/op5']),
+        ]);
+        $id = $this->id();
+        $this->postJson('/api/ai/generate-video', ['request_id' => $id, 'prompt' => 'a bicycle rotating slowly'])->assertStatus(202);
+
+        Http::assertSent(fn ($r) => str_contains($r->url(), 'api.openai.com/v1/videos'));
+        $this->assertSame('veo:models/veo-3.1-generate-preview/operations/op5', AiRequest::where('uuid', $id)->value('provider_job_id'));
+        $this->assertSame(10, $this->balance());
+    }
+
+    public function test_a_veo_video_asks_for_a_vertical_clip_and_a_photo_video_sends_the_first_frame(): void
+    {
+        $this->fake(['generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['name' => 'op'])]);
+
+        app(\App\Services\Ai\AiMediaService::class)->startVideo('a red bicycle', str_repeat('J', 2000), '12');
+
+        Http::assertSent(fn ($r) => str_contains($r->url(), ':predictLongRunning')
+            && $r->hasHeader('x-goog-api-key', 'test-gemini-key')
+            && $r['parameters'] == ['aspectRatio' => '9:16', 'resolution' => '1080p', 'durationSeconds' => 8]
+            && $r['instances'][0]['image'] == ['bytesBase64Encoded' => base64_encode(str_repeat('J', 2000)), 'mimeType' => 'image/jpeg']);
     }
 
     public function test_an_abandoned_video_is_refunded_by_the_scheduled_settler_even_if_the_app_never_returns(): void
     {
         $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
-            'api.openai.com/v1/videos/video_7' => Http::response(['status' => 'in_progress']),
-            'api.openai.com/v1/videos' => Http::response(['id' => 'video_7']),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview/operations/op7' => Http::response(['name' => 'op7']),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['name' => 'models/veo-3.1-generate-preview/operations/op7']),
         ]);
         $id = $this->id();
         $this->postJson('/api/ai/generate-video', ['request_id' => $id, 'prompt' => 'a bicycle rotating slowly'])->assertStatus(202);
@@ -400,7 +428,7 @@ class AiActionsTest extends TestCase
 
     public function test_only_one_video_can_be_in_flight_per_user(): void
     {
-        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + ['api.openai.com/v1/videos' => Http::response(['id' => 'video_1'])]);
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + ['generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['name' => 'op1'])]);
         $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'a bicycle rotating slowly'])->assertStatus(202);
 
         $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'another bicycle clip please'])->assertStatus(429);
@@ -642,7 +670,7 @@ class AiActionsTest extends TestCase
     public function test_a_request_post_illustrates_the_thing_wanted_and_a_video_asks_for_a_camera_move(): void
     {
         $this->fake($this->chat(['prompt' => 'A used mountain bike on a plain background, slow orbit, soft light, natural motion']) + [
-            'api.openai.com/v1/videos' => Http::response(['id' => 'video_r']),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['name' => 'op_r']),
         ]);
 
         $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'looking for a used bike', 'title' => 'Need a bike', 'description' => 'Want a used mountain bike, any brand.', 'context' => ['post_type' => 'طلب']])->assertStatus(202);
@@ -651,7 +679,7 @@ class AiActionsTest extends TestCase
             && str_contains($r['messages'][0]['content'], 'video generator') && str_contains($r['messages'][0]['content'], 'camera move')
             && str_contains($r['messages'][0]['content'], 'for a Request, show the thing the person is looking for')
             && str_contains($r['messages'][1]['content'], 'Post type: request'));
-        Http::assertSent(fn ($r) => $r->url() === 'https://api.openai.com/v1/videos' && str_contains(json_encode($r->data()), 'used mountain bike on a plain background'));
+        Http::assertSent(fn ($r) => str_contains($r->url(), ':predictLongRunning') && str_contains(json_encode($r->data()), 'used mountain bike on a plain background'));
     }
 
     public function test_if_the_prompt_writer_fails_the_users_own_prompt_is_used_and_the_action_still_succeeds(): void

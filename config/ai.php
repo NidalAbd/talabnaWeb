@@ -16,6 +16,9 @@ return [
     'video_model' => env('AI_VIDEO_MODEL', 'sora-2-pro'),
     'video_seconds' => env('AI_VIDEO_SECONDS', '8'),
     'video_size' => env('AI_VIDEO_SIZE', '1024x1792'),
+    // Veo (Gemini API), used once Sora is gone or fails: vertical 9:16, 1080p for 8 s clips, 720p for shorter ones.
+    'veo_model' => env('AI_VEO_MODEL', 'veo-3.1-generate-preview'),
+    'veo_resolution' => env('AI_VEO_RESOLUTION', '1080p'),
 
     // A request still "processing" after this long is given up on and refunded.
     'stale_minutes' => ['text' => 3, 'image' => 6, 'video' => 30], // sora-2-pro HD clips can take 10+ min

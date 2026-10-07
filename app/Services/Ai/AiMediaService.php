@@ -6,16 +6,20 @@ use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Storage;
 
-/** Image (gpt-image-1) and video (Sora) generation. Files go to the private "local" disk under ai-results/. */
+/** Image (gpt-image-1) and video (Veo, Sora before its shutdown) generation. Files go to the private "local" disk under ai-results/. */
 class AiMediaService
 {
-    public function __construct(private OpenAiClient $openai)
+    private const VEO_PREFIX = 'veo:';
+
+    private const SORA_SHUTDOWN_DATE = '2026-09-24';
+
+    public function __construct(private OpenAiClient $openai, private VeoClient $veo)
     {
     }
 
     public function isConfigured(): bool
     {
-        return $this->openai->isConfigured();
+        return $this->openai->isConfigured() || $this->veo->isConfigured();
     }
 
     /** Generates one image and stores it. @return string storage path */
@@ -86,8 +90,36 @@ class AiMediaService
     /**
      * Starts a video job. With [referenceJpeg] (Release C, cinematic video from the seller's photo) the clip starts
      * from that photo; it must already be the video's exact size (see fitForVideo). @return string the provider job id
+     *
+     * 2026-10-08: OpenAI shut the Videos API (Sora) down on 2026-09-24, so every video failed. Google Veo (Gemini API)
+     * is now the backup: Sora is tried only before its shutdown date, and any Sora failure other than a safety block
+     * goes on to Veo. Veo job ids carry a "veo:" prefix so pollVideo asks the right provider.
      */
-    public function startVideo(string $prompt, ?string $referenceJpeg = null, ?string $seconds = null, ?string $model = null, ?string $size = null): string
+    public function startVideo(string $prompt, ?string $referenceJpeg = null, ?string $seconds = null): string
+    {
+        if ($this->soraAvailable()) {
+            try {
+                return $this->startSora($prompt, $referenceJpeg, $seconds);
+            } catch (AiProviderException $e) {
+                if ($e->errorCode === 'blocked' || ! $this->veo->isConfigured()) {
+                    throw $e;
+                }
+                Log::warning('ai.video.sora_failed_using_veo', ['code' => $e->errorCode]);
+            }
+        }
+        if (! $this->veo->isConfigured()) {
+            throw new AiProviderException('provider_no_access', 'Video generation is not available right now.', 503);
+        }
+
+        return self::VEO_PREFIX.$this->veo->start($prompt, $referenceJpeg, (int) ($seconds ?? config('ai.video_seconds', '8')));
+    }
+
+    private function soraAvailable(): bool
+    {
+        return $this->openai->isConfigured() && now()->lt(self::SORA_SHUTDOWN_DATE);
+    }
+
+    private function startSora(string $prompt, ?string $referenceJpeg = null, ?string $seconds = null, ?string $model = null, ?string $size = null): string
     {
         $model ??= (string) config('ai.video_model', 'sora-2');
         $size ??= (string) config('ai.video_size', '720x1280');
@@ -111,7 +143,7 @@ class AiMediaService
         if ($response->status() === 404 && $model !== 'sora-2') {
             Log::warning('ai.video.pro_unavailable_fallback', ['model' => $model]);
 
-            return $this->startVideo($prompt, $referenceJpeg !== null ? self::coverToVideoSize($referenceJpeg, '720x1280') : null, $seconds, 'sora-2', '720x1280');
+            return $this->startSora($prompt, $referenceJpeg !== null ? self::coverToVideoSize($referenceJpeg, '720x1280') : null, $seconds, 'sora-2', '720x1280');
         }
         if (! $response->successful()) {
             $this->openai->fail($response, 'video');
@@ -221,6 +253,11 @@ class AiMediaService
      */
     public function pollVideo(string $jobId, string $uuid): array
     {
+        if (str_starts_with($jobId, self::VEO_PREFIX)) {
+            $poll = $this->veo->poll(substr($jobId, strlen(self::VEO_PREFIX)));
+
+            return isset($poll['bytes']) ? ['state' => 'done', 'path' => $this->store($uuid.'.mp4', $poll['bytes'])] : $poll;
+        }
         try {
             $response = $this->openai->http(30)->get(OpenAiClient::BASE.'/videos/'.$jobId);
         } catch (\Throwable) {

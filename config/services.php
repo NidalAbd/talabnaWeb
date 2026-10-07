@@ -66,6 +66,11 @@ return [
         'key' => env('OPENAI_API_KEY'),
     ],
 
+    // Google Gemini API: Veo video (the backup since OpenAI shut Sora down on 2026-09-24).
+    'gemini' => [
+        'key' => env('GEMINI_API_KEY'),
+    ],
+
     'google_play' => [
         'package_name' => env('GOOGLE_PLAY_PACKAGE_NAME'),
         'credentials_path' => env('GOOGLE_PLAY_CREDENTIALS_PATH'),
