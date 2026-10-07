@@ -74,6 +74,9 @@ class AiLedger
                         + ($cover !== null ? ['covered_by' => 'subscription', 'covered_usage' => $cover['usage']] : [])),
                 ]);
 
+                // Only real columns: callers pass extra context (mode, style, seconds...) that has no column, and
+                // AiRequest is unguarded, so those keys made the insert fail (a 500 for every Photo Studio tool).
+                $extra = array_intersect_key($extra, array_flip(self::EXTRA_COLUMNS));
                 $request = AiRequest::create(array_merge([
                     'uuid' => $uuid,
                     'user_id' => $userId,
@@ -100,6 +103,9 @@ class AiLedger
      * Features a subscription plan includes: feature key => [plan feature key, usage counter or null].
      * A counter means a monthly allowance (ai_images_per_month); null means unlimited while the plan has it.
      */
+    /** Columns of ai_requests a caller may fill through start()'s $extra. */
+    private const EXTRA_COLUMNS = ['provider', 'provider_job_id', 'prompt', 'ip'];
+
     private const PLAN_COVERS = [
         'generate_image' => ['ai_images_per_month', 'ai_images_used'],
         // Release B: the Photo Studio spends the same monthly image credits; Snap to sell comes with Pro/Business.
