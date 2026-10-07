@@ -161,6 +161,11 @@ $spaRoutes = function () {
         return view('spa');
     })->name('category.show');
 
+    // Subcategory pages: the sitemap and the Vue router had them, the server did not (404 for Google, 2026-10-08).
+    Route::get('/category/{id}/{slug}/subcategory/{subId}/{subSlug?}', function() {
+        return view('spa');
+    })->where(['id' => '[0-9]+', 'subId' => '[0-9]+'])->name('subcategory.show');
+
     Route::get('/listing/{id}/{slug?}', function() {
         return view('spa');
     })->name('listing.show');

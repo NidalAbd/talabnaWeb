@@ -115,7 +115,7 @@ class SeoController extends Controller
             $seo = $this->getListingSeo($matches[1], $locale, $seo, $baseUrl);
         } elseif (preg_match('/^\/category\/(\d+)/', $path, $matches)) {
             $subcategoryId = null;
-            if (preg_match('/subcategory=(\d+)/', $path, $subMatches)) {
+            if (preg_match('#/subcategory/(\d+)#', $path, $subMatches) || preg_match('/subcategory=(\d+)/', $path, $subMatches)) {
                 $subcategoryId = $subMatches[1];
             }
             $seo = $this->getCategorySeo($matches[1], $subcategoryId, $locale, $seo, $baseUrl);
@@ -453,12 +453,25 @@ class SeoController extends Controller
         $categoryName = $this->getLocalizedName($category->name, $locale);
         $subcategoryName = null;
 
+        $subcategory = null;
         if ($subcategoryId) {
-            $subcategory = Sub_categories::find($subcategoryId);
-            if ($subcategory) {
-                $subcategoryName = $this->getLocalizedName($subcategory->name, $locale);
-            }
+            $subcategory = Sub_categories::where('categories_id', $category->id)->find($subcategoryId);
+            if (!$subcategory) { $seo['notFound'] = true; return $seo; }
+            $subcategoryName = $this->getLocalizedName($subcategory->name, $locale);
         }
+
+        // Canonical and hreflang from each locale's own slugs (the URLs the sitemap lists). The request path's slug
+        // can be any spelling, and /fr/category/2/<arabic> and /fr/category/2/<french> were both self-canonical.
+        $buildPath = function (string $loc) use ($category, $subcategory) {
+            $path = '/category/' . $category->id . '/' . $this->slugify($this->getLocalizedName($category->name, $loc));
+            if ($subcategory) {
+                $path .= '/subcategory/' . $subcategory->id . '/' . $this->slugify($this->getLocalizedName($subcategory->name, $loc));
+            }
+            return $path;
+        };
+        $seo['canonical'] = $this->localizedUrl($baseUrl, $buildPath($locale), $locale, $this->defaultLocale());
+        $seo['alternates'] = $this->buildPerLocaleAlternates($buildPath, $baseUrl, $this->defaultLocale());
+        $seo['_alternates_locked'] = true;
 
         $listingCount = ServicePost::where('state', 'published')
             ->where('categories_id', $categoryId)
@@ -857,10 +870,13 @@ class SeoController extends Controller
      */
     private function slugify(string $text): string
     {
-        $text = preg_replace('/[^\p{L}\p{N}\s-]/u', '', $text);
+        // Same rules as SitemapController::slugify, so a page's canonical is exactly the URL the sitemap lists: keep
+        // combining marks (\p{M}: Hindi matras, Arabic harakat) and use rawurlencode. Dropping the marks here made the
+        // canonical differ from the sitemap URL for those scripts (2026-10-08).
+        $text = preg_replace('/[^\p{L}\p{N}\p{M}\s-]/u', '', $text);
         $text = preg_replace('/[\s-]+/', '-', $text);
         $text = trim($text, '-');
-        return urlencode($text) ?: 'item';
+        return rawurlencode($text) ?: 'item';
     }
 
     // ==================== SLUG-BASED SEO METHODS ====================

@@ -56,8 +56,9 @@ trait BuildsCrawlContent
             }
         } elseif (preg_match('#^/listing/(\d+)#', $path, $m)) {
             $post = ServicePost::find((int) $m[1]);
-        } elseif (preg_match('#^/category/(\d+)#', $path, $m)) {
+        } elseif (preg_match('#^/category/(\d+)(?:/[^/]+/subcategory/(\d+))?#u', $path, $m)) {
             $category = Categories::find($m[1]);
+            $sub = $category && !empty($m[2]) ? Sub_categories::where('categories_id', $category->id)->find($m[2]) : null;
         } elseif ($path === '/' || $path === '/browse') {
             return $this->homeCrawl($locale);
         } else {
