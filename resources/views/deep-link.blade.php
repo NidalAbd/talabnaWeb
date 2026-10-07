@@ -1,99 +1,64 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Opening {{ $routeName }} in Talbna App</title>
+    <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $preview['title'] }}</title>
+    <meta name="description" content="{{ $preview['description'] }}">
+
+    {{-- Link preview card for WhatsApp, Facebook, Telegram, X, iMessage --}}
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Talabna">
+    <meta property="og:title" content="{{ $preview['title'] }}">
+    <meta property="og:description" content="{{ $preview['description'] }}">
+    <meta property="og:image" content="{{ $preview['image'] }}">
+    <meta property="og:url" content="{{ $pageUrl }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{{ $preview['title'] }}">
+    <meta name="twitter:description" content="{{ $preview['description'] }}">
+    <meta name="twitter:image" content="{{ $preview['image'] }}">
+    {{-- Safari shows an "Open in Talabna" banner on iPhone --}}
+    <meta name="apple-itunes-app" content="app-id=6814376173, app-argument={{ $deepLink }}">
+
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            padding: 20px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 80vh;
-        }
-        .loader {
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #3498db;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        .button {
-            display: inline-block;
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            text-align: center;
-            text-decoration: none;
-            font-size: 16px;
-            margin: 4px 2px;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-        .fallback {
-            margin-top: 20px;
-            color: #666;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; text-align: center; padding: 24px;
+               margin: 0; min-height: 80vh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+               background: #f7f5f0; color: #1d1d1f; }
+        img.cover { max-width: 320px; width: 100%; border-radius: 16px; object-fit: cover; max-height: 320px; }
+        h2 { font-size: 20px; margin: 16px 0 6px; }
+        p { color: #666; margin: 4px 0 18px; }
+        .button { display: inline-block; background: #e8a33d; color: #1d1d1f; padding: 12px 22px; text-decoration: none;
+                  font-size: 16px; font-weight: 600; margin: 4px; border-radius: 12px; }
     </style>
     <script>
-        // Function to detect if user is on Android
-        function isAndroid() {
-            return /Android/.test(navigator.userAgent);
+        function storeUrl() {
+            var ua = navigator.userAgent || '';
+            if (/iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document)) return "{{ $appStoreUrl }}";
+            return "{{ $playStoreUrl }}";
         }
 
-        // Attempt to open the app
-        function openApp() {
-            var deepLink = "{{ $deepLink }}";
-            var playStoreUrl = "{{ $playStoreUrl }}";
-            var webFallbackUrl = "{{ $webFallbackUrl }}";
-
-            // Log for debugging
-            console.log("Attempting to open deep link: " + deepLink);
-
-            // Try to open the app with the deep link
-            window.location.href = deepLink;
-
-            // Set a timeout to redirect to Play Store if app doesn't open
-            setTimeout(function() {
-                // Check if we're still on this page
-                if (document.hidden) {
-                    // The app opened successfully
-                    console.log("App opened successfully");
-                    return;
-                }
-
-                console.log("App did not open, redirecting to store or web");
-                if (isAndroid()) {
-                    window.location = playStoreUrl;
-                } else {
-                    // For desktop or iOS, redirect to web version
-                    window.location = webFallbackUrl;
-                }
-            }, 2000); // Wait 2 seconds before redirecting
-        }
-
-        // Run when page loads
-        window.onload = openApp;
+        // When the app is installed, iOS Universal Links / Android App Links open it before this page loads.
+        // Otherwise: try the app scheme, then send the reader to the store for their phone.
+        window.onload = function () {
+            document.getElementById('store').href = storeUrl();
+            var isPhone = /Android|iPhone|iPad|iPod/.test(navigator.userAgent || '');
+            if (!isPhone) return; // a computer stays on this page
+            window.location.href = "{{ $deepLink }}";
+            setTimeout(function () {
+                if (!document.hidden) window.location = storeUrl();
+            }, 1800);
+        };
     </script>
 </head>
 <body>
-<h2>Opening {{ $routeName }} in Talbna App</h2>
-<div class="loader"></div>
-<p>Redirecting you to the app...</p>
-
-<div class="fallback">
-    <p>If nothing happens:</p>
-    <a id="app-store-link" class="button" href="{{ $playStoreUrl }}">Download the App</a>
-    <a id="web-fallback" class="button" style="background-color: #3498db;" href="{{ $webFallbackUrl }}">Continue to Website</a>
+@if (!empty($preview['image']))
+    <img class="cover" src="{{ $preview['image'] }}" alt="">
+@endif
+<h2>{{ $preview['title'] }}</h2>
+<p>Opening this {{ $routeName }} in the Talabna app…</p>
+<div>
+    <a class="button" href="{{ $deepLink }}">Open in Talabna</a>
+    <a id="store" class="button" style="background:#1d1d1f;color:#fff" href="{{ $playStoreUrl }}">Get the app</a>
 </div>
 </body>
 </html>

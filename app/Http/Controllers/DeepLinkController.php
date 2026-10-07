@@ -22,6 +22,11 @@ class DeepLinkController extends Controller
 
     public function redirect($route, $id = null)
     {
+        // The app's ShareUtils.sharePost uses "post" for a service post.
+        if ($route === 'post') {
+            $route = 'service-post';
+        }
+
         // Validate route and ID
         $validator = Validator::make(
             ['route' => $route, 'id' => $id],
@@ -86,16 +91,54 @@ class DeepLinkController extends Controller
 
         // Platform-specific store URLs
         $playStoreUrl = 'https://play.google.com/store/apps/details?id=com.talabna.talabna';
-        $appStoreUrl = 'https://apps.apple.com/app/talabna/id1234567890'; // Replace with actual iOS app URL
+        $appStoreUrl = 'https://apps.apple.com/app/id6814376173';
 
-        // Return a view that will handle the redirection
+        // A page that opens the app (or the right store) and gives WhatsApp / Facebook / X a preview card.
         return view('deep-link', [
             'deepLink' => $deepLink,
             'playStoreUrl' => $playStoreUrl,
             'appStoreUrl' => $appStoreUrl,
-            'routeName' => ucfirst($route),
-            'webFallbackUrl' => url("/api/{$route}" . ($id ? "/{$id}" : ""))
+            'routeName' => $route === 'reels' ? 'reel' : ($route === 'service-post' ? 'post' : $route),
+            'preview' => $this->preview($route, $id),
+            'pageUrl' => url()->current(),
         ]);
+    }
+
+    /** Title, description and image of a shared post or reel, for the link preview. */
+    protected function preview(string $route, $id): array
+    {
+        $preview = ['title' => 'Talabna', 'description' => 'Buy & sell nearby on Talabna.', 'image' => asset('storage/photos/og-image.jpg')];
+        if (!$id || !in_array($route, ['service-post', 'reels'], true)) {
+            return $preview;
+        }
+        try {
+            $post = ServicePost::with('photos')->find($id);
+            if (!$post) {
+                return $preview;
+            }
+            $text = function ($value) {
+                if (is_array($value)) {
+                    $value = $value['ar'] ?? $value['en'] ?? collect($value)->first(fn ($v) => is_string($v) && $v !== '');
+                }
+                return is_string($value) ? trim(strip_tags($value)) : '';
+            };
+            $title = $text($post->getRawOriginal('title') ? json_decode($post->getRawOriginal('title'), true) ?? $post->getRawOriginal('title') : null);
+            $description = $text($post->getRawOriginal('description') ? json_decode($post->getRawOriginal('description'), true) ?? $post->getRawOriginal('description') : null);
+            if ($title !== '') {
+                $preview['title'] = $title.' · Talabna';
+            }
+            if ($description !== '') {
+                $preview['description'] = \Illuminate\Support\Str::limit($description, 180);
+            }
+            $photo = $post->photos->first(fn ($p) => !preg_match('/\.(mp4|mov|webm|m4v)$/i', (string) $p->src)) ?? null;
+            if ($photo && $photo->src) {
+                $preview['image'] = str_starts_with($photo->src, 'http') ? $photo->src : url(ltrim($photo->src, '/'));
+            }
+        } catch (\Throwable $e) {
+            Log::warning('deep link preview failed', ['route' => $route, 'id' => $id, 'message' => $e->getMessage()]);
+        }
+
+        return $preview;
     }
 
     /**
