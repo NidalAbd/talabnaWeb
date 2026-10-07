@@ -459,6 +459,10 @@
   "ar": "حدث خطأ ما. لم يتم خصم أي نقاط.",
   "en": "Something went wrong. You were not charged."
  },
+ "ai.studio_no_item": {
+  "ar": "لا يظهر في هذه الصورة منتج واضح. استخدم صورة للمنتج الذي تبيعه. لم يتم خصم أي نقاط.",
+  "en": "This photo has no clear item to feature. Use a photo of the item you are selling. You were not charged."
+ },
  "ai.suggest_category": {
   "ar": "اقترح القسم",
   "en": "Suggest category"
@@ -1715,6 +1719,18 @@
   "ar": "بدون عنوان",
   "en": "Untitled"
  },
+ "drawer.drafts": {
+  "ar": "مسوداتي",
+  "en": "My drafts"
+ },
+ "drawer.jobs": {
+  "ar": "الوظائف",
+  "en": "Jobs"
+ },
+ "drawer.wallet": {
+  "ar": "النقاط والاشتراكات",
+  "en": "Points & plans"
+ },
  "duration_chip_selector.duration": {
   "ar": "المدة",
   "en": "Duration"
@@ -2099,9 +2115,21 @@
   "ar": "يجب أن يتكون الرقم من 9 أرقام",
   "en": "Number should be 9 digits"
  },
+ "location.pick_on_map": {
+  "ar": "اختر على الخريطة",
+  "en": "Pick on map"
+ },
+ "location.pinned": {
+  "ar": "الموقع المحدد",
+  "en": "Pinned location"
+ },
  "location.please_enter_a_number": {
   "ar": "يرجى إدخال رقم",
   "en": "Please enter a number"
+ },
+ "location.use_mine": {
+  "ar": "استخدم موقعي",
+  "en": "Use my location"
  },
  "location_button.view_google_map": {
   "ar": "عرض على خرائط Google",
@@ -2138,6 +2166,10 @@
  "location_picker.tap_on_the_map_to": {
   "ar": "اضغط على الخريطة لاختيار الموقع أو اسحب العلامة",
   "en": "Tap on the map to select location or drag the marker"
+ },
+ "location_step.where": {
+  "ar": "أين يقع؟",
+  "en": "Where is it?"
  },
  "map.all": {
   "ar": "الكل",
@@ -2206,6 +2238,38 @@
  "media.add_hint": {
   "ar": "أضف حتى {n} صور أو فيديو (دقيقة واحدة كحد أقصى)",
   "en": "Add up to {n} photos or a video (1 min max)"
+ },
+ "media.camera": {
+  "ar": "الكاميرا",
+  "en": "Camera"
+ },
+ "media.empty_title": {
+  "ar": "اعرض ما تقدمه",
+  "en": "Show what you are offering"
+ },
+ "media.gallery": {
+  "ar": "المعرض",
+  "en": "Gallery"
+ },
+ "media.make_cover": {
+  "ar": "اجعلها الغلاف",
+  "en": "Make cover"
+ },
+ "media.photos_sub": {
+  "ar": "الصورة الأولى هي الغلاف. اضغط ✨ على أي صورة لتحسينها.",
+  "en": "The first photo is the cover. Tap ✨ on a photo to improve it."
+ },
+ "media.photos_title": {
+  "ar": "الصور والفيديو",
+  "en": "Photos & video"
+ },
+ "media.shots_title": {
+  "ar": "لقطات يبحث عنها المشترون",
+  "en": "Shots buyers look for"
+ },
+ "media.video": {
+  "ar": "فيديو",
+  "en": "Video"
  },
  "media_viewer.video_failed": {
   "ar": "لا يمكن تشغيل هذا الفيديو الآن.",
@@ -2998,6 +3062,10 @@
   "ar": "ابحث عن مدينة...",
   "en": "Search city..."
  },
+ "post.start_with_photos": {
+  "ar": "ابدأ بالصور: يمكن للذكاء الاصطناعي كتابة العنوان والوصف من صورة.",
+  "en": "Start with photos: AI can write the title and description from one."
+ },
  "post.state.active": {
   "ar": "نشط",
   "en": "Active"
@@ -3013,6 +3081,14 @@
  "post.state.rejected": {
   "ar": "مرفوض",
   "en": "Rejected"
+ },
+ "post.texts_needed": {
+  "ar": "أضف عنوانًا ووصفًا (40 حرفًا على الأقل) أولًا.",
+  "en": "Add a title and a description (40+ characters) first."
+ },
+ "post.texts_needed_photo": {
+  "ar": "أضف عنوانًا ووصفًا، أو اضغط «املأ إعلانك من هذه الصورة».",
+  "en": "Add a title and description, or tap \"Fill your post from this photo\"."
  },
  "post.type.offer_hint": {
   "ar": "أعرض شيئًا",
@@ -3118,6 +3194,10 @@
   "ar": "{duration} أيام",
   "en": "{duration} days"
  },
+ "post_preview.badge_duration_one_day": {
+  "ar": "يوم واحد",
+  "en": "1 day"
+ },
  "post_preview.premium_badge": {
   "ar": "شارة مميزة",
   "en": "Premium Badge"
@@ -3190,6 +3270,34 @@
   "ar": "مجانًا",
   "en": "Free"
  },
+ "price_type.hint_budget": {
+  "ar": "المبلغ الذي يمكنك دفعه",
+  "en": "What you can pay"
+ },
+ "price_type.hint_fixed": {
+  "ar": "سعر واحد واضح",
+  "en": "One clear price"
+ },
+ "price_type.hint_free": {
+  "ar": "للتبرع مجانًا",
+  "en": "Giving it away"
+ },
+ "price_type.hint_negotiable": {
+  "ar": "منفتح على العروض",
+  "en": "Open to offers"
+ },
+ "price_type.hint_none": {
+  "ar": "لا يظهر السعر",
+  "en": "Price not shown"
+ },
+ "price_type.hint_on_request": {
+  "ar": "يراسلك المشترون",
+  "en": "Buyers message you"
+ },
+ "price_type.hint_salary": {
+  "ar": "من – إلى شهريًا",
+  "en": "From – to per month"
+ },
  "price_type.negotiable": {
   "ar": "قابل للتفاوض",
   "en": "Negotiable"
@@ -3213,6 +3321,10 @@
  "price_type.salary_to": {
   "ar": "حتى (اختياري)",
   "en": "Up to (optional)"
+ },
+ "price_type.title": {
+  "ar": "كيف تريد تسعيره؟",
+  "en": "How do you want to price it?"
  },
  "privacy.could_not_open_email_app": {
   "ar": "تعذّر فتح تطبيق البريد",
@@ -4914,6 +5026,14 @@
   "ar": "تم الملء من صورتك. راجع التفاصيل وعدّل ما تريد.",
   "en": "Filled from your photo. Check the details and edit anything."
  },
+ "snap.from_photo_sub": {
+  "ar": "يقترح الذكاء الاصطناعي العنوان والوصف والقسم والسعر، وتراجع كل خطوة بنفسك.",
+  "en": "AI suggests the title, description, category and price. You review every step."
+ },
+ "snap.from_photo_title": {
+  "ar": "املأ إعلانك من هذه الصورة",
+  "en": "Fill your post from this photo"
+ },
  "snap.gallery": {
   "ar": "اختر من المعرض",
   "en": "Choose from gallery"
@@ -5225,6 +5345,10 @@
  "studio.working_video": {
   "ar": "جارٍ إنشاء الفيديو… بضع دقائق. أبقِ هذه الصفحة مفتوحة.",
   "en": "Making your video… a few minutes. Keep this open."
+ },
+ "studio.working_video_bg": {
+  "ar": "جارٍ إنشاء الفيديو… بضع دقائق.\nيمكنك الإغلاق ومتابعة التصفح: سنرسل لك إشعارًا عندما يجهز.",
+  "en": "Making your video… a few minutes.\nYou can close this and keep browsing: we will notify you when it is ready."
  },
  "subcategory.failed_to_load_location_data": {
   "ar": "تعذّر تحميل بيانات الموقع",
