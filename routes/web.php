@@ -730,6 +730,9 @@ Route::middleware(['auth'])->group(function () {
 });
 
 Route::middleware(['auth', 'admin'])->group(function () {
+    // Recent errors and warnings from the Laravel log, grouped (no SSH needed).
+    Route::get('/admin/server-errors', [\App\Http\Controllers\Admin\ServerErrorsController::class, 'index'])->name('admin.server-errors');
+
     // Marketing Notification routes
     Route::get('/notifications/marketing', [NotificationMarketingController::class, 'index'])->name('notifications.marketing.index');
     Route::post('/notifications/marketing/send-all', [NotificationMarketingController::class, 'sendToAll'])->name('notifications.marketing.send-all');

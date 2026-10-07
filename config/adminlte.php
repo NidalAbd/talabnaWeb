@@ -430,6 +430,13 @@ return [
             ]
         ],
 
+        [
+            'text' => 'Server errors',
+            'url'  => 'admin/server-errors',
+            'icon' => 'fas fa-bug',
+            'icon_color' => 'red',
+        ],
+
         ['header' => 'POINTS & MONETIZATION'],
 
         // Points System
