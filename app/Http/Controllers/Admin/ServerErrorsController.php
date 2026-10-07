@@ -83,7 +83,9 @@ class ServerErrorsController extends Controller
     /** Same problem with different ids/numbers groups together. */
     private function signature(string $message): string
     {
+        // The SQL and context differ per request (ids, values): group on the error itself.
         $s = preg_replace('/\{.*$/s', '', $message);
+        $s = preg_replace('/\s*\((Connection|SQL):.*$/s', '', (string) $s);
         $s = preg_replace('/[0-9a-f]{8}-[0-9a-f-]{27,}/i', '#', (string) $s);
 
         return (string) preg_replace('/\d+/', '#', (string) $s);

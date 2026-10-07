@@ -521,6 +521,10 @@ class AutoTranslationService
             if (json_last_error() === JSON_ERROR_CTRL_CHAR) {
                 $translated = json_decode($this->escapeControlCharsInStrings($content), true);
             }
+            if (json_last_error() === JSON_ERROR_CTRL_CHAR) {
+                // Still some (e.g. raw form feeds or NULs the model emitted): drop the invisible ones and try once more.
+                $translated = json_decode((string) preg_replace('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', '', $content), true);
+            }
             if (json_last_error() !== JSON_ERROR_NONE) {
                 Log::error("Failed to parse batch {$label}: " . json_last_error_msg());
                 return null;
