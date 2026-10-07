@@ -422,7 +422,10 @@ class AiController extends Controller
 
         return response()->json(
             AiRequest::where('user_id', $request->user()->id)->where('status', AiRequest::SUCCEEDED)
-                ->whereIn('feature', ['generate_image', 'generate_video'])->whereNotNull('result_path')->where('completed_at', '>=', $keep)
+                // Photo Studio results too: a paid result the app never received (closed, connection lost) was
+                // impossible to get back.
+                ->whereIn('feature', ['generate_image', 'generate_video', 'studio_light', 'studio_background', 'studio_scene', 'studio_cinematic', 'studio_video'])
+                ->whereNotNull('result_path')->where('completed_at', '>=', $keep)
                 ->latest('id')->limit(30)->get()
                 ->filter(fn (AiRequest $r) => Storage::disk('local')->exists($r->result_path))
                 ->map(fn (AiRequest $r) => [
@@ -430,6 +433,7 @@ class AiController extends Controller
                     'file_type' => str_ends_with($r->result_path, '.mp4') ? 'video' : 'image',
                     'file_url' => url('/api/ai/requests/'.$r->uuid.'/file'),
                     'prompt' => mb_substr(preg_replace('/^USER:\s*/', '', explode("\n", (string) $r->prompt)[0] ?? ''), 0, 200),
+                    'feature' => $r->feature,
                     'created_at' => $r->created_at?->toIso8601String(),
                 ])->values()
         );
