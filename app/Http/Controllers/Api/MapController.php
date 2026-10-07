@@ -8,7 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 /**
- * GET /api/feed/map?lat&lng&radius_km&category_id&type (Release C, 2026-10-07): live posts with a real location inside
+ * GET /api/feed/map?lat&lng&radius_km&category_id&type&q (Release C, 2026-10-07; q = words in the title/description): live posts with a real location inside
  * the visible area, for the map view. Small pins only (id, position, title, price, first photo); up to 200, nearest
  * first. Posts on the app's default placeholder location are left out.
  */
@@ -25,6 +25,7 @@ class MapController extends Controller
             'radius_km' => 'nullable|numeric|min:1|max:200',
             'category_id' => 'nullable|integer',
             'type' => 'nullable|in:عرض,طلب',
+            'q' => 'nullable|string|max:80',
         ]);
         $lat = (float) $d['lat'];
         $lng = (float) $d['lng'];
@@ -41,6 +42,14 @@ class MapController extends Controller
             ->whereNotIn('categories_id', [6, 7])
             ->when(! empty($d['category_id']), fn ($q) => $q->where('categories_id', (int) $d['category_id']))
             ->when(! empty($d['type']), fn ($q) => $q->where('type', $d['type']))
+            ->when(trim((string) ($d['q'] ?? '')) !== '', function ($q) use ($d) {
+                // Same matching as search: plain text, or JSON-escaped (Arabic stored as \u....).
+                $text = trim((string) $d['q']);
+                $plain = '%'.addcslashes($text, '%_\\').'%';
+                $escaped = '%'.addcslashes(trim(json_encode($text), '"'), '%_\\').'%';
+                $q->where(fn ($w) => $w->where('title', 'LIKE', $plain)->orWhere('description', 'LIKE', $plain)
+                    ->orWhere('title', 'LIKE', $escaped)->orWhere('description', 'LIKE', $escaped));
+            })
             ->with('photos')
             ->latest()
             ->limit(400)
