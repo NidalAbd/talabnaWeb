@@ -239,12 +239,11 @@ $spaRoutes = function () {
 // Default locale (Arabic) — unprefixed
 $spaRoutes();
 
-// Non-default locales — /{locale}/* . Locale codes hard-coded here to keep
-// route compilation static and avoid touching the DB on every route refresh;
-// keep in sync with the active_languages table.
+// Non-default locales — /{locale}/* . The codes are a constant (Language::WEB_LOCALES) so route compilation stays
+// static; sitemaps and hreflang list the same set.
 Route::group([
     'prefix' => '{locale}',
-    'where' => ['locale' => 'en|tr|fr|es|hi|ur|bn|pt|ru|id|de|zh|ku|fa|sw|ms'],
+    'where' => ['locale' => implode('|', \App\Models\Language::WEB_LOCALES)],
     'as' => 'locale.',
 ], $spaRoutes);
 

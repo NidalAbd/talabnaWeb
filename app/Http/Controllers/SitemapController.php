@@ -96,7 +96,7 @@ class SitemapController extends Controller
     {
         if ($static = $this->tryStaticFile('sitemap.xml')) return $static;
         try {
-        $content = Cache::remember('sitemap-index-v6', 3600, function () {
+        $content = Cache::remember('sitemap-index-v7', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
             $now = now()->toIso8601String();
@@ -156,18 +156,17 @@ class SitemapController extends Controller
     public function pages()
     {
         if ($static = $this->tryStaticFile('sitemap-pages.xml')) return $static;
-        $content = Cache::remember('sitemap-pages-v4', 3600, function () {
+        $content = Cache::remember('sitemap-pages-v5', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
-            $activeLanguages = \App\Models\Language::getActiveOrdered();
+            $activeLanguages = \App\Models\Language::getWebOrdered();
             $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
             $allLocales = $activeLanguages->pluck('code')->all();
 
             $pages = [
                 ['url' => '/', 'priority' => '1.0', 'changefreq' => 'daily'],
                 ['url' => '/browse', 'priority' => '0.9', 'changefreq' => 'hourly'],
-                ['url' => '/search', 'priority' => '0.8', 'changefreq' => 'daily'],
                 ['url' => '/about', 'priority' => '0.5', 'changefreq' => 'monthly'],
                 ['url' => '/contact', 'priority' => '0.5', 'changefreq' => 'monthly'],
                 ['url' => '/privacy', 'priority' => '0.3', 'changefreq' => 'yearly'],
@@ -200,11 +199,11 @@ class SitemapController extends Controller
     {
         if ($static = $this->tryStaticFile('sitemap-categories.xml')) return $static;
         try {
-        $content = Cache::remember('sitemap-categories-v4', 3600, function () {
+        $content = Cache::remember('sitemap-categories-v5', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">';
 
-            $activeLanguages = \App\Models\Language::getActiveOrdered();
+            $activeLanguages = \App\Models\Language::getWebOrdered();
             $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
             // Categories' name JSON is fully populated for all 17 active
             // locales (verified) — no per-record gating needed.
@@ -256,13 +255,13 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-locations-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-locations-v7-{$page}";
+        $cacheKey = "sitemap-locations-v8-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationRecords();
             $offset = ($page - 1) * self::LOCATIONS_PER_PAGE;
             $slice = array_slice($records, $offset, self::LOCATIONS_PER_PAGE);
 
-            $activeLanguages = \App\Models\Language::getActiveOrdered();
+            $activeLanguages = \App\Models\Language::getWebOrdered();
             $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
             $allLocales = $activeLanguages->pluck('code')->all();
             $now = now()->toIso8601String();
@@ -343,13 +342,13 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-location-categories-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-location-categories-v6-{$page}";
+        $cacheKey = "sitemap-location-categories-v7-{$page}";
         $content = Cache::remember($cacheKey, 3600, function () use ($page) {
             $records = $this->locationCategoryRecords();
             $offset = ($page - 1) * self::LOC_CAT_PER_PAGE;
             $slice = array_slice($records, $offset, self::LOC_CAT_PER_PAGE);
 
-            $activeLanguages = \App\Models\Language::getActiveOrdered();
+            $activeLanguages = \App\Models\Language::getWebOrdered();
             $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
             $allLocales = $activeLanguages->pluck('code')->all();
             $now = now()->toIso8601String();
@@ -415,7 +414,7 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-listings-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-listings-v5-{$page}";
+        $cacheKey = "sitemap-listings-v6-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::LISTINGS_PER_PAGE;
@@ -430,7 +429,7 @@ class SitemapController extends Controller
                     'country_id', 'city_id', 'categories_id', 'sub_categories_id',
                 ]);
 
-            $activeLanguages = \App\Models\Language::getActiveOrdered();
+            $activeLanguages = \App\Models\Language::getWebOrdered();
             $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
 
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
@@ -463,7 +462,7 @@ class SitemapController extends Controller
     {
         $page = max(1, (int) $page);
         if ($static = $this->tryStaticFile("sitemap-users-{$page}.xml")) return $static;
-        $cacheKey = "sitemap-users-v5-{$page}";
+        $cacheKey = "sitemap-users-v6-{$page}";
 
         $content = Cache::remember($cacheKey, 1800, function () use ($page) {
             $perPage = self::USERS_PER_PAGE;
@@ -478,7 +477,7 @@ class SitemapController extends Controller
                 ->take($perPage)
                 ->get(['id', 'user_name', 'updated_at']);
 
-            $activeLanguages = \App\Models\Language::getActiveOrdered();
+            $activeLanguages = \App\Models\Language::getWebOrdered();
             $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
             $allLocales = $activeLanguages->pluck('code')->all();
 
@@ -618,9 +617,10 @@ class SitemapController extends Controller
     {
         $base = rtrim(url('/'), '/');
         $cleanPath = '/' . ltrim($path, '/');
+        // "/hi/" 301s to "/hi": list the final URL.
         return $locale === $defaultLocale
             ? $base . $cleanPath
-            : $base . '/' . $locale . $cleanPath;
+            : $base . '/' . $locale . ($cleanPath === '/' ? '' : $cleanPath);
     }
 
     /**

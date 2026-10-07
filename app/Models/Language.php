@@ -64,6 +64,23 @@ class Language extends Model
     /**
      * Get all active languages ordered
      */
+    /**
+     * Locales the website serves under /{code}/ (routes/web.php builds its {locale} pattern from this list). More
+     * languages are active for the app; a web URL in any of those was a 404, and the sitemaps and hreflang tags listed
+     * them all (2026-10-08: about two thirds of the sitemap URLs were 404s).
+     */
+    public const WEB_LOCALES = ['en', 'tr', 'fr', 'es', 'hi', 'ur', 'bn', 'pt', 'ru', 'id', 'de', 'zh', 'ku', 'fa', 'sw', 'ms'];
+
+    /** Active languages the website has URLs for (the default one included): for sitemaps and hreflang. */
+    public static function getWebOrdered()
+    {
+        $default = self::getDefault()?->code ?? 'ar';
+
+        return self::getActiveOrdered()
+            ->filter(fn ($lang) => $lang->code === $default || in_array($lang->code, self::WEB_LOCALES, true))
+            ->values();
+    }
+
     public static function getActiveOrdered()
     {
         return Cache::remember('languages_active', 3600, function () {

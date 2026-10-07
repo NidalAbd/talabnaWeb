@@ -40,7 +40,7 @@ class SeoController extends Controller
         }
 
         // Cache SEO data for 5 minutes to improve performance
-        $cacheKey = 'seo_' . md5($path . $locale);
+        $cacheKey = 'seo_v2_' . md5($path . $locale); // v2: hreflang limited to web locales
 
         return Cache::remember($cacheKey, 1800, function () use ($path, $locale) {
             return $this->generateSeoData($path, $locale);
@@ -148,7 +148,7 @@ class SeoController extends Controller
     private function buildPerLocaleAlternates(callable $pathBuilder, string $baseUrl, string $defaultLocale): array
     {
         $alternates = [];
-        foreach (\App\Models\Language::getActiveOrdered() as $lang) {
+        foreach (\App\Models\Language::getWebOrdered() as $lang) {
             $alternates[] = [
                 'hreflang' => $lang->code,
                 'href' => $this->localizedUrl($baseUrl, $pathBuilder($lang->code), $lang->code, $defaultLocale),
@@ -184,7 +184,8 @@ class SeoController extends Controller
         if ($locale === $defaultLocale) {
             return $base . $cleanPath;
         }
-        return $base . '/' . $locale . $cleanPath;
+        // "/hi/" 301s to "/hi": list the final URL.
+        return $base . '/' . $locale . ($cleanPath === '/' ? '' : $cleanPath);
     }
 
     /**
@@ -198,13 +199,13 @@ class SeoController extends Controller
         // Convert canonical → locale-agnostic path. Strip $baseUrl + any leading
         // /{locale}/ that matches an active language code.
         $path = preg_replace('#^' . preg_quote($base, '#') . '#', '', $canonical) ?: '/';
-        $path = preg_replace('#^/(en|tr|fr|es|hi|ur|bn|pt|ru|id|de|zh|ku|fa|sw|ms)(/|$)#', '/', $path);
+        $path = preg_replace('#^/('.implode('|', \App\Models\Language::WEB_LOCALES).')(/|$)#', '/', $path);
         // Strip any residual ?lang= legacy query.
         $path = preg_replace('/([?&])lang=[^&]*(&|$)/', '$1', $path);
         $path = rtrim(rtrim($path, '?'), '&');
 
         $alternates = [];
-        foreach (\App\Models\Language::getActiveOrdered() as $lang) {
+        foreach (\App\Models\Language::getWebOrdered() as $lang) {
             $alternates[] = [
                 'hreflang' => $lang->code,
                 'href' => $this->localizedUrl($baseUrl, $path, $lang->code, $defaultLocale),
@@ -1095,7 +1096,7 @@ class SeoController extends Controller
      */
     private function generateHreflangAlternates(string $baseUrl, string $path): array
     {
-        $languages = \App\Models\Language::getActiveOrdered();
+        $languages = \App\Models\Language::getWebOrdered();
         $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
 
         $alternates = [];
