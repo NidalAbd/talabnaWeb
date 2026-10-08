@@ -28,7 +28,7 @@ class VeoClient
     }
 
     /** @return string the operation name */
-    public function start(string $prompt, ?string $referenceJpeg, int $seconds): string
+    public function start(string $prompt, ?string $referenceJpeg, int $seconds, ?string $model = null): string
     {
         // Veo makes 4, 6 or 8 s clips (the app may ask for 12, which Sora had).
         $seconds = $seconds <= 4 ? 4 : ($seconds <= 6 ? 6 : 8);
@@ -39,7 +39,7 @@ class VeoClient
             // learned that on 2026-09-16 when every photo video was refused.
             $instance['image'] = ['bytesBase64Encoded' => base64_encode($referenceJpeg), 'mimeType' => 'image/jpeg'];
         }
-        $model = (string) config('ai.veo_model', 'veo-3.1-generate-preview');
+        $model = $model ?: (string) config('ai.veo_model', 'veo-3.1-generate-preview');
         try {
             $response = $this->http(60)->post(self::BASE.'/models/'.$model.':predictLongRunning', [
                 'instances' => [$instance],

@@ -49,7 +49,9 @@ class AiTextChain
             throw new AiProviderException('provider_auth', 'AI is not available right now, try again later.', 503);
         }
         // Healthy providers first; ones marked down still get a last try rather than failing the request outright.
-        usort($order, fn ($a, $b) => $this->isDown($a) <=> $this->isDown($b));
+        // The parallel check (AiHealth) and recent failures decide; one provider is asked at a time.
+        $health = app(AiHealth::class);
+        usort($order, fn ($a, $b) => (int) ($this->isDown($a) || ! $health->ready("$a:text")) <=> (int) ($this->isDown($b) || ! $health->ready("$b:text")));
 
         $last = null;
         foreach ($order as $i => $provider) {

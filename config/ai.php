@@ -32,6 +32,9 @@ return [
     // Veo (Gemini API), used once Sora is gone or fails: vertical 9:16, 1080p for 8 s clips, 720p for shorter ones.
     'veo_model' => env('AI_VEO_MODEL', 'veo-3.1-generate-preview'),
     'veo_resolution' => env('AI_VEO_RESOLUTION', '1080p'),
+    // Backups (2026-10-08): Veo Fast when Veo is not ready; Gemini's image model when gpt-image-1 is not.
+    'veo_fast_model' => env('AI_VEO_FAST_MODEL', 'veo-3.1-fast-generate-preview'),
+    'gemini_image_model' => env('AI_GEMINI_IMAGE_MODEL', 'gemini-2.5-flash-image'),
 
     // A request still "processing" after this long is given up on and refunded.
     'stale_minutes' => ['text' => 3, 'image' => 6, 'video' => 30], // sora-2-pro HD clips can take 10+ min

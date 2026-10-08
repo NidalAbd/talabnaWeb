@@ -6,15 +6,82 @@ use Illuminate\Support\Facades\Log;
 
 use Illuminate\Support\Facades\Storage;
 
-/** Image (gpt-image-1) and video (Veo, Sora before its shutdown) generation. Files go to the private "local" disk under ai-results/. */
+/**
+ * Image and video generation. Files go to the private "local" disk under ai-results/.
+ *  - Images: OpenAI gpt-image-1, with Google's Gemini image model as the backup (2026-10-08).
+ *  - Video: Google Veo 3.1, with Veo 3.1 Fast as the backup (Sora was shut down on 2026-09-24).
+ * One request at a time: the first READY model gets it (AiHealth checks them all in parallel, for free); only when
+ * it fails does the request go to the next. Two models never work on the same request at once.
+ */
 class AiMediaService
 {
     private const VEO_PREFIX = 'veo:';
 
     private const SORA_SHUTDOWN_DATE = '2026-09-24';
 
-    public function __construct(private OpenAiClient $openai, private VeoClient $veo)
+    public function __construct(private OpenAiClient $openai, private VeoClient $veo, private GeminiImageClient $geminiImage, private AiHealth $health)
     {
+    }
+
+    /**
+     * Runs [steps] (model id => closure returning image bytes) one after another in readiness order and returns the
+     * first image. A safety block ends it (another model would refuse too, or should not be asked to try).
+     */
+    private function imageChain(array $steps): string
+    {
+        $last = null;
+        $started = microtime(true);
+        foreach ($this->health->order(array_keys($steps)) as $i => $id) {
+            // A backup only when there is time left for it: the whole request must end within the web server's limit.
+            if ($i > 0 && microtime(true) - $started > 40) {
+                break;
+            }
+            try {
+                $bytes = $steps[$id]();
+                if ($i > 0) {
+                    Log::info('ai.image.served_by_backup', ['model' => $id]);
+                }
+
+                return $bytes;
+            } catch (AiProviderException $e) {
+                if ($e->errorCode === 'blocked') {
+                    throw $e;
+                }
+                $last = $e;
+                if ($e->errorCode !== 'bad_answer') {
+                    $this->health->markDown($id, $e->errorCode);
+                }
+            }
+        }
+        throw $last ?? new AiProviderException('provider_no_access', 'Image generation is not available right now.', 503);
+    }
+
+    /** Gemini answers PNG; the app and the store expect JPEG. */
+    private static function toJpeg(string $bytes): string
+    {
+        if (str_starts_with($bytes, "\xFF\xD8") || ! function_exists('imagecreatefromstring')) {
+            return $bytes;
+        }
+        $img = @imagecreatefromstring($bytes);
+        if (! $img) {
+            return $bytes;
+        }
+        ob_start();
+        imagejpeg($img, null, 86);
+        imagedestroy($img);
+
+        return (string) ob_get_clean();
+    }
+
+    /** "1024x1536" -> "2:3" for Gemini; null ("auto") keeps the photo's own shape. */
+    private static function aspect(?string $size): ?string
+    {
+        return match ($size) {
+            '1024x1536' => '2:3',
+            '1536x1024' => '3:2',
+            '1024x1024' => '1:1',
+            default => null,
+        };
     }
 
     public function isConfigured(): bool
@@ -25,12 +92,23 @@ class AiMediaService
     /** Generates one image and stores it. @return string storage path */
     public function generateImage(string $prompt, string $uuid): string
     {
+        $full = 'Realistic, well-lit photo-style picture for a classified ad. No text, no watermark, no logos. '.$prompt;
+        $bytes = $this->imageChain([
+            'openai:image' => fn () => $this->openaiGenerate($full),
+            'gemini:image' => fn () => self::toJpeg($this->geminiImage->generate($full, null, self::aspect(config('ai.image_size', '1024x1024')), 90)),
+        ]);
+
+        return $this->store($uuid.'.jpg', $bytes);
+    }
+
+    private function openaiGenerate(string $prompt): string
+    {
         try {
             // 90 s: under the web server's own limit, so a slow answer fails cleanly here and the points go
             // back at once (at 120 s the request was cut off first and the refund waited for the settler).
             $response = $this->openai->http(90)->post(OpenAiClient::BASE.'/images/generations', [
                 'model' => config('ai.image_model', 'gpt-image-1'),
-                'prompt' => 'Realistic, well-lit photo-style picture for a classified ad. No text, no watermark, no logos. '.$prompt,
+                'prompt' => $prompt,
                 'size' => config('ai.image_size', '1024x1024'),
                 'quality' => config('ai.image_quality', 'medium'),
                 'output_format' => 'jpeg',
@@ -49,7 +127,7 @@ class AiMediaService
             throw new AiProviderException('bad_answer', 'The AI returned no image.', 502);
         }
 
-        return $this->store($uuid.'.jpg', $bytes);
+        return $bytes;
     }
 
     /**
@@ -57,6 +135,17 @@ class AiMediaService
      * @return string storage path
      */
     public function editImage(string $imageBytes, string $mime, string $prompt, string $uuid, string $quality = 'medium', string $size = 'auto'): string
+    {
+        $bytes = $this->imageChain([
+            'openai:image' => fn () => $this->openaiEdit($imageBytes, $mime, $prompt, $quality, $size),
+            'gemini:image' => fn () => self::toJpeg($this->geminiImage->generate(
+                $prompt.' Keep the item itself exactly as it is in the photo.', ['bytes' => $imageBytes, 'mime' => $mime], self::aspect($size), 140)),
+        ]);
+
+        return $this->store($uuid.'.jpg', $bytes);
+    }
+
+    private function openaiEdit(string $imageBytes, string $mime, string $prompt, string $quality, string $size): string
     {
         $ext = str_contains($mime, 'png') ? 'png' : (str_contains($mime, 'webp') ? 'webp' : 'jpg');
         try {
@@ -84,7 +173,7 @@ class AiMediaService
             throw new AiProviderException('bad_answer', 'The AI returned no image.', 502);
         }
 
-        return $this->store($uuid.'.jpg', $bytes);
+        return $bytes;
     }
 
     /**
@@ -110,8 +199,22 @@ class AiMediaService
         if (! $this->veo->isConfigured()) {
             throw new AiProviderException('provider_no_access', 'Video generation is not available right now.', 503);
         }
-
-        return self::VEO_PREFIX.$this->veo->start($prompt, $referenceJpeg, (int) ($seconds ?? config('ai.video_seconds', '8')));
+        // Veo, then Veo Fast (its own quota): one start at a time, the first ready model first. Starting only queues
+        // the job, so a failed start costs nothing.
+        $models = ['veo' => (string) config('ai.veo_model', 'veo-3.1-generate-preview'), 'veo_fast' => (string) config('ai.veo_fast_model', 'veo-3.1-fast-generate-preview')];
+        $last = null;
+        foreach ($this->health->order(array_keys($models)) as $id) {
+            try {
+                return self::VEO_PREFIX.$this->veo->start($prompt, $referenceJpeg, (int) ($seconds ?? config('ai.video_seconds', '8')), $models[$id]);
+            } catch (AiProviderException $e) {
+                if ($e->errorCode === 'blocked') {
+                    throw $e;
+                }
+                $last = $e;
+                $this->health->markDown($id, $e->errorCode, 10);
+            }
+        }
+        throw $last ?? new AiProviderException('provider_no_access', 'Video generation is not available right now.', 503);
     }
 
     private function soraAvailable(): bool

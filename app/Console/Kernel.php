@@ -51,6 +51,9 @@ class Kernel extends ConsoleKernel
         // Regenerate static sitemap files daily at 5 AM. Keeps Google's view
         // fresh as new listings are added between deploys. Static-file
         // serving means Google fetches never hit the DB or PHP rendering.
+        // Which AI models are ready: all checked at once, for free (requests then go to ready ones only).
+        $schedule->command('ai:health')->everyFiveMinutes()->withoutOverlapping();
+
         $schedule->command('sitemap:generate')
             ->dailyAt('05:00')
             ->withoutOverlapping()
