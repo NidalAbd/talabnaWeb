@@ -116,7 +116,7 @@ class ShopController extends Controller
     }
 
     /**
-     * GET /api/public/shops?lat=&lng=&country_id=&category_id=&limit=: shops near the viewer (by distance when the shop
+     * GET /api/public/shops?lat=&lng=&country_id=&category_id=&q=&limit=: shops near the viewer (by distance when the shop
      * has a map point, else same city/country first, then the nearest countries), plus shop counts per category.
      */
     public function near(Request $request): JsonResponse
@@ -128,11 +128,15 @@ class ShopController extends Controller
         $lat = $request->filled('lat') ? (float) $request->query('lat') : null;
         $lng = $request->filled('lng') ? (float) $request->query('lng') : null;
         $countryId = $request->integer('country_id') ?: null;
-        $limit = min(30, max(1, $request->integer('limit', 12)));
+        $limit = min(60, max(1, $request->integer('limit', 12)));
+        $q = trim(mb_substr((string) $request->query('q', ''), 0, 60));
         $locale = app()->getLocale();
 
         $shops = Shop::whereIn('user_id', $active)
-            ->when($request->integer('category_id'), fn ($q, $c) => $q->where('category_id', $c))->get();
+            ->when($request->integer('category_id'), fn ($w, $c) => $w->where('category_id', $c))
+            ->when($q !== '', fn ($w) => $w->where(fn ($x) => $x->where('name', 'like', '%' . addcslashes($q, '%_\\') . '%')
+                ->orWhere('about', 'like', '%' . addcslashes($q, '%_\\') . '%')))
+            ->get();
         $counts = ServicePost::where('state', 'published')->whereIn('user_id', $shops->pluck('user_id'))
             ->select('user_id', DB::raw('count(*) as n'))->groupBy('user_id')->pluck('n', 'user_id');
         $shops = $shops->filter(fn ($s) => ($counts[$s->user_id] ?? 0) > 0); // a shop with nothing on sale is not shown
