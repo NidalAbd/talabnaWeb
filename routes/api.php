@@ -335,6 +335,8 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     Route::middleware('throttle:8,1')->group(function () {
         Route::post('ai/generate-image', [App\Http\Controllers\Api\AiController::class, 'generateImage']);
         Route::post('ai/studio', [App\Http\Controllers\Api\AiController::class, 'studio']);
+        // Photo Studio scenes for the app (labels are in the app), scenes that suit ?kind first.
+        Route::get('ai/studio-scenes', fn (\Illuminate\Http\Request $r) => response()->json(['data' => \App\Services\Ai\StudioScenes::forApp(in_array($r->query('kind'), \App\Services\Ai\StudioScenes::KINDS, true) ? $r->query('kind') : null)]));
         Route::post('ai/snap', [App\Http\Controllers\Api\AiController::class, 'snapToSell']);
         Route::post('ai/studio-video', [App\Http\Controllers\Api\AiController::class, 'studioVideo']);
         Route::post('ai/generate-video', [App\Http\Controllers\Api\AiController::class, 'generateVideo']);

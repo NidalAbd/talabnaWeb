@@ -23,7 +23,8 @@ return [
     ],
     'image_model' => env('AI_IMAGE_MODEL', 'gpt-image-1'),
     'image_quality' => env('AI_IMAGE_QUALITY', 'medium'),
-    'image_size' => env('AI_IMAGE_SIZE', '1024x1024'),
+    // Vertical, for a phone screen (square filled a quarter of it, 2026-10-08).
+    'image_size' => env('AI_IMAGE_SIZE', '1024x1536'),
     // 2026-10-07: pro model, vertical HD, 8 s (sora-2 at 720p/4 s looked dated). About $4 per clip.
     'video_model' => env('AI_VIDEO_MODEL', 'sora-2-pro'),
     'video_seconds' => env('AI_VIDEO_SECONDS', '8'),

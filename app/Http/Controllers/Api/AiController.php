@@ -228,7 +228,7 @@ class AiController extends Controller
         $d = $request->validate([
             'request_id' => 'required|uuid',
             'mode' => 'required|in:light,background,scene,cinematic',
-            'style' => 'nullable|in:living_room,outdoor,desk,kitchen,showroom,nature',
+            'style' => 'nullable|in:'.implode(',', \App\Services\Ai\StudioScenes::keys()),
             'image' => 'required|file|mimes:jpeg,jpg,png,webp|max:10240',
         ]);
         $file = $request->file('image');
@@ -239,17 +239,10 @@ class AiController extends Controller
             // A photo without one clear item (a field of flowers) came back as an unrelated product.
             .' Use only what is in this photo: never invent, replace or swap the item for another object. '
             .'If there is no single clear item, keep the whole photo as it is and only improve light and colour.';
-        $scenes = [
-            'living_room' => 'a bright modern living room',
-            'outdoor' => 'an outdoor setting in soft daylight',
-            'desk' => 'a clean modern desk',
-            'kitchen' => 'a bright modern kitchen counter',
-            'showroom' => 'an elegant showroom',
-            'nature' => 'a natural setting with soft greenery',
-        ];
         // Background, scene and cinematic rebuild the picture around the item: first make sure there is one (free; no
         // charge when there is not). Light only adjusts the photo as it is.
         $subject = null;
+        $kind = null;
         if ($d['mode'] !== 'light' && $this->text->isConfigured()) {
             try {
                 $check = $this->text->photoSubject($bytes, $mime);
@@ -260,6 +253,7 @@ class AiController extends Controller
                     ], 422);
                 }
                 $subject = $check['item'];
+                $kind = $check['kind'] ?? null;
             } catch (\Throwable $e) {
                 Log::warning('ai.studio.subject_check_failed', ['message' => $e->getMessage()]);
             }
@@ -271,7 +265,8 @@ class AiController extends Controller
         [$prompt, $quality] = match ($d['mode']) {
             'light' => ['Improve this product photo: correct exposure, white balance and sharpness. Keep the same background and framing.'.$keep, 'medium'],
             'background' => ['Place this exact item on a clean seamless light studio backdrop with a soft natural shadow, centred, product-photography lighting.'.$keep, 'medium'],
-            'scene' => ['Place this exact item naturally in '.($scenes[$d['style'] ?? 'living_room'] ?? $scenes['living_room']).', realistic scale, matching light and shadows.'.$keep, 'medium'],
+            'scene' => ['Place this exact item naturally: '.\App\Services\Ai\StudioScenes::setting(\App\Services\Ai\StudioScenes::resolve($d['style'] ?? 'auto', $kind))
+                .'. Realistic scale, matching light and shadows, vertical phone-screen framing with the item as the hero.'.$keep, 'medium'],
             // Was "dramatic lighting": results came out dark with the eye drawn to the background.
             'cinematic' => ['Turn this into a bright, premium advertising photo of this exact item. The item is the hero: sharp '
                 .'focus on it, it is the brightest and clearest part of the frame, lit by soft key light with a gentle rim light. '
@@ -280,7 +275,10 @@ class AiController extends Controller
         };
 
         return $this->run($request, 'studio_'.$d['mode'], $d['request_id'], ['prompt' => $prompt, 'provider' => 'openai'], // the mode is in the feature name; ai_requests has no mode/style columns
-            fn (AiRequest $r) => [['mode' => $d['mode'], 'ai_enhanced' => true], $this->media->editImage($bytes, $mime, $prompt, $r->uuid, $quality)],
+            // Rebuilt pictures come out vertical (1024x1536): the app is phone-only and square images filled a quarter of
+            // the screen (2026-10-08). "light" keeps the photo's own framing.
+            fn (AiRequest $r) => [['mode' => $d['mode'], 'ai_enhanced' => true, 'scene' => $d['mode'] === 'scene' ? \App\Services\Ai\StudioScenes::resolve($d['style'] ?? 'auto', $kind) : null],
+                $this->media->editImage($bytes, $mime, $prompt, $r->uuid, $quality, $d['mode'] === 'light' ? 'auto' : '1024x1536')],
             usesMedia: true);
     }
 

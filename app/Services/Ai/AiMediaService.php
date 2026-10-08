@@ -56,7 +56,7 @@ class AiMediaService
      * Release B: edits the seller's own photo (Photo Studio). input_fidelity=high keeps the item as it is.
      * @return string storage path
      */
-    public function editImage(string $imageBytes, string $mime, string $prompt, string $uuid, string $quality = 'medium'): string
+    public function editImage(string $imageBytes, string $mime, string $prompt, string $uuid, string $quality = 'medium', string $size = 'auto'): string
     {
         $ext = str_contains($mime, 'png') ? 'png' : (str_contains($mime, 'webp') ? 'webp' : 'jpg');
         try {
@@ -66,7 +66,7 @@ class AiMediaService
                 ->post(OpenAiClient::BASE.'/images/edits', [
                     'model' => config('ai.image_model', 'gpt-image-1'),
                     'prompt' => $prompt,
-                    'size' => 'auto',
+                    'size' => $size,
                     'quality' => $quality,
                     'input_fidelity' => 'high',
                     'output_format' => 'jpeg',

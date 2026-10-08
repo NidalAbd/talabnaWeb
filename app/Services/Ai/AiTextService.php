@@ -184,11 +184,14 @@ class AiTextService
         $system = 'You check photos for a classifieds app. Say whether the photo shows one clear, '
             .'specific item or object that someone could be selling (a product, vehicle, device, furniture, property...). '
             .'A landscape, sky, crowd, plain texture or random scene with no main item is NOT an item. '
-            .'Answer JSON only: {"has_item": boolean, "item": short English name of the item or null}.';
-        $out = $this->chain->completeJson('light', $system, '', ['bytes' => $imageBytes, 'mime' => $mime], 60, 0, 30);
+            .'Answer JSON only: {"has_item": boolean, "item": short English name of the item or null, '
+            .'"kind": one of '.implode('|', StudioScenes::KINDS).' (a room or building is "property")}.';
+        $out = $this->chain->completeJson('light', $system, '', ['bytes' => $imageBytes, 'mime' => $mime], 80, 0, 30);
         $item = is_array($out) ? trim((string) ($out['item'] ?? '')) : '';
 
-        return ['has_item' => is_array($out) && ($out['has_item'] ?? false) === true, 'item' => $item !== '' ? mb_substr($item, 0, 80) : null];
+        $kind = is_array($out) && in_array($out['kind'] ?? null, StudioScenes::KINDS, true) ? $out['kind'] : 'other';
+
+        return ['has_item' => is_array($out) && ($out['has_item'] ?? false) === true, 'item' => $item !== '' ? mb_substr($item, 0, 80) : null, 'kind' => $kind];
     }
 
     public function suggestCategory(string $title, string $description, bool $job = false, array $context = []): array
