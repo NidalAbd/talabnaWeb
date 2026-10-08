@@ -82,7 +82,7 @@ class CategoryFeedBadgesTest extends TestCase
         $ids = collect($this->getJson($this->url($which))->assertOk()->json('servicePosts.data'))->pluck('id')->all();
 
         $this->assertSame($fresh[11], $ids[0], 'the newest post is first, not the old diamond one');
-        $this->assertSame(1, array_search($old, $ids), 'the featured post sits in its slot');
+        $this->assertSame(\App\Services\Feed\SponsoredPicker::SLOTS[0], array_search($old, $ids), 'the featured post sits in its slot');
     }
 
     /** @dataProvider feeds */

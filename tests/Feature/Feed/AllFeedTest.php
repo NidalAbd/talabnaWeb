@@ -91,7 +91,7 @@ class AllFeedTest extends TestCase
         $this->assertNotSame($old, $ids[0], 'a featured post does not sit above fresh posts');
         $this->assertSame($fresh[11], $ids[0], 'the newest organic post is first');
         $this->assertContains($old, $ids, 'the featured post still appears, in a featured slot');
-        $this->assertSame(1, array_search($old, $ids));
+        $this->assertSame(\App\Services\Feed\SponsoredPicker::SLOTS[0], array_search($old, $ids), 'its first featured slot (never the first cards)');
     }
 
     public function test_pages_do_not_repeat_posts_and_featured_ones_appear_once(): void

@@ -123,10 +123,17 @@ class AppleLoginTest extends TestCase
         $this->postJson('/api/auth/apple', ['identity_token' => $token, 'nonce' => 'other'])->assertStatus(401);
     }
 
-    public function test_new_user_without_an_email_gets_a_clear_error(): void
+    /** Apple sends the email only the first time; sign-in must still work (Apple requires it), with a placeholder. */
+    public function test_new_user_without_an_email_gets_an_account_with_a_placeholder(): void
     {
-        $this->postJson('/api/auth/apple', ['identity_token' => $this->token(['sub' => 'apple-6', 'email' => null])])->assertStatus(422);
-        $this->assertSame(0, User::count());
+        $this->postJson('/api/auth/apple', ['identity_token' => $this->token(['sub' => 'apple-6', 'email' => null])])->assertOk();
+        $user = User::sole();
+        $this->assertStringEndsWith('@users.talbna.invalid', $user->email);
+        $this->assertNull($user->email_verified_at);
+
+        // The same Apple id signs in to the same account next time.
+        $this->postJson('/api/auth/apple', ['identity_token' => $this->token(['sub' => 'apple-6', 'email' => null])])->assertOk();
+        $this->assertSame(1, User::count());
     }
 
     public function test_banned_account_cannot_sign_in(): void

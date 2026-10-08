@@ -93,20 +93,15 @@ class AiHealth
         return $out;
     }
 
-    /** The last check (runs one now when there is none, e.g. right after a deploy). */
+    /**
+     * The last check. A user's request never waits for a check: when there is none yet (right after a deploy), every
+     * model counts as ready until the scheduler's next run (every 5 minutes).
+     */
     public function status(): array
     {
         $cached = Cache::get(self::CACHE);
-        if (is_array($cached)) {
-            return $cached;
-        }
-        try {
-            return $this->probe();
-        } catch (\Throwable $e) {
-            Log::warning('ai.health.probe_failed', ['message' => $e->getMessage()]);
 
-            return [];
-        }
+        return is_array($cached) ? $cached : [];
     }
 
     /** Ready = the check found it usable and no real request failed on it in the last few minutes. */
@@ -128,12 +123,15 @@ class AiHealth
         Log::warning('ai.model.down', ['model' => $id, 'reason' => $reason, 'minutes' => $minutes]);
     }
 
-    /** The chain in the order to try: ready models first, the others last (still one at a time). */
+    /**
+     * The models to try, in order, one at a time: only the ready ones; when none is ready, all of them (the check may
+     * be stale, and failing without trying helps nobody).
+     */
     public function order(array $ids): array
     {
         $ids = array_values(array_filter($ids, fn ($id) => isset($this->models()[$id])));
-        usort($ids, fn ($a, $b) => (int) ! $this->ready($a) <=> (int) ! $this->ready($b));
+        $ready = array_values(array_filter($ids, fn ($id) => $this->ready($id)));
 
-        return $ids;
+        return $ready ?: $ids;
     }
 }

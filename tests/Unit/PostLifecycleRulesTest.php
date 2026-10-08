@@ -10,7 +10,7 @@ use Tests\TestCase;
 /** Release A: when a post may be renewed, and what owners and savers are told. */
 class PostLifecycleRulesTest extends TestCase
 {
-    private function post(string $state, ?\DateTimeInterface $expires): ServicePost
+    private function makePost(string $state, ?\DateTimeInterface $expires): ServicePost
     {
         $p = new ServicePost();
         $p->state = $state;
@@ -21,10 +21,10 @@ class PostLifecycleRulesTest extends TestCase
 
     public function test_renew_is_allowed_once_ended_or_in_the_last_week_only(): void
     {
-        $this->assertTrue(PostLifecycle::canRenew($this->post('expired', now()->subDay())));
-        $this->assertTrue(PostLifecycle::canRenew($this->post('published', now()->addDays(3))));
-        $this->assertFalse(PostLifecycle::canRenew($this->post('published', now()->addDays(20))));
-        $this->assertFalse(PostLifecycle::canRenew($this->post('sold', now()->addDays(3))));
+        $this->assertTrue(PostLifecycle::canRenew($this->makePost('expired', now()->subDay())));
+        $this->assertTrue(PostLifecycle::canRenew($this->makePost('published', now()->addDays(3))));
+        $this->assertFalse(PostLifecycle::canRenew($this->makePost('published', now()->addDays(20))));
+        $this->assertFalse(PostLifecycle::canRenew($this->makePost('sold', now()->addDays(3))));
     }
 
     public function test_pushes_are_written_in_the_users_language(): void

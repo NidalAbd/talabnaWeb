@@ -34,6 +34,15 @@ class AiActionsTest extends TestCase
         // Text tests fake OpenAI only; the backup chain has its own tests (AiTextChainTest).
         config(['services.openai.key' => 'test-key', 'services.gemini.key' => 'test-gemini-key', 'ai.text_providers' => ['openai']]);
         Storage::fake('local');
+        // These tests check charging, refunds and records, not the price list: they keep the prices they were
+        // written with (the live prices changed on 2026-10-08, see the reprice_points migration).
+        foreach (['enhance_post' => 2, 'enhance_resume' => 2, 'translate_post' => 2, 'snap_to_sell' => 2, 'suggest_category' => 1,
+            'suggest_price' => 1, 'generate_image' => 3, 'generate_video' => 20, 'studio_light' => 1, 'studio_background' => 2,
+            'studio_scene' => 3, 'studio_cinematic' => 4, 'studio_video' => 20] as $key => $points) {
+            DB::table('ai_features')->where('key', $key)->update(['points_cost' => $points]);
+        }
+        // The Gemini image backup is not part of these tests: only OpenAI answers images here.
+        \Illuminate\Support\Facades\Cache::put('ai_down:gemini:image', 'test', 3600);
 
         // The ledger exactly as production had it: type is an enum WITHOUT 'refund' (SQLite enforces it as a CHECK).
         $this->ledgerTable(withRefund: false);
@@ -102,7 +111,7 @@ class AiActionsTest extends TestCase
         $res = $this->getJson('/api/ai/pricing')->assertOk();
 
         $this->assertSame(30, $res->json('balance'));
-        $this->assertSame(3, $res->json('confirm_from'));
+        $this->assertSame(1, $res->json('confirm_from')); // every paid action asks first (owner, 2026-10-03)
         foreach (['enhance_post' => 2, 'translate_post' => 2, 'suggest_category' => 1, 'suggest_price' => 1, 'generate_image' => 3, 'generate_video' => 20] as $key => $cost) {
             $this->assertSame($cost, $res->json("features.$key.points"), $key);
             $this->assertTrue($res->json("features.$key.enabled"), $key);
@@ -254,7 +263,7 @@ class AiActionsTest extends TestCase
 
     public function test_without_an_openai_key_nothing_is_charged(): void
     {
-        config(['services.openai.key' => null]);
+        config(['services.openai.key' => null, 'services.gemini.key' => null, 'services.anthropic.key' => null]);
         $this->postJson('/api/ai/enhance-post', ['request_id' => $this->id(), 'title' => 'a b c'])->assertStatus(503);
         $this->assertSame(30, $this->balance());
     }
@@ -358,11 +367,32 @@ class AiActionsTest extends TestCase
 
     public function test_a_video_that_cannot_be_started_is_refunded_immediately(): void
     {
-        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + ['generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['error' => ['message' => 'not found']], 404)]);
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['error' => ['message' => 'not found']], 404),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-fast-generate-preview:predictLongRunning' => Http::response(['error' => ['message' => 'not found']], 404),
+        ]);
 
         $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'a bicycle rotating slowly'])
             ->assertStatus(502)->assertJsonPath('refunded', true)->assertJsonPath('code', 'provider_error');
         $this->assertSame(30, $this->balance());
+    }
+
+    public function test_when_veo_cannot_start_veo_fast_takes_the_video_and_only_one_job_runs(): void
+    {
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['error' => ['message' => 'quota exceeded']], 429),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-fast-generate-preview:predictLongRunning' => Http::response(['name' => 'models/veo-3.1-fast-generate-preview/operations/f1']),
+        ]);
+        $id = $this->id();
+        $this->postJson('/api/ai/generate-video', ['request_id' => $id, 'prompt' => 'a bicycle rotating slowly'])->assertStatus(202);
+
+        $this->assertSame('veo:models/veo-3.1-fast-generate-preview/operations/f1', AiRequest::where('uuid', $id)->value('provider_job_id'));
+        $this->assertSame(10, $this->balance(), 'charged once');
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::has('ai_down:veo'), 'Veo is skipped for the next requests');
+
+        // The next video goes straight to Veo Fast: Veo is not asked again while it is down.
+        $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'a bicycle rotating slowly']);
+        $this->assertSame(1, collect(Http::recorded())->filter(fn ($p) => str_contains($p[0]->url(), 'veo-3.1-generate-preview:predictLongRunning'))->count());
     }
 
     public function test_before_soras_shutdown_a_sora_failure_falls_back_to_veo(): void
@@ -404,7 +434,7 @@ class AiActionsTest extends TestCase
         app(AiSettler::class)->settleAll();
         $this->assertSame(10, $this->balance(), 'still running: nothing refunded yet');
 
-        AiRequest::where('uuid', $id)->update(['created_at' => now()->subMinutes(25)]);
+        AiRequest::where('uuid', $id)->update(['created_at' => now()->subMinutes(35)]); // past the 30-minute video limit
         $this->artisan('ai-points:settle')->assertExitCode(0);
 
         $row = AiRequest::where('uuid', $id)->first();
