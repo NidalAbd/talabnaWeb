@@ -20,6 +20,7 @@ class BadgeType extends Model
         'points_per_day',
         'priority',
         'view_boost_percent',
+        'price_by_days',
         'is_default',
         'is_active',
     ];
@@ -29,6 +30,7 @@ class BadgeType extends Model
         'points_per_day' => 'integer',
         'priority' => 'integer',
         'view_boost_percent' => 'integer',
+        'price_by_days' => 'array',
         'is_default' => 'boolean',
         'is_active' => 'boolean',
     ];
@@ -132,8 +134,17 @@ class BadgeType extends Model
     /**
      * Calculate total cost for a duration
      */
+    /**
+     * Points for [days] days. A badge can have a price per number of days (2026-10-08: longer is cheaper per day, e.g.
+     * silver 7 days = 4 points instead of 14); a duration the table does not list costs its per-day rate.
+     */
     public function calculateCost(int $days): int
     {
+        $table = $this->price_by_days ?? [];
+        if ($days > 0 && isset($table[(string) $days])) {
+            return (int) $table[(string) $days];
+        }
+
         return $this->points_per_day * $days;
     }
 

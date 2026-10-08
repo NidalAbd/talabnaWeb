@@ -347,11 +347,12 @@ class BadgeService
         // Calculate remaining days
         $remainingDays = max(0, $expiresAt->diffInDays($now, false));
 
-        // Original cost
-        $totalPaid = $currentBadge->points_per_day * $servicePost->badge_duration;
+        // Original cost (day prices can be packages, so the refund is the paid share of the unused days)
+        $duration = max(1, (int) $servicePost->badge_duration);
+        $totalPaid = $currentBadge->calculateCost($duration);
 
         // Refund for unused days only
-        $refundAmount = $currentBadge->points_per_day * $remainingDays;
+        $refundAmount = (int) floor($totalPaid * min($remainingDays, $duration) / $duration);
 
         return [
             'used_days' => $usedDays,
