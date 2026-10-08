@@ -10,10 +10,28 @@ use Illuminate\Support\Facades\Request;
 
 class NotificationController extends Controller
 {
+    /**
+     * The app's tabs (2026-10-08). The app filtered only the pages it had loaded, so a tab with few matches (an account
+     * with 518 notifications and a handful of comments) paged through everything and looked stuck. The server filters now.
+     */
+    public const CATEGORIES = [
+        'messages' => ['comment', 'comment_reply'],
+        'activity' => ['post', 'badge', 'badge_applied', 'badge_upgraded', 'badge_switched', 'badge_expired', 'pointIn',
+            'points_approved', 'pointOut', 'sub_category', 'user', 'follower'],
+    ];
+
+    /** GET users/{user}/notifications?page=&category=messages|activity|system&read=0|1 */
     public function index($user): \Illuminate\Http\JsonResponse
     {
         // Only your own notifications, whatever id is in the URL.
-        $notifications = Notification::where('user_id', Auth::id())->orderBy('created_at', 'desc')->paginate(10);
+        $category = request()->query('category');
+        $read = request()->query('read');
+        $notifications = Notification::where('user_id', Auth::id())
+            ->when(isset(self::CATEGORIES[$category]), fn ($q) => $q->whereIn('type', self::CATEGORIES[$category]))
+            ->when($category === 'system', fn ($q) => $q->whereNotIn('type', array_merge(...array_values(self::CATEGORIES))))
+            ->when($read === '0' || $read === '1', fn ($q) => $q->where('read', (int) $read))
+            ->orderBy('created_at', 'desc')->orderByDesc('id')
+            ->paginate(20);
 
         // Whether what each notification points at still exists, so the app can show
         // "No longer available" instead of opening a broken screen (2026-10-05).
@@ -54,13 +72,9 @@ class NotificationController extends Controller
     }
     public function markAllAsRead()
     {
-        $user = Auth::user()->id; // Assuming you are using Laravel's built-in authentication
-        $notifications = Notification::where('user_id', $user)->where('read', 0)->get();
+        // One query (it saved them one by one: hundreds of queries for a busy account).
+        Notification::where('user_id', Auth::id())->where('read', 0)->update(['read' => 1]);
 
-       foreach ($notifications as  $notification){
-           $notification->read = 1;
-           $notification->save();
-       }
         return response()->json(['message' => 'All notifications marked as read.'], 200);
     }
 
