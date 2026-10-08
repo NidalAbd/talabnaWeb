@@ -38,7 +38,7 @@ class AiActionsTest extends TestCase
         // written with (the live prices changed on 2026-10-08, see the reprice_points migration).
         foreach (['enhance_post' => 2, 'enhance_resume' => 2, 'translate_post' => 2, 'snap_to_sell' => 2, 'suggest_category' => 1,
             'suggest_price' => 1, 'generate_image' => 3, 'generate_video' => 20, 'studio_light' => 1, 'studio_background' => 2,
-            'studio_scene' => 3, 'studio_cinematic' => 4, 'studio_video' => 20] as $key => $points) {
+            'studio_scene' => 3, 'studio_cinematic' => 4, 'studio_video' => 20, 'generate_video_hd' => 20, 'studio_video_hd' => 20] as $key => $points) {
             DB::table('ai_features')->where('key', $key)->update(['points_cost' => $points]);
         }
         // The Gemini image backup is not part of these tests: only OpenAI answers images here.
@@ -377,22 +377,67 @@ class AiActionsTest extends TestCase
         $this->assertSame(30, $this->balance());
     }
 
-    public function test_when_veo_cannot_start_veo_fast_takes_the_video_and_only_one_job_runs(): void
+    public function test_hd_starts_on_veo_fast_and_when_it_cannot_the_better_model_takes_it_once(): void
     {
         $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
-            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['error' => ['message' => 'quota exceeded']], 429),
-            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-fast-generate-preview:predictLongRunning' => Http::response(['name' => 'models/veo-3.1-fast-generate-preview/operations/f1']),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-fast-generate-preview:predictLongRunning' => Http::response(['error' => ['message' => 'quota exceeded']], 429),
+            'generativelanguage.googleapis.com/v1beta/models/veo-3.1-generate-preview:predictLongRunning' => Http::response(['name' => 'models/veo-3.1-generate-preview/operations/s1']),
         ]);
         $id = $this->id();
-        $this->postJson('/api/ai/generate-video', ['request_id' => $id, 'prompt' => 'a bicycle rotating slowly'])->assertStatus(202);
+        $this->postJson('/api/ai/generate-video', ['request_id' => $id, 'prompt' => 'a bicycle rotating slowly', 'quality' => 'hd'])->assertStatus(202);
 
-        $this->assertSame('veo:models/veo-3.1-fast-generate-preview/operations/f1', AiRequest::where('uuid', $id)->value('provider_job_id'));
-        $this->assertSame(10, $this->balance(), 'charged once');
-        $this->assertTrue(\Illuminate\Support\Facades\Cache::has('ai_down:veo'), 'Veo is skipped for the next requests');
+        $this->assertSame('veo:models/veo-3.1-generate-preview/operations/s1', AiRequest::where('uuid', $id)->value('provider_job_id'));
+        $this->assertSame(10, $this->balance(), 'charged once, at the hd price');
+        $this->assertTrue(\Illuminate\Support\Facades\Cache::has('ai_down:veo_fast'), 'Veo Fast is skipped for the next requests');
 
-        // The next video goes straight to Veo Fast: Veo is not asked again while it is down.
-        $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'a bicycle rotating slowly']);
-        $this->assertSame(1, collect(Http::recorded())->filter(fn ($p) => str_contains($p[0]->url(), 'veo-3.1-generate-preview:predictLongRunning'))->count());
+        $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'a bicycle rotating slowly', 'quality' => 'hd']);
+        $this->assertSame(1, collect(Http::recorded())->filter(fn ($p) => str_contains($p[0]->url(), 'veo-3.1-fast-generate-preview:predictLongRunning'))->count());
+    }
+
+    public function test_each_quality_has_its_price_and_its_model(): void
+    {
+        foreach (['normal' => 5, 'hd' => 10, 'pro' => 20] as $q => $p) {
+            DB::table('ai_features')->where('key', "generate_video_$q")->update(['points_cost' => $p]);
+        }
+        DB::table('palservice_points')->where('user_id', $this->user->id)->update(['point' => 100]);
+        $this->fake($this->chat(['prompt' => 'A plain red bicycle slowly rotating on a white background, soft light, slow orbit']) + [
+            'generativelanguage.googleapis.com/v1beta/models/*:predictLongRunning' => Http::response(['name' => 'models/x/operations/q']),
+        ]);
+
+        foreach (['normal' => ['veo-3.1-lite-generate-preview', '720p', 95], 'hd' => ['veo-3.1-fast-generate-preview', '1080p', 85], 'pro' => ['veo-3.1-generate-preview', '1080p', 65]] as $q => [$model, $res, $balance]) {
+            $id = $this->id();
+            $this->postJson('/api/ai/generate-video', ['request_id' => $id, 'prompt' => 'a bicycle rotating slowly', 'quality' => $q])->assertStatus(202);
+            $this->assertSame($balance, $this->balance(), "$q price");
+            $this->assertSame($q, AiRequest::where('uuid', $id)->value('quality'));
+            Http::assertSent(fn ($r) => str_contains($r->url(), "$model:predictLongRunning") && $r['parameters']['resolution'] === $res);
+            AiRequest::where('uuid', $id)->update(['status' => AiRequest::SUCCEEDED]); // one video in flight at a time
+        }
+    }
+
+    public function test_a_quality_that_cannot_be_made_now_is_refused_before_any_charge(): void
+    {
+        $this->fake([]);
+        app(\App\Services\Ai\AiHealth::class)->markDown('veo', 'provider_busy');
+
+        $this->postJson('/api/ai/generate-video', ['request_id' => $this->id(), 'prompt' => 'a bicycle rotating slowly', 'quality' => 'pro'])
+            ->assertStatus(503)->assertJsonPath('code', 'quality_unavailable');
+        $this->assertSame(30, $this->balance());
+        $this->assertSame(0, AiRequest::count());
+        Http::assertNothingSent();
+
+        $res = $this->getJson('/api/ai/pricing')->assertOk();
+        $this->assertFalse($res->json('video_qualities.pro.available'));
+        $this->assertTrue($res->json('video_qualities.hd.available'), 'hd still works (Veo Fast)');
+        $this->assertTrue($res->json('video_qualities.normal.available'));
+    }
+
+    public function test_pricing_lists_the_three_video_qualities_and_their_prices(): void
+    {
+        foreach (['normal' => 5, 'hd' => 10, 'pro' => 20] as $q => $p) {
+            DB::table('ai_features')->where('key', "generate_video_$q")->update(['points_cost' => $p]);
+        }
+        $res = $this->getJson('/api/ai/pricing')->assertOk();
+        $this->assertSame([5, 10, 20], [$res->json('video_qualities.normal.points'), $res->json('video_qualities.hd.points'), $res->json('video_qualities.pro.points')]);
     }
 
     public function test_before_soras_shutdown_a_sora_failure_falls_back_to_veo(): void

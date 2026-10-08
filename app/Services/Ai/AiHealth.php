@@ -48,6 +48,7 @@ class AiHealth
                 'gemini:image' => (string) config('ai.gemini_image_model', 'gemini-2.5-flash-image'),
                 'veo' => (string) config('ai.veo_model', 'veo-3.1-generate-preview'),
                 'veo_fast' => (string) config('ai.veo_fast_model', 'veo-3.1-fast-generate-preview'),
+                'veo_lite' => (string) config('ai.veo_lite_model', 'veo-3.1-lite-generate-preview'),
             ] as $id => $model) {
                 $list[$id] = ['provider' => 'gemini', 'model' => $model, 'url' => $g.$model, 'headers' => $h];
             }

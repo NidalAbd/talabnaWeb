@@ -28,7 +28,7 @@ class VeoClient
     }
 
     /** @return string the operation name */
-    public function start(string $prompt, ?string $referenceJpeg, int $seconds, ?string $model = null): string
+    public function start(string $prompt, ?string $referenceJpeg, int $seconds, ?string $model = null, ?string $resolution = null): string
     {
         // Veo makes 4, 6 or 8 s clips (the app may ask for 12, which Sora had).
         $seconds = $seconds <= 4 ? 4 : ($seconds <= 6 ? 6 : 8);
@@ -45,8 +45,8 @@ class VeoClient
                 'instances' => [$instance],
                 'parameters' => [
                     'aspectRatio' => '9:16',
-                    // 1080p is only offered for 8 s clips.
-                    'resolution' => $seconds === 8 ? (string) config('ai.veo_resolution', '1080p') : '720p',
+                    // 1080p is only offered for 8 s clips; the quality picks the resolution (normal 720p, hd/pro 1080p).
+                    'resolution' => $seconds === 8 ? ($resolution ?? (string) config('ai.veo_resolution', '1080p')) : '720p',
                     'durationSeconds' => $seconds,
                 ],
             ]);

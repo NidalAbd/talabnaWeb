@@ -35,6 +35,7 @@ return [
     'veo_resolution' => env('AI_VEO_RESOLUTION', '1080p'),
     // Backups (2026-10-08): Veo Fast when Veo is not ready; Gemini's image model when gpt-image-1 is not.
     'veo_fast_model' => env('AI_VEO_FAST_MODEL', 'veo-3.1-fast-generate-preview'),
+    'veo_lite_model' => env('AI_VEO_LITE_MODEL', 'veo-3.1-lite-generate-preview'),
     'gemini_image_model' => env('AI_GEMINI_IMAGE_MODEL', 'gemini-2.5-flash-image'),
 
     // A request still "processing" after this long is given up on and refunded.

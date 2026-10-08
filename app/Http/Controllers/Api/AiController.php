@@ -57,6 +57,18 @@ class AiController extends Controller
                     'included'    => $left,
                 ]];
             }),
+            // Video qualities (2026-10-08): price for this user (0 when the plan includes videos) and whether it can be
+            // made right now. Same prices for a video from a description and from a photo.
+            'video_qualities' => collect(['normal', 'hd', 'pro'])->mapWithKeys(function ($q) use ($features, $userId) {
+                $row = $features->firstWhere('key', "generate_video_$q");
+                $left = $this->ledger->remainingAllowance($userId, 'generate_video');
+
+                return [$q => [
+                    'points' => $left !== null && $left !== 0 ? 0 : (int) ($row?->points_cost ?? 0),
+                    'base_points' => (int) ($row?->points_cost ?? 0),
+                    'available' => (bool) ($row?->enabled) && $this->media->videoQualityReady($q),
+                ]];
+            }),
             'balance' => $this->ledger->balance($userId),
             'media_slots' => [
                 'free' => \App\Services\MediaSlots::free($userId),
@@ -292,9 +304,11 @@ class AiController extends Controller
             'request_id' => 'required|uuid',
             'image' => 'required|file|mimes:jpeg,jpg,png,webp|max:10240',
             'seconds' => 'nullable|in:4,8,12',
+            'quality' => 'nullable|in:normal,hd,pro',
         ]);
         $user = $request->user();
-        if ($early = $this->precheck($user->id, 'studio_video', true)) {
+        $quality = $d['quality'] ?? 'hd'; // apps before 2026-10-08 send none
+        if ($early = $this->precheck($user->id, 'studio_video', true) ?? $this->qualityCheck($quality)) {
             return $early;
         }
         try {
@@ -318,7 +332,7 @@ class AiController extends Controller
             }
         }
         try {
-            $ai = $this->ledger->start($user->id, 'studio_video', $d['request_id'], ['provider' => 'openai', 'ip' => $request->ip()]);
+            $ai = $this->ledger->start($user->id, 'studio_video', $d['request_id'], ['provider' => 'google', 'ip' => $request->ip(), 'quality' => $quality]);
         } catch (InsufficientBalanceException $e) {
             return $this->notEnough($e, 'studio_video');
         } catch (AiProviderException $e) {
@@ -341,7 +355,7 @@ class AiController extends Controller
                 .'surface to reveal texture and detail, gentle 10-degree orbit, then settle on a clean hero framing for the last second. '
                 .'The item stays exactly as in the first frame (shape, colours, labels, condition), sharp and well lit, never morphing. '
                 .'No people, no hands, no text.';
-            $ai->update(['provider_job_id' => $this->media->startVideo($prompt, $reference, $d['seconds'] ?? null)]);
+            $ai->update(['provider_job_id' => $this->media->startVideo($prompt, $reference, $d['seconds'] ?? null, $quality)]);
         } catch (AiProviderException $e) {
             $this->ledger->fail($ai, $e->errorCode, $e->getMessage());
         } catch (\Throwable $e) {
@@ -383,14 +397,16 @@ class AiController extends Controller
             'context.currency' => 'nullable|string|max:10',
             'context.city' => 'nullable|string|max:120',
             'context.country' => 'nullable|string|max:120',
+            'quality' => 'nullable|in:normal,hd,pro',
         ]);
         $user = $request->user();
+        $quality = $d['quality'] ?? 'hd'; // apps before 2026-10-08 send none
 
-        if ($early = $this->precheck($user->id, 'generate_video', true)) {
+        if ($early = $this->precheck($user->id, 'generate_video', true) ?? $this->qualityCheck($quality)) {
             return $early;
         }
         try {
-            $ai = $this->ledger->start($user->id, 'generate_video', $d['request_id'], ['prompt' => $d['prompt'], 'provider' => 'openai', 'ip' => $request->ip()]);
+            $ai = $this->ledger->start($user->id, 'generate_video', $d['request_id'], ['prompt' => $d['prompt'], 'provider' => 'google', 'ip' => $request->ip(), 'quality' => $quality]);
         } catch (InsufficientBalanceException $e) {
             return $this->notEnough($e, 'generate_video');
         } catch (AiProviderException $e) {
@@ -403,7 +419,7 @@ class AiController extends Controller
         try {
             $final = $this->text->mediaPrompt('video', $d['prompt'], $d['title'] ?? '', $d['description'] ?? '', $this->context($d));
             $this->recordFinalPrompt($ai, $d['prompt'], $final);
-            $ai->update(['provider_job_id' => $this->media->startVideo($final)]);
+            $ai->update(['provider_job_id' => $this->media->startVideo($final, null, null, $quality)]);
         } catch (AiProviderException $e) {
             $this->ledger->fail($ai, $e->errorCode, $e->getMessage());
         } catch (\Throwable $e) {
@@ -533,6 +549,15 @@ class AiController extends Controller
         }
 
         return $this->respond($ai->refresh());
+    }
+
+    /** A video quality whose models are all down is refused before anything is charged. */
+    private function qualityCheck(string $quality): ?JsonResponse
+    {
+        return $this->media->videoQualityReady($quality) ? null : response()->json([
+            'error' => 'This video quality is not available right now. Try another quality; you were not charged.',
+            'code' => 'quality_unavailable',
+        ], 503);
     }
 
     /** Checks that cost nothing to fail: provider configured, feature on, not too many jobs in flight. */

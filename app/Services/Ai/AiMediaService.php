@@ -184,7 +184,35 @@ class AiMediaService
      * is now the backup: Sora is tried only before its shutdown date, and any Sora failure other than a safety block
      * goes on to Veo. Veo job ids carry a "veo:" prefix so pollVideo asks the right provider.
      */
-    public function startVideo(string $prompt, ?string $referenceJpeg = null, ?string $seconds = null): string
+    /**
+     * Video qualities the user picks (2026-10-08): model and resolution behind each, the first one first. A backup is
+     * only ever the same quality or better, so nobody pays for a quality they did not get; "pro" has none.
+     */
+    public const VIDEO_QUALITIES = [
+        'normal' => [['veo_lite', '720p'], ['veo_fast', '720p']],
+        'hd' => [['veo_fast', '1080p'], ['veo', '1080p']],
+        'pro' => [['veo', '1080p']],
+    ];
+
+    /** Whether a quality can be made now (its first-choice model or a backup is ready). */
+    public function videoQualityReady(string $quality): bool
+    {
+        foreach (self::VIDEO_QUALITIES[$quality] ?? [] as [$id]) {
+            if ($this->veo->isConfigured() && $this->health->ready($id)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Starts a video job in the chosen quality. With [referenceJpeg] the clip starts from that photo (it must already
+     * be the video's size, see fitForVideo). @return string the provider job id ("veo:" + Google's operation name)
+     *
+     * OpenAI shut the Videos API (Sora) down on 2026-09-24; Sora is tried only before that date.
+     */
+    public function startVideo(string $prompt, ?string $referenceJpeg = null, ?string $seconds = null, string $quality = 'hd'): string
     {
         if ($this->soraAvailable()) {
             try {
@@ -199,13 +227,21 @@ class AiMediaService
         if (! $this->veo->isConfigured()) {
             throw new AiProviderException('provider_no_access', 'Video generation is not available right now.', 503);
         }
-        // Veo, then Veo Fast (its own quota): one start at a time, the first ready model first. Starting only queues
-        // the job, so a failed start costs nothing.
-        $models = ['veo' => (string) config('ai.veo_model', 'veo-3.1-generate-preview'), 'veo_fast' => (string) config('ai.veo_fast_model', 'veo-3.1-fast-generate-preview')];
+        $chain = self::VIDEO_QUALITIES[$quality] ?? self::VIDEO_QUALITIES['hd'];
+        $steps = [];
+        foreach ($chain as [$id, $resolution]) {
+            $steps[$id] = $resolution;
+        }
+        $models = [
+            'veo' => (string) config('ai.veo_model', 'veo-3.1-generate-preview'),
+            'veo_fast' => (string) config('ai.veo_fast_model', 'veo-3.1-fast-generate-preview'),
+            'veo_lite' => (string) config('ai.veo_lite_model', 'veo-3.1-lite-generate-preview'),
+        ];
+        // One start at a time, the first ready model first. Starting only queues the job: a failed start costs nothing.
         $last = null;
-        foreach ($this->health->order(array_keys($models)) as $id) {
+        foreach ($this->health->order(array_keys($steps)) as $id) {
             try {
-                return self::VEO_PREFIX.$this->veo->start($prompt, $referenceJpeg, (int) ($seconds ?? config('ai.video_seconds', '8')), $models[$id]);
+                return self::VEO_PREFIX.$this->veo->start($prompt, $referenceJpeg, (int) ($seconds ?? config('ai.video_seconds', '8')), $models[$id], $steps[$id]);
             } catch (AiProviderException $e) {
                 if ($e->errorCode === 'blocked') {
                     throw $e;

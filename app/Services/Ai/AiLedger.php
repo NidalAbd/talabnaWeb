@@ -39,7 +39,9 @@ class AiLedger
 
         try {
             return DB::transaction(function () use ($userId, $feature, $uuid, $extra) {
-                $price = AiFeature::find($feature);
+                // A video's price depends on its quality (normal / hd / pro): row "{feature}_{quality}" (2026-10-08).
+                $quality = $extra['quality'] ?? null;
+                $price = AiFeature::find($quality ? "{$feature}_{$quality}" : $feature) ?? AiFeature::find($feature);
                 if (! $price || ! $price->enabled) {
                     throw new AiProviderException('feature_off', 'This AI feature is not available right now.', 403);
                 }
@@ -70,7 +72,7 @@ class AiLedger
                     'type' => 'used',
                     'point' => $points,
                     'status' => 'completed',
-                    'metadata' => json_encode(['reason' => 'ai', 'feature' => $feature, 'request' => $uuid]
+                    'metadata' => json_encode(['reason' => 'ai', 'feature' => $feature, 'request' => $uuid] + ($quality ? ['quality' => $quality] : [])
                         + ($cover !== null ? ['covered_by' => 'subscription', 'covered_usage' => $cover['usage']] : [])),
                 ]);
 
@@ -104,7 +106,7 @@ class AiLedger
      * A counter means a monthly allowance (ai_images_per_month); null means unlimited while the plan has it.
      */
     /** Columns of ai_requests a caller may fill through start()'s $extra. */
-    private const EXTRA_COLUMNS = ['provider', 'provider_job_id', 'prompt', 'ip'];
+    private const EXTRA_COLUMNS = ['provider', 'provider_job_id', 'prompt', 'ip', 'quality'];
 
     private const PLAN_COVERS = [
         'generate_image' => ['ai_images_per_month', 'ai_images_used'],
