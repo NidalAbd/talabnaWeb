@@ -1120,7 +1120,7 @@ class SeoController extends Controller
 
         // JSON-LD Product (true facts only, no made-up rating) + breadcrumbs
         $seo['jsonLd'] = array_values(array_filter([
-            $this->productSchema($post, $title, $description, $baseUrl . $path, "{$catName} > {$subName}"),
+            $this->productSchema($post, $title, $description, $seo['canonical'] ?? ($baseUrl . $path), "{$catName} > {$subName}"),
             $this->breadcrumbSchema($seo['breadcrumbs']),
         ]));
 

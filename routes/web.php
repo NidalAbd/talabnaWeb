@@ -194,6 +194,13 @@ $spaRoutes = function () {
 
     // Shop pages (2026-10-08): talbna.cloud/shop/{link name}.
     Route::get('/shop/{slug}', function() {
+        // One address per shop: the owner id and old link names 301 to the current link name.
+        $key = (string) request()->route('slug');
+        $shop = ctype_digit($key) ? \App\Models\Shop::where('user_id', (int) $key)->first(['user_id', 'slug']) : null;
+        if ($shop && $shop->slug && $shop->slug !== $key) {
+            $locale = request()->route('locale');
+            return redirect(($locale ? '/' . $locale : '') . '/shop/' . $shop->slug, 301);
+        }
         return spa_page();
     })->where('slug', '[A-Za-z0-9-]+')->name('shop.show');
 
