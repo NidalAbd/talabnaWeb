@@ -64,8 +64,12 @@ class FeatureUnlocks
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
     }
 
-    /** Charges the points and records the unlock. ['ok'=>true] or ['ok'=>false,'code'=>...]. */
-    public static function buy(int $userId, string $feature, ?int $targetId = null): array
+    /**
+     * Charges the points and records the unlock. ['ok'=>true] or ['ok'=>false,'code'=>...]. With $renew, a time-limited
+     * feature that is still running (bought, not from the plan) is extended from its current end date (2026-10-08:
+     * a shop owner could not renew before the 30 days ran out).
+     */
+    public static function buy(int $userId, string $feature, ?int $targetId = null, bool $renew = false): array
     {
         $def = self::CATALOG[$feature] ?? null;
         if (! $def) {
@@ -74,15 +78,20 @@ class FeatureUnlocks
         if ($def[2] && ! $targetId) {
             return ['ok' => false, 'code' => 'target_required'];
         }
+        $extendFrom = null;
         if (! $def[2] && self::has($userId, $feature) && $feature !== 'saved_searches_pack') {
-            return ['ok' => true, 'already' => true];
+            $viaPlan = in_array(self::planSlug($userId), $def[3], true);
+            if (! $renew || $viaPlan || ! $def[1]) {
+                return ['ok' => true, 'already' => true];
+            }
+            $extendFrom = self::activeQuery($userId, $feature, null)->max('expires_at');
         }
         if ($def[2] && self::has($userId, $feature, $targetId)) {
             return ['ok' => true, 'already' => true];
         }
         $points = self::price($feature);
 
-        return DB::transaction(function () use ($userId, $feature, $targetId, $points, $def) {
+        $result = DB::transaction(function () use ($userId, $feature, $targetId, $points, $def, $extendFrom) {
             $balance = palservice_points::where('user_id', $userId)->lockForUpdate()->first();
             $have = (int) ($balance?->point ?? 0);
             if ($have < $points) {
@@ -94,10 +103,16 @@ class FeatureUnlocks
             }
             DB::table('feature_unlocks')->insert([
                 'user_id' => $userId, 'feature' => $feature, 'target_id' => $def[2] ? $targetId : null, 'points' => $points,
-                'expires_at' => $def[1] ? now()->addDays($def[1]) : null, 'created_at' => now(), 'updated_at' => now(),
+                'expires_at' => $def[1] ? ($extendFrom ? \Illuminate\Support\Carbon::parse($extendFrom) : now())->addDays($def[1]) : null,
+                'created_at' => now(), 'updated_at' => now(),
             ]);
 
             return ['ok' => true, 'points' => $points, 'balance' => $have - $points];
         });
+        if ($feature === 'shop_page' && $result['ok']) {
+            ShopDirectory::forget(); // the shop shows at once
+        }
+
+        return $result;
     }
 }

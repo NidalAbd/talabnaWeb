@@ -144,6 +144,7 @@
     <noscript><link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet"></noscript>
 
     <!-- Vite Assets -->
+    <script>window.__WEB_LOCALES__ = @json(\App\Models\Language::WEB_LOCALES);</script>
     @vite(['resources/js/app.js'])
 
     <!-- Critical inline CSS -->

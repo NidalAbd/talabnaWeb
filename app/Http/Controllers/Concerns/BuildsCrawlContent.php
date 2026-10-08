@@ -25,7 +25,7 @@ trait BuildsCrawlContent
     {
         $path = '/' . ltrim(urldecode($path), '/');
 
-        return Cache::remember('seo_crawl_v2_' . md5($path . $locale), 1800, function () use ($path, $locale) {
+        return Cache::remember('seo_crawl_v3_' . md5($path . $locale), 1800, function () use ($path, $locale) {
             try {
                 return $this->buildCrawlContent($path, $locale);
             } catch (\Throwable $e) {
@@ -61,6 +61,10 @@ trait BuildsCrawlContent
         } elseif (preg_match('#^/category/(\d+)(?:/[^/]+/subcategory/(\d+))?#u', $path, $m)) {
             $category = Categories::find($m[1]);
             $sub = $category && !empty($m[2]) ? Sub_categories::where('categories_id', $category->id)->find($m[2]) : null;
+        } elseif (preg_match('#^/shop/([A-Za-z0-9-]+)/?$#', $path, $m)) {
+            $shop = ctype_digit($m[1]) ? \App\Models\Shop::where('user_id', (int) $m[1])->first() : \App\Models\Shop::where('slug', strtolower($m[1]))->first();
+
+            return ['shop' => $shop && \App\Services\ShopDirectory::isActive((int) $shop->user_id) ? $shop : null];
         } elseif ($path === '/' || $path === '/browse') {
             return ['home' => true];
         } else {
@@ -79,13 +83,16 @@ trait BuildsCrawlContent
     {
         $path = '/' . ltrim(urldecode($path), '/');
 
-        return Cache::remember('seo_thin_v1_' . md5($path), 1800, function () use ($path) {
+        return Cache::remember('seo_thin_v2_' . md5($path), 1800, function () use ($path) {
             $ctx = $this->resolvePageContext($path);
             if ($ctx === null || isset($ctx['home'])) {
                 return false;
             }
             if (array_key_exists('post', $ctx)) {
                 return $ctx['post'] !== null && $ctx['post']->isBotPost();
+            }
+            if (array_key_exists('shop', $ctx)) {
+                return $ctx['shop'] === null || !ServicePost::indexable()->where('user_id', $ctx['shop']->user_id)->exists();
             }
             [$country, $city, $category, $sub] = $ctx['place'];
 
@@ -111,6 +118,9 @@ trait BuildsCrawlContent
         }
         if (isset($ctx['home'])) {
             return $this->homeCrawl($locale);
+        }
+        if (array_key_exists('shop', $ctx)) {
+            return $ctx['shop'] ? $this->shopCrawl($ctx['shop'], $locale) : null;
         }
         $post = $ctx['post'] ?? null;
         if (array_key_exists('post', $ctx) && !$post) {
@@ -211,7 +221,9 @@ trait BuildsCrawlContent
         $city = $post->city_id ? cities::find($post->city_id) : null;
         $category = $post->categories_id ? Categories::find($post->categories_id) : null;
 
+        $shop = \App\Services\ShopDirectory::badge((int) $post->user_id);
         $links = array_filter([
+            $shop ? $this->link($shop['name'] . ' - ' . $this->t('crawl_shop', $locale, 'متجر', 'Shop'), $this->localizedUrl(url('/'), $shop['path'], $locale, $this->defaultLocale())) : null,
             $country && $city && $category ? $this->link($this->name($category->name, $locale) . ' - ' . $this->name($city->name, $locale), $this->placeUrl($country, $city, $category, $locale)) : null,
             $country && $city ? $this->link($this->name($city->name, $locale), $this->placeUrl($country, $city, null, $locale)) : null,
             $country ? $this->link($this->name($country->name, $locale), $this->placeUrl($country, null, null, $locale)) : null,
@@ -226,6 +238,55 @@ trait BuildsCrawlContent
                 $this->section($this->t('crawl_browse_more', $locale, 'تصفح المزيد', 'Browse more'), array_values($links)),
                 $this->section($this->t('crawl_similar', $locale, 'إعلانات مشابهة', 'Similar listings'),
                     array_map(fn ($i) => $this->link($i['title'], $i['url']), $this->listingItems($similar, $locale))),
+            ])),
+        ];
+    }
+
+    /** A shop page: its name and about, every product as a link, then its city/category and other shops nearby. */
+    private function shopCrawl(\App\Models\Shop $shop, string $locale): array
+    {
+        $listings = $this->published()->where('user_id', $shop->user_id)->latest('id')->limit(60)->get();
+        $country = $shop->country_id ? countries::find($shop->country_id) : null;
+        $city = $shop->city_id ? cities::find($shop->city_id) : null;
+        $category = $shop->category_id ? Categories::find($shop->category_id) : null;
+
+        $place = array_values(array_filter([
+            $country && $city && $category ? $this->link($this->name($category->name, $locale) . ' - ' . $this->name($city->name, $locale), $this->placeUrl($country, $city, $category, $locale)) : null,
+            $country && $city ? $this->link($this->name($city->name, $locale), $this->placeUrl($country, $city, null, $locale)) : null,
+            $country ? $this->link($this->name($country->name, $locale), $this->placeUrl($country, null, null, $locale)) : null,
+        ]));
+
+        $others = [];
+        foreach (\App\Services\ShopDirectory::active() as $uid => $s) {
+            if ($uid === (int) $shop->user_id || count($others) >= 12) {
+                continue;
+            }
+            $o = \App\Models\Shop::where('user_id', $uid)->first(['country_id']);
+            if ($o && (!$shop->country_id || (int) $o->country_id === (int) $shop->country_id)
+                && $this->published()->where('user_id', $uid)->exists()) {
+                $others[] = $this->link($s['name'], $this->localizedUrl(url('/'), $s['path'], $locale, $this->defaultLocale()));
+            }
+        }
+        $hours = [];
+        $dayNames = $locale === 'ar' ? ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت']
+            : ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        foreach ($shop->week_hours ?? [] as $h) {
+            $hours[] = $dayNames[$h['d']] . ' ' . $h['open'] . '–' . $h['close'];
+        }
+        $intro = trim(implode(' · ', array_filter([
+            trim(strip_tags((string) $shop->about)),
+            $shop->address,
+            $hours ? implode('، ', $hours) : $shop->hours,
+        ])));
+
+        return [
+            'h1' => $shop->name,
+            'intro' => mb_substr($intro, 0, 900),
+            'listings' => $this->listingItems($listings, $locale),
+            'empty' => $listings->isEmpty(),
+            'sections' => array_values(array_filter([
+                $this->section($this->t('crawl_browse_more', $locale, 'تصفح المزيد', 'Browse more'), $place),
+                $this->section($this->t('crawl_other_shops', $locale, 'متاجر أخرى', 'Other shops'), $others),
             ])),
         ];
     }

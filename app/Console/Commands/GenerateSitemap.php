@@ -91,6 +91,11 @@ class GenerateSitemap extends Command
             $write("sitemap-users-{$i}.xml", $controller->users($i)->getContent());
         }
 
+        if (SitemapController::shopUserIds()) {
+            $this->info('Generating shops...');
+            $write('sitemap-shops.xml', $controller->shops()->getContent());
+        }
+
         $totalFiles = count($disk->files($dir));
         $this->info("\n✓ Generated {$totalFiles} files (xml + gz pairs)");
         return self::SUCCESS;

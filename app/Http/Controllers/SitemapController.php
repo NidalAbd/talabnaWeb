@@ -96,7 +96,7 @@ class SitemapController extends Controller
     {
         if ($static = $this->tryStaticFile('sitemap.xml')) return $static;
         try {
-        $content = Cache::remember('sitemap-index-v9', 3600, function () {
+        $content = Cache::remember('sitemap-index-v10', 3600, function () {
             $xml = '<?xml version="1.0" encoding="UTF-8"?>';
             $xml .= '<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
             $now = now()->toIso8601String();
@@ -136,6 +136,11 @@ class SitemapController extends Controller
             $userPages = max(1, (int) ceil($totalUsers / self::USERS_PER_PAGE));
             for ($i = 1; $i <= $userPages; $i++) {
                 $xml .= '<sitemap><loc>' . url("/sitemap-users-{$i}.xml") . '</loc><lastmod>' . $now . '</lastmod></sitemap>';
+            }
+
+            // Shops with something on sale from a real account (2026-10-08).
+            if (self::shopUserIds()) {
+                $xml .= '<sitemap><loc>' . url('/sitemap-shops.xml') . '</loc><lastmod>' . $now . '</lastmod></sitemap>';
             }
 
             $xml .= '</sitemapindex>';
@@ -496,6 +501,44 @@ class SitemapController extends Controller
         return $this->xmlResponse($content);
     }
 
+    /** Active shops that have at least one indexable listing. @return int[] */
+    public static function shopUserIds(): array
+    {
+        $active = array_keys(\App\Services\ShopDirectory::active());
+
+        return $active ? ServicePost::indexable()->whereIn('user_id', $active)->distinct()->pluck('user_id')->map(fn ($id) => (int) $id)->all() : [];
+    }
+
+    /** sitemap-shops.xml: every shop page in every web locale (the link name is the same in all of them). */
+    public function shops()
+    {
+        if ($static = $this->tryStaticFile('sitemap-shops.xml')) return $static;
+        $content = Cache::remember('sitemap-shops-v1', 1800, function () {
+            $shops = \App\Models\Shop::whereIn('user_id', self::shopUserIds())->get(['user_id', 'slug', 'updated_at']);
+            $activeLanguages = \App\Models\Language::getWebOrdered();
+            $defaultLocale = \App\Models\Language::getDefault()?->code ?? 'ar';
+            $allLocales = $activeLanguages->pluck('code')->all();
+
+            $xml = '<?xml version="1.0" encoding="UTF-8"?>';
+            $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">';
+            foreach ($shops as $shop) {
+                $latest = ServicePost::indexable()->where('user_id', $shop->user_id)->max('updated_at');
+                $lastmod = max((string) $shop->updated_at, (string) $latest);
+                $xml .= $this->multiLocaleUrlBlock(
+                    fn (string $loc) => $shop->path(),
+                    $allLocales, $activeLanguages, $defaultLocale,
+                    \Illuminate\Support\Carbon::parse($lastmod ?: now())->toIso8601String(),
+                    'daily', '0.8'
+                );
+            }
+            $xml .= '</urlset>';
+
+            return $xml;
+        });
+
+        return $this->xmlResponse($content);
+    }
+
     /**
      * Generate robots.txt
      */
@@ -507,6 +550,7 @@ class SitemapController extends Controller
         $content .= "Allow: /category/\n";
         $content .= "Allow: /listing/\n";
         $content .= "Allow: /user/\n";
+        $content .= "Allow: /shop/\n";
         $content .= "Allow: /services/\n";
         $content .= "Allow: /search\n";
         $content .= "Allow: /about\n";

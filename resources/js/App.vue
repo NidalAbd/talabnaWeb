@@ -316,6 +316,7 @@
 
 <script setup>
 import { APP_STORE_URL, comingSoon } from '@/utils/stores'
+import { WEB_LOCALES } from '@/utils/locales'
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAppStore } from '@/stores/app'
@@ -385,7 +386,7 @@ const changeLanguage = (code) => {
   // re-renders SSR meta (canonical, hreflang) for the new locale. Default
   // locale (ar) is unprefixed; all others sit under /{code}/.
   const defaultLocale = 'ar'
-  const localeCodes = ['en','tr','fr','es','hi','ur','bn','pt','ru','id','de','zh','ku','fa','sw','ms']
+  const localeCodes = WEB_LOCALES
   const url = new URL(window.location.href)
   // Strip any existing locale prefix from the path.
   const segments = url.pathname.split('/').filter(Boolean)

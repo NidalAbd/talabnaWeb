@@ -89,6 +89,12 @@ Route::prefix('public')->group(function () {
     // User Profile
     Route::get('/users/{id}', [PublicController::class, 'userProfile']);
 
+    // Shops (2026-10-08): public storefronts for the app and the web page talbna.cloud/shop/{slug}.
+    Route::get('/shops', [App\Http\Controllers\Api\ShopController::class, 'near'])->middleware('throttle:60,1');
+    Route::get('/shops/{key}', [App\Http\Controllers\Api\ShopController::class, 'page'])->where('key', '[A-Za-z0-9-]+')->middleware('throttle:120,1');
+    Route::get('/shops/{key}/posts', [App\Http\Controllers\Api\ShopController::class, 'posts'])->where('key', '[A-Za-z0-9-]+')->middleware('throttle:120,1');
+    Route::post('/shops/{key}/contact', [App\Http\Controllers\Api\ShopController::class, 'contact'])->where('key', '[A-Za-z0-9-]+')->middleware('throttle:30,1');
+
     // Badge Types (public - for displaying available badges)
     Route::get('/badge-types', [PublicController::class, 'badgeTypes']);
     Route::get('/badge-types/{badgeType}', [BadgeTypeController::class, 'show']);

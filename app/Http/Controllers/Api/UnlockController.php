@@ -31,12 +31,12 @@ class UnlockController extends Controller
     /** POST /api/unlocks {feature, target_id?} */
     public function store(Request $request): JsonResponse
     {
-        $d = $request->validate(['feature' => 'required|string|in:'.implode(',', array_keys(FeatureUnlocks::CATALOG)), 'target_id' => 'nullable|integer']);
+        $d = $request->validate(['feature' => 'required|string|in:'.implode(',', array_keys(FeatureUnlocks::CATALOG)), 'target_id' => 'nullable|integer', 'renew' => 'nullable|boolean']);
         $uid = $request->user()->id;
         if (! empty($d['target_id']) && ! ServicePost::where('id', $d['target_id'])->where('user_id', $uid)->exists()) {
             return response()->json(['message' => 'Only for your own posts.'], 403);
         }
-        $r = FeatureUnlocks::buy($uid, $d['feature'], $d['target_id'] ?? null);
+        $r = FeatureUnlocks::buy($uid, $d['feature'], $d['target_id'] ?? null, (bool) ($d['renew'] ?? false));
         if (! $r['ok']) {
             return response()->json(['message' => $r['code'] === 'insufficient_points' ? 'Not enough points.' : 'Not available.'] + $r,
                 $r['code'] === 'insufficient_points' ? 402 : 422);

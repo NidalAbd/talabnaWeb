@@ -83,6 +83,7 @@ Route::get('/sitemap-location-categories.xml', [SitemapController::class, 'locat
 Route::get('/sitemap-location-categories-{page}.xml', [SitemapController::class, 'locationCategories'])->where('page', '[0-9]+');
 Route::get('/sitemap-listings-{page}.xml', [SitemapController::class, 'listings'])->where('page', '[0-9]+');
 Route::get('/sitemap-users-{page}.xml', [SitemapController::class, 'users'])->where('page', '[0-9]+');
+Route::get('/sitemap-shops.xml', [SitemapController::class, 'shops']);
 Route::get('/robots.txt', [SitemapController::class, 'robots']);
 
 // Image optimization proxy (serves WebP for web frontend, originals untouched for Flutter)
@@ -190,6 +191,11 @@ $spaRoutes = function () {
     Route::get('/user/{id}', function() {
         return spa_page();
     })->where('id', '[0-9]+')->name('user.public.profile');
+
+    // Shop pages (2026-10-08): talbna.cloud/shop/{link name}.
+    Route::get('/shop/{slug}', function() {
+        return spa_page();
+    })->where('slug', '[A-Za-z0-9-]+')->name('shop.show');
 
     Route::get('/about', function() {
         return spa_page();

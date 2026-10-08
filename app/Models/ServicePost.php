@@ -94,7 +94,7 @@ class ServicePost extends Model
         'updated_at' => 'datetime',
     ];
 
-    protected $appends = ['currency_name'];
+    protected $appends = ['currency_name', 'shop'];
 
     /**
      * Boot the model.
@@ -213,6 +213,15 @@ class ServicePost extends Model
         }
 
         return $this->save();
+    }
+
+    /**
+     * The owner's shop while it is active (name, logo, link), so cards and post pages show the shop instead of the
+     * username (2026-10-08). From a cached map: no query per post.
+     */
+    public function getShopAttribute(): ?array
+    {
+        return \App\Services\ShopDirectory::badge($this->attributes['user_id'] ?? null);
     }
 
     /**

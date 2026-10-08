@@ -42,7 +42,7 @@ class SeoController extends Controller
         }
 
         // Cache SEO data for 5 minutes to improve performance
-        $cacheKey = 'seo_v5_' . md5($path . $locale); // v3: 72 web locales, listing hreflang = translated only // v2: hreflang limited to web locales
+        $cacheKey = 'seo_v6_' . md5($path . $locale); // v6: shops, no made-up ratings // v3: 72 web locales, listing hreflang = translated only // v2: hreflang limited to web locales
 
         return Cache::remember($cacheKey, 1800, function () use ($path, $locale) {
             return $this->generateSeoData($path, $locale);
@@ -121,6 +121,8 @@ class SeoController extends Controller
             $seo = $this->getCategorySeo($matches[1], $subcategoryId, $locale, $seo, $baseUrl);
         } elseif (preg_match('/^\/services\/(\d+)\/([^\/]+)(?:\/(\d+)\/([^\/]+))?(?:\/(\d+)\/([^\/]+))?/', $path, $matches)) {
             $seo = $this->getServicesSeo($matches, $locale, $seo, $baseUrl);
+        } elseif (preg_match('#^/shop/([A-Za-z0-9-]+)/?$#', $path, $matches)) {
+            $seo = $this->getShopSeo($matches[1], $locale, $seo, $baseUrl);
         } elseif (preg_match('/^\/user\/(\d+)/', $path, $matches)) {
             $seo = $this->getUserSeo($matches[1], $locale, $seo, $baseUrl);
         } elseif ($path === '/' || $path === '') {
@@ -131,7 +133,9 @@ class SeoController extends Controller
 
         // Bot-made posts and places/categories/profiles without a real listing: noindex (still shown to users).
         if (empty($seo['notFound'])) {
-            if (preg_match('#^/user/(\d+)#', $path, $um)) {
+            if (preg_match('#^/shop/#', $path)) {
+                $seo['noindex'] = $this->isThinOrBotPage($path); // nothing on sale from a real account yet
+            } elseif (preg_match('#^/user/(\d+)#', $path, $um)) {
                 $seo['noindex'] = !ServicePost::indexable()->where('user_id', (int) $um[1])->exists();
             } elseif ($this->isThinOrBotPage($path)) {
                 $seo['noindex'] = true;
@@ -310,110 +314,11 @@ class SeoController extends Controller
         $seo['twitter']['description'] = $seo['description'];
         $seo['twitter']['image'] = $seo['og']['image'];
 
-        // Calculate rating based on favorites and views (simulate rating for SEO)
-        $favoritesCount = $listing->favorites_count ?? 0;
-        $viewCount = $listing->view_count ?? 1;
-        $ratingValue = min(5, max(3.5, 3.5 + ($favoritesCount / max($viewCount, 1)) * 3));
-        $ratingValue = round($ratingValue, 1);
-        $reviewCount = max(1, $favoritesCount);
-
-        // JSON-LD Product Schema with required merchant fields
-        $seo['jsonLd'][] = [
-            '@context' => 'https://schema.org',
-            '@type' => 'Product',
-            'name' => $title,
-            'description' => mb_substr(strip_tags($description), 0, 500),
-            'image' => $seo['og']['image'] ?? $baseUrl . '/storage/photos/og-image.jpg',
-            'sku' => 'TLB-' . $listing->id,
-            'mpn' => 'TLB' . str_pad($listing->id, 8, '0', STR_PAD_LEFT),
-            'brand' => [
-                '@type' => 'Brand',
-                'name' => 'Talabna',
-            ],
-            // Aggregate rating (required by Google for rich snippets)
-            'aggregateRating' => [
-                '@type' => 'AggregateRating',
-                'ratingValue' => $ratingValue,
-                'bestRating' => 5,
-                'worstRating' => 1,
-                'ratingCount' => $reviewCount,
-                'reviewCount' => $reviewCount,
-            ],
-            // Review (required by Google for rich snippets)
-            'review' => [
-                '@type' => 'Review',
-                'reviewRating' => [
-                    '@type' => 'Rating',
-                    'ratingValue' => $ratingValue,
-                    'bestRating' => 5,
-                    'worstRating' => 1,
-                ],
-                'author' => [
-                    '@type' => 'Person',
-                    'name' => $listing->user?->name ?? $listing->user?->user_name ?? 'User',
-                ],
-                'reviewBody' => $locale === 'ar' ? 'إعلان موثق على منصة طلبنا' : 'Verified listing on Talabna platform',
-                'datePublished' => $listing->created_at?->format('Y-m-d') ?? now()->format('Y-m-d'),
-            ],
-            'offers' => [
-                '@type' => 'Offer',
-                'price' => $listing->price ?? 0,
-                'priceCurrency' => $listing->price_currency_code ?? 'USD',
-                'availability' => 'https://schema.org/InStock',
-                'url' => $seo['canonical'],
-                'priceValidUntil' => now()->addYear()->format('Y-m-d'),
-                'itemCondition' => 'https://schema.org/NewCondition',
-                'seller' => [
-                    '@type' => 'Person',
-                    'name' => $listing->user?->name ?? $listing->user?->user_name ?? 'Seller',
-                ],
-                // Merchant return policy (required by Google)
-                'hasMerchantReturnPolicy' => [
-                    '@type' => 'MerchantReturnPolicy',
-                    'applicableCountry' => $countryIso,
-                    'returnPolicyCategory' => 'https://schema.org/MerchantReturnNotPermitted',
-                    'merchantReturnDays' => 0,
-                ],
-                // Shipping details (required by Google)
-                'shippingDetails' => [
-                    '@type' => 'OfferShippingDetails',
-                    'shippingRate' => [
-                        '@type' => 'MonetaryAmount',
-                        'value' => 0,
-                        'currency' => $listing->price_currency_code ?? 'USD',
-                    ],
-                    'shippingDestination' => [
-                        '@type' => 'DefinedRegion',
-                        'addressCountry' => $countryIso,
-                    ],
-                    'deliveryTime' => [
-                        '@type' => 'ShippingDeliveryTime',
-                        'handlingTime' => [
-                            '@type' => 'QuantitativeValue',
-                            'minValue' => 0,
-                            'maxValue' => 1,
-                            'unitCode' => 'DAY',
-                        ],
-                        'transitTime' => [
-                            '@type' => 'QuantitativeValue',
-                            'minValue' => 0,
-                            'maxValue' => 7,
-                            'unitCode' => 'DAY',
-                        ],
-                    ],
-                ],
-            ],
-            'category' => $categoryName,
-            'areaServed' => [
-                '@type' => 'Place',
-                'name' => $location,
-                'address' => [
-                    '@type' => 'PostalAddress',
-                    'addressLocality' => $cityName,
-                    'addressCountry' => $countryIso,
-                ],
-            ],
-        ];
+        // Product: only what is true (2026-10-08). The made-up rating/review (from views and favourites), the "Talabna"
+        // brand and the invented shipping/returns are gone: Google treats fake review markup as spam.
+        if ($product = $this->productSchema($listing, $title, $description, $seo['canonical'], $categoryName)) {
+            $seo['jsonLd'][] = $product;
+        }
 
         // JSON-LD BreadcrumbList
         $seo['jsonLd'][] = [
@@ -430,7 +335,7 @@ class SeoController extends Controller
                     '@type' => 'ListItem',
                     'position' => 2,
                     'name' => $categoryName,
-                    'item' => "{$baseUrl}/category/{$listing->categories_id}",
+                    'item' => $this->localizedUrl($baseUrl, '/category/' . $listing->categories_id . '/' . $this->slugify($categoryName), $locale, $this->defaultLocale()),
                 ],
                 [
                     '@type' => 'ListItem',
@@ -713,6 +618,11 @@ class SeoController extends Controller
 
         if (!$user) { $seo['notFound'] = true; return $seo; }
 
+        // The same listings as the owner's shop page: point Google at the shop, the page made to be found (2026-10-08).
+        if ($shop = \App\Services\ShopDirectory::badge((int) $userId)) {
+            $seo['canonical'] = $this->localizedUrl($baseUrl, $shop['path'], $locale, $this->defaultLocale());
+        }
+
         $seo['title'] = $locale === 'ar'
             ? "{$user->name} | {$user->service_posts_count} إعلان على طلبنا"
             : "{$user->name} | {$user->service_posts_count} Listings on Talabna";
@@ -731,6 +641,116 @@ class SeoController extends Controller
                 'url' => "{$baseUrl}/user/{$userId}",
             ],
         ];
+
+        return $seo;
+    }
+
+    /**
+     * Shop page /shop/{slug} (2026-10-08): a local business with its own page. Store schema (address, map point,
+     * opening hours, phone, logo), breadcrumbs and the products as an ItemList. A shop that is not active answers
+     * 404; one with nothing on sale yet is noindex (see generateSeoData).
+     */
+    private function getShopSeo(string $key, string $locale, array $seo, string $baseUrl): array
+    {
+        $shop = ctype_digit($key) ? \App\Models\Shop::where('user_id', (int) $key)->first()
+            : \App\Models\Shop::where('slug', strtolower($key))->first();
+        if (!$shop || !\App\Services\ShopDirectory::isActive((int) $shop->user_id)) {
+            $seo['notFound'] = true;
+            return $seo;
+        }
+        $base = rtrim($baseUrl, '/');
+        $city = $shop->city_id ? cities::find($shop->city_id) : null;
+        $country = $shop->country_id ? countries::find($shop->country_id) : null;
+        $category = $shop->category_id ? Categories::find($shop->category_id) : null;
+        $cityName = $this->getLocalizedName($city?->name, $locale);
+        $countryName = $this->getLocalizedName($country?->name, $locale);
+        $catName = $this->getLocalizedName($category?->name, $locale);
+        $place = implode($locale === 'ar' ? '، ' : ', ', array_filter([$cityName, $countryName]));
+
+        $posts = ServicePost::indexable()->where('user_id', $shop->user_id)->with('photos')->latest()->limit(30)->get();
+        $count = ServicePost::indexable()->where('user_id', $shop->user_id)->count();
+
+        $seo['canonical'] = $this->localizedUrl($baseUrl, $shop->path(), $locale, $this->defaultLocale());
+        $what = $catName !== '' ? $catName : null;
+        if ($locale === 'ar') {
+            $seo['title'] = $shop->name . ($what || $place ? ' - ' . trim(($what ?? '') . ($place ? ' في ' . $place : '')) : '') . ' | طلبنا';
+            $gen = "{$shop->name}" . ($place ? " في {$place}" : '') . ": {$count} منتج" . ($what ? " في {$what}" : '') . '. ساعات العمل والموقع والتواصل المباشر على طلبنا.';
+        } else {
+            $seo['title'] = $shop->name . ($what || $place ? ' - ' . trim(($what ?? '') . ($place ? ' in ' . $place : '')) : '') . ' | Talabna';
+            $gen = "{$shop->name}" . ($place ? " in {$place}" : '') . ": {$count} products" . ($what ? " in {$what}" : '') . '. Opening hours, location and direct contact on Talabna.';
+        }
+        $about = trim(preg_replace('/\s+/u', ' ', strip_tags((string) $shop->about)));
+        $seo['description'] = $about !== '' ? mb_substr($about, 0, 155) : $gen;
+        $seo['keywords'] = implode(', ', array_filter([$shop->name, $catName, $cityName, $countryName]));
+
+        $image = $shop->cover ?: $shop->logo;
+        $imageUrl = $image ? $base . '/' . ltrim(preg_replace('#^/?(storage/)+#', 'storage/', $image), '/')
+            : ($posts->first()?->photos->first() ? $this->photoUrl($posts->first()->photos->first(), $baseUrl) : null);
+        if ($imageUrl) {
+            $seo['og']['image'] = $imageUrl;
+            $seo['twitter']['image'] = $imageUrl;
+        }
+        $seo['og']['type'] = 'business.business';
+
+        $days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        $hours = array_map(fn ($h) => [
+            '@type' => 'OpeningHoursSpecification',
+            'dayOfWeek' => 'https://schema.org/' . $days[$h['d']],
+            'opens' => $h['open'],
+            'closes' => $h['close'] === '24:00' ? '23:59' : $h['close'],
+        ], $shop->week_hours ?? []);
+        $logoUrl = $shop->logo ? $base . '/' . ltrim(preg_replace('#^/?(storage/)+#', 'storage/', $shop->logo), '/') : null;
+        $phone = $shop->phone ?: $shop->whatsapp;
+
+        $seo['jsonLd'] = [array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'Store',
+            '@id' => $seo['canonical'] . '#store',
+            'name' => $shop->name,
+            'description' => $about !== '' ? mb_substr($about, 0, 500) : null,
+            'url' => $seo['canonical'],
+            'image' => $imageUrl,
+            'logo' => $logoUrl,
+            'telephone' => $phone ?: null,
+            'address' => ($place || $shop->address) ? array_filter([
+                '@type' => 'PostalAddress',
+                'streetAddress' => $shop->address ?: null,
+                'addressLocality' => $cityName ?: null,
+                'addressCountry' => $country?->iso_code ? strtoupper($country->iso_code) : null,
+            ]) : null,
+            'geo' => ($shop->lat !== null && $shop->lng !== null)
+                ? ['@type' => 'GeoCoordinates', 'latitude' => $shop->lat, 'longitude' => $shop->lng] : null,
+            'hasMap' => ($shop->lat !== null && $shop->lng !== null) ? "https://www.google.com/maps?q={$shop->lat},{$shop->lng}" : null,
+            'openingHoursSpecification' => $hours ?: null,
+        ], fn ($v) => $v !== null)];
+
+        if ($posts->isNotEmpty()) {
+            $seo['jsonLd'][] = [
+                '@context' => 'https://schema.org',
+                '@type' => 'ItemList',
+                'name' => $shop->name,
+                'numberOfItems' => $count,
+                'itemListElement' => $posts->take(20)->values()->map(fn ($p, $i) => [
+                    '@type' => 'ListItem',
+                    'position' => $i + 1,
+                    'url' => $this->localizedUrl($baseUrl, SlugResolver::buildPostUrl($p, $locale), $locale, $this->defaultLocale()),
+                    'name' => (string) ($p->translate('title', $locale) ?? $p->translate('title', 'ar') ?? $p->title),
+                ])->all(),
+            ];
+        }
+
+        $crumbs = [['name' => $locale === 'ar' ? 'الرئيسية' : 'Talabna', 'url' => $this->localizedUrl($baseUrl, '/', $locale, $this->defaultLocale())]];
+        if ($country) {
+            $crumbs[] = ['name' => $countryName, 'url' => $this->localizedUrl($baseUrl, '/services/' . $country->id . '/' . $this->slugify($countryName), $locale, $this->defaultLocale())];
+            if ($city) {
+                $crumbs[] = ['name' => $cityName, 'url' => $this->localizedUrl($baseUrl, '/services/' . $country->id . '/' . $this->slugify($countryName) . '/' . $city->id . '/' . $this->slugify($cityName), $locale, $this->defaultLocale())];
+            }
+        }
+        $crumbs[] = ['name' => $shop->name, 'url' => $seo['canonical']];
+        $seo['breadcrumbs'] = $crumbs;
+        if ($bc = $this->breadcrumbSchema($crumbs)) {
+            $seo['jsonLd'][] = $bc;
+        }
 
         return $seo;
     }
@@ -820,6 +840,58 @@ class SeoController extends Controller
             : "Browse all classified ads on Talabna. {$totalListings} listings in cars, real estate, jobs, phones and more. Filter by location and price.";
 
         return $seo;
+    }
+
+    /**
+     * schema.org Product for a post with a price (2026-10-08). A post without a price gets none: Google requires an
+     * offer, and an empty Product is an error in Search Console. Availability follows the post (reserved, sold), the
+     * seller is the owner's shop when it has one.
+     */
+    private function productSchema(ServicePost $post, string $title, string $description, string $url, string $category): ?array
+    {
+        if ((float) $post->price <= 0 || $title === '') {
+            return null;
+        }
+        $baseUrl = config('app.url', 'https://talbna.cloud');
+        $images = $post->photos->filter(fn ($ph) => !preg_match('/\.(mp4|mov|webm|m3u8)$/i', (string) $ph->src))
+            ->take(5)->map(fn ($ph) => $this->photoUrl($ph, $baseUrl))->values()->all();
+        $shop = \App\Services\ShopDirectory::badge((int) $post->user_id);
+        $availability = $post->state === 'sold' ? 'SoldOut' : ($post->reserved_at ? 'LimitedAvailability' : 'InStock');
+
+        return array_filter([
+            '@context' => 'https://schema.org',
+            '@type' => 'Product',
+            'name' => mb_substr($title, 0, 150),
+            'description' => mb_substr(trim(strip_tags($description)), 0, 500) ?: null,
+            'image' => $images ?: null,
+            'sku' => 'TLB-' . $post->id,
+            'category' => $category ?: null,
+            'url' => $url,
+            'offers' => [
+                '@type' => 'Offer',
+                'url' => $url,
+                'price' => (float) $post->price,
+                'priceCurrency' => strtoupper((string) ($post->price_currency_code ?: 'USD')),
+                'availability' => 'https://schema.org/' . $availability,
+                'seller' => $shop
+                    ? ['@type' => 'Organization', 'name' => $shop['name'], 'url' => rtrim($baseUrl, '/') . $shop['path']]
+                    : ['@type' => 'Person', 'name' => $post->user?->name ?: ($post->user?->user_name ?: 'Talabna user')],
+            ],
+        ], fn ($v) => $v !== null);
+    }
+
+    /** BreadcrumbList from [['name','url'], ...]; null when a step has no name. */
+    private function breadcrumbSchema(array $crumbs): ?array
+    {
+        $items = [];
+        foreach (array_values($crumbs) as $i => $c) {
+            if (trim((string) ($c['name'] ?? '')) === '') {
+                return null;
+            }
+            $items[] = ['@type' => 'ListItem', 'position' => $i + 1, 'name' => $c['name'], 'item' => $c['url']];
+        }
+
+        return $items ? ['@context' => 'https://schema.org', '@type' => 'BreadcrumbList', 'itemListElement' => $items] : null;
     }
 
     /**
@@ -1046,32 +1118,11 @@ class SeoController extends Controller
             ['name' => $title, 'url' => $baseUrl . $path],
         ];
 
-        // JSON-LD Product schema
-        $seo['jsonLd'] = [[
-            '@context' => 'https://schema.org',
-            '@type' => $post->price > 0 ? 'Product' : 'Service',
-            'name' => $title,
-            'description' => mb_substr($description, 0, 500),
-            'url' => $baseUrl . $path,
-            'image' => $seo['og']['image'] ?? $baseUrl . '/storage/photos/og-image.jpg',
-            'category' => "{$catName} > {$subName}",
-            'offers' => $post->price > 0 ? [
-                '@type' => 'Offer',
-                'price' => $post->price,
-                'priceCurrency' => $post->price_currency_code ?? 'USD',
-                'availability' => 'https://schema.org/InStock',
-                'areaServed' => [
-                    '@type' => 'City',
-                    'name' => $cityName,
-                    'containedIn' => ['@type' => 'Country', 'name' => $countryName],
-                ],
-            ] : null,
-            'aggregateRating' => $post->view_count > 0 ? [
-                '@type' => 'AggregateRating',
-                'ratingValue' => min(5, max(3, round(($post->favorites_count ?? 0) / max(1, $post->view_count) * 50, 1))),
-                'reviewCount' => max(1, $post->favorites_count ?? 0),
-            ] : null,
-        ]];
+        // JSON-LD Product (true facts only, no made-up rating) + breadcrumbs
+        $seo['jsonLd'] = array_values(array_filter([
+            $this->productSchema($post, $title, $description, $baseUrl . $path, "{$catName} > {$subName}"),
+            $this->breadcrumbSchema($seo['breadcrumbs']),
+        ]));
 
         // Server-side content preview for crawlers
         $seo['content_preview'] = [

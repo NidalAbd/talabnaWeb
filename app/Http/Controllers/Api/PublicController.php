@@ -142,7 +142,7 @@ class PublicController extends Controller
     /**
      * Transform listing data to fix JSON name fields
      */
-    private function transformListing($listing)
+    public function transformListing($listing)
     {
         if (!$listing) return null;
 

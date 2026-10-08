@@ -154,8 +154,18 @@
 
               <hr class="mb-6" />
 
-              <!-- Seller Info -->
-              <div class="d-flex align-center mb-6">
+              <!-- Seller: the shop when the owner has one (2026-10-08) -->
+              <router-link v-if="listing.shop" :to="listing.shop.path" class="d-flex align-center mb-6" style="text-decoration: none; color: inherit; gap: 12px;">
+                <div style="width: 56px; height: 56px; border-radius: 16px; overflow: hidden; background: #EDE4D1; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                  <img v-if="listing.shop.logo" :src="ensureAbsoluteUrl(listing.shop.logo)" :alt="listing.shop.name" loading="lazy" decoding="async" width="56" height="56" style="width: 100%; height: 100%; object-fit: cover;" />
+                  <i v-else class="mdi mdi-storefront-outline" style="font-size: 28px; color: #7A5300;"></i>
+                </div>
+                <div style="flex: 1; min-width: 0;">
+                  <h3 class="text-subtitle-1 font-weight-bold" style="margin: 0;">{{ listing.shop.name }}</h3>
+                  <p class="text-caption text-medium-emphasis" style="margin: 0;">{{ appStore.locale === 'ar' ? 'زيارة المتجر' : 'Visit the shop' }} ›</p>
+                </div>
+              </router-link>
+              <div v-else class="d-flex align-center mb-6">
                 <div class="avatar mr-4" style="width: 56px; height: 56px;">
                   <img v-if="userPhotoUrl" :src="userPhotoUrl" loading="lazy" decoding="async" width="56" height="56" class="img-cover" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;" />
                   <i v-else class="mdi mdi-account" style="font-size: 32px;"></i>

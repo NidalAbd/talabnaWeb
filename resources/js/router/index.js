@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { WEB_LOCALES } from '@/utils/locales'
+import { markNavigation } from '@/utils/ssrSeo'
 
 // Lazy load views for better performance
 const Home = () => import('@/views/Home.vue')
@@ -7,6 +9,7 @@ const ListingDetails = () => import('@/views/ListingDetails.vue')
 const Category = () => import('@/views/Category.vue')
 const Search = () => import('@/views/Search.vue')
 const UserProfile = () => import('@/views/UserProfile.vue')
+const Shop = () => import('@/views/Shop.vue')
 const Services = () => import('@/views/Services.vue')
 const About = () => import('@/views/About.vue')
 const Contact = () => import('@/views/Contact.vue')
@@ -78,6 +81,14 @@ const routes = [
     component: UserProfile,
     meta: {
       title: 'الملف الشخصي - طلبنا',
+    },
+  },
+  {
+    path: '/shop/:slug',
+    name: 'shop',
+    component: Shop,
+    meta: {
+      title: 'المتجر - طلبنا',
     },
   },
   {
@@ -206,7 +217,7 @@ const routes = [
 // router matches the path WITHOUT the prefix (e.g. /fr/listing/1493 → match
 // /listing/:id with base /fr). Internal navigation via router.push keeps
 // the prefix automatically.
-const LOCALE_CODES = ['en','tr','fr','es','hi','ur','bn','pt','ru','id','de','zh','ku','fa','sw','ms']
+const LOCALE_CODES = WEB_LOCALES
 const firstSeg = (window.location.pathname.split('/').filter(Boolean)[0] || '').toLowerCase()
 const localeBase = LOCALE_CODES.includes(firstSeg) ? `/${firstSeg}` : '/'
 
@@ -222,10 +233,11 @@ const router = createRouter({
   },
 })
 
-// Update page title on navigation
+// Update page title on in-app navigation (the first page keeps the server's title).
 router.beforeEach((to, from, next) => {
-  document.title = to.meta.title || 'طلبنا - Talabna'
+  if (from.matched.length) document.title = to.meta.title || 'طلبنا - Talabna'
   next()
 })
+router.afterEach(() => markNavigation())
 
 export default router
