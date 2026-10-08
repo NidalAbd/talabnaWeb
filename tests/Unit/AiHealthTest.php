@@ -39,7 +39,7 @@ class AiHealthTest extends TestCase
         $this->assertSame('no_access', $s['claude:text']['status']);
         $this->assertSame('no_model', $s['veo']['status']);
         $this->assertSame('ok', $s['veo_fast']['status']);
-        $this->assertCount(7, Http::recorded());
+        $this->assertCount(8, Http::recorded()); // 8 models, Veo Lite included
         Http::assertNotSent(fn ($r) => $r->method() !== 'GET', 'only reads: nothing is generated or charged');
         $this->assertFalse(app(AiHealth::class)->ready('veo'));
         $this->assertSame(['veo_fast'], app(AiHealth::class)->order(['veo', 'veo_fast']));
