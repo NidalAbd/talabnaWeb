@@ -15,7 +15,8 @@ return [
     'text_providers' => explode(',', env('AI_TEXT_PROVIDERS', 'openai,claude,gemini')),
     'tiers' => [
         // Language check, "is there an item in this photo".
-        'light' => ['openai' => 'gpt-4.1-nano', 'claude' => 'claude-haiku-5-5', 'gemini' => 'gemini-3.1-flash-lite'],
+        // gpt-4.1-nano is shut down on 2026-10-23 (OpenAI deprecations); gpt-4o-mini has no shutdown date.
+        'light' => ['openai' => 'gpt-4o-mini', 'claude' => 'claude-haiku-5-5', 'gemini' => 'gemini-3.1-flash-lite'],
         // Post writing, translation, category, price, photo-to-ad, video brief.
         'standard' => ['openai' => env('AI_TEXT_MODEL', 'gpt-4o-mini'), 'claude' => 'claude-haiku-5-5', 'gemini' => 'gemini-3.1-flash-lite'],
         // Kept for larger jobs; nothing uses it yet.

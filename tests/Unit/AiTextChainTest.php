@@ -45,7 +45,7 @@ class AiTextChainTest extends TestCase
 
         $this->assertSame('en', app(AiTextChain::class)->complete('light', 'sys', 'hello'));
 
-        Http::assertSent(fn ($r) => $r['model'] === 'gpt-4.1-nano');
+        Http::assertSent(fn ($r) => $r['model'] === 'gpt-4o-mini');
         Http::assertNotSent(fn ($r) => str_contains($r->url(), 'anthropic'));
     }
 
