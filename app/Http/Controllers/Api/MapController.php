@@ -34,27 +34,38 @@ class MapController extends Controller
         $dLat = $r / 111.0;
         $dLng = $r / (111.0 * max(0.2, cos(deg2rad($lat))));
 
+        // Where a post sits on the map: its own location, or (2026-10-08) its owner's location rounded to about 1 km
+        // when the post has none. Only 52 of 336 live posts had their own, so the map showed three or four pins;
+        // rounding keeps the owner's exact address private (an area, like other marketplaces show).
+        $own = '(service_posts.location_latitudes IS NOT NULL AND service_posts.location_latitudes != 0 AND NOT (service_posts.location_latitudes = '.self::DEFAULT_LAT.' AND service_posts.location_longitudes = '.self::DEFAULT_LNG.'))';
+        $userOk = '(users.location_latitudes IS NOT NULL AND users.location_latitudes != 0 AND NOT (users.location_latitudes = '.self::DEFAULT_LAT.' AND users.location_longitudes = '.self::DEFAULT_LNG.'))';
+        $latExpr = "CASE WHEN $own THEN service_posts.location_latitudes WHEN $userOk THEN ROUND(users.location_latitudes, 2) END";
+        $lngExpr = "CASE WHEN $own THEN service_posts.location_longitudes WHEN $userOk THEN ROUND(users.location_longitudes, 2) END";
+
         $posts = ServicePost::query()
-            ->where('state', 'published')
-            ->whereBetween('location_latitudes', [$lat - $dLat, $lat + $dLat])
-            ->whereBetween('location_longitudes', [$lng - $dLng, $lng + $dLng])
-            ->where(fn ($q) => $q->where('location_latitudes', '!=', self::DEFAULT_LAT)->orWhere('location_longitudes', '!=', self::DEFAULT_LNG))
-            ->whereNotIn('categories_id', [6, 7])
-            ->when(! empty($d['category_id']), fn ($q) => $q->where('categories_id', (int) $d['category_id']))
-            ->when(! empty($d['type']), fn ($q) => $q->where('type', $d['type']))
+            ->join('users', 'users.id', '=', 'service_posts.user_id')
+            ->where('service_posts.state', 'published')
+            ->whereRaw("($latExpr) BETWEEN ? AND ?", [$lat - $dLat, $lat + $dLat])
+            ->whereRaw("($lngExpr) BETWEEN ? AND ?", [$lng - $dLng, $lng + $dLng])
+            ->whereNotIn('service_posts.categories_id', [6, 7])
+            ->when(! empty($d['category_id']), fn ($q) => $q->where('service_posts.categories_id', (int) $d['category_id']))
+            ->when(! empty($d['type']), fn ($q) => $q->where('service_posts.type', $d['type']))
             ->when(trim((string) ($d['q'] ?? '')) !== '', function ($q) use ($d) {
                 // Same matching as search: plain text, or JSON-escaped (Arabic stored as \u....).
                 $text = trim((string) $d['q']);
                 $plain = '%'.addcslashes($text, '%_\\').'%';
                 $escaped = '%'.addcslashes(trim(json_encode($text), '"'), '%_\\').'%';
-                $q->where(fn ($w) => $w->where('title', 'LIKE', $plain)->orWhere('description', 'LIKE', $plain)
-                    ->orWhere('title', 'LIKE', $escaped)->orWhere('description', 'LIKE', $escaped));
+                $q->where(fn ($w) => $w->where('service_posts.title', 'LIKE', $plain)->orWhere('service_posts.description', 'LIKE', $plain)
+                    ->orWhere('service_posts.title', 'LIKE', $escaped)->orWhere('service_posts.description', 'LIKE', $escaped));
             })
             ->with('photos')
-            ->latest()
+            ->latest('service_posts.created_at')
             ->limit(400)
-            ->get(['id', 'title', 'price', 'price_type', 'price_max', 'price_currency_code', 'type', 'location_latitudes',
-                'location_longitudes', 'categories_id', 'sub_categories_id', 'reserved_at', 'state', 'have_badge']);
+            ->select(['service_posts.id', 'service_posts.title', 'service_posts.price', 'service_posts.price_type', 'service_posts.price_max',
+                'service_posts.price_currency_code', 'service_posts.type', 'service_posts.categories_id', 'service_posts.sub_categories_id',
+                'service_posts.reserved_at', 'service_posts.state', 'service_posts.have_badge'])
+            ->selectRaw("($latExpr) as location_latitudes, ($lngExpr) as location_longitudes, NOT $own as approximate_location")
+            ->get();
 
         $pins = $posts->map(function ($p) use ($lat, $lng) {
             $p->distance = round(ServicePost::distance($lat, $lng, $p->location_latitudes, $p->location_longitudes), 2);

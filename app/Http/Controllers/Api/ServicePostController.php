@@ -936,10 +936,21 @@ class ServicePostController extends Controller
         }
 
         if ($category == 6) {
-            $userLatitude = $currentUser->location_latitudes;
-            $userLongitude = $currentUser->location_longitudes;
-            $distanceExpression = (new ServicePost)->distanceExpression($userLatitude, $userLongitude);
-            $servicePosts->orderByRaw($distanceExpression);
+            // "Near": posts with a location nearest first. Posts without one had a NULL distance, which MySQL sorts
+            // FIRST, so far-away posts from other countries led the list (2026-10-08). They now come after, by own
+            // city, own country, then the nearest countries; a user without a location gets that order directly.
+            $userLatitude = (float) $currentUser->location_latitudes;
+            $userLongitude = (float) $currentUser->location_longitudes;
+            if ($userLatitude != 0.0 || $userLongitude != 0.0) {
+                $servicePosts->orderByRaw('(location_latitudes IS NULL OR location_longitudes IS NULL OR (location_latitudes = 0 AND location_longitudes = 0)) ASC')
+                    ->orderByRaw((new ServicePost)->distanceExpression($userLatitude, $userLongitude));
+            }
+            $servicePosts->orderByRaw('CASE WHEN country_id = ? AND city_id = ? THEN 1 WHEN country_id = ? THEN 2 ELSE 3 END',
+                [$userCountryId, $userCityId, $userCountryId]);
+            if ($userCountryId && ($near = \App\Services\Feed\NearestCountries::ids((int) $userCountryId))) {
+                $servicePosts->orderByRaw('FIELD(service_posts.country_id, ' . implode(',', array_reverse($near)) . ') DESC');
+            }
+            $servicePosts->orderBy('created_at', 'DESC');
         } else {
             // Fresh posts first, near ones before far ones. Featured (badge) posts are NOT pinned on top any more:
             // they are rotated into fixed slots below, so every page shows new content.
