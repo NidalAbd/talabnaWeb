@@ -113,6 +113,16 @@ class FeedController extends Controller
             ->orderByRaw('EXISTS (SELECT 1 FROM feed_seen fs WHERE fs.user_id = ? AND fs.service_post_id = service_posts.id AND fs.seen_at < ?) ASC',
                 [$me->id, $seenBefore])
             ->when(! isset($d['country_id']) && $me->country_id, function ($q) use ($me) {
+                // Posts meant for this viewer first (2026-10-08): each post has a stage (PostDistribution): 1 its city
+                // and the owner's followers, 2 its country, 3 nearby countries, 4 everywhere. The others still come,
+                // after them. A post without a stage yet counts as its country.
+                $near = array_slice(NearestCountries::ids((int) $me->country_id), 0, 6) ?: [(int) $me->country_id];
+                $q->orderByRaw('(CASE WHEN service_posts.city_id = ? OR EXISTS (SELECT 1 FROM followers f WHERE f.user_id = service_posts.user_id AND f.follower_id = ?) THEN 1 '
+                    .'WHEN service_posts.country_id = ? THEN 2 WHEN service_posts.country_id IN ('.implode(',', array_map('intval', $near)).') THEN 3 ELSE 4 END) '
+                    .'<= COALESCE((SELECT pd.stage FROM post_distribution pd WHERE pd.service_post_id = service_posts.id), 2) DESC',
+                    [(int) $me->city_id, (int) $me->id, (int) $me->country_id]);
+            })
+            ->when(! isset($d['country_id']) && $me->country_id, function ($q) use ($me) {
                 // Own country first, then the nearest ones.
                 $order = NearestCountries::ids((int) $me->country_id);
                 if ($order) {

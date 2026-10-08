@@ -56,6 +56,8 @@ class UnlockController extends Controller
         if (! $advanced && ! FeatureUnlocks::has($uid, 'insights_post', $servicePost->id) && ! FeatureUnlocks::has($uid, 'insights_all')) {
             return response()->json([
                 'locked' => true,
+                // A free taste (2026-10-08): how many people it reached; the funnel behind it is what the unlock shows.
+                'reach' => app(\App\Services\Feed\PostDistribution::class)->funnel($servicePost->id)['reach'],
                 'price_post' => FeatureUnlocks::price('insights_post'),
                 'price_all' => FeatureUnlocks::price('insights_all'),
                 'price_advanced' => FeatureUnlocks::price('advanced_insights'),
@@ -91,6 +93,12 @@ class UnlockController extends Controller
                 'offers' => DB::table('offers')->where('service_post_id', $id)->whereNull('parent_id')->count(),
             ],
             'daily' => collect($daily)->map(fn ($v, $d) => ['date' => $d] + $v)->values(),
+            // Reached -> stopped -> opened -> read -> contacted, each once per person (2026-10-08).
+            'funnel' => app(\App\Services\Feed\PostDistribution::class)->funnel($id),
+            // How far it is spread now: 1 city, 2 country, 3 nearby countries, 4 everywhere.
+            'distribution' => ($dist = DB::table('post_distribution')->where('service_post_id', $id)->first())
+                ? ['stage' => (int) $dist->stage, 'testing' => (bool) $dist->testing, 'relative' => (float) $dist->relative]
+                : null,
             'advanced' => $advanced ? $this->advanced($id) : null,
             'price_advanced' => FeatureUnlocks::price('advanced_insights'),
         ]);

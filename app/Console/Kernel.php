@@ -53,6 +53,8 @@ class Kernel extends ConsoleKernel
         // serving means Google fetches never hit the DB or PHP rendering.
         // Which AI models are ready: all checked at once, for free (requests then go to ready ones only).
         $schedule->command('ai:health')->everyFiveMinutes()->withoutOverlapping();
+        // How far each post spreads (city, country, nearby countries, everywhere), from how people engage with it.
+        $schedule->command('posts:distribute')->everyTenMinutes()->withoutOverlapping();
 
         $schedule->command('sitemap:generate')
             ->dailyAt('05:00')
