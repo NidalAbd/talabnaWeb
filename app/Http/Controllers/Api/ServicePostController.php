@@ -183,18 +183,28 @@ class ServicePostController extends Controller
                 ->map(fn ($p) => ['user_id' => $currentUser->id, 'service_post_id' => $p->id, 'seen_at' => $now])->all());
         }
 
-        foreach ($servicePosts as $servicePost) {
-            $postUser = User::with('photos')->find($servicePost->user_id);
-            $servicePost->user_photo = $postUser->photos->first();
-            $servicePost->user_name = $postUser->user_name;
-            $servicePost->email = $postUser->email;
-            $servicePost->WatsNumber = $postUser->WatsNumber;
-            $servicePost->user_verified = $postUser->phone_verified_at !== null;
-            $servicePost->whatsapp_verified = $postUser->whatsapp_verified_at !== null;
-            $servicePost->phones = $postUser->phones;
+        // Owners, favourites and follows for the whole page in three queries (2026-10-10: it was three queries per
+        // reel, about 40 per page, on a shared server).
+        $ownerIds = $servicePosts->getCollection()->pluck('user_id')->unique()->values();
+        $owners = User::with('photos')->whereIn('id', $ownerIds)->get()->keyBy('id');
+        $favorited = \App\Models\Favorite::where('user_id', Auth::id())
+            ->where('favoritable_type', (new ServicePost)->getMorphClass())
+            ->whereIn('favoritable_id', $servicePosts->getCollection()->pluck('id'))
+            ->pluck('favoritable_id')->flip();
+        $followed = DB::table('followers')->where('user_id', $currentUser->id)->whereIn('follower_id', $ownerIds)
+            ->pluck('follower_id')->flip();
 
-            $favorite = $servicePost->favorites()->where('user_id', Auth::id())->first();
-            $servicePost->is_favorited = (bool)$favorite;
+        foreach ($servicePosts as $servicePost) {
+            $postUser = $owners->get($servicePost->user_id);
+            $servicePost->user_photo = $postUser?->photos->first();
+            $servicePost->user_name = $postUser?->user_name;
+            $servicePost->email = $postUser?->email;
+            $servicePost->WatsNumber = $postUser?->WatsNumber;
+            $servicePost->user_verified = $postUser?->phone_verified_at !== null;
+            $servicePost->whatsapp_verified = $postUser?->whatsapp_verified_at !== null;
+            $servicePost->phones = $postUser?->phones;
+
+            $servicePost->is_favorited = $favorited->has($servicePost->id);
 
             $servicePost->distance = round(ServicePost::distance(
                 $currentUser->location_latitudes,
@@ -203,8 +213,7 @@ class ServicePostController extends Controller
                 $servicePost->location_longitudes
             ), 2);
 
-            $follow = $currentUser->followers()->where('follower_id', $postUser->id)->first();
-            $servicePost->is_followed = (bool)$follow;
+            $servicePost->is_followed = $followed->has($servicePost->user_id);
         }
 
         return response()->json(compact('servicePosts'));
@@ -858,11 +867,20 @@ class ServicePostController extends Controller
             ->where(fn ($w) => $w->whereNull('service_posts.badge_expires_at')->orWhere('service_posts.badge_expires_at', '>', now()))
             ->limit(300)->get()->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge, 'country_id' => $p->country_id, 'city_id' => $p->city_id])->all();
         // Browsing a category on purpose: every featured post can show (no frequency cap), weighted and paced.
-        $me = \App\Models\User::find($userId);
-        $picked = $picker->pick($pool, 10, \App\Services\Feed\SponsoredPicker::sessionSeed($userId), [
-            'country_id' => $me?->country_id, 'city_id' => $me?->city_id,
-            'shown' => $picker->impressionsToday(array_column($pool, 'id')),
-        ]);
+        // Picked once per scroll session and feed (2026-10-10): picking again for every page saw the impressions the
+        // earlier pages had just added, chose a different set, and a post could be skipped or repeated across pages.
+        $seed = \App\Services\Feed\SponsoredPicker::sessionSeed($userId);
+        $pickKey = 'feat:pick:'.md5($seed.'|'.$base->toSql().'|'.json_encode($base->getBindings()));
+        $picked = \Illuminate\Support\Facades\Cache::remember($pickKey, \App\Services\Feed\SponsoredPicker::SESSION_MINUTES * 60, function () use ($picker, $pool, $seed, $userId) {
+            $me = \App\Models\User::find($userId);
+
+            return $picker->pick($pool, 10, $seed, [
+                'country_id' => $me?->country_id, 'city_id' => $me?->city_id,
+                'shown' => $picker->impressionsToday(array_column($pool, 'id')),
+            ]);
+        });
+        // A featured post that ended or lost its badge since the pick is left out (the pool is fresh)
+        $picked = array_values(array_intersect($picked, array_column($pool, 'id')));
 
         $paginator = $query->when($picked, fn ($q) => $q->whereNotIn('service_posts.id', $picked))->paginate(10);
 
