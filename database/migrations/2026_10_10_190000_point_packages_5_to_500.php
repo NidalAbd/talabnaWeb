@@ -4,10 +4,9 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\DB;
 
 /**
- * Points packages on sale (owner, 2026-10-10): 5, 10, 25, 50, 100, 200, 500. Packages under 5 points are hidden.
- * 500 exists in Google Play (points_500, $359.99); 200 is added switched off until its Play product (points_200)
- * exists. The app shows the store's price; these rows decide which packages appear. 1000 points = 2 x 500 (Play caps
- * one product at about USD 400).
+ * Points packages on sale (owner, 2026-10-10): 5, 10, 25, 50, 100, 250, 500, all existing Google Play products
+ * (250 instead of a new 200). Packages under 5 points are hidden. The app shows the store's price; these rows decide
+ * which packages appear. 1000 points = 2 x 500 (Play caps one product at about USD 400).
  */
 return new class extends Migration
 {
@@ -26,7 +25,8 @@ return new class extends Migration
     public function up(): void
     {
         DB::table('point_packages')->where('points_amount', '<', 5)->update(['is_active' => false, 'updated_at' => now()]);
-        foreach ([[200, 149.99, 25, 8, false], [500, 359.99, 28, 9, true]] as [$points, $price, $discount, $order, $active]) {
+        DB::table('point_packages')->where('points_amount', 200)->delete(); // an earlier step added it switched off
+        foreach ([[250, 189.99, 24, 8, true], [500, 359.99, 28, 9, true]] as [$points, $price, $discount, $order, $active]) {
             if (! DB::table('point_packages')->where('points_amount', $points)->exists()) {
                 DB::table('point_packages')->insert($this->row($points, $price, $discount, $order, $active));
             }
@@ -35,6 +35,6 @@ return new class extends Migration
 
     public function down(): void
     {
-        DB::table('point_packages')->whereIn('points_amount', [200, 500])->delete();
+        DB::table('point_packages')->whereIn('points_amount', [250, 500])->delete();
     }
 };
