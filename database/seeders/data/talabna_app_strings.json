@@ -5845,5 +5845,1209 @@
  "welcome.title": {
   "ar": "مرحباً بك في طلبنا",
   "en": "Welcome to Talabna"
+ },
+ "shop.all_shops": {
+  "en": "Shops",
+  "ar": "المتاجر"
+ },
+ "help.start": {
+  "en": "Getting started",
+  "ar": "البداية"
+ },
+ "help.start.account": {
+  "en": "Your account",
+  "ar": "حسابك"
+ },
+ "help.start.account_body": {
+  "en": "Sign in with Google, Apple or email. Edit your name, photo, country and city from your profile. Your country and city decide what you see first in the feed.",
+  "ar": "سجّل الدخول عبر Google أو Apple أو البريد. عدّل اسمك وصورتك ودولتك ومدينتك من ملفك الشخصي. دولتك ومدينتك تحددان ما تراه أولًا في الصفحة الرئيسية."
+ },
+ "help.start.location": {
+  "en": "Location and distance",
+  "ar": "الموقع والمسافة"
+ },
+ "help.start.location_body": {
+  "en": "Allow location to see how far each post is and to use Near me and the map. Your exact address is never shown: on the map a post without its own location appears in an area of about 1 km.",
+  "ar": "اسمح بالموقع لترى بُعد كل إعلان ولتستخدم \"قريب مني\" والخريطة. عنوانك الدقيق لا يظهر أبدًا: الإعلان الذي ليس له موقع خاص يظهر على الخريطة ضمن منطقة تقارب 1 كم."
+ },
+ "help.start.phone": {
+  "en": "Verify your phone",
+  "ar": "توثيق رقم الهاتف"
+ },
+ "help.start.phone_body": {
+  "en": "Verify your number from your profile so buyers can call or message you on WhatsApp. You choose how they can reach you.",
+  "ar": "وثّق رقمك من ملفك الشخصي ليتمكن المشترون من الاتصال بك أو مراسلتك على واتساب. أنت تختار طريقة التواصل."
+ },
+ "help.start.language": {
+  "en": "Language and appearance",
+  "ar": "اللغة والمظهر"
+ },
+ "help.start.language_body": {
+  "en": "Settings > Preferences: change the language (72 languages) and switch dark or light mode. Data saver loads fewer photos on slow connections.",
+  "ar": "الإعدادات > التفضيلات: غيّر اللغة (72 لغة) وبدّل بين الوضع الداكن والفاتح. وضع توفير البيانات يحمّل صورًا أقل على الاتصال البطيء."
+ },
+ "help.posting": {
+  "en": "Posting",
+  "ar": "النشر"
+ },
+ "help.posting.create": {
+  "en": "Create a post",
+  "ar": "إنشاء إعلان"
+ },
+ "help.posting.create_body": {
+  "en": "Tap + Post, choose Offer or Request, add a title, description, price and photos. Drafts are saved automatically if you leave.",
+  "ar": "اضغط + نشر، اختر عرض أو طلب، وأضف العنوان والوصف والسعر والصور. تُحفظ المسودة تلقائيًا إذا خرجت."
+ },
+ "help.posting.photos": {
+  "en": "Photos that sell",
+  "ar": "صور تبيع"
+ },
+ "help.posting.photos_body": {
+  "en": "The first photo is the cover. Under \"Shots buyers look for\" tap Front, Side, Back, Close-up or Video to take that shot straight away. Real angles beat invented ones.",
+  "ar": "الصورة الأولى هي الغلاف. تحت \"لقطات يبحث عنها المشترون\" اضغط الأمام أو الجانب أو الخلف أو لقطة قريبة أو فيديو لالتقاطها مباشرة. اللقطات الحقيقية أفضل من المصطنعة."
+ },
+ "help.posting.manage": {
+  "en": "Edit, renew, reserved and sold",
+  "ar": "التعديل والتجديد والحجز والبيع"
+ },
+ "help.posting.manage_body": {
+  "en": "Open your post > ⋮: Edit, Change category, Manage badge. A post lasts 30 days: renew it to keep it up. Mark it Reserved, or Sold to hide it from the feed (it stays on your profile).",
+  "ar": "افتح إعلانك > ⋮: تعديل، تغيير الفئة، إدارة الشارة. يبقى الإعلان 30 يومًا ويمكنك تجديده. حدّده كمحجوز، أو كمباع لإخفائه من الصفحة الرئيسية (يبقى في ملفك)."
+ },
+ "help.posting.spin": {
+  "en": "360° view and insights",
+  "ar": "عرض 360° والإحصائيات"
+ },
+ "help.posting.spin_body": {
+  "en": "Add a 360° view from a short walk-around video: buyers turn the item by dragging. Post insights show views, saves and messages.",
+  "ar": "أضف عرض 360° من فيديو قصير تدور فيه حول المنتج: يدوّره المشتري بالسحب. إحصائيات الإعلان تعرض المشاهدات والحفظ والرسائل."
+ },
+ "help.ai": {
+  "en": "AI tools",
+  "ar": "أدوات الذكاء الاصطناعي"
+ },
+ "help.ai.write": {
+  "en": "Write and translate with AI",
+  "ar": "الكتابة والترجمة بالذكاء الاصطناعي"
+ },
+ "help.ai.write_body": {
+  "en": "Improve your title and description, get a suggested category and price, or translate your post. Snap to sell turns one photo into a ready post.",
+  "ar": "حسّن العنوان والوصف، واحصل على فئة وسعر مقترحين، أو ترجم إعلانك. \"صوّر وبِع\" يحوّل صورة واحدة إلى إعلان جاهز."
+ },
+ "help.ai.studio": {
+  "en": "Photo Studio",
+  "ar": "استوديو الصور"
+ },
+ "help.ai.studio_body": {
+  "en": "Tap ✨ on a photo: fix light and colour, studio background, cinematic shot, 8-second video, or place the item in a scene. \"Best for this item\" picks the scene that suits it (car showroom for a car, marble for perfume...). Free tools: crop (free or 1:1, 4:5, 9:16...), blur faces and plates, add your shop logo.",
+  "ar": "اضغط ✨ على أي صورة: تحسين الإضاءة والألوان، خلفية استوديو، لقطة سينمائية، فيديو 8 ثوانٍ، أو وضع المنتج في مشهد. \"الأنسب لهذا المنتج\" يختار المشهد المناسب (صالة سيارات للسيارة، رخام للعطر...). أدوات مجانية: القص (حر أو 1:1، 4:5، 9:16...)، تمويه الوجوه واللوحات، إضافة شعار متجرك."
+ },
+ "help.ai.scenes": {
+  "en": "Scenes",
+  "ar": "المشاهد"
+ },
+ "help.ai.scenes_body": {
+  "en": "More than 40 scenes: cars (showroom, city street, open road), phones and electronics, fashion, perfume and jewellery (marble, silk), nature (rock and waterfall, rock by the sea, desert, beach, snow), studio sets (podium, gradient), cafe, Ramadan and more. Pictures come out vertical to fill the phone screen.",
+  "ar": "أكثر من 40 مشهدًا: السيارات (صالة عرض، شارع المدينة، طريق مفتوح)، الجوالات والإلكترونيات، الأزياء، العطور والمجوهرات (رخام، حرير)، الطبيعة (صخرة وشلال، صخرة في البحر، صحراء، شاطئ، ثلج)، استوديو (منصة، تدرّج لوني)، مقهى، رمضان وغيرها. الصور تخرج طولية لتملأ شاشة الجوال."
+ },
+ "help.ai.cost": {
+  "en": "What AI costs",
+  "ar": "تكلفة الذكاء الاصطناعي"
+ },
+ "help.ai.cost_body": {
+  "en": "Each AI action shows its price in points before you confirm. If it fails or the photo has no clear item, you are not charged, or your points come back automatically. AI never changes the item's condition.",
+  "ar": "كل عملية ذكاء اصطناعي تعرض سعرها بالنقاط قبل التأكيد. إذا فشلت أو لم يكن في الصورة منتج واضح لا تُخصم نقاط، أو تعود تلقائيًا. الذكاء الاصطناعي لا يغيّر حالة المنتج أبدًا."
+ },
+ "help.points": {
+  "en": "Points and badges",
+  "ar": "النقاط والشارات"
+ },
+ "help.points.points": {
+  "en": "Points",
+  "ar": "النقاط"
+ },
+ "help.points.points_body": {
+  "en": "Buy points in the app (Points in the menu or when an action asks for them). Use them for badges, AI tools, the shop page and extra saved searches.",
+  "ar": "اشترِ النقاط من التطبيق (النقاط في القائمة أو عندما تطلبها أي عملية) واستخدمها للشارات وأدوات الذكاء الاصطناعي وصفحة المتجر وعمليات بحث محفوظة إضافية."
+ },
+ "help.points.badges": {
+  "en": "Badges: Silver, Gold, Diamond",
+  "ar": "الشارات: فضي، ذهبي، ماسي"
+ },
+ "help.points.badges_body2": {
+  "en": "A badge makes your post featured: it appears through the feed for more people and shows its badge on the card. Longer is cheaper per day: for 7 days Silver is 4 points, Gold 7, Diamond 12 (Diamond is seen the most).",
+  "ar": "الشارة تجعل إعلانك مميزًا: يظهر لعدد أكبر من الناس عبر الصفحة الرئيسية وتظهر شارته على البطاقة. كلما طالت المدة قلّ سعر اليوم: لمدة 7 أيام الفضي 4 نقاط، الذهبي 7، الماسي 12 (الماسي الأكثر ظهورًا)."
+ },
+ "help.browse": {
+  "en": "Browsing and search",
+  "ar": "التصفح والبحث"
+ },
+ "help.browse.feed": {
+  "en": "Home feed",
+  "ar": "الصفحة الرئيسية"
+ },
+ "help.browse.feed_body": {
+  "en": "New posts come first, from your country and then the nearest countries. Switch between cards and list from the top bar. Filters: offer or request, city, price.",
+  "ar": "تظهر الإعلانات الجديدة أولًا، من دولتك ثم الدول الأقرب. بدّل بين البطاقات والقائمة من الشريط العلوي. الفلاتر: عرض أو طلب، المدينة، السعر."
+ },
+ "help.browse.near": {
+  "en": "Near me and the map",
+  "ar": "قريب مني والخريطة"
+ },
+ "help.browse.near_body": {
+  "en": "Near me lists posts by distance from you. The map shows posts around you; move or zoom to explore, and search by words.",
+  "ar": "\"قريب مني\" يرتب الإعلانات حسب بُعدها عنك. الخريطة تعرض الإعلانات حولك؛ حرّكها أو قرّبها للاستكشاف وابحث بالكلمات."
+ },
+ "help.browse.saved": {
+  "en": "Search and saved searches",
+  "ar": "البحث وعمليات البحث المحفوظة"
+ },
+ "help.browse.saved_body": {
+  "en": "Search any word, then tap Save: we notify you when new posts match. Manage them from the menu > Saved searches.",
+  "ar": "ابحث عن أي كلمة ثم اضغط حفظ: سنخبرك عند نشر إعلانات جديدة مطابقة. أدرها من القائمة > عمليات البحث المحفوظة."
+ },
+ "help.browse.follow": {
+  "en": "Follow and favourites",
+  "ar": "المتابعة والمفضلة"
+ },
+ "help.browse.follow_body": {
+  "en": "Follow a seller to hear about their new posts. Tap ♡ to save a post to your favourites.",
+  "ar": "تابع البائع لتصلك إعلاناته الجديدة. اضغط ♡ لحفظ الإعلان في المفضلة."
+ },
+ "help.chat": {
+  "en": "Chat and safety",
+  "ar": "المحادثة والأمان"
+ },
+ "help.chat.chat": {
+  "en": "Chat about a post",
+  "ar": "المحادثة حول إعلان"
+ },
+ "help.chat.chat_body": {
+  "en": "Tap Chat on any post. Messages are translated into your language automatically, so you can talk with anyone.",
+  "ar": "اضغط محادثة على أي إعلان. تُترجم الرسائل تلقائيًا إلى لغتك لتتحدث مع أي شخص."
+ },
+ "help.chat.safety": {
+  "en": "Stay safe",
+  "ar": "ابقَ آمنًا"
+ },
+ "help.chat.safety_body": {
+  "en": "Meet in public places, check the item before paying, and never send money in advance. Report a post or user from ⋮, and block anyone you don't want to hear from.",
+  "ar": "التقِ في أماكن عامة، افحص المنتج قبل الدفع، ولا ترسل المال مسبقًا. أبلغ عن إعلان أو مستخدم من ⋮، واحظر من لا تريد التواصل معه."
+ },
+ "help.shop": {
+  "en": "My shop",
+  "ar": "متجري"
+ },
+ "help.shop.what": {
+  "en": "What is My shop",
+  "ar": "ما هو متجري"
+ },
+ "help.shop.what_body": {
+  "en": "A shop page for sellers: your logo, shop name, opening hours and about appear at the top of your profile above your posts, so buyers see a real business. Add your logo to your photos for free in the Photo Studio.",
+  "ar": "صفحة متجر للبائعين: يظهر شعارك واسم متجرك ومواعيد العمل والنبذة أعلى ملفك فوق إعلاناتك، فيرى المشتري نشاطًا تجاريًا حقيقيًا. أضف شعارك إلى صورك مجانًا في استوديو الصور."
+ },
+ "help.shop.how": {
+  "en": "How to get it",
+  "ar": "كيف تحصل عليه"
+ },
+ "help.shop.how_body": {
+  "en": "Menu > My shop: unlock it with points for 30 days (included in the Business plan), fill in the details and save.",
+  "ar": "القائمة > متجري: افتحه بالنقاط لمدة 30 يومًا (مشمول في خطة الأعمال)، أدخل التفاصيل واحفظ."
+ },
+ "help.notif": {
+  "en": "Notifications",
+  "ar": "الإشعارات"
+ },
+ "help.notif.what": {
+  "en": "What you are told about",
+  "ar": "ما الذي تُبلَّغ عنه"
+ },
+ "help.notif.what_body": {
+  "en": "Messages, comments and likes on your posts, new posts from sellers you follow, saved search matches, and when an AI photo or video is ready.",
+  "ar": "الرسائل والتعليقات والإعجابات على إعلاناتك، والإعلانات الجديدة ممن تتابعهم، ونتائج عمليات البحث المحفوظة، وعند جاهزية صورة أو فيديو بالذكاء الاصطناعي."
+ },
+ "help.trouble": {
+  "en": "Troubleshooting",
+  "ar": "حل المشكلات"
+ },
+ "help.trouble.crash": {
+  "en": "The app is slow or closes",
+  "ar": "التطبيق بطيء أو يُغلق"
+ },
+ "help.trouble.crash_body": {
+  "en": "Update the app from Google Play or the App Store, close and reopen it, and check your connection. Data saver helps on slow networks.",
+  "ar": "حدّث التطبيق من Google Play أو App Store، أغلقه وأعد فتحه، وتحقق من الاتصال. وضع توفير البيانات يساعد على الشبكات البطيئة."
+ },
+ "help.trouble.password": {
+  "en": "Reset your password",
+  "ar": "استعادة كلمة المرور"
+ },
+ "help.trouble.password_body": {
+  "en": "On the sign-in screen tap Forgot password and follow the email we send you.",
+  "ar": "في شاشة الدخول اضغط \"نسيت كلمة المرور\" واتبع الرسالة التي تصلك على البريد."
+ },
+ "help.trouble.contact": {
+  "en": "Contact us",
+  "ar": "تواصل معنا"
+ },
+ "help.trouble.contact_body": {
+  "en": "Still stuck? Write to us at support@talbna.cloud and we will get back to you.",
+  "ar": "ما زلت بحاجة لمساعدة؟ راسلنا على support@talbna.cloud وسنرد عليك."
+ },
+ "notification.filter_unread": {
+  "en": "Unread",
+  "ar": "غير مقروء"
+ },
+ "reels.video_failed": {
+  "en": "The video didn't load. Check your connection.",
+  "ar": "تعذّر تحميل الفيديو. تحقق من اتصالك."
+ },
+ "common.retry": {
+  "en": "Try again",
+  "ar": "إعادة المحاولة"
+ },
+ "location.gps_failed": {
+  "en": "We couldn't get your location. Choose your country and city below.",
+  "ar": "تعذّر تحديد موقعك. اختر دولتك ومدينتك من القائمة."
+ },
+ "location.pick_city": {
+  "en": "We found your country. Please choose your city.",
+  "ar": "وجدنا دولتك. اختر مدينتك من فضلك."
+ },
+ "location.save_failed": {
+  "en": "Couldn't save. Check your connection and try again.",
+  "ar": "تعذّر الحفظ. تحقق من اتصالك وحاول مرة أخرى."
+ },
+ "location.title": {
+  "en": "Where are you?",
+  "ar": "أين أنت؟"
+ },
+ "location.sub": {
+  "en": "We show you posts and shops near you, and buyers see where you are.",
+  "ar": "نعرض لك الإعلانات والمحلات القريبة منك، ويعرف المشترون مكانك."
+ },
+ "location.confirm": {
+  "en": "Confirm",
+  "ar": "تأكيد"
+ },
+ "location.later": {
+  "en": "Later",
+  "ar": "لاحقًا"
+ },
+ "shop.near_title": {
+  "en": "Shops near you",
+  "ar": "متاجر قريبة منك"
+ },
+ "shop.see_all": {
+  "en": "See all",
+  "ar": "عرض الكل"
+ },
+ "shop.km": {
+  "en": "{n} km",
+  "ar": "{n} كم"
+ },
+ "shop.open": {
+  "en": "Open",
+  "ar": "مفتوح"
+ },
+ "shop.closed": {
+  "en": "Closed",
+  "ar": "مغلق"
+ },
+ "shop.n_products": {
+  "en": "{n} products",
+  "ar": "{n} منتج"
+ },
+ "shop.have_business": {
+  "en": "Have a shop or business?",
+  "ar": "عندك محل أو بزنس؟"
+ },
+ "shop.have_business_sub": {
+  "en": "Open your shop to show here and on Google.",
+  "ar": "افتح متجرك ليظهر هنا وعلى جوجل."
+ },
+ "shop.open_yours": {
+  "en": "Open your shop",
+  "ar": "افتح متجرك"
+ },
+ "shop.renewed": {
+  "en": "Renewed for 30 more days",
+  "ar": "تم التجديد 30 يوماً إضافية"
+ },
+ "shop.preview": {
+  "en": "View as buyers",
+  "ar": "كما يراه الناس"
+ },
+ "shop.with_plan": {
+  "en": "Active · included in Business",
+  "ar": "فعّال · مشمول في خطة الأعمال"
+ },
+ "shop.active": {
+  "en": "Active",
+  "ar": "فعّال"
+ },
+ "shop.days_left": {
+  "en": "Active · {n} days left",
+  "ar": "فعّال · متبقٍ {n} يوم"
+ },
+ "shop.renew": {
+  "en": "Renew · {n} pts",
+  "ar": "تجديد · {n} نقطة"
+ },
+ "shop.last_30": {
+  "en": "Last 30 days",
+  "ar": "آخر 30 يوم"
+ },
+ "shop.vs_before": {
+  "en": "vs. the 30 days before",
+  "ar": "مقارنة بالشهر السابق"
+ },
+ "shop.m_visits": {
+  "en": "Shop visits",
+  "ar": "زيارات المتجر"
+ },
+ "shop.m_followers": {
+  "en": "New followers",
+  "ar": "متابعون جدد"
+ },
+ "shop.m_contacts": {
+  "en": "Calls & chats",
+  "ar": "محادثات واتصالات"
+ },
+ "shop.m_products": {
+  "en": "Products on sale",
+  "ar": "منتجات معروضة"
+ },
+ "shop.visits_daily": {
+  "en": "Shop visits per day",
+  "ar": "زيارات المتجر يومياً"
+ },
+ "shop.complete": {
+  "en": "Shop completeness",
+  "ar": "اكتمال المتجر"
+ },
+ "shop.complete_hint": {
+  "en": "Complete shops show higher in \"Shops near you\" and on Google.",
+  "ar": "المتاجر المكتملة تظهر أعلى في \"متاجر قريبة منك\" وعلى جوجل."
+ },
+ "shop.add": {
+  "en": "Add",
+  "ar": "أضف"
+ },
+ "shop.a_details": {
+  "en": "Shop details",
+  "ar": "بيانات المتجر"
+ },
+ "shop.a_details_sub": {
+  "en": "Name, link, about",
+  "ar": "الاسم والرابط والنبذة"
+ },
+ "shop.a_look": {
+  "en": "Cover & logo",
+  "ar": "الغلاف والشعار"
+ },
+ "shop.a_look_sub": {
+  "en": "Your shop's look",
+  "ar": "هوية متجرك"
+ },
+ "shop.a_hours": {
+  "en": "Opening hours",
+  "ar": "ساعات العمل"
+ },
+ "shop.a_hours_sub": {
+  "en": "Open / closed by itself",
+  "ar": "مفتوح / مغلق تلقائياً"
+ },
+ "shop.a_contact": {
+  "en": "Contact & location",
+  "ar": "التواصل والموقع"
+ },
+ "shop.a_contact_sub": {
+  "en": "Phone, WhatsApp, map",
+  "ar": "هاتف، واتساب، خريطة"
+ },
+ "shop.a_offer": {
+  "en": "Shop offer",
+  "ar": "عرض المتجر"
+ },
+ "shop.a_offer_sub": {
+  "en": "Shown on top of your shop",
+  "ar": "يظهر أعلى متجرك"
+ },
+ "shop.a_featured": {
+  "en": "Featured products",
+  "ar": "منتجات مميزة"
+ },
+ "shop.a_featured_sub": {
+  "en": "Pin up to 4",
+  "ar": "ثبّت حتى 4"
+ },
+ "shop.link": {
+  "en": "Your shop link",
+  "ar": "رابط متجرك"
+ },
+ "shop.link_hint": {
+  "en": "Shows on Google. Put it in your WhatsApp status, Instagram and on your shop sign.",
+  "ar": "يظهر على جوجل. ضعه في حالة واتساب وإنستغرام وعلى لافتة محلك."
+ },
+ "shop.copy": {
+  "en": "Copy",
+  "ar": "نسخ"
+ },
+ "shop.copied": {
+  "en": "Link copied",
+  "ar": "تم نسخ الرابط"
+ },
+ "shop.share": {
+  "en": "Share",
+  "ar": "مشاركة"
+ },
+ "shop.c_logo": {
+  "en": "Logo",
+  "ar": "الشعار"
+ },
+ "shop.c_cover": {
+  "en": "Cover photo",
+  "ar": "صورة الغلاف"
+ },
+ "shop.c_about": {
+  "en": "About the shop",
+  "ar": "نبذة عن المتجر"
+ },
+ "shop.c_hours": {
+  "en": "Opening hours",
+  "ar": "ساعات العمل"
+ },
+ "shop.c_location": {
+  "en": "Location on the map",
+  "ar": "الموقع على الخريطة"
+ },
+ "shop.c_contact": {
+  "en": "Phone or WhatsApp",
+  "ar": "هاتف أو واتساب"
+ },
+ "shop.c_products": {
+  "en": "At least 3 products",
+  "ar": "3 منتجات على الأقل"
+ },
+ "shop.p1": {
+  "en": "A professional shop page",
+  "ar": "صفحة متجر احترافية"
+ },
+ "shop.p1s": {
+  "en": "Cover and logo, shelves for your products, search inside the shop, call and WhatsApp buttons.",
+  "ar": "غلاف وشعار، رفوف لمنتجاتك، بحث داخل المتجر، وأزرار اتصال وواتساب."
+ },
+ "shop.p2": {
+  "en": "Your shop name on all your posts",
+  "ar": "اسم متجرك على كل إعلاناتك"
+ },
+ "shop.p2s": {
+  "en": "A \"Shop\" mark instead of your username, so buyers trust you more.",
+  "ar": "علامة \"متجر\" بدل اسم المستخدم، فيثق بك المشتري أكثر."
+ },
+ "shop.p3": {
+  "en": "In \"Shops near you\"",
+  "ar": "في \"متاجر قريبة منك\""
+ },
+ "shop.p3s": {
+  "en": "On the home page and in search, for people in your city.",
+  "ar": "في الصفحة الرئيسية والبحث للناس في مدينتك."
+ },
+ "shop.p4": {
+  "en": "A page on Google",
+  "ar": "صفحة على جوجل"
+ },
+ "shop.p4s": {
+  "en": "Your own link talbna.cloud/shop/… that shows in search results and you can share anywhere.",
+  "ar": "رابط خاص talbna.cloud/shop/… يظهر في نتائج البحث وتشاركه أينما تريد."
+ },
+ "shop.p5": {
+  "en": "Followers and alerts",
+  "ar": "متابعون وتنبيهات"
+ },
+ "shop.p5s": {
+  "en": "Your followers get a notification for every new product.",
+  "ar": "يصل إشعار لمتابعيك عند كل منتج جديد."
+ },
+ "shop.p6": {
+  "en": "Shop insights",
+  "ar": "إحصائيات المتجر"
+ },
+ "shop.p6s": {
+  "en": "Visits, followers and calls and chats, day by day.",
+  "ar": "زيارات ومتابعون واتصالات ومحادثات يوماً بيوم."
+ },
+ "shop.badge": {
+  "en": "Talabna Shop",
+  "ar": "متجر طلبنا"
+ },
+ "shop.paused_title": {
+  "en": "Your shop is paused",
+  "ar": "متجرك متوقف مؤقتاً"
+ },
+ "shop.offer_title": {
+  "en": "Turn your posts into a shop people know",
+  "ar": "حوّل إعلاناتك إلى متجر يعرفه الناس"
+ },
+ "shop.paused_body": {
+  "en": "Everything you set up is kept. Renew and your shop page, name on posts and Google page come back at once.",
+  "ar": "كل ما جهزته محفوظ. جدّد ويعود متجرك واسمه على إعلاناتك وصفحته على جوجل فوراً."
+ },
+ "shop.offer_body": {
+  "en": "A page with your name and logo, shown to people near you and on Google, and you see who visited and contacted you.",
+  "ar": "صفحة باسمك وشعارك، تظهر للقريبين منك وعلى جوجل، وتعرف منها من زارك وتواصل معك."
+ },
+ "shop.monthly": {
+  "en": "Monthly",
+  "ar": "شهري"
+ },
+ "shop.pts": {
+  "en": "{n} points",
+  "ar": "{n} نقطة"
+ },
+ "shop.for_30": {
+  "en": "for 30 days",
+  "ar": "لمدة 30 يوماً"
+ },
+ "shop.business": {
+  "en": "Business plan",
+  "ar": "خطة الأعمال"
+ },
+ "shop.included": {
+  "en": "Included",
+  "ar": "مشمول"
+ },
+ "shop.with_badge": {
+  "en": "with badge and priority",
+  "ar": "مع شارة وأولوية الظهور"
+ },
+ "shop.renew_now": {
+  "en": "Renew my shop",
+  "ar": "جدّد متجري"
+ },
+ "shop.open_now_cta": {
+  "en": "Open my shop now",
+  "ar": "افتح متجري الآن"
+ },
+ "shop.setup_time": {
+  "en": "Setting it up takes two minutes: name, logo, cover, hours and location.",
+  "ar": "تجهيزه يأخذ دقيقتين: الاسم، الشعار، الغلاف، الساعات والموقع."
+ },
+ "shop.search_shops": {
+  "en": "Search shops",
+  "ar": "ابحث عن متجر"
+ },
+ "shop.all": {
+  "en": "All",
+  "ar": "الكل"
+ },
+ "shop.none_yet": {
+  "en": "No shops here yet.",
+  "ar": "لا توجد متاجر هنا بعد."
+ },
+ "shop.none_match": {
+  "en": "No shop matches this search.",
+  "ar": "لا يوجد متجر يطابق البحث."
+ },
+ "shop.setup": {
+  "en": "Set up your shop",
+  "ar": "جهّز متجرك"
+ },
+ "shop.edit": {
+  "en": "Edit shop",
+  "ar": "تعديل المتجر"
+ },
+ "shop.name_needed": {
+  "en": "Write the shop name first",
+  "ar": "اكتب اسم المتجر أولاً"
+ },
+ "shop.cover_pick": {
+  "en": "Cover photo",
+  "ar": "صورة الغلاف"
+ },
+ "shop.cover_hint": {
+  "en": "Your shop front, your best products or your team. Wide photos look best.",
+  "ar": "واجهة محلك أو أفضل منتجاتك أو فريقك. الصور العريضة تظهر أجمل."
+ },
+ "shop.logo_hint": {
+  "en": "Your logo shows on your shop and on all your posts. A square picture works best.",
+  "ar": "شعارك يظهر على متجرك وعلى كل إعلاناتك. الصورة المربعة أفضل."
+ },
+ "shop.slug": {
+  "en": "Link name",
+  "ar": "اسم الرابط"
+ },
+ "shop.slug_hint": {
+  "en": "English letters, numbers and dashes. Leave empty and we make one from the name.",
+  "ar": "حروف إنجليزية وأرقام وشرطات. اتركه فارغاً وننشئه من الاسم."
+ },
+ "shop.about_hint": {
+  "en": "What you sell, what makes you different, delivery, warranty...",
+  "ar": "ماذا تبيع، ما يميزك، التوصيل، الضمان..."
+ },
+ "shop.phone": {
+  "en": "Phone",
+  "ar": "رقم الهاتف"
+ },
+ "shop.whatsapp": {
+  "en": "WhatsApp",
+  "ar": "واتساب"
+ },
+ "shop.address": {
+  "en": "Address",
+  "ar": "العنوان"
+ },
+ "shop.address_hint": {
+  "en": "Street, area",
+  "ar": "الشارع، المنطقة"
+ },
+ "shop.loc_set": {
+  "en": "Location set on the map",
+  "ar": "تم تحديد الموقع على الخريطة"
+ },
+ "shop.loc_unset": {
+  "en": "No location yet: buyers can't find you on the map",
+  "ar": "لا يوجد موقع: لن يجدك المشترون على الخريطة"
+ },
+ "shop.remove": {
+  "en": "Remove",
+  "ar": "إزالة"
+ },
+ "shop.loc_here": {
+  "en": "I'm at the shop",
+  "ar": "أنا في المحل"
+ },
+ "shop.loc_map": {
+  "en": "Pick on map",
+  "ar": "اختر من الخريطة"
+ },
+ "shop.hours_hint": {
+  "en": "Buyers see \"Open now\" or \"Closed\" by itself.",
+  "ar": "يرى المشترون \"مفتوح الآن\" أو \"مغلق\" تلقائياً."
+ },
+ "shop.hours_same": {
+  "en": "Same hours on all open days",
+  "ar": "نفس الساعات لكل أيام العمل"
+ },
+ "shop.offer_hint": {
+  "en": "Shown at the top of your shop. Leave empty for no offer.",
+  "ar": "يظهر أعلى متجرك. اتركه فارغاً بلا عرض."
+ },
+ "shop.offer_text": {
+  "en": "The offer",
+  "ar": "نص العرض"
+ },
+ "shop.offer_ex": {
+  "en": "10% off all accessories this week",
+  "ar": "خصم 10% على كل الإكسسوارات هذا الأسبوع"
+ },
+ "shop.offer_no_end": {
+  "en": "No end date",
+  "ar": "بدون تاريخ انتهاء"
+ },
+ "shop.offer_until": {
+  "en": "Until {d}",
+  "ar": "حتى {d}"
+ },
+ "shop.offer_pick_end": {
+  "en": "End date",
+  "ar": "تاريخ الانتهاء"
+ },
+ "shop.featured_hint": {
+  "en": "Pick up to 4 to show first in your shop.",
+  "ar": "اختر حتى 4 تظهر أولاً في متجرك."
+ },
+ "shop.no_products": {
+  "en": "Publish posts and they show here.",
+  "ar": "انشر إعلانات وستظهر هنا."
+ },
+ "shop.max4": {
+  "en": "Up to 4 featured products",
+  "ar": "حتى 4 منتجات مميزة"
+ },
+ "shop.mark": {
+  "en": "Shop",
+  "ar": "متجر"
+ },
+ "shop.sold_by": {
+  "en": "Sold by",
+  "ar": "يبيعه"
+ },
+ "shop.visit": {
+  "en": "Visit the shop",
+  "ar": "زيارة المتجر"
+ },
+ "shop.cannot_open": {
+  "en": "Could not open it on this phone",
+  "ar": "تعذّر فتحه على هذا الهاتف"
+ },
+ "shop.not_available": {
+  "en": "Shop not available",
+  "ar": "المتجر غير متاح"
+ },
+ "shop.not_available_body": {
+  "en": "This shop is closed for now or the link is wrong.",
+  "ar": "هذا المتجر مغلق حالياً أو الرابط غير صحيح."
+ },
+ "shop.load_failed": {
+  "en": "Could not load the shop",
+  "ar": "تعذّر تحميل المتجر"
+ },
+ "shop.as_buyers_see": {
+  "en": "This is how buyers see your shop",
+  "ar": "هكذا يرى المشترون متجرك"
+ },
+ "shop.manage": {
+  "en": "Manage",
+  "ar": "إدارة"
+ },
+ "shop.products": {
+  "en": "Products",
+  "ar": "منتج"
+ },
+ "shop.followers": {
+  "en": "Followers",
+  "ar": "متابع"
+ },
+ "shop.sold": {
+  "en": "Sold",
+  "ar": "تم بيعه"
+ },
+ "shop.following": {
+  "en": "Following",
+  "ar": "تتابعه"
+ },
+ "shop.follow": {
+  "en": "Follow",
+  "ar": "متابعة"
+ },
+ "shop.chat": {
+  "en": "Chat",
+  "ar": "محادثة"
+ },
+ "shop.call": {
+  "en": "Call",
+  "ar": "اتصال"
+ },
+ "shop.offer": {
+  "en": "Shop offer",
+  "ar": "عرض المتجر"
+ },
+ "shop.search": {
+  "en": "Search this shop",
+  "ar": "ابحث في منتجات المتجر"
+ },
+ "shop.featured": {
+  "en": "Featured",
+  "ar": "منتجات مميزة"
+ },
+ "shop.nothing": {
+  "en": "Nothing here yet.",
+  "ar": "لا توجد منتجات هنا بعد."
+ },
+ "shop.no_about": {
+  "en": "The shop has not written about itself yet.",
+  "ar": "لم يكتب المتجر نبذة بعد."
+ },
+ "shop.since": {
+  "en": "On Talabna since {y}",
+  "ar": "على طلبنا منذ {y}"
+ },
+ "shop.no_hours": {
+  "en": "Hours not set yet.",
+  "ar": "لم تُحدد الساعات بعد."
+ },
+ "shop.location": {
+  "en": "Location",
+  "ar": "الموقع"
+ },
+ "shop.no_location": {
+  "en": "Location not set yet.",
+  "ar": "لم يُحدد الموقع بعد."
+ },
+ "shop.open_maps": {
+  "en": "Open in Google Maps",
+  "ar": "افتح في خرائط جوجل"
+ },
+ "day.sun": {
+  "en": "Sunday",
+  "ar": "الأحد"
+ },
+ "day.mon": {
+  "en": "Monday",
+  "ar": "الاثنين"
+ },
+ "day.tue": {
+  "en": "Tuesday",
+  "ar": "الثلاثاء"
+ },
+ "day.wed": {
+  "en": "Wednesday",
+  "ar": "الأربعاء"
+ },
+ "day.thu": {
+  "en": "Thursday",
+  "ar": "الخميس"
+ },
+ "day.fri": {
+  "en": "Friday",
+  "ar": "الجمعة"
+ },
+ "day.sat": {
+  "en": "Saturday",
+  "ar": "السبت"
+ },
+ "shop.open_now": {
+  "en": "Open now",
+  "ar": "مفتوح الآن"
+ },
+ "shop.open_until": {
+  "en": "Open now · closes {t}",
+  "ar": "مفتوح الآن · يغلق {t}"
+ },
+ "shop.closed_now": {
+  "en": "Closed now",
+  "ar": "مغلق الآن"
+ },
+ "shop.opens_at": {
+  "en": "Closed · opens {t}",
+  "ar": "مغلق · يفتح {t}"
+ },
+ "shop.tab_products": {
+  "en": "Products",
+  "ar": "المنتجات"
+ },
+ "shop.tab_about": {
+  "en": "About",
+  "ar": "عن المتجر"
+ },
+ "shop.tab_place": {
+  "en": "Hours & location",
+  "ar": "الساعات والموقع"
+ },
+ "shop.visit_short": {
+  "en": "Shop",
+  "ar": "المتجر"
+ },
+ "profile_edit.country_locked": {
+  "en": "You can't change your country now. You can change it again in {n} days.",
+  "ar": "لا يمكنك تغيير دولتك الآن. يمكنك تغييرها بعد {n} يومًا."
+ },
+ "profile_edit.save_changes_changes": {
+  "en": "Save $changes changes",
+  "ar": "حفظ $changes تغييرات"
+ },
+ "insights.reached_n": {
+  "en": "Your post reached {n} people",
+  "ar": "وصل إعلانك إلى {n} شخص"
+ },
+ "insights.reached_more": {
+  "en": "See how many stopped on it, opened it, read it and contacted you.",
+  "ar": "اعرف كم شخصًا توقف عنده وفتحه وقرأه وتواصل معك."
+ },
+ "insights.f_reach": {
+  "en": "Reached",
+  "ar": "وصل إليهم"
+ },
+ "insights.f_stopped": {
+  "en": "Stopped on it",
+  "ar": "توقفوا عنده"
+ },
+ "insights.f_opened": {
+  "en": "Opened it",
+  "ar": "فتحوه"
+ },
+ "insights.f_read": {
+  "en": "Read it",
+  "ar": "قرأوه"
+ },
+ "insights.f_actions": {
+  "en": "Contacted or saved",
+  "ar": "تواصلوا أو حفظوا"
+ },
+ "insights.funnel": {
+  "en": "From seeing it to contacting you",
+  "ar": "من رؤية الإعلان إلى التواصل معك"
+ },
+ "insights.funnel_hint": {
+  "en": "Each person counts once.",
+  "ar": "كل شخص يُحسب مرة واحدة."
+ },
+ "insights.calls": {
+  "en": "Calls",
+  "ar": "اتصالات"
+ },
+ "insights.whatsapp": {
+  "en": "WhatsApp",
+  "ar": "واتساب"
+ },
+ "insights.shares": {
+  "en": "Shares",
+  "ar": "مشاركات"
+ },
+ "reach.s1": {
+  "en": "Its city",
+  "ar": "مدينته"
+ },
+ "reach.s2": {
+  "en": "Its country",
+  "ar": "دولته"
+ },
+ "reach.s3": {
+  "en": "Nearby countries",
+  "ar": "الدول القريبة"
+ },
+ "reach.s4": {
+  "en": "Everywhere",
+  "ar": "كل مكان"
+ },
+ "reach.why_test": {
+  "en": "New post: shown first to people in its city and your followers. It spreads further when they engage with it.",
+  "ar": "إعلان جديد: يظهر أولًا لأهل مدينته ومتابعيك، ويتوسع عندما يتفاعلون معه."
+ },
+ "reach.why_up": {
+  "en": "People engage with it more than with similar posts, so it is shown further.",
+  "ar": "الناس يتفاعلون معه أكثر من الإعلانات المشابهة، لذلك يظهر لمدى أوسع."
+ },
+ "reach.why_down": {
+  "en": "Fewer people stop on it than on similar posts. A clear first photo, a fair price and a full description help.",
+  "ar": "عدد أقل يتوقف عنده مقارنة بالإعلانات المشابهة. صورة أولى واضحة وسعر مناسب ووصف كامل تساعد."
+ },
+ "reach.why_even": {
+  "en": "It does about as well as similar posts.",
+  "ar": "أداؤه قريب من الإعلانات المشابهة."
+ },
+ "reach.title": {
+  "en": "Who it is shown to now",
+  "ar": "لمن يظهر الآن"
+ },
+ "media.full": {
+  "en": "You reached the photo limit. Remove one to add this shot.",
+  "ar": "وصلت للحد الأقصى من الصور. احذف واحدة لإضافة هذه اللقطة."
+ },
+ "modern_badge_card.from_pts": {
+  "en": "from {points} pts",
+  "ar": "من {points} نقطة"
+ },
+ "crop.free": {
+  "en": "Free",
+  "ar": "حر"
+ },
+ "crop.title": {
+  "en": "Crop",
+  "ar": "قص"
+ },
+ "crop.done": {
+  "en": "Done",
+  "ar": "تم"
+ },
+ "studio.scene_auto": {
+  "en": "Best for this item",
+  "ar": "الأنسب لهذا المنتج"
+ },
+ "studio.scene_car_showroom": {
+  "en": "Car showroom",
+  "ar": "صالة سيارات"
+ },
+ "studio.scene_car_street": {
+  "en": "City street",
+  "ar": "شارع المدينة"
+ },
+ "studio.scene_car_road": {
+  "en": "Open road",
+  "ar": "طريق مفتوح"
+ },
+ "studio.scene_car_studio": {
+  "en": "Dark studio",
+  "ar": "استوديو داكن"
+ },
+ "studio.scene_tech_dark": {
+  "en": "Dark tech",
+  "ar": "تقني داكن"
+ },
+ "studio.scene_tech_minimal": {
+  "en": "Minimal desk",
+  "ar": "مكتب بسيط"
+ },
+ "studio.scene_in_hand": {
+  "en": "In hand",
+  "ar": "في اليد"
+ },
+ "studio.scene_podium": {
+  "en": "Podium",
+  "ar": "منصة عرض"
+ },
+ "studio.scene_gradient": {
+  "en": "Colour gradient",
+  "ar": "تدرّج لوني"
+ },
+ "studio.scene_monochrome": {
+  "en": "Same colour",
+  "ar": "لون واحد"
+ },
+ "studio.scene_luxury_marble": {
+  "en": "Marble",
+  "ar": "رخام"
+ },
+ "studio.scene_silk": {
+  "en": "Silk",
+  "ar": "حرير"
+ },
+ "studio.scene_lavender": {
+  "en": "Lavender",
+  "ar": "خزامى"
+ },
+ "studio.scene_flowers": {
+  "en": "Flowers",
+  "ar": "زهور"
+ },
+ "studio.scene_waterfall_rock": {
+  "en": "Waterfall rock",
+  "ar": "صخرة وشلال"
+ },
+ "studio.scene_sea_rock": {
+  "en": "Rock by the sea",
+  "ar": "صخرة في البحر"
+ },
+ "studio.scene_water_splash": {
+  "en": "Water splash",
+  "ar": "رذاذ الماء"
+ },
+ "studio.scene_desert_dunes": {
+  "en": "Desert dunes",
+  "ar": "كثبان الصحراء"
+ },
+ "studio.scene_beach_sand": {
+  "en": "Beach",
+  "ar": "شاطئ"
+ },
+ "studio.scene_mountain_view": {
+  "en": "Mountain view",
+  "ar": "إطلالة جبلية"
+ },
+ "studio.scene_snow": {
+  "en": "Snow",
+  "ar": "ثلج"
+ },
+ "studio.scene_stone_slate": {
+  "en": "Stone slate",
+  "ar": "حجر طبيعي"
+ },
+ "studio.scene_wood_log": {
+  "en": "Wood log",
+  "ar": "جذع خشب"
+ },
+ "studio.scene_wood_rustic": {
+  "en": "Rustic wood",
+  "ar": "خشب ريفي"
+ },
+ "studio.scene_cafe": {
+  "en": "Cafe",
+  "ar": "مقهى"
+ },
+ "studio.scene_restaurant_table": {
+  "en": "Restaurant table",
+  "ar": "طاولة مطعم"
+ },
+ "studio.scene_fashion_flatlay": {
+  "en": "Flat lay",
+  "ar": "ترتيب مسطّح"
+ },
+ "studio.scene_boutique": {
+  "en": "Boutique",
+  "ar": "بوتيك"
+ },
+ "studio.scene_on_model": {
+  "en": "On a model",
+  "ar": "على عارض"
+ },
+ "studio.scene_pastel_room": {
+  "en": "Pastel room",
+  "ar": "غرفة باستيل"
+ },
+ "studio.scene_modern_home": {
+  "en": "Modern home",
+  "ar": "منزل عصري"
+ },
+ "studio.scene_loft": {
+  "en": "Loft",
+  "ar": "لوفت"
+ },
+ "studio.scene_bright_interior": {
+  "en": "Brighter room",
+  "ar": "غرفة أكثر إشراقًا"
+ },
+ "studio.scene_workshop": {
+  "en": "Workshop",
+  "ar": "ورشة"
+ },
+ "studio.scene_neon_night": {
+  "en": "Neon night",
+  "ar": "ليل النيون"
+ },
+ "studio.scene_ramadan": {
+  "en": "Ramadan",
+  "ar": "رمضان"
+ },
+ "studio.crop": {
+  "en": "Crop",
+  "ar": "قص"
+ },
+ "video_q.from": {
+  "en": "from {n} pts",
+  "ar": "من {n} نقطة"
+ },
+ "video_q.normal": {
+  "en": "Normal",
+  "ar": "عادي"
+ },
+ "video_q.hd": {
+  "en": "HD",
+  "ar": "عالي الدقة HD"
+ },
+ "video_q.pro": {
+  "en": "Professional",
+  "ar": "احترافي"
+ },
+ "video_q.normal_body": {
+  "en": "Good for a quick look at the item. Standard sharpness.",
+  "ar": "مناسب لعرض سريع للمنتج. وضوح عادي."
+ },
+ "video_q.hd_body": {
+  "en": "Sharp full-HD video. The best choice for most posts.",
+  "ar": "فيديو واضح بدقة Full HD. الخيار الأفضل لمعظم الإعلانات."
+ },
+ "video_q.pro_body": {
+  "en": "Our best quality: richer detail, smoother motion and lighting, like a real advert.",
+  "ar": "أعلى جودة لدينا: تفاصيل أغنى، وحركة وإضاءة أنعم، كإعلان حقيقي."
+ },
+ "video_q.title": {
+  "en": "Choose the video quality",
+  "ar": "اختر جودة الفيديو"
+ },
+ "video_q.sub": {
+  "en": "An 8-second vertical video. If it cannot be made, your points come back.",
+  "ar": "فيديو عمودي مدته 8 ثوانٍ. إذا تعذّر إنشاؤه تعود نقاطك."
+ },
+ "video_q.continue": {
+  "en": "Continue",
+  "ar": "متابعة"
+ },
+ "video_q.included": {
+  "en": "Included in your plan",
+  "ar": "مشمول في خطتك"
+ },
+ "video_q.points": {
+  "en": "{n} pts",
+  "ar": "{n} نقطة"
+ },
+ "video_q.recommended": {
+  "en": "Recommended",
+  "ar": "موصى به"
+ },
+ "video_q.unavailable": {
+  "en": "Not available right now. Try again later.",
+  "ar": "غير متاحة الآن. حاول لاحقًا."
  }
 }
