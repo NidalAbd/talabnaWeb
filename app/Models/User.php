@@ -412,4 +412,19 @@ class User extends Authenticatable implements CanResetPasswordContract
         // Set unban_at for all the user's banned devices
         $this->bannedDevices()->update(['unban_at' => now()]);
     }
+
+    /**
+     * Days before this user may change their country again (0 = now). With a verified phone the country changes at
+     * most once per cooldown (verification.change_cooldown_days, 30 by default), like the phone numbers (2026-10-10).
+     */
+    public function countryChangeDaysLeft(): int
+    {
+        if (! $this->phone_verified_at || ! $this->country_changed_at) {
+            return 0;
+        }
+        $days = max(1, (int) \App\Models\AppSetting::get('verification.change_cooldown_days', 30));
+        $next = $this->country_changed_at->copy()->addDays($days);
+
+        return $next->isPast() ? 0 : (int) ceil(now()->diffInHours($next) / 24);
+    }
 }

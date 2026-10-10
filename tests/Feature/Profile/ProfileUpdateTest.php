@@ -116,4 +116,41 @@ class ProfileUpdateTest extends TestCase
         $u = $this->makeUser('sara5');
         $this->putJson("/api/users/{$u->id}", ['name' => 'X Y'])->assertStatus(401);
     }
+
+    public function test_with_a_verified_phone_the_country_is_locked_for_a_while_after_a_change_and_the_profile_says_so(): void
+    {
+        $me = $this->makeUser('mover1', ['country_id' => 1, 'phone_verified_at' => now(), 'country_changed_at' => now()->subDays(10)]);
+        Passport::actingAs($me);
+
+        $this->getJson("/api/user/profile/{$me->id}")->assertOk()->assertJsonPath('userData.country_change_days_left', 20);
+
+        $res = $this->putJson("/api/users/{$me->id}", ['country' => ['id' => 2]])
+            ->assertStatus(422)->assertJsonPath('error_type', 'country_locked')->assertJsonPath('field', 'country');
+        $this->assertStringContainsString('20 days', json_decode($res->json('message'), true)['en']);
+        $this->assertSame(1, (int) $me->fresh()->country_id);
+
+        // Saving other details with the same country still works
+        $this->putJson("/api/users/{$me->id}", ['country' => ['id' => 1], 'name' => 'Mover'])->assertOk();
+    }
+
+    public function test_the_country_can_change_when_the_wait_is_over_or_the_phone_is_not_verified(): void
+    {
+        $free = $this->makeUser('free1', ['country_id' => 1, 'country_changed_at' => now()->subDays(2)]);
+        Passport::actingAs($free);
+        $this->getJson("/api/user/profile/{$free->id}")->assertJsonPath('userData.country_change_days_left', 0);
+        $this->putJson("/api/users/{$free->id}", ['country' => ['id' => 2]])->assertOk();
+        $this->assertSame(2, (int) $free->fresh()->country_id);
+
+        $waited = $this->makeUser('waited1', ['country_id' => 1, 'phone_verified_at' => now(), 'country_changed_at' => now()->subDays(31)]);
+        Passport::actingAs($waited);
+        $this->putJson("/api/users/{$waited->id}", ['country' => ['id' => 3]])->assertOk();
+        $this->assertSame(3, (int) $waited->fresh()->country_id);
+    }
+
+    public function test_others_do_not_see_my_country_wait(): void
+    {
+        $me = $this->makeUser('private1', ['phone_verified_at' => now(), 'country_changed_at' => now()]);
+        Passport::actingAs($this->makeUser('viewer1'));
+        $this->assertArrayNotHasKey('country_change_days_left', $this->getJson("/api/user/profile/{$me->id}")->json('userData'));
+    }
 }

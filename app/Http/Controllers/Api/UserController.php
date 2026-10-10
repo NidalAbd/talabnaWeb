@@ -347,6 +347,10 @@ class UserController extends Controller
             // Trust: sales/purchases both sides confirmed in chat (2026-10-05). The owner
             // can hide them from others (privacy); they always see their own.
             $isMe = (int) Auth::id() === (int) $userData->id;
+            if ($isMe) {
+                // The profile editor says up front when the country cannot be changed yet (2026-10-10).
+                $userData->country_change_days_left = $userData->countryChangeDaysLeft();
+            }
             $userData->deals = ($isMe || ($userData->show_deals ?? true))
                 ? \App\Models\Deal::statsFor((int) $userData->id)
                 : null;
@@ -669,11 +673,10 @@ class UserController extends Controller
             }
             // With a verified phone the country follows the 30-day country rule.
             $newCountryId = (isset($validatedData['country']) && is_array($validatedData['country'])) ? ($validatedData['country']['id'] ?? null) : null;
-            if ($newCountryId && (int) $newCountryId !== (int) $user->country_id && $user->phone_verified_at
-                && $user->country_changed_at && $user->country_changed_at->copy()->addDays(30)->isFuture()) {
+            if ($newCountryId && (int) $newCountryId !== (int) $user->country_id && ($days = $user->countryChangeDaysLeft()) > 0) {
                 return $this->profileFieldError('country', 'country_locked',
-                    'You can change your country once every 30 days.',
-                    'يمكنك تغيير دولتك مرة كل 30 يومًا.');
+                    "You can't change your country now. You can change it again in {$days} days.",
+                    "لا يمكنك تغيير دولتك الآن. يمكنك تغييرها بعد {$days} يومًا.");
             }
 
             // A CHANGED username must be 3-30 letters/digits/dots/underscores and unique. An unchanged one is left
