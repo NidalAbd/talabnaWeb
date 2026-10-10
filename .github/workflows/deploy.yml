@@ -362,7 +362,10 @@ jobs:
             # Sync build assets from public_html to public (Laravel reads from public/)
             rm -rf public/build
             cp -rf public_html/build public/build
-            echo "✅ Build assets synced to public/"
+            # App link files too (2026-10-10: public/ still served February's apple-app-site-association, without /shop/*)
+            mkdir -p public/.well-known
+            cp -f public_html/.well-known/apple-app-site-association public_html/.well-known/assetlinks.json public/.well-known/ 2>/dev/null || true
+            echo "✅ Build assets and app link files synced to public/"
             # Clear caches
             php artisan view:clear
             php artisan cache:clear
