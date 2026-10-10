@@ -63,15 +63,17 @@ class CategoriesController extends Controller
         // Start with base query - exclude suspended
         $baseQuery = Categories::where('isSuspended', false);
 
-        // Apply news category permission filtering
-        if (!$user->hasPermission('add_news')) {
-            $baseQuery->whereRaw("NOT JSON_CONTAINS_PATH(name, 'one', '$.ar') OR JSON_EXTRACT(name, '$.ar') != '\"اخبار\"'");
-        }
-
         // Apply direct filtering
         $query = $this->directCategoryFilter($baseQuery, $user);
 
-        $categories = $query->get();
+        // A "News" category (اخبار) is only for users allowed to post news (filtered here, not with MySQL-only
+        // JSON functions, so the tests run it too)
+        $canNews = $user->hasPermission('add_news');
+        $categories = $query->get()->reject(function ($c) use ($canNews) {
+            $name = is_array($c->name) ? $c->name : (json_decode((string) $c->getRawOriginal('name'), true) ?: []);
+
+            return ! $canNews && ($name['ar'] ?? null) === 'اخبار';
+        })->values();
         return response()->json(compact('categories'));
     }
 
@@ -111,15 +113,9 @@ class CategoriesController extends Controller
      */
     private function directCategoryFilter($query, $user)
     {
-        $isPalestineUser = $user->country_id == self::PALESTINE_COUNTRY_ID;
-
-        if ($isPalestineUser) {
-            // Palestine users: exclude Services category explicitly
-            return $query->where('id', '!=', self::SERVICES_CATEGORY_ID);
-        } else {
-            // Non-Palestine users: exclude Emergency category explicitly
-            return $query->where('id', '!=', self::EMERGENCY_CATEGORY_ID);
-        }
+        // Every category in every country (2026-10-10). Palestine used to lose Services and every other country
+        // Urgent; the owner wants both everywhere. Kept as the one place a per-country rule would go.
+        return $query;
     }
 
     /**
