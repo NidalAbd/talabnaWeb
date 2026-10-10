@@ -859,35 +859,104 @@ class ServicePostController extends Controller
      * Pages a feed query WITHOUT pinning featured (badge) posts on top: the organic posts come in the query's own order,
      * and a couple of featured ones (a seeded, weighted rotation per user and hour) are placed in fixed slots of each page.
      */
-    private function paginateWithRotatingBadges($query, int $userId, int $page)
+    /** A plain browse: no type, price, place, language or detail filters (only paging). */
+    private static function unfiltered(Request $request): bool
+    {
+        return empty(array_diff(array_keys($request->query()), ['page', 'seen_before', 'per_page', '_']));
+    }
+
+    /** Featured posts kept for each page when a category has few of its own (3 pages x 2 slots). */
+    private const FEATURED_FILL_TARGET = 6;
+
+    /**
+     * Featured posts from elsewhere for a category with few of its own (2026-10-10, owner request: a paid badge
+     * should be seen even where few are bought). $fill lists where to look, in order: ['same_category', cat, sub]
+     * (the other subcategories) and ['other_category', cat] (any other category). Same rules as the feeds:
+     * published, active owner, badge not expired. Shared by everyone for a minute.
+     *
+     * @return array<int, array{id:int,have_badge:string,badge_type_id:?int,country_id:?int,city_id:?int}>
+     */
+    private function featuredFill(array $fill, array $exclude, int $need): array
+    {
+        $out = [];
+        foreach ($fill as $f) {
+            if ($need <= count($out)) {
+                break;
+            }
+            $rows = \Illuminate\Support\Facades\Cache::remember('feat:fill:'.md5(json_encode($f)), 60, function () use ($f) {
+                $q = ServicePost::query()->where('state', 'published')
+                    ->where('have_badge', '!=', 'عادي')
+                    ->where(fn ($w) => $w->whereNull('badge_expires_at')->orWhere('badge_expires_at', '>', now()))
+                    ->whereHas('user', fn ($u) => $u->where('is_active', 'active'));
+                if ($f[0] === 'same_category') {
+                    $q->where('categories_id', $f[1])->where('sub_categories_id', '!=', $f[2]);
+                } else {
+                    $q->where('categories_id', '!=', $f[1]);
+                }
+
+                return $q->orderByDesc('id')->limit(100)->get(['id', 'have_badge', 'badge_type_id', 'country_id', 'city_id'])
+                    ->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge, 'badge_type_id' => $p->badge_type_id, 'country_id' => $p->country_id, 'city_id' => $p->city_id])->all();
+            });
+            foreach ($rows as $r) {
+                if (! in_array($r['id'], $exclude, true)) {
+                    $out[] = $r;
+                    $exclude[] = $r['id'];
+                }
+            }
+        }
+
+        return $out;
+    }
+
+    private function paginateWithRotatingBadges($query, int $userId, int $page, array $fill = [])
     {
         $picker = new \App\Services\Feed\SponsoredPicker();
         $base = clone $query; // all the filters, none of the exclusions below
 
-        $pool = (clone $base)->reorder()->setEagerLoads([])->select('service_posts.id', 'service_posts.have_badge', 'service_posts.country_id', 'service_posts.city_id')
+        $pool = (clone $base)->reorder()->setEagerLoads([])->select('service_posts.id', 'service_posts.have_badge', 'service_posts.badge_type_id', 'service_posts.country_id', 'service_posts.city_id')
             ->where('service_posts.have_badge', '!=', 'عادي')
             ->where(fn ($w) => $w->whereNull('service_posts.badge_expires_at')->orWhere('service_posts.badge_expires_at', '>', now()))
-            ->limit(300)->get()->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge, 'country_id' => $p->country_id, 'city_id' => $p->city_id])->all();
+            ->limit(300)->get()->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge, 'badge_type_id' => $p->badge_type_id, 'country_id' => $p->country_id, 'city_id' => $p->city_id])->all();
         // Browsing a category on purpose: every featured post can show (no frequency cap), weighted and paced.
         // Picked once per scroll session and feed (2026-10-10): picking again for every page saw the impressions the
         // earlier pages had just added, chose a different set, and a post could be skipped or repeated across pages.
         $seed = \App\Services\Feed\SponsoredPicker::sessionSeed($userId);
         $pickKey = 'feat:pick:'.md5($seed.'|'.$base->toSql().'|'.json_encode($base->getBindings()));
-        $picked = \Illuminate\Support\Facades\Cache::remember($pickKey, \App\Services\Feed\SponsoredPicker::SESSION_MINUTES * 60, function () use ($picker, $pool, $seed, $userId) {
+        $pickKey .= $fill ? ':fill' : '';
+        $picked = \Illuminate\Support\Facades\Cache::remember($pickKey, \App\Services\Feed\SponsoredPicker::SESSION_MINUTES * 60, function () use ($picker, $pool, $seed, $userId, $fill) {
             $me = \App\Models\User::find($userId);
+            $viewer = ['country_id' => $me?->country_id, 'city_id' => $me?->city_id];
+            $own = $picker->pick($pool, 10, $seed, $viewer + ['shown' => $picker->impressionsToday(array_column($pool, 'id'))]);
+            // Few featured posts here: the rest of the slots go to featured posts from the same category, then others
+            $taken = array_column($pool, 'id');
+            foreach ($fill as $tier) {
+                if (count($own) >= self::FEATURED_FILL_TARGET) {
+                    break;
+                }
+                $more = $this->featuredFill([$tier], $taken, 40);
+                $taken = array_merge($taken, array_column($more, 'id'));
+                $own = array_merge($own, $picker->pick($more, self::FEATURED_FILL_TARGET - count($own), $seed.'|'.$tier[0],
+                    $viewer + ['shown' => $picker->impressionsToday(array_column($more, 'id'))]));
+            }
 
-            return $picker->pick($pool, 10, $seed, [
-                'country_id' => $me?->country_id, 'city_id' => $me?->city_id,
-                'shown' => $picker->impressionsToday(array_column($pool, 'id')),
-            ]);
+            return $own;
         });
-        // A featured post that ended or lost its badge since the pick is left out (the pool is fresh)
-        $picked = array_values(array_intersect($picked, array_column($pool, 'id')));
+        // A featured post that ended or lost its badge since the pick is left out
+        $live = array_column($pool, 'id');
+        if ($fill) {
+            $live = array_merge($live, array_column($this->featuredFill($fill, $live, 1000), 'id'));
+        }
+        $picked = array_values(array_intersect($picked, $live));
 
         $paginator = $query->when($picked, fn ($q) => $q->whereNotIn('service_posts.id', $picked))->paginate(10);
 
         $slice = array_slice($picked, max(0, ($page - 1) * count(\App\Services\Feed\SponsoredPicker::SLOTS)), count(\App\Services\Feed\SponsoredPicker::SLOTS));
         $sponsored = $slice ? (clone $base)->reorder()->whereIn('service_posts.id', $slice)->get()->keyBy('id')->all() : [];
+        if ($fill && ($missing = array_diff($slice, array_keys($sponsored)))) {
+            // Posts from other (sub)categories: same loading as the page, without its category filter
+            $sponsored += ServicePost::query()->setEagerLoads($base->getEagerLoads())->withCount(['comments', 'favorites'])
+                ->whereIn('id', $missing)->get()->keyBy('id')->all();
+        }
         $paginator->setCollection(collect($picker->mix($paginator->items(), $sponsored, $picked, $page)));
         $picker->recordShown($userId, array_keys($sponsored));
 
@@ -995,7 +1064,8 @@ class ServicePostController extends Controller
         // Paginate results (featured posts spread through the pages)
         $servicePosts = $category == 6
             ? $servicePosts->paginate(10) // "Near" is ordered by distance only
-            : $this->paginateWithRotatingBadges($servicePosts, $currentUser->id, (int) $request->get('page', 1));
+            : $this->paginateWithRotatingBadges($servicePosts, $currentUser->id, (int) $request->get('page', 1),
+                self::unfiltered($request) ? [['other_category', (int) $category]] : []);
 
         // Log filter parameters for debugging
         Log::info('Service Post Category Filters', [
@@ -1108,7 +1178,8 @@ class ServicePostController extends Controller
         }
 
         // Paginate the results (featured posts spread through the pages)
-        $servicePosts = $this->paginateWithRotatingBadges($servicePosts, $currentUser->id, (int) $request->get('page', 1));
+        $servicePosts = $this->paginateWithRotatingBadges($servicePosts, $currentUser->id, (int) $request->get('page', 1),
+            self::unfiltered($request) ? [['same_category', (int) $categories, (int) $sub_categories], ['other_category', (int) $categories]] : []);
 
         // Log filter parameters for debugging
         Log::info('Service Post SubCategory Filters', [

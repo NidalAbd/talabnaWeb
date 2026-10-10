@@ -29,7 +29,9 @@ class BadgeWeightsTest extends TestCase
 
     public function test_weights_come_from_the_admin_percentages(): void
     {
-        $this->assertEquals(['ماسي' => 3.0, 'ذهبي' => 2.0, 'فضي' => 1.5], SponsoredPicker::weights());
+        $w = SponsoredPicker::weights();
+        $this->assertEquals([3.0, 2.0, 1.5], [$w['ماسي'], $w['ذهبي'], $w['فضي']]);
+        $this->assertEquals([3.0, 2.0, 1.5], [$w['id:1'], $w['id:2'], $w['id:3']]);
     }
 
     public function test_the_share_of_picks_follows_the_weights(): void
@@ -52,5 +54,28 @@ class BadgeWeightsTest extends TestCase
         SponsoredPicker::weights();
         BadgeType::find(1)->update(['view_boost_percent' => 400]);
         $this->assertEquals(5.0, SponsoredPicker::weights()['ماسي']);
+    }
+
+    public function test_a_badge_the_admin_adds_counts_by_its_own_boost_above_or_between_the_others(): void
+    {
+        // "Gold Diamond" between Diamond and Gold, and "Royal" above Diamond
+        BadgeType::create(['name' => ['ar' => 'ذهبي ماسي', 'en' => 'Gold Diamond'], 'slug' => 'gold-diamond', 'points_per_day' => 2, 'priority' => 2, 'view_boost_percent' => 150, 'is_active' => true, 'is_default' => false]);
+        $royal = BadgeType::create(['name' => ['ar' => 'ملكي', 'en' => 'Royal'], 'slug' => 'royal', 'points_per_day' => 5, 'priority' => 0, 'view_boost_percent' => 500, 'is_active' => true, 'is_default' => false]);
+        $w = SponsoredPicker::weights();
+        $this->assertEquals(2.5, $w['ذهبي ماسي']);
+        $this->assertEquals(6.0, $w['ملكي']);
+        $this->assertEquals(6.0, $w['id:'.$royal->id]);
+
+        // In picks: Royal (6) ahead of Diamond (3) about 2 to 1
+        $picker = new SponsoredPicker();
+        $c = [['id' => 1, 'have_badge' => 'ماسي'], ['id' => 2, 'have_badge' => 'ملكي', 'badge_type_id' => $royal->id]];
+        $royalFirst = 0;
+        for ($i = 0; $i < 3000; $i++) {
+            $royalFirst += $picker->pick($c, 1, "s$i")[0] === 2 ? 1 : 0;
+        }
+        $this->assertEqualsWithDelta(6 / 9, $royalFirst / 3000, 0.04);
+
+        // And it is ordered by its level where the order is by badge
+        $this->assertStringContainsString("'ملكي'", BadgeType::getLegacyOrderByClause());
     }
 }

@@ -27,19 +27,26 @@ class SponsoredPicker
 
     /**
      * Share of each badge = 1 + its "view boost %" from the admin (2026-10-10: the % was shown in the admin but the
-     * feed used fixed numbers). 200% => 3x the share of a post with no boost, 100% => 2x, 50% => 1.5x.
-     * Cached 10 minutes, so an admin change applies within minutes.
+     * feed used fixed numbers). 200% => 3x the share of a post with no boost, 100% => 2x, 50% => 1.5x. Every active
+     * badge counts, including ones the admin adds (above Diamond, between Diamond and Gold...): posts store the badge's
+     * Arabic name in have_badge and its id in badge_type_id, so both are keys ("id:7" and the name).
+     * Cached 10 minutes; saving a badge clears it.
      *
-     * @return array<string, float> legacy badge name => weight
+     * @return array<string, float>
      */
     public static function weights(): array
     {
         try {
-            return \Illuminate\Support\Facades\Cache::remember('feat:weights:v1', 600, function () {
+            return \Illuminate\Support\Facades\Cache::remember('feat:weights:v2', 600, function () {
                 $out = [];
-                foreach (\Illuminate\Support\Facades\DB::table('badge_types')->where('is_active', 1)->get(['slug', 'view_boost_percent']) as $b) {
+                foreach (\App\Models\BadgeType::where('is_active', true)->where('is_default', false)->get() as $b) {
+                    $w = 1 + max(0, (int) $b->view_boost_percent) / 100;
+                    $out['id:'.$b->id] = $w;
+                    if ($b->name_ar !== '') {
+                        $out[$b->name_ar] = $w;
+                    }
                     if (isset(self::LEGACY[$b->slug])) {
-                        $out[self::LEGACY[$b->slug]] = 1 + max(0, (int) $b->view_boost_percent) / 100;
+                        $out[self::LEGACY[$b->slug]] = $w;
                     }
                 }
 
@@ -95,7 +102,7 @@ class SponsoredPicker
         $weights = $viewer['weights'] ?? self::weights();
         $keyed = [];
         foreach ($rows as $id => $c) {
-            $weight = $weights[(string) ($c['have_badge'] ?? '')] ?? 1;
+            $weight = $weights['id:'.($c['badge_type_id'] ?? '')] ?? $weights[(string) ($c['have_badge'] ?? '')] ?? 1;
             $weight /= 1 + self::PACING_SOFTNESS * (($shown[$id] ?? 0) / $avg);
             if (! empty($viewer['city_id']) && (int) ($c['city_id'] ?? 0) === (int) $viewer['city_id']) {
                 $weight *= 1.6;

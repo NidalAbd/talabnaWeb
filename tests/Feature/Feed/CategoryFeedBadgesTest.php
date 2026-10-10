@@ -116,4 +116,40 @@ class CategoryFeedBadgesTest extends TestCase
         $this->assertSame([$expired], $requests, 'the featured OFFER is filtered out, not injected');
         $this->assertNotContains($offer, $requests);
     }
+
+    /** @dataProvider feeds */
+    public function test_a_category_with_no_featured_posts_shows_featured_ones_from_elsewhere(string $which): void
+    {
+        $otherCat = DB::table('categories')->insertGetId(['name' => json_encode(['en' => 'Jobs']), 'created_at' => now(), 'updated_at' => now()]);
+        $otherSub = DB::table('sub_categories')->insertGetId(['categories_id' => $otherCat, 'name' => json_encode(['en' => 'IT']), 'created_at' => now(), 'updated_at' => now()]);
+        foreach (range(1, 12) as $i) {
+            $this->makePost();
+        }
+        $elsewhere = $this->makePost(['have_badge' => 'ماسي', 'categories_id' => $otherCat, 'sub_categories_id' => $otherSub]);
+
+        $page = collect($this->getJson($this->url($which))->assertOk()->json('servicePosts.data'));
+        $this->assertSame(\App\Services\Feed\SponsoredPicker::SLOTS[0], $page->pluck('id')->search($elsewhere), 'shown in the featured slot');
+        $this->assertSame($otherCat, (int) $page->firstWhere('id', $elsewhere)['categories_id']);
+        $this->assertCount(11, $page, '10 of the category plus the featured one');
+
+        // A filtered search stays exact: nothing from elsewhere
+        $filtered = collect($this->getJson($this->url($which).'&type=%D8%B9%D8%B1%D8%B6')->assertOk()->json('servicePosts.data'))->pluck('id');
+        $this->assertNotContains($elsewhere, $filtered->all());
+    }
+
+    public function test_a_subcategory_fills_from_its_own_category_first(): void
+    {
+        $sibling = DB::table('sub_categories')->insertGetId(['categories_id' => $this->cat, 'name' => json_encode(['en' => 'SUV']), 'created_at' => now(), 'updated_at' => now()]);
+        $otherCat = DB::table('categories')->insertGetId(['name' => json_encode(['en' => 'Jobs']), 'created_at' => now(), 'updated_at' => now()]);
+        foreach (range(1, 12) as $i) {
+            $this->makePost();
+        }
+        $suv = $this->makePost(['have_badge' => 'فضي', 'sub_categories_id' => $sibling]);
+        $job = $this->makePost(['have_badge' => 'ماسي', 'categories_id' => $otherCat]);
+
+        $ids = collect($this->getJson($this->url('subcategory'))->json('servicePosts.data'))->pluck('id')->all();
+        $this->assertSame(\App\Services\Feed\SponsoredPicker::SLOTS[0], array_search($suv, $ids), 'the same category comes first');
+        $this->assertNotFalse(array_search($job, $ids), 'then the other categories, on the same page');
+        $this->assertGreaterThan(array_search($suv, $ids), array_search($job, $ids));
+    }
 }

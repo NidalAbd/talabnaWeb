@@ -85,12 +85,12 @@ class FeedController extends Controller
         };
 
         // Featured posts that match the filters. Cached for a minute and shared by everyone with the same filters.
-        $pool = Cache::remember('feed:sponsored:'.md5(json_encode($d + ['v' => 2], JSON_UNESCAPED_UNICODE)), 60, function () use ($filters) {
+        $pool = Cache::remember('feed:sponsored:'.md5(json_encode($d + ['v' => 3], JSON_UNESCAPED_UNICODE)), 60, function () use ($filters) {
             return $filters(ServicePost::query())
                 ->where('have_badge', '!=', 'عادي')
                 ->where(fn ($q) => $q->whereNull('badge_expires_at')->orWhere('badge_expires_at', '>', now()))
-                ->limit(300)->get(['id', 'have_badge', 'country_id', 'city_id'])
-                ->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge, 'country_id' => $p->country_id, 'city_id' => $p->city_id])->all();
+                ->limit(300)->get(['id', 'have_badge', 'badge_type_id', 'country_id', 'city_id'])
+                ->map(fn ($p) => ['id' => $p->id, 'have_badge' => $p->have_badge, 'badge_type_id' => $p->badge_type_id, 'country_id' => $p->country_id, 'city_id' => $p->city_id])->all();
         });
         // Each page picks from the featured posts this user may still see today (frequency cap), so a visit
         // doesn't open on the same ones as the last.
