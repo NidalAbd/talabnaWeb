@@ -17,6 +17,7 @@ class GooglePlayVerificationService
         'points_25' => 25,
         'points_50' => 50,
         'points_100' => 100,
+        'points_200' => 200,
         'points_250' => 250,
         'points_500' => 500,
     ];
