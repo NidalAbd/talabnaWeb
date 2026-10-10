@@ -7537,5 +7537,9 @@
  "details.other": {
   "en": "Other",
   "ar": "أخرى"
+ },
+ "comments.sort": {
+  "en": "Order",
+  "ar": "الترتيب"
  }
 }
