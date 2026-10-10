@@ -952,8 +952,6 @@ class ServicePostController extends Controller
             }
             $servicePosts->orderBy('created_at', 'DESC');
         } else {
-            // Your own posts after everyone else's (2026-10-10), as in the home feed.
-            $servicePosts->orderByRaw('service_posts.user_id = ? ASC', [(int) $currentUser->id]);
             // Fresh posts first, near ones before far ones. Featured (badge) posts are NOT pinned on top any more:
             // they are rotated into fixed slots below, so every page shows new content.
             $servicePosts->orderByRaw("
@@ -1073,10 +1071,6 @@ class ServicePostController extends Controller
             $servicePosts->where('city_id', (int)$request->city_id);
         }
 
-        // Your own posts after everyone else's (2026-10-10), as in the home feed.
-        if ($currentUser) {
-            $servicePosts->orderByRaw('service_posts.user_id = ? ASC', [(int) $currentUser->id]);
-        }
         // Fresh posts first, near ones before far ones; featured posts are rotated into fixed slots (not pinned on top).
         $servicePosts->orderByRaw("
     CASE

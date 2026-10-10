@@ -94,17 +94,6 @@ class AllFeedTest extends TestCase
         $this->assertSame(\App\Services\Feed\SponsoredPicker::SLOTS[0], array_search($old, $ids), 'its first featured slot (never the first cards)');
     }
 
-    public function test_my_own_posts_come_after_everyone_elses_even_when_they_are_newer(): void
-    {
-        $other = $this->makeUser('seller');
-        $theirs = $this->makePost(['user_id' => $other->id, 'created_at' => now()->subDays(3)]);
-        $mine = $this->makePost(['created_at' => now()]);
-
-        $ids = collect($this->feed()->assertOk()->json('servicePosts.data'))->pluck('id')->all();
-
-        $this->assertSame([$theirs, $mine], $ids, 'newest, but mine: after theirs');
-    }
-
     public function test_pages_do_not_repeat_posts_and_featured_ones_appear_once(): void
     {
         foreach (range(1, 30) as $i) {
