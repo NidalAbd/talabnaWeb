@@ -115,4 +115,12 @@ class DetailSearchTest extends TestCase
         $this->assertSame('+iphone* +pro*', \App\Services\PostSearch::booleanQuery('iPhone 15 Pro'));
         $this->assertNull(\App\Services\PostSearch::booleanQuery('s 15'));
     }
+
+    public function test_arabic_words_match_with_or_without_the_article_and_letter_forms(): void
+    {
+        $this->assertSame('+سياره*', \App\Services\PostSearch::booleanQuery('السيارة'));
+        $this->assertSame('+سياره*', \App\Services\PostSearch::booleanQuery('سيارة'));
+        $this->assertStringContainsString('السياره سياره', \App\Services\PostSearch::searchNorm('السيارة', true));
+        $this->assertSame('احمد', \App\Services\PostSearch::searchNorm('أحمد'));
+    }
 }

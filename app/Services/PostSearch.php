@@ -34,9 +34,29 @@ class PostSearch
                 $parts[] = $v;
             }
         }
-        $text = PostAttributes::norm(strip_tags(implode(' ', $parts)));
+        return mb_substr(self::searchNorm(strip_tags(implode(' ', $parts)), true), 0, 6000);
+    }
 
-        return mb_substr($text, 0, 5000);
+    /**
+     * Text as it is indexed and searched: lower case; Arabic letter forms joined (أ إ آ -> ا, ة -> ه, ى -> ي, no
+     * harakat). With [$withBare], an Arabic word with the article also gets its bare form ("السيارة" -> "سياره"), so
+     * a search for "سيارة" finds it (the index matches word starts only).
+     */
+    public static function searchNorm(string $text, bool $withBare = false): string
+    {
+        $t = mb_strtolower($text);
+        $t = preg_replace('/[\x{064B}-\x{065F}\x{0670}\x{0640}]/u', '', $t);
+        $t = strtr($t, ['أ' => 'ا', 'إ' => 'ا', 'آ' => 'ا', 'ٱ' => 'ا', 'ة' => 'ه', 'ى' => 'ي']);
+        $words = preg_split('/[^\p{L}\p{N}]+/u', $t, -1, PREG_SPLIT_NO_EMPTY) ?: [];
+        $out = [];
+        foreach ($words as $w) {
+            $out[] = $w;
+            if ($withBare && mb_strlen($w) > 4 && preg_match('/^(وال|بال|فال|كال|لل|ال)(.+)$/u', $w, $m) && mb_strlen($m[2]) >= 3) {
+                $out[] = $m[2];
+            }
+        }
+
+        return implode(' ', $out);
     }
 
     /** Keeps a post's search words and detail rows up to date (ServicePost::saved, posts:index-search). */
@@ -55,7 +75,10 @@ class PostSearch
     /** "+iphone* +15" for MATCH ... IN BOOLEAN MODE: every word of 3+ letters must be there. Null when none qualify. */
     public static function booleanQuery(string $text): ?string
     {
-        $words = array_filter(preg_split('/[^\p{L}\p{N}]+/u', PostAttributes::norm($text)) ?: [], fn ($w) => mb_strlen($w) >= 3);
+        // The bare form of an Arabic word with the article, as indexed ("السيارات" -> "سيارات")
+        $words = array_map(fn ($w) => preg_match('/^(وال|بال|فال|كال|لل|ال)(.{3,})$/u', $w, $m) && mb_strlen($w) > 4 ? $m[2] : $w,
+            preg_split('/\s+/u', self::searchNorm($text), -1, PREG_SPLIT_NO_EMPTY) ?: []);
+        $words = array_filter($words, fn ($w) => mb_strlen($w) >= 3);
 
         return $words ? implode(' ', array_map(fn ($w) => '+'.$w.'*', array_slice(array_values(array_unique($words)), 0, 8))) : null;
     }
@@ -68,7 +91,7 @@ class PostSearch
             // Indexed: fast with any number of posts. Short words (1-2 letters, e.g. "15" stays, "s" doesn't) are
             // checked on the found rows only.
             $q->whereRaw('MATCH(search_text) AGAINST (? IN BOOLEAN MODE)', [$bool]);
-            foreach (preg_split('/\s+/u', PostAttributes::norm($text)) as $w) {
+            foreach (preg_split('/\s+/u', self::searchNorm($text), -1, PREG_SPLIT_NO_EMPTY) as $w) {
                 if ($w !== '' && mb_strlen($w) < 3) {
                     $q->where('search_text', 'LIKE', '%'.addcslashes($w, '%_\\').'%');
                 }
