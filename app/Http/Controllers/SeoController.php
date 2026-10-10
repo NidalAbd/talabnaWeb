@@ -858,7 +858,28 @@ class SeoController extends Controller
         $shop = \App\Services\ShopDirectory::badge((int) $post->user_id);
         $availability = $post->state === 'sold' ? 'SoldOut' : ($post->reserved_at ? 'LimitedAvailability' : 'InStock');
 
+        // Real reviews of this listing only (buyers rating the item after a deal, 2026-10-10). Google suggests rating
+        // and review fields; made-up ones break its rules, so a post without reviews has none.
+        $reviews = \App\Models\Review::where('service_post_id', $post->id)->with('reviewer:id,name,user_name')
+            ->latest()->get(['id', 'reviewer_id', 'rating', 'comment', 'created_at']);
+        $rating = $reviews->isEmpty() ? null : [
+            '@type' => 'AggregateRating',
+            'ratingValue' => round((float) $reviews->avg('rating'), 1),
+            'reviewCount' => $reviews->count(),
+            'bestRating' => 5,
+            'worstRating' => 1,
+        ];
+        $reviewItems = $reviews->take(5)->map(fn ($r) => array_filter([
+            '@type' => 'Review',
+            'reviewRating' => ['@type' => 'Rating', 'ratingValue' => (int) $r->rating, 'bestRating' => 5, 'worstRating' => 1],
+            'author' => ['@type' => 'Person', 'name' => $r->reviewer?->name ?: ($r->reviewer?->user_name ?: 'Talabna user')],
+            'reviewBody' => $r->comment ? mb_substr(strip_tags($r->comment), 0, 500) : null,
+            'datePublished' => $r->created_at?->toDateString(),
+        ], fn ($v) => $v !== null))->values()->all();
+
         return array_filter([
+            'aggregateRating' => $rating,
+            'review' => $reviewItems ?: null,
             '@context' => 'https://schema.org',
             '@type' => 'Product',
             'name' => mb_substr($title, 0, 150),
