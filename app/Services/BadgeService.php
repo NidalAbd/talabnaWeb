@@ -602,6 +602,8 @@ class BadgeService
             'user_id' => $post->user_id,
             'type' => 'badge_expired',
             'message' => $message,
+            'target_type' => 'post',
+            'target_id' => $post->id,
         ]);
 
         try {

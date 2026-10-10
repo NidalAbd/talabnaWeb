@@ -190,7 +190,10 @@ class ExpireBadges extends Command
         Notification::create([
             'message' => $message,
             'user_id' => $post->user_id,
-            'type' => 'badge'
+            'type' => 'badge',
+            // Tapping it opens the post (2026-10-10: it opened nothing; the text had no [post_id:N] tag).
+            'target_type' => 'post',
+            'target_id' => $post->id,
         ]);
 
         // Send Firebase push notification

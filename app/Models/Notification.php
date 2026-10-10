@@ -44,6 +44,10 @@ class Notification extends DatabaseNotification
         if (preg_match('/\[post_id:(\d+)\]/', stripslashes($rawMessage), $m)) {
             return ['type' => 'post', 'id' => (int) $m[1]];
         }
+        // Badge notices written as "... on post #2783 ..." (expiry job before 2026-10-10) open that post too.
+        if (str_starts_with($type, 'badge') && preg_match('/#(\d+)/', stripslashes($rawMessage), $m)) {
+            return ['type' => 'post', 'id' => (int) $m[1]];
+        }
         if (in_array($type, self::POINT_TYPES, true)) return ['type' => 'points', 'id' => null];
         if ($type === 'report') return ['type' => 'report', 'id' => null];
         if ($type === 'password') return ['type' => 'password', 'id' => null];
