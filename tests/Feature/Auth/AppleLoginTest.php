@@ -56,6 +56,25 @@ class AppleLoginTest extends TestCase
         $this->assertArrayNotHasKey('apple_id', $res->json('user'));
     }
 
+    public function test_a_new_account_gets_the_country_and_city_of_the_phone_and_is_not_yet_confirmed(): void
+    {
+        DB::table('countries')->insert([
+            ['id' => 901, 'name' => json_encode(['en' => 'Palestine', 'ar' => 'فلسطين']), 'country_code' => '00970', 'iso_code' => 'PS'],
+            ['id' => 902, 'name' => json_encode(['en' => 'Jordan', 'ar' => 'الأردن']), 'country_code' => '00962', 'iso_code' => 'JO'],
+        ]);
+        DB::table('cities')->insert(['id' => 9201, 'country_id' => 902, 'name' => json_encode(['en' => 'Irbid', 'ar' => 'إربد'])]);
+
+        $res = $this->postJson('/api/auth/apple', [
+            'identity_token' => $this->token(['sub' => 'apple-geo', 'email' => 'geo@example.com']),
+            'country_iso' => 'jo', 'place_names' => ['اربد'],
+        ])->assertOk();
+
+        $u = User::find($res->json('user.id'));
+        $this->assertSame(902, (int) $u->country_id, 'country_id used to be dropped: it was not fillable');
+        $this->assertSame(9201, (int) $u->city_id);
+        $this->assertNull($u->location_confirmed_at, 'the app still asks once');
+    }
+
     public function test_returning_user_is_not_duplicated(): void
     {
         $first = $this->postJson('/api/auth/apple', ['identity_token' => $this->token(['sub' => 'apple-2', 'email' => 'back@example.com'])])->assertOk();

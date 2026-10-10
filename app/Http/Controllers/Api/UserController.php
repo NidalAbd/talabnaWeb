@@ -94,11 +94,11 @@ class UserController extends Controller
         DB::beginTransaction();
         try {
             // Fetch default country and city
-            $country = Countries::first();
+            ['country' => $country, 'city' => $city] = app(\App\Services\Geo\LocationResolver::class)
+                ->forNewUser($request->input('country_iso'), $request->input('place_names', []));
             if (!$country) {
                 throw new \Exception('No country found for user registration');
             }
-            $city = Cities::where('country_id', $country->id)->first();
 
             // Create user with FCM token
             $user = User::create([
@@ -350,6 +350,7 @@ class UserController extends Controller
             if ($isMe) {
                 // The profile editor says up front when the country cannot be changed yet (2026-10-10).
                 $userData->country_change_days_left = $userData->countryChangeDaysLeft();
+                $userData->location_confirmed = $userData->location_confirmed_at !== null;
             }
             $userData->deals = ($isMe || ($userData->show_deals ?? true))
                 ? \App\Models\Deal::statsFor((int) $userData->id)

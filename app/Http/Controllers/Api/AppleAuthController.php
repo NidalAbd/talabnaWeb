@@ -37,6 +37,10 @@ class AppleAuthController extends Controller
             'name' => 'nullable|string|max:255',
             'device_token' => 'nullable|string',
             'referral_code' => 'nullable|string|max:8',
+            // Where the phone is (2026-10-10): the new account gets that country instead of the first one.
+            'country_iso' => 'nullable|string|max:2',
+            'place_names' => 'nullable|array|max:6',
+            'place_names.*' => 'nullable|string|max:120',
         ]);
 
         $claims = $this->verifier->verify($data['identity_token'], $data['nonce'] ?? null);
@@ -133,8 +137,8 @@ class AppleAuthController extends Controller
     private function createUser(string $appleId, string $email, bool $emailVerified, array $data): User
     {
         $name = trim((string) ($data['name'] ?? '')) ?: (str_ends_with($email, '.invalid') ? 'Talabna User' : Str::before($email, '@'));
-        $country = countries::first();
-        $city = $country ? cities::where('country_id', $country->id)->first() : null;
+        ['country' => $country, 'city' => $city] = app(\App\Services\Geo\LocationResolver::class)
+            ->forNewUser($data['country_iso'] ?? null, $data['place_names'] ?? []);
 
         $user = User::create([
             'name' => $name,

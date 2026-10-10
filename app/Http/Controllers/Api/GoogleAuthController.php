@@ -154,8 +154,9 @@ class GoogleAuthController extends Controller
                 $isNewUser = true;
 
                 // Get default country and city
-                $country = Countries::first();
-                $city = $country ? Cities::where('country_id', $country->id)->first() : null;
+                // The phone's country (and city names) when it sent them (2026-10-10); else the old default
+                ['country' => $country, 'city' => $city] = app(\App\Services\Geo\LocationResolver::class)
+                    ->forNewUser($request->input('country_iso'), $request->input('place_names', []));
 
                 // Create user data array
                 $userData = [

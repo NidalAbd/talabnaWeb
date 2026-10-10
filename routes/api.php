@@ -138,6 +138,7 @@ Route::get('check-ban-status', [BanCheckController::class, 'checkBanStatus'])->n
 Route::post('register-device', [BanCheckController::class, 'registerDevice'])->name('api.register-device');
 
 // Google authentication routes
+Route::post('geo/resolve', [App\Http\Controllers\Api\GeoController::class, 'resolve'])->middleware('throttle:30,1');
 Route::post('auth/google', [GoogleAuthController::class, 'handleGoogleAuth'])->middleware('throttle:12,1');
 Route::post('auth/apple', [AppleAuthController::class, 'handleAppleAuth'])->middleware('throttle:12,1');
 Route::match(['get', 'post'], 'auth/apple/callback', [AppleAuthController::class, 'appleCallback'])->middleware('throttle:30,1');
@@ -173,6 +174,7 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     Route::post('phone/no-whatsapp', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'noWhatsapp']);
     Route::post('phone/verify', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'verify'])->middleware('throttle:10,1');
     Route::post('phone/verify-both', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'verifyBoth']);
+    Route::post('user/location', [App\Http\Controllers\Api\GeoController::class, 'confirm'])->middleware('throttle:20,1');
     Route::get('phone/status', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'status']);
     Route::post('phone/change-country', [\App\Http\Controllers\Api\PhoneVerificationController::class, 'changeCountry']);
 
