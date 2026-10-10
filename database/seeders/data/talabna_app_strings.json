@@ -7313,5 +7313,229 @@
  "points.save_amount": {
   "en": "Save {amount}",
   "ar": "وفر {amount}"
+ },
+ "chat2.rate_item": {
+  "en": "How was the item? Your rating helps other buyers.",
+  "ar": "كيف كان المنتج؟ تقييمك يساعد المشترين الآخرين."
+ },
+ "chat2.rate": {
+  "en": "Rate",
+  "ar": "قيّم"
+ },
+ "reviews.thanks": {
+  "en": "Thanks for your rating",
+  "ar": "شكرًا على تقييمك"
+ },
+ "comments.sort_new": {
+  "en": "Newest",
+  "ar": "الأحدث"
+ },
+ "comments.sort_top": {
+  "en": "Top",
+  "ar": "الأهم"
+ },
+ "comments.empty_owner": {
+  "en": "Questions about your post will appear here.",
+  "ar": "ستظهر هنا الأسئلة عن منشورك."
+ },
+ "comments.view_more_replies": {
+  "en": "View {n} more replies",
+  "ar": "عرض {n} ردود أخرى"
+ },
+ "comments.pinned": {
+  "en": "Pinned by the seller",
+  "ar": "ثبّته البائع"
+ },
+ "comments.seller": {
+  "en": "Seller",
+  "ar": "البائع"
+ },
+ "comments.sending": {
+  "en": "Sending…",
+  "ar": "جارٍ الإرسال…"
+ },
+ "comments.unpin": {
+  "en": "Unpin",
+  "ar": "إلغاء التثبيت"
+ },
+ "comments.pin": {
+  "en": "Pin",
+  "ar": "تثبيت"
+ },
+ "comments.q_available": {
+  "en": "Is it still available?",
+  "ar": "هل ما زال متوفرًا؟"
+ },
+ "comments.q_price": {
+  "en": "What's your best price?",
+  "ar": "ما آخر سعر؟"
+ },
+ "comments.q_where": {
+  "en": "Where is it?",
+  "ar": "أين مكانه؟"
+ },
+ "comments.q_photos": {
+  "en": "Can you send more photos?",
+  "ar": "هل يمكنك إرسال صور أكثر؟"
+ },
+ "details.make": {
+  "en": "Make",
+  "ar": "الشركة المصنعة"
+ },
+ "details.model": {
+  "en": "Model",
+  "ar": "الموديل"
+ },
+ "details.color": {
+  "en": "Colour",
+  "ar": "اللون"
+ },
+ "details.ram": {
+  "en": "RAM",
+  "ar": "الذاكرة العشوائية"
+ },
+ "details.device_type": {
+  "en": "Type",
+  "ar": "النوع"
+ },
+ "details.property_type": {
+  "en": "Property type",
+  "ar": "نوع العقار"
+ },
+ "details.c_black": {
+  "en": "Black",
+  "ar": "أسود"
+ },
+ "details.c_white": {
+  "en": "White",
+  "ar": "أبيض"
+ },
+ "details.c_silver": {
+  "en": "Silver",
+  "ar": "فضي"
+ },
+ "details.c_gray": {
+  "en": "Gray",
+  "ar": "رمادي"
+ },
+ "details.c_gold": {
+  "en": "Gold",
+  "ar": "ذهبي"
+ },
+ "details.c_blue": {
+  "en": "Blue",
+  "ar": "أزرق"
+ },
+ "details.c_red": {
+  "en": "Red",
+  "ar": "أحمر"
+ },
+ "details.c_green": {
+  "en": "Green",
+  "ar": "أخضر"
+ },
+ "details.c_purple": {
+  "en": "Purple",
+  "ar": "بنفسجي"
+ },
+ "details.c_pink": {
+  "en": "Pink",
+  "ar": "وردي"
+ },
+ "details.c_yellow": {
+  "en": "Yellow",
+  "ar": "أصفر"
+ },
+ "details.c_orange": {
+  "en": "Orange",
+  "ar": "برتقالي"
+ },
+ "details.c_brown": {
+  "en": "Brown",
+  "ar": "بني"
+ },
+ "details.c_beige": {
+  "en": "Beige",
+  "ar": "بيج"
+ },
+ "details.c_titanium": {
+  "en": "Titanium",
+  "ar": "تيتانيوم"
+ },
+ "details.t_phone": {
+  "en": "Phone",
+  "ar": "جوال"
+ },
+ "details.t_tablet": {
+  "en": "Tablet",
+  "ar": "تابلت"
+ },
+ "details.t_laptop": {
+  "en": "Laptop",
+  "ar": "لابتوب"
+ },
+ "details.t_desktop": {
+  "en": "Desktop",
+  "ar": "كمبيوتر مكتبي"
+ },
+ "details.t_watch": {
+  "en": "Smartwatch",
+  "ar": "ساعة ذكية"
+ },
+ "details.t_tv": {
+  "en": "TV",
+  "ar": "تلفزيون"
+ },
+ "details.t_console": {
+  "en": "Game console",
+  "ar": "جهاز ألعاب"
+ },
+ "details.t_camera": {
+  "en": "Camera",
+  "ar": "كاميرا"
+ },
+ "details.t_headphones": {
+  "en": "Headphones",
+  "ar": "سماعات"
+ },
+ "details.t_accessory": {
+  "en": "Accessory",
+  "ar": "إكسسوار"
+ },
+ "details.p_apartment": {
+  "en": "Apartment",
+  "ar": "شقة"
+ },
+ "details.p_house": {
+  "en": "House",
+  "ar": "بيت"
+ },
+ "details.p_villa": {
+  "en": "Villa",
+  "ar": "فيلا"
+ },
+ "details.p_land": {
+  "en": "Land",
+  "ar": "أرض"
+ },
+ "details.p_shop": {
+  "en": "Shop",
+  "ar": "محل"
+ },
+ "details.p_office": {
+  "en": "Office",
+  "ar": "مكتب"
+ },
+ "details.p_building": {
+  "en": "Building",
+  "ar": "عمارة"
+ },
+ "details.p_farm": {
+  "en": "Farm",
+  "ar": "مزرعة"
+ },
+ "details.other": {
+  "en": "Other",
+  "ar": "أخرى"
  }
 }
