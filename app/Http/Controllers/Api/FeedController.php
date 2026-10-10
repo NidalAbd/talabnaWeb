@@ -110,6 +110,9 @@ class FeedController extends Controller
         $poolIds = array_column($pool, 'id');
         $organic = $load($filters(ServicePost::query()))
             ->when($poolIds, fn ($q) => $q->whereNotIn('id', $poolIds))
+            // Your own posts after everyone else's (2026-10-10): they were the newest, so they filled the top of the
+            // owner's own feed. They stay reachable on the profile and at the end of the feed.
+            ->orderByRaw('service_posts.user_id = ? ASC', [$me->id])
             ->orderByRaw('EXISTS (SELECT 1 FROM feed_seen fs WHERE fs.user_id = ? AND fs.service_post_id = service_posts.id AND fs.seen_at < ?) ASC',
                 [$me->id, $seenBefore])
             ->when(! isset($d['country_id']) && $me->country_id, function ($q) use ($me) {
