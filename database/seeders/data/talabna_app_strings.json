@@ -7049,5 +7049,269 @@
  "video_q.unavailable": {
   "en": "Not available right now. Try again later.",
   "ar": "غير متاحة الآن. حاول لاحقًا."
+ },
+ "time_ago.seconds": {
+  "en": "{n}s ago",
+  "ar": "منذ {n} ثانية"
+ },
+ "time_ago.minutes": {
+  "en": "{n}m ago",
+  "ar": "منذ {n} دقيقة"
+ },
+ "time_ago.hours": {
+  "en": "{n}h ago",
+  "ar": "منذ {n} ساعة"
+ },
+ "time_ago.days": {
+  "en": "{n}d ago",
+  "ar": "منذ {n} يوم"
+ },
+ "time_ago.months": {
+  "en": "{n}mo ago",
+  "ar": "منذ {n} شهر"
+ },
+ "time_ago.years": {
+  "en": "{n}y ago",
+  "ar": "منذ {n} سنة"
+ },
+ "time_ago.just_now": {
+  "en": "Just now",
+  "ar": "الآن"
+ },
+ "block.confirm": {
+  "en": "You won't see their posts or comments and they can't message you. You can unblock them any time in Settings.",
+  "ar": "لن ترى منشوراته أو تعليقاته ولن يتمكن من مراسلتك. يمكنك إلغاء الحظر في أي وقت من الإعدادات."
+ },
+ "auth.already_have_account_q": {
+  "en": "Already have an account?",
+  "ar": "لديك حساب بالفعل؟"
+ },
+ "gender.male": {
+  "en": "Male",
+  "ar": "ذكر"
+ },
+ "gender.female": {
+  "en": "Female",
+  "ar": "انثى"
+ },
+ "gender.label": {
+  "en": "Gender",
+  "ar": "الجنس"
+ },
+ "language_theme_selector.this_language_is_not_available": {
+  "en": "This language is not available",
+  "ar": "هذه اللغة غير متوفرة حالياً"
+ },
+ "language_theme_selector.language_changed_successfully": {
+  "en": "Language changed successfully",
+  "ar": "تم تغيير اللغة بنجاح"
+ },
+ "translation_helper.an_unexpected_error_occurred": {
+  "en": "An unexpected error occurred",
+  "ar": "حدث خطأ غير متوقع"
+ },
+ "purchase_request_state.maximum_per_transfer_is_points": {
+  "en": "Maximum per transfer is {maxValue} points",
+  "ar": "الحد الأقصى للتحويل الواحد هو {maxValue} نقطة"
+ },
+ "purchase_request_state.you_have_reached_your_daily_transfer_limit": {
+  "en": "You have reached your daily transfer limit ({maxValue})",
+  "ar": "لقد وصلت إلى الحد الأقصى للتحويلات اليومية ({maxValue})"
+ },
+ "purchase_request_state.this_would_exceed_your_daily_limit_points": {
+  "en": "This would exceed your daily limit ({maxValue} points)",
+  "ar": "سيتجاوز هذا التحويل حدك اليومي ({maxValue} نقطة)"
+ },
+ "purchase_request_state.transfer_limit_exceeded": {
+  "en": "Transfer limit exceeded",
+  "ar": "تجاوزت حد التحويل"
+ },
+ "ai.extras_cost_long": {
+  "en": "Your post has {extra} more than the {free} free ones. This takes {cost} from your {balance} when you publish.",
+  "ar": "منشورك فيه {extra} أكثر من {free} المجانية. سيُخصم {cost} من رصيدك ({balance}) عند النشر."
+ },
+ "ai.need_more_points": {
+  "en": "You need {n} more to use this.",
+  "ar": "تحتاج إلى {n} إضافية لاستخدام هذه الميزة."
+ },
+ "errors.categories_failed": {
+  "en": "Couldn't load categories",
+  "ar": "فشل في تحميل الفئات الرئيسية"
+ },
+ "errors.subcategories_failed": {
+  "en": "Couldn't load subcategories",
+  "ar": "فشل في تحميل الفئات الفرعية"
+ },
+ "errors.subcategories_empty": {
+  "en": "No subcategories found",
+  "ar": "خطأ: لا توجد بيانات للفئات الفرعية"
+ },
+ "errors.bad_server_response": {
+  "en": "The server sent an unexpected answer. Please try again.",
+  "ar": "وصل رد غير متوقع من الخادم. حاول مرة أخرى."
+ },
+ "errors.transactions_failed": {
+  "en": "Couldn't load transactions",
+  "ar": "حدث خطأ أثناء جلب المعاملات"
+ },
+ "errors.transfers_failed": {
+  "en": "Couldn't load transfers between users",
+  "ar": "حدث خطأ أثناء جلب المعاملات بين المستخدمين"
+ },
+ "errors.recent_transactions_failed": {
+  "en": "Couldn't load recent transactions",
+  "ar": "حدث خطأ أثناء جلب آخر المعاملات"
+ },
+ "errors.notification_update_failed": {
+  "en": "Couldn't update the notification",
+  "ar": "فشل في تحديث الإشعار"
+ },
+ "errors.load_failed": {
+  "en": "Couldn't load the data",
+  "ar": "فشل في سحب البيانات"
+ },
+ "errors.purchase_requests_failed": {
+  "en": "Couldn't load purchase requests",
+  "ar": "حدث خطأ أثناء جلب طلبات الشراء"
+ },
+ "errors.purchase_send_failed": {
+  "en": "Couldn't send the purchase request",
+  "ar": "حدث خطأ أثناء إرسال طلب الشراء"
+ },
+ "errors.purchase_cancel_failed": {
+  "en": "Couldn't cancel the purchase request",
+  "ar": "حدث خطأ أثناء إلغاء طلب الشراء"
+ },
+ "errors.profile_not_found": {
+  "en": "This profile does not exist",
+  "ar": "هذا الملف الشخصي غير موجود"
+ },
+ "errors.profile_failed": {
+  "en": "Couldn't load the profile",
+  "ar": "فشل في تحميل الملف الشخصي"
+ },
+ "errors.followers_failed": {
+  "en": "Couldn't load followers",
+  "ar": "فشل في تحميل المتابعين"
+ },
+ "errors.followers_server": {
+  "en": "Couldn't reach the server to load followers",
+  "ar": "خطأ في الاتصال بالخادم - المتابعين"
+ },
+ "errors.no_internet": {
+  "en": "No internet connection. Please check your connection.",
+  "ar": "خطا في الاتصال بالإنترنت - يرجى التحقق من اتصالك"
+ },
+ "errors.timeout": {
+  "en": "The connection timed out. Please try again later.",
+  "ar": "انتهت مهلة الاتصال - يرجى المحاولة لاحقًا"
+ },
+ "errors.profile_server": {
+  "en": "Couldn't reach the server to load the profile",
+  "ar": "خطا الاتصال في الخادم - الملف الشخصي"
+ },
+ "errors.posts_failed": {
+  "en": "Couldn't load posts",
+  "ar": "فشل في تحميل المنشورات"
+ },
+ "errors.posts_server": {
+  "en": "Couldn't reach the server to load posts",
+  "ar": "خطا الاتصال في الخادم - المنشورات"
+ },
+ "errors.post_not_found": {
+  "en": "This post does not exist",
+  "ar": "هذا المنشور غير موجود"
+ },
+ "errors.post_failed": {
+  "en": "Couldn't load the post",
+  "ar": "فشل في تحميل المنشةر"
+ },
+ "errors.post_delete_failed": {
+  "en": "Couldn't delete the post",
+  "ar": "خطا في حذف المنشور"
+ },
+ "errors.photo_delete_failed": {
+  "en": "Couldn't delete the photo",
+  "ar": "خطا في حذف الصورة"
+ },
+ "errors.search_failed": {
+  "en": "Couldn't load search results",
+  "ar": "فشل في تحميل نتائج البحث"
+ },
+ "errors.countries_failed": {
+  "en": "Couldn't load countries",
+  "ar": "فشل في تحميل الدول"
+ },
+ "errors.cities_failed": {
+  "en": "Couldn't load cities",
+  "ar": "فشل في تحميل المدن للدولة"
+ },
+ "pin.locked": {
+  "en": "PIN is locked. Please try again in {minutes} minutes",
+  "ar": "تم قفل رمز التحويل. يرجى المحاولة بعد {minutes} دقيقة"
+ },
+ "pin.attempts_left": {
+  "en": "{n} attempts remaining",
+  "ar": "تبقى {n} محاولات"
+ },
+ "transfer_limits.you_have_reached_your_daily_transfer_limit": {
+  "en": "You have reached your daily transfer limit",
+  "ar": "لقد وصلت إلى الحد الأقصى للتحويلات اليومية"
+ },
+ "transfer_limits.maximum_per_transfer_is_points": {
+  "en": "Maximum per transfer is {maxPerTransfer} points",
+  "ar": "الحد الأقصى للتحويل الواحد هو {maxPerTransfer} نقطة"
+ },
+ "transfer_limits.this_transfer_would_exceed_your_remaining_daily_": {
+  "en": "This transfer would exceed your remaining daily limit ({remainingAmount} points)",
+  "ar": "سيتجاوز هذا التحويل حدك اليومي المتبقي ({remainingAmount} نقطة)"
+ },
+ "transfer_result.insufficient_balance_for_this_transfer": {
+  "en": "Insufficient balance for this transfer",
+  "ar": "رصيدك غير كافٍ لهذا التحويل"
+ },
+ "transfer_result.maximum_per_transfer_limit_exceeded": {
+  "en": "Maximum per-transfer limit exceeded",
+  "ar": "تجاوزت الحد الأقصى للتحويل الواحد"
+ },
+ "transfer_result.daily_transfer_count_limit_reached": {
+  "en": "Daily transfer count limit reached",
+  "ar": "لقد وصلت إلى الحد الأقصى للتحويلات اليومية"
+ },
+ "transfer_result.daily_transfer_amount_limit_reached": {
+  "en": "Daily transfer amount limit reached",
+  "ar": "لقد وصلت إلى الحد الأقصى للمبلغ اليومي"
+ },
+ "transfer_result.transfer_limit_exceeded": {
+  "en": "Transfer limit exceeded",
+  "ar": "تجاوزت حد التحويل"
+ },
+ "transfer_result.invalid_pin_attempts_remaining": {
+  "en": "Invalid PIN. {remaining} attempts remaining",
+  "ar": "رمز التحويل غير صحيح. تبقى {remaining} محاولات"
+ },
+ "transfer_result.pin_is_locked_please_try_again_later": {
+  "en": "PIN is locked. Please try again later",
+  "ar": "تم قفل رمز التحويل. يرجى المحاولة لاحقاً"
+ },
+ "transfer_result.too_many_attempts_please_wait": {
+  "en": "Too many attempts. Please wait",
+  "ar": "محاولات كثيرة. يرجى الانتظار"
+ },
+ "transfer_result.cannot_transfer_points_to_a_user_in_a_different_": {
+  "en": "Cannot transfer points to a user in a different country",
+  "ar": "لا يمكن إرسال النقاط إلى مستخدم في بلد آخر"
+ },
+ "transfer_result.an_error_occurred_during_transfer": {
+  "en": "An error occurred during transfer",
+  "ar": "حدث خطأ أثناء التحويل"
+ },
+ "service_post.time_left": {
+  "en": "{d} days, {h} hours, {m} minutes",
+  "ar": "{d} يوم، {h} ساعة، {m} دقيقة"
+ },
+ "points.save_amount": {
+  "en": "Save {amount}",
+  "ar": "وفر {amount}"
  }
 }
