@@ -1005,6 +1005,8 @@ class ServicePostController extends Controller
         }
         // Release C: category details (year, mileage, rooms, area, condition...).
         \App\Services\PostAttributes::applyFilters($servicePosts, (int) ($categories ?? $category ?? 0), $request->all());
+        // Options with counts for the category's details, for apps that ask (2026-10-10)
+        $facets = $request->boolean('facets') ? \App\Services\PostAttributes::facets(clone $servicePosts, (int) ($categories ?? $category ?? 0)) : null;
 
         // ADD COUNTRY AND CITY FILTERS
         if ($request->has('country_id') && is_numeric($request->country_id)) {
@@ -1108,7 +1110,7 @@ class ServicePostController extends Controller
             $servicePost->user_verified = $postUser->phone_verified_at !== null;
         }
 
-        return response()->json(compact('servicePosts'));
+        return response()->json(compact('servicePosts') + ($facets !== null ? ['facets' => $facets] : []));
     }
 
     public function servicePostCategorySubCategory($categories, $sub_categories, Request $request): JsonResponse
@@ -1151,6 +1153,8 @@ class ServicePostController extends Controller
         }
         // Release C: category details (year, mileage, rooms, area, condition...).
         \App\Services\PostAttributes::applyFilters($servicePosts, (int) ($categories ?? $category ?? 0), $request->all());
+        // Options with counts for the category's details, for apps that ask (2026-10-10)
+        $facets = $request->boolean('facets') ? \App\Services\PostAttributes::facets(clone $servicePosts, (int) ($categories ?? $category ?? 0)) : null;
 
         // ADD COUNTRY AND CITY FILTERS
         if ($request->has('country_id') && is_numeric($request->country_id)) {
@@ -1220,7 +1224,7 @@ class ServicePostController extends Controller
             $servicePost->user_verified = $postUser->phone_verified_at !== null;
         }
 
-        return response()->json(compact('servicePosts'));
+        return response()->json(compact('servicePosts') + ($facets !== null ? ['facets' => $facets] : []));
     }
 
 // ADD THESE NEW METHODS FOR COUNTRIES AND CITIES

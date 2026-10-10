@@ -125,6 +125,23 @@ class ServicePost extends Model
                 }
             }
         });
+
+        // Search words and detail rows follow the post (2026-10-10, PostSearch / PostAttributes)
+        static::saved(function ($servicePost) {
+            if ($servicePost->wasRecentlyCreated || $servicePost->wasChanged(['title', 'description', 'details', 'categories_id'])) {
+                try {
+                    \App\Services\PostSearch::indexPost($servicePost);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('post search index failed', ['post' => $servicePost->id, 'error' => $e->getMessage()]);
+                }
+            }
+        });
+        static::deleted(function ($servicePost) {
+            try {
+                \Illuminate\Support\Facades\DB::table('post_attribute_values')->where('service_post_id', $servicePost->id)->delete();
+            } catch (\Throwable) {
+            }
+        });
     }
 
     /**

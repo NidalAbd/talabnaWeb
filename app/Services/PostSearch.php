@@ -16,11 +16,64 @@ class PostSearch
 {
     public const FILTER_KEYS = ['category_id', 'sub_category_id', 'type', 'min_price', 'max_price', 'country_id', 'city_id'];
 
+    /** Set by posts:index-search once every post has its search_text: then search uses the FULLTEXT index. */
+    public const READY_KEY = 'search:fulltext_ready';
+
+    /** The words a post is found by: title and description in every language, and its details (brand, model...). */
+    public static function textOf(ServicePost $post): string
+    {
+        $parts = [];
+        foreach (['title', 'description'] as $f) {
+            $v = $post->getRawOriginal($f) ?? $post->getAttributes()[$f] ?? null;
+            $d = is_string($v) ? json_decode($v, true) : $v;
+            $parts = array_merge($parts, is_array($d) ? array_values(array_filter($d, 'is_string')) : [(string) $v]);
+        }
+        $details = is_array($post->details) ? $post->details : (json_decode((string) $post->details, true) ?: []);
+        foreach ($details as $v) {
+            if (is_string($v)) {
+                $parts[] = $v;
+            }
+        }
+        $text = PostAttributes::norm(strip_tags(implode(' ', $parts)));
+
+        return mb_substr($text, 0, 5000);
+    }
+
+    /** Keeps a post's search words and detail rows up to date (ServicePost::saved, posts:index-search). */
+    public static function indexPost(ServicePost $post): void
+    {
+        ServicePost::withoutGlobalScopes()->where('id', $post->id)->update(['search_text' => self::textOf($post)]);
+        PostAttributes::sync($post);
+    }
+
+    private static function fulltext(): bool
+    {
+        return in_array(\Illuminate\Support\Facades\DB::getDriverName(), ['mysql', 'mariadb'], true)
+            && \Illuminate\Support\Facades\Cache::has(self::READY_KEY);
+    }
+
+    /** "+iphone* +15" for MATCH ... IN BOOLEAN MODE: every word of 3+ letters must be there. Null when none qualify. */
+    public static function booleanQuery(string $text): ?string
+    {
+        $words = array_filter(preg_split('/[^\p{L}\p{N}]+/u', PostAttributes::norm($text)) ?: [], fn ($w) => mb_strlen($w) >= 3);
+
+        return $words ? implode(' ', array_map(fn ($w) => '+'.$w.'*', array_slice(array_values(array_unique($words)), 0, 8))) : null;
+    }
+
     public static function query(?string $text, array $filters = []): Builder
     {
         $q = ServicePost::query()->where('state', 'published');
         $text = trim((string) $text);
-        if ($text !== '') {
+        if ($text !== '' && self::fulltext() && ($bool = self::booleanQuery($text)) !== null) {
+            // Indexed: fast with any number of posts. Short words (1-2 letters, e.g. "15" stays, "s" doesn't) are
+            // checked on the found rows only.
+            $q->whereRaw('MATCH(search_text) AGAINST (? IN BOOLEAN MODE)', [$bool]);
+            foreach (preg_split('/\s+/u', PostAttributes::norm($text)) as $w) {
+                if ($w !== '' && mb_strlen($w) < 3) {
+                    $q->where('search_text', 'LIKE', '%'.addcslashes($w, '%_\\').'%');
+                }
+            }
+        } elseif ($text !== '') {
             $plain = '%'.addcslashes($text, '%_\\').'%';
             $escaped = '%'.addcslashes(trim(json_encode($text), '"'), '%_\\').'%';
             $q->where(function ($w) use ($plain, $escaped) {
@@ -48,6 +101,10 @@ class PostSearch
         }
         if (! empty($filters['city_id'])) {
             $q->where('city_id', (int) $filters['city_id']);
+        }
+        // Details of the category (storage, colour, model...)
+        if (! empty($filters['category_id'])) {
+            PostAttributes::applyFilters($q, (int) $filters['category_id'], $filters);
         }
 
         return $q;
@@ -80,6 +137,8 @@ class PostSearch
     /** Only the known filter keys, without empty values (what a saved search stores). */
     public static function cleanFilters(array $filters): array
     {
-        return array_filter(array_intersect_key($filters, array_flip(self::FILTER_KEYS)), fn ($v) => $v !== null && $v !== '');
+        $base = array_filter(array_intersect_key($filters, array_flip(self::FILTER_KEYS)), fn ($v) => $v !== null && $v !== '');
+
+        return $base + PostAttributes::requestFilters(isset($filters['category_id']) ? (int) $filters['category_id'] : null, $filters);
     }
 }

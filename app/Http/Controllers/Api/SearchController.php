@@ -13,7 +13,6 @@ class SearchController extends Controller
 {
     public function search(Request $request)
     {
-        Log::info('Request received', ['request' => $request->all()]);
         $user = Auth::id();
         $CurrentUser = User::find($user);
         $query = $request->input('search');
@@ -74,14 +73,26 @@ class SearchController extends Controller
             $follow = $CurrentUser->followers()->where('follower_id',  $postUser->id)->first();
             $servicePost->is_followed = (bool)$follow;
         }
-        Log::info(response()->json([
-            'users' => $users,
-            'posts' => $posts,
-        ]));
+        // Options with counts for the details of the category searched (2026-10-10): the chosen category, else the one
+        // most of the results are in. Only for apps that ask (facets=1).
+        $facets = null;
+        if ($request->boolean('facets')) {
+            $matching = $broadened && ($words = \App\Services\PostSearch::words((string) $query))
+                ? \App\Services\PostSearch::anyWord($words, $filters)
+                : \App\Services\PostSearch::query($query, $filters);
+            $cat = (int) ($filters['category_id'] ?? 0) ?: (int) (clone $matching)->reorder()->setEagerLoads([])
+                ->select('categories_id', \Illuminate\Support\Facades\DB::raw('COUNT(*) as c'))->groupBy('categories_id')
+                ->orderByDesc('c')->limit(1)->value('categories_id');
+            if ($cat && \App\Services\PostAttributes::fieldsFor($cat)) {
+                $facets = ['category_id' => $cat, 'fields' => \App\Services\PostAttributes::facets($matching, $cat)];
+            }
+        }
+
         return response()->json([
             'users' => $users,
             'posts' => $posts,
             'broadened' => $broadened,
+            'facets' => $facets,
         ]);
     }
 
