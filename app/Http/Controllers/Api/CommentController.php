@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Services\Social\ActivityDigest;
+
 use App\Http\Controllers\Controller;
 use App\Models\Comment;
 use App\Models\Notification;
@@ -14,45 +16,115 @@ use Illuminate\Support\Facades\Log;
 
 class CommentController extends Controller
 {
-    /**
-     * Get comments for a post with threaded replies.
-     */
-    public function index($postId): JsonResponse
-    {
-        // Get only top-level comments (not replies), with their replies loaded
-        $comments = Comment::with([
-            'user:id,user_name,name,email',
-            'user.photos',
-            'replies' => function ($query) {
-                $query->with(['user:id,user_name,name,email', 'user.photos'])
-                    ->orderBy('created_at', 'asc');
-            }
-        ])
-            ->where('service_post_id', $postId)
-            ->whereNull('parent_id') // Only top-level comments
-            ->orderBy('created_at', 'desc')
-            ->paginate(10);
+    private const USER = ['user:id,user_name,name,email', 'user.photos'];
 
-        // Add replies_count to each comment
-        $comments->getCollection()->transform(function ($comment) {
-            $comment->replies_count = $comment->replies->count();
-            return $comment;
-        });
+    /**
+     * Comments of a post, 10 a page (2026-10-10).
+     *
+     * - ?sort=top (most liked, then most replied) or new (default). The post owner's pinned comment comes first.
+     * - ?replies=2: each comment carries its first 2 replies; the rest come from comments/{id}/replies, 10 a page.
+     *   Without it (apps before 2026-10-10) every reply is sent, as before, since those apps can't load more.
+     * - likes_count, is_liked, is_pinned on every comment and reply.
+     */
+    public function index($postId, Request $request): JsonResponse
+    {
+        $preview = $request->has('replies') ? max(0, min(5, (int) $request->query('replies'))) : null;
+        $query = Comment::with(self::USER)
+            ->withCount('replies')
+            ->where('service_post_id', $postId)
+            ->whereNull('parent_id')
+            ->orderByRaw('pinned_at IS NULL')
+            ->orderByDesc('pinned_at');
+        if ($request->query('sort') === 'top') {
+            $query->orderByDesc('likes_count')->orderByDesc('replies_count');
+        }
+        $query->orderByDesc('created_at')->orderByDesc('id');
+        if ($preview === null) {
+            $query->with(['replies' => fn ($q) => $q->with(self::USER)->orderBy('created_at', 'asc')]);
+        }
+        $comments = $query->paginate(10);
+        $items = $comments->getCollection();
+
+        if ($preview !== null) {
+            $ids = $items->pluck('id')->all();
+            $first = $ids && $preview > 0
+                ? Comment::query()->fromSub(
+                    Comment::query()->withoutGlobalScopes()
+                        ->selectRaw('comments.*, ROW_NUMBER() OVER (PARTITION BY parent_id ORDER BY created_at, id) AS reply_rank')
+                        ->whereIn('parent_id', $ids),
+                    'comments'
+                )->where('reply_rank', '<=', $preview)->with(self::USER)->orderBy('created_at')->get()->groupBy('parent_id')
+                : collect();
+            foreach ($items as $c) {
+                $c->setRelation('replies', ($first[$c->id] ?? collect())->each(fn ($r) => $r->makeHidden('reply_rank'))->values());
+            }
+        }
+        self::withLikes($items->concat($items->flatMap(fn ($c) => $c->replies)));
 
         return response()->json($comments);
     }
 
+    /** Sets is_liked / is_pinned on the given comments (one query). */
+    private static function withLikes($comments): void
+    {
+        $ids = collect($comments)->pluck('id')->filter()->all();
+        $liked = $ids && auth()->id()
+            ? \Illuminate\Support\Facades\DB::table('comment_likes')->where('user_id', auth()->id())->whereIn('comment_id', $ids)->pluck('comment_id')->flip()
+            : collect();
+        foreach ($comments as $c) {
+            $c->is_liked = $liked->has($c->id);
+            $c->is_pinned = $c->pinned_at !== null;
+            $c->likes_count = (int) ($c->likes_count ?? 0);
+        }
+    }
+
     /**
-     * Get replies for a specific comment.
+     * Get replies for a specific comment (10 a page, oldest first).
      */
     public function getReplies($commentId): JsonResponse
     {
-        $replies = Comment::with(['user:id,user_name,name,email', 'user.photos'])
+        $replies = Comment::with(self::USER)
             ->where('parent_id', $commentId)
             ->orderBy('created_at', 'asc')
+            ->orderBy('id')
             ->paginate(10);
+        self::withLikes($replies->getCollection());
 
         return response()->json($replies);
+    }
+
+    /** POST comments/{comment}/like: like or unlike a comment. */
+    public function like(Comment $comment): JsonResponse
+    {
+        $uid = auth()->id();
+        $deleted = \Illuminate\Support\Facades\DB::table('comment_likes')->where('comment_id', $comment->id)->where('user_id', $uid)->delete();
+        if ($deleted) {
+            Comment::where('id', $comment->id)->where('likes_count', '>', 0)->decrement('likes_count');
+        } else {
+            \Illuminate\Support\Facades\DB::table('comment_likes')->insertOrIgnore(['comment_id' => $comment->id, 'user_id' => $uid, 'created_at' => now()]);
+            Comment::where('id', $comment->id)->increment('likes_count');
+        }
+
+        return response()->json(['is_liked' => ! $deleted, 'likes_count' => (int) Comment::where('id', $comment->id)->value('likes_count')]);
+    }
+
+    /** POST comments/{comment}/pin: the post owner pins one top-level comment (again to unpin). */
+    public function pin(Comment $comment): JsonResponse
+    {
+        $ownerId = (int) ServicePost::where('id', $comment->service_post_id)->value('user_id');
+        if ($ownerId !== (int) auth()->id()) {
+            return response()->json(['message' => 'Only the post owner can pin a comment'], 403);
+        }
+        if ($comment->parent_id) {
+            return response()->json(['message' => 'Replies cannot be pinned'], 422);
+        }
+        $pin = $comment->pinned_at === null;
+        Comment::where('service_post_id', $comment->service_post_id)->whereNotNull('pinned_at')->update(['pinned_at' => null]);
+        if ($pin) {
+            Comment::where('id', $comment->id)->update(['pinned_at' => now()]);
+        }
+
+        return response()->json(['is_pinned' => $pin]);
     }
 
     /**
@@ -74,84 +146,41 @@ class CommentController extends Controller
         // Load the user relationship for the response
         $comment->load(['user:id,user_name,name,email', 'user.photos']);
 
-        // Send notification for reply
-        if (isset($validatedData['parent_id']) && $validatedData['parent_id']) {
-            $this->sendReplyNotification($comment, $validatedData['parent_id']);
-        } else {
-            // Send notification to post owner for new comment
-            $this->sendCommentNotification($comment);
+        // Grouped per post (ActivityDigest): a busy post doesn't push its owner once per comment
+        $post = ServicePost::find($comment->service_post_id);
+        $actor = auth()->user();
+        if ($post) {
+            $notified = [];
+            if (! empty($validatedData['parent_id'])) {
+                $parentOwner = (int) Comment::where('id', $validatedData['parent_id'])->value('user_id');
+                if ($parentOwner) {
+                    ActivityDigest::record($parentOwner, 'comment_reply', $post, $actor);
+                    $notified[] = $parentOwner;
+                }
+            } else {
+                ActivityDigest::record((int) $post->user_id, 'comment', $post, $actor);
+                $notified[] = (int) $post->user_id;
+            }
+            // @username mentions (at most 5 per comment), not twice for someone already told
+            foreach (self::mentionedUserIds($validatedData['content']) as $mentioned) {
+                if (! in_array($mentioned, $notified, true)) {
+                    ActivityDigest::record($mentioned, 'mention', $post, $actor);
+                }
+            }
         }
 
         return response()->json($comment, 201);
     }
 
-    /**
-     * Send notification when someone replies to a comment.
-     */
-    private function sendReplyNotification(Comment $reply, int $parentCommentId): void
+    /** Users named as @user_name in a comment (at most 5). */
+    public static function mentionedUserIds(string $content): array
     {
-        $parentComment = Comment::with('user')->find($parentCommentId);
-
-        if (!$parentComment || $parentComment->user_id === auth()->id()) {
-            return; // Don't notify yourself
+        if (! preg_match_all('/(?<![\w@])@([A-Za-z0-9._]{3,30})/u', $content, $m)) {
+            return [];
         }
+        $names = array_slice(array_unique(array_map(fn ($n) => rtrim($n, '.'), $m[1])), 0, 5);
 
-        $replierName = auth()->user()->user_name ?? auth()->user()->name ?? 'Someone';
-        $post = ServicePost::find($reply->service_post_id);
-        $postTitle = $post ? mb_substr($post->title, 0, 30) . (mb_strlen($post->title) > 30 ? '...' : '') : 'a post';
-
-        Notification::create([
-            'user_id' => $parentComment->user_id,
-            'message' => json_encode([
-                'en' => "{$replierName} replied to your comment on \"{$postTitle}\" [post_id:{$reply->service_post_id}]",
-                'ar' => "قام {$replierName} بالرد على تعليقك على \"{$postTitle}\" [post_id:{$reply->service_post_id}]",
-            ]),
-            'type' => 'comment_reply',
-            'read' => false,
-        ]);
-
-        try {
-            $user = User::find($parentComment->user_id);
-            if ($user && !empty($user->fcm_token)) {
-                $user->notify(new CommentNotification($replierName, $postTitle, $reply->service_post_id, true));
-            }
-        } catch (\Exception $e) {
-            Log::warning('FCM comment reply notification failed: ' . $e->getMessage());
-        }
-    }
-
-    /**
-     * Send notification when someone comments on a post.
-     */
-    private function sendCommentNotification(Comment $comment): void
-    {
-        $post = ServicePost::find($comment->service_post_id);
-
-        if (!$post || $post->user_id === auth()->id()) {
-            return; // Don't notify yourself
-        }
-
-        $commenterName = auth()->user()->user_name ?? auth()->user()->name ?? 'Someone';
-        $postTitle = mb_substr($post->title, 0, 30) . (mb_strlen($post->title) > 30 ? '...' : '');
-
-        Notification::create([
-            'user_id' => $post->user_id,
-            'message' => json_encode([
-                'en' => "{$commenterName} commented on your post \"{$postTitle}\" [post_id:{$comment->service_post_id}]",
-                'ar' => "قام {$commenterName} بالتعليق على منشورك \"{$postTitle}\" [post_id:{$comment->service_post_id}]",
-            ]),
-            'type' => 'comment',
-            'read' => false,
-        ]);
-
-        try {
-            $user = User::find($post->user_id);
-            if ($user && !empty($user->fcm_token)) {
-                $user->notify(new CommentNotification($commenterName, $postTitle, $comment->service_post_id, false));
-            }
-        } catch (\Exception $e) {
-            Log::warning('FCM comment notification failed: ' . $e->getMessage());
-        }
+        return User::whereIn('user_name', $names)->where('is_active', 'active')->pluck('id')->map(fn ($id) => (int) $id)->all();
     }
 
     /**

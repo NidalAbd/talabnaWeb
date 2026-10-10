@@ -23,6 +23,8 @@ class Comment extends Model
         'content',
     ];
 
+    protected $casts = ['pinned_at' => 'datetime'];
+
     /**
      * Get the user that owns the comment.
      */

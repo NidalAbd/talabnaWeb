@@ -47,6 +47,8 @@ class FavoriteController extends Controller
             $favorite->user_id = Auth::id();
             $post->favorites()->save($favorite);
             $isFavorited = true;
+            // The owner hears about likes in groups, never one push per like (ActivityDigest)
+            \App\Services\Social\ActivityDigest::record((int) $post->user_id, 'like', $post, Auth::user());
         } else {
             $favorite->delete();
             $isFavorited = false;
@@ -70,6 +72,8 @@ class FavoriteController extends Controller
             $favorite->user_id = Auth::id();
             $post->favorites()->save($favorite);
             $isFavorited = true;
+            // The owner hears about likes in groups, never one push per like (ActivityDigest)
+            \App\Services\Social\ActivityDigest::record((int) $post->user_id, 'like', $post, Auth::user());
         } else {
             $favorite->delete();
             $isFavorited = false;

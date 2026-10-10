@@ -219,6 +219,8 @@ Route::middleware(['auth:api', 'check.user.ban'])->group(function () {
     Route::post('subcategories/{subcategory}/toggle-follow', [SubcategoriesController::class, 'toggleFollowCategory'])->middleware('auth:api');
     Route::get('subcategories/{subcategory}/is-following', [SubcategoriesController::class, 'isFollowingCategory'])->name('subcategories.isFollowing');
     Route::post('search', [SearchController::class, 'search']);
+    Route::post('comments/{comment}/like', [CommentController::class, 'like'])->middleware('throttle:60,1');
+    Route::post('comments/{comment}/pin', [CommentController::class, 'pin']);
     Route::resource('comments', CommentController::class);
     Route::get('commentsForPost/{postId}', [CommentController::class, 'index']);
     Route::get('comments/{commentId}/replies', [CommentController::class, 'getReplies']);

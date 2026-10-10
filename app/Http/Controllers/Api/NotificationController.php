@@ -15,7 +15,7 @@ class NotificationController extends Controller
      * with 518 notifications and a handful of comments) paged through everything and looked stuck. The server filters now.
      */
     public const CATEGORIES = [
-        'messages' => ['comment', 'comment_reply'],
+        'messages' => ['comment', 'comment_reply', 'mention', 'like'],
         'activity' => ['post', 'badge', 'badge_applied', 'badge_upgraded', 'badge_switched', 'badge_expired', 'pointIn',
             'points_approved', 'pointOut', 'sub_category', 'user', 'follower'],
     ];
