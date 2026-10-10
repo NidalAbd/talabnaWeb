@@ -82,4 +82,22 @@ class ReelsEndpointTest extends TestCase
             $this->assertSame(User::find($p['user_id'])->user_name, $p['user_name']);
         }
     }
+
+    public function test_a_featured_reel_takes_its_slot_instead_of_coming_first(): void
+    {
+        $diamond = DB::table('service_posts')->orderBy('id')->value('id'); // the oldest reel
+        DB::table('service_posts')->where('id', $diamond)->update(['have_badge' => 'ماسي']);
+        Passport::actingAs($this->me);
+
+        $all = [];
+        foreach ([1, 2, 3] as $page) {
+            $ids = collect($this->getJson("/api/service_posts/reels?page=$page&seen_before=".now()->timestamp)->json('servicePosts.data'))->pluck('id')->all();
+            if ($page === 1) {
+                $this->assertSame(\App\Services\Feed\SponsoredPicker::SLOTS[0], array_search($diamond, $ids), 'in its slot, not first');
+            }
+            $all = array_merge($all, $ids);
+        }
+        $this->assertCount(23, $all);
+        $this->assertSame(count($all), count(array_unique($all)));
+    }
 }

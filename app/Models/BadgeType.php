@@ -9,6 +9,14 @@ use Illuminate\Support\Facades\Cache;
 
 class BadgeType extends Model
 {
+
+    /** An admin change to a badge's view boost applies to the feeds at once (SponsoredPicker::weights()). */
+    protected static function booted(): void
+    {
+        static::saved(fn () => \Illuminate\Support\Facades\Cache::forget('feat:weights:v1'));
+        static::deleted(fn () => \Illuminate\Support\Facades\Cache::forget('feat:weights:v1'));
+    }
+
     use HasFactory;
 
     protected $fillable = [

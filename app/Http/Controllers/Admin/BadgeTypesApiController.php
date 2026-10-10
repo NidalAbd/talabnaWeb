@@ -188,7 +188,7 @@ class BadgeTypesApiController extends Controller
             'icon' => 'nullable|string|max:255',
             'points_per_day' => 'required|integer|min:0',
             'priority' => 'required|integer|min:0',
-            'view_boost_percent' => 'required|integer|min:0|max:100',
+            'view_boost_percent' => 'required|integer|min:0|max:1000',
             'is_active' => 'boolean',
             'is_default' => 'boolean'
         ]);
@@ -246,7 +246,7 @@ class BadgeTypesApiController extends Controller
             'icon' => 'nullable|string|max:255',
             'points_per_day' => 'sometimes|required|integer|min:0',
             'priority' => 'sometimes|required|integer|min:0',
-            'view_boost_percent' => 'sometimes|required|integer|min:0|max:100',
+            'view_boost_percent' => 'sometimes|required|integer|min:0|max:1000',
             'is_active' => 'boolean',
             'is_default' => 'boolean'
         ]);

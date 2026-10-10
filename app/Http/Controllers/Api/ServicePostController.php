@@ -174,8 +174,10 @@ class ServicePostController extends Controller
             ->with('category')
             ->orderByRaw('EXISTS (SELECT 1 FROM feed_seen fs WHERE fs.user_id = ? AND fs.service_post_id = service_posts.id AND fs.seen_at < ?) ASC',
                 [$currentUser->id, $seenBefore])
-            ->orderByRaw(BadgeType::getLegacyOrderByClause() . ", id DESC")
-            ->paginate(10);
+            ->orderByDesc('service_posts.id');
+        // Featured reels share slots by the admin's badge boost, like the Home and category feeds (2026-10-10). They
+        // used to come all first (every Diamond, then every Gold...), whatever the boost said.
+        $servicePosts = $this->paginateWithRotatingBadges($servicePosts, $currentUser->id, $page);
 
         if (! $reportsSeen && $servicePosts->count()) {
             $now = now();
